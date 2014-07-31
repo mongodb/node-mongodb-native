@@ -46,6 +46,9 @@ var ReplSetManager = function(replsetOptions) {
   var configSet = null;
   var tags = replsetOptions.tags;
 
+  // Internal check server
+  var server = null;
+
   // Clone the options
   replsetOptions = cloneOptions(replsetOptions);
   
@@ -69,12 +72,20 @@ var ReplSetManager = function(replsetOptions) {
       // The result
       var result = result.result;
       var ready = true;
+      var hasPrimary = false;
+
       // Figure out if all the servers are ready
       result.members.forEach(function(m) {
         if([1, 2, 7].indexOf(m.state) == -1) ready = false;
       });
 
       if(ready) {
+        result.members.forEach(function(m) {
+          if(m.state == 1) hasPrimary = true;
+        });
+      }
+
+      if(ready && hasPrimary) {
         server.destroy();
         return callback(null, null);
       }
@@ -93,6 +104,8 @@ var ReplSetManager = function(replsetOptions) {
       callback = options;
       options = {};
     }
+
+    options = options || {};
 
     var _id = 0;
     configSet = {
@@ -125,7 +138,7 @@ var ReplSetManager = function(replsetOptions) {
     }
     
     // Let's pick one of the servers and run the command against it
-    var server = new Server({
+    server = new Server({
         host: serverManagers[0].host
       , port: serverManagers[0].port
       , connectionTimeout: 2000
@@ -144,11 +157,14 @@ var ReplSetManager = function(replsetOptions) {
       server.command('admin.$cmd'
         , {replSetInitiate: configSet}
         , {readPreference: new ReadPreference('secondary')}, function(err, result) {
+          if(options.override || err == null) {
+            return ensureUp(server, function(err, r) {
+              server.destroy();
+              callback(err, r);
+            });
+          }
+          // Return error
           if(err) return callback(err, null);
-          ensureUp(server, function(err, r) {
-            server.destroy();
-            callback(err, r);
-          });
       });
     });
 
@@ -158,6 +174,9 @@ var ReplSetManager = function(replsetOptions) {
     // Connect
     server.connect();
   }
+
+  // 
+  // Reconfigure and ensure
 
   //
   // Start the server
@@ -182,7 +201,7 @@ var ReplSetManager = function(replsetOptions) {
       opts.port = startPort + i;
       opts.dbpath = opts.dbpath ? opts.dbpath + f("/data-%s", opts.port) : null;
       opts.logpath = opts.logpath ? opts.logpath + f("/data-%s.log", opts.port) : null;
-      // opts.fork = null;
+      opts.fork = null;
       // Create a server manager
       serverManagers.push(new ServerManager(opts));
     }
@@ -213,13 +232,20 @@ var ReplSetManager = function(replsetOptions) {
       options = {};
     }
 
+    // console.log("========================== STOP")
+    // console.dir(server.name)
+    server.destroy()
+
     var count = serverManagers.length;
     // Stop all servers
     serverManagers.forEach(function(s) {
       s.stop(function() {
         count = count - 1;
         if(count == 0) {
-          callback();
+          // Configure the replicaset
+          configureAndEnsure(function() {
+            callback();
+          });
         }
       });
     });
@@ -244,7 +270,9 @@ var ReplSetManager = function(replsetOptions) {
         count = count - 1;
 
         if(count == 0) {
-          callback(null, null);
+          configureAndEnsure({override:true}, function() {
+            callback(null, null);
+          });
         }
       });
     }

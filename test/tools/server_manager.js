@@ -90,6 +90,7 @@ var ServerManager = function(serverOptions) {
 
   var bootServer = function(cmd, callback) {
     var pingServer = function() {
+      if(server) server.destroy();
       // Else we need to start checking if the server is up
       server = new Server({host: host
         , port: port
@@ -183,7 +184,6 @@ var ServerManager = function(serverOptions) {
     }
 
     var signal = options.signal || -15;
-
     // Stop server connection
     server.destroy();
     // Kill the process with the desired signal
@@ -218,6 +218,8 @@ var ServerManager = function(serverOptions) {
   this.ismaster = function(callback) {
     self.connect(function(err, _server) {
       if(err) return callback(err);
+
+      // console.log("=============================== ismaster :: 0")
 
       _server.command('system.$cmd', {ismaster:true}, function(err, r) {
         _server.destroy();
