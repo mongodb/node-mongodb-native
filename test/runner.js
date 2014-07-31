@@ -40,6 +40,7 @@ var createConfiguration = function(options) {
     var url = options.url || "mongodb://%slocalhost:27017/" + database;
     var port = options.port || 27017;
     var host = options.host || 'localhost';
+    var replicasetName = options.replicasetName || 'rs';
     var writeConcern = options.writeConcern || {w:1};
     var writeConcernMax = options.writeConcernMax || {w:1};
     
@@ -57,18 +58,21 @@ var createConfiguration = function(options) {
     // return configuration
     return {
       manager: manager,
+      replicasetName: replicasetName,
 
       start: function(callback) {
         manager.start({purge:true, signal:-9}, function(err) {
-        //   console.log("+++++++++++++++++++++++++++++++++++++++++ STARTED")
-        //   console.dir(err)
+          // console.log("+++++++++++++++++++++++++++++++++++++++++ STARTED")
+          // console.dir(err)
           if(err) throw err;
           callback();
         });
       },
 
       stop: function(callback) {
+        // console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 0")
         manager.stop({signal: -15}, function() {
+        // console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 1")
           callback();
         });        
       },
@@ -196,6 +200,7 @@ var testFiles =[
 
   // Replicaset tests
   , '/test/functional/replset_failover_tests.js'
+  , '/test/functional/replset_connection_tests.js'
 ]
 
 // Add all the tests to run
@@ -250,8 +255,10 @@ if(argv.t == 'functional') {
   if(argv.e == 'replicaset') {
     config = createConfiguration({
         port: 31000,
+        host: 'localhost',
         url: "mongodb://%slocalhost:31000/integration_tests?rs_name=rs",
         writeConcernMax: {w: 'majority', wtimeout: 5000},
+        replicasetName: 'rs',
         
         topology: function(host, port, serverOptions) {
           var m = require('../');
