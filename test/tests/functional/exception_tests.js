@@ -1,21 +1,28 @@
 /**
  * @ignore
  */
-exports.shouldCorrectlyHandleThrownError = function(configuration, test) {
-  var db = configuration.newDbInstance({w:1}, {poolSize:1});
-  db.open(function(err, db) {
-    db.createCollection('shouldCorrectlyHandleThrownError', function(err, r) {
-      try {
-        db.collection('shouldCorrectlyHandleThrownError', function(err, collection) {
-          debug(someUndefinedVariable);
-        });        
-      } catch (err) {
-        test.ok(err != null);
-        db.close();
-        test.done();        
-      }
+exports.shouldCorrectlyHandleThrownError = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {node: ">=0.10.26"},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    db.open(function(err, db) {
+      db.createCollection('shouldCorrectlyHandleThrownError', function(err, r) {
+        try {
+          db.collection('shouldCorrectlyHandleThrownError', function(err, collection) {
+            debug(someUndefinedVariable);
+          });        
+        } catch (err) {
+          test.ok(err != null);
+          db.close();
+          test.done();        
+        }
+      });
     });
-  });
+  }
 }
 
 /**
@@ -24,7 +31,7 @@ exports.shouldCorrectlyHandleThrownError = function(configuration, test) {
 exports.shouldCorrectlyHandleThrownErrorInRename = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {node: ">0.10.0"},
+  requires: {node: ">=0.10.26"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -53,43 +60,57 @@ exports.shouldCorrectlyHandleThrownErrorInRename = {
 /**
  * @ignore
  */
-exports.shouldCorrectlyHandleExceptionsInCursorNext = function(configuration, test) {
-  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+exports.shouldCorrectlyHandleExceptionsInCursorNext = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {node: ">=0.10.26"},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1});
 
-  process.once('uncaughtException', function(err) {
-    test.ok(err != null);
-    db.close();
-    test.done();
-  });
+    process.once('uncaughtException', function(err) {
+      test.ok(err != null);
+      db.close();
+      test.done();
+    });
 
-  db.open(function(err, db) {
-    var col = db.collection('shouldCorrectlyHandleExceptionsInCursorNext');
-    col.insert({a:1}, function(err, result) {
-      col.find().nextObject(function(err, result) {
-        boom
+    db.open(function(err, db) {
+      var col = db.collection('shouldCorrectlyHandleExceptionsInCursorNext');
+      col.insert({a:1}, function(err, result) {
+        col.find().nextObject(function(err, result) {
+          boom
+        });
       });
     });
-  });
+  }
 }
 
 /**
  * @ignore
  */
-exports.shouldCorrectlyHandleExceptionsInCursorEach = function(configuration, test) {
-  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+exports.shouldCorrectlyHandleExceptionsInCursorEach = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  requires: {node: ">=0.10.26"},
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1});
 
-  process.once('uncaughtException', function(err) {
-    test.ok(err != null);
-    db.close();
-    test.done();
-  });
+    process.once('uncaughtException', function(err) {
+      test.ok(err != null);
+      db.close();
+      test.done();
+    });
 
-  db.open(function(err, db) {
-    var col = db.collection('shouldCorrectlyHandleExceptionsInCursorNext');
-    col.insert({a:1}, function(err, result) {
-      col.find().each(function(err, result) {
-        boom
+    db.open(function(err, db) {
+      var col = db.collection('shouldCorrectlyHandleExceptionsInCursorNext');
+      col.insert({a:1}, function(err, result) {
+        col.find().each(function(err, result) {
+          boom
+        });
       });
     });
-  });
+  }
 }
