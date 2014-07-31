@@ -1926,3 +1926,24 @@ exports.shouldCorrectlyApplyBitOperator = function(configuration, test) {
     });
   });
 }
+
+// exports['test test'] = function(configuration, test) {
+//   var db = configuration.newDbInstance({w:1}, {native_parser:false})
+//   db.open(function(err, db) {
+//     var col = db.collection('shouldCorrectlyApplyBitOperator2');
+
+//     col.update({a:1}, {$set: { 'loc.long': -100, 'loc.lat': 45 }}, {upsert:true}, function(err, result) {
+//       test.equal(null, err);
+
+//       col.findOne({a:1}, function(err, doc) {
+//         console.dir(doc)
+//         test.equal(null, err);
+//         test.equal(1, doc.a);
+//         test.equal(0, doc.b);
+
+//         db.close();
+//         test.done();
+//       });
+//     });
+//   });
+// }
