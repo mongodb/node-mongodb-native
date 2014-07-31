@@ -63,7 +63,7 @@
 , "bugs" :          { "mail" :  "node-mongodb-native@googlegroups.com"
                     , "url" :   "http://github.com/mongodb/node-mongodb-native/issues" }
 , "dependencies" : {
-  "bson": "0.2.10"
+  "bson": "0.2.11"
 }
 , "devDependencies": {
       "dox": "0.4.4"
