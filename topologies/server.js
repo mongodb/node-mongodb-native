@@ -19,6 +19,8 @@ var inherits = require('util').inherits
 var bsonTypes = [b.Long, b.ObjectID, b.Binary, b.Code, b.DBRef, b.Symbol, b.Double, b.Timestamp, b.MaxKey, b.MinKey];
 // BSON parser
 var bsonInstance = null;
+// Server instance if
+var serverId = 0;
 
 // Single store for all callbacks
 var Callbacks = function() {
@@ -30,8 +32,12 @@ var Callbacks = function() {
   //
   // Flush all callbacks
   this.flush = function(err) {
+    // console.log("========================================= FLUSH")
     // Error out any current callbacks
     for(var id in this._events) {
+      // console.log("f = " + id)
+      // console.dir(self.listeners(id))
+      // console.log(self.listeners(id)[0].listener.toString())
       var executeError = function(_id, _callbacks) {
         _callbacks.emit(_id, err, null);
       }
@@ -130,6 +136,9 @@ var Server = function(options) {
   // Auth providers
   var authProviders = options.authProviders || {};
 
+  // Server instance id
+  var id = serverId++;
+
   //
   // Fallback methods
   //
@@ -163,6 +172,7 @@ var Server = function(options) {
   // Set error properties
   getProperty(this, 'name', 'name', serverDetails, {});
   getSingleProperty(this, 'bson', bsonInstance);
+  getSingleProperty(this, 'id', id);
 
   // Supports server
   var supportsServer = function() {
@@ -246,6 +256,15 @@ var Server = function(options) {
   }
 
   var errorHandler = function(err, connection) {
+    // console.log("----------------------------------- errorHandler :: ");
+    // console.log("emitError :: " + emitError)
+    // console.log("serverDetails.name :: " + serverDetails.name)
+    // console.log("id :: " + serverId)
+    // console.log("reconnect :: " + reconnect)
+    // console.log("self.isConnected :: " + pool.isConnected())
+    // console.log("self.isDestroyed :: " + pool.isDestroyed())
+
+    // console.dir(err)
     if(readPreferenceStrategies != null) notifyStrategies('error', [self]);
     if(logger.isInfo()) logger.info(f('server %s errored out with %s', self.name, JSON.stringify(err)));
     // Flush out all the callbacks
@@ -298,12 +317,19 @@ var Server = function(options) {
   }
 
   var connectHandler = function(connection) {
+    // console.log("=============== connect server id " + self.name + " :: " + serverId)
     // Apply any applyAuthentications
     applyAuthentications(function() {
 
+      // console.log("=============================== CONNECT :: 0")
       // Execute an ismaster
       self.command('system.$cmd', {ismaster:true}, function(err, r) {
-        if(err) return self.emit('close', err, self);
+      // console.log("=============================== CONNECT :: 1")
+      // console.dir(self.isConnected())
+
+        if(err) {
+          return self.emit('close', err, self);
+        }
 
         if(!err) {
           ismaster = r.result;
@@ -346,6 +372,7 @@ var Server = function(options) {
    * @method
    */
   this.connect = function(_options) {
+    // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% connect :: " + options.port)
     // Set server specific settings
     _options = _options || {}
     if(typeof _options.promoteLongs == 'boolean') 
@@ -570,10 +597,14 @@ var Server = function(options) {
       return callback(MongoError.create(err));
     }
 
+    // console.log("####################################### command :: " + self.name)
+    // console.dir(cmd)
+
     // Register the callback
     callbacks.register(query.requestId, function(err, result) {
       // Notify end of command
       notifyStrategies('endOperation', [self, err, result, new Date()]);
+      // console.log(callback.toString())
       if(err) return callback(err);
       if(result.documents[0]['$err'] 
         || result.documents[0]['errmsg']

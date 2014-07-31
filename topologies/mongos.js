@@ -12,6 +12,9 @@ var CONNECTING = 'connecting';
 var CONNECTED = 'connected';
 var DESTROYED = 'destroyed';
 
+// Instance id
+var mongosId = 0;
+
 //
 // Clone the options
 var cloneOptions = function(options) {
@@ -187,6 +190,9 @@ var Mongos = function(seedlist, options) {
   // Auth providers
   var authProviders = {};
 
+  // Unique instance id
+  var id = mongosId++;
+
   // Current retries left
   var retriesLeft = reconnectTries;
 
@@ -210,6 +216,10 @@ var Mongos = function(seedlist, options) {
       return servers.length > 0 ? servers[0].bson : null; 
     }
   });
+
+  Object.defineProperty(this, 'id', {
+    enumerable:true, get: function() { return id; }
+  })
 
   //
   // Inquires about state changes
