@@ -1,5 +1,5 @@
-var mongodb = require("../../lib/mongodb"),
-  ReplicaSetManager = require('../tools/replica_set_manager').ReplicaSetManager;
+var mongodb = require("../../../lib/mongodb"),
+  ReplicaSetManager = require('../../tools/replica_set_manager').ReplicaSetManager;
 
 var options = {
   auto_reconnect: true,
@@ -14,43 +14,51 @@ for(var i = 0; i < 122; i++) {
   userObjects.push({'user_id':i});
 }
 
-RS = new ReplicaSetManager({retries:120, secondary_count:2, passive_count:1, arbiter_count:1});
-RS.startSet(true, function(err, result) {      
-  // Replica configuration
-  var replSet = new mongodb.ReplSetServers( [ 
-      new mongodb.Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
-      new mongodb.Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
-      new mongodb.Server( RS.host, RS.ports[2], { auto_reconnect: true } )
-    ], 
-    {rs_name:RS.name}
-  );
-  
-  var queryCount = 0;
-  var users;
-  var db = new mongodb.Db("data", replSet);
-  db.on("error", function(err) {
-    console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-    console.dir(err)
-  })
-  
-  db.open(function(err, client){
-    if(err){
-      console.log("[%s] %s", new Date, err.stack || err);
-      return;
-    }
-    
-    if(users){
-      console.log("[%s] Reconnected?!", new Date);
-      return;
-    }
-    
-    client.collection("users", function(err, coll){      
-      coll.insert(userObjects, {w:1}, function(err, result) {
-        users = coll;
-        query();        
-      })
-    });    
+RS = new ReplicaSetManager({retries:120, secondary_count:2, passive_count:0, arbiter_count:0});
+RS.startSet(true, function(err, result) {
+  console.log("--------------------------------------------------------------")
+  console.log("--------------------------------------------------------------")
+  console.log("--------------------------------------------------------------")
+  mongodb.MongoClient.connect('mongodb://localhost:30000,localhost:30001,localhost:30002/data?socketTimeoutMS=0', function(err, db) {
+
   });
+
+
+  // // Replica configuration
+  // var replSet = new mongodb.ReplSetServers( [ 
+  //     new mongodb.Server( RS.host, RS.ports[1], { auto_reconnect: true } ),
+  //     new mongodb.Server( RS.host, RS.ports[0], { auto_reconnect: true } ),
+  //     new mongodb.Server( RS.host, RS.ports[2], { auto_reconnect: true } )
+  //   ], 
+  //   {rs_name:RS.name, socketOptions: {socketTimeoutMS: 0}}
+  // );
+  
+  // var queryCount = 0;
+  // var users;
+  // var db = new mongodb.Db("data", replSet, {w:1});
+  // db.on("error", function(err) {
+  //   console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+  //   console.dir(err)
+  // })
+  
+  // db.open(function(err, client){
+  //   // if(err){
+  //   //   console.log("[%s] %s", new Date, err.stack || err);
+  //   //   return;
+  //   // }
+    
+  //   // if(users){
+  //   //   console.log("[%s] Reconnected?!", new Date);
+  //   //   return;
+  //   // }
+    
+  //   // client.collection("users", function(err, coll){      
+  //   //   coll.insert(userObjects, {w:1}, function(err, result) {
+  //   //     users = coll;
+  //   //     query();        
+  //   //   })
+  //   // });    
+  // });
 
   function query(){
     var current = queryCount++;
