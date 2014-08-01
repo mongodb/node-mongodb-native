@@ -13,9 +13,9 @@ exports['Should Correctly Authenticate on Win32 using kerberos with MongoClient'
     , Server = configuration.getMongoPackage().Server;
 
   // KDC Server
-  var server = "kdc.10gen.me";
-  var principal = "dev1@10GEN.ME";
-  var pass = "a";
+  var server = "ldaptest.10gen.cc";
+  var principal = "drivers@LDAPTEST.10GEN.CC";
+  var pass = process.env['LDAPTEST_PASSWORD'];
   var urlEncodedPrincipal = encodeURIComponent(principal);
 
   // Let's write the actual connection code
@@ -23,35 +23,11 @@ exports['Should Correctly Authenticate on Win32 using kerberos with MongoClient'
     test.equal(null, err);
     test.ok(db != null);
 
-    // Attempt an operation
-    db.admin().command({listDatabases:1}, function(err, docs) {
+    db.collection('test').find().toArray(function(err, docs) {
       test.equal(null, err);
-      test.ok(docs.documents[0].databases);
-
-      db.close();
+      test.ok(true, docs[0].kerberos);
       test.done();
     });
-  });
-}
-
-/**
- * @ignore
- */
-exports['Should Fail to Authenticate due to illegal service name'] = function(configuration, test) {
-  var Db = configuration.getMongoPackage().Db
-    , MongoClient = configuration.getMongoPackage().MongoClient
-    , Server = configuration.getMongoPackage().Server;
-
-  // KDC Server
-  var server = "kdc.10gen.me";
-  var principal = "dev1@10GEN.ME";
-  var pass = "a";
-  var urlEncodedPrincipal = encodeURIComponent(principal);
-
-  // Let's write the actual connection code
-  MongoClient.connect(format("mongodb://%s:%s@%s/test?authMechanism=GSSAPI&gssapiServiceName=mongodb2&maxPoolSize=1", urlEncodedPrincipal, pass, server), function(err, db) {
-    test.ok(err != null);
-    test.done();
   });
 }
 
@@ -64,9 +40,9 @@ exports['Should Correctly Authenticate using kerberos on Win32 with MongoClient 
     , Server = configuration.getMongoPackage().Server;
 
   // KDC Server
-  var server = "kdc.10gen.me";
-  var principal = "dev1@10GEN.ME";
-  var pass = "a";
+  var server = "ldaptest.10gen.cc";
+  var principal = "drivers@LDAPTEST.10GEN.CC";
+  var pass = process.env['LDAPTEST_PASSWORD'];
   var urlEncodedPrincipal = encodeURIComponent(principal);
 
   // Let's write the actual connection code
@@ -74,20 +50,20 @@ exports['Should Correctly Authenticate using kerberos on Win32 with MongoClient 
     test.equal(null, err);
     test.ok(db != null);
 
-    // Attempt an operation
-    db.admin().command({listDatabases:1}, function(err, docs) {
+    // Find the docs
+    db.collection('test').find().toArray(function(err, docs) {
       test.equal(null, err);
-      test.ok(docs.documents[0].databases);
+      test.ok(true, docs[0].kerberos);
 
       // Close the connection
       // db.close();
       db.serverConfig.connectionPool.openConnections[0].connection.destroy();
 
       setTimeout(function() {
-        // Attempt an operation
-        db.admin().command({listDatabases:1}, function(err, docs) {
+        // Find the docs
+        db.collection('test').find().toArray(function(err, docs) {
           test.equal(null, err);
-          test.ok(docs.documents[0].databases);
+          test.ok(true, docs[0].kerberos);
 
           db.close();
           test.done();
@@ -106,10 +82,10 @@ exports['Should Correctly Authenticate on Win32 authenticate method manually'] =
     , Server = configuration.getMongoPackage().Server;
 
   // KDC Server
-  var server = "kdc.10gen.me";
-  var principal = "dev1@10GEN.ME";
+  var server = "ldaptest.10gen.cc";
+  var principal = "drivers@LDAPTEST.10GEN.CC";
+  var pass = process.env['LDAPTEST_PASSWORD'];
   var urlEncodedPrincipal = encodeURIComponent(principal);
-  var pass = "a";
 
   var db = new Db('test', new Server('kdc.10gen.me', 27017), {w:1});
   db.open(function(err, db) {
@@ -117,12 +93,33 @@ exports['Should Correctly Authenticate on Win32 authenticate method manually'] =
     test.ok(db != null);
 
     // Authenticate
-    db.authenticate(principal, pass, {authMechanism: 'GSSAPI'}, function(err, result) {
+    db.authenticate(principal, null, {authMechanism: 'GSSAPI'}, function(err, result) {
       test.equal(null, err);
       test.ok(result);
 
       db.close();
       test.done();
     });
+  });
+}
+
+/**
+ * @ignore
+ */
+exports['Should Fail to Authenticate due to illegal service name'] = function(configuration, test) {
+  var Db = configuration.getMongoPackage().Db
+    , MongoClient = configuration.getMongoPackage().MongoClient
+    , Server = configuration.getMongoPackage().Server;
+
+  // KDC Server
+  var server = "ldaptest.10gen.cc";
+  var principal = "drivers@LDAPTEST.10GEN.CC";
+  var pass = process.env['LDAPTEST_PASSWORD'];
+  var urlEncodedPrincipal = encodeURIComponent(principal);
+
+  // Let's write the actual connection code
+  MongoClient.connect(format("mongodb://%s:%s@%s/test?authMechanism=GSSAPI&gssapiServiceName=mongodb2&maxPoolSize=1", urlEncodedPrincipal, pass, server), function(err, db) {
+    test.ok(err != null);
+    test.done();
   });
 }
