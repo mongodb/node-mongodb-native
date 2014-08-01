@@ -1,4 +1,4 @@
-1.4.8
+1.4.8 2014-08-01
 ----------------
 - NODE-205 correctly emit authenticate event
 - NODE-210 ensure no undefined connection error when checking server state
