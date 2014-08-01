@@ -35,40 +35,17 @@ var validVersion = function(compare_version, version_required) {
     for(var i = 0; i < v1.length; ++i) {
       if(v1[i] > v2[i]) return -1;
       if(v1[i] < v2[i]) return 1;
-      // if(v2.length == i) {
-      //   return 1;
-      // }
-
-      // if(v1[i] == v2[i]) {
-      //   continue;
-      // } else if (v1[i] > v2[i]) {
-      //   return 1;
-      // } else {
-      //   return -1;
-      // }
     }
-
-    // if(v1.length != v2.length) {
-    //   return -1;
-    // }
-
     return 0;    
   }
-
-  // console.log("-----------------------------------------------")
-  // console.dir(v1parts)
-  // console.dir(v2parts)
-  // console.dir(compare(v1parts, v2parts))
 
   // calculate comparison
   var result = compare(v1parts, v2parts)
 
   // Return if it's valid depending on the passed in comparator
   if((comparator == '=' || comparator == '>=' || comparator == '<=') && result == 0) {
-    // console.log("------------ -1")
     return true;
   } else if((comparator == '>' || comparator == '>=') && result == -1) {
-    // console.log("------------ 0")
     return true;
   } else if((comparator == '<' || comparator == '<=') && result == 1) {
     return true;
