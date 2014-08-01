@@ -1,7 +1,7 @@
 exports.shouldFailInsertDueToUniqueIndex = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {node: ">=0.10.26"},
+  requires: {node: ">=0.11.0"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -26,7 +26,7 @@ exports.shouldFailInsertDueToUniqueIndex = {
 exports.shouldFailInsertDueToUniqueIndexStrict = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {node: ">=0.10.26"},
+  requires: {node: ">=0.11.0"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -55,7 +55,7 @@ exports.shouldFailInsertDueToUniqueIndexStrict = {
 exports['mixing included and excluded fields should return an error object with message'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {node: ">=0.10.26"},
+  requires: {node: ">=0.11.0"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -78,7 +78,7 @@ exports['mixing included and excluded fields should return an error object with 
 exports['should handle error throw in user callback'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {node: ">=0.10.26"},
+  requires: {node: ">=0.11.0"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -100,7 +100,7 @@ exports['should handle error throw in user callback'] = {
 exports['Should handle uncaught error correctly'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {node: ">=0.10.26"},
+  requires: {node: ">=0.11.0"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -120,7 +120,7 @@ exports['Should handle uncaught error correctly'] = {
 exports['Should handle throw error in db operation correctly'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {node: ">=0.10.26"},
+  requires: {node: ">=0.11.0"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -141,7 +141,7 @@ exports['Should handle throw error in db operation correctly'] = {
 exports['Should handle MongoClient uncaught error correctly'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {node: ">=0.10.26"},
+  requires: {node: ">=0.11.0"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -164,7 +164,7 @@ exports['Should handle MongoClient uncaught error correctly'] = {
 exports['Should handle MongoClient throw error in db operation correctly'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {node: ">=0.10.26"},
+  requires: {node: ">=0.11.0"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -185,7 +185,7 @@ exports['Should handle MongoClient throw error in db operation correctly'] = {
 exports['Should handle Error thrown during operation'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {node: ">=0.10.26"},
+  requires: {node: ">=0.11.0"},
   
   // The actual test we wish to run
   test: function(configuration, test) {
