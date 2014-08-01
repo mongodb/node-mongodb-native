@@ -2801,10 +2801,12 @@ exports.shouldCorrectlyPipeAGridFsToAfile = {
         // Open the gridStore for reading and pipe to a file
         var gridStore = new GridStore(db, "test_gs_read_stream_pipe", "r");
         gridStore.open(function(err, gridStore) {
+          // Create a file write stream
+          var fileStream = fs.createWriteStream("./test_gs_weird_bug_streamed.tmp");
           // Grab the read stream
           var stream = gridStore.stream();
           // When the stream is finished close the database
-          stream.on("end", function(err) {
+          fileStream.on("close", function(err) {
             // Read the original content
             var originalData = fs.readFileSync("./test/functional/data/test_gs_weird_bug.png");
             // Ensure we are doing writing before attempting to open the file
@@ -2818,10 +2820,8 @@ exports.shouldCorrectlyPipeAGridFsToAfile = {
               db.close();
               test.done();          
             });
-          })
+          });
 
-          // Create a file write stream
-          var fileStream = fs.createWriteStream("./test_gs_weird_bug_streamed.tmp");
           // Pipe out the data
           stream.pipe(fileStream);
         })

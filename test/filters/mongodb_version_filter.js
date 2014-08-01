@@ -1,7 +1,8 @@
 var validVersion = require('./shared').validVersion;
 
 var MongoDBVersionFilter = function() {
-  var mongodb_version_array = [];
+  // Get environmental variables that are known
+  var mongodb_version = null;
 
   this.beforeStart = function(object, callback) {
     // Get the first configuration
@@ -12,7 +13,7 @@ var MongoDBVersionFilter = function() {
 
       db.command({buildInfo:true}, function(err, result) {
         if(err) throw err;
-        mongodb_version_array = result.versionArray;
+        mongodb_version = result.versionArray.join('.');
         db.close();
         callback();
       });
@@ -24,7 +25,7 @@ var MongoDBVersionFilter = function() {
   	if(test.metadata.requires == null) return false;
   	if(test.metadata.requires.mongodb == null) return false;
   	// Return if this is a valid method
-    return !validVersion(mongodb_version_array, test.metadata.requires.mongodb);
+    return !validVersion(mongodb_version, test.metadata.requires.mongodb);
 	}
 }
 
