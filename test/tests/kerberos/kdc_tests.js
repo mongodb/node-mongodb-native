@@ -1,7 +1,8 @@
 var format = require('util').format;
 
 // You need to set up the kinit tab first
-// kinit dev1@10GEN.ME
+// https://wiki.mongodb.com/pages/viewpage.action?title=Testing+Kerberos&spaceKey=DH
+// kinit -p drivers@LDAPTEST.10GEN.CC
 // password: (not shown)
 
 /**
@@ -13,26 +14,19 @@ exports['Should Correctly Authenticate using kerberos with MongoClient'] = funct
     , Server = configuration.getMongoPackage().Server;
 
   // KDC Server
-  var server = "kdc.10gen.me";
-  var principal = "dev1@10GEN.ME";
+  var server = "ldaptest.10gen.cc";
+  var principal = "drivers@LDAPTEST.10GEN.CC";
   var urlEncodedPrincipal = encodeURIComponent(principal);
 
   // Let's write the actual connection code
-  MongoClient.connect(format("mongodb://%s@%s/test?authMechanism=GSSAPI&gssapiServiceName=mongodb&maxPoolSize=1", urlEncodedPrincipal, server), function(err, db) {
+  MongoClient.connect(format("mongodb://%s@%s/kerberos?authMechanism=GSSAPI&gssapiServiceName=mongodb&maxPoolSize=1", urlEncodedPrincipal, server), function(err, db) {
     test.equal(null, err);
     test.ok(db != null);
 
-    // Attempt an operation
-    db.admin().command({listDatabases:1}, function(err, docs) {
+    db.collection('test').find().toArray(function(err, docs) {
       test.equal(null, err);
-      test.ok(docs.documents[0].databases);
-
-      db.db('admin').collection('system.users').find().toArray(function(err, users) {
-        test.equal(null, err);
-        test.ok(users != null);
-        db.close();
-        test.done();
-      });
+      test.ok(true, docs[0].kerberos);
+      test.done();
     });
   });
 }
@@ -46,29 +40,29 @@ exports['Should Correctly Authenticate using kerberos with MongoClient and then 
     , Server = configuration.getMongoPackage().Server;
 
   // KDC Server
-  var server = "kdc.10gen.me";
-  var principal = "dev1@10GEN.ME";
+  var server = "ldaptest.10gen.cc";
+  var principal = "drivers@LDAPTEST.10GEN.CC";
   var urlEncodedPrincipal = encodeURIComponent(principal);
 
   // Let's write the actual connection code
-  MongoClient.connect(format("mongodb://%s@%s/test?authMechanism=GSSAPI&maxPoolSize=5", urlEncodedPrincipal, server), function(err, db) {
+  MongoClient.connect(format("mongodb://%s@%s/kerberos?authMechanism=GSSAPI&gssapiServiceName=mongodb&maxPoolSize=5", urlEncodedPrincipal, server), function(err, db) {
     test.equal(null, err);
     test.ok(db != null);
 
-    // Attempt an operation
-    db.admin().command({listDatabases:1}, function(err, docs) {
+    // Find the docs
+    db.collection('test').find().toArray(function(err, docs) {
       test.equal(null, err);
-      test.ok(docs.documents[0].databases);
+      test.ok(true, docs[0].kerberos);
 
       // Close the connection
       // db.close();
       db.serverConfig.connectionPool.openConnections[0].connection.destroy();
 
       setTimeout(function() {
-        // Attempt an operation
-        db.admin().command({listDatabases:1}, function(err, docs) {
+        // Find the docs
+        db.collection('test').find().toArray(function(err, docs) {
           test.equal(null, err);
-          test.ok(docs.documents[0].databases);
+          test.ok(true, docs[0].kerberos);
 
           db.close();
           test.done();
@@ -87,11 +81,11 @@ exports['Should Correctly Authenticate authenticate method manually'] = function
     , Server = configuration.getMongoPackage().Server;
 
   // KDC Server
-  var server = "kdc.10gen.me";
-  var principal = "dev1@10GEN.ME";
+  var server = "ldaptest.10gen.cc";
+  var principal = "drivers@LDAPTEST.10GEN.CC";
   var urlEncodedPrincipal = encodeURIComponent(principal);
 
-  var db = new Db('test', new Server('kdc.10gen.me', 27017), {w:1});
+  var db = new Db('test', new Server(server, 27017), {w:1});
   db.open(function(err, db) {
     test.equal(null, err);
     test.ok(db != null);
@@ -116,8 +110,8 @@ exports['Should Fail to Authenticate due to illegal service name'] = function(co
     , Server = configuration.getMongoPackage().Server;
 
   // KDC Server
-  var server = "kdc.10gen.me";
-  var principal = "dev1@10GEN.ME";
+  var server = "ldaptest.10gen.cc";
+  var principal = "drivers@LDAPTEST.10GEN.CC";
   var urlEncodedPrincipal = encodeURIComponent(principal);
 
   // Let's write the actual connection code
