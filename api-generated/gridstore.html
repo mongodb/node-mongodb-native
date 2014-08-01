@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>GridStore() &mdash; MongoDB Node.JS Driver 1.4.7 documentation</title>
+    <title>GridStore() &mdash; MongoDB Node.JS Driver 1.4.8 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.4.7',
+        VERSION:     '1.4.8',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.4.7 documentation" href="../index.html" />
+    <link rel="top" title="MongoDB Node.JS Driver 1.4.8 documentation" href="../index.html" />
     <link rel="next" title="ReadStream()" href="readstream.html" />
     <link rel="prev" title="Grid()" href="grid.html" /> 
   </head>
@@ -37,7 +37,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.7 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.8 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -1502,10 +1502,12 @@ the given string does not have one.</p>
       <span class="c1">// Open the gridStore for reading and pipe to a file</span>
       <span class="kd">var</span> <span class="nx">gridStore</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">GridStore</span><span class="p">(</span><span class="nx">db</span><span class="p">,</span> <span class="s2">&quot;test_gs_read_stream_pipe&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">);</span>
       <span class="nx">gridStore</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">gridStore</span><span class="p">)</span> <span class="p">{</span>
+        <span class="c1">// Create a file write stream</span>
+        <span class="kd">var</span> <span class="nx">fileStream</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">createWriteStream</span><span class="p">(</span><span class="s2">&quot;./test_gs_weird_bug_streamed.tmp&quot;</span><span class="p">);</span>
         <span class="c1">// Grab the read stream</span>
         <span class="kd">var</span> <span class="nx">stream</span> <span class="o">=</span> <span class="nx">gridStore</span><span class="p">.</span><span class="nx">stream</span><span class="p">(</span><span class="kc">true</span><span class="p">);</span>
         <span class="c1">// When the stream is finished close the database</span>
-        <span class="nx">stream</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;end&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">fileStream</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s2">&quot;close&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span>
           <span class="c1">// Read the original content</span>
           <span class="kd">var</span> <span class="nx">originalData</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">readFileSync</span><span class="p">(</span><span class="s2">&quot;./test/tests/functional/gridstore/test_gs_weird_bug.png&quot;</span><span class="p">);</span>
           <span class="c1">// Ensure we are doing writing before attempting to open the file</span>
@@ -1520,8 +1522,6 @@ the given string does not have one.</p>
           <span class="p">});</span>
         <span class="p">})</span>
 
-        <span class="c1">// Create a file write stream</span>
-        <span class="kd">var</span> <span class="nx">fileStream</span> <span class="o">=</span> <span class="nx">fs</span><span class="p">.</span><span class="nx">createWriteStream</span><span class="p">(</span><span class="s2">&quot;./test_gs_weird_bug_streamed.tmp&quot;</span><span class="p">);</span>
         <span class="c1">// Pipe out the data</span>
         <span class="nx">stream</span><span class="p">.</span><span class="nx">pipe</span><span class="p">(</span><span class="nx">fileStream</span><span class="p">);</span>
       <span class="p">})</span>
@@ -2274,7 +2274,7 @@ the given string does not have one.</p>
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.7 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.8 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">

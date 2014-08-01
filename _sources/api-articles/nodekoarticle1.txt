@@ -43,27 +43,26 @@ driver to fit as close to native Javascript types as possible.
    bit and a 64 bit. The driver will try to fit the value into 32 bits
    if it can and promote it to 64 bits if it has to. Similarly it will
    deserialize attempting to fit it into 53 bits if it can. If it cannot
-   it will return an instance of **Long** to avoid loosing precession.
--  **Long class** a special class that let's you store 64 bit integers
-   and also let's you operate on the 64 bits integers.
+   it will return an instance of **Long** to avoid losing precision.
+-  **Long class** a special class that lets you store 64 bit integers
+   and also lets you operate on the 64 bit integers.
 -  **Date** maps directly to a Javascript Date
 -  **RegExp** maps directly to a Javascript RegExp
 -  **String** maps directly to a Javascript String (encoded in utf8)
--  **Binary class** a special class that let's you store data in Mongo
-   DB
--  **Code class** a special class that let's you store javascript
+-  **Binary class** a special class that lets you store data in Mongo DB
+-  **Code class** a special class that lets you store javascript
    functions in Mongo DB, can also provide a scope to run the method in
 -  **ObjectID class** a special class that holds a MongoDB document
    identifier (the equivalent to a Primary key)
--  **DbRef class** a special class that let's you include a reference in
+-  **DbRef class** a special class that lets you include a reference in
    a document pointing to another object
--  **Symbol class** a special class that let's you specify a symbol, not
+-  **Symbol class** a special class that lets you specify a symbol, not
    really relevant for javascript but for languages that supports the
    concept of symbols.
 
 As we see the number type can be a little tricky due to the way integers
 are implemented in Javascript. The latest driver will do correct
-conversion up to 53 bit's of complexity. If you need to handle big
+conversion up to 53 bits of complexity. If you need to handle big
 integers the recommendation is to use the Long class to operate on the
 numbers.
 
@@ -92,7 +91,7 @@ database, where **localhost:27017** is the server host and port and
 **exampleDb** the db we wish to connect to. After the url notice the
 hash containing the **auto\_reconnect** key. Auto reconnect tells the
 driver to retry sending a command to the server if there is a failure
-during it's execution.
+during its execution.
 
 Another useful option you can pass in is
 

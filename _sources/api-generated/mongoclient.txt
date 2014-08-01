@@ -124,7 +124,7 @@ close
 -----
 
 
-Close the current db connection, including all the child db instances. Emits close event if no callback is provided.
+Close the current db connection, including all the child db instances. Emits close event and calls optional callback.
 
 .. js:function:: close(callback)
 

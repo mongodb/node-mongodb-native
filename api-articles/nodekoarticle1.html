@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>A Basic introduction to Mongo DB &mdash; MongoDB Node.JS Driver 1.4.7 documentation</title>
+    <title>A Basic introduction to Mongo DB &mdash; MongoDB Node.JS Driver 1.4.8 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.4.7',
+        VERSION:     '1.4.8',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.4.7 documentation" href="../index.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 1.4.8 documentation" href="../index.html" /> 
   </head>
   <body>
 
@@ -35,7 +35,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.7 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.8 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -82,27 +82,26 @@ integer value is at a 53 bit. Mongo has two types for integers, a 32
 bit and a 64 bit. The driver will try to fit the value into 32 bits
 if it can and promote it to 64 bits if it has to. Similarly it will
 deserialize attempting to fit it into 53 bits if it can. If it cannot
-it will return an instance of <strong>Long</strong> to avoid loosing precession.</li>
-<li><strong>Long class</strong> a special class that let&#8217;s you store 64 bit integers
-and also let&#8217;s you operate on the 64 bits integers.</li>
+it will return an instance of <strong>Long</strong> to avoid losing precision.</li>
+<li><strong>Long class</strong> a special class that lets you store 64 bit integers
+and also lets you operate on the 64 bit integers.</li>
 <li><strong>Date</strong> maps directly to a Javascript Date</li>
 <li><strong>RegExp</strong> maps directly to a Javascript RegExp</li>
 <li><strong>String</strong> maps directly to a Javascript String (encoded in utf8)</li>
-<li><strong>Binary class</strong> a special class that let&#8217;s you store data in Mongo
-DB</li>
-<li><strong>Code class</strong> a special class that let&#8217;s you store javascript
+<li><strong>Binary class</strong> a special class that lets you store data in Mongo DB</li>
+<li><strong>Code class</strong> a special class that lets you store javascript
 functions in Mongo DB, can also provide a scope to run the method in</li>
 <li><strong>ObjectID class</strong> a special class that holds a MongoDB document
 identifier (the equivalent to a Primary key)</li>
-<li><strong>DbRef class</strong> a special class that let&#8217;s you include a reference in
+<li><strong>DbRef class</strong> a special class that lets you include a reference in
 a document pointing to another object</li>
-<li><strong>Symbol class</strong> a special class that let&#8217;s you specify a symbol, not
+<li><strong>Symbol class</strong> a special class that lets you specify a symbol, not
 really relevant for javascript but for languages that supports the
 concept of symbols.</li>
 </ul>
 <p>As we see the number type can be a little tricky due to the way integers
 are implemented in Javascript. The latest driver will do correct
-conversion up to 53 bit&#8217;s of complexity. If you need to handle big
+conversion up to 53 bits of complexity. If you need to handle big
 integers the recommendation is to use the Long class to operate on the
 numbers.</p>
 </div>
@@ -127,7 +126,7 @@ database, where <strong>localhost:27017</strong> is the server host and port and
 <strong>exampleDb</strong> the db we wish to connect to. After the url notice the
 hash containing the <strong>auto_reconnect</strong> key. Auto reconnect tells the
 driver to retry sending a command to the server if there is a failure
-during it&#8217;s execution.</p>
+during its execution.</p>
 <p>Another useful option you can pass in is</p>
 <p><strong>poolSize</strong>, this allows you to control how many tcp connections are
 opened in parallel. The default value for this is 5 but you can set it
@@ -602,7 +601,7 @@ DB</a></li>
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.7 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.8 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">
