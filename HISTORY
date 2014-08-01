@@ -1,3 +1,17 @@
+1.4.8
+----------------
+- NODE-205 correctly emit authenticate event
+- NODE-210 ensure no undefined connection error when checking server state
+- NODE-212 correctly inherit socketTimeoutMS from replicaset when HA process adds new servers or reconnects to existing ones
+- NODE-220 don't throw error if ensureIndex errors out in Gridstore
+- Updated bson to 0.2.11 to ensure correct toBSON behavior when returning non object in nested classes
+- Fixed test running filters
+- Wrap debug log in a call to format (Issue #1187, https://github.com/andyroyle)
+- False option values should not trigger w:1 (Issue #1186, https://github.com/jsdevel)
+- Fix aggregatestream.close(Issue #1194, https://github.com/jonathanong)
+- Fixed parsing issue for w:0 in url parser when in connection string
+- Modified collection.geoNear to support a geoJSON point or legacy coordinate pair (Issue #1198, https://github.com/mmacmillan)
+
 1.4.7 2014-06-18
 ----------------
 - Make callbacks to be executed in right domain when server comes back up (Issue #1184, https://github.com/anton-kotenko)
