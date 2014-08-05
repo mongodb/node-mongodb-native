@@ -46,6 +46,12 @@ var ReplSetManager = function(replsetOptions) {
   var configSet = null;
   var tags = replsetOptions.tags;
 
+  // All server addresses
+  var serverAddresses = [];
+  var secondaryServers = [];
+  var arbiterServers = [];
+  var primaryServer = [];;
+
   // Internal check server
   var server = null;
 
@@ -58,6 +64,14 @@ var ReplSetManager = function(replsetOptions) {
   // filtered out internal keys
   var internalOptions = filterInternalOptionsOut(replsetOptions
     , ["bin", "host", "secondaries", "arbiters", "startPort", "tags"]);
+
+  Object.defineProperty(this, 'secondaries', {
+    enumerable:true, get: function() { return secondaryServers.slice(0); }
+  });
+
+  Object.defineProperty(this, 'arbiters', {
+    enumerable:true, get: function() { return arbiterServers.slice(0); }
+  });
 
   //
   // ensure replicaset is up and running
@@ -125,6 +139,15 @@ var ReplSetManager = function(replsetOptions) {
       configSet.members[_id] = {
           _id: _id
         , host: serverManagers[_id].name
+      }      
+    }
+
+    // For all servers add the members
+    for(var i = 0; i < arbiters; i++, _id++) {
+      configSet.members[_id] = {
+          _id: _id
+        , host: serverManagers[_id].name
+        , arbiterOnly: true
       }      
     }
 
@@ -202,6 +225,8 @@ var ReplSetManager = function(replsetOptions) {
       opts.dbpath = opts.dbpath ? opts.dbpath + f("/data-%s", opts.port) : null;
       opts.logpath = opts.logpath ? opts.logpath + f("/data-%s.log", opts.port) : null;
       opts.fork = null;
+      // Add list
+      serverAddresses.push(f("%s:%s", 'localhost', opts.port));      
       // Create a server manager
       serverManagers.push(new ServerManager(opts));
     }
@@ -219,7 +244,15 @@ var ReplSetManager = function(replsetOptions) {
         if(serversLeft == 0) {
           // Configure the replicaset
           configureAndEnsure(function() {
-            callback(null, self);
+            // console.log("================================================ 0")
+            // Refresh view
+            getServerManagerByType('primary', function() {
+              // console.log("================================================ 1")
+              // console.dir(primaryServer)
+              // console.dir(secondaryServers)
+              // console.dir(arbiterServers)
+              callback(null, self);
+            });
           });
         }
       });
@@ -316,6 +349,14 @@ var ReplSetManager = function(replsetOptions) {
       _manager.ismaster(function(err, ismaster) {
         if(err) return callback(err, null);
 
+        if(ismaster.secondary) {
+          secondaryServers.push(ismaster.me);
+        } else if(ismaster.arbiterOnly) {
+          arbiterServers.push(ismaster.me);
+        } else if(ismaster.ismaster) {
+          primaryServer = ismaster.me;
+        }
+
         if(type == 'secondary' && manager == null && ismaster.secondary) {
           manager = _manager;
         } else if(type == 'primary' && manager == null && ismaster.ismaster) {
@@ -327,6 +368,11 @@ var ReplSetManager = function(replsetOptions) {
         callback(null, null);
       });      
     }
+
+    // Remove all internal services
+    secondaryServers = [];
+    arbiterServers = [];
+    primaryServer = [];;
 
     // Locate a server of the right type
     for(var i = 0; i < serverManagers.length; i++) {
