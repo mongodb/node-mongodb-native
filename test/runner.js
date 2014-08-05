@@ -170,37 +170,39 @@ var runner = new Runner({
 });
 
 var testFiles =[
-    '/test/functional/mongo_client_tests.js'
-  , '/test/functional/collection_tests.js'
-  , '/test/functional/db_tests.js'
-  , '/test/functional/cursor_tests.js'
-  , '/test/functional/insert_tests.js'
-  , '/test/functional/aggregation_tests.js'
-  , '/test/functional/admin_tests.js'
-  , '/test/functional/connection_tests.js'
-  , '/test/functional/cursorstream_tests.js'
-  , '/test/functional/custom_pk_tests.js'
-  , '/test/functional/domain_tests.js'
-  , '/test/functional/error_tests.js'
-  , '/test/functional/find_tests.js'
-  , '/test/functional/geo_tests.js'
-  , '/test/functional/index_tests.js'
-  , '/test/functional/mapreduce_tests.js'
-  , '/test/functional/maxtimems_tests.js'
-  , '/test/functional/multiple_db_tests.js'
-  , '/test/functional/object_id_tests.js'
-  , '/test/functional/raw_tests.js'
-  , '/test/functional/readpreference_tests.js'
-  , '/test/functional/remove_tests.js'
-  , '/test/functional/unicode_tests.js'
-  , '/test/functional/uri_tests.js'
-  , '/test/functional/url_parser_tests.js'
-  , '/test/functional/gridfs_tests.js'
-  , '/test/functional/bulk_tests.js'
+  //   '/test/functional/mongo_client_tests.js'
+  // , '/test/functional/collection_tests.js'
+  // , '/test/functional/db_tests.js'
+  // , '/test/functional/cursor_tests.js'
+  // , '/test/functional/insert_tests.js'
+  // , '/test/functional/aggregation_tests.js'
+  // , '/test/functional/admin_tests.js'
+  // , '/test/functional/connection_tests.js'
+  // , '/test/functional/cursorstream_tests.js'
+  // , '/test/functional/custom_pk_tests.js'
+  // , '/test/functional/domain_tests.js'
+  // , '/test/functional/error_tests.js'
+  // , '/test/functional/find_tests.js'
+  // , '/test/functional/geo_tests.js'
+  // , '/test/functional/index_tests.js'
+  // , '/test/functional/mapreduce_tests.js'
+  // , '/test/functional/maxtimems_tests.js'
+  // , '/test/functional/multiple_db_tests.js'
+  // , '/test/functional/object_id_tests.js'
+  // , '/test/functional/raw_tests.js'
+  // , '/test/functional/readpreference_tests.js'
+  // , '/test/functional/remove_tests.js'
+  // , '/test/functional/unicode_tests.js'
+  // , '/test/functional/uri_tests.js'
+  // , '/test/functional/url_parser_tests.js'
+  // , '/test/functional/gridfs_tests.js'
+  // , '/test/functional/bulk_tests.js'
 
-  // Replicaset tests
-  , '/test/functional/replset_failover_tests.js'
-  , '/test/functional/replset_connection_tests.js'
+  // // Replicaset tests
+  // , '/test/functional/replset_failover_tests.js'
+  // , '/test/functional/replset_connection_tests.js'
+  // , '/test/functional/replset_operations_tests.js'
+  , '/test/functional/replset_read_preference_tests.js'
 ]
 
 // Add all the tests to run
@@ -275,6 +277,7 @@ if(argv.t == 'functional') {
           return new ReplSetManager({
               dbpath: path.join(path.resolve('db'))
             , logpath: path.join(path.resolve('db'))
+            , arbiters: 1
             , tags: [{loc: "ny"}, {loc: "sf"}, {loc: "sf"}]
             , replSet: 'rs', startPort: 31000
           });
