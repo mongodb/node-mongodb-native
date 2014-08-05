@@ -574,6 +574,8 @@ var Mongos = function(seedlist, options) {
 
     // No server returned we had an error
     if(server == null) return callback(new MongoError("no mongos found"));
+    // Set the topology
+    options.topology = self;
     // Return the cursor
     return server.cursor(ns, cmd, options);
   }

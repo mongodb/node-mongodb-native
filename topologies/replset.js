@@ -1134,29 +1134,30 @@ var ReplSet = function(seedlist, options) {
    * @param {boolean} [options.partial=false] partial flag set
    * @param {opResultCallback} callback A callback function
    */
-  this.cursor = function(ns, cmd, options, callback) {
-    if(typeof options == 'function') {
-      callback = options;
-      options = {};
-    }
-
+  this.cursor = function(ns, cmd, options) {
     var server = null;
     // Ensure we have no options
     options = options || {};
-    try {
+    // try {
       // Pick the right server based on readPreference
       // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 0")
+      // console.dir(options.readPreference)
       server = pickServer(options.readPreference);
-      // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 1")
+      // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 1 :: " + server.name)
       if(debug) self.emit('pickedServer', options.readPreference, server);      
       // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ 2")
-    } catch(err) {
-      console.dir(err)
-      return callback(err);
-    }
+    // } catch(err) {
+    //   // console.dir(err)
+    //   throw err;
+    //   // if(callback)
+    //   // return callback(err);
+    // }
 
     // No server returned we had an error
-    if(server == null) return callback(new MongoError("no server found"));
+    // if(server == null) return callback(new MongoError("no server found"));
+    if(server == null) throw new MongoError("no server found");
+    // Set the topology
+    options.topology = self;
     // Execute the command
     return server.cursor(ns, cmd, options);
   }
