@@ -267,13 +267,16 @@ var ensureConnection = function(configuration, numberOfTries, callback) {
       new Server(configuration.host, configuration.port + 1),
       new Server(configuration.host, configuration.port + 2)
     ], 
-    {rs_name:configuration.replicasetName}
+    {rs_name:configuration.replicasetName, socketOptions: {connectTimeoutMS: 1000}}
   );
+
+  // console.log("===================== ensureConnection 0 :: " + numberOfTries)
 
   if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
   // Open the db
   var db = new Db('integration_test_', replSet, {w:0});
   db.open(function(err, p_db) {
+    // console.log("===================== ensureConnection 1")
     // Close the connection
     db.close();
 
@@ -726,6 +729,37 @@ exports['Should correctly connect to arbiter with single connection'] = {
   }
 }
 
+exports['Should correctly connect to secondary with single connection'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var mongo = configuration.require
+      , ReplSet = mongo.ReplSet
+      , Server = mongo.Server
+      , Db = mongo.Db;
+
+    // Replset start port
+    var replicasetManager = configuration.manager;
+    // Get the arbiters
+    var secondaries = replicasetManager.secondaries;
+    var host = secondaries[0].split(":")[0];
+    var port = parseInt(secondaries[0].split(":")[1], 10);
+    var db = new Db('integration_test_', new Server(host, port), {w:1});
+
+    db.open(function(err, p_db) {
+      test.equal(null, err);
+
+      p_db.command({ismaster: true}, function(err, result) {
+        test.equal(null, err);
+
+        p_db.close();
+        test.done();
+      });
+    })
+  }
+}
+
 /**
  * @ignore
  */
@@ -847,6 +881,68 @@ exports['Should correctly connect to a replicaset with writeConcern specified an
       test.equal(5000, gs.writeConcern.wtimeout);
       db.close();
       test.done();
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['Should Correctly remove server going into recovery mode'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var ReplSet = configuration.require.ReplSet
+      , Server = configuration.require.Server
+      , Db = configuration.require.Db;
+    
+    // Replica configuration
+    var replSet = new ReplSet([
+        new Server(configuration.host, configuration.port),
+        new Server(configuration.host, configuration.port + 1),
+        new Server(configuration.host, configuration.port + 2)
+      ], 
+      {rs_name:configuration.replicasetName}
+    );
+
+    // Open the db connection
+    var db = new Db('integration_test_', replSet, {w:1});
+    db.on("fullsetup", function() {
+      db.command({ismaster:true}, function(err, result) {
+        // Filter out the secondaries
+        var secondaries = [];
+        result.hosts.forEach(function(s) {
+          if(result.primary != s && result.arbiters.indexOf(s) == -1)
+            secondaries.push(s);
+        });
+
+        // Get the arbiters
+        var host = secondaries[0].split(":")[0];
+        var port = parseInt(secondaries[0].split(":")[1], 10);
+        var db1 = new Db('integration_test_', new Server(host, port), {w:1});
+
+        db.serverConfig.on('left', function(t) {
+          // Return to working state
+          db1.admin().command({ replSetMaintenance: 0 }, function(err, result) {
+            db.close();
+            db1.close();
+            test.done();
+          });
+        });
+
+        db1.open(function(err, db1) {
+          test.equal(null, err);
+
+          db1.admin().command({ replSetMaintenance: 1 }, function(err, result) {
+            // Done
+          });
+        });
+      });
+    });
+
+    db.open(function(err, p_db) {
+      db = p_db;
     });
   }
 }
