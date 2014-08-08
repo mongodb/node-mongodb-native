@@ -47,7 +47,17 @@ var copy = function(fObj, tObj) {
   return tObj;
 }
 
+/**
+ * @ignore
+ */
+var bindToCurrentDomain = function(callback) {
+  var domain = process.domain;
+  if(domain == null || callback == null) return callback;
+  return domain.bind(callback);
+}
+
 exports.setProperty = setProperty;
 exports.getProperty = getProperty;
 exports.getSingleProperty = getSingleProperty;
 exports.copy = copy;
+exports.bindToCurrentDomain = bindToCurrentDomain;

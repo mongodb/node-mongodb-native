@@ -1,5 +1,6 @@
 var inherits = require('util').inherits
   , f = require('util').format
+  , bindToCurrentDomain = require('../connection/utils').bindToCurrentDomain
   , EventEmitter = require('events').EventEmitter
   , Pool = require('../connection/pool')
   , b = require('bson')
@@ -71,6 +72,11 @@ var bindToCurrentDomain = function(callback) {
   return domain.bind(callback);
 }
 
+var DISCONNECTED = 'disconnected';
+var CONNECTING = 'connecting';
+var CONNECTED = 'connected';
+var DESTROYED = 'destroyed';
+
 /**
  * Creates a new Server instance
  * @class
@@ -106,7 +112,7 @@ var bindToCurrentDomain = function(callback) {
 var Server = function(options) {
   var self = this;
   // Server callbacks
-  var callbacks = new Callbacks;
+  var callbacks = new Callbacks();
   
   // Add event listener
   EventEmitter.call(this);
@@ -118,6 +124,8 @@ var Server = function(options) {
 
   // Logger
   var logger = Logger('Server', options);
+  // Server state
+  var state = DISCONNECTED;
   
   // Reconnect option
   var reconnect = typeof options.reconnect == 'boolean' ? options.reconnect :  true;
@@ -138,6 +146,12 @@ var Server = function(options) {
 
   // Server instance id
   var id = serverId++;
+
+  // Grouping tag used for debugging purposes
+  var tag = options.tag;
+
+  // Do we have a not connected handler
+  var disconnectHandler = options.disconnectHandler;
 
   //
   // Fallback methods
@@ -171,7 +185,7 @@ var Server = function(options) {
 
   // Set error properties
   getProperty(this, 'name', 'name', serverDetails, {});
-  getSingleProperty(this, 'bson', bsonInstance);
+  getProperty(this, 'bson', 'bson', options, {});
   getSingleProperty(this, 'id', id);
 
   // Supports server
@@ -182,10 +196,13 @@ var Server = function(options) {
   //
   // Reconnect server
   var reconnectServer = function() {
+    state = CONNECTING;
     // Create a new Pool
     pool = new Pool(options);
     // error handler
     var errorHandler = function(err) {
+      console.log("============================== connect")
+      state = DISCONNECTED;
       // Destroy the pool
       pool.destroy();
       // Adjust the number of retries
@@ -203,10 +220,16 @@ var Server = function(options) {
     //
     // Attempt to connect
     pool.once('connect', function() {
+      console.log("============================== connect")
+
       // Remove any non used handlers
-      ['error', 'close', 'timeout', 'parseError'].forEach(function(e) {
+      var events = ['error', 'close', 'timeout', 'parseError'];
+      events.forEach(function(e) {
         pool.removeAllListeners(e);
       })
+
+      // Set connected state
+      state = CONNECTED;
 
       // Add proper handlers
       pool.once('error', errorHandler);
@@ -233,6 +256,9 @@ var Server = function(options) {
       }
     });
 
+
+      console.log("============================== hello")
+
     //
     // Handle connection failure
     pool.once('error', errorHandler);
@@ -256,6 +282,7 @@ var Server = function(options) {
   }
 
   var errorHandler = function(err, connection) {
+    console.log("====================================== ERROR :: " + tag + " :: " + id + " :: " + state)
     // console.log("----------------------------------- errorHandler :: ");
     // console.log("emitError :: " + emitError)
     // console.log("serverDetails.name :: " + serverDetails.name)
@@ -263,21 +290,27 @@ var Server = function(options) {
     // console.log("reconnect :: " + reconnect)
     // console.log("self.isConnected :: " + pool.isConnected())
     // console.log("self.isDestroyed :: " + pool.isDestroyed())
-
+    if(state == DISCONNECTED || state == DESTROYED) return;
+    // Set disconnected state
+    state = DISCONNECTED;
     // console.dir(err)
     if(readPreferenceStrategies != null) notifyStrategies('error', [self]);
     if(logger.isInfo()) logger.info(f('server %s errored out with %s', self.name, JSON.stringify(err)));
     // Flush out all the callbacks
     callbacks.flush(new MongoError(f("server %s received an error %s", self.name, JSON.stringify(err))));
+    // Destroy all connections
+    self.destroy();    
     // Emit error event
     if(emitError) self.emit('error', err, self);
     // If we specified the driver to reconnect perform it
     if(reconnect) setTimeout(function() { currentReconnectRetry = reconnectTries, reconnectServer() }, reconnectInterval);
-    // Destroy all connections
-    self.destroy();    
   }
 
   var fatalErrorHandler = function(err, connection) {
+    if(state == DISCONNECTED || state == DESTROYED) return;
+    // Set disconnected state
+    state = DISCONNECTED;
+
     if(readPreferenceStrategies != null) notifyStrategies('error', [self]);
     if(logger.isInfo()) logger.info(f('server %s errored out with %s', self.name, JSON.stringify(err)));    
     // Flush out all the callbacks
@@ -291,6 +324,10 @@ var Server = function(options) {
   }  
 
   var timeoutHandler = function(err, connection) {
+    if(state == DISCONNECTED || state == DESTROYED) return;
+    // Set disconnected state
+    state = DISCONNECTED;
+
     if(readPreferenceStrategies != null) notifyStrategies('timeout', [self]);
     if(logger.isInfo()) logger.info(f('server %s timed out', self.name));
     // Flush out all the callbacks
@@ -304,6 +341,11 @@ var Server = function(options) {
   }
 
   var closeHandler = function(err, connection) {
+    console.log("====================================== server close :: " + tag + " :: " + state)
+    if(state == DISCONNECTED || state == DESTROYED) return;
+    // Set disconnected state
+    state = DISCONNECTED;
+
     if(readPreferenceStrategies != null) notifyStrategies('close', [self]);
     if(logger.isInfo()) logger.info(f('server %s closed', self.name));
     // Flush out all the callbacks
@@ -328,6 +370,7 @@ var Server = function(options) {
       // console.dir(self.isConnected())
 
         if(err) {
+          state = DISCONNECTED;
           return self.emit('close', err, self);
         }
 
@@ -339,6 +382,7 @@ var Server = function(options) {
 
         // Validate if we it's a server we can connect to
         if(!supportsServer() && fallback == null) {
+          state = DISCONNECTED
           return self.emit('error', new MongoError("non supported server version"), self);
         }
 
@@ -347,16 +391,37 @@ var Server = function(options) {
 
         // No read preference strategies just emit connect
         if(readPreferenceStrategies == null) {
+          state = CONNECTED;
           return self.emit('connect', self);
         }
 
         // Signal connect to all readPreferences
         notifyStrategies('connect', [self], function(err, result) {
+          state = CONNECTED;
           return self.emit('connect', self);
         });        
       });      
     });
   }
+
+  /**
+   * Execute a command
+   * @method
+   * @param {string} type Type of BSON parser to use (c++ or js)
+   */
+  this.setBSONParserType = function(type) {
+    var nBSON = null;
+
+    if(type == 'c++') {
+      nBSON = require('bson').native().BSON;
+    } else if(type == 'js') {
+      nBSON = require('bson').pure().BSON;
+    } else {
+      throw new MongoError(f("% parser not supported", type));
+    }
+
+    options.bson = new nBSON(bsonTypes);
+  }  
 
   /**
    * Returns the last known ismaster document for this server
@@ -373,17 +438,24 @@ var Server = function(options) {
    */
   this.connect = function(_options) {
     // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% connect :: " + options.port)
+    // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% connect :: " + options.port)
+    // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% connect :: " + options.port)
     // Set server specific settings
     _options = _options || {}
     if(typeof _options.promoteLongs == 'boolean') 
       options.promoteLongs = _options.promoteLongs;
-    // Destroy existing pool
-    if(pool) {
-      pool.destroy();
+    // // Destroy existing pool
+    // if(pool) {
+    //   pool.destroy();
+    // }
+    
+    // Set the state to connection
+    state = CONNECTING;
+    // Create a new connection pool
+    if(!pool) {
+      pool = new Pool(options);      
     }
 
-    // Create a new connection pool
-    pool = new Pool(options);
     // Add all the event handlers
     pool.once('timeout', timeoutHandler);
     pool.once('close', closeHandler);
@@ -391,6 +463,9 @@ var Server = function(options) {
     pool.on('message', messageHandler);
     pool.once('connect', connectHandler);
     pool.once('parseError', fatalErrorHandler);
+
+    // console.log("------------------------------------ pool.errors :: " + pool.listeners('error').length)
+
     // Connect the pool
     pool.connect(); 
   }
@@ -401,11 +476,11 @@ var Server = function(options) {
    */
   this.destroy = function() {
     if(logger.isDebug()) logger.debug(f('destroy called on server %s', self.name));
-    // console.log("----------------- destroy server " + self.name)
-
-    // Close pool
+    console.log("----------------- destroy server " + self.name + " :: " + id + " :: ")
+    // Set state as destroyed
+    state = DESTROYED;
+    // Close the pool
     pool.destroy();
-
     // Flush out all the callbacks
     callbacks.flush(new MongoError(f("server %s sockets closed", self.name)));
   }
@@ -509,6 +584,13 @@ var Server = function(options) {
     if(logger.isDebug()) logger.debug(f('executing command [%s] against %s', JSON.stringify({
       ns: ns, cmd: cmd, options: options
     }), self.name));
+
+    // Topology is not connected, save the call in the provided store to be
+    // Executed at some point when the handler deems it's reconnected
+    if(!self.isConnected() && disconnectHandler != null) {
+      callback = bindToCurrentDomain(callback);
+      return disconnectHandler.add('command', ns, cmd, options, callback);
+    }
 
     // If we have no connection error
     if(!pool.isConnected()) return callback(new MongoError(f("no connection available to server %s", self.name)));
@@ -624,6 +706,17 @@ var Server = function(options) {
    * @param {opResultCallback} callback A callback function
    */
   this.insert = function(ns, ops, options, callback) {
+    // console.log("------------------------------------------------------")
+    // console.dir(self.isConnected())
+    // console.dir(disconnectHandler)
+
+    // Topology is not connected, save the call in the provided store to be
+    // Executed at some point when the handler deems it's reconnected
+    if(!self.isConnected() && disconnectHandler != null) {
+      callback = bindToCurrentDomain(callback);
+      return disconnectHandler.add('insert', ns, ops, options, callback);
+    }
+
     // console.log("--------------------------------------------- insert")
     if(fallback && (ismaster.maxWireVersion == null || ismaster.maxWireVersion == 0)) return fallback.insert(ismaster, ns, bson, pool, callbacks, ops, options, callback);
     executeWrite(this, 'insert', 'documents', ns, ops, options, callback);
@@ -639,6 +732,13 @@ var Server = function(options) {
    * @param {opResultCallback} callback A callback function
    */
   this.update = function(ns, ops, options, callback) {
+    // Topology is not connected, save the call in the provided store to be
+    // Executed at some point when the handler deems it's reconnected
+    if(!self.isConnected() && disconnectHandler != null) {
+      callback = bindToCurrentDomain(callback);
+      return disconnectHandler.add('update', ns, ops, options, callback);
+    }
+
     // console.log("--------------------------------------------- update")
     if(fallback && (ismaster.maxWireVersion == null || ismaster.maxWireVersion == 0)) return fallback.update(ismaster, ns, bson, pool, callbacks, ops, options, callback);
     executeWrite(this, 'update', 'updates', ns, ops, options, callback);
@@ -654,6 +754,13 @@ var Server = function(options) {
    * @param {opResultCallback} callback A callback function
    */
   this.remove = function(ns, ops, options, callback) {
+    // Topology is not connected, save the call in the provided store to be
+    // Executed at some point when the handler deems it's reconnected
+    if(!self.isConnected() && disconnectHandler != null) {
+      callback = bindToCurrentDomain(callback);
+      return disconnectHandler.add('remove', ns, ops, options, callback);
+    }
+
     // console.log("--------------------------------------------- remove")
     if(fallback && (ismaster.maxWireVersion == null || ismaster.maxWireVersion == 0)) return fallback.remove(ismaster, ns, bson, pool, callbacks, ops, options, callback);
     executeWrite(this, 'delete', 'deletes', ns, ops, options, callback);
@@ -750,12 +857,41 @@ var Server = function(options) {
   }
 
   /**
+   * Get server
+   * @method
+   * @param {object} [options.readPreference={}] Read preference for the connection
+   * @return {Server}
+   */
+  this.getServer = function(options) {
+    return self;
+  }
+
+  /**
+   * Get callbacks object
+   * @method
+   * @return {Callbacks}
+   */
+  this.getCallbacks = function() {
+    return callbacks;
+  }
+
+  /**
+   * Get connection
+   * @method
+   * @param {object} [options.readPreference={}] Read preference for the connection
+   * @return {Connection}
+   */
+  this.getConnection = function(options) {
+    return pool.get();
+  }
+
+  /**
    * Name of BSON parser currently used
    * @method
    * @return {string}
    */
   this.parserType = function() {
-    if(bsonInstance.serialize.toString().indexOf('[native code]') != -1)
+    if(options.bson.serialize.toString().indexOf('[native code]') != -1)
       return 'c++';
     return 'js';
   }
@@ -806,10 +942,11 @@ var Server = function(options) {
    * @param {boolean} [options.partial=false] partial flag set
    * @param {opResultCallback} callback A callback function
    */
-  this.cursor = function(ns, cmd, options) {
-    options = options || {};
-    if(options.topology == null) options.topology = self;
-    return new Cursor(bson, ns, cmd, options.connection ? options.connection : pool.get(), callbacks, options || {});
+  this.cursor = function(ns, cmd, cursorOptions) {
+    return new Cursor(bson, ns, cmd, cursorOptions, self, options);
+    // options = options || {};
+    // if(options.topology == null) options.topology = self;
+    // return new Cursor(bson, ns, cmd, options.connection ? options.connection : pool.get(), callbacks, options || {});
   }
 
   var slaveOk = function(r) {

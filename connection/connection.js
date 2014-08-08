@@ -49,6 +49,8 @@ var Connection = function(options) {
   if(!options.bson) throw new Error("must pass in valid bson parser");
   // Get bson parser
   var bson = options.bson;
+  // Grouping tag used for debugging purposes
+  var tag = options.tag;
 
   // Max BSON message size
   var maxBsonMessageSize = options.maxBsonMessageSize || (1024 * 1024 * 16 * 4);
@@ -94,6 +96,7 @@ var Connection = function(options) {
   var writeStream = null;
 
   // Set the single properties
+  getSingleProperty(this, 'id', id);
   getSingleProperty(this, 'host', host);
   getSingleProperty(this, 'port', port);
   getSingleProperty(this, 'connectionTimeout', connectionTimeout);
@@ -219,10 +222,14 @@ var Connection = function(options) {
   //
   // Connection handlers
   var errorHandler = function(err) {  
+    // console.log("--------------------------------- connection error :: " + self.listeners('error').length)
     // Debug information
     if(logger.isDebug()) logger.debug(f('connection %s for [%s:%s] errored out with [%s]', id,host, port, JSON.stringify(err)));
-    // Emit the error
-    self.emit("error", MongoError.create(err), self);
+    // if(self.listeners('error').length > 0) {
+    //   console.log(self.listeners('error')[0].listener.toString())
+    // }
+    // // Emit the error
+    if(self.listeners('error').length > 0) self.emit("error", MongoError.create(err), self);
   }
 
   var timeoutHandler = function() {
@@ -235,13 +242,16 @@ var Connection = function(options) {
   }
 
   var closeHandler = function(hadError) {
+    // console.log("--------------------------------- connection close :: " + hadError + " :: " + self.port + " " + id + " :: " + tag)
     // Debug information
     if(logger.isDebug()) logger.debug(f('connection %s with for [%s:%s] closed', id,host, port));
     // Emit close event
-    if(!hadError)
+    if(!hadError) {
+      // console.log("-------------------- " + self.listeners('close').length);
       self.emit("close"
         , MongoError.create(f("connection %s to %s:%s closed", id, host, port))
         , self);        
+    }
   }  
 
   var dataHandler = function(data) {
