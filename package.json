@@ -15,7 +15,8 @@
     "core"
   ],
   "dependencies": {
-    "bson": "latest"
+      "mongodb-core": "latest"
+    , "bson": "latest"
   },
   "devDependencies": {
     "integra": "0.1.1",

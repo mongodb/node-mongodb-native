@@ -52,29 +52,29 @@ var Configuration = function(options) {
     return {    
       start: function(callback) {
         var self = this;
-        if(skipStart) return callback();
-        // Start the db
-        manager.start({purge:true, signal: -9}, function(err) {
-          var server = topology(this, mongo);
-          // Set up connect
-          server.once('connect', function() {
-            // Drop the database
-            server.command(f("%s.$cmd", self.db), {dropDatabase: 1}, function(err, r) {
-              server.destroy();
+        // if(skipStart) return callback();
+        // // Start the db
+        // manager.start({purge:true, signal: -9}, function(err) {
+        //   var server = topology(this, mongo);
+        //   // Set up connect
+        //   server.once('connect', function() {
+        //     // Drop the database
+        //     server.command(f("%s.$cmd", self.db), {dropDatabase: 1}, function(err, r) {
+        //       server.destroy();
               callback();
-            });
-          });
+        //     });
+        //   });
           
-          // Connect
-          server.connect();
-        });
+        //   // Connect
+        //   server.connect();
+        // });
       },
 
       stop: function(callback) {
-        if(skipTermination) return callback();
-        manager.stop({signal: -15}, function() {
+        // if(skipTermination) return callback();
+        // manager.stop({signal: -15}, function() {
           callback();
-        });        
+        // });        
       },
 
       restart: function(callback) {

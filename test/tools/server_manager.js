@@ -177,6 +177,15 @@ var ServerManager = function(serverOptions) {
     }
   }
 
+  var waitToDie = function(pid, callback) {
+    exec(f("ps %s", pid), function(error, stdout) {
+      if(stdout.indexOf(pid) == -1) return callback();
+      setTimeout(function() {
+        waitToDie(pid, callback);
+      }, 100);
+    });
+  }
+
   this.stop = function(options, callback) {    
     if(typeof options == 'function') {
       callback = options;
@@ -188,13 +197,16 @@ var ServerManager = function(serverOptions) {
     server.destroy();
     // Kill the process with the desired signal
     exec(f("kill %d %s", signal, pid), function(error) {
-      try {
-        // Destroy pid file
-        fs.unlinkSync(path.join(dbpath, "mongod.lock"))
-      } catch(err) {}
-      // Return
-      if(error) return callback(error, null);
-      callback(null, null);
+      // Monitor for pid until it's dead
+      waitToDie(pid, function() {
+        try {
+          // Destroy pid file
+          fs.unlinkSync(path.join(dbpath, "mongod.lock"))
+        } catch(err) {}
+        // Return
+        if(error) return callback(error, null);
+        callback(null, null);
+      });
     });
   }
 
