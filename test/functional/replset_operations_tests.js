@@ -1,5 +1,11 @@
 var format = require('util').format;
 
+var restartAndDone = function(configuration, test) {
+  configuration.manager.restart(function() {
+    test.done();
+  });
+}
+
 /*******************************************************************
  *
  * Ordered
@@ -306,6 +312,133 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
         // Finish up test
         db.close();
         test.done();
+      });
+    });
+  }
+}
+
+/**
+ * Example of a simple url connection string to a replicaset, with acknowledgement of writes.
+ *
+ * @_class mongoclient
+ * @_function MongoClient.connect
+ */
+exports['Should correctly connect to a replicaset'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var mongo = configuration.require
+      , MongoClient = mongo.MongoClient;
+
+    // Create url
+    var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
+      , format("%s:%s", configuration.host, configuration.port)
+      , format("%s:%s", configuration.host, configuration.host + 1)
+      , "integration_test_"
+      , configuration.replicasetName
+      , "primary");
+
+    MongoClient.connect(url, function(err, db) {
+    // DOC_LINE MongoClient.connect("mongodb://localhost:30000,localhost:30001,localhost:30002/integration_test_?w=1", function(err, db) {
+    // DOC_START  
+      test.equal(null, err);
+      test.ok(db != null);
+
+      db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
+        test.equal(null, err);
+        test.equal(1, result);
+
+        db.close();
+        test.done();
+      });
+    });
+    // DOC_END
+  }
+}
+
+exports['Should Correctly group using replicaset'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var mongo = configuration.require,
+      MongoClient = mongo.MongoClient,
+      ReadPreference = mongo.ReadPreference;
+
+    // Create url
+    var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
+      , format("%s:%s", configuration.host, configuration.port)
+      , format("%s:%s", configuration.host, configuration.host + 1)
+      , "integration_test_"
+      , configuration.replicasetName
+      , "primary");
+
+    var manager = configuration.manager;
+
+    MongoClient.connect(url, function(err, db) {
+      var collection = db.collection('testgroup_replicaset', {
+            readPreference: ReadPreference.SECONDARY
+          , w:2, wtimeout: 10000
+        });
+      
+      collection.insert([{key:1,x:10}, {key:2,x:30}, {key:1,x:20}, {key:3,x:20}], {safe:{w:3, wtimeout:10000}}, function(err, result) {
+        // Kill the primary
+        manager.shutdown('primary', {signal: -15}, function(node) {
+          // Do a collection find
+          collection.group(['key'], {}, {sum:0}, function reduce(record, memo){
+            memo.sum += record.x;
+          }, true, function(err, items){
+            // console.dir(items)
+            test.equal(null, err);
+            test.equal(3, items.length);
+            db.close();
+            restartAndDone(configuration, test);
+          })
+        });
+      });
+    });
+  }
+}
+
+exports['Should fail to do map reduce to out collection'] = {
+  metadata: { requires: { topology: 'replicaset', mongodb: '>1.7.6' } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var mongo = configuration.require,
+      MongoClient = mongo.MongoClient,
+      ReadPreference = mongo.ReadPreference;
+
+    // Create url
+    var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
+      , format("%s:%s", configuration.host, configuration.port)
+      , format("%s:%s", configuration.host, configuration.host + 1)
+      , "integration_test_"
+      , configuration.replicasetName
+      , "primary");
+
+    var manager = configuration.manager;
+
+    MongoClient.connect(url, function(err, db) {
+      var collection = db.collection('test_map_reduce_functions_notInline_map_reduce', {
+            readPreference: ReadPreference.SECONDARY
+          , w:2, wtimeout: 10000
+        });
+
+      // Parse version of server if available
+      db.admin().serverInfo(function(err, result){
+        // Map function
+        var map = function() { emit(this.user_id, 1); };
+        // Reduce function
+        var reduce = function(k,vals) { return 1; };
+
+        // Execute map reduce and return results inline
+        collection.mapReduce(map, reduce
+          , {out : {replace:'replacethiscollection'}, readPreference:ReadPreference.SECONDARY}, function(err, results) {
+          db.close();
+          test.done();            
+        });
       });
     });
   }

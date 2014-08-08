@@ -74,6 +74,7 @@ exports.shouldCreateComplexIndexOnTwoFields = {
           // Create an index on the a field
           collection.createIndex({a:1, b:1}
             , options, function(err, indexName) {
+            console.dir(options)
 
             test.ok(!options.readPreference);
             // Show that duplicate records got dropped

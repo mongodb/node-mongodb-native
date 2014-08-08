@@ -66,7 +66,7 @@ exports.shouldStayInCorrectDomainForQueuedReadCommand = {
   test: function(configuration, test) {
     var Domain = require('domain');
     var domainInstance = Domain.create();
-    var client = configuration.newDbInstance({w: 0}, {poolSize: 1, auto_reconnect: true});
+    var client = configuration.newDbInstance({w: 0, bufferMaxEntries: 0}, {poolSize: 1, auto_reconnect: true});
 
     client.open(function(err, client) {
       var connection = client.serverConfig.connections()[0];
@@ -74,7 +74,7 @@ exports.shouldStayInCorrectDomainForQueuedReadCommand = {
       connection.destroy();
 
       domainInstance.run(function() {
-        collection.count({}, function(err) {
+        collection.count({}, function(err, c) {
           test.ok(err != null);
           test.ok(process.domain === domainInstance);
           domainInstance.exit();
@@ -101,7 +101,7 @@ exports.shouldStayInCorrectDomainForQueuedWriteCommand = {
   test: function(configuration, test) {
     var Domain = require('domain');
     var domainInstance = Domain.create();
-    var client = configuration.newDbInstance({w: 1}, {poolSize: 1, auto_reconnect: true});
+    var client = configuration.newDbInstance({w: 1, bufferMaxEntries: 0}, {poolSize: 1, auto_reconnect: true});
 
     client.open(function(err, client) {
       test.ok(!err);

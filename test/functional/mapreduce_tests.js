@@ -264,7 +264,7 @@ exports.shouldPerformMapReduceFunctionInline = {
 * @_class collection
 * @_function mapReduce
 */
-exports.shouldPerformMapReduceInContext = {
+exports.shouldPerformMapReduceWithContext = {
   metadata: {},
   
   // The actual test we wish to run
@@ -325,6 +325,7 @@ exports.shouldPerformMapReduceInContext = {
                 // Find all entries in the map-reduce collection
                 outCollection.find().toArray(function(err, results) {
                   test.equal(2, results[0].value)
+
                   db.close();
                   test.done();
                 });

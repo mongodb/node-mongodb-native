@@ -69,6 +69,9 @@ exports.shouldCorrectlyPerformAutomaticConnect = {
     automatic_connect_client.open(function(err, automatic_connect_client) {
       // Listener for closing event
       var closeListener = function(has_error) {
+        console.log("================================================ 0")
+        console.log("================================================ 0")
+        console.log("================================================ 0")
         // Let's insert a document
         var collection = automatic_connect_client.collection('test_object_id_generation_data2');
         // Insert another test document and collect using ObjectId
@@ -153,9 +156,13 @@ exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDb = {
 
         // Force close the connection
         db.close(true, function(err, result) {
+          console.log("------------------------------- 0")
 
           // Attemp to insert should fail now with correct message 'db closed by application'
           collection.insert({a:2}, {w:1}, function(err, result) {
+          console.log("------------------------------- 1")
+          console.dir(err)
+          console.dir(result)
             test.equal('db closed by application', err.message);
             test.done();
           });
@@ -1176,7 +1183,7 @@ exports.shouldCorrectlyRenameACollection = {
  * @_class db
  * @_function createIndex
  */
-exports.shouldCreateComplexIndexOnTwoFieldsDb = {
+exports.shouldCreateOnDbComplexIndexOnTwoFields = {
   metadata: {},
   
   // The actual test we wish to run
@@ -1610,14 +1617,25 @@ exports.shouldCorrectlyReconnectWhenError = {
 
     var db = new Db('integration_tests_to_drop_2', new Server("127.0.0.1", 27088,
       {auto_reconnect: false, poolSize: 4}), {w:0});
+
+      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 0")
+      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 0")
+      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 0")
     // Establish connection to db
     db.open(function(err, _db) {
+      // console.log("----------------------------------------- 0")
       test.ok(err != null);
+      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 1")
+      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 1")
+      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 1")
+
 
       db.open(function(err, _db) {
+      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 2")
+      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 2")
+      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 2")
         test.ok(err != null);
         db.close();
-
         test.done();
       })
     });
