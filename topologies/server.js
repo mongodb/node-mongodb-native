@@ -20,8 +20,10 @@ var inherits = require('util').inherits
 var bsonTypes = [b.Long, b.ObjectID, b.Binary, b.Code, b.DBRef, b.Symbol, b.Double, b.Timestamp, b.MaxKey, b.MinKey];
 // BSON parser
 var bsonInstance = null;
-// Server instance if
+// Server instance id
 var serverId = 0;
+// Callbacks instance id
+var callbackId = 0;
 
 // Single store for all callbacks
 var Callbacks = function() {
@@ -29,6 +31,13 @@ var Callbacks = function() {
 
   // Self reference
   var self = this;
+
+  // Id
+  var id = callbackId++;
+
+  Object.defineProperty(this, 'id', {
+    enumerable:true, get: function() { return id; }
+  });
 
   //
   // Flush all callbacks
@@ -201,7 +210,7 @@ var Server = function(options) {
     pool = new Pool(options);
     // error handler
     var errorHandler = function(err) {
-      console.log("============================== connect")
+      // console.log("============================== connect")
       state = DISCONNECTED;
       // Destroy the pool
       pool.destroy();
@@ -220,7 +229,7 @@ var Server = function(options) {
     //
     // Attempt to connect
     pool.once('connect', function() {
-      console.log("============================== connect")
+      // console.log("============================== connect")
 
       // Remove any non used handlers
       var events = ['error', 'close', 'timeout', 'parseError'];
@@ -257,7 +266,7 @@ var Server = function(options) {
     });
 
 
-      console.log("============================== hello")
+      // console.log("============================== hello")
 
     //
     // Handle connection failure
@@ -273,16 +282,20 @@ var Server = function(options) {
   //
   // Handlers
   var messageHandler = function(response, connection) {
-    // console.log("+++++++++++++++++++++++++++++++++++++++ messageHandler :: " + response.responseTo + " :: " + response.requestId)
+    // console.log("+++++++++++++++++++++++++++++++++++++++ messageHandler :: " + response.responseTo + " :: " + response.requestId + " :: " + callbacks.id + ' :: ' + self.name)
     // Parse the message
     response.parse({raw: callbacks.raw(response.responseTo)});
     // if(response.documents)console.dir(response.documents)
     if(logger.isDebug()) logger.debug(f('message [%s] received from %s', response.raw.toString('hex'), self.name));
+
+    // console.log("========================================================")
+    // console.dir(callbacks)
+
     callbacks.emit(response.responseTo, null, response);      
   }
 
   var errorHandler = function(err, connection) {
-    console.log("====================================== ERROR :: " + tag + " :: " + id + " :: " + state)
+    // console.log(" SERVER :: ====================================== ERROR :: " + tag + " :: " + id + " :: " + state)
     // console.log("----------------------------------- errorHandler :: ");
     // console.log("emitError :: " + emitError)
     // console.log("serverDetails.name :: " + serverDetails.name)
@@ -324,6 +337,7 @@ var Server = function(options) {
   }  
 
   var timeoutHandler = function(err, connection) {
+    // console.log("====================================== server timeout :: " + tag + " :: " + state)
     if(state == DISCONNECTED || state == DESTROYED) return;
     // Set disconnected state
     state = DISCONNECTED;
@@ -341,7 +355,7 @@ var Server = function(options) {
   }
 
   var closeHandler = function(err, connection) {
-    console.log("====================================== server close :: " + tag + " :: " + state)
+    // console.log("====================================== server close :: " + tag + " :: " + state)
     if(state == DISCONNECTED || state == DESTROYED) return;
     // Set disconnected state
     state = DISCONNECTED;
@@ -359,7 +373,7 @@ var Server = function(options) {
   }
 
   var connectHandler = function(connection) {
-    // console.log("=============== connect server id " + self.name + " :: " + serverId)
+    // console.log("SERVER :: =============== connect server id " + self.name + " :: " + serverId)
     // Apply any applyAuthentications
     applyAuthentications(function() {
 
@@ -367,10 +381,10 @@ var Server = function(options) {
       // Execute an ismaster
       self.command('system.$cmd', {ismaster:true}, function(err, r) {
       // console.log("=============================== CONNECT :: 1")
-      // console.dir(self.isConnected())
 
         if(err) {
           state = DISCONNECTED;
+      // console.log("=============================== CONNECT :: 2")
           return self.emit('close', err, self);
         }
 
@@ -383,6 +397,7 @@ var Server = function(options) {
         // Validate if we it's a server we can connect to
         if(!supportsServer() && fallback == null) {
           state = DISCONNECTED
+      // console.log("=============================== CONNECT :: 3")
           return self.emit('error', new MongoError("non supported server version"), self);
         }
 
@@ -392,12 +407,14 @@ var Server = function(options) {
         // No read preference strategies just emit connect
         if(readPreferenceStrategies == null) {
           state = CONNECTED;
+      // console.log("=============================== CONNECT :: 4")
           return self.emit('connect', self);
         }
 
         // Signal connect to all readPreferences
         notifyStrategies('connect', [self], function(err, result) {
           state = CONNECTED;
+      // console.log("=============================== CONNECT :: 5")
           return self.emit('connect', self);
         });        
       });      
@@ -444,10 +461,11 @@ var Server = function(options) {
     _options = _options || {}
     if(typeof _options.promoteLongs == 'boolean') 
       options.promoteLongs = _options.promoteLongs;
-    // // Destroy existing pool
-    // if(pool) {
-    //   pool.destroy();
-    // }
+    // Destroy existing pool
+    if(pool) {
+      pool.destroy();
+      pool = null;
+    }
     
     // Set the state to connection
     state = CONNECTING;
@@ -476,7 +494,7 @@ var Server = function(options) {
    */
   this.destroy = function() {
     if(logger.isDebug()) logger.debug(f('destroy called on server %s', self.name));
-    console.log("----------------- destroy server " + self.name + " :: " + id + " :: ")
+    // console.log("----------------- destroy server " + self.name + " :: " + id + " :: ")
     // Set state as destroyed
     state = DESTROYED;
     // Close the pool

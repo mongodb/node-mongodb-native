@@ -1,5 +1,6 @@
 var inherits = require('util').inherits
   , f = require('util').format
+  , b = require('bson')
   , bindToCurrentDomain = require('../connection/utils').bindToCurrentDomain
   , EventEmitter = require('events').EventEmitter
   , Server = require('./server')
@@ -7,6 +8,8 @@ var inherits = require('util').inherits
   , MongoError = require('../error')
   , Ping = require('./strategies/ping')
   , Session = require('./session')
+  , Cursor = require('../cursor')
+  , BSON = require('bson').native().BSON
   , Logger = require('../connection/logger');
 
 var DISCONNECTED = 'disconnected';
@@ -299,6 +302,11 @@ var State = function() {
   }
 }
 
+// All bson types
+var bsonTypes = [b.Long, b.ObjectID, b.Binary, b.Code, b.DBRef, b.Symbol, b.Double, b.Timestamp, b.MaxKey, b.MinKey];
+// BSON parser
+var bsonInstance = null;
+
 /**
  * Creates a new Replset instance
  * @class
@@ -350,6 +358,21 @@ var ReplSet = function(seedlist, options) {
   var index = 0;
   // Ha Index
   var haId = 0;
+
+  //
+  // Factory overrides
+  //
+  var Cursor = options.cursorFactory || BasicCursor;
+
+  // BSON Parser, ensure we have a single instance
+  if(bsonInstance == null) {
+    bsonInstance = new BSON(bsonTypes);
+  }
+
+  // Pick the right bson parser
+  var bson = options.bson ? options.bson : bsonInstance;
+  // Add bson parser to options
+  options.bson = bson;
 
   // Special replicaset options
   var secondaryOnlyConnectionAllowed = typeof options.secondaryOnlyConnectionAllowed == 'boolean'
@@ -452,8 +475,8 @@ var ReplSet = function(seedlist, options) {
   }
 
   var errorHandler = function(err, server) {
-    if(state == DESTROYED) return;
     // console.log("============================================ errorHandler REPLSET")
+    if(state == DESTROYED) return;
     // console.dir(err)
     if(logger.isInfo()) logger.info(f('[%s] server %s errored out with %s', id, server.lastIsMaster() ? server.lastIsMaster().me : server.name, JSON.stringify(err)));
     addToListIfNotExist(disconnectedServers, server);
@@ -469,8 +492,8 @@ var ReplSet = function(seedlist, options) {
   }
 
   var closeHandler = function(err, server) {
-    if(state == DESTROYED) return;
     // console.log("============================================ closeHandler REPLSET")
+    if(state == DESTROYED) return;
     // console.dir(err)
     if(logger.isInfo()) logger.info(f('[%s] server %s closed', id, server.lastIsMaster() ? server.lastIsMaster().me : server.name));
     addToListIfNotExist(disconnectedServers, server);
@@ -482,6 +505,10 @@ var ReplSet = function(seedlist, options) {
   //
   var replicasetInquirer = function(norepeat) {
     // console.log("========================================== replicasetInquirer :: " + state + " :: " + id)
+    // console.log(" primary :: " + (replState.primary != null))
+    // console.log(" secondaries :: " + replState.secondaries.length)
+    // console.log(" arbiters :: " + replState.secondaries.length)
+    // console.log(" disconnectedServers :: " + disconnectedServers.length)
     if(state == DESTROYED) return
     // Process already running don't rerun
     if(highAvailabilityProcessRunning) return;
@@ -505,6 +532,8 @@ var ReplSet = function(seedlist, options) {
     while(disconnectedServers.length > 0) {
       // Get the first disconnected server
       var server = disconnectedServers.shift();
+      // console.log("---------------------- connect to a disconnected server :: " + server.name);
+
       if(logger.isInfo()) logger.info(f('[%s] monitoring attempting to connect to %s', id, server.lastIsMaster() ? server.lastIsMaster().me : server.name));
       // Set up the event handlers
       server.once('error', errorHandlerTemp('error'));
@@ -656,6 +685,11 @@ var ReplSet = function(seedlist, options) {
     for(var i = 0; i < servers.length; i++) {
       inspectServer(servers[i]);
     }
+
+    // console.log('---------------------------------------- check if fullsetup')
+    // console.log("initialConnectionServers.length = " + initialConnectionServers.length)
+    // console.log("Object.keys(connectingServers).length = " + Object.keys(connectingServers).length)
+    // console.log("fullsetup = " + fullsetup)
 
     // If no more initial servers and new scheduled servers to connect
     if(initialConnectionServers.length == 0 && Object.keys(connectingServers).length == 0 && !fullsetup) {
@@ -1051,9 +1085,15 @@ var ReplSet = function(seedlist, options) {
    * @method
    * @return {boolean}
    */
-  this.isConnected = function() {
+  this.isConnected = function(options) {
     // console.log("------------------ replState.isSecondaryConnected() = " + replState.isSecondaryConnected() + " :: " + tag)
     // console.log("------------------ replState.isPrimaryConnected() = " + replState.isPrimaryConnected() + " :: " + tag)
+    options = options || {};
+    // If we specified a read preference check if we are connected to something
+    // than can satisfy this
+    if(options.readPreference 
+      && options.readPreference.preference != ReadPreference.PRIMARY)
+      return replState.isSecondaryConnected() || replState.isPrimaryConnected();
 
     if(secondaryOnlyConnectionAllowed) return replState.isSecondaryConnected();
     return replState.isPrimaryConnected();
@@ -1101,9 +1141,9 @@ var ReplSet = function(seedlist, options) {
 
     // Topology is not connected, save the call in the provided store to be
     // Executed at some point when the handler deems it's reconnected
-    if(!self.isConnected() && disconnectHandler != null) {
+    if(!self.isConnected(options) && disconnectHandler != null) {
       callback = bindToCurrentDomain(callback);
-      return disconnectHandler.add('command', ns, ops, options, callback);
+      return disconnectHandler.add('command', ns, cmd, options, callback);
     }
 
     // Pick the right server based on readPreference
@@ -1313,6 +1353,25 @@ var ReplSet = function(seedlist, options) {
     if(authProviders == null) authProviders = {};
     authProviders[name] = provider;
   } 
+
+  /**
+   * Execute a command
+   * @method
+   * @param {string} type Type of BSON parser to use (c++ or js)
+   */
+  this.setBSONParserType = function(type) {
+    var nBSON = null;
+
+    if(type == 'c++') {
+      nBSON = require('bson').native().BSON;
+    } else if(type == 'js') {
+      nBSON = require('bson').pure().BSON;
+    } else {
+      throw new MongoError(f("% parser not supported", type));
+    }
+
+    options.bson = new nBSON(bsonTypes);
+  }  
 
   /**
    * Returns the last known ismaster document for this server
