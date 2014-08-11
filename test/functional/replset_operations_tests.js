@@ -75,7 +75,7 @@ exports['Should fail due to w:5 and wtimeout:1 with ordered batch api'] = {
       executeTests(db, function() {
         // Finish up test
         db.close();
-        test.done();
+        restartAndDone(configuration, test);
       });
     });
   }
@@ -153,7 +153,7 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
       executeTests(db, function() {
         // Finish up test
         db.close();
-        test.done();
+        restartAndDone(configuration, test);
       });
     });
   }
@@ -229,7 +229,7 @@ exports['Should fail due to w:5 and wtimeout:1 with unordered batch api'] = {
       executeTests(db, function() {
         // Finish up test
         db.close();
-        test.done();
+        restartAndDone(configuration, test);
       });
     });
   }
@@ -311,7 +311,7 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
       executeTests(db, function() {
         // Finish up test
         db.close();
-        test.done();
+        restartAndDone(configuration, test);
       });
     });
   }
@@ -350,7 +350,7 @@ exports['Should correctly connect to a replicaset'] = {
         test.equal(1, result);
 
         db.close();
-        test.done();
+        restartAndDone(configuration, test);
       });
     });
     // DOC_END
@@ -437,7 +437,7 @@ exports['Should fail to do map reduce to out collection'] = {
         collection.mapReduce(map, reduce
           , {out : {replace:'replacethiscollection'}, readPreference:ReadPreference.SECONDARY}, function(err, results) {
           db.close();
-          test.done();            
+          restartAndDone(configuration, test);            
         });
       });
     });

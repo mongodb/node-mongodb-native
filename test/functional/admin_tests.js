@@ -813,7 +813,6 @@ exports['Should correctly issue authenticated event on successful authentication
     var db = configure.newDbInstance({w:1}, {poolSize:1});
 
     db.on('authenticated', function() {
-      console.log("-------------------------------------- 4")
       test.done();
     });
 
@@ -821,8 +820,6 @@ exports['Should correctly issue authenticated event on successful authentication
     // DOC_START
     // Establish connection to db  
     db.open(function(err, db) {
-
-      console.log("-------------------------------------- 0")
       // Grab a collection object
       var collection = db.collection('test');
 
@@ -832,21 +829,19 @@ exports['Should correctly issue authenticated event on successful authentication
 
         // Use the admin database for the operation
         var adminDb = db.admin();
-      console.log("-------------------------------------- 1")
 
         // Add the new user to the admin database
         adminDb.addUser('admin15', 'admin15', function(err, result) {
           test.equal(null, err);
           test.ok(result != null);
 
-      console.log("-------------------------------------- 2")
-
           // Authenticate using the newly added user
           adminDb.authenticate('admin15', 'admin15', function(err, result) {
-      console.log("-------------------------------------- 3")
             test.equal(null, err); 
             test.equal(true, result);         
-            // db.close();
+            
+            db.close();
+            test.done();
           });
         });
       });

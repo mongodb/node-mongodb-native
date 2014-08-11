@@ -4,212 +4,213 @@ var restartAndDone = function(configuration, test) {
   });
 }
 
-// /**
-//  * @ignore
-//  */
-// exports['Should correctly receive ha'] = {
-//   metadata: { requires: { topology: 'replicaset' } },
+/**
+ * @ignore
+ */
+exports['Should correctly receive ha'] = {
+  metadata: { requires: { topology: 'replicaset' } },
   
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var db = configuration.newDbInstance({w:0}, {poolSize:1});
-//     db.open(function(err, db) {
-//       test.equal(null, err);
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    db.open(function(err, db) {
+      test.equal(null, err);
 
-//       db.serverConfig.on('ha', function(e, options) {
-//         db.close();
-//         test.done();        
-//       });
-//     });
-//   }
-// }
+      db.serverConfig.on('ha', function(e, options) {
+        db.close();
+        restartAndDone(configuration, test);
+      });
+    });
+  }
+}
 
-// /**
-//  * @ignore
-//  */
-// exports['Should correctly handle primary stepDown'] = {
-//   metadata: { requires: { topology: 'replicaset' } },
+/**
+ * @ignore
+ */
+exports['Should correctly handle primary stepDown'] = {
+  metadata: { requires: { topology: 'replicaset' } },
   
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     // The state
-//     var state = 0;
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    // The state
+    var state = 0;
 
-//     var db = configuration.newDbInstance({w:0}, {poolSize:1});
-//     db.open(function(err, db) {
-//       db.serverConfig.on('ha', function(e, options) {});
-//       // Wait for close event due to primary stepdown
-//       db.serverConfig.on('joined', function(t, d, s) {
-//         if(t == 'primary') state++;
-//       });
+    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    db.open(function(err, db) {
+      db.serverConfig.on('ha', function(e, options) {});
+      // Wait for close event due to primary stepdown
+      db.serverConfig.on('joined', function(t, d, s) {
+        if(t == 'primary') state++;
+      });
 
-//       db.serverConfig.on('left', function(t, s) {
-//         if(t == 'primary') state++;
-//       });
+      db.serverConfig.on('left', function(t, s) {
+        if(t == 'primary') state++;
+      });
 
-//       // Wait fo rthe test to be done
-//       var interval = setInterval(function() {
-//         if(state == 2) {
-//           clearInterval(interval);
-//           db.close();
-//           restartAndDone(configuration, test);
-//         }
-//       }, 500);
+      // Wait fo rthe test to be done
+      var interval = setInterval(function() {
+        if(state == 2) {
+          clearInterval(interval);
+          db.close();
+          restartAndDone(configuration, test);
+        }
+      }, 500);
 
-//       db.once('fullsetup', function() {
-//         configuration.manager.stepDown({force: true}, function(err, result) {});        
-//       });
-//     });
-//   }
-// }
+      db.once('fullsetup', function() {
+        configuration.manager.stepDown({force: true}, function(err, result) {});        
+      });
+    });
+  }
+}
 
-// exports['Should correctly recover from secondary shutdowns'] = {
-//   metadata: { requires: { topology: 'replicaset' } },
+exports['Should correctly recover from secondary shutdowns'] = {
+  metadata: { requires: { topology: 'replicaset' } },
 
-//   test: function(configuration, test) {
-//     var ReadPreference = configuration.require.ReadPreference;
-//     // The state
-//     var primary = false;
+  test: function(configuration, test) {
+    var ReadPreference = configuration.require.ReadPreference;
+    // The state
+    var primary = false;
 
-//     // Get a new instance
-//     var db = configuration.newDbInstance({w:0}, {poolSize:1});
-//     db.open(function(err, db) {
-//       test.equal(null, err);
-//       // The state
-//       var left = {};
-//       var joined = 0;
+    // Get a new instance
+    var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-//       // Wait for left events
-//       db.serverConfig.on('left', function(t, s) {
-//         left[s.name] = ({type: t, server: s});
+    // Wait for a second and shutdown secondaries
+    db.once('fullsetup', function() {
+      // Shutdown the first secondary
+      configuration.manager.shutdown('secondary', {signal:15}, function(err, result) {
+        // Shutdown the second secondary
+        configuration.manager.shutdown('secondary', {signal:15}, function(err, result) {
+        });
+      });
+    });
+    
+    db.open(function(err, db) {
+      test.equal(null, err);
+      // The state
+      var left = {};
+      var joined = 0;
 
-//         // Restart the servers
-//         if(Object.keys(left).length == 3) {
-//           // Wait for close event due to primary stepdown
-//           db.serverConfig.on('joined', function(t, d, s) {
-//             if('primary' == t && left[s.name]) {
-//               joined++;
-//               primary = true;
-//             } else if('secondary' == t && left[s.name]) {
-//               joined++;
-//             }
+      // Wait for left events
+      db.serverConfig.on('left', function(t, s) {
+        left[s.name] = ({type: t, server: s});
 
-//             if(joined >= Object.keys(left).length && primary) {
-//               db.collection('replset_insert0').insert({a:1}, function(err, result) {
-//                 test.equal(null, err);
+        // Restart the servers
+        if(Object.keys(left).length == 3) {
+          // Wait for close event due to primary stepdown
+          db.serverConfig.on('joined', function(t, d, s) {
+            if('primary' == t && left[s.name]) {
+              joined++;
+              primary = true;
+            } else if('secondary' == t && left[s.name]) {
+              joined++;
+            }
 
-//                 db.command({ismaster:true}
-//                   , {readPreference: new ReadPreference('secondary')}
-//                   , function(err, result) {
-//                     test.equal(null, err);
-//                     db.close();
-//                     restartAndDone(configuration, test);
-//                   });
-//               });
-//             }
-//           });
+            if(joined >= Object.keys(left).length && primary) {
+              db.collection('replset_insert0').insert({a:1}, function(err, result) {
+                test.equal(null, err);
 
-//           // Let's restart a secondary
-//           configuration.manager.restartServer('secondary', function(err, result) {
-//             // Let's restart a secondary
-//             configuration.manager.restartServer('secondary', function(err, result) {
-//             });
-//           });
-//         }
-//       });
+                db.command({ismaster:true}
+                  , {readPreference: new ReadPreference('secondary')}
+                  , function(err, result) {
+                    test.equal(null, err);
+                    db.close();
+                    restartAndDone(configuration, test);
+                  });
+              });
+            }
+          });
 
-//       // Wait for a second and shutdown secondaries
-//       db.once('fullsetup', function() {
-//         // Shutdown the first secondary
-//         configuration.manager.shutdown('secondary', {signal:15}, function(err, result) {
-//           // Shutdown the second secondary
-//           configuration.manager.shutdown('secondary', {signal:15}, function(err, result) {
-//           });
-//         });
-//       });
-//     });
-//   }
-// }
+          // Let's restart a secondary
+          configuration.manager.restartServer('secondary', function(err, result) {
+            // Let's restart a secondary
+            configuration.manager.restartServer('secondary', function(err, result) {
+            });
+          });
+        }
+      });
+    });
+  }
+}
 
-// exports['Should correctly remove and re-add secondary and detect removal and re-addition of the server'] = {
-//   metadata: { requires: { topology: 'replicaset' } },
+exports['Should correctly remove and re-add secondary and detect removal and re-addition of the server'] = {
+  metadata: { requires: { topology: 'replicaset' } },
 
-//   test: function(configuration, test) {
-//     // The state
-//     var state = 0;
-//     var leftServer = null;
+  test: function(configuration, test) {
+    // The state
+    var state = 0;
+    var leftServer = null;
 
-//     // Get a new instance
-//     var db = configuration.newDbInstance({w:0}, {poolSize:1});
-//     db.open(function(err, db) {
-//       test.equal(null, err);
+    // Get a new instance
+    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    db.open(function(err, db) {
+      test.equal(null, err);
 
-//       db.serverConfig.on('joined', function(t, d, s) {
-//         if(t == 'secondary' && leftServer && s.name == leftServer.host) {
-//           db.close();
-//           restartAndDone(configuration, test);
-//         }
-//       });
+      db.serverConfig.on('joined', function(t, d, s) {
+        if(t == 'secondary' && leftServer && s.name == leftServer.host) {
+          db.close();
+          restartAndDone(configuration, test);
+        }
+      });
 
-//       db.serverConfig.on('left', function(t, s) {
-//         if(t == 'secondary' && leftServer && s.name == leftServer.host) state++;
-//       });
+      db.serverConfig.on('left', function(t, s) {
+        if(t == 'secondary' && leftServer && s.name == leftServer.host) state++;
+      });
 
-//       db.once('fullsetup', function() {
-//         // Shutdown the first secondary
-//         configuration.manager.remove('secondary', function(err, serverDetails) {
-//           leftServer = serverDetails;
+      db.once('fullsetup', function() {
+        // Shutdown the first secondary
+        configuration.manager.remove('secondary', function(err, serverDetails) {
+          leftServer = serverDetails;
 
-//           setTimeout(function() {
-//             // Shutdown the second secondary
-//             configuration.manager.add(serverDetails, function(err, result) {});          
-//           }, 10000)
-//         });      
-//       });
-//     });
-//   }
-// }
+          setTimeout(function() {
+            // Shutdown the second secondary
+            configuration.manager.add(serverDetails, function(err, result) {});          
+          }, 10000)
+        });      
+      });
+    });
+  }
+}
 
-// exports['Should correctly remove and re-add secondary with new priority and detect removal and re-addition of the server as new new primary'] = {
-//   metadata: { requires: { topology: 'replicaset' } },
+exports['Should correctly remove and re-add secondary with new priority and detect removal and re-addition of the server as new new primary'] = {
+  metadata: { requires: { topology: 'replicaset' } },
 
-//   test: function(configuration, test) {
-//     // The state
-//     var state = 0;
-//     var leftServer = null;
+  test: function(configuration, test) {
+    // The state
+    var state = 0;
+    var leftServer = null;
 
-//     // Get a new instance
-//     var db = configuration.newDbInstance({w:0}, {poolSize:1});
-//     db.open(function(err, db) {
-//       test.equal(null, err);
+    // Get a new instance
+    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    db.open(function(err, db) {
+      test.equal(null, err);
 
-//       // Add event listeners
-//       db.serverConfig.on('joined', function(t, d, s) {
-//         if(t == 'primary' && leftServer && s.name == leftServer.host) {
-//           db.close();
-//           restartAndDone(configuration, test);
-//         }
-//       });
+      // Add event listeners
+      db.serverConfig.on('joined', function(t, d, s) {
+        if(t == 'primary' && leftServer && s.name == leftServer.host) {
+          db.close();
+          restartAndDone(configuration, test);
+        }
+      });
 
-//       db.serverConfig.on('left', function(t, s) {
-//         if(t == 'secondary' && leftServer && s.name == leftServer.host) state++;
-//       });
+      db.serverConfig.on('left', function(t, s) {
+        if(t == 'secondary' && leftServer && s.name == leftServer.host) state++;
+      });
 
-//       db.once('fullsetup', function() {
-//         // Shutdown the first secondary
-//         configuration.manager.remove('secondary', function(err, serverDetails) {
-//           serverDetails.priority = 10;
-//           leftServer = serverDetails;
+      db.once('fullsetup', function() {
+        // Shutdown the first secondary
+        configuration.manager.remove('secondary', function(err, serverDetails) {
+          serverDetails.priority = 10;
+          leftServer = serverDetails;
 
-//           setTimeout(function() {
-//             // Shutdown the second secondary
-//             configuration.manager.add(serverDetails, function(err, result) {});          
-//           }, 10000)
-//         });
-//       });
-//     });
-//   }
-// }
+          setTimeout(function() {
+            // Shutdown the second secondary
+            configuration.manager.add(serverDetails, function(err, result) {});          
+          }, 10000)
+        });
+      });
+    });
+  }
+}
 
 /**
  * @ignore
@@ -321,6 +322,66 @@ exports['Should work correctly with inserts after bringing master back'] = {
           });
         });
       });
+    });
+
+    db.open(function(err, p_db) {
+      db = p_db;
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['Should correctly read from secondary even if primary is down'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  test: function(configuration, test) {
+    var mongo = configuration.require
+      , ReadPreference = mongo.ReadPreference
+      , ReplSet = mongo.ReplSet
+      , Server = mongo.Server
+      , Db = mongo.Db;
+
+    var manager = configuration.manager;
+
+    // Replica configuration
+    var replSet = new ReplSet([
+        new Server(configuration.host, configuration.port),
+        new Server(configuration.host, configuration.port + 1),
+        new Server(configuration.host, configuration.port + 2)
+      ]
+      , {rs_name:configuration.replicasetName, tag: "Application", poolSize: 1}
+    );
+
+    var db = new Db('integration_test_', replSet, {w:0, readPreference:ReadPreference.PRIMARY_PREFERRED});
+    db.on('fullsetup', function(err, p_db) {
+      test.ok(err == null);
+      var collection = p_db.collection('notempty');
+
+      // Insert a document
+      collection.insert({a:1}, {w:2, wtimeout:10000}, function(err, result) {
+        
+        // Run a simple query
+        collection.findOne(function (err, doc) {
+          test.ok(err == null);
+          test.ok(1, doc.a);
+
+          // Shut down primary server
+          manager.shutdown('primary', {signal: -15}, function (err, result) {
+
+            // Run a simple query
+            collection.findOne(function (err, doc) {
+              // test.ok(Object.keys(replSet._state.secondaries).length > 0);
+              test.equal(null, err);
+              test.ok(doc != null);
+
+              p_db.close();
+              restartAndDone(configuration, test);
+            });
+          });
+        });
+      });  
     });
 
     db.open(function(err, p_db) {

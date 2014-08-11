@@ -25,7 +25,7 @@ exports['Should throw error due to mongos connection usage'] = {
       , {rs_name:configuration.replicasetName}
       );
     } catch(err) {
-      test.done();
+      restartAndDone(configuration, test);
     }
   }
 }
@@ -53,7 +53,7 @@ exports['Should correctly handle error when no server up in replicaset'] = {
       test.ok(err != null);
 
       db.close();
-      test.done();
+      restartAndDone(configuration, test);
     });
   }
 }
@@ -92,7 +92,7 @@ exports['Should correctly connect with default replicasetNoOption'] = {
     db.open(function(err, p_db) {
       test.equal(null, err);
       p_db.close();
-      test.done();
+      restartAndDone(configuration, test);
     });
     // DOC_END
   }
@@ -153,7 +153,7 @@ exports['Should correctly connect with default replicaset and socket options set
       var connection = db.serverConfig.connections()[0];
       test.equal(100, connection.keepAliveInitialDelay);
       p_db.close();
-      test.done();
+      restartAndDone(configuration, test);
     })
   }
 }
@@ -186,7 +186,7 @@ exports['Should emit close no callback'] = {
 
       setTimeout(function() {
         test.equal(dbCloseCount, 1);
-        test.done();
+        restartAndDone(configuration, test);
       }, 2000);
     })
   }
@@ -221,7 +221,7 @@ exports['Should emit close with callback'] = {
         // Let all events fire.
         process.nextTick(function() {
           test.equal(dbCloseCount, 1);
-          test.done();
+          restartAndDone(configuration, test);
         });
       });
     })
@@ -249,7 +249,7 @@ exports['Should correctly pass error when wrong replicaSet'] = {
     var db = new Db('integration_test_', replSet, {w:0});
     db.open(function(err, p_db) {
       test.notEqual(null, err);
-      test.done();
+      restartAndDone(configuration, test);
     })
   }
 }
@@ -321,7 +321,7 @@ exports['Should connect with primary stepped down'] = {
           test.equal(true, connection.isConnected());
           // Close the database
           p_db.close();
-          test.done();
+          restartAndDone(configuration, test);
         })
       });
     });
@@ -430,7 +430,7 @@ exports['Should correctly emit open signal and full set signal'] = {
 
       // Close and cleanup
       _db.close();
-      test.done();
+      restartAndDone(configuration, test);
     });
 
     db.open(function(err, p_db) {})
@@ -468,7 +468,7 @@ exports['ReplSet honors socketOptions options'] = {
       test.equal(3000, connection.socketTimeout);
       test.equal(false, connection.noDelay);
       p_db.close();
-      test.done();
+      restartAndDone(configuration, test);
     });
   }
 }
@@ -547,7 +547,7 @@ exports['Should correctly emit all signals even if not yet connected'] = {
                 setTimeout(function() {
                   test.equal(2, close_count);
                   test.equal(2, open_count);
-                  test.done();
+                  restartAndDone(configuration, test);
                 }, 1000);
               });                                                                      
             });                                                                         
@@ -691,7 +691,7 @@ exports['Should correctly receive ping and ha events'] = {
         if(ping && ha_connect && ha_ismaster) {
           clearInterval(interval);
           db.close();
-          test.done();
+          restartAndDone(configuration, test);
         }
       }, 100);
     });
@@ -723,7 +723,7 @@ exports['Should correctly connect to arbiter with single connection'] = {
         test.equal(null, err);
 
         p_db.close();
-        test.done();
+        restartAndDone(configuration, test);
       });
     })
   }
@@ -754,7 +754,7 @@ exports['Should correctly connect to secondary with single connection'] = {
         test.equal(null, err);
 
         p_db.close();
-        test.done();
+        restartAndDone(configuration, test);
       });
     })
   }
@@ -793,7 +793,7 @@ exports['Should correctly connect to a replicaset with additional options'] = {
         test.equal(1, result);
 
         db.close();
-        test.done();
+        restartAndDone(configuration, test);
       });
     });
   }
@@ -823,7 +823,7 @@ exports['Should correctly connect to a replicaset with readPreference set'] = {
         test.equal(null, err);
 
         db.close();
-        test.done();
+        restartAndDone(configuration, test);
       });
     });
   }
@@ -849,7 +849,7 @@ exports['Should give an error for non-existing servers'] = {
 
     MongoClient.connect(url, function(err, db) {
       test.ok(err != null);
-      test.done();
+      restartAndDone(configuration, test);
     });
   }
 }
@@ -880,7 +880,7 @@ exports['Should correctly connect to a replicaset with writeConcern specified an
       test.equal('majority', gs.writeConcern.w);
       test.equal(5000, gs.writeConcern.wtimeout);
       db.close();
-      test.done();
+      restartAndDone(configuration, test);
     });
   }
 }
@@ -927,7 +927,7 @@ exports['Should Correctly remove server going into recovery mode'] = {
           db1.admin().command({ replSetMaintenance: 0 }, function(err, result) {
             db.close();
             db1.close();
-            test.done();
+            restartAndDone(configuration, test);
           });
         });
 

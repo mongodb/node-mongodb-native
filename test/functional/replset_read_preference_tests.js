@@ -107,7 +107,7 @@ exports['Should Correctly Pick lowest ping time'] = {
 
                 // Close db
                 db.close();
-                test.done();           
+                restartAndDone(configuration, test);           
               });                
             });
           });
@@ -178,7 +178,7 @@ exports['Should Correctly vary read server when using readpreference NEAREST'] =
             test.ok(Object.keys(viewedServers).length > 1);
 
             db.close();
-            test.done();
+            restartAndDone(configuration, test);
           });
         });
       });
@@ -255,7 +255,7 @@ exports.shouldCorrectlyReadFromGridstoreWithSecondaryReadPreference = {
                 gridStore.read(function(err, data2) {
                   test.equal(null, err);
                   test.equal(data.toString('base64'), data2.toString('base64'));
-                  test.done();
+                  restartAndDone(configuration, test);
                 })
               });
             });
@@ -378,7 +378,7 @@ exports['Connection to replicaset with primary read preference'] = {
         // Attempt to read (should fail due to the server not being a primary);
         collection.find().toArray(function(err, items) {
           db.close();
-          test.done();
+          restartAndDone(configuration, test);
         });
       });
     });
@@ -440,7 +440,7 @@ exports['Should Set read preference at collection level using collection method'
         cursor.toArray(function(err, items) {
           test.equal(ReadPreference.SECONDARY, cursor.readPreference.preference)
           db.close();
-          test.done();
+          restartAndDone(configuration, test);
         });
       });
     });
@@ -503,7 +503,7 @@ exports['Should Set read preference at collection level using createCollection m
             // Does not get called or we don't care
             test.equal(ReadPreference.SECONDARY, cursor.readPreference.preference)
             db.close();
-            test.done();
+            restartAndDone(configuration, test);
           });
         });
       });
@@ -565,7 +565,7 @@ exports['Should Set read preference at cursor level'] = {
         // Attempt to read (should fail due to the server not being a primary);
         collection.find().setReadPreference(ReadPreference.SECONDARY).toArray(function(err, items) {
           db.close();
-          test.done();
+          restartAndDone(configuration, test);
         });
       });
     });
@@ -616,7 +616,7 @@ exports['Attempt to change read preference at cursor level after object read leg
         cursor.each(function(err, result) {
           if(result == null) {
             p_db.close();
-            test.done();
+            restartAndDone(configuration, test);
           } else {
             try {
               // Try to change the read preference it should not work as the query was executed
@@ -684,7 +684,7 @@ exports['Set read preference at db level'] = {
           // Does not get called or we don't care
           test.equal(ReadPreference.SECONDARY, cursor.readPreference.preference)
           db.close();
-          test.done();
+          restartAndDone(configuration, test);
         });
       });
     });
@@ -744,7 +744,7 @@ exports['Set read preference at collection level using collection method'] = {
           // Does not get called or we don't care
           test.equal(ReadPreference.SECONDARY, cursor.readPreference.preference)
           db.close();
-          test.done();
+          restartAndDone(configuration, test);
         });
       });
     });
@@ -791,7 +791,7 @@ exports['Ensure tag read goes only to the correct server'] = {
 
       db.db('local').collection('system.replset').find().toArray(function(err, doc) {
         db.close();
-        test.done();
+        restartAndDone(configuration, test);
       });
     });
 

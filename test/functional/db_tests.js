@@ -156,14 +156,10 @@ exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDb = {
 
         // Force close the connection
         db.close(true, function(err, result) {
-          console.log("------------------------------- 0")
-
           // Attemp to insert should fail now with correct message 'db closed by application'
           collection.insert({a:2}, {w:1}, function(err, result) {
-          console.log("------------------------------- 1")
-          console.dir(err)
-          console.dir(result)
             test.equal('db closed by application', err.message);
+            db.close();
             test.done();
           });
         });
@@ -1617,23 +1613,11 @@ exports.shouldCorrectlyReconnectWhenError = {
 
     var db = new Db('integration_tests_to_drop_2', new Server("127.0.0.1", 27088,
       {auto_reconnect: false, poolSize: 4}), {w:0});
-
-      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 0")
-      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 0")
-      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 0")
     // Establish connection to db
     db.open(function(err, _db) {
-      // console.log("----------------------------------------- 0")
       test.ok(err != null);
-      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 1")
-      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 1")
-      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 1")
-
 
       db.open(function(err, _db) {
-      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 2")
-      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 2")
-      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 2")
         test.ok(err != null);
         db.close();
         test.done();
