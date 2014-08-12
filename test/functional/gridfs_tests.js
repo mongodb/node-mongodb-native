@@ -3229,65 +3229,65 @@ exports.shouldCorrectlySeekWithString = {
               gridStore.seek(0, function(err, gridStore) {
                 gridStore.getc(function(err, chr) {
                   test.equal('h', chr);
-                });
-              });
-            });
 
-            var gridStore3 = new GridStore(db, "test_gs_seek", "r");
-            gridStore3.open(function(err, gridStore) {
-              gridStore.seek(7, function(err, gridStore) {
-                gridStore.getc(function(err, chr) {
-                  test.equal('w', chr);
-                });
-              });
-            });
+                  var gridStore3 = new GridStore(db, "test_gs_seek", "r");
+                  gridStore3.open(function(err, gridStore) {
+                    gridStore.seek(7, function(err, gridStore) {
+                      gridStore.getc(function(err, chr) {
+                        test.equal('w', chr);
 
-            var gridStore4 = new GridStore(db, "test_gs_seek", "r");
-            gridStore4.open(function(err, gridStore) {
-              gridStore.seek(4, function(err, gridStore) {
-                gridStore.getc(function(err, chr) {
-                  test.equal('o', chr);
-                });
-              });
-            });
-
-            var gridStore5 = new GridStore(db, "test_gs_seek", "r");
-            gridStore5.open(function(err, gridStore) {
-              gridStore.seek(-1, GridStore.IO_SEEK_END, function(err, gridStore) {
-                gridStore.getc(function(err, chr) {
-                  test.equal('!', chr);
-                });
-              });
-            });
-
-            var gridStore6 = new GridStore(db, "test_gs_seek", "r");
-            gridStore6.open(function(err, gridStore) {
-              gridStore.seek(-6, GridStore.IO_SEEK_END, function(err, gridStore) {
-                gridStore.getc(function(err, chr) {
-                  test.equal('w', chr);
-                });
-              });
-            });
-
-            var gridStore7 = new GridStore(db, "test_gs_seek", "r");
-            gridStore7.open(function(err, gridStore) {
-              gridStore.seek(7, GridStore.IO_SEEK_CUR, function(err, gridStore) {
-                gridStore.getc(function(err, chr) {
-                  test.equal('w', chr);
-
-                  gridStore.seek(-1, GridStore.IO_SEEK_CUR, function(err, gridStore) {
-                    gridStore.getc(function(err, chr) {
-                      test.equal('w', chr);
-
-                      gridStore.seek(-4, GridStore.IO_SEEK_CUR, function(err, gridStore) {
-                        gridStore.getc(function(err, chr) {
-                          test.equal('o', chr);
-
-                          gridStore.seek(3, GridStore.IO_SEEK_CUR, function(err, gridStore) {
+                        var gridStore4 = new GridStore(db, "test_gs_seek", "r");
+                        gridStore4.open(function(err, gridStore) {
+                          gridStore.seek(4, function(err, gridStore) {
                             gridStore.getc(function(err, chr) {
                               test.equal('o', chr);
-                              db.close();
-                              test.done();
+
+                              var gridStore5 = new GridStore(db, "test_gs_seek", "r");
+                              gridStore5.open(function(err, gridStore) {
+                                gridStore.seek(-1, GridStore.IO_SEEK_END, function(err, gridStore) {
+                                  gridStore.getc(function(err, chr) {
+                                    test.equal('!', chr);
+
+                                    var gridStore6 = new GridStore(db, "test_gs_seek", "r");
+                                    gridStore6.open(function(err, gridStore) {
+                                      gridStore.seek(-6, GridStore.IO_SEEK_END, function(err, gridStore) {
+                                        gridStore.getc(function(err, chr) {
+                                          test.equal('w', chr);
+
+                                          var gridStore7 = new GridStore(db, "test_gs_seek", "r");
+                                          gridStore7.open(function(err, gridStore) {
+                                            gridStore.seek(7, GridStore.IO_SEEK_CUR, function(err, gridStore) {
+                                              gridStore.getc(function(err, chr) {
+                                                test.equal('w', chr);
+
+                                                gridStore.seek(-1, GridStore.IO_SEEK_CUR, function(err, gridStore) {
+                                                  gridStore.getc(function(err, chr) {
+                                                    test.equal('w', chr);
+
+                                                    gridStore.seek(-4, GridStore.IO_SEEK_CUR, function(err, gridStore) {
+                                                      gridStore.getc(function(err, chr) {
+                                                        test.equal('o', chr);
+
+                                                        gridStore.seek(3, GridStore.IO_SEEK_CUR, function(err, gridStore) {
+                                                          gridStore.getc(function(err, chr) {
+                                                            test.equal('o', chr);
+                                                            db.close();
+                                                            test.done();
+                                                          });
+                                                        });
+                                                      });
+                                                    });
+                                                  });
+                                                });
+                                              });
+                                            });
+                                          });
+                                        });
+                                      });
+                                    });
+                                  });
+                                });
+                              });
                             });
                           });
                         });

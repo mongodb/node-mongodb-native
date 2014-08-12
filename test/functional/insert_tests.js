@@ -48,11 +48,15 @@ var ISODate = function (string) {
 exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafe = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {
+    requires: {
+      topology: 'single,replset'
+    }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
     // Fetch a collection to insert document into
@@ -87,11 +91,11 @@ exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafe = {
 exports.shouldCorrectlyPerformABatchDocumentInsertSafe = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
     db.open(function(err, db) {
@@ -99,7 +103,7 @@ exports.shouldCorrectlyPerformABatchDocumentInsertSafe = {
       var collection = db.collection("batch_document_insert_collection_safe");
       // Insert a single document
       collection.insert([{hello:'world_safe1'}
-        , {hello:'world_safe2'}], {w:1}, function(err, result) {
+        , {hello:'world_safe2'}], configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         // Fetch the document
@@ -125,19 +129,22 @@ exports.shouldCorrectlyPerformABatchDocumentInsertSafe = {
 exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafe = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
     db.open(function(err, db) {
       // Fetch a collection to insert document into
       var collection = db.collection("simple_document_insert_with_function_safe");
+
+      var o = configuration.writeConcernMax();
+      o.serializeFunctions = true;
       // Insert a single document
       collection.insert({hello:'world'
-        , func:function() {}}, {w:1, serializeFunctions:true}, function(err, result) {
+        , func:function() {}}, o, function(err, result) {
         test.equal(null, err);
 
         // Fetch the document
@@ -163,11 +170,13 @@ exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafe = {
 exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.1"] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {mongodb: ">1.9.1"},
+  metadata: {
+    requires: {mongodb: ">1.9.1"}
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
@@ -182,7 +191,7 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
 
         // Insert some intial data into the collection
         collection.insert([{name:"Jim"}
-          , {name:"Sarah", title:"Princess"}], {w:1}, function(err, result) {
+          , {name:"Sarah", title:"Princess"}], configuration.writeConcernMax(), function(err, result) {
 
           // Force keep going flag, ignoring unique index issue
           collection.insert([{name:"Jim"}
@@ -208,14 +217,14 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
 exports.shouldCorrectlyPerformSingleInsert = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('shouldCorrectlyPerformSingleInsert');
-      collection.insert({a:1}, {w:1}, function(err, result) {
+      collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
         collection.findOne(function(err, item) {
           test.equal(1, item.a);
           db.close();
@@ -232,17 +241,17 @@ exports.shouldCorrectlyPerformSingleInsert = {
 exports.shouldCorrectlyHandleMultipleDocumentInsert = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('test_multiple_insert');
       var docs = [{a:1}, {a:2}];
 
-      collection.insert(docs, {w:1}, function(err, ids) {
+      collection.insert(docs, configuration.writeConcernMax(), function(err, ids) {
         ids.forEach(function(doc) {
           test.ok(((doc['_id']) instanceof ObjectID || Object.prototype.toString.call(doc['_id']) === '[object ObjectID]'));
         });
@@ -271,16 +280,16 @@ exports.shouldCorrectlyHandleMultipleDocumentInsert = {
 exports.shouldCorrectlyExecuteSaveInsertUpdate = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('shouldCorrectlyExecuteSaveInsertUpdate');
 
-      collection.save({ email : 'save' }, {w:1}, function() {
-        collection.insert({ email : 'insert' }, {w:1}, function() {
+      collection.save({ email : 'save' }, configuration.writeConcernMax(), function() {
+        collection.insert({ email : 'insert' }, configuration.writeConcernMax(), function() {
           collection.update(
             { email : 'update' },
             { email : 'update' },
@@ -306,11 +315,11 @@ exports.shouldCorrectlyExecuteSaveInsertUpdate = {
 exports.shouldCorrectlyInsertAndRetrieveLargeIntegratedArrayDocument = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('test_should_deserialize_large_integrated_array');
 
@@ -318,7 +327,7 @@ exports.shouldCorrectlyInsertAndRetrieveLargeIntegratedArrayDocument = {
         'b':['tmp1', 'tmp2', 'tmp3', 'tmp4', 'tmp5', 'tmp6', 'tmp7', 'tmp8', 'tmp9', 'tmp10', 'tmp11', 'tmp12', 'tmp13', 'tmp14', 'tmp15', 'tmp16']
       };
       // Insert the collection
-      collection.insert(doc, {w:1}, function(err, r) {
+      collection.insert(doc, configuration.writeConcernMax(), function(err, r) {
         // Fetch and check the collection
         collection.findOne({'a': 0}, function(err, result) {
           test.deepEqual(doc.a, result.a);
@@ -337,7 +346,7 @@ exports.shouldCorrectlyInsertAndRetrieveLargeIntegratedArrayDocument = {
 exports.shouldCorrectlyInsertAndRetrieveDocumentWithAllTypes = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -346,7 +355,7 @@ exports.shouldCorrectlyInsertAndRetrieveDocumentWithAllTypes = {
       , Code = configuration.require.Code
       , DBRef = configuration.require.DBRef;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('test_all_serialization_types');
 
@@ -374,7 +383,7 @@ exports.shouldCorrectlyInsertAndRetrieveDocumentWithAllTypes = {
         'dbref': new DBRef('namespace', oid, 'integration_tests_')
       }
 
-      collection.insert(motherOfAllDocuments, {w:1}, function(err, docs) {
+      collection.insert(motherOfAllDocuments, configuration.writeConcernMax(), function(err, docs) {
         collection.findOne(function(err, doc) {
           // Assert correct deserialization of the values
           test.equal(motherOfAllDocuments.string, doc.string);
@@ -412,11 +421,11 @@ exports.shouldCorrectlyInsertAndRetrieveDocumentWithAllTypes = {
 exports.shouldCorrectlyInsertAndUpdateDocumentWithNewScriptContext = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('test_all_serialization_types');
 
@@ -429,10 +438,10 @@ exports.shouldCorrectlyInsertAndUpdateDocumentWithNewScriptContext = {
       };
 
       db.collection('users', getResult(function(user_collection){
-        user_collection.remove({}, {w:1}, function(err, result) {
+        user_collection.remove({}, configuration.writeConcernMax(), function(err, result) {
           //first, create a user object
           var newUser = { name : 'Test Account', settings : {} };
-          user_collection.insert([newUser], {w:1}, getResult(function(users){
+          user_collection.insert([newUser], configuration.writeConcernMax(), getResult(function(users){
               var user = users[0];
 
               var scriptCode = "settings.block = []; settings.block.push('test');";
@@ -443,7 +452,7 @@ exports.shouldCorrectlyInsertAndUpdateDocumentWithNewScriptContext = {
               //now create update command and issue it
               var updateCommand = { $set : context };
 
-              user_collection.update({_id : user._id}, updateCommand, {w:1},
+              user_collection.update({_id : user._id}, updateCommand, configuration.writeConcernMax(),
                 getResult(function(updateCommand) {
                   // Fetch the object and check that the changes are persisted
                   user_collection.findOne({_id : user._id}, function(err, doc) {
@@ -469,7 +478,7 @@ exports.shouldCorrectlyInsertAndUpdateDocumentWithNewScriptContext = {
 exports.shouldCorrectlySerializeDocumentWithAllTypesInNewContext = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -478,7 +487,7 @@ exports.shouldCorrectlySerializeDocumentWithAllTypesInNewContext = {
       , Code = configuration.require.Code
       , DBRef = configuration.require.DBRef;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('test_all_serialization_types_new_context');
 
@@ -518,7 +527,7 @@ exports.shouldCorrectlySerializeDocumentWithAllTypesInNewContext = {
       // sys.puts(sys.inspect(context.motherOfAllDocuments))
       var motherOfAllDocuments = context.motherOfAllDocuments;
 
-      collection.insert(context.motherOfAllDocuments, {w:1}, function(err, docs) {
+      collection.insert(context.motherOfAllDocuments, configuration.writeConcernMax(), function(err, docs) {
         collection.findOne(function(err, doc) {
           // Assert correct deserialization of the values
           test.equal(motherOfAllDocuments.string, doc.string);
@@ -555,17 +564,17 @@ exports.shouldCorrectlySerializeDocumentWithAllTypesInNewContext = {
 exports.shouldCorrectlyDoToJsonForLongValue = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var Long = configuration.require.Long;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('test_to_json_for_long');
 
-      collection.insert([{value: Long.fromNumber(32222432)}], {w:1}, function(err, ids) {
+      collection.insert([{value: Long.fromNumber(32222432)}], configuration.writeConcernMax(), function(err, ids) {
         collection.findOne({}, function(err, item) {
           test.equal(32222432, item.value);
           db.close();
@@ -582,11 +591,11 @@ exports.shouldCorrectlyDoToJsonForLongValue = {
 exports.shouldCorrectlyInsertAndUpdateWithNoCallback = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('test_insert_and_update_no_callback');
 
@@ -614,19 +623,19 @@ exports.shouldCorrectlyInsertAndUpdateWithNoCallback = {
 exports.shouldInsertAndQueryTimestamp = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var Timestamp = configuration.require.Timestamp
       , Long = configuration.require.Long;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('test_insert_and_query_timestamp');
 
       // Insert the update
-      collection.insert({i:Timestamp.fromNumber(100), j:Long.fromNumber(200)}, {w:1}, function(err, r) {
+      collection.insert({i:Timestamp.fromNumber(100), j:Long.fromNumber(200)}, configuration.writeConcernMax(), function(err, r) {
         // Locate document
         collection.findOne({}, function(err, item) {
           test.ok(item.i instanceof Timestamp);
@@ -646,16 +655,16 @@ exports.shouldInsertAndQueryTimestamp = {
 exports.shouldCorrectlyInsertAndQueryUndefined = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('test_insert_and_query_undefined');
 
       // Insert the update
-      collection.insert({i:undefined}, {w:1}, function(err, r) {
+      collection.insert({i:undefined}, configuration.writeConcernMax(), function(err, r) {
         // Locate document
         collection.findOne({}, function(err, item) {
           test.equal(null, item.i)
@@ -674,7 +683,7 @@ exports.shouldCorrectlyInsertAndQueryUndefined = {
 exports.shouldCorrectlySerializeDBRefToJSON = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -693,11 +702,11 @@ exports.shouldCorrectlySerializeDBRefToJSON = {
 exports.shouldThrowErrorIfSerializingFunction = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('test_should_throw_error_if_serializing_function');
 
@@ -721,17 +730,17 @@ exports.shouldThrowErrorIfSerializingFunction = {
 exports.shouldCorrectlyInsertDocumentWithUUID = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var Binary = configuration.require.Binary;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('insert_doc_with_uuid');
 
-      collection.insert({_id : "12345678123456781234567812345678", field: '1'}, {w:1}, function(err, result) {
+      collection.insert({_id : "12345678123456781234567812345678", field: '1'}, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         collection.find({_id : "12345678123456781234567812345678"}).toArray(function(err, items) {
@@ -742,7 +751,7 @@ exports.shouldCorrectlyInsertDocumentWithUUID = {
           // Generate a binary id
           var binaryUUID = new Binary('00000078123456781234567812345678', Binary.SUBTYPE_UUID);
 
-          collection.insert({_id : binaryUUID, field: '2'}, {w:1}, function(err, result) {
+          collection.insert({_id : binaryUUID, field: '2'}, configuration.writeConcernMax(), function(err, result) {
             collection.find({_id : binaryUUID}).toArray(function(err, items) {
               test.equal(null, err);
               test.equal(items[0].field, '2')
@@ -762,18 +771,18 @@ exports.shouldCorrectlyInsertDocumentWithUUID = {
 exports.shouldCorrectlyCallCallbackWithDbDriverInStrictMode = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('test_insert_and_update_no_callback_strict');
 
-      collection.insert({_id : "12345678123456781234567812345678", field: '1'}, {w:1}, function(err, result) {
+      collection.insert({_id : "12345678123456781234567812345678", field: '1'}, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
-        collection.update({ '_id': "12345678123456781234567812345678" }, { '$set': { 'field': 0 }}, {w:1}, function(err, numberOfUpdates) {
+        collection.update({ '_id': "12345678123456781234567812345678" }, { '$set': { 'field': 0 }}, configuration.writeConcernMax(), function(err, numberOfUpdates) {
           test.equal(null, err);
           test.equal(1, numberOfUpdates);
           db.close();
@@ -790,14 +799,14 @@ exports.shouldCorrectlyCallCallbackWithDbDriverInStrictMode = {
 exports.shouldCorrectlyInsertDBRefWithDbNotDefined = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var DBRef = configuration.require.DBRef
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('shouldCorrectlyInsertDBRefWithDbNotDefined');
 
@@ -805,12 +814,12 @@ exports.shouldCorrectlyInsertDBRefWithDbNotDefined = {
       var doc2 = {_id: new ObjectID()};
       var doc3 = {_id: new ObjectID()};
       
-      collection.insert(doc, {w:1}, function(err, result) {
+      collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
         // Create object with dbref
         doc2.ref = new DBRef('shouldCorrectlyInsertDBRefWithDbNotDefined', doc._id);
         doc3.ref = new DBRef('shouldCorrectlyInsertDBRefWithDbNotDefined', doc._id, configuration.db_name);
 
-        collection.insert([doc2, doc3], {w:1}, function(err, result) {
+        collection.insert([doc2, doc3], configuration.writeConcernMax(), function(err, result) {
           
           // Get all items
           collection.find().toArray(function(err, items) {
@@ -837,21 +846,21 @@ exports.shouldCorrectlyInsertDBRefWithDbNotDefined = {
 exports.shouldCorrectlyInsertUpdateRemoveWithNoOptions = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('shouldCorrectlyInsertUpdateRemoveWithNoOptions');
 
-      collection.insert({a:1}, {w:1}, function(err, result) {
+      collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
-        collection.update({a:1}, {a:2}, {w:1}, function(err, result) {
+        collection.update({a:1}, {a:2}, configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
 
-          collection.remove({a:2}, {w:1}, function(err, result) {
+          collection.remove({a:2}, configuration.writeConcernMax(), function(err, result) {
             test.equal(null, err);
 
             collection.count(function(err, count) {
@@ -872,17 +881,17 @@ exports.shouldCorrectlyInsertUpdateRemoveWithNoOptions = {
 exports.shouldCorrectlyExecuteMultipleFetches = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
     // Search parameter
     var to = 'ralph'
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('shouldCorrectlyExecuteMultipleFetches');
       // Execute query
-      collection.insert({addresses:{localPart:'ralph'}}, {w:1}, function(err, result) {
+      collection.insert({addresses:{localPart:'ralph'}}, configuration.writeConcernMax(), function(err, result) {
         // Let's find our user
         collection.findOne({"addresses.localPart" : to}, function( err, doc ) {
           test.equal(null, err);
@@ -901,17 +910,17 @@ exports.shouldCorrectlyExecuteMultipleFetches = {
 exports.shouldCorrectlyFailWhenNoObjectToUpdate = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('shouldCorrectlyFailWhenNoObjectToUpdate');
 
-      collection.update({_id : new ObjectID()}, { email : 'update' }, {w:1},
+      collection.update({_id : new ObjectID()}, { email : 'update' }, configuration.writeConcernMax(),
         function(err, result) {
           test.equal(0, result);
           db.close();
@@ -928,7 +937,7 @@ exports.shouldCorrectlyFailWhenNoObjectToUpdate = {
 exports['Should correctly insert object and retrieve it when containing array and IsoDate'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -944,11 +953,11 @@ exports['Should correctly insert object and retrieve it when containing array an
      ]
     }
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('Should_correctly_insert_object_and_retrieve_it_when_containing_array_and_IsoDate');
 
-      collection.insert(doc, {w:1}, function(err, result) {
+      collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
         test.ok(err == null);
 
         collection.findOne(function(err, item) {
@@ -968,7 +977,7 @@ exports['Should correctly insert object and retrieve it when containing array an
 exports['Should correctly insert object with timestamps'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -986,11 +995,11 @@ exports['Should correctly insert object with timestamps'] = {
      "timestamp2" : new Timestamp(33333),
     }
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('Should_correctly_insert_object_with_timestamps');
 
-      collection.insert(doc, {w:1}, function(err, result) {
+      collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
         test.ok(err == null);
 
         collection.findOne(function(err, item) {
@@ -1010,7 +1019,7 @@ exports['Should correctly insert object with timestamps'] = {
 exports['Should fail on insert due to key starting with $'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1021,10 +1030,10 @@ exports['Should fail on insert due to key starting with $'] = {
      "$key" : "foreign",
     }
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('Should_fail_on_insert_due_to_key_starting_with');
-      collection.insert(doc, {w:1}, function(err, result) {
+      collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
         test.ok(err != null);
         db.close();
         test.done();
@@ -1039,7 +1048,7 @@ exports['Should fail on insert due to key starting with $'] = {
 exports['Should Correctly allow for control of serialization of functions on command level'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1050,10 +1059,10 @@ exports['Should Correctly allow for control of serialization of functions on com
       func : function() {}
     }
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('Should_Correctly_allow_for_control_of_serialization_of_functions_on_command_level');
-      collection.insert(doc, {w:1}, function(err, result) {
+      collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
 
         collection.update({str:"String"}, {$set:{c:1, d:function(){}}}, {w:1, serializeFunctions:false}, function(err, result) {
           test.equal(1, result);
@@ -1080,7 +1089,7 @@ exports['Should Correctly allow for control of serialization of functions on com
 exports['Should Correctly allow for control of serialization of functions on collection level'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1091,10 +1100,10 @@ exports['Should Correctly allow for control of serialization of functions on col
       func : function() {}
     }
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('Should_Correctly_allow_for_control_of_serialization_of_functions_on_collection_level', {serializeFunctions:true});
-      collection.insert(doc, {w:1}, function(err, result) {
+      collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         collection.findOne({str : "String"}, function(err, item) {
@@ -1113,7 +1122,7 @@ exports['Should Correctly allow for control of serialization of functions on col
 exports['Should Correctly allow for using a Date object as _id'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1122,10 +1131,10 @@ exports['Should Correctly allow for using a Date object as _id'] = {
       str : 'hello'
     }
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('Should_Correctly_allow_for_using_a_Date_object_as__id');
-      collection.insert(doc, {w:1}, function(err, result) {
+      collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         collection.findOne({str : "hello"}, function(err, item) {
@@ -1144,14 +1153,14 @@ exports['Should Correctly allow for using a Date object as _id'] = {
 exports['Should Correctly fail to update returning 0 results'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('Should_Correctly_fail_to_update_returning_0_results');
-      collection.update({a:1}, {$set: {a:1}}, {w:1}, function(err, numberOfUpdated) {
+      collection.update({a:1}, {$set: {a:1}}, configuration.writeConcernMax(), function(err, numberOfUpdated) {
         test.equal(0, numberOfUpdated);
         db.close();
         test.done();
@@ -1166,7 +1175,7 @@ exports['Should Correctly fail to update returning 0 results'] = {
 exports['Should Correctly update two fields including a sub field'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1183,14 +1192,14 @@ exports['Should Correctly update two fields including a sub field'] = {
       }
     }
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('Should_Correctly_update_two_fields_including_a_sub_field');
-      collection.insert(doc, {w:1}, function(err, result) {
+      collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         // Update two fields
-        collection.update({_id:doc._id}, {$set:{Prop1:'p1_2', 'More.Sub2':'s2_2'}}, {w:1}, function(err, numberOfUpdatedDocs) {
+        collection.update({_id:doc._id}, {$set:{Prop1:'p1_2', 'More.Sub2':'s2_2'}}, configuration.writeConcernMax(), function(err, numberOfUpdatedDocs) {
           test.equal(null, err);
           test.equal(1, numberOfUpdatedDocs);
 
@@ -1213,18 +1222,18 @@ exports['Should Correctly update two fields including a sub field'] = {
 exports['Should correctly fail due to duplicate key for _id'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('Should_Correctly_update_two_fields_including_a_sub_field_2');
-      collection.insert({_id:1}, {w:1}, function(err, result) {
+      collection.insert({_id:1}, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         // Update two fields
-        collection.insert({_id:1}, {w:1}, function(err, result) {
+        collection.insert({_id:1}, configuration.writeConcernMax(), function(err, result) {
           test.ok(err != null);
           db.close();
           test.done();
@@ -1240,15 +1249,15 @@ exports['Should correctly fail due to duplicate key for _id'] = {
 exports.shouldCorrectlyInsertDocWithCustomId = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('shouldCorrectlyInsertDocWithCustomId');
       // Insert the update
-      collection.insert({_id:0, test:'hello'}, {w:1}, function(err, result) {
+      collection.insert({_id:0, test:'hello'}, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         collection.findOne({_id:0}, function(err, item) {
@@ -1268,11 +1277,11 @@ exports.shouldCorrectlyInsertDocWithCustomId = {
 exports.shouldCorrectlyPerformUpsertAgainstNewDocumentAndExistingOne = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('shouldCorrectlyPerformUpsertAgainstNewDocumentAndExistingOne');
 
@@ -1300,11 +1309,11 @@ exports.shouldCorrectlyPerformUpsertAgainstNewDocumentAndExistingOne = {
 exports.shouldCorrectlyPerformLargeTextInsert = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('shouldCorrectlyPerformLargeTextInsert');
 
@@ -1315,7 +1324,7 @@ exports.shouldCorrectlyPerformLargeTextInsert = {
         string = string + "a";
       }
 
-      collection.insert({a:1, string:string}, {w:1}, function(err, result) {
+      collection.insert({a:1, string:string}, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         collection.findOne({a:1}, function(err, doc) {
@@ -1335,11 +1344,11 @@ exports.shouldCorrectlyPerformLargeTextInsert = {
 exports.shouldCorrectlyPerformInsertOfObjectsUsingToBSON = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('shouldCorrectlyPerformInsertOfObjectsUsingToBSON');
 
@@ -1347,7 +1356,7 @@ exports.shouldCorrectlyPerformInsertOfObjectsUsingToBSON = {
       var doc = {a:1, b:1};
       doc.toBSON = function() { return {c:this.a}};
 
-      collection.insert(doc, {w:1}, function(err, result) {
+      collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         collection.findOne({c:1}, function(err, doc) {
@@ -1367,13 +1376,15 @@ exports.shouldCorrectlyPerformInsertOfObjectsUsingToBSON = {
 exports.shouldAttempToForceBsonSize = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {serverType: 'Server'},
+  metadata: {
+    requires: {topology: 'single'}
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var Binary = configuration.require.Binary;
 
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, disableDriverBSONSizeCheck:true});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, disableDriverBSONSizeCheck:true});
     // Establish connection to db
     db.open(function(err, db) {
       db.createCollection('shouldAttempToForceBsonSize', function(err, collection) {
@@ -1384,7 +1395,7 @@ exports.shouldAttempToForceBsonSize = {
           {a:1, b:new Binary(new Buffer(16777216/3))},
         ]
 
-        collection.insert(doc, {w:1}, function(err, result) {
+        collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
 
           collection.findOne({a:1}, function(err, doc) {
@@ -1406,15 +1417,15 @@ exports.shouldAttempToForceBsonSize = {
 exports.shouldCorrectlyUseCustomObjectToUpdateDocument = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('shouldCorrectlyUseCustomObjectToUpdateDocument');
 
-      collection.insert({a:{b:{c:1}}}, {w:1}, function(err, result) {
+      collection.insert({a:{b:{c:1}}}, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         // Dynamically build query
@@ -1424,7 +1435,7 @@ exports.shouldCorrectlyUseCustomObjectToUpdateDocument = {
         query.a.b['c'] = 1;
 
         // Update document
-        collection.update(query, {$set: {'a.b.d':1}}, {w:1}, function(err, numberUpdated) {
+        collection.update(query, {$set: {'a.b.d':1}}, configuration.writeConcernMax(), function(err, numberUpdated) {
           test.equal(null, err);
           test.equal(1, numberUpdated);
 
@@ -1442,11 +1453,11 @@ exports.shouldCorrectlyUseCustomObjectToUpdateDocument = {
 exports.shouldExecuteInsertWithNoCallbackAndWriteConcern = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('shouldExecuteInsertWithNoCallbackAndWriteConcern');
       collection.insert({a:{b:{c:1}}});
@@ -1462,7 +1473,7 @@ exports.shouldExecuteInsertWithNoCallbackAndWriteConcern = {
 exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcern = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1472,7 +1483,7 @@ exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcern = {
     }
     cb.called = 0;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('gh-completely');
       collection.insert({ a: 1 }, { w: 0 }, cb);
@@ -1491,7 +1502,7 @@ exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcern = {
 exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithUpdate = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1502,7 +1513,7 @@ exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithUpdate = {
     }
     cb.called = 0;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('gh-completely');
       collection.update({ a: 1 }, {a:2}, { upsert:true, w: 0 }, cb);
@@ -1521,7 +1532,7 @@ exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithUpdate = {
 exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithRemove = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1532,7 +1543,7 @@ exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithRemove = {
     }
     cb.called = 0;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('gh-completely');
       collection.remove({ a: 1 }, { w: 0 }, cb);
@@ -1551,7 +1562,7 @@ exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithRemove = {
 exports.handleBSONTypeInsertsCorrectly = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1563,7 +1574,7 @@ exports.handleBSONTypeInsertsCorrectly = {
       , MaxKey = configuration.require.MaxKey
       , Code = configuration.require.Code;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('bson_types_insert');
 
@@ -1577,7 +1588,7 @@ exports.handleBSONTypeInsertsCorrectly = {
         , "code": new Code("function () {}", {a: 55})
       }
 
-      collection.insert(document, {w:1}, function(err, result) {
+      collection.insert(document, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         collection.findOne({"symbol": new Symbol("abcdefghijkl")}, function(err, doc) {
@@ -1627,13 +1638,13 @@ exports.handleBSONTypeInsertsCorrectly = {
 exports.mixedTimestampAndDateQuery = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var Timestamp = configuration.require.Timestamp;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('timestamp_date');
 
@@ -1642,7 +1653,7 @@ exports.mixedTimestampAndDateQuery = {
           { "x": new Timestamp(1, 2) }
         , { "x": d }];
 
-      collection.insert(documents, {w:1}, function(err, result) {
+      collection.insert(documents, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         collection.findOne({"x": new Timestamp(1, 2)}, function(err, doc) {
@@ -1667,11 +1678,11 @@ exports.mixedTimestampAndDateQuery = {
 exports.positiveAndNegativeInfinity = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('negative_pos');
       var d = new Date();
@@ -1681,7 +1692,7 @@ exports.positiveAndNegativeInfinity = {
         , neg: Number.NEGATIVE_INFINITY
       }
 
-      collection.insert(document, {w:1}, function(err, result) {
+      collection.insert(document, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         collection.findOne({}, function(err, doc) {
@@ -1699,16 +1710,16 @@ exports.positiveAndNegativeInfinity = {
 exports.shouldCorrectlyInsertSimpleRegExpDocument = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var regexp = /foobar/i;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_regex', function(err, collection) {
-        collection.insert({'b':regexp}, {w:1}, function(err, ids) {
+        collection.insert({'b':regexp}, configuration.writeConcernMax(), function(err, ids) {
           collection.find({}, {'fields': ['b']}).toArray(function(err, items) {
             test.equal(("" + regexp), ("" + items[0].b));
             // Let's close the db
@@ -1724,17 +1735,17 @@ exports.shouldCorrectlyInsertSimpleRegExpDocument = {
 exports.shouldCorrectlyInsertSimpleUTF8Regexp = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var regexp = /foobaré/;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('shouldCorrectlyInsertSimpleUTF8Regexp');
 
-      collection.insert({'b':regexp}, {w:1}, function(err, ids) {
+      collection.insert({'b':regexp}, configuration.writeConcernMax(), function(err, ids) {
         test.equal(null, err)
 
         collection.find({}, {'fields': ['b']}).toArray(function(err, items) {
@@ -1752,11 +1763,11 @@ exports.shouldCorrectlyInsertSimpleUTF8Regexp = {
 exports.shouldCorrectlyThrowDueToIllegalCollectionName = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var k = new Buffer(15);
       for (var i = 0; i < 15; i++)
@@ -1781,12 +1792,15 @@ exports.shouldCorrectlyThrowDueToIllegalCollectionName = {
 exports.shouldCorrectlyHonorPromoteLongFalseNativeBSON = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var Long = configuration.require.Long;
-    var db = configuration.newDbInstance({w:1, promoteLongs:false}, {native_parser:true})
+
+    var o = configuration.writeConcernMax();
+    o.promoteLongs = false;
+    var db = configuration.newDbInstance(o, {native_parser:true})
     db.open(function(err, db) {
       db.collection('shouldCorrectlyHonorPromoteLong').insert({
             doc: Long.fromNumber(10)
@@ -1809,13 +1823,13 @@ exports.shouldCorrectlyHonorPromoteLongFalseNativeBSON = {
 exports.shouldCorrectlyHonorPromoteLongTrueNativeBSON = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var Long = configuration.require.Long;
 
-    var db = configuration.newDbInstance({w:1}, {native_parser:true})
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:true})
     db.open(function(err, db) {
       db.collection('shouldCorrectlyHonorPromoteLongTrueNativeBSON').insert({
             doc: Long.fromNumber(10)
@@ -1838,7 +1852,7 @@ exports.shouldCorrectlyHonorPromoteLongTrueNativeBSON = {
 exports.shouldCorrectlyHonorPromoteLongFalseJSBSON = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1868,13 +1882,13 @@ exports.shouldCorrectlyHonorPromoteLongFalseJSBSON = {
 exports.shouldCorrectlyHonorPromoteLongTrueJSBSON = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var Long = configuration.require.Long;
 
-    var db = configuration.newDbInstance({w:1}, {native_parser:false})
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:false})
     db.open(function(err, db) {
       db.collection('shouldCorrectlyHonorPromoteLongTrueJSBSON').insert({
             doc: Long.fromNumber(10)
@@ -1905,7 +1919,7 @@ exports.shouldCorrectlyHonorPromoteLongTrueJSBSON = {
 //   test: function(configuration, test) {
 //     var Long = configuration.require.Long;
 
-//     var db = configuration.newDbInstance({w:1}, {native_parser:false})
+//     var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:false})
 //     db.open(function(err, db) {
 //       console.log("================================================ 0")
 //       db.collection('shouldCorrectlyOverrideCheckKeysJS').insert({
@@ -1943,12 +1957,12 @@ exports.shouldCorrectlyHonorPromoteLongTrueJSBSON = {
 // exports.shouldCorrectlyOverrideCheckKeysNative = {
 //   // Add a tag that our runner can trigger on
 //   // in this case we are setting that node needs to be higher than 0.10.X to run
-//   requires: {},
+//   metadata: {},
   
 //   // The actual test we wish to run
 //   test: function(configuration, test) {
 //     var Long = configuration.require.Long;
-//     var db = configuration.newDbInstance({w:1}, {native_parser:true})
+//     var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:true})
 //     db.open(function(err, db) {
 //       db.collection('shouldCorrectlyOverrideCheckKeysNative').insert({
 //             doc: Long.fromNumber(10)
@@ -1978,13 +1992,13 @@ exports.shouldCorrectlyHonorPromoteLongTrueJSBSON = {
 // exports.shouldCorrectlyOverrideCheckKeysNativeOnUpdate = {
 //   // Add a tag that our runner can trigger on
 //   // in this case we are setting that node needs to be higher than 0.10.X to run
-//   requires: {},
+//   metadata: {},
   
 //   // The actual test we wish to run
 //   test: function(configuration, test) {
 //     var Long = configuration.require.Long;
 
-//     var db = configuration.newDbInstance({w:1}, {native_parser:true})
+//     var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:true})
 //     db.open(function(err, db) {
 //       db.collection('shouldCorrectlyOverrideCheckKeysNativeOnUpdate').update({
 //           ps: {op: {'$set': 1}}
@@ -2006,13 +2020,13 @@ exports.shouldCorrectlyHonorPromoteLongTrueJSBSON = {
 // exports.shouldCorrectlyOverrideCheckKeysJSOnUpdate = {
 //   // Add a tag that our runner can trigger on
 //   // in this case we are setting that node needs to be higher than 0.10.X to run
-//   requires: {},
+//   metadata: {},
   
 //   // The actual test we wish to run
 //   test: function(configuration, test) {
 //     var Long = configuration.require.Long;
 
-//     var db = configuration.newDbInstance({w:1}, {native_parser:false})
+//     var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:false})
 //     db.open(function(err, db) {
 //       db.collection('shouldCorrectlyOverrideCheckKeysJSOnUpdate').update({
 //           ps: {op: {'$set': 1}}
@@ -2034,13 +2048,13 @@ exports.shouldCorrectlyHonorPromoteLongTrueJSBSON = {
 exports.shouldCorrectlyWorkWithCheckKeys = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var Long = configuration.require.Long;
 
-    var db = configuration.newDbInstance({w:1}, {native_parser:false})
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:false})
     db.open(function(err, db) {
       db.collection('shouldCorrectlyOverrideCheckKeysJSOnUpdate').update({
           "ps.op.t":1
@@ -2056,11 +2070,11 @@ exports.shouldCorrectlyWorkWithCheckKeys = {
 exports.shouldCorrectlyApplyBitOperator = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  requires: {},
+  metadata: {},
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {native_parser:false})
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:false})
     db.open(function(err, db) {
       var col = db.collection('shouldCorrectlyApplyBitOperator');
 

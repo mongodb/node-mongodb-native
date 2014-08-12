@@ -10,7 +10,7 @@ exports.shouldCorrectlyPerformSimpleGeoNearCommand = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     // Establish connection to db  
     db.open(function(err, db) {
@@ -22,7 +22,7 @@ exports.shouldCorrectlyPerformSimpleGeoNearCommand = {
       collection.ensureIndex({loc:"2d"}, function(err, result) {
 
         // Save a new location tagged document
-        collection.insert([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], {w:1}, function(err, result) {
+        collection.insert([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], configuration.writeConcernMax(), function(err, result) {
          
           // Use geoNear command to find document
           collection.geoNear(50, 50, {query:{a:1}, num:1}, function(err, docs) {
@@ -45,11 +45,11 @@ exports.shouldCorrectlyPerformSimpleGeoNearCommand = {
  * @ignore
  */
 exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommand = {
-  metadata: {},
+  metadata: { requires: { topology: ["single", "replset"] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
@@ -63,7 +63,7 @@ exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommand = {
       collection.ensureIndex({loc: "geoHaystack", type: 1}, {bucketSize: 1}, function(err, result) {
 
         // Save a new location tagged document
-        collection.insert([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], {w:1}, function(err, result) {
+        collection.insert([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], configuration.writeConcernMax(), function(err, result) {
          
           // Use geoNear command to find document
           collection.geoHaystackSearch(50, 50, {search:{a:1}, limit:1, maxDistance:100}, function(err, docs) {

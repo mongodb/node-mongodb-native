@@ -34,7 +34,7 @@ exports.shouldCorrectlySaveASimpleDocument = {
           db.close();
           test.done();
         });
-      }, 1000);
+      }, 2000);
     });
     // DOC_END
   }
@@ -52,7 +52,7 @@ exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveIt = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -63,7 +63,7 @@ exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveIt = {
       var collection = db.collection("save_a_simple_document_modify_it_and_resave_it");
 
       // Save a document with no safe option
-      collection.save({hello:'world'}, configuration.writeConcern(), function(err, result) {
+      collection.save({hello:'world'}, configuration.writeConcernMax(), function(err, result) {
 
         // Find the saved document
         collection.findOne({hello:'world'}, function(err, item) {
@@ -74,7 +74,7 @@ exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveIt = {
           item['hello2'] = 'world2';
 
           // Save the item with the additional field
-          collection.save(item, configuration.writeConcern(), function(err, result) {
+          collection.save(item, configuration.writeConcernMax(), function(err, result) {
 
             // Find the changed document
             collection.findOne({hello:'world'}, function(err, item) {
@@ -101,7 +101,7 @@ exports.shouldCorrectExecuteBasicCollectionMethods = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, client) {    
       var collection = client.createCollection('test_collection_methods', function(err, collection) {
         // Verify that all the result are correct coming back (should contain the value ok)
@@ -162,17 +162,17 @@ exports.shouldAccessToCollections = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, client) {
       // Create two collections
       db.createCollection('test.spiderman', function(r) {
         db.createCollection('test.mario', function(r) {
           // Insert test documents (creates collections)
           db.collection('test.spiderman', function(err, spiderman_collection) {
-            spiderman_collection.insert({foo:5}, configuration.writeConcern(), function(err, r) {
+            spiderman_collection.insert({foo:5}, configuration.writeConcernMax(), function(err, r) {
 
               db.collection('test.mario', function(err, mario_collection) {
-                mario_collection.insert({bar:0}, configuration.writeConcern(), function(err, r) {
+                mario_collection.insert({bar:0}, configuration.writeConcernMax(), function(err, r) {
                   // Assert collections
                   db.collections(function(err, collections) {
                     var found_spiderman = false;
@@ -213,7 +213,7 @@ exports.shouldCorrectlyDropCollectionWithDropFunction = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -262,7 +262,7 @@ exports.shouldCorrectlyRetriveCollectionNames = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    configuration.newDbInstance(configuration.writeConcern(), {poolSize:1}).open(function(err, db) {
+    configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open(function(err, db) {
       db.createCollection('test_collection_names', function(err, r) {
         test.equal(null, err);
 
@@ -277,7 +277,7 @@ exports.shouldCorrectlyRetriveCollectionNames = {
           test.ok(found);
           // Insert a document in an non-existing collection should create the collection
           db.collection('test_collection_names2', function(err, collection) {
-            collection.insert({a:1}, configuration.writeConcern(), function(err, r) {
+            collection.insert({a:1}, configuration.writeConcernMax(), function(err, r) {
               db.collectionNames(function(err, documents) {
                 documents.forEach(function(document) {
                   if(document.name == configuration.database + '.test_collection_names2') found = true;
@@ -309,7 +309,7 @@ exports.shouldCorrectlyRetrieveCollectionInfo = {
   test: function(configuration, test) {
     var Cursor = configuration.require.Cursor;
 
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_collections_info', function(err, r) {
         db.collectionsInfo(function(err, cursor) {
@@ -345,7 +345,7 @@ exports.shouldCorrectlyRetriveCollectionOptions = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var Collection = configuration.require.Collection;
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -382,7 +382,7 @@ exports.shouldCorrectlyExecuteIsCapped = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var Collection = configuration.require.Collection;
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -417,7 +417,7 @@ exports.shouldCorrectlyExecuteIndexExists = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -425,10 +425,10 @@ exports.shouldCorrectlyExecuteIndexExists = {
     db.open(function(err, db) {
 
       // Create a test collection that we are getting the options back from
-      db.createCollection('test_collection_index_exists', configuration.writeConcern(), function(err, collection) {
+      db.createCollection('test_collection_index_exists', configuration.writeConcernMax(), function(err, collection) {
         test.equal(null, err);
         // Create an index on the collection
-        collection.createIndex('a', configuration.writeConcern(), function(err, indexName) {
+        collection.createIndex('a', configuration.writeConcernMax(), function(err, indexName) {
           // Let's test to check if a single index exists
           collection.indexExists("a_1", function(err, result) {
             test.equal(true, result);
@@ -463,14 +463,14 @@ exports.shouldEnsureStrictAccessCollection = {
   test: function(configuration, test) {
     var Collection = configuration.require.Collection;
     
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.collection('does-not-exist', {strict: true}, function(err, collection) {
         test.ok(err instanceof Error);
         test.equal("Collection does-not-exist does not exist. Currently in strict mode.", err.message);
 
         db.createCollection('test_strict_access_collection', function(err, collection) {
-          db.collection('test_strict_access_collection', configuration.writeConcern(), function(err, collection) {
+          db.collection('test_strict_access_collection', configuration.writeConcernMax(), function(err, collection) {
             test.equal(null, err);
             test.ok(collection.collectionName);
             // Let's close the db
@@ -493,7 +493,7 @@ exports.shouldPerformStrictCreateCollection = {
   test: function(configuration, test) {
     var Collection = configuration.require.Collection;
 
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_strict_create_collection', function(err, collection) {
         test.equal(null, err);
@@ -527,39 +527,39 @@ exports.shouldFailToInsertDueToIllegalKeys = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_invalid_key_names', function(err, collection) {
         // Legal inserts
-        collection.insert([{'hello':'world'}, {'hello':{'hello':'world'}}], configuration.writeConcern(), function(err, r) {
+        collection.insert([{'hello':'world'}, {'hello':{'hello':'world'}}], configuration.writeConcernMax(), function(err, r) {
           // Illegal insert for key
-          collection.insert({'$hello':'world'}, configuration.writeConcern(), function(err, doc) {
+          collection.insert({'$hello':'world'}, configuration.writeConcernMax(), function(err, doc) {
             test.ok(err instanceof Error);
             test.equal("key $hello must not start with '$'", err.message);
 
-            collection.insert({'hello':{'$hello':'world'}}, configuration.writeConcern(), function(err, doc) {
+            collection.insert({'hello':{'$hello':'world'}}, configuration.writeConcernMax(), function(err, doc) {
               test.ok(err instanceof Error);
               test.equal("key $hello must not start with '$'", err.message);
 
-              collection.insert({'he$llo':'world'}, configuration.writeConcern(), function(err, docs) {
+              collection.insert({'he$llo':'world'}, configuration.writeConcernMax(), function(err, docs) {
                 test.equal(null, err);
 
-                collection.insert({'hello':{'hell$o':'world'}}, configuration.writeConcern(), function(err, docs) {
+                collection.insert({'hello':{'hell$o':'world'}}, configuration.writeConcernMax(), function(err, docs) {
                   test.ok(err == null);
 
-                  collection.insert({'.hello':'world'}, configuration.writeConcern(), function(err, doc) {
+                  collection.insert({'.hello':'world'}, configuration.writeConcernMax(), function(err, doc) {
                     test.ok(err instanceof Error);
                     test.equal("key .hello must not contain '.'", err.message);
 
-                    collection.insert({'hello':{'.hello':'world'}}, configuration.writeConcern(), function(err, doc) {
+                    collection.insert({'hello':{'.hello':'world'}}, configuration.writeConcernMax(), function(err, doc) {
                       test.ok(err instanceof Error);
                       test.equal("key .hello must not contain '.'", err.message);
 
-                      collection.insert({'hello.':'world'}, configuration.writeConcern(), function(err, doc) {
+                      collection.insert({'hello.':'world'}, configuration.writeConcernMax(), function(err, doc) {
                         test.ok(err instanceof Error);
                         test.equal("key hello. must not contain '.'", err.message);
 
-                        collection.insert({'hello':{'hello.':'world'}}, configuration.writeConcern(), function(err, doc) {
+                        collection.insert({'hello':{'hello.':'world'}}, configuration.writeConcernMax(), function(err, doc) {
                           test.ok(err instanceof Error);
                           test.equal("key hello. must not contain '.'", err.message);
                           // Let's close the db
@@ -587,7 +587,7 @@ exports.shouldFailDueToIllegalCollectionNames = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.collection(5, function(err, collection) {
         test.equal("collection name must be a String", err.message);
@@ -626,7 +626,7 @@ exports.shouldCorrectlyCountOnNonExistingCollection = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.collection('test_multiple_insert_2', function(err, collection) {
         collection.count(function(err, count) {
@@ -650,18 +650,18 @@ exports.shouldCorrectlyExecuteSave = {
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
     
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_save', function(err, collection) {
         var doc = {'hello':'world'};
-        collection.save(doc, configuration.writeConcern(), function(err, docs) {
+        collection.save(doc, configuration.writeConcernMax(), function(err, docs) {
           test.ok(docs._id != null);
 
           collection.count(function(err, count) {
             test.equal(1, count);
             doc = docs;
 
-            collection.save(doc, configuration.writeConcern(), function(err, doc2) {
+            collection.save(doc, configuration.writeConcernMax(), function(err, doc2) {
 
               collection.count(function(err, count) {
                 test.equal(1, count);
@@ -671,7 +671,7 @@ exports.shouldCorrectlyExecuteSave = {
 
                   doc3.hello = 'mike';
 
-                  collection.save(doc3, configuration.writeConcern(), function(err, doc4) {
+                  collection.save(doc3, configuration.writeConcernMax(), function(err, doc4) {
                     collection.count(function(err, count) {
                       test.equal(1, count);
 
@@ -679,7 +679,7 @@ exports.shouldCorrectlyExecuteSave = {
                         test.equal('mike', doc5.hello);
 
                         // Save another document
-                        collection.save({hello:'world'}, configuration.writeConcern(), function(err, doc) {
+                        collection.save({hello:'world'}, configuration.writeConcernMax(), function(err, doc) {
                           collection.count(function(err, count) {
                             test.equal(2, count);
                             // Let's close the db
@@ -710,10 +710,10 @@ exports.shouldCorrectlySaveDocumentWithLongValue = {
   test: function(configuration, test) {
     var Long = configuration.require.Long;
 
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_save_long', function(err, collection) {
-        collection.insert({'x':Long.fromNumber(9223372036854775807)}, configuration.writeConcern(), function(err, r) {
+        collection.insert({'x':Long.fromNumber(9223372036854775807)}, configuration.writeConcernMax(), function(err, r) {
           collection.findOne(function(err, doc) {
             test.ok(Long.fromNumber(9223372036854775807).equals(doc.x));
             // Let's close the db
@@ -734,11 +734,11 @@ exports.shouldSaveObjectThatHasIdButDoesNotExistInCollection = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_save_with_object_that_has_id_but_does_not_actually_exist_in_collection', function(err, collection) {
         var a = {'_id':'1', 'hello':'world'};
-        collection.save(a, configuration.writeConcern(), function(err, docs) {
+        collection.save(a, configuration.writeConcernMax(), function(err, docs) {
           collection.count(function(err, count) {
             test.equal(1, count);
 
@@ -746,7 +746,7 @@ exports.shouldSaveObjectThatHasIdButDoesNotExistInCollection = {
               test.equal('world', doc.hello);
 
               doc.hello = 'mike';
-              collection.save(doc, configuration.writeConcern(), function(err, doc) {
+              collection.save(doc, configuration.writeConcernMax(), function(err, doc) {
                 collection.findOne(function(err, doc) {
                   collection.count(function(err, count) {
                     test.equal(1, count);
@@ -776,13 +776,13 @@ exports.shouldCorrectlyUpdateWithNoDocs = {
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
     
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_should_correctly_do_update_with_no_docs', function(err, collection) {
         var id = new ObjectID(null)
         var doc = {_id:id, a:1};
 
-        collection.update({"_id":id}, doc, configuration.writeConcern(), function(err, numberofupdateddocs) {
+        collection.update({"_id":id}, doc, configuration.writeConcernMax(), function(err, numberofupdateddocs) {
           test.equal(null, err);
           test.equal(0, numberofupdateddocs);
           
@@ -816,7 +816,7 @@ exports.shouldCorrectlyUpdateASimpleDocument = {
       db.collection('update_a_simple_document', function(err, collection) {
 
         // Insert a document, then update it
-        collection.insert({a:1}, configuration.writeConcern(), function(err, doc) {
+        collection.insert({a:1}, configuration.writeConcernMax(), function(err, doc) {
 
           // Update the document with an atomic operator
           collection.update({a:1}, {$set:{b:2}});
@@ -852,7 +852,7 @@ exports.shouldCorrectlyUpsertASimpleDocument = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -894,7 +894,7 @@ exports.shouldCorrectlyUpdateMultipleDocuments = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -905,10 +905,12 @@ exports.shouldCorrectlyUpdateMultipleDocuments = {
       db.collection('update_a_simple_document_multi', function(err, collection) {
 
         // Insert a couple of documentations
-        collection.insert([{a:1, b:1}, {a:1, b:2}], configuration.writeConcern(), function(err, result) {
+        collection.insert([{a:1, b:1}, {a:1, b:2}], configuration.writeConcernMax(), function(err, result) {
 
+          var o = configuration.writeConcernMax();
+          o.multi = true
           // Update multiple documents using the multi option
-          collection.update({a:1}, {$set:{b:0}}, {w: 1, multi:true}, function(err, numberUpdated) {
+          collection.update({a:1}, {$set:{b:0}}, o, function(err, numberUpdated) {
             test.equal(null, err);
             test.equal(2, numberUpdated);
 
@@ -943,7 +945,7 @@ exports.shouldCorrectlyHandleDistinctIndexes = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -955,7 +957,7 @@ exports.shouldCorrectlyHandleDistinctIndexes = {
 
         // Insert documents to perform distinct against
         collection.insert([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
-          {a:2, b:{c:'a'}}, {a:3}, {a:3}], configuration.writeConcern(), function(err, ids) {
+          {a:2, b:{c:'a'}}, {a:3}, {a:3}], configuration.writeConcernMax(), function(err, ids) {
 
           // Peform a distinct query against the a field
           collection.distinct('a', function(err, docs) {
@@ -988,7 +990,7 @@ exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilter = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -1000,7 +1002,7 @@ exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilter = {
 
         // Insert documents to perform distinct against
         collection.insert([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
-          {a:2, b:{c:'a'}}, {a:3}, {a:3}, {a:5, c:1}], configuration.writeConcern(), function(err, ids) {
+          {a:2, b:{c:'a'}}, {a:3}, {a:3}, {a:5, c:1}], configuration.writeConcernMax(), function(err, ids) {
 
           // Peform a distinct query with a filter against the documents
           collection.distinct('a', {c:1}, function(err, docs) {
@@ -1028,7 +1030,7 @@ exports.shouldCorrectlyDoSimpleCountExamples = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -1039,7 +1041,7 @@ exports.shouldCorrectlyDoSimpleCountExamples = {
       db.createCollection('simple_count_example', function(err, collection) {
 
         // Insert documents to perform distinct against
-        collection.insert([{a:1}, {a:2}, {a:3}, {a:4, b:1}], configuration.writeConcern(), function(err, ids) {
+        collection.insert([{a:1}, {a:2}, {a:3}, {a:4, b:1}], configuration.writeConcernMax(), function(err, ids) {
 
           // Perform a total count command
           collection.count(function(err, count) {
@@ -1070,22 +1072,22 @@ exports.shouldCorrectlyExecuteInsertUpdateDeleteSafeMode = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_should_execute_insert_update_delete_safe_mode', function(err, collection) {
         test.equal('test_should_execute_insert_update_delete_safe_mode', collection.collectionName);
 
-        collection.insert({i:1}, configuration.writeConcern(), function(err, ids) {
+        collection.insert({i:1}, configuration.writeConcernMax(), function(err, ids) {
           test.equal(1, ids.length);
           test.ok(ids[0]._id.toHexString().length == 24);
 
           // Update the record
-          collection.update({i:1}, {"$set":{i:2}}, configuration.writeConcern(), function(err, result) {
+          collection.update({i:1}, {"$set":{i:2}}, configuration.writeConcernMax(), function(err, result) {
             test.equal(null, err);
             test.equal(1, result);
 
             // Remove safely
-            collection.remove({}, configuration.writeConcern(), function(err, result) {
+            collection.remove({}, configuration.writeConcernMax(), function(err, result) {
               test.equal(null, err);
 
               db.close();
@@ -1106,7 +1108,7 @@ exports.shouldPerformMultipleSaves = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection("multiple_save_test", function(err, collection) {
         var doc = {
@@ -1115,7 +1117,7 @@ exports.shouldPerformMultipleSaves = {
         };
 
         //insert new user
-        collection.save(doc, configuration.writeConcern(), function(err, r) {
+        collection.save(doc, configuration.writeConcernMax(), function(err, r) {
           collection.find({}, {name: 1}).limit(1).toArray(function(err, users){
             var user = users[0]
 
@@ -1124,7 +1126,7 @@ exports.shouldPerformMultipleSaves = {
             } else if(user) {
               user.pants = 'worn'
 
-              collection.save(user, configuration.writeConcern(), function(err, result){
+              collection.save(user, configuration.writeConcernMax(), function(err, result){
                 test.equal(null, err);
                 test.equal(1, result);
                 db.close();
@@ -1147,11 +1149,11 @@ exports.shouldCorrectlySaveDocumentWithNestedArray = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection("save_error_on_save_test", function(err, collection) {
         // Create unique index for username
-        collection.createIndex([['username', 1]], configuration.writeConcern(), function(err, result) {
+        collection.createIndex([['username', 1]], configuration.writeConcernMax(), function(err, result) {
           var doc = {
             email: 'email@email.com',
             encrypted_password: 'password',
@@ -1165,7 +1167,7 @@ exports.shouldCorrectlySaveDocumentWithNestedArray = {
             profile_fields: [],
             username: 'amit' };
           //insert new user
-          collection.save(doc, configuration.writeConcern(), function(err, doc) {
+          collection.save(doc, configuration.writeConcernMax(), function(err, doc) {
 
               collection.find({}).limit(1).toArray(function(err, users) {
                 test.equal(null, err);
@@ -1200,13 +1202,13 @@ exports.shouldPeformCollectionRemoveWithNoCallback = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.collection("remove_with_no_callback_bug_test", function(err, collection) {
-        collection.save({a:1}, configuration.writeConcern(), function(){
-          collection.save({b:1}, configuration.writeConcern(), function(){
-            collection.save({c:1}, configuration.writeConcern(), function(){
-               collection.remove({a:1}, configuration.writeConcern(), function(err, r) {
+        collection.save({a:1}, configuration.writeConcernMax(), function(){
+          collection.save({b:1}, configuration.writeConcernMax(), function(){
+            collection.save({c:1}, configuration.writeConcernMax(), function(){
+               collection.remove({a:1}, configuration.writeConcernMax(), function(err, r) {
                  // Let's perform a count
                  collection.count(function(err, count) {
                    test.equal(null, err);
@@ -1235,7 +1237,7 @@ exports.shouldCorrectlyRetriveACollectionsIndexes = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -1245,20 +1247,22 @@ exports.shouldCorrectlyRetriveACollectionsIndexes = {
       // Crete the collection for the distinct example
       db.createCollection('simple_key_based_distinct', function(err, collection) {
         // Create a geo 2d index
-        collection.ensureIndex({loc:"2d"}, configuration.writeConcern(), function(err, result) {
+        collection.ensureIndex({loc:"2d"}, configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
 
           // Create a simple single field index
-          collection.ensureIndex({a:1}, configuration.writeConcern(), function(err, result) {
+          collection.ensureIndex({a:1}, configuration.writeConcernMax(), function(err, result) {
             test.equal(null, err);
 
-            // List all of the indexes on the collection
-            collection.indexes(function(err, indexes) {
-              test.equal(3, indexes.length);
+            setTimeout(function() {
+              // List all of the indexes on the collection
+              collection.indexes(function(err, indexes) {
+                test.equal(3, indexes.length);
 
-              db.close();
-              test.done();
-            });
+                db.close();
+                test.done();
+              });              
+            }, 1000);
           })
         })
       });
@@ -1279,7 +1283,7 @@ exports.shouldCorrectlyReturnACollectionsStats = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('locahost', 27017));
     // DOC_START
@@ -1290,7 +1294,7 @@ exports.shouldCorrectlyReturnACollectionsStats = {
       db.createCollection('collection_stats_test', function(err, collection) {
 
           // Insert some documents
-          collection.insert([{a:1}, {hello:'world'}], configuration.writeConcern(), function(err, result) {
+          collection.insert([{a:1}, {hello:'world'}], configuration.writeConcernMax(), function(err, result) {
 
             // Retrieve the statistics for the collection
             collection.stats(function(err, stats) {
@@ -1318,14 +1322,14 @@ exports.shouldCorrectlyCreateTTLCollectionWithIndexUsingEnsureIndex = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('shouldCorrectlyCreateTTLCollectionWithIndexUsingEnsureIndex', function(err, collection) {
         collection.ensureIndex({createdAt:1}, {expireAfterSeconds:1, w: 1}, function(err, result) {
           test.equal(null, err);
 
           // Insert a document with a date
-          collection.insert({a:1, createdAt:new Date()}, configuration.writeConcern(), function(err, result) {
+          collection.insert({a:1, createdAt:new Date()}, configuration.writeConcernMax(), function(err, result) {
             test.equal(null, err);
 
             collection.indexInformation({full:true}, function(err, indexes) {
@@ -1360,14 +1364,14 @@ exports.shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex', {}, function(err, collection) {
         collection.createIndex({createdAt:1}, {expireAfterSeconds:1, w: 1}, function(err, result) {
           test.equal(null, err);
 
           // Insert a document with a date
-          collection.insert({a:1, createdAt:new Date()}, configuration.writeConcern(), function(err, result) {
+          collection.insert({a:1, createdAt:new Date()}, configuration.writeConcernMax(), function(err, result) {
             test.equal(null, err);
 
             collection.indexInformation({full:true}, function(err, indexes) {
@@ -1398,11 +1402,11 @@ exports.shouldCorrectlyReadBackDocumentWithNull = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('shouldCorrectlyReadBackDocumentWithNull', {}, function(err, collection) {
         // Insert a document with a date
-        collection.insert({test:null}, configuration.writeConcern(), function(err, result) {
+        collection.insert({test:null}, configuration.writeConcernMax(), function(err, result) {
             test.equal(null, err);
 
             collection.findOne(function(err, item) {
@@ -1425,7 +1429,7 @@ exports.shouldThrowErrorDueToIllegalUpdate = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('shouldThrowErrorDueToIllegalUpdate', {}, function(err, coll) {
         try {
@@ -1455,7 +1459,7 @@ exports.shouldCorrectlyHandle0asIdForSave = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.collection('shouldCorrectlyHandle0asIdForSave').save({_id:0}, function(err, r) {
         test.equal(null, err);
@@ -1480,7 +1484,7 @@ exports['Should correctly execute update with . field in selector'] = {
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.collection('executeUpdateWithElemMatch').update({'item.i': 1}, {$set: {a:1}}, function(err, result, full) {
         test.equal(null, err);
@@ -1502,7 +1506,7 @@ exports['Should correctly execute update with elemMatch field in selector'] = {
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.collection('executeUpdateWithElemMatch').update({item: {$elemMatch: {name: 'my_name'}}}, {$set: {a:1}}, function(err, result, full) {
         test.equal(null, err);
@@ -1524,7 +1528,7 @@ exports['Should correctly execute find with elemMatch field in selector'] = {
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.collection('executeUpdateWithElemMatch').findOne({item: {$elemMatch: {name: 'my_name'}}}, function(err, result, full) {
         test.equal(null, err);
@@ -1546,7 +1550,7 @@ exports['Should correctly execute remove with elemMatch field in selector'] = {
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcern(), {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.collection('executeUpdateWithElemMatch').remove({item: {$elemMatch: {name: 'my_name'}}}, function(err, result, full) {
         test.equal(null, err);

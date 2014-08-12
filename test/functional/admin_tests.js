@@ -18,13 +18,8 @@ exports.shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode = {
         adminDb.addUser('admin', 'admin', function(err, result) {
           adminDb.authenticate('admin', 'admin', function(err, replies) {
             adminDb.validateCollection('shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode', function(err, doc) {
-              // Pre 1.9.1 servers
-              if(doc.result != null) {
-                test.ok(doc.result != null);
-                test.ok(doc.result.match(/firstExtent/) != null);                    
-              } else {
-                test.ok(doc.firstExtent != null);
-              }
+              test.equal(null, err);
+              test.ok(doc != null);
 
               adminDb.removeUser('admin', function(err) {
                 test.equal(null, err);
@@ -812,7 +807,7 @@ exports['Should correctly issue authenticated event on successful authentication
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-    db.on('authenticated', function() {
+    db.once('authenticated', function() {
       test.done();
     });
 
@@ -838,10 +833,8 @@ exports['Should correctly issue authenticated event on successful authentication
           // Authenticate using the newly added user
           adminDb.authenticate('admin15', 'admin15', function(err, result) {
             test.equal(null, err); 
-            test.equal(true, result);         
-            
+            test.equal(true, result);            
             db.close();
-            test.done();
           });
         });
       });

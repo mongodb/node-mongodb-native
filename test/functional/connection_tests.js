@@ -10,10 +10,10 @@ exports['Should correctly connect to server using domain socket'] = {
     db.open(function(err, db) {
       test.equal(null, err);
 
-      db.collection("domainSocketCollection").insert({a:1}, {w:1}, function(err, item) {
+      db.collection("domainSocketCollection0").insert({a:1}, {w:1}, function(err, item) {
         test.equal(null, err);
 
-        db.collection("domainSocketCollection").find({a:1}).toArray(function(err, items) {
+        db.collection("domainSocketCollection0").find({a:1}).toArray(function(err, items) {
           test.equal(null, err);
           test.equal(1, items.length);
 
@@ -37,10 +37,10 @@ exports['Should connect to server using domain socket with undefined port'] = {
     db.open(function(err, db) {
       test.equal(null, err);
 
-      db.collection("domainSocketCollection").insert({x:1}, {w:1}, function(err, item) {
+      db.collection("domainSocketCollection1").insert({x:1}, {w:1}, function(err, item) {
         test.equal(null, err);
 
-        db.collection("domainSocketCollection").find({x:1}).toArray(function(err, items) {
+        db.collection("domainSocketCollection1").find({x:1}).toArray(function(err, items) {
           test.equal(null, err);
           test.equal(1, items.length);
 

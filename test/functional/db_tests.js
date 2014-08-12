@@ -65,17 +65,14 @@ exports.shouldCorrectlyPerformAutomaticConnect = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var automatic_connect_client = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:true});
+    var automatic_connect_client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:true});
     automatic_connect_client.open(function(err, automatic_connect_client) {
       // Listener for closing event
       var closeListener = function(has_error) {
-        console.log("================================================ 0")
-        console.log("================================================ 0")
-        console.log("================================================ 0")
         // Let's insert a document
         var collection = automatic_connect_client.collection('test_object_id_generation_data2');
         // Insert another test document and collect using ObjectId
-        collection.insert({"name":"Patty", "age":34}, {w:1}, function(err, ids) {
+        collection.insert({"name":"Patty", "age":34}, configuration.writeConcernMax(), function(err, ids) {
           test.equal(1, ids.length);
           test.ok(ids[0]._id.toHexString().length == 24);
 
@@ -111,7 +108,7 @@ exports.shouldCorrectlyPerformAutomaticConnectWithMaxBufferSize0 = {
         // Let's insert a document
         var collection = automatic_connect_client.collection('test_object_id_generation_data2');
         // Insert another test document and collect using ObjectId
-        collection.insert({"name":"Patty", "age":34}, {w:1}, function(err, ids) {
+        collection.insert({"name":"Patty", "age":34}, configuration.writeConcernMax(), function(err, ids) {
           test.ok(err != null);
           test.ok(err.message.indexOf("0") != -1)
           // Let's close the db
@@ -140,7 +137,7 @@ exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDb = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
@@ -151,13 +148,13 @@ exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDb = {
       var collection = db.collection('shouldCorrectlyFailOnRetryDueToAppCloseOfDb');
 
       // Insert a document
-      collection.insert({a:1}, {w:1}, function(err, result) {
+      collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         // Force close the connection
         db.close(true, function(err, result) {
           // Attemp to insert should fail now with correct message 'db closed by application'
-          collection.insert({a:2}, {w:1}, function(err, result) {
+          collection.insert({a:2}, configuration.writeConcernMax(), function(err, result) {
             test.equal('db closed by application', err.message);
             db.close();
             test.done();
@@ -181,8 +178,9 @@ exports.shouldCorrectlyExecuteEvalFunctions = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var Code = configuration.require.Code;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var Code = configuration.require.Code
+      , ReadPreference = configuration.require.ReadPreference;
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
@@ -210,44 +208,46 @@ exports.shouldCorrectlyExecuteEvalFunctions = {
         });
 
         // Evaluate a function on the server that writes to a server collection
-        db.eval('function (x) {db.test_eval.save({y:x});}', [5], function(err, result) {
-          // Locate the entry
-          db.collection('test_eval', function(err, collection) {
-            collection.findOne(function(err, item) {
-              test.equal(5, item.y); tests_done();
+        db.eval('function (x) {db.test_eval.save({y:x});}', [5], {readPreference: ReadPreference.PRIMARY}, function(err, result) {
+          setTimeout(function() {
+            // Locate the entry
+            db.collection('test_eval', function(err, collection) {
+              collection.findOne(function(err, item) {
+                test.equal(5, item.y); tests_done();
 
-              // Evaluate a function with 2 parameters passed in
-              db.eval('function (x, y) {return x + y;}', [2, 3], function(err, result) {
-                test.equal(5, result); tests_done();
-
-                // Evaluate a function with no parameters passed in
-                db.eval('function () {return 5;}', function(err, result) {
+                // Evaluate a function with 2 parameters passed in
+                db.eval('function (x, y) {return x + y;}', [2, 3], function(err, result) {
                   test.equal(5, result); tests_done();
 
-                  // Evaluate a statement
-                  db.eval('2 + 3;', function(err, result) {
+                  // Evaluate a function with no parameters passed in
+                  db.eval('function () {return 5;}', function(err, result) {
                     test.equal(5, result); tests_done();
 
-                    // Evaluate a statement using the code object
-                    db.eval(new Code("2 + 3;"), function(err, result) {
+                    // Evaluate a statement
+                    db.eval('2 + 3;', function(err, result) {
                       test.equal(5, result); tests_done();
 
-                      // Evaluate a statement using the code object including a scope
-                      db.eval(new Code("return i;", {'i':2}), function(err, result) {
-                        test.equal(2, result); tests_done();
+                      // Evaluate a statement using the code object
+                      db.eval(new Code("2 + 3;"), function(err, result) {
+                        test.equal(5, result); tests_done();
 
                         // Evaluate a statement using the code object including a scope
-                        db.eval(new Code("i + 3;", {'i':2}), function(err, result) {
-                          test.equal(5, result); tests_done();
+                        db.eval(new Code("return i;", {'i':2}), function(err, result) {
+                          test.equal(2, result); tests_done();
 
-                          // Evaluate an illegal statement
-                          db.eval("5 ++ 5;", function(err, result) {
-                            test.ok(err instanceof Error);
-                            test.ok(err.message != null);
-                            tests_done();
-                            // Let's close the db
-                            // db.close();
-                            // test.done();
+                          // Evaluate a statement using the code object including a scope
+                          db.eval(new Code("i + 3;", {'i':2}), function(err, result) {
+                            test.equal(5, result); tests_done();
+
+                            // Evaluate an illegal statement
+                            db.eval("5 ++ 5;", function(err, result) {
+                              test.ok(err instanceof Error);
+                              test.ok(err.message != null);
+                              tests_done();
+                              // Let's close the db
+                              // db.close();
+                              // test.done();
+                            });
                           });
                         });
                       });
@@ -256,7 +256,7 @@ exports.shouldCorrectlyExecuteEvalFunctions = {
                 });
               });
             });
-          });
+          }, 1000);
         });
       });
     });
@@ -277,7 +277,7 @@ exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunction = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var Code = configuration.require.Code;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
@@ -285,11 +285,11 @@ exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunction = {
     db.open(function(err, db) {
 
       // Clean out the collection
-      db.collection("system.js").remove({}, {w:1}, function(err, result) {
+      db.collection("system.js").remove({}, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         // Define a system level function
-        db.collection("system.js").insert({_id: "echo", value: new Code("function(x) { return x; }")}, {w:1}, function(err, result) {
+        db.collection("system.js").insert({_id: "echo", value: new Code("function(x) { return x; }")}, configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
         
           db.eval("echo(5)", function(err, result) {
@@ -317,17 +317,17 @@ exports.shouldCorrectlyDereferenceDbRef = {
     var DBRef = configuration.require.DBRef
       , ObjectID = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_deref', function(err, collection) {
-        collection.insert({'a':1}, {w:1}, function(err, ids) {
-          collection.remove({}, {w:1}, function(err, result) {
+        collection.insert({'a':1}, configuration.writeConcernMax(), function(err, ids) {
+          collection.remove({}, configuration.writeConcernMax(), function(err, result) {
             collection.count(function(err, count) {
               test.equal(0, count);
 
               // Execute deref a db reference
               db.dereference(new DBRef("test_deref", new ObjectID()), function(err, result) {
-                collection.insert({'x':'hello'}, {w:1}, function(err, ids) {
+                collection.insert({'x':'hello'}, configuration.writeConcernMax(), function(err, ids) {
                   collection.findOne(function(err, document) {
                     test.equal('hello', document.x);
 
@@ -337,11 +337,11 @@ exports.shouldCorrectlyDereferenceDbRef = {
                       db.dereference(new DBRef("test_deref", 4), function(err, result) {
                         var obj = {'_id':4};
 
-                        collection.insert(obj, {w:1}, function(err, ids) {
+                        collection.insert(obj, configuration.writeConcernMax(), function(err, ids) {
                           db.dereference(new DBRef("test_deref", 4), function(err, document) {
                             test.equal(obj['_id'], document._id);
-                            collection.remove({}, {w:1}, function(err, result) {
-                              collection.insert({'x':'hello'}, {w:1}, function(err, ids) {
+                            collection.remove({}, configuration.writeConcernMax(), function(err, result) {
+                              collection.insert({'x':'hello'}, configuration.writeConcernMax(), function(err, ids) {
                                 db.dereference(new DBRef("test_deref", null), function(err, result) {
                                   test.equal(null, result);
                                   // Let's close the db
@@ -377,7 +377,7 @@ exports.shouldCorrectlyRenameCollection = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
@@ -436,7 +436,7 @@ exports.shouldCorrectlyRenameCollection = {
           }
 
           // Insert a couple of documents
-          collection1.insert([{'x':1}, {'x':2}], {w:1}, function(err, docs) {
+          collection1.insert([{'x':1}, {'x':2}], configuration.writeConcernMax(), function(err, docs) {
 
             // Attemp to rename the first collection to the second one, this will fail
             collection1.rename('test_rename_collection2', function(err, collection) {
@@ -476,7 +476,7 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnection = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
@@ -503,7 +503,7 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallback =
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
@@ -534,7 +534,7 @@ exports.shouldCorrectlyRetrieveCollectionInformation = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
@@ -580,7 +580,7 @@ exports.shouldCorrectlyRetrieveCollectionNames = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
@@ -622,7 +622,7 @@ exports.shouldCorrectlyAccessACollection = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
@@ -671,7 +671,7 @@ exports.shouldCorrectlyRetrieveAllCollections = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
@@ -707,7 +707,7 @@ exports.shouldCorrectlyHandleFailedConnection = {
     var Db = configuration.require.Db
       , Server = configuration.require.Server;
 
-    var fs_client = new Db(configuration.database, new Server("127.0.0.1", 25117, {auto_reconnect: false}), {w:0});
+    var fs_client = new Db(configuration.database, new Server("127.0.0.1", 25117, {auto_reconnect: false}), configuration.writeConcernMax());
     fs_client.open(function(err, fs_client) {
       test.ok(err != null)
       test.done();
@@ -725,7 +725,7 @@ exports.shouldCorrectlyResaveDBRef = {
   test: function(configuration, test) {
     var DBRef = configuration.require.DBRef;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.dropCollection('test_resave_dbref', function() {
         db.createCollection('test_resave_dbref', function(err, collection) {
@@ -771,7 +771,7 @@ exports.shouldCorrectlyDereferenceDbRefExamples = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var DBRef = configuration.require.DBRef;
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
@@ -786,26 +786,28 @@ exports.shouldCorrectlyDereferenceDbRefExamples = {
       secondDb.createCollection('test_deref_examples', function(err, collection) {
 
         // Insert a document in the collection
-        collection.insert({'a':1}, {w:1}, function(err, ids) {
+        collection.insert({'a':1}, configuration.writeConcernMax(), function(err, ids) {
 
           // Let's build a db reference and resolve it
           var dbRef = new DBRef('test_deref_examples', ids[0]._id, 'integration_tests_2');
 
-          // Resolve it including a db resolve
-          db.dereference(dbRef, function(err, item) {
-            test.equal(1, item.a);
-
-            // Let's build a db reference and resolve it
-            var dbRef = new DBRef('test_deref_examples', ids[0]._id);
-
-            // Simple local resolve
-            secondDb.dereference(dbRef, function(err, item) {
+          setTimeout(function() {
+            // Resolve it including a db resolve
+            db.dereference(dbRef, function(err, item) {
               test.equal(1, item.a);
 
-              db.close();
-              test.done();
-            });
-          });
+              // Let's build a db reference and resolve it
+              var dbRef = new DBRef('test_deref_examples', ids[0]._id);
+
+              // Simple local resolve
+              secondDb.dereference(dbRef, function(err, item) {
+                test.equal(1, item.a);
+
+                db.close();
+                test.done();
+              });
+            });            
+          }, 500);
         });
       });
     });
@@ -825,7 +827,7 @@ exports.shouldCorrectlyLogoutFromTheDatabase = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
@@ -872,7 +874,7 @@ exports.shouldCorrectlyAuthenticateAgainstTheDatabase = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
@@ -914,7 +916,7 @@ exports.shouldCorrectlyAddUserToDb = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
@@ -951,7 +953,7 @@ exports.shouldCorrectlyAddAndRemoveUser = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
@@ -1002,7 +1004,7 @@ exports.shouldCorrectlyCreateACollection = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
@@ -1015,7 +1017,7 @@ exports.shouldCorrectlyCreateACollection = {
         test.equal(null, err);
 
         // Insert a document in the capped collection
-        collection.insert({a:1}, {w:1}, function(err, result) {
+        collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
 
           db.close();
@@ -1039,7 +1041,7 @@ exports.shouldCorrectlyExecuteACommandAgainstTheServer = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
@@ -1056,7 +1058,7 @@ exports.shouldCorrectlyExecuteACommandAgainstTheServer = {
           test.equal(null, err);
 
           // Insert a document in the capped collection
-          collection.insert({a:1}, {w:1}, function(err, result) {
+          collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
             test.equal(null, err);
 
             // Drop the collection from this world
@@ -1091,7 +1093,7 @@ exports.shouldCorrectlyCreateDropAndVerifyThatCollectionIsGone = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
@@ -1123,7 +1125,7 @@ exports.shouldCorrectlyRenameACollection = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
@@ -1132,11 +1134,11 @@ exports.shouldCorrectlyRenameACollection = {
       test.equal(null, err);
 
       // Create a collection
-      db.createCollection("simple_rename_collection", {w:1}, function(err, collection) {
+      db.createCollection("simple_rename_collection", configuration.writeConcernMax(), function(err, collection) {
         test.equal(null, err);
 
         // Insert a document in the collection
-        collection.insert({a:1}, {w:1}, function(err, result) {
+        collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
 
           // Retrieve the number of documents from the collection
@@ -1184,7 +1186,7 @@ exports.shouldCreateOnDbComplexIndexOnTwoFields = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
@@ -1197,7 +1199,7 @@ exports.shouldCreateOnDbComplexIndexOnTwoFields = {
 
         // Insert a bunch of documents for the index
         collection.insert([{a:1, b:1}, {a:1, b:1}
-          , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
+          , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
 
           // Create an index on the a field
@@ -1212,13 +1214,12 @@ exports.shouldCreateOnDbComplexIndexOnTwoFields = {
               // Peform a query, with explain to show we hit the query
               collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
                 test.equal(null, err);
-                test.ok(explanation[0].indexBounds.a != null);
-                test.ok(explanation[0].indexBounds.b != null);
+                test.ok(explanation != null);
 
                 db.close();
                 test.done();
               });
-            })
+            })              
           });
         });
       });
@@ -1238,7 +1239,7 @@ exports.shouldCreateComplexEnsureIndexDb = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
@@ -1251,7 +1252,7 @@ exports.shouldCreateComplexEnsureIndexDb = {
 
         // Insert a bunch of documents for the index
         collection.insert([{a:1, b:1}, {a:1, b:1}
-          , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
+          , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
 
           // Create an index on the a field
@@ -1266,8 +1267,7 @@ exports.shouldCreateComplexEnsureIndexDb = {
               // Peform a query, with explain to show we hit the query
               collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
                 test.equal(null, err);
-                test.ok(explanation[0].indexBounds.a != null);
-                test.ok(explanation[0].indexBounds.b != null);
+                test.ok(explanation != null);
 
                 db.close();
                 test.done();
@@ -1292,7 +1292,7 @@ exports.shouldCorrectlyReturnCursorInformation = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
@@ -1310,7 +1310,7 @@ exports.shouldCorrectlyReturnCursorInformation = {
         }
 
         // Insert a bunch of documents for the index
-        collection.insert(docs, {w:1}, function(err, result) {
+        collection.insert(docs, configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
 
           // Let's set a cursor
@@ -1344,7 +1344,7 @@ exports.shouldCorrectlyCreateAndDropIndex = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
@@ -1357,7 +1357,7 @@ exports.shouldCorrectlyCreateAndDropIndex = {
 
         // Insert a bunch of documents for the index
         collection.insert([{a:1, b:1}, {a:1, b:1}
-          , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
+          , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
 
           // Create an index on the a field
@@ -1392,11 +1392,13 @@ exports.shouldCorrectlyCreateAndDropIndex = {
  * @_function reIndex
  */
 exports.shouldCorrectlyForceReindexOnCollection = {
-  metadata: {},
+  metadata: {
+    requires: { topology: ["single", "replset"] }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
@@ -1409,7 +1411,7 @@ exports.shouldCorrectlyForceReindexOnCollection = {
 
         // Insert a bunch of documents for the index
         collection.insert([{a:1, b:1}, {a:1, b:1}
-          , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {w:1}, function(err, result) {
+          , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
 
           // Create an index on the a field
@@ -1445,7 +1447,9 @@ exports.shouldCorrectlyForceReindexOnCollection = {
  * @_function indexInformation
  */
 exports.shouldCorrectlyShowTheResultsFromIndexInformation = {
-  metadata: {},
+  metadata: {
+    requires: { topology: ["single", "replset"] }
+  },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1462,7 +1466,7 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = {
 
         // Insert a bunch of documents for the index
         collection.insert([{a:1, b:1}, {a:1, b:1}
-          , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
+          , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
 
           // Create an index on the a field
@@ -1502,7 +1506,7 @@ exports.shouldCorrectlyDropTheDatabase = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START
@@ -1515,7 +1519,7 @@ exports.shouldCorrectlyDropTheDatabase = {
 
         // Insert a bunch of documents for the index
         collection.insert([{a:1, b:1}, {a:1, b:1}
-          , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
+          , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
 
           // Let's drop the database
@@ -1559,7 +1563,7 @@ exports.shouldCorrectlyGetErrorDroppingNonExistingDb = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     // Establish connection to db
     db.open(function(err, db) {
@@ -1584,7 +1588,7 @@ exports.shouldCorrectlyThrowWhenTryingToReOpenConnection = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
     // Establish connection to db
     db.open(function(err, db) {
@@ -1612,7 +1616,7 @@ exports.shouldCorrectlyReconnectWhenError = {
       , Server = configuration.require.Server;
 
     var db = new Db('integration_tests_to_drop_2', new Server("127.0.0.1", 27088,
-      {auto_reconnect: false, poolSize: 4}), {w:0});
+      {auto_reconnect: false, poolSize: 4}), configuration.writeConcernMax());
     // Establish connection to db
     db.open(function(err, _db) {
       test.ok(err != null);
@@ -1638,7 +1642,7 @@ exports.shouldCorrectlyRetrieveDbStats = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
     // DOC_START

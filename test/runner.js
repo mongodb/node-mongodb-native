@@ -62,7 +62,6 @@ var createConfiguration = function(options) {
 
       start: function(callback) {
         manager.start({purge:true, signal:-9}, function(err) {
-          // console.log("+++++++++++++++++++++++++++++++++++++++++ STARTED")
           // console.dir(err)
           if(err) throw err;
           callback();
@@ -286,11 +285,12 @@ if(argv.t == 'functional') {
   } else if(argv.e == 'sharded') {
     config = createConfiguration({
         port: 50000,
+        host: 'localhost',
         url: "mongodb://%slocalhost:50000/integration_tests",
         writeConcernMax: {w: 'majority', wtimeout: 5000},
         
         topology: function(host, port, serverOptions) {
-          var m = require('../lib/mongodb');
+          var m = require('../');
           host = host || 'locahost'; port = port || 50000;
           return new m.Mongos([new m.Server(host, port, serverOptions)]);
         }, 
