@@ -93,13 +93,14 @@ var ShardingManager = function(mongosOptions) {
             dbpath: dbpath + f("/data-%s", initiallConfigPort)
           , logpath: logpath + f("/data-%s.log", initiallConfigPort)
           , port: initiallConfigPort
+          , fork: null
         };
 
         // Create a server manager
         configs.push(new ServerManager(opts));
-        // Update the mongos port
+        // Update the config server port
         initiallConfigPort = initiallConfigPort + 1;
-        // Start all the mongoses
+        // Start all the config server
         configs[i].start({purge:true}, function(err) {
           if(err) throw err;
           configsLeft = configsLeft - 1;
@@ -117,12 +118,13 @@ var ShardingManager = function(mongosOptions) {
       var replSetsLeft = numberOfReplicasets;
       // Create Replicaset Managers
       for(var i = 0; i < numberOfReplicasets; i++) {
+        var name = replSet + i;
         replicasets.push(new ReplSetManager({
             startPort: initialPort
           , dbpath: dbpath
           , logpath: logpath
           , tags: tags
-          , replSet: replSet
+          , replSet: name
         }));
         
         // Increase the initialPort
@@ -186,20 +188,24 @@ var ShardingManager = function(mongosOptions) {
       mongoses[0].connect(function(err, server) {
         if(err) throw err;
 
-        for(var i = 0; i < numberOfReplicasets; i++) {
-          replicasets[i].getIsMaster(function(err, ismaster) {
+        var setupShard = function(replset) {
+          replset.getIsMaster(function(err, ismaster) {
             if(err) throw err;
 
             server.command('admin.$cmd', {
-              addshard: f("%s/%s", replSet, ismaster.me)
-            }, function(err, result) {              
-              replSetsLeft = replSetsLeft - 1;
-              if(err) throw err;
+              addshard: f("%s/%s", replset.name, ismaster.me)
+            }, callback);
+          });
+        }
 
-              if(replSetsLeft == 0) {
-                callback();
-              }
-            });
+        for(var i = 0; i < numberOfReplicasets; i++) {
+          setupShard(replicasets[i], function(err, result) {
+            replSetsLeft = replSetsLeft - 1;
+            if(err) throw err;
+
+            if(replSetsLeft == 0) {
+              callback();
+            }
           });
         }
       });
@@ -208,9 +214,16 @@ var ShardingManager = function(mongosOptions) {
     // Start up sharded system
     var start = function() {
       setTimeout(function() {
+        
+        // Start up replicasets
         startReplicasets(function() {
+          
+          // Start up config servers
           startConfigs(function() {
+          
+            // Start up mongos processes
             startMongoses(function() {
+          
               // Set up the sharded system
               setupShards(function() {
                 callback();

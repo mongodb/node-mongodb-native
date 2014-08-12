@@ -231,8 +231,6 @@ var ServerManager = function(serverOptions) {
     self.connect(function(err, _server) {
       if(err) return callback(err);
 
-      // console.log("=============================== ismaster :: 0")
-
       _server.command('system.$cmd', {ismaster:true}, function(err, r) {
         _server.destroy();
         if(err) return callback(err);

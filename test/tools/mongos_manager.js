@@ -88,6 +88,7 @@ var MongosManager = function(mongosOptions) {
 
   var bootServer = function(cmd, callback) {
     var pingServer = function() {
+
       // Else we need to start checking if the server is up
       server = new Server({host: host
         , port: port
@@ -103,10 +104,8 @@ var MongosManager = function(mongosOptions) {
         _server.destroy();
 
         try {
-          // Read the pidfile        
           pid = fs.readFileSync(pidfilepath, 'ascii').trim();          
         } catch(err) {
-          console.dir(err)
           return setTimeout(pingServer, 1000);
         }
         
@@ -119,6 +118,12 @@ var MongosManager = function(mongosOptions) {
       });
 
       var errHandler = function(err) {
+        if(err.code == 10185) {
+          var _callback = callback;
+          callback = null;
+          return _callback(null, server); 
+        }
+
         setTimeout(pingServer, 1000);
       }
       

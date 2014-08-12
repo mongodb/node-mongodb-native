@@ -73,6 +73,10 @@ var ReplSetManager = function(replsetOptions) {
     enumerable:true, get: function() { return arbiterServers.slice(0); }
   });
 
+  Object.defineProperty(this, 'name', {
+    enumerable:true, get: function() { return replSet; }
+  });
+
   //
   // ensure replicaset is up and running
   var ensureUp = function(server, callback) {
@@ -244,13 +248,8 @@ var ReplSetManager = function(replsetOptions) {
         if(serversLeft == 0) {
           // Configure the replicaset
           configureAndEnsure(function() {
-            // console.log("================================================ 0")
             // Refresh view
             getServerManagerByType('primary', function() {
-              // console.log("================================================ 1")
-              // console.dir(primaryServer)
-              // console.dir(secondaryServers)
-              // console.dir(arbiterServers)
               callback(null, self);
             });
           });
@@ -265,8 +264,6 @@ var ReplSetManager = function(replsetOptions) {
       options = {};
     }
 
-    // console.log("========================== STOP")
-    // console.dir(server.name)
     server.destroy()
 
     var count = serverManagers.length;
