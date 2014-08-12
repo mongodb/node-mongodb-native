@@ -104,6 +104,9 @@ var Query = function(bson, ns, query, options) {
     // Initial index
     var index = 4;
 
+    // console.log("====================================================")
+    // console.dir(this.slaveOk)
+
     // Write header information
     index = write32bit(index, _buffer, requestId);
     index = write32bit(index, _buffer, 0);
@@ -132,6 +135,11 @@ var Query = function(bson, ns, query, options) {
     // console.log("######################################### Query")
     // console.dir(query)
     // console.dir(options)
+
+
+    // console.log("##################### setupClassicFind")
+    // console.dir(cmd)
+    // console.dir(findCmd)
 
     // Serialize query
     var queryLength = bson.serializeWithBufferAndIndex(query
