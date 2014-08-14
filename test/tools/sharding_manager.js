@@ -226,7 +226,10 @@ var ShardingManager = function(mongosOptions) {
           
               // Set up the sharded system
               setupShards(function() {
-                callback();
+
+                setTimeout(function() {
+                  callback();
+                }, 5000);
               });
             })
           });
