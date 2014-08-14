@@ -717,36 +717,6 @@ exports.shouldCorrectlyCreateAndUseSparseIndex = {
 /**
  * @ignore
  */
-exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.1"] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: {mongodb: ">1.9.1"} },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
-    db.open(function(err, db) {
-      db.createCollection('shouldCorrectlyExecuteKeepGoingWithMongodb191OrHigher', function(err, collection) {
-        collection.ensureIndex({title:1}, {unique:true, w:1}, function(err, indexName) {
-          collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}], {w:1}, function(err, result) {
-            // Force keep going flag, ignoring unique index issue
-            collection.insert([{name:"Jim"}, {name:"Sarah", title:"Princess"}, {name:'Gump', title:"Gump"}], {w:1, keepGoing:true}, function(err, result) {
-              collection.count(function(err, count) {
-                test.equal(3, count);
-                db.close();
-                test.done();
-              })
-            });
-          });
-        });
-      });
-    });
-  }
-}
-
-/**
- * @ignore
- */
 exports.shouldCorrectlyHandleGeospatialIndexes = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run

@@ -16,7 +16,10 @@ var restartAndDone = function(configuration, test) {
  * @ignore
  */
 exports['Should fail due to w:5 and wtimeout:1 with ordered batch api'] = {
-  metadata: { requires: { topology: 'replicaset' } },
+  metadata: { requires: { 
+      topology: 'replicaset' 
+    , mongodb: '>=2.6.0'
+  } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -85,7 +88,10 @@ exports['Should fail due to w:5 and wtimeout:1 with ordered batch api'] = {
  * @ignore
  */
 exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key errors with ordered batch api'] = {
-  metadata: { requires: { topology: 'replicaset' } },
+  metadata: { requires: { 
+      topology: 'replicaset' 
+    , mongodb: '>=2.6.0'
+  } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -169,7 +175,10 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
  * @ignore
  */
 exports['Should fail due to w:5 and wtimeout:1 with unordered batch api'] = {
-  metadata: { requires: { topology: 'replicaset' } },
+  metadata: { requires: { 
+      topology: 'replicaset' 
+    , mongodb: '>=2.6.0'
+  } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -239,7 +248,10 @@ exports['Should fail due to w:5 and wtimeout:1 with unordered batch api'] = {
  * @ignore
  */
 exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key errors with unordered batch api'] = {
-  metadata: { requires: { topology: 'replicaset' } },
+  metadata: { requires: { 
+      topology: 'replicaset' 
+    , mongodb: '>=2.6.0'
+  } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -382,7 +394,7 @@ exports['Should Correctly group using replicaset'] = {
           , w:2, wtimeout: 10000
         });
       
-      collection.insert([{key:1,x:10}, {key:2,x:30}, {key:1,x:20}, {key:3,x:20}], {safe:{w:3, wtimeout:10000}}, function(err, result) {
+      collection.insert([{key:1,x:10}, {key:2,x:30}, {key:1,x:20}, {key:3,x:20}], {w:'2'}, function(err, result) {
         // Kill the primary
         manager.shutdown('primary', {signal: -15}, function(node) {
           // Do a collection find

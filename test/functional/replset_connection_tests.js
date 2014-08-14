@@ -935,7 +935,6 @@ exports['Should Correctly remove server going into recovery mode'] = {
           test.equal(null, err);
 
           db1.admin().command({ replSetMaintenance: 1 }, function(err, result) {
-            // Done
           });
         });
       });

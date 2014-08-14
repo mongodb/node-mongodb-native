@@ -19,7 +19,6 @@ exports['Should correctly execute ordered batch with no errors using write comma
       var col = db.collection('batch_write_ordered_ops_0');
       // Initialize the Ordered Batch
       var batch = col.initializeOrderedBulkOp();
-
       // Add some operations to be executed in order
       batch.insert({a:1});
       batch.find({a:1}).updateOne({$set: {b:1}});
