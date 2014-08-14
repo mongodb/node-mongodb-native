@@ -394,7 +394,7 @@ exports['Should Correctly group using replicaset'] = {
           , w:2, wtimeout: 10000
         });
       
-      collection.insert([{key:1,x:10}, {key:2,x:30}, {key:1,x:20}, {key:3,x:20}], {w:'2'}, function(err, result) {
+      collection.insert([{key:1,x:10}, {key:2,x:30}, {key:1,x:20}, {key:3,x:20}], configuration.writeConcernMax(), function(err, result) {
         // Kill the primary
         manager.shutdown('primary', {signal: -15}, function(node) {
           // Do a collection find
