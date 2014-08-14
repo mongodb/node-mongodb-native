@@ -458,14 +458,14 @@ exports.shouldCorrectlyPerformFindByWhere = {
             // Let's test usage of the $where statement
             collection.find({'$where':new Code('this.a > 2')}).count(function(err, count) {
               test.equal(1, count);
-            });
 
-            collection.find({'$where':new Code('this.a > i', {i:1})}).count(function(err, count) {
-              test.equal(2, count);
+              collection.find({'$where':new Code('this.a > i', {i:1})}).count(function(err, count) {
+                test.equal(2, count);
 
-              // Let's close the db
-              db.close();
-              test.done();
+                // Let's close the db
+                db.close();
+                test.done();
+              });
             });
           });
         });

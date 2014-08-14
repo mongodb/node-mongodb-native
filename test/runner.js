@@ -62,16 +62,13 @@ var createConfiguration = function(options) {
 
       start: function(callback) {
         manager.start({purge:true, signal:-9}, function(err) {
-          // console.dir(err)
           if(err) throw err;
           callback();
         });
       },
 
       stop: function(callback) {
-        // console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 0")
         manager.stop({signal: -15}, function() {
-        // console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++ 1")
           callback();
         });        
       },
@@ -202,6 +199,11 @@ var testFiles =[
   , '/test/functional/replset_connection_tests.js'
   , '/test/functional/replset_operations_tests.js'
   , '/test/functional/replset_read_preference_tests.js'
+
+  // Sharding tests
+  , '/test/functional/sharding_failover_tests.js'
+  , '/test/functional/sharding_connection_tests.js'
+  , '/test/functional/sharding_read_preference_tests.js'
 ]
 
 // Add all the tests to run
@@ -292,6 +294,8 @@ if(argv.t == 'functional') {
         topology: function(host, port, serverOptions) {
           var m = require('../');
           host = host || 'locahost'; port = port || 50000;
+          serverOptions = shallowClone(serverOptions);
+          serverOptions.poolSize = 1;
           return new m.Mongos([new m.Server(host, port, serverOptions)]);
         }, 
 

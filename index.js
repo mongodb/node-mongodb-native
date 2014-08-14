@@ -14,6 +14,7 @@ connect.ReadPreference = require('./lib/read_preference');
 connect.Grid = require('./lib/gridfs/grid');
 connect.GridStore = require('./lib/gridfs/grid_store');
 connect.Chunk = require('./lib/gridfs/chunk');
+connect.Logger = core.Logger;
 
 // BSON types exported
 connect.Binary = core.BSON.Binary;
@@ -25,7 +26,7 @@ connect.MinKey = core.BSON.MinKey;
 connect.MaxKey = core.BSON.MaxKey;
 connect.ObjectID = core.BSON.ObjectID;
 connect.Symbol = core.BSON.Symbol;
-connect.Timestamp = core.BSON.Timestamp;  
+connect.Timestamp = core.BSON.Timestamp;
 
 // Add connect method
 connect.connect = connect;
