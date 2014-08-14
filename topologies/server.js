@@ -287,15 +287,20 @@ var Server = function(options) {
   // Handlers
   var messageHandler = function(response, connection) {
     // console.log("+++++++++++++++++++++++++++++++++++++++ messageHandler :: " + response.responseTo + " :: " + response.requestId + " :: " + callbacks.id + ' :: ' + self.name)
-    // Parse the message
-    response.parse({raw: callbacks.raw(response.responseTo)});
-    // if(response.documents)console.dir(response.documents)
-    if(logger.isDebug()) logger.debug(f('message [%s] received from %s', response.raw.toString('hex'), self.name));
+    try {
+      // Parse the message
+      response.parse({raw: callbacks.raw(response.responseTo)});
+      // if(response.documents)console.dir(response.documents)
+      if(logger.isDebug()) logger.debug(f('message [%s] received from %s', response.raw.toString('hex'), self.name));      
+      callbacks.emit(response.responseTo, null, response);      
+    } catch (err) {
+      callbacks.flush(new MongoError(err));
+      self.destroy();
+    }
 
     // console.log("========================================================")
     // console.dir(callbacks)
 
-    callbacks.emit(response.responseTo, null, response);      
   }
 
   var errorHandler = function(err, connection) {
