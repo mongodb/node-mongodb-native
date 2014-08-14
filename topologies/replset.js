@@ -439,6 +439,10 @@ var ReplSet = function(seedlist, options) {
     enumerable:true, get: function() { return id; }
   });
 
+  Object.defineProperty(this, 'haInterval', {
+    enumerable:true, get: function() { return haInterval; }
+  });
+
   //
   // Debug options
   if(debug) {

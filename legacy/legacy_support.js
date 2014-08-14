@@ -13,37 +13,37 @@ var LegacySupport = function() {
   // Aggregate up all the results
   //
   var aggregateWriteOperationResults = function(opType, ops, results, connection) {
-    var final = { ok: 1, n: 0 }
+    var finalResult = { ok: 1, n: 0 }
     
     // Map all the results coming back
     for(var i = 0; i < results.length; i++) {
       var result = results[i];
       var op = ops[i];
 
-      if((result.upserted || (result.updatedExisting == false)) && final.upserted == null) {
-        final.upserted = [];
+      if((result.upserted || (result.updatedExisting == false)) && finalResult.upserted == null) {
+        finalResult.upserted = [];
       }
 
       // Push the upserted document to the list of upserted values
       if(result.upserted) {
-        final.upserted.push({index: i, _id: result.upserted});
+        finalResult.upserted.push({index: i, _id: result.upserted});
       }
 
       // We have an upsert where we passed in a _id
       if(result.updatedExisting == false && result.n == 1 && result.upserted == null) {
-        final.upserted.push({index: i, _id: op.q._id});
+        finalResult.upserted.push({index: i, _id: op.q._id});
       }
 
       // We have an insert command
       if(result.ok == 1 && opType == 'insert' && result.err == null) {
-        final.n = final.n + 1;
+        finalResult.n = finalResult.n + 1;
       }
 
       // We have a command error
       if(result != null && result.ok == 0 || result.err || result.errmsg) {
-        if(result.ok == 0) final.ok = 0;
-        final.code = result.code;
-        final.errmsg = result.errmsg || result.err || result.errMsg;
+        if(result.ok == 0) finalResult.ok = 0;
+        finalResult.code = result.code;
+        finalResult.errmsg = result.errmsg || result.err || result.errMsg;
 
         // Check if we have a write error
         if(result.code == 11000 
@@ -51,30 +51,30 @@ var LegacySupport = function() {
           || result.code == 12582
           || result.code == 14
           || result.code == 13511) {
-          if(final.writeErrors == null) final.writeErrors = [];
-          final.writeErrors.push({
+          if(finalResult.writeErrors == null) finalResult.writeErrors = [];
+          finalResult.writeErrors.push({
               index: i
             , code: result.code
             , errmsg: result.errmsg || result.err || result.errMsg
           });
         } else {
-          final.writeConcernError = {
+          finalResult.writeConcernError = {
               code: result.code
             , errmsg: result.errmsg || result.err || result.errMsg            
           }
         }
       } else if(typeof result.n == 'number') {
-        final.n += result.n;
+        finalResult.n += result.n;
       } else {
-        final.n += 1;
+        finalResult.n += 1;
       }
       
       // Result as expected
-      if(result != null && result.lastOp) final.lastOp = result.lastOp;
+      if(result != null && result.lastOp) finalResult.lastOp = result.lastOp;
     }
 
-    // Return final aggregated results
-    return new CommandResult(final, connection);
+    // Return finalResult aggregated results
+    return new CommandResult(finalResult, connection);
   }
 
   //
@@ -112,7 +112,7 @@ var LegacySupport = function() {
       try {
         // Execute the insert
         connection.write(op);
-        
+
         // If write concern 0 don't fire getLastError
         if(writeConcern.w != 0) {
           // Write the lastError message
@@ -131,6 +131,7 @@ var LegacySupport = function() {
           });          
         }
       } catch(err) {
+        if(typeof err == 'string') err = new MongoError(err);
         // We have a serialization error, rewrite as a write error to have same behavior as modern
         // write commands
         getLastErrors.push({ ok: 1, errmsg: err.message, code: 14 });
@@ -195,6 +196,7 @@ var LegacySupport = function() {
           callbacks.register(getLastErrorOp.requestId, callbackOp(i));
         }
       } catch(err) {
+        if(typeof err == 'string') err = new MongoError(err);
         // Update the number of operations executed
         totalOps = totalOps - 1;
         // We have a serialization error, rewrite as a write error to have same behavior as modern
