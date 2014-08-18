@@ -44,10 +44,12 @@ var createConfiguration = function(options) {
     var writeConcern = options.writeConcern || {w:1};
     var writeConcernMax = options.writeConcernMax || {w:1};
     
+    // Shallow clone the options
+    var fOptions = shallowClone(options);
+    options.journal = false;
+
     // Override manager or use default
-    var manager = options.manager ? options.manager() : new ServerManager({
-      journal:false
-    });  
+    var manager = options.manager ? options.manager() : new ServerManager(fOptions);  
 
     // clone
     var clone = function(o) {
@@ -116,21 +118,25 @@ var createConfiguration = function(options) {
         // Override implementation
         if(options.newDbInstanceWithDomainSocket) return options.newDbInstanceWithDomainSocket(dbOptions, serverOptions);
 
-        // If we have a topology
+        // Default topology
+        var topology = Server;
+        // If we have a specific topology
         if(options.topology) {
-          return topology(null, null, serverOptions);
+          topology = options.topology;
         }
 
         // Fall back
         var host = serverOptions && serverOptions.host || "/tmp/mongodb-27017.sock";
 
+        // Set up the options
+        if(options.sslOnNormalPorts == null) serverOptions.ssl = true;
         // If we explicitly testing undefined port behavior
         if(serverOptions && serverOptions.port == 'undefined') {
-          return new Db('integration_tests', new Server(host, undefined, serverOptions), dbOptions);
+          return new Db('integration_tests', topology(host, undefined, serverOptions), dbOptions);
         }
 
         // Normal socket connection
-        return new Db('integration_tests', new Server(host, serverOptions), dbOptions);
+        return new Db('integration_tests', topology(host, serverOptions), dbOptions);
       },
 
       url: function(username, password) {
@@ -204,6 +210,9 @@ var testFiles =[
   , '/test/functional/sharding_failover_tests.js'
   , '/test/functional/sharding_connection_tests.js'
   , '/test/functional/sharding_read_preference_tests.js'
+
+  // // SSL tests
+  // , '/test/functional/ssl_mongoclient_tests.js'
 ]
 
 // Add all the tests to run
@@ -309,7 +318,24 @@ if(argv.t == 'functional') {
             , replsetStartPort: 31000
           });
         }
-    })
+    });
+  } else if(argv.e == 'ssl') {
+    // Create ssl server
+    config = createConfiguration({
+        sslOnNormalPorts: null
+      , fork:null
+      , sslPEMKeyFile: __dirname + "/functional/ssl/server.pem"
+      , url: "mongodb://%slocalhost:27017/integration_tests?ssl=true"
+      
+      , topology: function(host, port, serverOptions) {
+        var m = require('../');
+        host = host || 'locahost'; port = port || 27017;
+        serverOptions = shallowClone(serverOptions);
+        serverOptions.poolSize = 1;
+        serverOptions.ssl = true;
+        return new m.Server(host, port, serverOptions);
+      }, 
+    });
   }
 
   // If we have a test we are filtering by

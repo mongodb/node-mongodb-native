@@ -1,3 +1,9 @@
+// console.log(argv._);
+var argv = require('optimist')
+    .usage('Usage: $0 -t [target] -e [environment] -n [name] -f [filename] -r [smoke report file]')
+    .demand(['t'])
+    .argv;
+
 var MongoDBTopologyFilter = function() {
   // Keep the server config
   var serverConfig = null;
@@ -11,16 +17,8 @@ var MongoDBTopologyFilter = function() {
     // Get the MongoDB topology
     configuration.newDbInstance({w:1}).open(function(err, db) {
       if(err) throw err;
-
-      // Check the topology
-      if(db.serverConfig instanceof Server) {
-      	serverConfig = "single";
-      } else if(db.serverConfig instanceof ReplSet) {
-      	serverConfig = "replicaset";
-      } else if(db.serverConfig instanceof Mongos) {
-      	serverConfig = "mongos";
-      }
-
+      // Use the provided environment for the filtering
+      serverConfig = argv.e || 'single';
       // Close the connection
       db.close();
       callback();

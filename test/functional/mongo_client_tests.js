@@ -9,7 +9,7 @@ exports['Should Correctly Do MongoClient with bufferMaxEntries:0'] = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
-    MongoClient.connect(configuration.url() + "?maxPoolSize=1", {
+    MongoClient.connect(configuration.url(), {
       db: {bufferMaxEntries:0},
     }, function(err, db) {
       // Listener for closing event
