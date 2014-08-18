@@ -56,6 +56,8 @@ var ServerManager = function(serverOptions) {
   serverOptions.rest = null;
   // serverOptions.fork = null;
   // serverOptions.httpinterface = null;
+    // console.log("------------------------------------ serverOptions")
+    // console.dir(serverOptions)
 
   // Return
   this.port = port;
@@ -66,39 +68,68 @@ var ServerManager = function(serverOptions) {
   var server = null;
   var ismaster = null;
 
+  // Allowed server options
+  var allowedOptions = ['sslOnNormalPorts', 'sslMode', 'sslPEMKeyFile'
+    , 'sslPEMKeyPassword', 'sslClusterFile', 'sslClusterPassword'
+    , 'sslCAFile', 'sslCRLFile', 'sslWeakCertificateValidation'
+    , 'sslAllowInvalidHostnames', 'sslAllowInvalidCertificates', 'sslFIPSMode'
+    , 'configsvr', 'shardsvr', 'replSet', 'replIndexPrefetch'
+    , 'autoresync', 'slavedelay', 'only', 'source', 'slave', 'master'
+    , 'oplogSize', 'journalCommitInterval', 'journalOptions', 'nojournal'
+    , 'journal', 'notablescan', 'noscripting', 'repairpath', 'repair'
+    , 'upgrade', 'syncdelay', 'smallfiles', 'quotaFiles', 'quota'
+    , 'nssize', 'noprealloc', 'noIndexBuildRetry', 'directoryperdb'
+    , 'dbpath', 'sysinfo', 'cpu', 'profile', 'slowms', 'rest'
+    , 'jsonp', 'ipv6', 'noauth', 'auth', 'fork', 'unixSocketPrefix'
+    , 'nounixsocket', 'clusterAuthMode', 'httpinterface', 'setParameter'
+    , 'keyFile', 'pidfilepath', 'timeStampFormat', 'logappend'
+    , 'syslogFacility', 'syslog', 'logpath', 'maxConns', 'bind_ip'];
+
   // Return the startup command
   var buildStartupCommand = function(options) {
+    // console.log("------------------------------------ buildStartupCommand")
+    // console.dir(options)
+
     var command = [];
     // Binary command
-    command.push(f("%s", bin));
+    command.push(f('%s', bin));
     command.push('--smallfiles');
     command.push('--noprealloc')
     command.push('--nojournal');
     // Push test commands
-    command.push("--setParameter enableTestCommands=1");
+    command.push('--setParameter enableTestCommands=1');
 
+    // Add all other passed in options    
     for(var name in options) {
-      if(options[name] === null) {
-        command.push(f("--%s", name));      
-      } else  if(options[name]) {
-        command.push(f("--%s %s", name, options[name]));
+      if(allowedOptions.indexOf(name) != -1) {
+        if(options[name] === null) {
+          command.push(f('--%s', name));      
+        } else if(typeof options[name] == 'function') {
+        } else if(options[name]) {
+          command.push(f('--%s %s', name, options[name]));
+        }        
       }
     }
 
-    return command.join(" ");
+    return command.join(' ');
   }
 
   var bootServer = function(cmd, callback) {
     var pingServer = function() {
       if(server) server.destroy();
-      // Else we need to start checking if the server is up
-      server = new Server({host: host
+      var opt = {host: host
         , port: port
         , connectionTimeout: 2000
         , socketTimeout: 2000
         , size: 1
         , reconnect: false
-      });
+      }
+
+      // Merge in any special options
+      if(serverOptions.ssl) opt.ssl = true;
+
+      // Else we need to start checking if the server is up
+      server = new Server(opt);
       
       // On connect let's go
       server.on('connect', function(_server) {
@@ -140,6 +171,10 @@ var ServerManager = function(serverOptions) {
           var _internal = callback;
           callback = null;
           return _internal(error);
+        } else {
+          var _internal = callback;
+          callback = null;
+          return _internal();          
         }
       });
 
@@ -194,7 +229,7 @@ var ServerManager = function(serverOptions) {
 
     var signal = options.signal || -15;
     // Stop server connection
-    server.destroy();
+    if(server) server.destroy();
     // Kill the process with the desired signal
     exec(f("kill %d %s", signal, pid), function(error) {
       // Monitor for pid until it's dead
@@ -251,15 +286,20 @@ var ServerManager = function(serverOptions) {
   this.connect = function(callback) {
     if(server.isConnected()) return callback(null, server);
 
-    // Else we need to start checking if the server is up
-    var s = new Server({host: host
+    var opt = {host: host
       , port: port
       , connectionTimeout: 2000
       , socketTimeout: 2000
       , size: 1
       , reconnect: false
       , emitError: true
-    });
+    }
+
+    // Merge in any special options
+    if(serverOptions.ssl) opt.ssl = true;
+
+    // Else we need to start checking if the server is up
+    var s = new Server(opt);
     
     // On connect let's go
     s.on('connect', function(_server) {
