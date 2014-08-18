@@ -111,7 +111,7 @@ var DESTROYED = 'destroyed';
  * @param {Buffer} [options.ca] SSL Certificate store binary buffer
  * @param {Buffer} [options.cert] SSL Certificate binary buffer
  * @param {Buffer} [options.key] SSL Key file binary buffer
- * @param {string} [options.passPhrase] SSL Certificate pass phrase
+ * @param {string} [options.passphrase] SSL Certificate pass phrase
  * @param {boolean} [options.rejectUnauthorized=false] Reject unauthorized server certificates
  * @param {boolean} [options.promoteLongs=true] Convert Long values from the db into Numbers if they fit into 53 bits
  * @return {Server} A cursor instance
@@ -305,6 +305,7 @@ var Server = function(options) {
 
   var errorHandler = function(err, connection) {
     // console.log(" SERVER :: ====================================== ERROR :: " + tag + " :: " + id + " :: " + state)
+    // console.dir(err)
     // console.log("----------------------------------- errorHandler :: ");
     // console.log("emitError :: " + emitError)
     // console.log("serverDetails.name :: " + serverDetails.name)
