@@ -9,20 +9,10 @@ var MongoDBTopologyFilter = function() {
   var serverConfig = null;
 
   this.beforeStart = function(object, callback) {
-    var Server = require('../..').Server
-      , ReplSet = require('../..').ReplSet
-      , Mongos = require('../..').Mongos;
-    // Get the first configuration
-    var configuration = object.configurations[0];
-    // Get the MongoDB topology
-    configuration.newDbInstance({w:1}).open(function(err, db) {
-      if(err) throw err;
-      // Use the provided environment for the filtering
-      serverConfig = argv.e || 'single';
-      // Close the connection
-      db.close();
-      callback();
-    });
+    // Use the provided environment for the filtering
+    serverConfig = argv.e || 'single';
+    // Finish up
+    callback();
   }
 
 	this.filter = function(test) {

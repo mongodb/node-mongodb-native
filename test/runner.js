@@ -9,6 +9,7 @@ var Runner = require('integra').Runner
   , FileFilter = require('integra').FileFilter
   , TestNameFilter = require('integra').TestNameFilter
   , path = require('path')
+  , fs = require('fs')
   , f = require('util').format;
 
 var smokePlugin = require('./smoke_plugin.js');
@@ -92,8 +93,13 @@ var createConfiguration = function(options) {
       },
 
       newDbInstance: function(dbOptions, serverOptions) {
+        serverOptions = serverOptions || {};
         // Override implementation
         if(options.newDbInstance) return options.newDbInstance(dbOptions, serverOptions);
+
+        // Set up the options
+        if(options.sslOnNormalPorts == null) serverOptions.ssl = true;
+        // if(options.sslPEMKeyFile) serverOptions.key = fs.readFileSync(__dirname + "/ssl/client.pem");
 
         // Fall back
         var port = serverOptions && serverOptions.port || options.port || 27017;
@@ -109,6 +115,9 @@ var createConfiguration = function(options) {
         if(options.topology) {
           topology = options.topology;
         }
+
+        // console.log("################################# serverOptions")
+        // console.dir(serverOptions)
 
         // Return a new db instance
         return new Db(database, new topology(host, port, serverOptions), dbOptions);
@@ -172,47 +181,47 @@ var runner = new Runner({
 });
 
 var testFiles =[
-    '/test/functional/mongo_client_tests.js'
-  , '/test/functional/collection_tests.js'
-  , '/test/functional/db_tests.js'
-  , '/test/functional/cursor_tests.js'
-  , '/test/functional/insert_tests.js'
-  , '/test/functional/aggregation_tests.js'
-  , '/test/functional/admin_tests.js'
-  , '/test/functional/connection_tests.js'
-  , '/test/functional/cursorstream_tests.js'
-  , '/test/functional/custom_pk_tests.js'
-  , '/test/functional/domain_tests.js'
-  , '/test/functional/error_tests.js'
-  , '/test/functional/find_tests.js'
-  , '/test/functional/geo_tests.js'
-  , '/test/functional/index_tests.js'
-  , '/test/functional/mapreduce_tests.js'
-  , '/test/functional/maxtimems_tests.js'
-  , '/test/functional/multiple_db_tests.js'
-  , '/test/functional/object_id_tests.js'
-  , '/test/functional/raw_tests.js'
-  , '/test/functional/readpreference_tests.js'
-  , '/test/functional/remove_tests.js'
-  , '/test/functional/unicode_tests.js'
-  , '/test/functional/uri_tests.js'
-  , '/test/functional/url_parser_tests.js'
-  , '/test/functional/gridfs_tests.js'
-  , '/test/functional/bulk_tests.js'
+  //   '/test/functional/mongo_client_tests.js'
+  // , '/test/functional/collection_tests.js'
+  // , '/test/functional/db_tests.js'
+  // , '/test/functional/cursor_tests.js'
+  // , '/test/functional/insert_tests.js'
+  // , '/test/functional/aggregation_tests.js'
+  // , '/test/functional/admin_tests.js'
+  // , '/test/functional/connection_tests.js'
+  // , '/test/functional/cursorstream_tests.js'
+  // , '/test/functional/custom_pk_tests.js'
+  // , '/test/functional/domain_tests.js'
+  // , '/test/functional/error_tests.js'
+  // , '/test/functional/find_tests.js'
+  // , '/test/functional/geo_tests.js'
+  // , '/test/functional/index_tests.js'
+  // , '/test/functional/mapreduce_tests.js'
+  // , '/test/functional/maxtimems_tests.js'
+  // , '/test/functional/multiple_db_tests.js'
+  // , '/test/functional/object_id_tests.js'
+  // , '/test/functional/raw_tests.js'
+  // , '/test/functional/readpreference_tests.js'
+  // , '/test/functional/remove_tests.js'
+  // , '/test/functional/unicode_tests.js'
+  // , '/test/functional/uri_tests.js'
+  // , '/test/functional/url_parser_tests.js'
+  // , '/test/functional/gridfs_tests.js'
+  // , '/test/functional/bulk_tests.js'
 
-  // Replicaset tests
-  , '/test/functional/replset_failover_tests.js'
-  , '/test/functional/replset_connection_tests.js'
-  , '/test/functional/replset_operations_tests.js'
-  , '/test/functional/replset_read_preference_tests.js'
+  // // Replicaset tests
+  // , '/test/functional/replset_failover_tests.js'
+  // , '/test/functional/replset_connection_tests.js'
+  // , '/test/functional/replset_operations_tests.js'
+  // , '/test/functional/replset_read_preference_tests.js'
 
-  // Sharding tests
-  , '/test/functional/sharding_failover_tests.js'
-  , '/test/functional/sharding_connection_tests.js'
-  , '/test/functional/sharding_read_preference_tests.js'
+  // // Sharding tests
+  // , '/test/functional/sharding_failover_tests.js'
+  // , '/test/functional/sharding_connection_tests.js'
+  // , '/test/functional/sharding_read_preference_tests.js'
 
-  // // SSL tests
-  // , '/test/functional/ssl_mongoclient_tests.js'
+  // SSL tests
+  , '/test/functional/ssl_mongoclient_tests.js'
 ]
 
 // Add all the tests to run
@@ -336,6 +345,24 @@ if(argv.t == 'functional') {
         return new m.Server(host, port, serverOptions);
       }, 
     });
+  // } else if(argv.e == 'ssl_replset') {
+  //   // Create ssl server
+  //   config = createConfiguration({
+  //       sslOnNormalPorts: null
+  //     , fork:null
+  //     , port: 31000
+  //     , sslPEMKeyFile: __dirname + "/functional/ssl/server.pem"
+  //     , url: "mongodb://%slocalhost:31000/integration_tests?ssl=true"
+      
+  //     , topology: function(host, port, serverOptions) {
+  //       var m = require('../');
+  //       host = host || 'locahost'; port = port || 31000;
+  //       serverOptions = shallowClone(serverOptions);
+  //       serverOptions.poolSize = 1;
+  //       serverOptions.ssl = true;
+  //       return new m.Server(host, port, serverOptions);
+  //     }, 
+  //   });
   }
 
   // If we have a test we are filtering by
