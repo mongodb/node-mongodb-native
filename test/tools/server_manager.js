@@ -54,10 +54,9 @@ var ServerManager = function(serverOptions) {
 
   // Add rest options
   serverOptions.rest = null;
-  // serverOptions.fork = null;
-  // serverOptions.httpinterface = null;
-    // console.log("------------------------------------ serverOptions")
-    // console.dir(serverOptions)
+
+  // Get the keys
+  var keys = Object.keys(serverOptions);
 
   // Return
   this.port = port;
@@ -83,19 +82,19 @@ var ServerManager = function(serverOptions) {
     , 'jsonp', 'ipv6', 'noauth', 'auth', 'fork', 'unixSocketPrefix'
     , 'nounixsocket', 'clusterAuthMode', 'httpinterface', 'setParameter'
     , 'keyFile', 'pidfilepath', 'timeStampFormat', 'logappend'
-    , 'syslogFacility', 'syslog', 'logpath', 'maxConns', 'bind_ip'];
+    , 'syslogFacility', 'syslog', 'logpath', 'maxConns', 'bind_ip', 'port'];
 
   // Return the startup command
   var buildStartupCommand = function(options) {
     // console.log("------------------------------------ buildStartupCommand")
     // console.dir(options)
+    // process.exit(0)
 
     var command = [];
     // Binary command
     command.push(f('%s', bin));
     command.push('--smallfiles');
     command.push('--noprealloc')
-    command.push('--nojournal');
     // Push test commands
     command.push('--setParameter enableTestCommands=1');
 
@@ -111,6 +110,11 @@ var ServerManager = function(serverOptions) {
       }
     }
 
+    var keys = Object.keys(options);
+    if(keys.indexOf('journal') == -1) {
+      command.push('--nojournal');
+    }
+
     return command.join(' ');
   }
 
@@ -123,22 +127,40 @@ var ServerManager = function(serverOptions) {
         , socketTimeout: 2000
         , size: 1
         , reconnect: false
+        , emitError: typeof serverOptions.emitError == 'boolean' ? serverOptions.emitError : false
       }
 
+      // Set the key
+      if(keys.indexOf('sslOnNormalPorts') != -1) opt.ssl = true;
+      if(keys.indexOf('ssl') != -1) opt.ssl = serverOptions.ssl;
+      if(keys.indexOf('ca') != -1) opt.ca = serverOptions.ca;
+      if(keys.indexOf('cert') != -1) opt.cert = serverOptions.cert;
+      if(keys.indexOf('rejectUnauthorized') != -1) opt.rejectUnauthorized = serverOptions.rejectUnauthorized;
+      if(keys.indexOf('key') != -1) opt.key = serverOptions.key;
+      if(keys.indexOf('passphrase') != -1) opt.passphrase = serverOptions.passphrase;
+
+      // console.log("-------------------------------------")
+      // console.dir(opt)
+
       // Merge in any special options
-      if(serverOptions.ssl) opt.ssl = true;
+      // if(serverOptions.ssl) opt.ssl = true;
 
       // Else we need to start checking if the server is up
       server = new Server(opt);
       
       // On connect let's go
       server.on('connect', function(_server) {
+        // console.log("+++++++++++++++++++++++++++++++++++ CONNECT")
+        // console.log("+++++++++++++++++++++++++++++++++++ CONNECT")
+        // console.log("+++++++++++++++++++++++++++++++++++ CONNECT")
+
         ismaster = server.lastIsMaster();
         _server.destroy();
 
         try {
           // Read the pidfile        
           pid = fs.readFileSync(path.join(dbpath, "mongod.lock"), 'ascii').trim();
+          // console.dir(pid)
         } catch(err) {
           return setTimeout(pingServer, 1000);
         }
@@ -152,6 +174,10 @@ var ServerManager = function(serverOptions) {
       });
 
       var errHandler = function(err) {
+        // console.log("+++++++++++++++++++++++++++++++++++ ERR")
+        // console.log("+++++++++++++++++++++++++++++++++++ ERR")
+        // console.log("+++++++++++++++++++++++++++++++++++ ERR")
+        // console.dir(err)
         setTimeout(pingServer, 1000);
       }
       
@@ -171,10 +197,6 @@ var ServerManager = function(serverOptions) {
           var _internal = callback;
           callback = null;
           return _internal(error);
-        } else {
-          var _internal = callback;
-          callback = null;
-          return _internal();          
         }
       });
 
@@ -230,8 +252,12 @@ var ServerManager = function(serverOptions) {
     var signal = options.signal || -15;
     // Stop server connection
     if(server) server.destroy();
+    // console.log("_____________________ DIE 0")
+    // console.log("signal :: " + signal)
+    // console.log("pid :: " + pid)
     // Kill the process with the desired signal
     exec(f("kill %d %s", signal, pid), function(error) {
+    // console.log("_____________________ DIE 1")
       // Monitor for pid until it's dead
       waitToDie(pid, function() {
         try {
@@ -295,8 +321,14 @@ var ServerManager = function(serverOptions) {
       , emitError: true
     }
 
-    // Merge in any special options
-    if(serverOptions.ssl) opt.ssl = true;
+    // Set the key
+    if(keys.indexOf('sslOnNormalPorts') != -1) opt.ssl = true;
+    if(keys.indexOf('ssl') != -1) opt.ssl = serverOptions.ssl;
+    if(keys.indexOf('ca') != -1) opt.ca = serverOptions.ca;
+    if(keys.indexOf('cert') != -1) opt.cert = serverOptions.cert;
+    if(keys.indexOf('rejectUnauthorized') != -1) opt.rejectUnauthorized = serverOptions.rejectUnauthorized;
+    if(keys.indexOf('key') != -1) opt.key = serverOptions.key;
+    if(keys.indexOf('passphrase') != -1) opt.passphrase = serverOptions.passphrase;
 
     // Else we need to start checking if the server is up
     var s = new Server(opt);

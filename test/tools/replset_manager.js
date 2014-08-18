@@ -45,12 +45,16 @@ var ReplSetManager = function(replsetOptions) {
   var version = 1;
   var configSet = null;
   var tags = replsetOptions.tags;
+  var host = replsetOptions.host || 'localhost';
 
   // All server addresses
   var serverAddresses = [];
   var secondaryServers = [];
   var arbiterServers = [];
   var primaryServer = [];;
+
+  // Get the keys
+  var keys = Object.keys(replsetOptions);
 
   // Internal check server
   var server = null;
@@ -118,6 +122,7 @@ var ReplSetManager = function(replsetOptions) {
   //
   // Configure and ensure
   var configureAndEnsure = function(options, callback) {
+    // console.log("------ configureAndEnsure --------------------------- 0")
     if(typeof options == 'function') {
       callback = options;
       options = {};
@@ -164,15 +169,30 @@ var ReplSetManager = function(replsetOptions) {
       }
     }
     
-    // Let's pick one of the servers and run the command against it
-    server = new Server({
+    var opts = {
         host: serverManagers[0].host
       , port: serverManagers[0].port
       , connectionTimeout: 2000
       , size: 1
       , reconnect: false
       , emitError: true
-    });
+    }
+    // console.log("------ configureAndEnsure --------------------------- 1")
+
+    // Set the key
+    if(keys.indexOf('sslOnNormalPorts') != -1) opts.ssl = true;
+    if(keys.indexOf('ssl') != -1) opts.ssl = replsetOptions.ssl;
+    if(keys.indexOf('ca') != -1) opts.ca = replsetOptions.ca;
+    if(keys.indexOf('cert') != -1) opts.cert = replsetOptions.cert;
+    if(keys.indexOf('rejectUnauthorized') != -1) opts.rejectUnauthorized = replsetOptions.rejectUnauthorized;
+    if(keys.indexOf('key') != -1) opts.key = replsetOptions.key;
+    if(keys.indexOf('passphrase') != -1) opts.passphrase = replsetOptions.passphrase;
+
+    // console.log("========================================================= attempting to connect")
+    // console.dir(opts)
+
+    // Let's pick one of the servers and run the command against it
+    server = new Server(opts);
 
     var onError = function(err) {
       callback(err, null);
@@ -190,6 +210,7 @@ var ReplSetManager = function(replsetOptions) {
               callback(err, r);
             });
           }
+          
           // Return error
           if(err) return callback(err, null);
       });
@@ -218,36 +239,48 @@ var ReplSetManager = function(replsetOptions) {
     var serversLeft = totalServers;
     var purge = typeof options.purge == 'boolean' ? options.purge : true;
     var kill = typeof options.kill == 'boolean' ? options.kill : true;
+    var signal = typeof options.signal == 'number' ? options.signal : -15;
     var self = this;
 
     // Start all the servers
     for(var i = 0; i < totalServers; i++) {
       // Clone the options
       var opts = cloneOptions(internalOptions);
+      // Emit errors
+      opts.emitError = true;
       // Set the current Port 
+      opts.host = host;
       opts.port = startPort + i;
       opts.dbpath = opts.dbpath ? opts.dbpath + f("/data-%s", opts.port) : null;
       opts.logpath = opts.logpath ? opts.logpath + f("/data-%s.log", opts.port) : null;
       opts.fork = null;
       // Add list
-      serverAddresses.push(f("%s:%s", 'localhost', opts.port));      
+      serverAddresses.push(f("%s:%s", host, opts.port));      
+
+      // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ADDING")
+      // console.dir(opts)
       // Create a server manager
       serverManagers.push(new ServerManager(opts));
     }
 
     // Start all the servers
     for(var i = 0; i < serverManagers.length; i++) {
-      var startOpts = {purge: purge, kill: kill};
+      var startOpts = {purge: purge, kill: kill, signal: signal};
 
+          // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 0")
       // Start the server
       serverManagers[i].start(startOpts, function(err) {
+          // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 1")
+          // console.dir(err)
         if(err) throw err;
         serversLeft = serversLeft - 1;
 
         // All servers are down
         if(serversLeft == 0) {
+          // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 2")
           // Configure the replicaset
           configureAndEnsure(function() {
+            // console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 3")
             // Refresh view
             getServerManagerByType('primary', function() {
               callback(null, self);
