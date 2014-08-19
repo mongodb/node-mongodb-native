@@ -755,7 +755,9 @@ var ReplSet = function(seedlist, options) {
          if((secondaryOnlyConnectionAllowed && !replState.isSecondaryConnected() && !replState.isPrimaryConnected()) 
           || (!secondaryOnlyConnectionAllowed && !replState.isPrimaryConnected())) {
             if(logger.isInfo()) logger.info(f('[%s] no valid seed servers in list', id));
-            return self.emit('error', new MongoError('no valid seed servers in list'));
+
+            if(self.listeners('error').length > 0)
+              return self.emit('error', new MongoError('no valid seed servers in list'));
          }
       }
 
@@ -766,7 +768,9 @@ var ReplSet = function(seedlist, options) {
       //     console.log("===================== EMITTING ERROR")
       // console.log(self.listeners('error')[0].listener.toString())
           if(logger.isInfo()) logger.info(f('[%s] no valid seed servers in list', id));
-          self.emit('error', new MongoError('no valid seed servers in list'));
+
+          if(self.listeners('error').length > 0)
+            self.emit('error', new MongoError('no valid seed servers in list'));
         } 
       }
 
