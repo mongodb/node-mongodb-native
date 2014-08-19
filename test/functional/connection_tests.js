@@ -288,3 +288,49 @@ exports.shouldCorrectlyReturnFalseOnIsConnectBeforeConnectionHappened = {
     test.done();
   }
 }
+
+/**
+ * @ignore
+ */
+exports['Should correctly reconnect and finish query operation'] = {
+  metadata: { requires: { topology: 'single' } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
+      , Server = configuration.require.Server;
+
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:true});
+    db.open(function(err, db) {
+      test.equal(null, err);    
+
+      db.collection('test_reconnect').insert({a:1}, function(err, doc) {
+        test.equal(null, err);
+
+        db.serverConfig.once('reconnect', function() {
+          
+          // Await reconnect and re-authentication    
+          db.collection('test_reconnect').findOne(function(err, doc) {
+            test.equal(null, err);
+            test.equal(1, doc.a);
+
+            // Attempt disconnect again
+            db.serverConfig.connections()[0].destroy();
+
+            // Await reconnect and re-authentication    
+            db.collection('test_reconnect').findOne(function(err, doc) {
+              test.equal(null, err);
+              test.equal(1, doc.a);
+
+              test.done();
+            });
+          });
+        })
+        
+        // Force close
+        db.serverConfig.connections()[0].destroy();
+      });
+    });
+  }
+}
