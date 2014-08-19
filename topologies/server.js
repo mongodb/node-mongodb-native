@@ -207,6 +207,7 @@ var Server = function(options) {
   //
   // Reconnect server
   var reconnectServer = function() {
+      // console.log("============================== reconnectServer")
     state = CONNECTING;
     // Create a new Pool
     pool = new Pool(options);
@@ -231,8 +232,6 @@ var Server = function(options) {
     //
     // Attempt to connect
     pool.once('connect', function() {
-      // console.log("============================== connect")
-
       // Remove any non used handlers
       var events = ['error', 'close', 'timeout', 'parseError'];
       events.forEach(function(e) {
