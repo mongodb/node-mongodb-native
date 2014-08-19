@@ -318,7 +318,7 @@ var Server = function(options) {
     if(readPreferenceStrategies != null) notifyStrategies('error', [self]);
     if(logger.isInfo()) logger.info(f('server %s errored out with %s', self.name, JSON.stringify(err)));
     // Flush out all the callbacks
-    callbacks.flush(new MongoError(f("server %s received an error %s", self.name, JSON.stringify(err))));
+    if(callbacks) callbacks.flush(new MongoError(f("server %s received an error %s", self.name, JSON.stringify(err))));
     // Destroy all connections
     self.destroy();    
     // Emit error event
@@ -335,7 +335,7 @@ var Server = function(options) {
     if(readPreferenceStrategies != null) notifyStrategies('error', [self]);
     if(logger.isInfo()) logger.info(f('server %s errored out with %s', self.name, JSON.stringify(err)));    
     // Flush out all the callbacks
-    callbacks.flush(new MongoError(f("server %s received an error %s", self.name, JSON.stringify(err))));
+    if(callbacks) callbacks.flush(new MongoError(f("server %s received an error %s", self.name, JSON.stringify(err))));
     // Emit error event
     self.emit('error', err, self);
     // If we specified the driver to reconnect perform it
@@ -353,7 +353,7 @@ var Server = function(options) {
     if(readPreferenceStrategies != null) notifyStrategies('timeout', [self]);
     if(logger.isInfo()) logger.info(f('server %s timed out', self.name));
     // Flush out all the callbacks
-    callbacks.flush(new MongoError(f("server %s timed out", self.name)));
+    if(callbacks) callbacks.flush(new MongoError(f("server %s timed out", self.name)));
     // Emit error event
     self.emit('timeout', err, self);
     // If we specified the driver to reconnect perform it
@@ -371,7 +371,7 @@ var Server = function(options) {
     if(readPreferenceStrategies != null) notifyStrategies('close', [self]);
     if(logger.isInfo()) logger.info(f('server %s closed', self.name));
     // Flush out all the callbacks
-    callbacks.flush(new MongoError(f("server %s sockets closed", self.name)));
+    if(callbacks) callbacks.flush(new MongoError(f("server %s sockets closed", self.name)));
     // Emit error event
     self.emit('close', err, self);
     // If we specified the driver to reconnect perform it
@@ -510,7 +510,7 @@ var Server = function(options) {
     // Close the pool
     pool.destroy();
     // Flush out all the callbacks
-    callbacks.flush(new MongoError(f("server %s sockets closed", self.name)));
+    if(callbacks) callbacks.flush(new MongoError(f("server %s sockets closed", self.name)));
   }
 
   /**
@@ -814,6 +814,10 @@ var Server = function(options) {
     
     // Actual arguments
     var finalArguments = [self, pool, db].concat(args.slice(0)).concat([function(err, r) {
+      // console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ AUTH")
+      // console.dir(err)
+      // console.dir(r)
+
       if(err) return callback(err);
       if(!r) return callback(new MongoError('could not authenticate'));
       callback(null, new Session({}, self));
