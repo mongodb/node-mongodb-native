@@ -254,58 +254,6 @@ exports['Should correctly shut down if attempting to connect to ssl server with 
   }
 }
 
-// /**
-//  * @ignore
-//  */
-// exports.debugit = {
-//   metadata: {
-//     requires: {
-//       topology: 'ssl'
-//     }
-//   },
-  
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var ServerManager = require('mongodb-core').ServerManager
-//       , MongoClient = configuration.require.MongoClient;
-
-//     // All inserted docs
-//     var docs = [];
-//     var errs = [];
-//     var insertDocs = [];
-
-//     // Read the ca
-//     var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
-//     var cert = fs.readFileSync(__dirname + "/ssl/client.pem");
-//     var key = fs.readFileSync(__dirname + "/ssl/client.pem");
-      
-//     // Connect
-//     MongoClient.connect("mongodb://localhost:30000/test?replicaSet=replica-set-foo&ssl=true", {
-//       server: {
-//           ssl:true
-//         , sslValidate:false
-//         , sslCA:ca
-//       }
-//     }, function(err, db) {
-//       console.log("----------------------------------------------------")
-//       console.log("----------------------------------------------------")
-//       console.log("----------------------------------------------------")
-//       console.log("----------------------------------------------------")
-//       console.dir(err)
-//       console.dir(db)
-//       // test.equal(null, err);
-//       // test.ok(db != null);
-
-//       db.close();
-
-//       // serverManager.stop(function() {
-//         test.done();
-//       // });
-//     });
-//     // });
-//   }
-// }
-
 /**
  * @ignore
  */

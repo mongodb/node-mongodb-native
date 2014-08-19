@@ -222,6 +222,8 @@ var testFiles =[
 
   // SSL tests
   , '/test/functional/ssl_mongoclient_tests.js'
+  // , '/test/functional/ssl_validation_tests.js'
+  , '/test/functional/ssl_validation_tests.js'
 ]
 
 // Add all the tests to run
