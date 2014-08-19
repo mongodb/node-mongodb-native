@@ -13,10 +13,14 @@ exports.shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode = {
     db.open(function(err, db) {
       var collection = db.collection('shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode');
       collection.insert({'a':1}, {w: 1}, function(err, doc) {
-        var adminDb = db.admin();
-        
+        var adminDb = db.admin();        
         adminDb.addUser('admin', 'admin', function(err, result) {
+          test.equal(null, err);
+
           adminDb.authenticate('admin', 'admin', function(err, replies) {
+            test.equal(null, err);
+            test.equal(true, replies);
+
             adminDb.validateCollection('shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode', function(err, doc) {
               test.equal(null, err);
               test.ok(doc != null);
