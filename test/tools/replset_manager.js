@@ -81,6 +81,10 @@ var ReplSetManager = function(replsetOptions) {
     enumerable:true, get: function() { return replSet; }
   });
 
+  Object.defineProperty(this, 'startPort', {
+    enumerable:true, get: function() { return startPort; }
+  });
+
   //
   // ensure replicaset is up and running
   var ensureUp = function(server, callback) {
@@ -210,7 +214,7 @@ var ReplSetManager = function(replsetOptions) {
               callback(err, r);
             });
           }
-          
+
           // Return error
           if(err) return callback(err, null);
       });
