@@ -5,6 +5,7 @@ var Runner = require('integra').Runner
   , NodeVersionFilter = require('./filters/node_version_filter')
   , MongoDBVersionFilter = require('./filters/mongodb_version_filter')
   , MongoDBTopologyFilter = require('./filters/mongodb_topology_filter')
+  , OSFilter = require('./filters/os_filter')
   , TravisFilter = require('./filters/travis_filter')
   , FileFilter = require('integra').FileFilter
   , TestNameFilter = require('integra').TestNameFilter
@@ -182,33 +183,33 @@ var runner = new Runner({
 });
 
 var testFiles =[
-  //   '/test/functional/mongo_client_tests.js'
-  // , '/test/functional/collection_tests.js'
-  // , '/test/functional/db_tests.js'
-  // , '/test/functional/cursor_tests.js'
-  // , '/test/functional/insert_tests.js'
-  // , '/test/functional/aggregation_tests.js'
-  // , '/test/functional/admin_tests.js'
-  // , '/test/functional/connection_tests.js'
-  // , '/test/functional/cursorstream_tests.js'
-  // , '/test/functional/custom_pk_tests.js'
-  // , '/test/functional/domain_tests.js'
-  // , '/test/functional/error_tests.js'
-  // , '/test/functional/find_tests.js'
-  // , '/test/functional/geo_tests.js'
-  // , '/test/functional/index_tests.js'
-  // , '/test/functional/mapreduce_tests.js'
-  // , '/test/functional/maxtimems_tests.js'
-  // , '/test/functional/multiple_db_tests.js'
-  // , '/test/functional/object_id_tests.js'
-  // , '/test/functional/raw_tests.js'
-  // , '/test/functional/readpreference_tests.js'
-  // , '/test/functional/remove_tests.js'
-  // , '/test/functional/unicode_tests.js'
-  // , '/test/functional/uri_tests.js'
-  // , '/test/functional/url_parser_tests.js'
-  // , '/test/functional/gridfs_tests.js'
-  // , '/test/functional/bulk_tests.js'
+    '/test/functional/mongo_client_tests.js'
+  , '/test/functional/collection_tests.js'
+  , '/test/functional/db_tests.js'
+  , '/test/functional/cursor_tests.js'
+  , '/test/functional/insert_tests.js'
+  , '/test/functional/aggregation_tests.js'
+  , '/test/functional/admin_tests.js'
+  , '/test/functional/connection_tests.js'
+  , '/test/functional/cursorstream_tests.js'
+  , '/test/functional/custom_pk_tests.js'
+  , '/test/functional/domain_tests.js'
+  , '/test/functional/error_tests.js'
+  , '/test/functional/find_tests.js'
+  , '/test/functional/geo_tests.js'
+  , '/test/functional/index_tests.js'
+  , '/test/functional/mapreduce_tests.js'
+  , '/test/functional/maxtimems_tests.js'
+  , '/test/functional/multiple_db_tests.js'
+  , '/test/functional/object_id_tests.js'
+  , '/test/functional/raw_tests.js'
+  , '/test/functional/readpreference_tests.js'
+  , '/test/functional/remove_tests.js'
+  , '/test/functional/unicode_tests.js'
+  , '/test/functional/uri_tests.js'
+  , '/test/functional/url_parser_tests.js'
+  , '/test/functional/gridfs_tests.js'
+  , '/test/functional/bulk_tests.js'
 
   // // Replicaset tests
   // , '/test/functional/replset_failover_tests.js'
@@ -224,10 +225,13 @@ var testFiles =[
   // // SSL tests
   // , '/test/functional/ssl_mongoclient_tests.js'
   // , '/test/functional/ssl_validation_tests.js'
-  , '/test/functional/ssl_x509_connect_tests.js'
+  // , '/test/functional/ssl_x509_connect_tests.js'
 
-  // // LDAP Tests
-  // , '/test/functional/ldap_tests.js'  
+  // LDAP Tests
+  , '/test/functional/ldap_tests.js'  
+
+  // Kerberos Tests
+  , '/test/functional/kerberos_tests.js'  
 ]
 
 // Add all the tests to run
@@ -263,6 +267,8 @@ runner.plugin(new NodeVersionFilter());
 runner.plugin(new MongoDBVersionFilter());
 // Add a Topology filter plugin
 runner.plugin(new MongoDBTopologyFilter());
+// Add a OS filter plugin
+runner.plugin(new OSFilter())
 
 // Exit when done
 runner.on('exit', function(errors, results) {
@@ -370,7 +376,7 @@ if(argv.t == 'functional') {
   //     }, 
   //   });
   } else if(argv.e == 'ldap') {
-
+  } else if(argv.e == 'kerberos') {
   }
 
   // If we have a test we are filtering by

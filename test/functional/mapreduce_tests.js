@@ -5,7 +5,7 @@
  * @_function group
  */
 exports.shouldCorrectlyExecuteGroupFunction = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -125,7 +125,7 @@ exports.shouldCorrectlyExecuteGroupFunction = {
 * @ignore
 */
 exports.shouldCorrectlyExecuteGroupFunctionWithFinalizeFunction = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -164,7 +164,7 @@ exports.shouldCorrectlyExecuteGroupFunctionWithFinalizeFunction = {
  * @_function mapReduce
  */
 exports.shouldPerformSimpleMapReduceFunctions = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -218,7 +218,7 @@ exports.shouldPerformSimpleMapReduceFunctions = {
 exports.shouldPerformMapReduceFunctionInline = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: {mongodb: ">1.7.6"} },
+  metadata: { requires: { mongodb: '>1.7.6', topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -265,7 +265,7 @@ exports.shouldPerformMapReduceFunctionInline = {
 * @_function mapReduce
 */
 exports.shouldPerformMapReduceWithContext = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -346,7 +346,7 @@ exports.shouldPerformMapReduceWithContext = {
  * @_function mapReduce
  */
 exports.shouldPerformMapReduceInContextObjects = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -424,7 +424,7 @@ exports.shouldPerformMapReduceInContextObjects = {
 * @ignore
 */
 exports.shouldPerformMapReduceWithStringFunctions = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -460,7 +460,7 @@ exports.shouldPerformMapReduceWithStringFunctions = {
 exports.shouldForceMapReduceError = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: {mongodb: ">1.7.6"} },
+  metadata: { requires: { mongodb: ">1.7.6", topology: ['single', 'replicaset', 'sharded', 'ssl'] } },  
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -487,7 +487,7 @@ exports.shouldForceMapReduceError = {
 * @ignore
 */
 exports.shouldPerformMapReduceWithParametersBeingFunctions = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -520,7 +520,7 @@ exports.shouldPerformMapReduceWithParametersBeingFunctions = {
 * @ignore
 */
 exports.shouldPerformMapReduceWithCodeObjects = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -555,7 +555,7 @@ exports.shouldPerformMapReduceWithCodeObjects = {
 * @ignore
 */
 exports.shouldPerformMapReduceWithOptions = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -594,7 +594,7 @@ exports.shouldPerformMapReduceWithOptions = {
 * @ignore
 */
 exports.shouldHandleMapReduceErrors = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -623,7 +623,7 @@ exports.shouldHandleMapReduceErrors = {
 * @ignore
 */
 exports.shouldSaveDataToDifferentDbFromMapreduce = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -668,7 +668,7 @@ exports.shouldSaveDataToDifferentDbFromMapreduce = {
 * @ignore
 */
 exports.shouldCorrectlyReturnNestedKeys = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -725,7 +725,7 @@ exports.shouldCorrectlyReturnNestedKeys = {
 * @ignore
 */
 exports.shouldPerformMapReduceWithScopeContainingFunction = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {

@@ -7,7 +7,7 @@ var parse = require('../../lib/url_parser');
  * @ignore
  */
 exports['Should correctly parse mongodb://localhost'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -25,7 +25,7 @@ exports['Should correctly parse mongodb://localhost'] = {
  * @ignore
  */
 exports['Should correctly parse mongodb://localhost:27017'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -43,7 +43,7 @@ exports['Should correctly parse mongodb://localhost:27017'] = {
  * @ignore
  */
 exports['Should correctly parse mongodb://localhost?safe=true&readPreference=secondary'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -62,7 +62,7 @@ exports['Should correctly parse mongodb://localhost?safe=true&readPreference=sec
  * @ignore
  */
 exports['Should correctly parse mongodb://localhost:28101'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -80,7 +80,7 @@ exports['Should correctly parse mongodb://localhost:28101'] = {
  * @ignore
  */
 exports['Should correctly parse mongodb://fred:foobar@localhost/baz'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -100,7 +100,7 @@ exports['Should correctly parse mongodb://fred:foobar@localhost/baz'] = {
  * @ignore
  */
 exports['Should correctly parse mongodb://fred:foo%20bar@localhost/baz'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -120,7 +120,7 @@ exports['Should correctly parse mongodb://fred:foo%20bar@localhost/baz'] = {
  * @ignore
  */
 exports['Should correctly parse mongodb:///tmp/mongodb-27017.sock'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -137,7 +137,7 @@ exports['Should correctly parse mongodb:///tmp/mongodb-27017.sock'] = {
  * @ignore
  */
 exports['Should correctly parse mongodb://fred:foo@/tmp/mongodb-27017.sock'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -156,7 +156,7 @@ exports['Should correctly parse mongodb://fred:foo@/tmp/mongodb-27017.sock'] = {
  * @ignore
  */
 exports['Should correctly parse mongodb://fred:foo@/tmp/mongodb-27017.sock/somedb'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -175,7 +175,7 @@ exports['Should correctly parse mongodb://fred:foo@/tmp/mongodb-27017.sock/somed
  * @ignore
  */
 exports['Should correctly parse mongodb://fred:foo@/tmp/mongodb-27017.sock/somedb?safe=true'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -195,7 +195,7 @@ exports['Should correctly parse mongodb://fred:foo@/tmp/mongodb-27017.sock/somed
  * @ignore
  */
 exports['Should correctly parse mongodb://example1.com:27017,example2.com:27018'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -215,7 +215,7 @@ exports['Should correctly parse mongodb://example1.com:27017,example2.com:27018'
  * @ignore
  */
 exports['Should correctly parse mongodb://localhost,localhost:27018,localhost:27019'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -237,7 +237,7 @@ exports['Should correctly parse mongodb://localhost,localhost:27018,localhost:27
  * @ignore
  */
 exports['Should correctly parse mongodb://host1,host2,host3/?slaveOk=true'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -260,7 +260,7 @@ exports['Should correctly parse mongodb://host1,host2,host3/?slaveOk=true'] = {
  * @ignore
  */
 exports['Should correctly parse mongodb://localhost/?safe=true'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -279,7 +279,7 @@ exports['Should correctly parse mongodb://localhost/?safe=true'] = {
  * @ignore
  */
 exports['Should correctly parse mongodb://host1,host2,host3/?safe=true;w=2;wtimeoutMS=2000'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -304,7 +304,7 @@ exports['Should correctly parse mongodb://host1,host2,host3/?safe=true;w=2;wtime
  * @ignore
  */
 exports['Parse mongodb://localhost/db?replicaSet=hello&ssl=prefer&connectTimeoutMS=1000&socketTimeoutMS=2000'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -329,7 +329,7 @@ exports['Parse mongodb://localhost/db?replicaSet=hello&ssl=prefer&connectTimeout
  * @ignore
  */
 exports['Parse mongodb://localhost/db?ssl=true'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -349,7 +349,7 @@ exports['Parse mongodb://localhost/db?ssl=true'] = {
  * @ignore
  */
 exports['Parse mongodb://localhost/db?maxPoolSize=100'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -369,7 +369,7 @@ exports['Parse mongodb://localhost/db?maxPoolSize=100'] = {
  * @ignore
  */
 exports['Parse mongodb://localhost/db?w=-1'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -388,7 +388,7 @@ exports['Parse mongodb://localhost/db?w=-1'] = {
  * @ignore
  */
 exports['Throw on unsuported options'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -406,7 +406,7 @@ exports['Throw on unsuported options'] = {
  * @ignore
  */
 exports['Write concerns parsing'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -427,7 +427,7 @@ exports['Write concerns parsing'] = {
  * @ignore
  */
 exports['GSSAPI parsing'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -460,7 +460,7 @@ exports['GSSAPI parsing'] = {
  * @ignore
  */
 exports['Read preferences parsing'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -494,7 +494,7 @@ exports['Read preferences parsing'] = {
  * @ignore
  */
 exports['Read preferences tag parsing'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -520,7 +520,7 @@ exports['Read preferences tag parsing'] = {
  * @ignore
  */
 exports['Should correctly parse mongodb://[::1]:1234'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -538,7 +538,7 @@ exports['Should correctly parse mongodb://[::1]:1234'] = {
  * @ignore
  */
 exports['Should correctly parse mongodb://[::1]'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -556,7 +556,7 @@ exports['Should correctly parse mongodb://[::1]'] = {
  * @ignore
  */
 exports['Should correctly parse mongodb://localhost,[::1]:27018,[2607:f0d0:1002:51::41]'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {

@@ -6,7 +6,7 @@
  * @ignore
  */
 exports.shouldRemoveAllDocumentsNoSafe = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -49,7 +49,7 @@ exports.shouldRemoveAllDocumentsNoSafe = {
  * @ignore
  */
 exports.shouldRemoveSubsetOfDocumentsSafeMode = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -85,7 +85,7 @@ exports.shouldRemoveSubsetOfDocumentsSafeMode = {
  * @ignore
  */
 exports.shouldCorrectlyClearOutCollection = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -121,7 +121,7 @@ exports.shouldCorrectlyClearOutCollection = {
  * @ignore
  */
 exports.shouldCorrectlyRemoveDocumentUsingRegExp = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -152,7 +152,7 @@ exports.shouldCorrectlyRemoveDocumentUsingRegExp = {
  * @ignore
  */
 exports.shouldCorrectlyRemoveOnlyFirstDocument = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {

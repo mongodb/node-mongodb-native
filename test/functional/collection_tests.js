@@ -8,7 +8,7 @@
  * @ignore
  */
 exports.shouldCorrectlySaveASimpleDocument = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -48,7 +48,7 @@ exports.shouldCorrectlySaveASimpleDocument = {
  * @ignore
  */
 exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveIt = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -97,7 +97,7 @@ exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveIt = {
  * @ignore
  */
 exports.shouldCorrectExecuteBasicCollectionMethods = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -158,7 +158,7 @@ exports.shouldCorrectExecuteBasicCollectionMethods = {
  * @ignore
  */
 exports.shouldAccessToCollections = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -209,7 +209,7 @@ exports.shouldAccessToCollections = {
  * @ignore
  */
 exports.shouldCorrectlyDropCollectionWithDropFunction = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -258,7 +258,7 @@ exports.shouldCorrectlyDropCollectionWithDropFunction = {
  * @ignore
  */
 exports.shouldCorrectlyRetriveCollectionNames = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -303,7 +303,7 @@ exports.shouldCorrectlyRetriveCollectionNames = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveCollectionInfo = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -340,7 +340,7 @@ exports.shouldCorrectlyRetrieveCollectionInfo = {
  * @_function options
  */
 exports.shouldCorrectlyRetriveCollectionOptions = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -377,7 +377,7 @@ exports.shouldCorrectlyRetriveCollectionOptions = {
  * @_function isCapped
  */
 exports.shouldCorrectlyExecuteIsCapped = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -413,7 +413,7 @@ exports.shouldCorrectlyExecuteIsCapped = {
  * @_function indexExists
  */
 exports.shouldCorrectlyExecuteIndexExists = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -457,7 +457,7 @@ exports.shouldCorrectlyExecuteIndexExists = {
  * @ignore
  */
 exports.shouldEnsureStrictAccessCollection = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -487,7 +487,7 @@ exports.shouldEnsureStrictAccessCollection = {
  * @ignore
  */
 exports.shouldPerformStrictCreateCollection = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -523,7 +523,7 @@ exports.shouldPerformStrictCreateCollection = {
  * @ignore
  */
 exports.shouldFailToInsertDueToIllegalKeys = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -583,7 +583,7 @@ exports.shouldFailToInsertDueToIllegalKeys = {
  * @ignore
  */
 exports.shouldFailDueToIllegalCollectionNames = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -622,7 +622,7 @@ exports.shouldFailDueToIllegalCollectionNames = {
  * @ignore
  */
 exports.shouldCorrectlyCountOnNonExistingCollection = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -644,7 +644,7 @@ exports.shouldCorrectlyCountOnNonExistingCollection = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteSave = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -704,7 +704,7 @@ exports.shouldCorrectlyExecuteSave = {
  * @ignore
  */
 exports.shouldCorrectlySaveDocumentWithLongValue = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -730,7 +730,7 @@ exports.shouldCorrectlySaveDocumentWithLongValue = {
  * @ignore
  */
 exports.shouldSaveObjectThatHasIdButDoesNotExistInCollection = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -770,7 +770,7 @@ exports.shouldSaveObjectThatHasIdButDoesNotExistInCollection = {
  * @ignore
  */
 exports.shouldCorrectlyUpdateWithNoDocs = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -801,7 +801,7 @@ exports.shouldCorrectlyUpdateWithNoDocs = {
  * @_function update
  */
 exports.shouldCorrectlyUpdateASimpleDocument = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -848,7 +848,7 @@ exports.shouldCorrectlyUpdateASimpleDocument = {
  * @ignore
  */
 exports.shouldCorrectlyUpsertASimpleDocument = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -890,7 +890,7 @@ exports.shouldCorrectlyUpsertASimpleDocument = {
  * @ignore
  */
 exports.shouldCorrectlyUpdateMultipleDocuments = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -941,7 +941,7 @@ exports.shouldCorrectlyUpdateMultipleDocuments = {
  * @ignore
  */
 exports.shouldCorrectlyHandleDistinctIndexes = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -986,7 +986,7 @@ exports.shouldCorrectlyHandleDistinctIndexes = {
  * @ignore
  */
 exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilter = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1026,7 +1026,7 @@ exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilter = {
  * @ignore
  */
 exports.shouldCorrectlyDoSimpleCountExamples = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1068,7 +1068,7 @@ exports.shouldCorrectlyDoSimpleCountExamples = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteInsertUpdateDeleteSafeMode = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1104,7 +1104,7 @@ exports.shouldCorrectlyExecuteInsertUpdateDeleteSafeMode = {
  * @ignore
  */
 exports.shouldPerformMultipleSaves = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1144,7 +1144,7 @@ exports.shouldPerformMultipleSaves = {
  * @ignore
  */
 exports.shouldCorrectlySaveDocumentWithNestedArray = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1198,7 +1198,7 @@ exports.shouldCorrectlySaveDocumentWithNestedArray = {
  * @ignore
  */
 exports.shouldPeformCollectionRemoveWithNoCallback = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1233,7 +1233,7 @@ exports.shouldPeformCollectionRemoveWithNoCallback = {
  * @ignore
  */
 exports.shouldCorrectlyRetriveACollectionsIndexes = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1279,7 +1279,7 @@ exports.shouldCorrectlyRetriveACollectionsIndexes = {
  * @ignore
  */
 exports.shouldCorrectlyReturnACollectionsStats = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1314,11 +1314,7 @@ exports.shouldCorrectlyReturnACollectionsStats = {
  * @ignore
  */
 exports.shouldCorrectlyCreateTTLCollectionWithIndexUsingEnsureIndex = {
-  metadata: {
-    requires: {
-      mongodb: ">2.1.0"
-    }
-  },
+  metadata: { requires: { mongodb: ">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1356,11 +1352,7 @@ exports.shouldCorrectlyCreateTTLCollectionWithIndexUsingEnsureIndex = {
  * @ignore
  */
 exports.shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex = {
-  metadata: {
-    requires: {
-      mongodb: ">2.1.0"
-    }
-  },
+  metadata: { requires: { mongodb: ">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1398,7 +1390,7 @@ exports.shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex = {
  * @ignore
  */
 exports.shouldCorrectlyReadBackDocumentWithNull = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1425,7 +1417,7 @@ exports.shouldCorrectlyReadBackDocumentWithNull = {
  * @ignore
  */
 exports.shouldThrowErrorDueToIllegalUpdate = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1455,7 +1447,7 @@ exports.shouldThrowErrorDueToIllegalUpdate = {
  * @ignore
  */
 exports.shouldCorrectlyHandle0asIdForSave = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1478,7 +1470,7 @@ exports.shouldCorrectlyHandle0asIdForSave = {
  * @ignore
  */
 exports['Should correctly execute update with . field in selector'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1500,7 +1492,7 @@ exports['Should correctly execute update with . field in selector'] = {
  * @ignore
  */
 exports['Should correctly execute update with elemMatch field in selector'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1522,7 +1514,7 @@ exports['Should correctly execute update with elemMatch field in selector'] = {
  * @ignore
  */
 exports['Should correctly execute find with elemMatch field in selector'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1544,7 +1536,7 @@ exports['Should correctly execute find with elemMatch field in selector'] = {
  * @ignore
  */
 exports['Should correctly execute remove with elemMatch field in selector'] = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {

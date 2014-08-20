@@ -2,7 +2,7 @@
  * @ignore
  */
 exports.shouldCorrectlySaveDocumentsAndReturnAsRaw = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -47,7 +47,7 @@ exports.shouldCorrectlySaveDocumentsAndReturnAsRaw = {
  * @ignore
  */
 exports.shouldCorrectlySaveDocumentsAndReturnAsRawWithRawSetAtCollectionLevel = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {

@@ -2,7 +2,7 @@
  * @ignore
  */
 exports.shouldCorrectlySaveUnicodeContainingDocument = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -68,7 +68,7 @@ exports.shouldCorrectlySaveUnicodeContainingDocument = {
  * @ignore
  */
 exports.shouldCorrectlyInsertUnicodeCharacters = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -99,7 +99,7 @@ exports.shouldCorrectlyInsertUnicodeCharacters = {
  * @ignore
  */
 exports.shouldCreateObjectWithChineseObjectName = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -131,7 +131,7 @@ exports.shouldCreateObjectWithChineseObjectName = {
  * @ignore
  */
 exports.shouldCorrectlyHandleUT8KeyNames = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) { 

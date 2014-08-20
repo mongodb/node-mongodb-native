@@ -2,7 +2,7 @@
  * @ignore
  */
 exports.shouldCorrectlyHandleIllegalDbNames = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -133,7 +133,7 @@ exports.shouldCorrectlyPerformAutomaticConnectWithMaxBufferSize0 = {
  * @ignore
  */
 exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDb = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -174,7 +174,7 @@ exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDb = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteEvalFunctions = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -272,7 +272,7 @@ exports.shouldCorrectlyExecuteEvalFunctions = {
  * @ignore
  */
 exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunction = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -310,7 +310,7 @@ exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunction = {
  * @ignore
  */
 exports.shouldCorrectlyDereferenceDbRef = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -373,7 +373,7 @@ exports.shouldCorrectlyDereferenceDbRef = {
  * @ignore
  */
 exports.shouldCorrectlyRenameCollection = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -472,7 +472,7 @@ exports.shouldCorrectlyRenameCollection = {
  * @ignore
  */
 exports.shouldCorrectlyOpenASimpleDbSingleServerConnection = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -499,7 +499,7 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnection = {
  * @ignore
  */
 exports.shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallback = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -530,7 +530,7 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallback =
  * @ignore
  */
 exports.shouldCorrectlyRetrieveCollectionInformation = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -576,7 +576,7 @@ exports.shouldCorrectlyRetrieveCollectionInformation = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveCollectionNames = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -618,7 +618,7 @@ exports.shouldCorrectlyRetrieveCollectionNames = {
  * @ignore
  */
 exports.shouldCorrectlyAccessACollection = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -667,7 +667,7 @@ exports.shouldCorrectlyAccessACollection = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveAllCollections = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -700,7 +700,7 @@ exports.shouldCorrectlyRetrieveAllCollections = {
  * @ignore
  */
 exports.shouldCorrectlyHandleFailedConnection = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -719,7 +719,7 @@ exports.shouldCorrectlyHandleFailedConnection = {
  * @ignore
  */
 exports.shouldCorrectlyResaveDBRef = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -766,7 +766,7 @@ exports.shouldCorrectlyResaveDBRef = {
  * @ignore
  */
 exports.shouldCorrectlyDereferenceDbRefExamples = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1000,7 +1000,7 @@ exports.shouldCorrectlyAddAndRemoveUser = {
  * @ignore
  */
 exports.shouldCorrectlyCreateACollection = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1037,7 +1037,7 @@ exports.shouldCorrectlyCreateACollection = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteACommandAgainstTheServer = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1089,7 +1089,7 @@ exports.shouldCorrectlyExecuteACommandAgainstTheServer = {
  * @ignore
  */
 exports.shouldCorrectlyCreateDropAndVerifyThatCollectionIsGone = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1121,7 +1121,7 @@ exports.shouldCorrectlyCreateDropAndVerifyThatCollectionIsGone = {
  * @ignore
  */
 exports.shouldCorrectlyRenameACollection = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1182,7 +1182,7 @@ exports.shouldCorrectlyRenameACollection = {
  * @_function createIndex
  */
 exports.shouldCreateOnDbComplexIndexOnTwoFields = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1235,7 +1235,7 @@ exports.shouldCreateOnDbComplexIndexOnTwoFields = {
  * @_function ensureIndex
  */
 exports.shouldCreateComplexEnsureIndexDb = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1288,7 +1288,7 @@ exports.shouldCreateComplexEnsureIndexDb = {
  * @_function cursorInfo
  */
 exports.shouldCorrectlyReturnCursorInformation = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1340,7 +1340,7 @@ exports.shouldCorrectlyReturnCursorInformation = {
  * @_function dropIndex
  */
 exports.shouldCorrectlyCreateAndDropIndex = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1393,7 +1393,7 @@ exports.shouldCorrectlyCreateAndDropIndex = {
  */
 exports.shouldCorrectlyForceReindexOnCollection = {
   metadata: {
-    requires: { topology: ["single", "replset"] }
+    requires: { topology: ["single", "replicaset"] }
   },
   
   // The actual test we wish to run
@@ -1448,7 +1448,7 @@ exports.shouldCorrectlyForceReindexOnCollection = {
  */
 exports.shouldCorrectlyShowTheResultsFromIndexInformation = {
   metadata: {
-    requires: { topology: ["single", "replset"] }
+    requires: { topology: ["single", "replicaset"] }
   },
   
   // The actual test we wish to run
@@ -1502,7 +1502,7 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = {
  * @_function dropDatabase
  */
 exports.shouldCorrectlyDropTheDatabase = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1559,7 +1559,7 @@ exports.shouldCorrectlyDropTheDatabase = {
  * @ignore
  */
 exports.shouldCorrectlyGetErrorDroppingNonExistingDb = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1584,7 +1584,7 @@ exports.shouldCorrectlyGetErrorDroppingNonExistingDb = {
  * @ignore
  */
 exports.shouldCorrectlyThrowWhenTryingToReOpenConnection = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1608,7 +1608,7 @@ exports.shouldCorrectlyThrowWhenTryingToReOpenConnection = {
  * @ignore
  */
 exports.shouldCorrectlyReconnectWhenError = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1638,7 +1638,7 @@ exports.shouldCorrectlyReconnectWhenError = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveDbStats = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {

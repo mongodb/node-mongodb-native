@@ -6,7 +6,7 @@
  * @ignore
  */
 exports.shouldStreamDocumentsUsingTheCursorStreamPauseFunction = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -67,7 +67,7 @@ exports.shouldStreamDocumentsUsingTheCursorStreamPauseFunction = {
  * @ignore
  */
 exports.shouldStreamDocumentsUsingTheCursorStreamDestroyFunction = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -112,7 +112,7 @@ exports.shouldStreamDocumentsUsingTheCursorStreamDestroyFunction = {
 }
 
 exports.shouldStreamDocumentsWithPauseAndResumeForFetching = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -170,7 +170,7 @@ exports.shouldStreamDocumentsWithPauseAndResumeForFetching = {
 }
 
 exports.shouldStream10KDocuments = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -229,7 +229,7 @@ exports.shouldStream10KDocuments = {
 }
 
 exports.shouldTriggerMassiveAmountOfGetMores = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -275,7 +275,7 @@ exports.shouldTriggerMassiveAmountOfGetMores = {
 }
 
 exports.shouldStreamDocumentsAcrossGetMoreCommandAndCountCorrectly = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {

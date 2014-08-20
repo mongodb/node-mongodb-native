@@ -2,7 +2,7 @@
  * @ignore
  */
 exports.shouldCorrectlyGenerateObjectID = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -69,7 +69,7 @@ exports.shouldCorrectlyGenerateObjectID = {
  * @ignore
  */
 exports.shouldCorrectlyGenerate12ByteStringFromTimestamp = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -98,7 +98,7 @@ exports.shouldCorrectlyGenerate12ByteStringFromTimestamp = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieve24CharacterHexStringFromToHexString = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -121,7 +121,7 @@ exports.shouldCorrectlyRetrieve24CharacterHexStringFromToHexString = {
  * @ignore
  */
 exports.shouldCorrectlyGetAndSetObjectIDUsingGenerationTimeProperty = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -149,7 +149,7 @@ exports.shouldCorrectlyGetAndSetObjectIDUsingGenerationTimeProperty = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieve24CharacterHexStringFromToString = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -166,7 +166,7 @@ exports.shouldCorrectlyRetrieve24CharacterHexStringFromToString = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieve24CharacterHexStringFromToJSON = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -187,7 +187,7 @@ exports.shouldCorrectlyRetrieve24CharacterHexStringFromToJSON = {
  * @ignore
  */
 exports.shouldCorrectlyTransformObjectIDToHexAndObjectId = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -216,7 +216,7 @@ exports.shouldCorrectlyTransformObjectIDToHexAndObjectId = {
  * @ignore
  */
 exports.shouldCorrectlyDifferentiateBetweenObjectIdInstances = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -241,7 +241,7 @@ exports.shouldCorrectlyDifferentiateBetweenObjectIdInstances = {
  * @ignore
  */
 exports.shouldCorrectlyCreateOIDNotUsingObjectID = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -275,7 +275,7 @@ exports.shouldCorrectlyCreateOIDNotUsingObjectID = {
  * @ignore
  */
 exports.shouldCorrectlyGenerateObjectIDFromTimestamp = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -293,7 +293,7 @@ exports.shouldCorrectlyGenerateObjectIDFromTimestamp = {
  * @ignore
  */
 exports.shouldCorrectlyCreateAnObjectIDAndOverrideTheTimestamp = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -315,7 +315,7 @@ exports.shouldCorrectlyCreateAnObjectIDAndOverrideTheTimestamp = {
  * @ignore
  */
 exports.shouldCorrectlyInsertWithObjectId = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -364,7 +364,7 @@ exports.shouldCorrectlyInsertWithObjectId = {
  * @ignore
  */
 exports.shouldCorrectlyUseCreateFromTime = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {

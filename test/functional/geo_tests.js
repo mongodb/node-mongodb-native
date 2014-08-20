@@ -6,7 +6,7 @@
  * @ignore
  */
 exports.shouldCorrectlyPerformSimpleGeoNearCommand = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {

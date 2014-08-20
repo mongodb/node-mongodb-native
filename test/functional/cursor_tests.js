@@ -9,7 +9,7 @@ var fs = require('fs');
 exports.shouldCorrectlyExecuteToArray = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -48,7 +48,7 @@ exports.shouldCorrectlyExecuteToArray = {
 exports.shouldCorrectlyExecuteToArrayAndFailOnFurtherCursorAccess = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -88,7 +88,7 @@ exports.shouldCorrectlyExecuteToArrayAndFailOnFurtherCursorAccess = {
 exports.shouldCorrectlyFailToArrayDueToFinishedEachOperation = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -139,7 +139,7 @@ exports.shouldCorrectlyFailToArrayDueToFinishedEachOperation = {
 exports.shouldCorrectlyExecuteCursorExplain = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -170,7 +170,7 @@ exports.shouldCorrectlyExecuteCursorExplain = {
 exports.shouldCorrectlyExecuteCursorCount = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -243,7 +243,7 @@ exports.shouldCorrectlyExecuteCursorCount = {
 exports.shouldCorrectlyExecuteSortOnCursor = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -322,7 +322,7 @@ exports.shouldCorrectlyExecuteSortOnCursor = {
 exports.shouldCorrectlyThrowErrorOnToArrayWhenMissingCallback = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -366,7 +366,7 @@ exports.shouldCorrectlyThrowErrorOnToArrayWhenMissingCallback = {
 exports.shouldThrowErrorOnEachWhenMissingCallback = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -410,7 +410,7 @@ exports.shouldThrowErrorOnEachWhenMissingCallback = {
 exports.shouldCorrectlyHandleLimitOnCursor = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -453,7 +453,7 @@ exports.shouldCorrectlyHandleLimitOnCursor = {
 exports.shouldCorrectlyHandleNegativeOneLimitOnCursor = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -496,7 +496,7 @@ exports.shouldCorrectlyHandleNegativeOneLimitOnCursor = {
 exports.shouldCorrectlyHandleAnyNegativeLimitOnCursor = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -539,7 +539,7 @@ exports.shouldCorrectlyHandleAnyNegativeLimitOnCursor = {
 exports.shouldCorrectlyReturnErrorsOnIllegalLimitValues = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -610,7 +610,7 @@ exports.shouldCorrectlyReturnErrorsOnIllegalLimitValues = {
 exports.shouldCorrectlySkipRecordsOnCursor = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -674,7 +674,7 @@ exports.shouldCorrectlySkipRecordsOnCursor = {
 exports.shouldCorrectlyReturnErrorsOnIllegalSkipValues = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -720,7 +720,7 @@ exports.shouldCorrectlyReturnErrorsOnIllegalSkipValues = {
 exports.shouldReturnErrorsOnIllegalBatchSizes = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -773,7 +773,7 @@ exports.shouldReturnErrorsOnIllegalBatchSizes = {
 exports.shouldCorrectlyHandleChangesInBatchSizes = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -852,7 +852,7 @@ exports.shouldCorrectlyHandleChangesInBatchSizes = {
 exports.shouldCorrectlyHandleBatchSize = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -915,7 +915,7 @@ exports.shouldCorrectlyHandleBatchSize = {
 exports.shouldHandleWhenLimitBiggerThanBatchSize = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -973,7 +973,7 @@ exports.shouldHandleWhenLimitBiggerThanBatchSize = {
 exports.shouldHandleLimitLessThanBatchSize = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1021,7 +1021,7 @@ exports.shouldHandleLimitLessThanBatchSize = {
 exports.shouldHandleSkipLimitChaining = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1077,7 +1077,7 @@ exports.shouldHandleSkipLimitChaining = {
 exports.shouldCorrectlyHandleLimitSkipChainingInline = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1133,7 +1133,7 @@ exports.shouldCorrectlyHandleLimitSkipChainingInline = {
 exports.shouldCloseCursorNoQuerySent = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1158,7 +1158,7 @@ exports.shouldCloseCursorNoQuerySent = {
 exports.shouldCorrectlyRefillViaGetMoreCommand = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1234,7 +1234,7 @@ exports.shouldCorrectlyRefillViaGetMoreCommand = {
 exports.shouldCorrectlyRefillViaGetMoreAlternativeCollection = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1309,7 +1309,7 @@ exports.shouldCorrectlyRefillViaGetMoreAlternativeCollection = {
 exports.shouldCloseCursorAfterQueryHasBeenSent = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1336,47 +1336,61 @@ exports.shouldCloseCursorAfterQueryHasBeenSent = {
  * @ignore
  * @api private
  */
-exports.shouldCorrectlyExecuteCursorCountWithFields = function(configuration, test) {
-  var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-  db.open(function(err, db) {
-    db.createCollection('test_count_with_fields', function(err, collection) {
-      collection.save({'x':1, 'a':2}, configuration.writeConcernMax(), function(err, doc) {
-        collection.find({}, {'fields':['a']}).toArray(function(err, items) {
-          test.equal(1, items.length);
-          test.equal(2, items[0].a);
-          test.equal(null, items[0].x);
-        });
+exports.shouldCorrectlyExecuteCursorCountWithFields = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      db.createCollection('test_count_with_fields', function(err, collection) {
+        collection.save({'x':1, 'a':2}, configuration.writeConcernMax(), function(err, doc) {
+          collection.find({}, {'fields':['a']}).toArray(function(err, items) {
+            test.equal(1, items.length);
+            test.equal(2, items[0].a);
+            test.equal(null, items[0].x);
+          });
 
-        collection.findOne({}, {'fields':['a']}, function(err, item) {
-          test.equal(2, item.a);
-          test.equal(null, item.x);
-          db.close();
-          test.done();
+          collection.findOne({}, {'fields':['a']}, function(err, item) {
+            test.equal(2, item.a);
+            test.equal(null, item.x);
+            db.close();
+            test.done();
+          });
         });
       });
     });
-  });
+  }
 }
 
 /**
  * @ignore
  * @api private
  */
-exports.shouldCorrectlyCountWithFieldsUsingExclude = function(configuration, test) {
-  var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-  db.open(function(err, db) {
-    db.createCollection('test_count_with_fields_using_exclude', function(err, collection) {
-      collection.save({'x':1, 'a':2}, configuration.writeConcernMax(), function(err, doc) {
-        collection.find({}, {'fields':{'x':0}}).toArray(function(err, items) {
-          test.equal(1, items.length);
-          test.equal(2, items[0].a);
-          test.equal(null, items[0].x);
-          db.close();
-          test.done();
+exports.shouldCorrectlyCountWithFieldsUsingExclude = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      db.createCollection('test_count_with_fields_using_exclude', function(err, collection) {
+        collection.save({'x':1, 'a':2}, configuration.writeConcernMax(), function(err, doc) {
+          collection.find({}, {'fields':{'x':0}}).toArray(function(err, items) {
+            test.equal(1, items.length);
+            test.equal(2, items[0].a);
+            test.equal(null, items[0].x);
+            db.close();
+            test.done();
+          });
         });
       });
     });
-  });
+  }
 }
 
 /**
@@ -1386,7 +1400,7 @@ exports.shouldCorrectlyCountWithFieldsUsingExclude = function(configuration, tes
 exports.shouldCorrectlyExecuteEnsureIndexWithNoCallback = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1430,7 +1444,7 @@ exports.shouldCorrectlyExecuteEnsureIndexWithNoCallback = {
 exports['Should correctly rewind and restart cursor'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1486,7 +1500,7 @@ exports['Should correctly rewind and restart cursor'] = {
 exports['Should correctly execute count on cursor'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1537,7 +1551,7 @@ exports['Should correctly execute count on cursor'] = {
 exports['should be able to stream documents'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1627,7 +1641,7 @@ exports['should be able to stream documents'] = {
 exports['immediately destroying a stream prevents the query from executing'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1677,7 +1691,7 @@ exports['immediately destroying a stream prevents the query from executing'] = {
 exports['destroying a stream stops it'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1738,7 +1752,7 @@ exports['destroying a stream stops it'] = {
 exports['cursor stream errors'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1797,7 +1811,7 @@ exports['cursor stream errors'] = {
 exports['cursor stream errors connection force closed'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1854,7 +1868,7 @@ exports['cursor stream errors connection force closed'] = {
 exports['cursor stream pipe'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1919,7 +1933,7 @@ exports['cursor stream pipe'] = {
 exports.shouldCorrectlyUseCursorCountFunction = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1963,7 +1977,7 @@ exports.shouldCorrectlyUseCursorCountFunction = {
 exports.shouldCorrectlyPeformSimpleSorts = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2013,7 +2027,7 @@ exports.shouldCorrectlyPeformSimpleSorts = {
 exports.shouldCorrectlyPeformLimitOnCursor = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2057,7 +2071,7 @@ exports.shouldCorrectlyPeformLimitOnCursor = {
 exports.shouldCorrectlyPeformSkipOnCursor = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2102,7 +2116,7 @@ exports.shouldCorrectlyPeformSkipOnCursor = {
 exports.shouldCorrectlyPeformBatchSizeOnCursor = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2146,7 +2160,7 @@ exports.shouldCorrectlyPeformBatchSizeOnCursor = {
 exports.shouldCorrectlyPeformNextObjectOnCursor = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2190,7 +2204,7 @@ exports.shouldCorrectlyPeformNextObjectOnCursor = {
 exports.shouldCorrectlyPeformSimpleExplainCursor = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2233,7 +2247,7 @@ exports.shouldCorrectlyPeformSimpleExplainCursor = {
 exports.shouldStreamDocumentsUsingTheStreamFunction = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2285,7 +2299,7 @@ exports.shouldStreamDocumentsUsingTheStreamFunction = {
 exports.shouldStreamDocumentsUsingTheIsCloseFunction = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2337,7 +2351,7 @@ exports.shouldStreamDocumentsUsingTheIsCloseFunction = {
 exports.shouldCloseDeadTailableCursors = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2397,7 +2411,7 @@ exports.shouldCloseDeadTailableCursors = {
 exports.shouldAwaitData = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2428,7 +2442,7 @@ exports.shouldAwaitData = {
 exports.shouldNotAwaitDataWhenFalse = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2458,7 +2472,7 @@ exports.shouldNotAwaitDataWhenFalse = {
 exports.shouldCorrectExecuteExplainHonoringLimit = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2518,7 +2532,7 @@ exports.shouldCorrectExecuteExplainHonoringLimit = {
 exports.shouldNotExplainWhenFalse = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2545,7 +2559,7 @@ exports.shouldNotExplainWhenFalse = {
 exports.shouldFailToSetReadPreferenceOnCursor = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2574,7 +2588,7 @@ exports.shouldFailToSetReadPreferenceOnCursor = {
 exports.shouldNotFailDueToStackOverflowEach = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2629,7 +2643,7 @@ exports.shouldNotFailDueToStackOverflowEach = {
 exports.shouldNotFailDueToStackOverflowToArray = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2684,7 +2698,7 @@ exports.shouldNotFailDueToStackOverflowToArray = {
 exports.shouldCorrectlySkipAndLimit = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2717,7 +2731,7 @@ exports.shouldCorrectlySkipAndLimit = {
 exports.shouldFailToTailANormalCollection = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2748,7 +2762,7 @@ exports.shouldFailToTailANormalCollection = {
 exports.shouldStreamDocumentsUsingTheCloseFunction = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2799,7 +2813,7 @@ exports.shouldStreamDocumentsUsingTheCloseFunction = {
 exports.shouldCorrectlyUseFindAndCursorCount = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: {requires: {}},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {

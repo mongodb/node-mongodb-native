@@ -5,7 +5,7 @@
  * @ignore
  */
 exports.shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -94,7 +94,7 @@ exports.shouldCorrectlyAuthenticate = {
  * @ignore
  */
 exports.accessAdminLevelOperations = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -660,7 +660,7 @@ exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDb = {
  * @_function listDatabases
  */
 exports.shouldCorrectlyListAllAvailableDatabases = {
-  metadata: {},
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {  
