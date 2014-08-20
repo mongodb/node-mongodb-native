@@ -323,6 +323,7 @@ exports['Should correctly reconnect and finish query operation'] = {
               test.equal(null, err);
               test.equal(1, doc.a);
 
+              db.close();
               test.done();
             });
           });
