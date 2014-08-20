@@ -62,6 +62,9 @@ var ReplSetManager = function(replsetOptions) {
   // Clone the options
   replsetOptions = cloneOptions(replsetOptions);
   
+  // Any needed credentials
+  var credentials;
+
   // Contains all the server managers
   var serverManagers = [];
 
@@ -83,6 +86,10 @@ var ReplSetManager = function(replsetOptions) {
 
   Object.defineProperty(this, 'startPort', {
     enumerable:true, get: function() { return startPort; }
+  });
+
+  Object.defineProperty(this, 'replicasetName', {
+    enumerable:true, get: function() { return replSet; }
   });
 
   //
@@ -345,6 +352,14 @@ var ReplSetManager = function(replsetOptions) {
     }
   } 
 
+  this.setCredentials = function(provider, db, user, password) {
+    credentials = {
+        provider: provider
+      , db: db
+      , user: user
+      , password: password};
+  }
+
   //
   // Get the current ismaster
   var getIsMaster = function(callback) {
@@ -436,6 +451,8 @@ var ReplSetManager = function(replsetOptions) {
     // Get server by type
     getServerManagerByType(type, function(err, manager) {
       if(err) return callback(err);
+      // Set credentials
+      if(credentials) manager.setCredentials(credentials.provider, credentials.db, credentials.user, credentials.password);
       // Shut down the server
       manager.stop(options, callback);
     });
@@ -508,6 +525,9 @@ var ReplSetManager = function(replsetOptions) {
             d.members = members;
             d.version = d.version + 1;
 
+            // Set credentials
+            if(credentials) manager.setCredentials(credentials.provider, credentials.db, credentials.user, credentials.password);
+
             // Get a connection to the master
             manager.connect(function(err, server) {
               if(err) return callback(err, null);
@@ -555,6 +575,9 @@ var ReplSetManager = function(replsetOptions) {
           d.members.push(serverDetails)
           d.version = d.version + 1;
 
+          // Set credentials
+          if(credentials) manager.setCredentials(credentials.provider, credentials.db, credentials.user, credentials.password);
+
           // Get a connection to the master
           manager.connect(function(err, server) {
             if(err) return callback(err, null);
@@ -589,6 +612,9 @@ var ReplSetManager = function(replsetOptions) {
       // Get a live connection to the primary
       getServerManager(ismaster.primary, function(err, manager) {
         if(err) return callback(err);
+
+        // Set credentials
+        if(credentials) manager.setCredentials(credentials.provider, credentials.db, credentials.user, credentials.password);
         
         // Get a new connection
         manager.connect(function(err, server) {

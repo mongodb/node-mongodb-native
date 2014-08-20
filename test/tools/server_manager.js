@@ -55,6 +55,9 @@ var ServerManager = function(serverOptions) {
   // Add rest options
   serverOptions.rest = null;
 
+  // Any needed credentials
+  var credentials;
+
   // Get the keys
   var keys = Object.keys(serverOptions);
 
@@ -234,6 +237,14 @@ var ServerManager = function(serverOptions) {
     }
   }
 
+  this.setCredentials = function(provider, db, user, password) {
+    credentials = {
+        provider: provider
+      , db: db
+      , user: user
+      , password: password};
+  }
+
   var waitToDie = function(pid, callback) {
     exec(f("ps %s", pid), function(error, stdout) {
       if(stdout.indexOf(pid) == -1) return callback();
@@ -340,6 +351,15 @@ var ServerManager = function(serverOptions) {
       ['error', 'close', 'timeout', 'parseError'].forEach(function(e) {
         server.removeAllListeners(e);
       })
+
+      // If we have credentials apply them
+      if(credentials) {
+        return _server.auth(credentials.provider, credentials.db, credentials.user, credentials.password, function(err) {
+          if(err) return callback(err);
+          callback(null, _server)
+        });
+      }
+
 
       callback(null, _server);
     });
