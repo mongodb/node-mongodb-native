@@ -8,8 +8,8 @@ exports['Should correctly authenticate against admin db'] = {
       , Server = configuration.require.Server;
 
     // restart server
-    configuration.restart({purgedirectories: true}, function() {
-      var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:1});
+    configuration.restart(function() {
+      var db1 = new Db('mongo-ruby-test-auth1', new Server(configuration.host, configuration.port, {auto_reconnect: true}), {w:1});
       db1.open(function(err, db) {
         db.admin().addUser('admin', 'admin', function(err, result) {
           test.equal(null, err);
@@ -33,10 +33,10 @@ exports['Should correctly authenticate against admin db'] = {
                   // Attempt to save a document
                   db.collection('test').insert({a:1}, function(err, result) {
                     test.ok(err != null);
+                    db1.close();
 
                     // restart server
-                    configuration.restart({purgedirectories: true}, function() {
-                      db1.close();
+                    configuration.restart(function() {
                       test.done();
                     });
                   });
