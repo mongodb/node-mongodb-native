@@ -500,7 +500,6 @@ var ReplSet = function(seedlist, options) {
   }
 
   var closeHandler = function(err, server) {
-    // console.log("============================================ closeHandler REPLSET")
     if(state == DESTROYED) return;
     // console.dir(err)
     if(logger.isInfo()) logger.info(f('[%s] server %s closed', id, server.lastIsMaster() ? server.lastIsMaster().me : server.name));

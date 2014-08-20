@@ -14,7 +14,11 @@ var inherits = require('util').inherits
   , BSON = require('bson').native().BSON
   , LegacySupport = require('../legacy/legacy_support')
   , Session = require('./session')
-  , Logger = require('../connection/logger');  
+  , Logger = require('../connection/logger')
+  , MongoCR = require('../auth/mongocr')
+  , X509 = require('../auth/x509')
+  , Plain = require('../auth/plain')
+  , GSSAPI = require('../auth/gssapi')
 
 // All bson types
 var bsonTypes = [b.Long, b.ObjectID, b.Binary, b.Code, b.DBRef, b.Symbol, b.Double, b.Timestamp, b.MaxKey, b.MinKey];
@@ -372,6 +376,8 @@ var Server = function(options) {
     // Flush out all the callbacks
     if(callbacks) callbacks.flush(new MongoError(f("server %s sockets closed", self.name)));
     // Emit error event
+    // console.log("-------------------------------- EMIT CLOSE")
+    // console.log(self.listeners('close').length)
     self.emit('close', err, self);
     // If we specified the driver to reconnect perform it
     if(reconnect) setTimeout(function() { currentReconnectRetry = reconnectTries, reconnectServer() }, reconnectInterval);
@@ -988,6 +994,12 @@ var Server = function(options) {
     if(r) return r.slaveOk()
     return false;
   }
+
+  // Add auth providers
+  this.addAuthProvider('mongocr', new MongoCR());
+  this.addAuthProvider('x509', new X509());
+  this.addAuthProvider('plain', new Plain());
+  this.addAuthProvider('gssapi', new GSSAPI());  
 }
 
 inherits(Server, EventEmitter);
