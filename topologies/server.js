@@ -53,7 +53,7 @@ var Callbacks = function() {
     var executeError = function(_id, _callbacks) {
       _callbacks.emit(_id, err, null);
       // Force removal as some node versions don't delete the properties on emit
-      delete this._events[id];
+      delete self._events[id];
     }
 
     // Error out any current callbacks
