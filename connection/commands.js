@@ -87,7 +87,12 @@ var Query = function(bson, ns, query, options) {
   setProperty(this, awaitData, OPTS_AWAIT_DATA, values);
   setProperty(this, exhaust, OPTS_EXHAUST, values);
   setProperty(this, partial, OPTS_PARTIAL, values);
-  getSingleProperty(this, 'requestId', requestId);
+
+  // Get the request Id
+  Object.defineProperty(this, 'requestId', {
+      enumerable:true
+    , get: function() { return requestId; }
+  });
 
   //
   // Assign a new request Id
@@ -255,8 +260,11 @@ var GetMore = function(bson, ns, cursorId, opts) {
   var numberToReturn = opts.numberToReturn || 0;
   var requestId = _requestId++;
 
-  // Set up properties
-  getSingleProperty(this, 'requestId', requestId);
+  // Get the request Id
+  Object.defineProperty(this, 'requestId', {
+      enumerable:true
+    , get: function() { return requestId; }
+  });
 
   //
   // Uses a single allocated buffer for the process, avoiding multiple memory allocations
@@ -324,8 +332,11 @@ var GetMore = function(bson, ns, cursorId, opts) {
 var KillCursor = function(bson, cursorIds) {
   var requestId = _requestId++;
 
-  // Set up properties
-  getSingleProperty(this, 'requestId', requestId);
+  // Get the request Id
+  Object.defineProperty(this, 'requestId', {
+      enumerable:true
+    , get: function() { return requestId; }
+  });
 
   //
   // Uses a single allocated buffer for the process, avoiding multiple memory allocations

@@ -52,6 +52,8 @@ var Callbacks = function() {
   this.flush = function(err) {
     var executeError = function(_id, _callbacks) {
       _callbacks.emit(_id, err, null);
+      // Force removal as some node versions don't delete the properties on emit
+      delete this._events[id];
     }
 
     // Error out any current callbacks
@@ -64,6 +66,8 @@ var Callbacks = function() {
 
   this.raw = function(id) {
     if(this._events[id] == null) return false;
+    // console.log("################################ RAW :: " + id)
+    // console.dir(this._events[id].listener)
     return this._events[id].listener.raw == true ? true : false;
   }
 
@@ -72,6 +76,9 @@ var Callbacks = function() {
   }
 
   this.register = function(id, callback) {
+    // console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ Callbacks register")
+    // console.log("id :: " + id)
+    // console.dir(JSON.stringify(callback, null, 2))
     this.once(id, bindToCurrentDomain(callback));
   }
 }
@@ -289,10 +296,19 @@ var Server = function(options) {
   var messageHandler = function(response, connection) {
     // console.log("+++++++++++++++++++++++++++++++++++++++ messageHandler :: " + response.responseTo + " :: " + response.requestId + " :: " + callbacks.id + ' :: ' + self.name)
     try {
+      // console.log("----------------------------------------- RESPONSE 0")
+      // console.dir(response.responseTo)
+      // console.dir(callbacks)
+      // console.log(callbacks.raw)
+      // console.log(callbacks.raw(response.responseTo))
+      // console.log("----------------------------------------- RESPONSE 1")
+      response.parse();
+      // console.dir(response.documents)
       // Parse the message
       response.parse({raw: callbacks.raw(response.responseTo)});
+      // console.log("----------------------------------------- RESPONSE 2")
       // if(response.documents)console.dir(response.documents)
-      if(logger.isDebug()) logger.debug(f('message [%s] received from %s', response.raw.toString('hex'), self.name));      
+      if(logger.isDebug()) logger.debug(f('message [%s] received from %s', response.raw.toString('hex'), self.name));
       callbacks.emit(response.responseTo, null, response);      
     } catch (err) {
       callbacks.flush(new MongoError(err));
@@ -647,6 +663,7 @@ var Server = function(options) {
     // Create a query instance
     var query = new Query(bson, ns, cmd, queryOptions);
 
+    // console.log("--------------------------------------------- command 0")
     // console.log("--------------------------------------------- command :: " + query.requestId)
     // console.dir(cmd)
 
@@ -671,29 +688,42 @@ var Server = function(options) {
       logger.debug(f('cmd [%s] about to be executed on connection with id %s at %s:%s', JSON.stringify(cmd), json.id, json.host, json.port));
     }
 
+    // console.log("--------------------------------------------- command 1")
+
     // Execute multiple queries
     if(onAll) {
+    // console.log("--------------------------------------------- command 1:1")
       var connections = pool.getAll();
       var total = connections.length;
+    // console.log("--------------------------------------------- total :: " + total)
       // We have an error
       var error = null;
       // Execute on all connections
       for(var i = 0; i < connections.length; i++) {
         try {
-          connections[i].write(query);
+    // console.log("--------------------------------------------- command write :: " + i)
           query.incRequestId();
+          connections[i].write(query);
         } catch(err) {
+    // console.log("--------------------------------------------- command 1:3")
           total = total - 1;
           if(total == 0) return callback(MongoError.create(err));
         }
 
         // Register the callback
         callbacks.register(query.requestId, function(err, result) {
+    // console.log("--------------------------------------------- command 1:4")
+    // console.dir(err)
+    // if(result)console.dir(result.documents)
+    // console.dir(total - 1)
           if(err) error = err;
           total = total - 1;
 
           // Done
           if(total == 0) {
+            // console.log("-------------------------------------------------")
+            // console.dir(err)
+            // console.dir(result)
             // Notify end of command
             notifyStrategies('endOperation', [self, error, result, new Date()]);
             if(error) return callback(MongoError.create(error));
@@ -707,8 +737,10 @@ var Server = function(options) {
 
     // Execute a single command query
     try {
+    // console.log("--------------------------------------------- command 2")
       connection.write(query);
     } catch(err) {
+    // console.log("--------------------------------------------- command 3")
       return callback(MongoError.create(err));
     }
 
@@ -717,6 +749,7 @@ var Server = function(options) {
 
     // Register the callback
     callbacks.register(query.requestId, function(err, result) {
+    // console.log("--------------------------------------------- command 4")
       // console.log("=============================== command result")
       // console.dir(err)
       // console.log(JSON.stringify(result, null, 2))
