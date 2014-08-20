@@ -1,3 +1,5 @@
+var f = require('util').format;
+
 exports['Should correctly authenticate against admin db'] = {
   metadata: { requires: { topology: ['auth'] } },
   
@@ -11,6 +13,8 @@ exports['Should correctly authenticate against admin db'] = {
     configuration.restart(function() {
       var db1 = new Db('mongo-ruby-test-auth1', new Server(configuration.host, configuration.port, {auto_reconnect: true}), {w:1});
       db1.open(function(err, db) {
+        test.equal(null, err);
+
         db.admin().addUser('admin', 'admin', function(err, result) {
           test.equal(null, err);
 
@@ -50,318 +54,353 @@ exports['Should correctly authenticate against admin db'] = {
   }
 }
 
-// exports['Should correctly authenticate against normal db'] = {
-//   metadata: { requires: { topology: ['auth'] } },
+exports['Should correctly authenticate against normal db'] = {
+  metadata: { requires: { topology: ['auth'] } },
   
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var Db = configuration.require.Db
-//       , MongoClient = configuration.require.MongoClient
-//       , Server = configuration.require.Server;
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
+      , Server = configuration.require.Server;
 
-//     // restart server
-//     configuration.restart({purgedirectories: true}, function() {
-//       var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:1});
-//       db1.open(function(err, db) {
-//         db.addUser('user', 'user', function(err, result) {
-//           test.equal(null, err);
+    // restart server
+    configuration.restart(function() {
+      var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:1});
+      db1.open(function(err, db) {
+        test.equal(null, err);
 
-//           // An admin user must be defined for db level authentication to work correctly
-//           db.admin().addUser('admin', 'admin', function(err, result) {
+        db.addUser('user', 'user', function(err, result) {
+          test.equal(null, err);
 
-//             // Attempt to save a document
-//             db.collection('test').insert({a:1}, function(err, result) {
-//               test.ok(err != null);
+          // An admin user must be defined for db level authentication to work correctly
+          db.admin().addUser('admin', 'admin', function(err, result) {
 
-//               // Login the user
-//               db.authenticate("user", "user", function(err, result) {
-//                 test.equal(null, err);
-//                 test.ok(result);
+            // Attempt to save a document
+            db.collection('test').insert({a:1}, function(err, result) {
+              test.ok(err != null);
 
-//                 db.collection('test').insert({a:1}, function(err, result) {
-//                   test.equal(null, err);
+              // Login the user
+              db.authenticate("user", "user", function(err, result) {
+                test.equal(null, err);
+                test.ok(result);
 
-//                   // Logout the user
-//                   db.logout(function(err, result) {
-//                     test.equal(null, err);
+                db.collection('test').insert({a:1}, function(err, result) {
+                  test.equal(null, err);
 
-//                     // Attempt to save a document
-//                     db.collection('test').insert({a:1}, function(err, result) {
-//                       test.ok(err != null);
+                  // Logout the user
+                  db.logout(function(err, result) {
+                    test.equal(null, err);
 
-//                       // restart server
-//                       configuration.restart({purgedirectories: true}, function() {
-//                         db1.close();
-//                         test.done();
-//                       });
-//                     });
-//                   });
-//                 });
-//               });
-//             });
-//           });
-//         });
-//       });
-//     });
-//   }
-// }
+                    // Attempt to save a document
+                    db.collection('test').insert({a:1}, function(err, result) {
+                      test.ok(err != null);
+                      db1.close();
 
-// exports['Should correctly reapply the authentications'] = {
-//   metadata: { requires: { topology: ['auth'] } },
+                      // restart server
+                      configuration.restart(function() {
+                        test.done();
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  }
+}
+
+exports['Should correctly reapply the authentications'] = {
+  metadata: { requires: { topology: ['auth'] } },
   
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var Db = configuration.require.Db
-//       , MongoClient = configuration.require.MongoClient
-//       , Server = configuration.require.Server;
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
+      , Server = configuration.require.Server;
 
-//     // restart server
-//     configuration.restart({purgedirectories: true}, function() {
-//       var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:1});
-//       db1.open(function(err, db) {
-//         db.admin().addUser('admin', 'admin', function(err, result) {
-//           test.equal(null, err);
+    // restart server
+    configuration.restart(function() {
+      var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:1});
+      db1.open(function(err, db) {
+        test.equal(null, err);
 
-//           // Attempt to save a document
-//           db.collection('test').insert({a:1}, function(err, result) {
-//             test.ok(err != null);
+        db.admin().addUser('admin', 'admin', function(err, result) {
+          test.equal(null, err);
 
-//             // Login the user
-//             db.admin().authenticate("admin", "admin", function(err, result) {
-//               test.equal(null, err);
-//               test.ok(result);
+          // Attempt to save a document
+          db.collection('test').insert({a:1}, function(err, result) {
+            test.ok(err != null);
 
-//               db.collection('test').insert({a:1}, function(err, result) {
-//                 test.equal(null, err);
+            // Login the user
+            db.admin().authenticate("admin", "admin", function(err, result) {
+              test.equal(null, err);
+              test.ok(result);
 
-//                 // Bounce server
-//                 configuration.restart({purgedirectories: false}, function() {
+              db.collection('test').insert({a:1}, function(err, result) {
+                test.equal(null, err);
 
-//                   // Reconnect should reapply the credentials
-//                   db.collection('test').insert({a:1}, function(err, result) {
-//                     test.equal(null, err);
+                // Bounce server
+                configuration.restart(function() {
 
-//                     // restart server
-//                     configuration.restart({purgedirectories: true}, function() {
-//                       db1.close();
-//                       test.done();
-//                     });
-//                   });
-//                 });
-//               });
-//             });
-//           });
-//         });
-//       });
-//     });
-//   }
-// }
+                  // Reconnect should reapply the credentials
+                  db.collection('test').insert({a:1}, function(err, result) {
+                    test.equal(null, err);
+                    db1.close();
 
-// exports['Ordered bulk operation should fail correctly when not authenticated'] = {
-//   metadata: { requires: { topology: ['auth'] } },
+                    // restart server
+                    configuration.restart(function() {
+                      test.done();
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  }
+}
+
+exports['Ordered bulk operation should fail correctly when not authenticated'] = {
+  metadata: { requires: { topology: ['auth'] } },
   
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var Db = configuration.require.Db
-//       , MongoClient = configuration.require.MongoClient
-//       , Server = configuration.require.Server;
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
+      , Server = configuration.require.Server;
 
-//     // restart server
-//     configuration.restart({purgedirectories: true}, function() {
-//       var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:1});
-//       db1.open(function(err, db) {
-//         db.admin().addUser('admin', 'admin', function(err, result) {
-//           test.equal(null, err);
+    // restart server
+    configuration.restart(function() {
+      var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:1});
+      db1.open(function(err, db) {
+        test.equal(null, err);
 
-//           // Attempt to save a document
-//           var col = db.collection('test');
+        db.admin().addUser('admin', 'admin', function(err, result) {
+          test.equal(null, err);
 
-//           // Initialize the Ordered Batch
-//           var batch = col.initializeOrderedBulkOp();
+          // Attempt to save a document
+          var col = db.collection('test');
 
-//           // Add some operations to be executed in order
-//           batch.insert({a:1});
-//           batch.find({a:1}).updateOne({$set: {b:1}});
-//           batch.find({a:2}).upsert().updateOne({$set: {b:2}});
-//           batch.insert({a:3});
-//           batch.find({a:3}).remove({a:3});
+          // Initialize the Ordered Batch
+          var batch = col.initializeOrderedBulkOp();
 
-//           // Execute the operations
-//           batch.execute(function(err, result) {
-//             test.ok(err != null);
-//             test.ok(err.code != null);
-//             test.ok(err.errmsg != null);
+          // Add some operations to be executed in order
+          batch.insert({a:1});
+          batch.find({a:1}).updateOne({$set: {b:1}});
+          batch.find({a:2}).upsert().updateOne({$set: {b:2}});
+          batch.insert({a:3});
+          batch.find({a:3}).remove({a:3});
 
-//             db1.close();
-//             test.done();
-//           });
-//         });
-//       });
-//     });
-//   }
-// }
+          // Execute the operations
+          batch.execute(function(err, result) {
+            test.ok(err != null);
+            test.ok(err.code != null);
+            test.ok(err.errmsg != null);
 
-// exports['Unordered bulk operation should fail correctly when not authenticated'] = {
-//   metadata: { requires: { topology: ['auth'] } },
+            db1.close();
+            test.done();
+          });
+        });
+      });
+    });
+  }
+}
+
+exports['Unordered bulk operation should fail correctly when not authenticated'] = {
+  metadata: { requires: { topology: ['auth'] } },
   
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var Db = configuration.require.Db
-//       , MongoClient = configuration.require.MongoClient
-//       , Server = configuration.require.Server;
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
+      , Server = configuration.require.Server;
 
-//     // restart server
-//     configuration.restart({purgedirectories: true}, function() {
-//       var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:1});
-//       db1.open(function(err, db) {
-//         db.admin().addUser('admin', 'admin', function(err, result) {
-//           test.equal(null, err);
+    // restart server
+    configuration.restart(function() {
+      var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:1});
+      db1.open(function(err, db) {
+        test.equal(null, err);
 
-//           // Attempt to save a document
-//           var col = db.collection('test');
+        db.admin().addUser('admin', 'admin', function(err, result) {
+          test.equal(null, err);
 
-//           // Initialize the Ordered Batch
-//           var batch = col.initializeUnorderedBulkOp();
+          // Attempt to save a document
+          var col = db.collection('test');
 
-//           // Add some operations to be executed in order
-//           batch.insert({a:1});
-//           batch.find({a:1}).updateOne({$set: {b:1}});
-//           batch.find({a:2}).upsert().updateOne({$set: {b:2}});
-//           batch.insert({a:3});
-//           batch.find({a:3}).remove({a:3});
+          // Initialize the Ordered Batch
+          var batch = col.initializeUnorderedBulkOp();
 
-//           // Execute the operations
-//           batch.execute(function(err, result) {
-//             test.ok(err != null);
-//             test.ok(err.code != null);
-//             test.ok(err.errmsg != null);
+          // Add some operations to be executed in order
+          batch.insert({a:1});
+          batch.find({a:1}).updateOne({$set: {b:1}});
+          batch.find({a:2}).upsert().updateOne({$set: {b:2}});
+          batch.insert({a:3});
+          batch.find({a:3}).remove({a:3});
 
-//             db1.close();
-//             test.done();
-//           });
-//         });
-//       });
-//     });
-//   }
-// }
+          // Execute the operations
+          batch.execute(function(err, result) {
+            test.ok(err != null);
+            test.ok(err.code != null);
+            test.ok(err.errmsg != null);
 
+            db1.close();
+            test.done();
+          });
+        });
+      });
+    });
+  }
+}
 
+var replSetManager;
 
+var setUp = function(configuration, options, callback) {
+  var ReplSetManager = require('mongodb-core').ReplSetManager
+    , Db = configuration.require.Db
+    , Server = configuration.require.Server
+    , MongoClient = configuration.require.MongoClient;
 
+  // Check if we have any options
+  if(typeof options == 'function') callback = options, options = null;
 
+  // Default rs options
+  var rsOptions = {
+      auth: null
+    , keyFile: __dirname + '/data/keyfile.txt'
+      // ReplSet settings
+    , secondaries: 2
+  }
 
+  // Override options
+  if(options) rsOptions = options;
 
+  // Create Replicaset Manager
+  replSetManager = new ReplSetManager(rsOptions);
 
+  // Start SSL replicaset manager
+  replSetManager.start({kill: true, purge:true, signal: -9}, function(err, result) {      
+    if(err != null) throw err;
+    // Finish setup
+    callback();      
+  });      
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-// /**
-//  * @ignore
-//  */
-// exports['Should correctly handle replicaset master stepdown and stepup without loosing auth'] = {
-//   metadata: { requires: { topology: ['auth'] } },
+/**
+ * @ignore
+ */
+exports['Should correctly handle replicaset master stepdown and stepup without loosing auth'] = {
+  metadata: { requires: { topology: ['auth'] } },
   
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var Db = configuration.require.Db
-//       , Server = configuration.require.Server
-//       , ReplSetServers = configuration.require.ReplSetServers;
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Db = configuration.require.Db
+      , Server = configuration.require.Server
+      , ReplSet = configuration.require.ReplSet;
 
-//     var replSet = new ReplSetServers( [
-//         new Server( 'localhost', configuration.startPort),
-//         new Server( 'localhost', configuration.startPort + 1)
-//       ],
-//       {rs_name:"replica-set-foo", poolSize:1}
-//     );
+    setUp(configuration, function(err) {
+      var replSet = new ReplSet( [
+          new Server( 'localhost', replSetManager.startPort),
+          new Server( 'localhost', replSetManager.startPort + 1)
+        ],
+        {rs_name: replSetManager.replicasetName, poolSize:1}
+      );
 
-//     // Connect
-//     new Db('replicaset_test_auth', replSet, {w:0}).open(function(err, db) {    
-//       // Just set auths for the manager to handle it correctly
-//       configuration.setAuths("root", "root");
-//       // Add a user
-//       db.admin().addUser("root", "root", {w:3}, function(err, result) {
-//         test.equal(null, err);
+      // Connect
+      new Db('replicaset_test_auth', replSet, {w:1}).open(function(err, db) {    
+        // Just set auths for the manager to handle it correctly
+        replSetManager.setCredentials("mongocr", "admin", "root", "root");
+        // Add a user
+        db.admin().addUser("root", "root", {w:3}, function(err, result) {
+          test.equal(null, err);
 
-//         db.admin().authenticate("root", "root", function(err, result) {
-//           test.equal(null, err);
-//           test.ok(result);
+          db.admin().authenticate("root", "root", function(err, result) {
+            test.equal(null, err);
+            test.ok(result);
 
-//           configuration.killPrimary(9, function(err, result) {
-//             db.collection('replicaset_test_auth').insert({a:1}, {w:1}, function(err, result) {
-//               test.equal(null, err);
-
-//               db.close();
-//               test.done();
-//             });
-//           });
-//         });
-//       });
-//     });
-//   }
-// }
-
-// /**
-//  * @ignore
-//  */
-// exports.shouldCorrectlyAuthenticateUsingPrimary = {
-//   metadata: { requires: { topology: ['auth'] } },
-  
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var Db = configuration.require.Db
-//       , Server = configuration.require.Server
-//       , ReplSetServers = configuration.require.ReplSetServers;
-
-//     var replicaset = configuration.getReplicasetManager();
-
-//     var replSet = new ReplSetServers( [
-//         new Server( replicaset.host, replicaset.ports[1]),
-//         new Server( replicaset.host, replicaset.ports[0]),
-//       ],
-//       {rs_name:replicaset.name}
-//     );
-
-//     var db = new Db('node-native-test', replSet, {w:1, native_parser: (process.env['TEST_NATIVE'] != null)});
-//     db.open(function(err, p_db) {
-//       db.addUser("me", "secret", {w:3}, function(err, result) {
-//         replicaset.setAuths("me", "secret");
-//         db.close();
-
-//         // connection string
-//         var config = format("mongodb://me:secret@localhost:%s/node-native-test", configuration.startPort);
-//         // Connect
-//         Db.connect(config, function(error, client) {
-//           if (error) {
-//             console.log("Received connection error (" + error + ") with " + config)
-//           } else {
-//             // console.log("Connected with " + config)
-//             client.collectionNames(function(error, names) {
-//               if (error) {
-//                 console.log("Error querying (" + error + ") with " + config)
-//               } else {
-//                 // console.log("Queried with " + config)
-//               }
+            replSetManager.shutdown('primary', function(err, result) {
               
-//               client.close();
-//               test.done();
-//             })
-//           }
-//         });
-//       });
-//     });
-//   }
-// }
+              db.collection('replicaset_test_auth').insert({a:1}, {w:1}, function(err, result) {
+                test.equal(null, err);
+
+                db.close();
+
+                replSetManager.stop(function() {
+                  test.done();
+                });
+              });
+            });
+          });
+        });
+      });      
+    })
+  }
+}
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyAuthenticateUsingPrimary = {
+  metadata: { requires: { topology: ['auth'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient
+      , Db = configuration.require.Db
+      , Server = configuration.require.Server
+      , ReplSet = configuration.require.ReplSet;
+
+    setUp(configuration, function(err) {
+      var replSet = new ReplSet( [
+          new Server( 'localhost', replSetManager.startPort),
+          new Server( 'localhost', replSetManager.startPort + 1)
+        ],
+        {rs_name: replSetManager.replicasetName, poolSize:1}
+      );
+
+      var db = new Db('node-native-test', replSet, {w:1});
+      db.open(function(err, p_db) {
+        test.equal(null, err);
+        db.addUser("me", "secret", {w:3}, function(err, result) {
+
+          // Just set auths for the manager to handle it correctly
+          replSetManager.setCredentials("mongocr", "admin", "me", "secret");
+
+          // Close the connection
+          db.close();
+
+          // connection string
+          var config = f("mongodb://me:secret@localhost:%s/node-native-test?replicaSet=%s"
+            , replSetManager.startPort, replSetManager.replicasetName);
+          // Connect
+          MongoClient.connect(config, function(error, client) {
+            if (error) {
+              console.log("Received connection error (" + error + ") with " + config)
+            } else {
+              client.collectionNames(function(error, names) {
+                if (error) {
+                  console.log("Error querying (" + error + ") with " + config)
+                } else {
+                  // console.log("Queried with " + config)
+                }
+                
+                client.close();
+
+                replSetManager.stop(function() {
+                  test.done();
+                });
+              });
+            }
+          });
+        });
+      });
+    });
+  }
+}
 
 // /**
 //  * @ignore
@@ -373,11 +412,11 @@ exports['Should correctly authenticate against admin db'] = {
 //   test: function(configuration, test) {
 //     var Db = configuration.require.Db
 //       , Server = configuration.require.Server
-//       , ReplSetServers = configuration.require.ReplSetServers;
+//       , ReplSet = configuration.require.ReplSet;
 
 //     var replicaset = configuration.getReplicasetManager();
 
-//     var replSet = new ReplSetServers( [
+//     var replSet = new ReplSet( [
 //         new Server( replicaset.host, replicaset.ports[1]),
 //         new Server( replicaset.host, replicaset.ports[0]),
 //       ],
@@ -425,11 +464,11 @@ exports['Should correctly authenticate against admin db'] = {
 //   test: function(configuration, test) {
 //     var Db = configuration.require.Db
 //       , Server = configuration.require.Server
-//       , ReplSetServers = configuration.require.ReplSetServers;
+//       , ReplSet = configuration.require.ReplSet;
 
 //     var replicaset = configuration.getReplicasetManager();
 
-//     var replSet = new ReplSetServers( [
+//     var replSet = new ReplSet( [
 //         new Server( replicaset.host, replicaset.ports[1]),
 //         new Server( replicaset.host, replicaset.ports[0]),
 //       ],
@@ -478,11 +517,11 @@ exports['Should correctly authenticate against admin db'] = {
 //   test: function(configuration, test) {
 //     var Db = configuration.require.Db
 //       , Server = configuration.require.Server
-//       , ReplSetServers = configuration.require.ReplSetServers;
+//       , ReplSet = configuration.require.ReplSet;
 
 //     var replicaset = configuration.getReplicasetManager();
 
-//     var replSet = new ReplSetServers( [
+//     var replSet = new ReplSet( [
 //         new Server( replicaset.host, replicaset.ports[1]),
 //         new Server( replicaset.host, replicaset.ports[0]),
 //       ],
@@ -614,11 +653,11 @@ exports['Should correctly authenticate against admin db'] = {
 //   test: function(configuration, test) {
 //     var Db = configuration.require.Db
 //       , Server = configuration.require.Server
-//       , ReplSetServers = configuration.require.ReplSetServers;
+//       , ReplSet = configuration.require.ReplSet;
 
 //     var replicaset = configuration.getReplicasetManager();
 
-//     var replSet = new ReplSetServers( [
+//     var replSet = new ReplSet( [
 //         new Server( replicaset.host, replicaset.ports[1]),
 //         new Server( replicaset.host, replicaset.ports[0]),
 //       ],
@@ -691,11 +730,11 @@ exports['Should correctly authenticate against admin db'] = {
 //   test: function(configuration, test) {
 //     var Db = configuration.require.Db
 //       , Server = configuration.require.Server
-//       , ReplSetServers = configuration.require.ReplSetServers;
+//       , ReplSet = configuration.require.ReplSet;
 
 //     var replicaset = configuration.getReplicasetManager();
 
-//     var replSet = new ReplSetServers( [
+//     var replSet = new ReplSet( [
 //         new Server( replicaset.host, replicaset.ports[1]),
 //         new Server( replicaset.host, replicaset.ports[0]),
 //       ],
@@ -777,11 +816,11 @@ exports['Should correctly authenticate against admin db'] = {
 //   test: function(configuration, test) {
 //     var Db = configuration.require.Db
 //       , Server = configuration.require.Server
-//       , ReplSetServers = configuration.require.ReplSetServers;
+//       , ReplSet = configuration.require.ReplSet;
 
 //     var replicaset = configuration.getReplicasetManager();
 
-//     var replSet = new ReplSetServers( [
+//     var replSet = new ReplSet( [
 //         new Server( replicaset.host, replicaset.ports[1]),
 //         new Server( replicaset.host, replicaset.ports[0]),
 //       ],
@@ -833,12 +872,12 @@ exports['Should correctly authenticate against admin db'] = {
 //   test: function(configuration, test) {
 //     var Db = configuration.require.Db
 //       , Server = configuration.require.Server
-//       , ReplSetServers = configuration.require.ReplSetServers
+//       , ReplSet = configuration.require.ReplSet
 //       , ReadPreference = configuration.require.ReadPreference;
 
 //     var replicaset = configuration.getReplicasetManager();
 
-//     var replSet = new ReplSetServers( [
+//     var replSet = new ReplSet( [
 //         new Server( replicaset.host, replicaset.ports[1]),
 //         new Server( replicaset.host, replicaset.ports[0]),
 //       ],
@@ -911,12 +950,12 @@ exports['Should correctly authenticate against admin db'] = {
 //   test: function(configuration, test) {
 //     var Db = configuration.require.Db
 //       , Server = configuration.require.Server
-//       , ReplSetServers = configuration.require.ReplSetServers
+//       , ReplSet = configuration.require.ReplSet
 //       , ReadPreference = configuration.require.ReadPreference;
 
 //     var replicaset = configuration.getReplicasetManager();
 
-//     var replSet = new ReplSetServers( [
+//     var replSet = new ReplSet( [
 //         new Server( replicaset.host, replicaset.ports[1]),
 //         new Server( replicaset.host, replicaset.ports[0]),
 //       ],
@@ -989,12 +1028,12 @@ exports['Should correctly authenticate against admin db'] = {
 //     var Db = configuration.require.Db
 //       , Server = configuration.require.Server
 //       , MongoClient = configuration.require.MongoClient
-//       , ReplSetServers = configuration.require.ReplSetServers
+//       , ReplSet = configuration.require.ReplSet
 //       , ReadPreference = configuration.require.ReadPreference;
 
 //     var replicaset = configuration.getReplicasetManager();
 
-//     var replSet = new ReplSetServers( [
+//     var replSet = new ReplSet( [
 //         new Server( replicaset.host, replicaset.ports[1]),
 //         new Server( replicaset.host, replicaset.ports[0]),
 //       ],
@@ -1045,12 +1084,12 @@ exports['Should correctly authenticate against admin db'] = {
 //     var Db = configuration.require.Db
 //       , Server = configuration.require.Server
 //       , MongoClient = configuration.require.MongoClient
-//       , ReplSetServers = configuration.require.ReplSetServers
+//       , ReplSet = configuration.require.ReplSet
 //       , ReadPreference = configuration.require.ReadPreference;
 
 //     var replicaset = configuration.getReplicasetManager();
 
-//     var replSet = new ReplSetServers( [
+//     var replSet = new ReplSet( [
 //         new Server( replicaset.host, replicaset.ports[1]),
 //         new Server( replicaset.host, replicaset.ports[0]),
 //       ],
@@ -1104,19 +1143,19 @@ exports['Should correctly authenticate against admin db'] = {
 //     var Db = configuration.require.Db
 //       , Server = configuration.require.Server
 //       , MongoClient = configuration.require.MongoClient
-//       , ReplSetServers = configuration.require.ReplSetServers
+//       , ReplSet = configuration.require.ReplSet
 //       , ReadPreference = configuration.require.ReadPreference;
 
 //     var replicaset = configuration.getReplicasetManager();
 
-//     var replSet1 = new ReplSetServers( [
+//     var replSet1 = new ReplSet( [
 //         new Server( replicaset.host, replicaset.ports[1]),
 //         new Server( replicaset.host, replicaset.ports[0]),
 //       ],
 //       {rs_name:replicaset.name, poolSize:1, readPreference: ReadPreference.SECONDARY}
 //     );
 
-//     var replSet2 = new ReplSetServers( [
+//     var replSet2 = new ReplSet( [
 //         new Server( replicaset.host, replicaset.ports[1]),
 //         new Server( replicaset.host, replicaset.ports[0]),
 //       ],
