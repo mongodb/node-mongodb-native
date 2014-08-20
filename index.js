@@ -18,4 +18,5 @@ module.exports = {
   , MongoCR: require('./lib/auth/mongocr')
   , X509: require('./lib/auth/x509')
   , Plain: require('./lib/auth/plain')
+  , GSSAPI: require('./lib/auth/gssapi')
 }
