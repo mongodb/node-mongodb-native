@@ -365,6 +365,7 @@ exports.shouldCorrectlyAuthenticateUsingPrimary = {
       var db = new Db('node-native-test', replSet, {w:1});
       db.open(function(err, p_db) {
         test.equal(null, err);
+
         db.addUser("me", "secret", {w:3}, function(err, result) {
 
           // Just set auths for the manager to handle it correctly
@@ -402,733 +403,747 @@ exports.shouldCorrectlyAuthenticateUsingPrimary = {
   }
 }
 
-// /**
-//  * @ignore
-//  */
-// exports.shouldCorrectlyAuthenticateWithTwoSeeds = {
-//   metadata: { requires: { topology: ['auth'] } },
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyAuthenticateWithTwoSeeds = {
+  metadata: { requires: { topology: ['auth'] } },
   
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var Db = configuration.require.Db
-//       , Server = configuration.require.Server
-//       , ReplSet = configuration.require.ReplSet;
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient
+      , Db = configuration.require.Db
+      , Server = configuration.require.Server
+      , ReplSet = configuration.require.ReplSet;
 
-//     var replicaset = configuration.getReplicasetManager();
+    setUp(configuration, function(err) {
+      var replSet = new ReplSet( [
+          new Server( 'localhost', replSetManager.startPort),
+          new Server( 'localhost', replSetManager.startPort + 1)
+        ],
+        {rs_name: replSetManager.replicasetName, poolSize:1}
+      );
 
-//     var replSet = new ReplSet( [
-//         new Server( replicaset.host, replicaset.ports[1]),
-//         new Server( replicaset.host, replicaset.ports[0]),
-//       ],
-//       {rs_name:replicaset.name}
-//     );
+      var db = new Db('node-native-test', replSet, {w:1});
+      db.open(function(err, p_db) {
+        test.equal(null, err);
 
-//     var db = new Db('node-native-test', replSet, {w:1, native_parser: (process.env['TEST_NATIVE'] != null)});
-//     db.open(function(err, p_db) {
-//       db.addUser("me", "secret", {w:3}, function(err, result) {
-//         replicaset.setAuths("me", "secret");
-//         db.close();
+        db.addUser("me", "secret", {w:3}, function(err, result) {
+          // Just set auths for the manager to handle it correctly
+          replSetManager.setCredentials("mongocr", "admin", "me", "secret");
 
-//         // connection string
-//         var config = format("mongodb://me:secret@localhost:%s,localhost:%s/node-native-test", configuration.startPort, configuration.startPort + 1);
-//         // Connect
-//         Db.connect(config, function(error, client) {
-//           if (error) {
-//             console.log("Received connection error (" + error + ") with " + config)
-//           } else {
-//             // console.log("Connected with " + config)
-//             client.collectionNames(function(error, names) {
-//               if (error) {
-//                 console.log("Error querying (" + error + ") with " + config)
-//               } else {
-//                 // console.log("Queried with " + config)
-//               }
-              
-//               client.close();
-//               test.done();
-//             })
-//           }
-//         });
-//       });
-//     });
-//   }
-// }
+          // Close the connection
+          db.close();
 
-// /**
-//  * @ignore
-//  */
-// exports.shouldCorrectlyAuthenticateWithOnlySecondarySeed = {
-//   metadata: { requires: { topology: ['auth'] } },
+          // connection string
+          var config = f("mongodb://me:secret@localhost:%s,localhost:%s/node-native-test?replicaSet=%s"
+              , replSetManager.startPort, replSetManager.startPort + 1, replSetManager.replicasetName);
+          // Connect
+          MongoClient.connect(config, function(error, client) {
+            if (error) {
+              console.log("Received connection error (" + error + ") with " + config)
+            } else {
+              // console.log("Connected with " + config)
+              client.collectionNames(function(error, names) {
+                if (error) {
+                  console.log("Error querying (" + error + ") with " + config)
+                } else {
+                  // console.log("Queried with " + config)
+                }
+                
+                client.close();
+
+                replSetManager.stop(function() {
+                  test.done();
+                });
+              })
+            }
+          });
+        });
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyAuthenticateWithOnlySecondarySeed = {
+  metadata: { requires: { topology: ['auth'] } },
   
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var Db = configuration.require.Db
-//       , Server = configuration.require.Server
-//       , ReplSet = configuration.require.ReplSet;
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient
+      , Db = configuration.require.Db
+      , Server = configuration.require.Server
+      , ReplSet = configuration.require.ReplSet;
 
-//     var replicaset = configuration.getReplicasetManager();
+    setUp(configuration, function(err) {
+      var replSet = new ReplSet( [
+          new Server( 'localhost', replSetManager.startPort),
+          new Server( 'localhost', replSetManager.startPort + 1)
+        ],
+        {rs_name: replSetManager.replicasetName, poolSize:1}
+      );
 
-//     var replSet = new ReplSet( [
-//         new Server( replicaset.host, replicaset.ports[1]),
-//         new Server( replicaset.host, replicaset.ports[0]),
-//       ],
-//       {rs_name:replicaset.name}
-//     );
+      var db = new Db('node-native-test', replSet, {w:1});
+      db.open(function(err, p_db) {
+        test.equal(null, err);
 
-//     var db = new Db('node-native-test', replSet, {w:1, native_parser: (process.env['TEST_NATIVE'] != null)});
-//     db.open(function(err, p_db) {
-//       db.addUser("me", "secret", {w:3}, function(err, result) {
-//         replicaset.setAuths("me", "secret");
-//         // Close the connection
-//         db.close();
+        p_db.addUser("me", "secret", {w:3}, function(err, result) {
+          test.equal(null, err);
+          // // Just set auths for the manager to handle it correctly
+          // replSetManager.setCredentials("mongocr", "admin", "me", "secret");
 
-//         // connection string
-//         var config = format("mongodb://me:secret@localhost:%s/node-native-test?slaveOk=true", configuration.startPort);
-//         // Connect
-//         Db.connect(config, function(error, client) {
-//           if (error) {
-//             console.log("Received connection error (" + error + ") with " + config)
-//           } else {
-//             // console.log("Connected with " + config)
-//             client.collectionNames(function(error, names) {
-//               if (error) {
-//                 console.log("Error querying (" + error + ") with " + config)
-//               } else {
-//                 // console.log("Queried with " + config)
-//               }
-              
-//               client.close();
-//               test.done();
-//             })
-//           }
-//         });
-//       });
-//     });
-//   }
-// }
+          // Close the connection
+          p_db.close();
 
-// /**
-//  * @ignore
-//  */
-// exports.shouldCorrectlyAuthenticateWithMultipleLoginsAndLogouts = {
-//   metadata: { requires: { topology: ['auth'] } },
+          // connection string
+          var config = f("mongodb://me:secret@localhost:%s/node-native-test?readPreference=secondary&replicaSet=%s"
+            , replSetManager.startPort, replSetManager.replicasetName);
+          // Connect
+          MongoClient.connect(config, function(error, client) {
+            client.on('fullsetup', function() {
+              test.equal(null, error);
+
+              client.collection('test').findOne(function(err) {
+                test.equal(null, err);
+                
+                // Logout
+                client.logout(function() {
+
+                  // Should fail
+                  client.collection('test').findOne(function(err) {
+                    test.ok(err != null);
+
+                    // Authenticate
+                    client.authenticate("me", "secret", function(err, r) {
+                      test.equal(null, err);
+                      test.ok(r);
+
+                      // Shutdown the first secondary
+                      replSetManager.shutdown('secondary', {signal:15}, function(err, result) {
+                        
+                        // Shutdown the second secondary
+                        replSetManager.shutdown('secondary', {signal:15}, function(err, result) {
+
+                          // Let's restart a secondary
+                          replSetManager.restartServer('secondary', function(err, result) {
+                            
+                            // Let's restart a secondary
+                            replSetManager.restartServer('secondary', function(err, result) {
+                            
+                              // Should fail
+                              client.collection('test').findOne(function(err) {
+                                test.equal(null, err);
+
+                                client.close();
+
+                                replSetManager.stop(function() {
+                                  test.done();
+                                });
+                              });
+                            });
+                          });
+                        });
+                      });
+                    });
+                  });
+                });
+              })
+            })
+          });
+        });
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyAuthenticateWithMultipleLoginsAndLogouts = {
+  metadata: { requires: { topology: ['auth'] } },
   
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var Db = configuration.require.Db
-//       , Server = configuration.require.Server
-//       , ReplSet = configuration.require.ReplSet;
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient
+      , Db = configuration.require.Db
+      , Server = configuration.require.Server
+      , ReadPreference = configuration.require.ReadPreference
+      , ReplSet = configuration.require.ReplSet;
 
-//     var replicaset = configuration.getReplicasetManager();
+    setUp(configuration, function(err) {
+      var replSet = new ReplSet( [
+          new Server( 'localhost', replSetManager.startPort),
+          new Server( 'localhost', replSetManager.startPort + 1)
+        ],
+        {rs_name: replSetManager.replicasetName, poolSize:1}
+      );
 
-//     var replSet = new ReplSet( [
-//         new Server( replicaset.host, replicaset.ports[1]),
-//         new Server( replicaset.host, replicaset.ports[0]),
-//       ],
-//       {rs_name:replicaset.name}
-//     );
+      // Connect to the replicaset
+      var slaveDb = null;
+      var db = new Db('foo', replSet, {w:1});
+      db.open(function(err, p_db) {
 
-//     // Connect to the replicaset
-//     var slaveDb = null;
-//     var db = new Db('foo', replSet, {w:0, native_parser: (process.env['TEST_NATIVE'] != null)});
-//     db.open(function(err, p_db) {
-//       Step(
-//         function addUser() {
-//           db.admin().addUser("me", "secret", {w:3}, this);
-//         },
+        function ensureFailingInsert(err, result) {
+          // return
+          test.equal(null, err);
+          test.ok(result != null);
 
-//         function ensureFailingInsert(err, result) {
-//           // return
-//           var self = this;
-//           test.equal(null, err);
-//           test.ok(result != null);
-//           replicaset.setAuths("me", "secret");
+          // Just set auths for the manager to handle it correctly
+          replSetManager.setCredentials("mongocr", "admin", "me", "secret");
 
-//           db.collection("stuff", function(err, collection) {
-//             collection.insert({a:2}, {safe: {w: 3}}, self);
-//           });
-//         },
+          db.collection("stuff", function(err, collection) {
+            collection.insert({a:2}, {w: 3}, authenticate1);
+          });
+        }
 
-//         function authenticate(err, result) {
-//           test.ok(err != null);
+        function authenticate1(err, result) {
+          test.ok(err != null);
 
-//           db.admin().authenticate("me", "secret", this);
-//         },
+          db.admin().authenticate("me", "secret", changePassword);
+        }
 
-//         function changePassword(err, result) {
-//           var self = this;
-//           test.equal(null, err);
-//           test.ok(result);
+        function changePassword(err, result) {
+          test.equal(null, err);
+          test.ok(result);
 
-//           db.admin().addUser("me2", "secret2", {w:3}, this);
-//         },
+          db.admin().addUser("me2", "secret2", {w:3}, authenticate2);
+        }
 
-//         function authenticate(err, result) {
-//           db.admin().authenticate("me2", "secret2", this);
-//         },
+        function authenticate2(err, result) {
+          db.admin().authenticate("me2", "secret2", insertShouldSuccedNow);
+        }
 
-//         function insertShouldSuccedNow(err, result) {
-//           var self = this;
-//           test.equal(null, err);
-//           test.ok(result);
+        function insertShouldSuccedNow(err, result) {
+          test.equal(null, err);
+          test.ok(result);
 
-//           db.collection("stuff", function(err, collection) {
-//             collection.insert({a:3}, {safe: true}, self);
-//           });
-//         },
+          db.collection("stuff", function(err, collection) {
+            collection.insert({a:3}, {w:3}, queryShouldExecuteCorrectly);
+          });
+        }
 
-//         function queryShouldExecuteCorrectly(err, result) {
-//           var self = this;
-//           test.equal(null, err);
+        function queryShouldExecuteCorrectly(err, result) {
+          test.equal(null, err);
 
-//           db.collection("stuff", function(err, collection) {
-//             collection.findOne(self);
-//           });
-//         },
+          db.collection("stuff", function(err, collection) {
+            collection.findOne(logout);
+          });
+        }
 
-//         function logout(err, item) {
-//           test.ok(err == null);
-//           test.equal(3, item.a);
+        function logout(err, item) {
+          test.ok(err == null);
+          test.equal(3, item.a);
 
-//           db.admin().logout(this);
-//         },
+          db.admin().logout(findShouldFailDueToLoggedOut);
+        }
 
-//         function findShouldFailDueToLoggedOut(err, result) {
-//           var self = this;
-//           test.equal(null, err);
+        function findShouldFailDueToLoggedOut(err, result) {
+          test.equal(null, err);
 
-//           db.collection("stuff", function(err, collection) {
-//             collection.findOne(self);
-//           });
-//         },
+          db.collection("stuff", function(err, collection) {
+            collection.findOne(sameShouldApplyToRandomSecondaryServer);
+          });
+        }
 
-//         function sameShouldApplyToRandomSecondaryServer(err, result) {
-//           var self = this;
-//           test.ok(err != null);
+        function sameShouldApplyToRandomSecondaryServer(err, result) {
+          test.ok(err != null);
+          test.ok(replSetManager.secondaries.length > 0);
+          var secondaryItem = replSetManager.secondaries[0];
+          var secondary = secondaryItem.split(":");
 
-//           slaveDb = new Db('foo', new Server(db.serverConfig.secondaries[0].host
-//                     , db.serverConfig.secondaries[0].port, {auto_reconnect: true, poolSize: 1}), {w:0, native_parser: (process.env['TEST_NATIVE'] != null), slaveOk:true});
-//           slaveDb.open(function(err, slaveDb) {
-//             slaveDb.collection('stuff', function(err, collection) {
-//               collection.findOne(self)
-//             })
-//           });
-//         },
+          slaveDb = new Db('foo', new Server(secondary[0]
+                    , parseInt(secondary[1], 10)
+                    , {auto_reconnect: true, poolSize: 1, rs_name:replSetManager.replicasetName})
+                    , {w:1, readPreference: ReadPreference.SECONDARY});
+          slaveDb.open(function(err, slaveDb) {
+            test.equal(null, err);
 
-//         function shouldCorrectlyAuthenticateAgainstSecondary(err, result) {
-//           test.ok(err != null)
-//           slaveDb.admin().authenticate('me2', 'secret2', this);
-//         },
+            slaveDb.collection('stuff', function(err, collection) {
+              collection.findOne(shouldCorrectlyAuthenticateAgainstSecondary)
+            })
+          });
+        }
 
-//         function shouldCorrectlyInsertItem(err, result) {
-//           var self = this;
-//           test.equal(null, err);
-//           test.ok(result);
+        function shouldCorrectlyAuthenticateAgainstSecondary(err, result) {
+          test.ok(err != null)
+          slaveDb.admin().authenticate('me2', 'secret2', shouldCorrectlyInsertItem);
+        }
 
-//           slaveDb.collection('stuff', function(err, collection) {
-//             collection.findOne(self)
-//           })
-//         },
+        function shouldCorrectlyInsertItem(err, result) {
+          test.equal(null, err);
+          test.ok(result);
 
-//         function finishUp(err, item) {
-//           test.ok(err == null);
-//           test.equal(3, item.a);
+          slaveDb.collection('stuff', function(err, collection) {
+            collection.findOne(finishUp)
+          })
+        }
 
-//           test.done();
-//           p_db.close();
-//           slaveDb.close();
-//         }
-//       )
-//     });
-//   }
-// }
+        function finishUp(err, item) {
+          test.ok(err == null);
+          test.equal(3, item.a);
 
-// /**
-//  * @ignore
-//  */
-// exports.shouldCorrectlyAuthenticateReplicaset = {
-//   metadata: { requires: { topology: ['auth'] } },
+          p_db.close();
+          slaveDb.close();
+
+          replSetManager.stop(function() {
+            test.done();
+          });          
+        }
+        
+        db.admin().addUser("me", "secret", {w:3}, ensureFailingInsert);
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyAuthenticateAndEnsureIndex = {
+  metadata: { requires: { topology: ['auth'] } },
   
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var Db = configuration.require.Db
-//       , Server = configuration.require.Server
-//       , ReplSet = configuration.require.ReplSet;
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient
+      , Db = configuration.require.Db
+      , Server = configuration.require.Server
+      , ReadPreference = configuration.require.ReadPreference
+      , ReplSet = configuration.require.ReplSet;
 
-//     var replicaset = configuration.getReplicasetManager();
+    setUp(configuration, function(err) {
+      var replSet = new ReplSet( [
+          new Server( 'localhost', replSetManager.startPort),
+          new Server( 'localhost', replSetManager.startPort + 1)
+        ],
+        {rs_name: replSetManager.replicasetName, poolSize:1}
+      );
 
-//     var replSet = new ReplSet( [
-//         new Server( replicaset.host, replicaset.ports[1]),
-//         new Server( replicaset.host, replicaset.ports[0]),
-//       ],
-//       {rs_name:replicaset.name, read_secondary:true, poolSize:1}
-//     );
+      var db = new Db('foo', replSet, {w:1});
+      db.open(function(err, db_p) {
+        test.equal(null, err);
 
-//     // Connect to the replicaset
-//     var slaveDb = null;
-//     var db = new Db('foo', replSet, {w:0});
-//     db.open(function(err, p_db) {
-//       Step(
-//         function addUser() {
-//           db.admin().addUser("me", "secret", {w:3}, this);
-//         },
+        db_p.admin().addUser("me", "secret", {w:3}, function runWhatever(err, result) {
+          // Just set auths for the manager to handle it correctly
+          replSetManager.setCredentials("mongocr", "admin", "me", "secret");
 
-//         function ensureFailingInsert(err, result) {
-//           var self = this;
-//           test.equal(null, err);
-//           test.ok(result != null);
-//           replicaset.setAuths("me", "secret");
+          db_p.admin().authenticate("me", "secret", function(err, result) {
+            test.equal(null, err);
 
-//           db.collection("stuff", function(err, collection) {
-//             collection.insert({a:2}, {safe: {w: 2, wtimeout: 10000}}, self);
-//           });
-//         },
+            if (err){
+              console.log('ERR:'+err);
+              console.log('DB:'+db_p);
+            }
 
-//         function authenticate(err, result) {
-//           test.ok(err != null);
+            db_p.addUser('test', 'test', {w:3}, function(err, result) {
+              if (err){
+                console.log('ERR AUTH:'+err);
+                console.log('replies:'+result);
+              }
 
-//           db.admin().authenticate("me", "secret", this);
-//         },
+              // Just set auths for the manager to handle it correctly
+              replSetManager.setCredentials("mongocr", "admin", "test", "test");
 
-//         function insertShouldSuccedNow(err, result) {
-//           var self = this;
-//           test.equal(null, err);
-//           test.ok(result);
+              db_p.authenticate('test', 'test', function(err, replies) {
+                if (err){
+                  console.log('ERR AUTH:'+err);
+                  console.log('replies:'+replies);
+                }
 
-//           db.collection("stuff", function(err, collection) {
-//             collection.insert({a:2}, {safe: {w: 2, wtimeout: 10000}}, self);
-//           });
-//         },
+                db_p.collection('userconfirm', function( err, result ){
+                  if (err){
+                    console.log('Collection ERR:'+err);
+                  }
 
-//         function queryShouldExecuteCorrectly(err, result) {
-//           var self = this;
-//           test.equal(null, err);
+                  var userconfirm = result;
+                  var ensureIndexOptions = { unique: true, w: 0, background: true };
+                  userconfirm.ensureIndex([ [ 'confirmcode', 1 ] ],ensureIndexOptions, function(err, item){
 
-//           db.collection("stuff", function(err, collection) {
-//             collection.findOne(self);
-//           });
-//         },
+                    if (err){
+                      console.log('Userconfirm ensure index failed:'+err);
+                    }
 
-//         function finishUp(err, item) {
-//           test.ok(err == null);
-//           test.equal(2, item.a);
-//           p_db.close();
-//           test.done();
-//         }
-//       )
-//     });
-//   }
-// }
+                    db_p.collection('session', function( err, result ){
+                      if (err){
+                        console.log('Collection SESSION ERR:'+err);
+                      }
 
-// /**
-//  * @ignore
-//  */
-// exports.shouldCorrectlyAuthenticateAndEnsureIndex = {
-//   metadata: { requires: { topology: ['auth'] } },
+                      var session = result;
+                      session.ensureIndex([ [ 'sid', 1 ] ],ensureIndexOptions, function(err, res){
+                        if(err){
+                          console.log('Session ensure index failed'+err);
+                        }
+
+                        db_p.close();
+
+                        replSetManager.stop(function() {
+                          test.done();
+                        });
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyAuthenticateAndUseReadPreference = {
+  metadata: { requires: { topology: ['auth'] } },
   
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var Db = configuration.require.Db
-//       , Server = configuration.require.Server
-//       , ReplSet = configuration.require.ReplSet;
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient
+      , Db = configuration.require.Db
+      , Server = configuration.require.Server
+      , ReadPreference = configuration.require.ReadPreference
+      , ReplSet = configuration.require.ReplSet;
 
-//     var replicaset = configuration.getReplicasetManager();
+    setUp(configuration, function(err) {
+      var replSet = new ReplSet( [
+          new Server( 'localhost', replSetManager.startPort),
+          new Server( 'localhost', replSetManager.startPort + 1)
+        ],
+        {rs_name: replSetManager.replicasetName, poolSize:1}
+      );
 
-//     var replSet = new ReplSet( [
-//         new Server( replicaset.host, replicaset.ports[1]),
-//         new Server( replicaset.host, replicaset.ports[0]),
-//       ],
-//       {rs_name:replicaset.name, poolSize:1}
-//     );
+      var db = new Db('foo', replSet, {w:1});
+      db.open(function(err, db_p) {
+        test.equal(null, err);
 
-//     var db = new Db(configuration.db_name, replSet, {w:0, native_parser: false});
-//     db.open(function(err, db_p) {
-//       db_p.admin().addUser("me", "secret", {w:3}, function runWhatever(err, result) {
-//         replicaset.setAuths("me", "secret");
+        db_p.admin().addUser("me", "secret", {w:3}, function runWhatever(err, result) {
+          // Just set auths for the manager to handle it correctly
+          replSetManager.setCredentials("mongocr", "admin", "me", "secret");
 
-//         db_p.admin().authenticate("me", "secret", function(err, result) {
-//           test.equal(null, err);
+          db_p.admin().authenticate("me", "secret", function(err, result) {
+            test.equal(null, err);
 
-//           if (err){
-//             console.log('ERR:'+err);
-//             console.log('DB:'+db_p);
-//           }
+            db_p.addUser('test', 'test', {w:3}, function(err, result) {
+              test.equal(null, err);
 
-//           db_p.addUser('test', 'test', {w:3}, function(err, result) {
-//             if (err){
-//               console.log('ERR AUTH:'+err);
-//               console.log('replies:'+result);
-//             }
+              // Just set auths for the manager to handle it correctly
+              replSetManager.setCredentials("mongocr", "admin", "test", "test");
 
-//             replicaset.setAuths("test", "test");
+              db_p.authenticate('test', 'test', function(err, replies) {
+                test.equal(null, err);
 
-//             db_p.authenticate('test', 'test', function(err, replies) {
-//               if (err){
-//                 console.log('ERR AUTH:'+err);
-//                 console.log('replies:'+replies);
-//               }
+                db_p.collection('userconfirm2').insert({a:1}, {w:1}, function(err, result) {
+                  test.equal(null, err);
 
-//               db_p.collection('userconfirm', function( err, result ){
-//                 if (err){
-//                   console.log('Collection ERR:'+err);
-//                 }
+                  db_p.collection('userconfirm2').findOne(function(err, item) {            
+                    test.equal(null, err);
+                    test.equal(1, item.a);
+                    db_p.close();
 
-//                 var userconfirm = result;
-//                 var ensureIndexOptions = { unique: true, safe: false, background: true };
-//                 userconfirm.ensureIndex([ [ 'confirmcode', 1 ] ],ensureIndexOptions, function(err, item){
+                    replSetManager.stop(function() {
+                      test.done();
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  }
+}
 
-//                   if (err){
-//                     console.log('Userconfirm ensure index failed:'+err);
-//                   }
-
-//                   db_p.collection('session', function( err, result ){
-//                     if (err){
-//                       console.log('Collection SESSION ERR:'+err);
-//                     }
-
-//                     var session = result;
-//                     session.ensureIndex([ [ 'sid', 1 ] ],ensureIndexOptions, function(err, res){
-//                       if(err){
-//                         console.log('Session ensure index failed'+err);
-//                       }
-
-//                       db_p.close();
-//                       test.done();
-//                     });
-//                   });
-//                 });
-//               });
-//             });
-//           });
-//         });
-//       });
-//     });
-//   }
-// }
-
-// /**
-//  * @ignore
-//  */
-// exports.shouldCorrectlyAuthenticateAndUseReadPreference = {
-//   metadata: { requires: { topology: ['auth'] } },
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary = {
+  metadata: { requires: { topology: ['auth'] } },
   
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var Db = configuration.require.Db
-//       , Server = configuration.require.Server
-//       , ReplSet = configuration.require.ReplSet;
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient
+      , Db = configuration.require.Db
+      , Server = configuration.require.Server
+      , ReadPreference = configuration.require.ReadPreference
+      , ReplSet = configuration.require.ReplSet;
 
-//     var replicaset = configuration.getReplicasetManager();
+    setUp(configuration, function(err) {
+      var replSet = new ReplSet( [
+          new Server( 'localhost', replSetManager.startPort),
+          new Server( 'localhost', replSetManager.startPort + 1)
+        ],
+        {rs_name: replSetManager.replicasetName, poolSize:1}
+      );
 
-//     var replSet = new ReplSet( [
-//         new Server( replicaset.host, replicaset.ports[1]),
-//         new Server( replicaset.host, replicaset.ports[0]),
-//       ],
-//       {rs_name:replicaset.name, poolSize:1}
-//     );
+      var db = new Db('foo', replSet, {w:1});
+      db.open(function(err, db_p) {});
+      db.on('fullsetup', function(err, db_p) {
+        test.equal(null, err);
 
-//     var db = new Db(configuration.db_name, replSet, {w:0, native_parser: false});
-//     db.open(function(err, db_p) {
-//       test.equal(null, err);
+        db_p.admin().addUser("me", "secret", {w:3}, function runWhatever(err, result) {
+          // Just set auths for the manager to handle it correctly
+          replSetManager.setCredentials("mongocr", "admin", "me", "secret");
 
-//       db_p.admin().addUser("me", "secret", {w:3}, function runWhatever(err, result) {
-//         replicaset.setAuths("me", "secret");
+          db_p.admin().authenticate("me", "secret", function(err, result) {
+            test.equal(null, err);
 
-//         db_p.admin().authenticate("me", "secret", function(err, result) {
-//           test.equal(null, err);
+            db_p.collection('test').insert({a:1}, {w:1}, function(err, result) {
+              test.equal(null, err);
 
-//           db_p.addUser('test', 'test', {w:3}, function(err, result) {
-//             test.equal(null, err);
-//             replicaset.setAuths("test", "test");
+              db_p.addUser('test', 'test', {w:3}, function(err, result) {
+                test.equal(null, err);                
+                test.ok(result != null);
 
-//             db_p.authenticate('test', 'test', function(err, replies) {
-//               test.equal(null, err);
+                // Step down the primary
+                replSetManager.stepDown({force:true}, function(err, result) {
+                  db.serverConfig.on('joined', function(t) {
+                    if(t == 'primary') {
+                      var counter = 1000;
+                      var errors = 0;
 
-//               db_p.collection('userconfirm2').insert({a:1}, {w:1}, function(err, result) {
-//                 test.equal(null, err);
+                      for(var i = 0; i < counter; i++) {
+                        db_p.collection('test').find({a:1}).setReadPreference(ReadPreference.SECONDARY).toArray(function(err, r) {
+                          counter = counter - 1;
 
-//                 db_p.collection('userconfirm2').findOne(function(err, item) {            
-//                   test.equal(null, err);
-//                   test.equal(1, item.a);
-//                   db_p.close();
-//                   test.done();
-//                 });
-//               });
-//             });
-//           });
-//         });
-//       });
-//     });
-//   }
-// }
+                          if(err != null) {
+                            errors = errors + 1;
+                          }
 
-// /**
-//  * @ignore
-//  */
-// exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary = {
-//   metadata: { requires: { topology: ['auth'] } },
+                          if(counter == 0) {
+                            test.equal(0, errors)
+
+                            db_p.close();
+
+                            replSetManager.stop(function() {
+                              test.done();
+                            });
+                          }
+                        });
+                      }                        
+                    }
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyAuthWithSecondaryAfterKillPrimary = {
+  metadata: { requires: { topology: ['auth'] } },
   
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var Db = configuration.require.Db
-//       , Server = configuration.require.Server
-//       , ReplSet = configuration.require.ReplSet
-//       , ReadPreference = configuration.require.ReadPreference;
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient
+      , Db = configuration.require.Db
+      , Server = configuration.require.Server
+      , ReadPreference = configuration.require.ReadPreference
+      , ReplSet = configuration.require.ReplSet;
 
-//     var replicaset = configuration.getReplicasetManager();
+    setUp(configuration, function(err) {
+      var replSet = new ReplSet( [
+          new Server( 'localhost', replSetManager.startPort),
+          new Server( 'localhost', replSetManager.startPort + 1)
+        ],
+        {rs_name: replSetManager.replicasetName, poolSize:1}
+      );
 
-//     var replSet = new ReplSet( [
-//         new Server( replicaset.host, replicaset.ports[1]),
-//         new Server( replicaset.host, replicaset.ports[0]),
-//       ],
-//       {rs_name:replicaset.name, poolSize:1}
-//     );
+      var db = new Db('foo', replSet, {w:1});
+      db.open(function(err, db_p) {
+        test.equal(null, err);
 
-//     var db = new Db(configuration.db_name, replSet, {w:1, native_parser: false});
-//     db.open(function(err, db_p) {
-//       test.equal(null, err);
+        // Just set auths for the manager to handle it correctly
+        replSetManager.setCredentials("mongocr", "admin", "me", "secret");
 
-//       db_p.admin().addUser("me", "secret", {w:3}, function runWhatever(err, result) {
-//         replicaset.setAuths("me", "secret");
+        db_p.collection('test').insert({a:1}, {w:1}, function(err, result) {
+          test.equal(null, err);
 
-//         db_p.admin().authenticate("me", "secret", function(err, result) {
+          db_p.addUser('test', 'test', {w:3}, function(err, result) {
+            test.equal(null, err);                
+            test.ok(result != null);
 
-//           db_p.collection('test').insert({a:1}, {w:1}, function(err, result) {
-//             test.equal(null, err);
+            db_p.authenticate('test', 'test', function(err, result) {
+              test.equal(null, err);
+              test.equal(true, result);
 
-//             db_p.addUser('test', 'test', {w:3}, function(err, result) {
-//               test.equal(null, err);
-//               test.ok(result != null);
+              // Step down the primary
+              replSetManager.shutdown('primary', function(err, result) {
 
-//               db_p.authenticate('test', 'test', function(err, result) {
-//                 test.equal(null, err);
-//                 test.equal(true, result);
+                db.serverConfig.on('joined', function(t) {
+                  if(t == 'primary') {
+                    var counter = 1000;
+                    var errors = 0;
 
-//                 // Step down the primary
-//                 configuration.stepDownPrimary(function(err, result) {
+                    for(var i = 0; i < counter; i++) {
+                      db_p.collection('test').find({a:1}).setReadPreference(ReadPreference.SECONDARY).toArray(function(err, r) {
+                        counter = counter - 1;
 
-//                   // Wait for the secondary to recover
-//                   setTimeout(function(e) {
-//                     var counter = 1000;
-//                     var errors = 0;
+                        if(err != null) {
+                          errors = errors + 1;
+                          console.dir(err)
+                        }
 
-//                     for(var i = 0; i < counter; i++) {
-//                       db_p.collection('test').find({a:1}).setReadPreference(ReadPreference.SECONDARY).toArray(function(err, r) {
-//                         counter = counter - 1;
+                        if(counter == 0) {
+                          test.equal(0, errors)
 
-//                         if(err != null) {
-//                           errors = errors + 1;
-//                           console.dir(err)
-//                         }
+                          db_p.close();
 
-//                         if(counter == 0) {
-//                           test.equal(0, errors)
+                          replSetManager.stop(function() {
+                            test.done();
+                          });
+                        }
+                      });
+                    }                        
+                  }
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  }
+}
 
-//                           db_p.close();
-//                           test.done();
-//                         }
-//                       });
-//                     }
-//                   }, 30000);
-//                 });
-//               });
-//             });
-//           });
-//         });
-//       });
-//     });
-//   }
-// }
-
-// /**
-//  * @ignore
-//  */
-// exports.shouldCorrectlyAuthWithSecondaryAfterKillPrimary = {
-//   metadata: { requires: { topology: ['auth'] } },
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyAuthAgainstReplicaSetAdminDbUsingMongoClient = {
+  metadata: { requires: { topology: ['auth'] } },
   
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var Db = configuration.require.Db
-//       , Server = configuration.require.Server
-//       , ReplSet = configuration.require.ReplSet
-//       , ReadPreference = configuration.require.ReadPreference;
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient
+      , Db = configuration.require.Db
+      , Server = configuration.require.Server
+      , ReadPreference = configuration.require.ReadPreference
+      , ReplSet = configuration.require.ReplSet;
 
-//     var replicaset = configuration.getReplicasetManager();
+    setUp(configuration, function(err) {
+      var replSet = new ReplSet( [
+          new Server( 'localhost', replSetManager.startPort),
+          new Server( 'localhost', replSetManager.startPort + 1)
+        ],
+        {rs_name: replSetManager.replicasetName, poolSize:1}
+      );
 
-//     var replSet = new ReplSet( [
-//         new Server( replicaset.host, replicaset.ports[1]),
-//         new Server( replicaset.host, replicaset.ports[0]),
-//       ],
-//       {rs_name:replicaset.name, poolSize:1, read_secondary: true}
-//     );
+      var dbName = 'admin';
+      var db = new Db(dbName, replSet, {w:3});
+      db.open(function(err, db_p) {
+        test.equal(null, err);
 
-//     var db = new Db(configuration.db_name, replSet, { w: 1 });
-//     db.open(function(err, db) {
-//       db.admin().addUser("me", "secret", {w:3}, function runWhatever(err, result) {
-//         replicaset.setAuths("me", "secret");
-//         test.equal(null, err);
-//         //create an admin account so that authentication is required on collections
-//         db.admin().authenticate("me", "secret", function(err, result) {
+        db_p.admin().addUser("me", "secret", {w:3}, function runWhatever(err, result) {
+          // Just set auths for the manager to handle it correctly
+          replSetManager.setCredentials("mongocr", "admin", "me", "secret");
 
-//           //add a non-admin user
-//           db.addUser('test', 'test', {w:3}, function(err, result) {
-//             test.equal(null, err);
+          test.equal(null, err);
+          test.ok(result != null);
+          db_p.close();
 
-//             db.authenticate('test', 'test', function(err, result) {
-//               //insert, just to give us something to find
-//               db.collection('test').insert({a: 1}, {w: 1}, function(err, result) {
-            
-//                 db.collection('test').find({a: 1}).toArray(function(err, r) {
-//                   test.equal(null, err);
+          MongoClient.connect(f("mongodb://me:secret@%s:%s/%s?rs_name=%s&readPreference=secondary&w=3"
+            , 'localhost', replSetManager.startPort, dbName, replSetManager.replicasetName), function(err, db) {
+              db.on('fullsetup', function(err, db) {
+                test.equal(null, err);
 
-//                   configuration.setAuths("me", "secret");
+                // Insert document
+                db.collection('authcollectiontest').insert({a:1}, {w:'majority'}, function(err, result) {
+                  test.equal(null, err);
 
-//                   configuration.killPrimary(function(err, result) {
+                  // Find the document
+                  db.collection('authcollectiontest').find().toArray(function(err, docs) {
+                    test.equal(null, err);
+                    test.equal(1, docs.length);
+                    test.equal(1, docs[0].a);
 
-//                     // Wait for the primary to come back up, as a secondary.
-//                     setTimeout(function(e) {
-//                       var counter = 20;
-//                       var errors = 0;
-//                       for(var i = 0; i < counter; i++) {
-//                         db.collection('test').find({a: 1}).toArray(
-//                         function(err, r) {
-//                           counter = counter - 1;
-//                           if(err != null) {
-//                             errors = errors + 1;
-//                             console.dir(err)
-//                           }
+                    db.close();
 
-//                           if(counter == 0) {
-//                             test.equal(0, errors)
-//                             db.close();
-//                             test.done();
-//                           }
-//                         });
-//                       }
-//                     }, 30000);
-//                   });
-//                 });
-//               });
-//             });
-//           });
-//         });
-//       });
-//     });
-//   }
-// }
+                    replSetManager.stop(function() {
+                      test.done();
+                    });
+                  });
+                });
+              });
+          });
+        });
+      });
+    });
+  }
+}
 
-// /**
-//  * @ignore
-//  */
-// exports.shouldCorrectlyAuthAgainstReplicaSetAdminDbUsingMongoClient = {
-//   metadata: { requires: { topology: ['auth'] } },
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyAuthAgainstNormalDbUsingMongoClient = {
+  metadata: { requires: { topology: ['auth'] } },
   
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var Db = configuration.require.Db
-//       , Server = configuration.require.Server
-//       , MongoClient = configuration.require.MongoClient
-//       , ReplSet = configuration.require.ReplSet
-//       , ReadPreference = configuration.require.ReadPreference;
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient
+      , Db = configuration.require.Db
+      , Server = configuration.require.Server
+      , ReadPreference = configuration.require.ReadPreference
+      , ReplSet = configuration.require.ReplSet;
 
-//     var replicaset = configuration.getReplicasetManager();
+    setUp(configuration, function(err) {
+      var replSet = new ReplSet( [
+          new Server( 'localhost', replSetManager.startPort),
+          new Server( 'localhost', replSetManager.startPort + 1)
+        ],
+        {rs_name: replSetManager.replicasetName, poolSize:1}
+      );
 
-//     var replSet = new ReplSet( [
-//         new Server( replicaset.host, replicaset.ports[1]),
-//         new Server( replicaset.host, replicaset.ports[0]),
-//       ],
-//       {rs_name:replicaset.name, poolSize:1, read_secondary: true}
-//     );
+      var dbName = 'foo';
 
-//     var dbName = 'admin';
+      new Db(dbName, replSet, {w:3}).open(function(err, db_p) {
+        db_p.addUser("me", "secret", {w:3}, function runWhatever(err, result) {
+          // Just set auths for the manager to handle it correctly
+          replSetManager.setCredentials("mongocr", "admin", "me", "secret");
 
-//     new Db(dbName, replSet, {w:3}).open(function(err, db_p) {
-//       db_p.admin().addUser("me", "secret", {w:3}, function runWhatever(err, result) {
-//         replicaset.setAuths("me", "secret");
-//         test.equal(null, err);
-//         test.ok(result != null);
-//         db_p.close();
+          test.equal(null, err);
+          test.ok(result != null);
+          db_p.close();
 
-//         MongoClient.connect(format("mongodb://me:secret@%s:%s/%s?rs_name=%s&readPreference=secondary&w=3"
-//           , replicaset.host, replicaset.ports[0], dbName, replicaset.name), function(err, db) {
-//             test.equal(null, err);
+          MongoClient.connect(f("mongodb://me:secret@%s:%s/%s?rs_name=%s&readPreference=secondary&w=3"
+            , 'localhost', replSetManager.startPort, dbName, replSetManager.replicasetName), function(err, db) {
+              test.equal(null, err);
+              db.on('fullsetup', function(err, db) {
+                test.equal(null, err);
 
-//             // Insert document
-//             db.collection('authcollectiontest').insert({a:1}, {w:'majority'}, function(err, result) {
-//               test.equal(null, err);
+                // Insert document
+                db.collection('authcollectiontest').insert({a:1}, {w:'majority'}, function(err, result) {
+                  test.equal(null, err);
 
-//               // Find the document
-//               db.collection('authcollectiontest').find().toArray(function(err, docs) {
-//                 test.equal(null, err);
-//                 test.equal(1, docs.length);
-//                 test.equal(1, docs[0].a);
+                  // Find the document
+                  db.collection('authcollectiontest').find().toArray(function(err, docs) {
+                    test.equal(null, err);
+                    test.equal(1, docs.length);
+                    test.equal(1, docs[0].a);
 
-//                 db.close();
-//                 test.done();
-//               });
-//             });
-//         });
-//       });
-//     });
-//   }
-// }
+                    db.close();
 
-// /**
-//  * @ignore
-//  */
-// exports.shouldCorrectlyAuthAgainstNormalDbUsingMongoClient = {
-//   metadata: { requires: { topology: ['auth'] } },
-  
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var Db = configuration.require.Db
-//       , Server = configuration.require.Server
-//       , MongoClient = configuration.require.MongoClient
-//       , ReplSet = configuration.require.ReplSet
-//       , ReadPreference = configuration.require.ReadPreference;
-
-//     var replicaset = configuration.getReplicasetManager();
-
-//     var replSet = new ReplSet( [
-//         new Server( replicaset.host, replicaset.ports[1]),
-//         new Server( replicaset.host, replicaset.ports[0]),
-//       ],
-//       {rs_name:replicaset.name, poolSize:1, read_secondary: true}
-//     );
-
-//     var dbName = configuration.db_name;
-
-//     new Db(dbName, replSet, {w:3}).open(function(err, db_p) {
-//       db_p.addUser("me", "secret", {w:3}, function runWhatever(err, result) {
-//         replicaset.setAuths("me", "secret");
-
-//         test.equal(null, err);
-//         test.ok(result != null);
-//         db_p.close();
-
-//         MongoClient.connect(format("mongodb://me:secret@%s:%s/%s?rs_name=%s&readPreference=secondary&w=3"
-//           , replicaset.host, replicaset.ports[0], dbName, replicaset.name), function(err, db) {
-//             test.equal(null, err);
-
-//             // Insert document
-//             db.collection('authcollectiontest').insert({a:1}, {w:'majority'}, function(err, result) {
-//               test.equal(null, err);
-
-//               // Find the document
-//               db.collection('authcollectiontest').find().toArray(function(err, docs) {
-//                 test.equal(null, err);
-//                 test.equal(1, docs.length);
-//                 test.equal(1, docs[0].a);
-
-//                 db.close();
-//                 test.done();
-//               });
-//             });
-//         });
-//       });
-//     });
-//   }
-// }
+                    replSetManager.stop(function() {
+                      test.done();
+                    });
+                  });
+                });
+              });
+          });
+        });
+      });
+    });
+  }
+}
 
 // /**
 //  * @ignore
