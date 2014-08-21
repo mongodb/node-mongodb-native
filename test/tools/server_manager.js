@@ -47,6 +47,14 @@ var ServerManager = function(serverOptions) {
   // Clone the options
   serverOptions = cloneOptions(serverOptions);
 
+  Object.defineProperty(this, 'host', {
+    enumerable:true, get: function() { return host; }
+  });
+
+  Object.defineProperty(this, 'port', {
+    enumerable:true, get: function() { return port; }
+  });
+
   // filtered out internal keys
   var internalOptions = {};
   internalOptions = filterInternalOptionsOut(serverOptions, ["bin", "host"]);

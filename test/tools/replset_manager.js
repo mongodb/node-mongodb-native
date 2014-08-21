@@ -602,7 +602,7 @@ var ReplSetManager = function(replsetOptions) {
     }
   
     // Unpack all the options
-    options.avoidElectionFor = options.avoidElectionFor || 90;
+    options.replSetStepDown = options.replSetStepDown || 60;
     options.force = typeof options.force == 'boolean' ? options.force : false;
 
     // Get is master from one of the servers
@@ -626,7 +626,7 @@ var ReplSetManager = function(replsetOptions) {
             , force: options.force}, function(err, result) {
               // Destroy the server
               server.destroy();
-              callback(null, null);
+              callback(err, result);
           });
         });
       });
