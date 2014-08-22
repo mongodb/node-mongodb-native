@@ -257,6 +257,22 @@ exports['Unordered bulk operation should fail correctly when not authenticated']
   }
 }
 
+/**********************************************************************************************
+                                                                                               
+  ReplsetRep    ReplsetRepl  tReplsetRe   etRepl          Repl  t  plsetReplse  eplsetReplse   
+  setReplsetR   setReplsetRe  setReplset  plsetR        plsetRepls tReplsetRepl etReplsetRep   
+   pls    pls   epls    plse  epls    pls   epl        etRep  etRe lset    setR pls  Rep  et   
+   tReplsetRe    tRe          etReplsetRe   et         plset        epl              set       
+   lsetRepls     lsetRe       plsetRepls    pl          Repls       etRepl           epl       
+   ReplsetR      Replset      tReplsetR     tR             Repls    plsetRe          et        
+   setReplse     setRepl      lse           lse             etRe    tReplse          pls       
+   epl   Rep  e  epl          Rep          tRep    Re        lset   lse              tRe       
+   etR   setRep  etRe    tRe  set           set    se  epls  Repl   Repl    epl      lse       
+  eplse  eplset eplsetR plse Replse       tReplsetRep  etReplsetR  lsetRep setR    etRepls     
+  etRep   tRep  etReplsetRep setRep       lsetReplset  plsetRepl   ReplsetRepls    plsetRe     
+                                                                                                                                                                                              
+**********************************************************************************************/
+                                                                                                                                    
 var replSetManager;
 
 var setUp = function(configuration, options, callback) {
@@ -383,11 +399,7 @@ exports.shouldCorrectlyAuthenticateUsingPrimary = {
               console.log("Received connection error (" + error + ") with " + config)
             } else {
               client.collectionNames(function(error, names) {
-                if (error) {
-                  console.log("Error querying (" + error + ") with " + config)
-                } else {
-                  // console.log("Queried with " + config)
-                }
+                test.equal(null, error);
                 
                 client.close();
 
@@ -440,24 +452,17 @@ exports.shouldCorrectlyAuthenticateWithTwoSeeds = {
               , replSetManager.startPort, replSetManager.startPort + 1, replSetManager.replicasetName);
           // Connect
           MongoClient.connect(config, function(error, client) {
-            if (error) {
-              console.log("Received connection error (" + error + ") with " + config)
-            } else {
-              // console.log("Connected with " + config)
-              client.collectionNames(function(error, names) {
-                if (error) {
-                  console.log("Error querying (" + error + ") with " + config)
-                } else {
-                  // console.log("Queried with " + config)
-                }
-                
-                client.close();
+            test.equal(null, error);
 
-                replSetManager.stop(function() {
-                  test.done();
-                });
-              })
-            }
+            client.collectionNames(function(error, names) {
+              test.equal(null, err);
+              
+              client.close();
+
+              replSetManager.stop(function() {
+                test.done();
+              });
+            })
           });
         });
       });
@@ -492,8 +497,6 @@ exports.shouldCorrectlyAuthenticateWithOnlySecondarySeed = {
 
         p_db.addUser("me", "secret", {w:3}, function(err, result) {
           test.equal(null, err);
-          // // Just set auths for the manager to handle it correctly
-          // replSetManager.setCredentials("mongocr", "admin", "me", "secret");
 
           // Close the connection
           p_db.close();
@@ -732,49 +735,27 @@ exports.shouldCorrectlyAuthenticateAndEnsureIndex = {
           db_p.admin().authenticate("me", "secret", function(err, result) {
             test.equal(null, err);
 
-            if (err){
-              console.log('ERR:'+err);
-              console.log('DB:'+db_p);
-            }
-
             db_p.addUser('test', 'test', {w:3}, function(err, result) {
-              if (err){
-                console.log('ERR AUTH:'+err);
-                console.log('replies:'+result);
-              }
 
               // Just set auths for the manager to handle it correctly
               replSetManager.setCredentials("mongocr", "admin", "test", "test");
 
               db_p.authenticate('test', 'test', function(err, replies) {
-                if (err){
-                  console.log('ERR AUTH:'+err);
-                  console.log('replies:'+replies);
-                }
 
-                db_p.collection('userconfirm', function( err, result ){
-                  if (err){
-                    console.log('Collection ERR:'+err);
-                  }
+                db_p.collection('userconfirm', function(err, result ){
+                  test.equal(null, err);
 
                   var userconfirm = result;
                   var ensureIndexOptions = { unique: true, w: 0, background: true };
                   userconfirm.ensureIndex([ [ 'confirmcode', 1 ] ],ensureIndexOptions, function(err, item){
-
-                    if (err){
-                      console.log('Userconfirm ensure index failed:'+err);
-                    }
+                    test.equal(null, err);
 
                     db_p.collection('session', function( err, result ){
-                      if (err){
-                        console.log('Collection SESSION ERR:'+err);
-                      }
+                      test.equal(null, err);
 
                       var session = result;
                       session.ensureIndex([ [ 'sid', 1 ] ],ensureIndexOptions, function(err, res){
-                        if(err){
-                          console.log('Session ensure index failed'+err);
-                        }
+                        test.equal(null, err);
 
                         db_p.close();
 
@@ -987,12 +968,8 @@ exports.shouldCorrectlyAuthWithSecondaryAfterKillPrimary = {
 
                     for(var i = 0; i < counter; i++) {
                       db_p.collection('test').find({a:1}).setReadPreference(ReadPreference.SECONDARY).toArray(function(err, r) {
+                        test.equal(null, err);
                         counter = counter - 1;
-
-                        if(err != null) {
-                          errors = errors + 1;
-                          console.dir(err)
-                        }
 
                         if(counter == 0) {
                           test.equal(0, errors)
@@ -1145,204 +1122,192 @@ exports.shouldCorrectlyAuthAgainstNormalDbUsingMongoClient = {
   }
 }
 
-// /**
-//  * @ignore
-//  */
-// exports['Should Correctly Authenticate using different user source database and MongoClient on a replicaset'] = {
-//   // Add a tag that our runner can trigger on
-//   // in this case we are setting that node needs to be higher than 0.10.X to run
-//   metadata: { requires: { topology: ['auth'], mongodb: "=2.4.x" } },
+/*************************************************************************************
+                                                                                       
+  sMong       sMong    ngosMo   sMong   ongosM    sMong         ongosM       ngos  n   
+  ngosM       ngosM   osMongos  ngosM   osMong   ongosMongo    gosMongo    gosMongosM  
+    ongo      sMo    Mong  Mong  Mongo   ngos   gosM  gosM    sMon  sMon  sMong  Mong  
+    osMon    ongo    gos    osM  gosMon  sMo   sMon    ong    ngo    gos  ngosM        
+    ongos    o Mo   sMon    ongo MongosM ngo   ngo           osMo    Mong  Mongo       
+    osMong  Mo go   ngos    osMo gosMong sMo   sMo           ongo    gosM     Mongo    
+    on osMo go Mo    Mon    ong  Mon osMongo   ngo   ngosMo   sMo    Mon       osMo    
+    os ongosM  gos   gos    osM  gos ongosMo    Mo    Mongo   ngo    gos        ngos   
+    ong sMong sMon   Mong  Mong  Mon  sMongo    gos   gosM    sMon  sMon  sMon  sMon   
+  ngosMo gos ongosM   osMongos  ngosM  gosMo     ongosMon      gosMongo   ngosMongos   
+   Mongo Mo  osMong    ngosMo   sMong   ongo      sMongosM      ongosM    sMongosMo    
+
+**************************************************************************************/
+
+var shardedManager;
+
+var setUpSharded = function(configuration, options, callback) {
+  var ShardingManager = require('mongodb-core').ShardingManager
+    , Db = configuration.require.Db
+    , Server = configuration.require.Server
+    , MongoClient = configuration.require.MongoClient
+    , path = require('path');
+
+  // Check if we have any options
+  if(typeof options == 'function') callback = options, options = null;
+
+  // Sharding options
+  var shOptions = {
+      mongosStartPort: 50000
+    , replsetStartPort: 31000
+    , dbpath: path.join(path.resolve('db'))
+    , logpath: path.join(path.resolve('db'))
+    , replicasetOptions: {
+        auth: null
+      , keyFile: __dirname + '/data/keyfile.txt'
+        // ReplSet settings
+      , secondaries: 2      
+    }
+    , mongosOptions: {
+      keyFile: __dirname + '/data/keyfile.txt'      
+    }
+    , configsOptions: {
+        auth: null
+      , keyFile: __dirname + '/data/keyfile.txt'      
+    }
+  }
+
+  // Override options
+  if(options) shOptions = options;
+
+  // Create Replicaset Manager
+  shardedManager = new ShardingManager(shOptions);
+
+  // Start SSL replicaset manager
+  shardedManager.start({kill: true, purge:true, signal: -9}, function(err, result) {      
+    if(err != null) throw err;
+    // Finish setup
+    callback();      
+  });      
+}
+
+/**
+ * @ignore
+ */
+exports['should correctly connect and authenticate against admin database using mongos'] = {
+  metadata: { requires: { topology: ['auth'] } },
   
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var Db = configuration.require.Db
-//       , Server = configuration.require.Server
-//       , MongoClient = configuration.require.MongoClient
-//       , ReplSet = configuration.require.ReplSet
-//       , ReadPreference = configuration.require.ReadPreference;
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient
+      , Db = configuration.require.Db
+      , Server = configuration.require.Server
+      , Mongos = configuration.require.Mongos;
 
-//     var replicaset = configuration.getReplicasetManager();
+    setUpSharded(configuration, function(err) {
+      var mongos = new Mongos([
+          new Server( 'localhost', shardedManager.mongosStartPort),
+        ], {poolSize: 1});
 
-//     var replSet1 = new ReplSet( [
-//         new Server( replicaset.host, replicaset.ports[1]),
-//         new Server( replicaset.host, replicaset.ports[0]),
-//       ],
-//       {rs_name:replicaset.name, poolSize:1, readPreference: ReadPreference.SECONDARY}
-//     );
+      var db = new Db('node-native-test', mongos, {w:1});
+      db.open(function(err, p_db) {
+        test.equal(null, err);
 
-//     var replSet2 = new ReplSet( [
-//         new Server( replicaset.host, replicaset.ports[1]),
-//         new Server( replicaset.host, replicaset.ports[0]),
-//       ],
-//       {rs_name:replicaset.name, poolSize:1, readPreference: ReadPreference.SECONDARY}
-//     );
+        db.addUser("me", "secret", {w:3}, function(err, result) {
 
-//     var dbName = 'foo';
-//     var connectTimeoutMS = 100;
+          // Just set auths for the manager to handle it correctly
+          shardedManager.setCredentials("mongocr", "admin", "me", "secret");
 
-//     // Kill server and restart
-//     var auth_db = new Db(dbName, replSet1, {w:1});
-//     var db = new Db('users', replSet2, {w:1});
-//     db.open(function(err, db) {
+          // Close the connection
+          db.close();
 
-//       // Add admin user
-//       db.admin().addUser('admin', 'admin', function(err, result) {
-//         test.equal(null, err);
-//         test.ok(result != null);
+          // connection string
+          var config = f("mongodb://me:secret@localhost:%s/node-native-test"
+            , shardedManager.mongosStartPort);
+          // Connect
+          MongoClient.connect(config, function(error, client) {
+            test.equal(null, error);
 
-//         // Authenticate
-//         db.admin().authenticate('admin', 'admin', function(err, result) {
-//           test.equal(null, err);
-//           test.equal(true, result);
+            client.collectionNames(function(error, names) {
+              test.equal(null, error);
+              
+              client.close();
 
-//           db.addUser('mallory', 'a', function(err, result) {
-//             test.equal(null, err);
-//             test.ok(result != null);
+              shardedManager.stop(function() {
+                test.done();
+              });
+            });
+          });
+        });
+      });
+    });
+  }
+}
 
-//             db.db(dbName).collection('system.users').insert({user:"mallory", roles: ["readWrite"], userSource: "users"}, function(err, result) {
-//               test.equal(null, err);
-
-//               // Exit
-//               db.close();
-
-//               //
-//               // Authenticate using MongoClient
-//               MongoClient.connect(format("mongodb://mallory:a@%s:%s/%s?rs_name=%s&authSource=users&readPreference=secondary&w=3&connectTimeoutMS=%s"
-//                 , replicaset.host, replicaset.ports[0], dbName, replicaset.name, connectTimeoutMS), function(err, db) {
-//                   test.equal(null, err);
-
-//                   // Should work correctly
-//                   db.collection('t').insert({a:1}, function(err, result) {
-//                     test.equal(null, err);
-//                     db.close();
-
-//                     //
-//                     // Authenticate using db.authenticate against alternative source
-//                     auth_db.open(function(err, db) {
-
-//                       db.authenticate('mallory', 'a', {authSource:'users'}, function(err, result) {
-//                         test.equal(null, err);
-//                         test.equal(true, result);
-
-//                         db.collection('t').insert({a:1}, function(err, result) {
-//                           test.equal(null, err);
-//                           test.ok(result != null);
-
-//                           // Force close
-//                           db.serverConfig._state.master.connectionPool.openConnections[0].connection.destroy();
-
-//                           db.collection('t').insert({a:1}, function(err, result) {                          
-//                             test.equal(null, err);
-//                             test.ok(result != null);
-//                             // console.dir("========================================== 0")
-                            
-//                             // console.dir(err)
-//                             // console.dir(result)
-//                             // test.ok(err != null);
-
-//                             db.collection('t').insert({a:1}, function(err, result) {                          
-//                               // console.dir("========================================== 1")
-//                               // console.dir(err)
-//                               // console.dir(result)
-//                               test.equal(null, err);
-//                               test.ok(result != null);
-
-//                               db.logout(function(err, result) {
-//                                 // console.dir("========================================== 2")
-//                                 // console.dir(err)
-//                                 // console.dir(result)
-//                                 test.equal(null, err);
-//                                 test.equal(true, result);
-//                                 test.equal(0, db.serverConfig.auth.length());
-
-//                                 db.close();
-//                                 test.done(); 
-//                               });
-//                             });
-//                           });
-//                         });
-//                       });
-//                     });
-//                   });
-//               });
-//             });
-//           });
-//         });
-//       });
-//     });
-//   }
-// }
-
-// /**
-//  * @ignore
-//  */
-// exports['Should correctly connect to the mongoses using the connection string and auth'] = {
-//   metadata: { requires: { topology: ['auth'] } },
+/**
+ * @ignore
+ */
+exports['Should correctly handle replicaset master stepdown and stepup without loosing auth'] = {
+  metadata: { requires: { topology: ['auth'] } },
   
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var Db = configuration.require.Db
-//       , Server = configuration.require.Server
-//       , Mongos = configuration.require.Mongos;
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient
+      , Db = configuration.require.Db
+      , Server = configuration.require.Server
+      , Mongos = configuration.require.Mongos;
 
-//     // Set up mongos connection
-//     var mongos = new Mongos([
-//         new Server("localhost", 50000, { auto_reconnect: true })
-//       , new Server("localhost", 50001, { auto_reconnect: true })
-//     ]);
+    setUpSharded(configuration, function(err) {
+      var mongos = new Mongos([
+          new Server( 'localhost', shardedManager.mongosStartPort),
+        ], {poolSize: 1});
 
-//     // Connect using the mongos connections
-//     new Db('integration_test_', mongos, {w:1}).open(function(err, db) {
-//       db.admin().addUser("root", "root", function(err, result) {
-//         test.equal(null, err);
-    
-//         db.admin().authenticate("root", "root", function(err, result) {
-//           test.equal(null, err);
-//           test.ok(result);
+      var db = new Db('node-native-test', mongos, {w:1});
+      db.open(function(err, p_db) {
+        test.equal(null, err);
 
-//           // Kill the mongos server
-//           configuration.killMongoS(50000, function(err, result) {
-//             test.equal(null, err);
+        db.addUser("me", "secret", {w:3}, function(err, result) {
 
-//             db.collection('t').findOne({}, function(err, doc) {
-//               test.equal(null, err);
+          // Just set auths for the manager to handle it correctly
+          shardedManager.setCredentials("mongocr", "admin", "me", "secret");
 
-//               // Restart a mongos
-//               configuration.restartMongoS(50000, function(err, result) {
+          // Close the connection
+          db.close();
 
-//                 // Get all the connections
-//                 var connections = db.serverConfig.allRawConnections();
-//                 var totalLength = connections.length;
-//                 var totalErrors = 0;
+          // connection string
+          var config = f("mongodb://me:secret@localhost:%s/node-native-test"
+            , shardedManager.mongosStartPort);
+          // Connect
+          MongoClient.connect(config, function(error, client) {
+            test.equal(null, error);
 
-//                 setTimeout(function() {
-//                   for(var i = 0; i < connections.length; i++) {
-//                     var cursor = db.collection('t').find({});
-//                     // Force the connection
-//                     cursor.connection = connections[i];
-//                     // Execute toArray
-//                     cursor.toArray(function(err, docs) {
-//                       totalLength = totalLength - 1;
+            client.collectionNames(function(error, names) {
+              test.equal(null, error);
 
-//                       if(totalLength == 0) {
-//                         test.equal(0, totalErrors);
+              // Kill the mongos proxy
+              shardedManager.remove('mongos', {index: 0}, function(err, serverDetails1) {
 
-//                         db.admin().removeUser("root", function(err, result) {
-//                           test.equal(null, err);
-//                           test.ok(result);
+                shardedManager.remove('mongos', {index: 1}, function(err, serverDetails2) {
 
-//                           db.close();                              
-//                           test.done();
-//                         })
-//                       }
-//                     });
-//                   }
-//                 }, 5000);
-//               });
-//             });
-//           });
-//         });
-//       });
-//     });
-//   }
-// }
+                  client.collectionNames(function(error, names) {
+                    test.equal(null, error);
+                  });
+
+                  shardedManager.add(serverDetails1, function(err, result) {
+                    
+                    shardedManager.add(serverDetails2, function(err, result) {
+                      
+                      client.collectionNames(function(error, names) {
+                        test.equal(null, error);
+
+                        client.close();
+
+                        shardedManager.stop(function() {
+                          test.done();
+                        });
+                      });
+                    });
+                  });
+                });
+              });              
+            });
+          });
+        });
+      });
+    });
+  }
+}
