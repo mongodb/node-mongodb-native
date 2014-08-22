@@ -204,6 +204,10 @@ var Mongos = function(seedlist, options) {
     bsonInstance = new BSON(bsonTypes);
   }
 
+  //
+  // Current credentials used for auth
+  var credentials = [];  
+
   // Pick the right bson parser
   var bson = options.bson ? options.bson : bsonInstance;
   // Add bson parser to options
@@ -356,8 +360,6 @@ var Mongos = function(seedlist, options) {
   }
 
   var errorHandler = function(err, server) {
-    // console.log("----------------------------------------- error Handler :: " + server.name)
-    // console.dir(err)
     if(logger.isInfo()) logger.info(f('server %s errored out with %s', server.name, JSON.stringify(err)));
     mongosState.disconnected(server);
     if(mongosState.connectedServers().length == 0) state = DISCONNECTED;
@@ -373,8 +375,6 @@ var Mongos = function(seedlist, options) {
   }
 
   var closeHandler = function(err, server) {
-    // console.log("----------------------------------------- close Handler :: " + server.name)
-    // console.dir(err)
     if(logger.isInfo()) logger.info(f('server %s closed', server.name));
     mongosState.disconnected(server);
     if(mongosState.connectedServers().length == 0) state = DISCONNECTED;
@@ -391,51 +391,53 @@ var Mongos = function(seedlist, options) {
         server.removeAllListeners(e);
       });
 
-      // console.log("---------------------------------- connectHandler 0")
-      // console.log("mongosState.connectedServers().length :: " + mongosState.connectedServers().length)
-      // console.log("mongosState.disconnectedServers().length :: " + mongosState.disconnectedServers().length)
+      // finish processing the server
+      var processNewServer = function(_server) {
+        // Add the server handling code
+        if(_server.isConnected()) {
+          _server.once('error', errorHandler);
+          _server.once('close', closeHandler);
+          _server.once('timeout', timeoutHandler);
+          _server.once('parseError', timeoutHandler);
+          _server.on('message', messageHandler);        
+        }
 
-      // Add the server handling code
-      if(server.isConnected()) {
-        server.once('error', errorHandler);
-        server.once('close', closeHandler);
-        server.once('timeout', timeoutHandler);
-        server.once('parseError', timeoutHandler);
-        server.on('message', messageHandler);        
+        // Emit joined event
+        self.emit('joined', 'mongos', _server);
+
+        // Add to list connected servers
+        mongosState.connected(_server);
+
+        // Do we have a reconnect event
+        if('ha' == e && mongosState.connectedServers().length == 1) {
+          self.emit('reconnect', _server);
+        }
+
+        if(mongosState.disconnectedServers().length == 0 && 
+          mongosState.connectedServers().length > 0 &&
+          !fullsetup) {
+          fullsetup = true;
+          self.emit('fullsetup');
+        }
+
+        // Set connected
+        if(state == DISCONNECTED) {
+          state = CONNECTED;
+          self.emit('connect', self);
+        }
       }
 
-      // console.log("---------------------------------- connectHandler 1")
+      // No credentials just process server
+      if(credentials.length == 0) return processNewServer(server);
 
-      // Emit joined event
-      self.emit('joined', 'mongos', server);
-
-      // console.log("---------------------------------- connectHandler 2")
-
-      // Add to list connected servers
-      mongosState.connected(server);
-
-      // Do we have a reconnect event
-      if('ha' == e && mongosState.connectedServers().length == 1) {
-      // console.log("---------------------------------- connectHandler 3")
-        self.emit('reconnect', server);
-      }
-
-      if(mongosState.disconnectedServers().length == 0 && 
-        mongosState.connectedServers().length > 0 &&
-        !fullsetup) {
-        fullsetup = true;
-        self.emit('fullsetup');
-      }
-
-      // console.log("---------------------------------- connectHandler 4")
-      // console.log("mongosState.connectedServers().length :: " + mongosState.connectedServers().length)
-      // console.log("mongosState.disconnectedServers().length :: " + mongosState.disconnectedServers().length)
-
-      // Set connected
-      if(state == DISCONNECTED) {
-      // console.log("---------------------------------- connectHandler 5")
-        state = CONNECTED;
-        self.emit('connect', self);
+      // Do we have credentials, let's apply them all
+      var count = credentials.length;
+      // Apply the credentials
+      for(var i = 0; i < credentials.length; i++) {
+        server.auth.apply(server, credentials[i].concat([function(err, r) {        
+          count = count - 1;
+          if(count == 0) processNewServer(server);
+        }]));
       }
     }
   }
@@ -559,7 +561,6 @@ var Mongos = function(seedlist, options) {
     try {
       // Get a primary      
       server = mongosState.pickServer();
-      // console.log("---------------------- server :: " + server.name)
     } catch(err) {
       return callback(err);
     }
@@ -580,8 +581,6 @@ var Mongos = function(seedlist, options) {
    * @param {opResultCallback} callback A callback function
    */
   this.insert = function(ns, ops, options, callback) {
-    // console.log("--------------------------------------------------- 0")
-    // console.log("self.isConnected() :: " + self.isConnected())
     // Topology is not connected, save the call in the provided store to be
     // Executed at some point when the handler deems it's reconnected
     if(!self.isConnected() && disconnectHandler != null) {
@@ -589,7 +588,6 @@ var Mongos = function(seedlist, options) {
       return disconnectHandler.add('insert', ns, ops, options, callback);
     }
 
-    // console.log("--------------------------------------------------- 1")
     executeWriteOperation('insert', ns, ops, options, callback);
   }
 
@@ -665,6 +663,29 @@ var Mongos = function(seedlist, options) {
     // Ensure we have no options
     options = options || {};
 
+    // We need to execute the command on all servers
+    if(options.onAll) {
+      var servers = mongosState.getAll();
+      var count = servers.length;
+      var cmdErr = null;
+
+      for(var i = 0; i < servers.length; i++) {
+        servers[i].command(ns, cmd, options, function(err, r) {
+          count = count - 1;
+          // Finished executing command
+          if(count == 0) {
+            // Was it a logout command clear any credentials      
+            if(cmd.logout) clearCredentials(ns);
+            // Return the error
+            callback(err, r);
+          }
+        });
+      }
+
+      return;
+    }
+
+
     try {
       // Get a primary      
       server = mongosState.pickServer(options.writeConcern ? ReadPreference.primary : options.readPreference);
@@ -674,7 +695,34 @@ var Mongos = function(seedlist, options) {
 
     // No server returned we had an error
     if(server == null) return callback(new MongoError("no mongos found"));
-    server.command(ns, cmd, options, callback);      
+    server.command(ns, cmd, options, function(err, r) {
+      // Was it a logout command clear any credentials      
+      if(cmd.logout) clearCredentials(ns);
+      callback(err, r);      
+    });
+  }
+
+  // Add the new credential for a db, removing the old
+  // credential from the cache
+  var addCredentials = function(db, argsWithoutCallback) {
+    // Remove any credentials for the db
+    clearCredentials(db + ".dummy");
+    // Add new credentials to list
+    credentials.push(argsWithoutCallback);
+  }
+
+  // Clear out credentials for a namespace
+  var clearCredentials = function(ns) {
+    var db = ns.split('.')[0];
+    var filteredCredentials = [];
+
+    // Filter out all credentials for the db the user is logging out off
+    for(var i = 0; i < credentials.length; i++) {
+      if(credentials[i][1] != db) filteredCredentials.push(credentials[i]);
+    }
+
+    // Set new list of credentials
+    credentials = filteredCredentials;
   }
 
   /**
