@@ -46,6 +46,9 @@ var MongosManager = function(mongosOptions) {
   var pid = 0;
   var self = this;
 
+  // Any needed credentials
+  var credentials;
+
   // Clone the options
   mongosOptions = cloneOptions(mongosOptions);
 
@@ -154,6 +157,12 @@ var MongosManager = function(mongosOptions) {
     setTimeout(pingServer, 5000);
   }
 
+  this.setCredentials = function(provider, db, user, password) {
+    credentials = {
+        provider: provider, db: db, user: user, password: password
+    };
+  }
+
   this.start = function(options, callback) {
     if(typeof options == 'function') {
       callback = options;
@@ -250,6 +259,14 @@ var MongosManager = function(mongosOptions) {
       ['error', 'close', 'timeout', 'parseError'].forEach(function(e) {
         server.removeAllListeners(e);
       })
+
+      // If we have credentials apply them
+      if(credentials) {
+        return _server.auth(credentials.provider, credentials.db, credentials.user, credentials.password, function(err) {
+          if(err) return callback(err);
+          callback(null, _server)
+        });
+      }
 
       callback(null, _server);
     });

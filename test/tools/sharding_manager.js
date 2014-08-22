@@ -55,6 +55,11 @@ var ShardingManager = function(mongosOptions) {
   var replsetStartPort = mongosOptions.replsetStartPort || 31000;
   var configStartPort = mongosOptions.configStartPort || 35000;
 
+  // Replicaset options
+  var replicasetOptions = mongosOptions.replicasetOptions || {};
+  var mongosProxyOptions = mongosOptions.mongosOptions || {};
+  var configsOptions = mongosOptions.configsOptions || {};
+
   // Number of elements in each replicaset
   var secondaries = mongosOptions.secondaries || 2;
   var arbiters = mongosOptions.arbiters || 0;
@@ -69,6 +74,16 @@ var ShardingManager = function(mongosOptions) {
   var mongoses = [];
   var configs = [];
   var self = this;
+
+  Object.defineProperty(this, 'mongosStartPort', {
+    enumerable:true, get: function() { return mongosStartPort; }
+  });
+
+  this.setCredentials = function(provider, db, user, password) {
+    for(var i = 0; i < mongoses.length; i++) {
+      mongoses[i].setCredentials(provider, db, user, password);
+    }
+  }  
 
   //
   // Start the server
@@ -88,13 +103,11 @@ var ShardingManager = function(mongosOptions) {
       var configsLeft = numberOfConfigs;
       // Start the config instances
       for(var i = 0; i < numberOfConfigs; i++) {
-        // Clone the options
-        var opts = {
-            dbpath: dbpath + f("/data-%s", initiallConfigPort)
-          , logpath: logpath + f("/data-%s.log", initiallConfigPort)
-          , port: initiallConfigPort
-          , fork: null
-        };
+        var opts = cloneOptions(configsOptions);
+        opts.dbpath = dbpath + f("/data-%s", initiallConfigPort);
+        opts.logpath = logpath + f("/data-%s.log", initiallConfigPort);
+        opts.port = initiallConfigPort;
+        opts.fork = null;
 
         // Create a server manager
         configs.push(new ServerManager(opts));
@@ -118,14 +131,18 @@ var ShardingManager = function(mongosOptions) {
       var replSetsLeft = numberOfReplicasets;
       // Create Replicaset Managers
       for(var i = 0; i < numberOfReplicasets; i++) {
+        var opts = cloneOptions(replicasetOptions);
+        // Set name of replset
         var name = replSet + i;
-        replicasets.push(new ReplSetManager({
-            startPort: initialPort
-          , dbpath: dbpath
-          , logpath: logpath
-          , tags: tags
-          , replSet: name
-        }));
+
+        // Set some variables
+        opts.startPort = initialPort;
+        opts.dbpath = dbpath;
+        opts.logpath = logpath;
+        opts.tags = tags;
+        opts.replSet = name;
+
+        replicasets.push(new ReplSetManager(opts));
         
         // Increase the initialPort
         initialPort = initialPort + 5 + (secondaries + arbiters + 1);
@@ -158,13 +175,14 @@ var ShardingManager = function(mongosOptions) {
 
       // Start the config servers instances
       for(var i = 0; i < numberOfMongoses; i++) {
+        var opts = cloneOptions(mongosProxyOptions);
+        opts.port = initiallMongosPort;
+        opts.pidfilepath = f("%s", dbpath);
+        opts.logpath = f("%s/mongos-%s.log", logpath, initiallMongosPort);
+        opts.configdb = configs;
+
         // Done let's start up the mongos instances
-        mongoses.push(new MongosManager({
-            port: initiallMongosPort
-          , pidfilepath: f("%s", dbpath)
-          , logpath: f("%s/mongos-%s.log", logpath, initiallMongosPort)
-          , configdb: configs
-        }));
+        mongoses.push(new MongosManager(opts));
 
         // Update the mongos port
         initiallMongosPort = initiallMongosPort + 1;
@@ -188,13 +206,13 @@ var ShardingManager = function(mongosOptions) {
       mongoses[0].connect(function(err, server) {
         if(err) throw err;
 
-        var setupShard = function(replset) {
+        var setupShard = function(replset, _callback) {
           replset.getIsMaster(function(err, ismaster) {
             if(err) throw err;
 
             server.command('admin.$cmd', {
               addshard: f("%s/%s", replset.name, ismaster.me)
-            }, callback);
+            }, _callback);
           });
         }
 
@@ -214,19 +232,14 @@ var ShardingManager = function(mongosOptions) {
     // Start up sharded system
     var start = function() {
       setTimeout(function() {
-        
         // Start up replicasets
         startReplicasets(function() {
-          
           // Start up config servers
           startConfigs(function() {
-          
             // Start up mongos processes
             startMongoses(function() {
-          
               // Set up the sharded system
               setupShards(function() {
-
                 setTimeout(function() {
                   callback();
                 }, 5000);

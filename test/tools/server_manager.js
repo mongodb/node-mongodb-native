@@ -368,7 +368,6 @@ var ServerManager = function(serverOptions) {
         });
       }
 
-
       callback(null, _server);
     });
     

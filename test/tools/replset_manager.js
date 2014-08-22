@@ -354,10 +354,8 @@ var ReplSetManager = function(replsetOptions) {
 
   this.setCredentials = function(provider, db, user, password) {
     credentials = {
-        provider: provider
-      , db: db
-      , user: user
-      , password: password};
+        provider: provider, db: db, user: user, password: password
+    };
   }
 
   //
