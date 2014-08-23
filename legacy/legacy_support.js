@@ -71,6 +71,9 @@ var LegacySupport = function() {
         if(result.code == 11000 
           || result.code == 11001 
           || result.code == 12582
+          || result.code == 16544
+          || result.code == 16538
+          || result.code == 16542
           || result.code == 14
           || result.code == 13511) {
           if(finalResult.writeErrors == null) finalResult.writeErrors = [];
@@ -206,20 +209,14 @@ var LegacySupport = function() {
       try {
         // Execute the insert
         connection.write(op);
-        // console.log("--------------------------------------------------- EXECUTE 0")
-        // console.dir(writeConcern)
         // If write concern 0 don't fire getLastError
         if(hasWriteConcern(writeConcern)) {
-        // console.log("--------------------------------------------------- EXECUTE 1")
-
           var getLastErrorCmd = {getlasterror: 1};
           // Merge all the fields
           for(var j = 0; j < writeConcernFields.length; j++) {
             if(writeConcern[writeConcernFields[j]] != null)
               getLastErrorCmd[writeConcernFields[j]] = writeConcern[writeConcernFields[j]];
           }
-
-        // console.log("--------------------------------------------------- EXECUTE 2")
 
           // Create a getLastError command
           var getLastErrorOp = new Query(bson, f("%s.$cmd", db), getLastErrorCmd, {numberToReturn: -1});

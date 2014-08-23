@@ -280,6 +280,12 @@ var Mongos = function(seedlist, options) {
       retriesLeft = retriesLeft - 1;
     }
 
+    // If we have a primary and a disconnect handler, execute
+    // buffered operations
+    if(mongosState.isConnected() && disconnectHandler) {
+      disconnectHandler.execute();
+    }
+
     // Log the information
     if(logger.isDebug()) logger.debug(f('mongos ha proceess running'));
     

@@ -518,6 +518,12 @@ var ReplSet = function(seedlist, options) {
     // Controls if we are doing a single inquiry or repeating
     norepeat = typeof norepeat == 'boolean' ? norepeat : false;
 
+    // If we have a primary and a disconnect handler, execute
+    // buffered operations
+    if(replState.isPrimaryConnected() && replState.isSecondaryConnected() && disconnectHandler) {
+      disconnectHandler.execute();
+    }
+
     // Emit replicasetInquirer
     self.emit('ha', 'start', {norepeat: norepeat, id: localHaId, state: replState ? replState.toJSON() : {}});
 
@@ -988,7 +994,11 @@ var ReplSet = function(seedlist, options) {
     // If we specified a read preference check if we are connected to something
     // than can satisfy this
     if(options.readPreference 
-      && options.readPreference.preference != ReadPreference.PRIMARY)
+      && options.readPreference.equals(ReadPreference.secondary))
+      return replState.isSecondaryConnected();
+
+    if(options.readPreference 
+      && options.readPreference.equals(ReadPreference.primary))
       return replState.isSecondaryConnected() || replState.isPrimaryConnected();
 
     if(secondaryOnlyConnectionAllowed) return replState.isSecondaryConnected();
