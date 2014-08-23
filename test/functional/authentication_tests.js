@@ -395,19 +395,17 @@ exports.shouldCorrectlyAuthenticateUsingPrimary = {
             , replSetManager.startPort, replSetManager.replicasetName);
           // Connect
           MongoClient.connect(config, function(error, client) {
-            if (error) {
-              console.log("Received connection error (" + error + ") with " + config)
-            } else {
-              client.collectionNames(function(error, names) {
-                test.equal(null, error);
-                
-                client.close();
+            test.equal(null, error);
 
-                replSetManager.stop(function() {
-                  test.done();
-                });
+            client.collectionNames(function(error, names) {
+              test.equal(null, error);
+              
+              client.close();
+
+              replSetManager.stop(function() {
+                test.done();
               });
-            }
+            });
           });
         });
       });
@@ -538,11 +536,8 @@ exports.shouldCorrectlyAuthenticateWithOnlySecondarySeed = {
                             
                             // Let's restart a secondary
                             replSetManager.restartServer('secondary', function(err, result) {
-                              console.log("----------------------------------------------------- 0")
                               // Should fail
                               client.collection('test').findOne(function(err) {
-                              console.log("----------------------------------------------------- 1")
-                              console.dir(err)
                                 test.equal(null, err);
 
                                 client.close();

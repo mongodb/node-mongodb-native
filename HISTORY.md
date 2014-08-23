@@ -4,3 +4,4 @@
 - remove third result on update and remove and return the whole result document instead (getting rid of the weird 3 result parameters)
     - Might break some application
 - MongoClient only has the connect method (no ability instantiate with Server, ReplSet or similar)
+- Removed Grid class

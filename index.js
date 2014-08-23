@@ -11,7 +11,6 @@ connect.Server = require('./lib/server');
 connect.ReplSet = require('./lib/replset');
 connect.Mongos = require('./lib/mongos');
 connect.ReadPreference = require('./lib/read_preference');
-connect.Grid = require('./lib/gridfs/grid');
 connect.GridStore = require('./lib/gridfs/grid_store');
 connect.Chunk = require('./lib/gridfs/chunk');
 connect.Logger = core.Logger;
