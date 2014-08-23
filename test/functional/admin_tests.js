@@ -9,12 +9,12 @@ exports.shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode = {
   
   // The actual test we wish to run
   test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+    var db = configure.newDbInstance({}, {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode');
       collection.insert({'a':1}, {w: 1}, function(err, doc) {
         var adminDb = db.admin();        
-        adminDb.addUser('admin', 'admin', function(err, result) {
+        adminDb.addUser('admin', 'admin', configure.writeConcernMax(), function(err, result) {
           test.equal(null, err);
 
           adminDb.authenticate('admin', 'admin', function(err, replies) {

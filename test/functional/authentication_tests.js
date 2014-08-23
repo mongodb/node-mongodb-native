@@ -495,49 +495,54 @@ exports.shouldCorrectlyAuthenticateWithOnlySecondarySeed = {
       db.open(function(err, p_db) {
         test.equal(null, err);
 
-        p_db.addUser("me", "secret", {w:3}, function(err, result) {
+        p_db.admin().addUser("me", "secret", {w:3}, function(err, result) {
           test.equal(null, err);
 
           // Close the connection
           p_db.close();
 
+          // Just set auths for the manager to handle it correctly
+          replSetManager.setCredentials("mongocr", "admin", "me", "secret");
+
           // connection string
-          var config = f("mongodb://me:secret@localhost:%s/node-native-test?readPreference=secondary&replicaSet=%s"
+          var config = f("mongodb://me:secret@localhost:%s/node-native-test?authSource=admin&readPreference=secondary&replicaSet=%s&maxPoolSize=1"
             , replSetManager.startPort, replSetManager.replicasetName);
           // Connect
           MongoClient.connect(config, function(error, client) {
             client.on('fullsetup', function() {
               test.equal(null, error);
 
-              client.collection('test').findOne(function(err) {
+              client.collection('test').insert({a:1}, function(err, r) {
                 test.equal(null, err);
                 
                 // Logout
                 client.logout(function() {
 
                   // Should fail
-                  client.collection('test').findOne(function(err) {
+                  client.collection('test').findOne(function(err, r) {
                     test.ok(err != null);
 
                     // Authenticate
-                    client.authenticate("me", "secret", function(err, r) {
+                    client.admin().authenticate("me", "secret", function(err, r) {
                       test.equal(null, err);
                       test.ok(r);
 
                       // Shutdown the first secondary
-                      replSetManager.shutdown('secondary', {signal:15}, function(err, result) {
-                        
+                      replSetManager.shutdown('secondary', {signal:-9}, function(err, result) {
+
                         // Shutdown the second secondary
-                        replSetManager.shutdown('secondary', {signal:15}, function(err, result) {
+                        replSetManager.shutdown('secondary', {signal:-9}, function(err, result) {
 
                           // Let's restart a secondary
                           replSetManager.restartServer('secondary', function(err, result) {
                             
                             // Let's restart a secondary
                             replSetManager.restartServer('secondary', function(err, result) {
-                            
+                              console.log("----------------------------------------------------- 0")
                               // Should fail
                               client.collection('test').findOne(function(err) {
+                              console.log("----------------------------------------------------- 1")
+                              console.dir(err)
                                 test.equal(null, err);
 
                                 client.close();
@@ -1028,7 +1033,7 @@ exports.shouldCorrectlyAuthAgainstReplicaSetAdminDbUsingMongoClient = {
           test.ok(result != null);
           db_p.close();
 
-          MongoClient.connect(f("mongodb://me:secret@%s:%s/%s?rs_name=%s&readPreference=secondary&w=3"
+          MongoClient.connect(f("mongodb://me:secret@%s:%s/%s?authSource=admin&rs_name=%s&readPreference=secondary&w=3"
             , 'localhost', replSetManager.startPort, dbName, replSetManager.replicasetName), function(err, db) {
               db.on('fullsetup', function(err, db) {
                 test.equal(null, err);
@@ -1207,31 +1212,32 @@ exports['should correctly connect and authenticate against admin database using 
       db.open(function(err, p_db) {
         test.equal(null, err);
 
-        db.addUser("me", "secret", {w:3}, function(err, result) {
-
+        db.addUser("me", "secret", {w:'majority'}, function(err, result) {
           // Just set auths for the manager to handle it correctly
           shardedManager.setCredentials("mongocr", "admin", "me", "secret");
 
           // Close the connection
           db.close();
 
-          // connection string
-          var config = f("mongodb://me:secret@localhost:%s/node-native-test"
-            , shardedManager.mongosStartPort);
-          // Connect
-          MongoClient.connect(config, function(error, client) {
-            test.equal(null, error);
-
-            client.collectionNames(function(error, names) {
+          setTimeout(function() {
+            // connection string
+            var config = f("mongodb://me:secret@localhost:%s/node-native-test"
+              , shardedManager.mongosStartPort);
+            // Connect
+            MongoClient.connect(config, function(error, client) {
               test.equal(null, error);
-              
-              client.close();
 
-              shardedManager.stop(function() {
-                test.done();
+              client.collectionNames(function(error, names) {
+                test.equal(null, error);
+                
+                client.close();
+
+                shardedManager.stop(function() {
+                  test.done();
+                });
               });
-            });
-          });
+            });            
+          }, 5000);
         });
       });
     });
@@ -1241,7 +1247,7 @@ exports['should correctly connect and authenticate against admin database using 
 /**
  * @ignore
  */
-exports['Should correctly handle replicaset master stepdown and stepup without loosing auth'] = {
+exports['Should correctly handle replicaset master stepdown and stepup without loosing auth for sharding'] = {
   metadata: { requires: { topology: ['auth'] } },
   
   // The actual test we wish to run
@@ -1260,7 +1266,7 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
       db.open(function(err, p_db) {
         test.equal(null, err);
 
-        db.addUser("me", "secret", {w:3}, function(err, result) {
+        db.addUser("me", "secret", {w:'majority'}, function(err, result) {
 
           // Just set auths for the manager to handle it correctly
           shardedManager.setCredentials("mongocr", "admin", "me", "secret");
