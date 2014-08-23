@@ -229,7 +229,7 @@ exports.shouldCorrectlyFailAndReturnError = {
 exports.shouldCorrectlyPassReadPreference = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { mongodb: ">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl'] } },  
+  metadata: { requires: { mongodb: ">2.1.0", topology: ['single', 'ssl'] } },  
   
   // The actual test we wish to run
   test: function(configure, test) {

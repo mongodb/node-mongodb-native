@@ -1028,7 +1028,7 @@ exports.shouldCorrectlyAuthAgainstReplicaSetAdminDbUsingMongoClient = {
           test.ok(result != null);
           db_p.close();
 
-          MongoClient.connect(f("mongodb://me:secret@%s:%s/%s?authSource=admin&rs_name=%s&readPreference=secondary&w=3"
+          MongoClient.connect(f("mongodb://me:secret@%s:%s/%s?rs_name=%s&readPreference=secondary&w=3"
             , 'localhost', replSetManager.startPort, dbName, replSetManager.replicasetName), function(err, db) {
               db.on('fullsetup', function(err, db) {
                 test.equal(null, err);

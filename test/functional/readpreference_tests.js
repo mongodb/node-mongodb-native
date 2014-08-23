@@ -2,7 +2,7 @@
  * @ignore
  */
 exports['Should correctly apply collection level read Preference to count'] = {
-  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'replicaset', 'sharded', 'ssl'] } },  
+  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },  
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -37,7 +37,7 @@ exports['Should correctly apply collection level read Preference to count'] = {
  * @ignore
  */
 exports['Should correctly apply collection level read Preference to group'] = {
-  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'replicaset', 'sharded', 'ssl'] } },  
+  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },  
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -73,7 +73,7 @@ exports['Should correctly apply collection level read Preference to group'] = {
  * @ignore
  */
 exports['Should correctly apply collection level read Preference to geoNear'] = {
-  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'replicaset', 'sharded', 'ssl'] } },  
+  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },  
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -109,7 +109,7 @@ exports['Should correctly apply collection level read Preference to geoNear'] = 
  * @ignore
  */
 exports['Should correctly apply collection level read Preference to geoHaystackSearch'] = {
-  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'replicaset', 'sharded', 'ssl'] } },  
+  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },  
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -144,7 +144,7 @@ exports['Should correctly apply collection level read Preference to geoHaystackS
  * @ignore
  */
 exports['Should correctly apply collection level read Preference to mapReduce'] = {
-  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'replicaset', 'sharded', 'ssl'] } },  
+  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },  
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -184,7 +184,7 @@ exports['Should correctly apply collection level read Preference to mapReduce'] 
  * @ignore
  */
 exports['Should correctly apply collection level read Preference to mapReduce backward compatibility'] = {
-  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'replicaset', 'sharded', 'ssl'] } },  
+  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },  
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -224,7 +224,7 @@ exports['Should correctly apply collection level read Preference to mapReduce ba
  * @ignore
  */
 exports['Should fail due to not using mapreduce inline with read preference'] = {
-  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'replicaset', 'sharded', 'ssl'] } },  
+  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },  
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -256,7 +256,7 @@ exports['Should fail due to not using mapreduce inline with read preference'] = 
  * @ignore
  */
 exports['Should correctly apply collection level read Preference to aggregate'] = {
-  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'replicaset', 'sharded', 'ssl'] } },  
+  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },  
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -306,7 +306,7 @@ exports['Should correctly apply collection level read Preference to aggregate'] 
  * @ignore
  */
 exports['Should correctly apply collection level read Preference to stats'] = {
-  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'replicaset', 'sharded', 'ssl'] } },  
+  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },  
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -346,7 +346,7 @@ exports['Should correctly apply collection level read Preference to stats'] = {
  * @ignore
  */
 exports['Should correctly honor the readPreferences at DB and individual command level'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },  
   
   // The actual test we wish to run
   test: function(configuration, test) {
