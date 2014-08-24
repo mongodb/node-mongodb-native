@@ -17,7 +17,7 @@
   "dependencies": {
     "bson": "0.2.12",
     "mkdirp": "0.5.0",
-    "rimraf": "2.2.6",
+    "rimraf": "2.2.6"
   },
   "devDependencies": {
     "integra": "0.1.1",
