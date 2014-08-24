@@ -16,13 +16,13 @@
     "legacy"
   ],
   "dependencies": {
-      "mongodb-core": "latest"
-    , "readable-stream": "latest"
+      "mongodb-core": "1.0.0-alpha1"
+    , "readable-stream": "1.0.31"
   },
   "devDependencies": {
-      "integra": "latest"
-    , "optimist": "latest"
-    , "bson": "latest"
+      "integra": "0.1.6"
+    , "optimist": "0.6.1"
+    , "bson": "0.2.12"
   },
   "author": "Christian Kvalheim",
   "license": "Apache 2.0",
