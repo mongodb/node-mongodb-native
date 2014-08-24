@@ -16,7 +16,7 @@
     "legacy"
   ],
   "dependencies": {
-      "mongodb-core": "1.0.0-alpha1"
+      "mongodb-core": "1.0.0-alpha2"
     , "readable-stream": "1.0.31"
   },
   "devDependencies": {
@@ -29,5 +29,6 @@
   "bugs": {
     "url": "https://github.com/christkv/mongodb-legacy/issues"
   },
+  "scripts": { "test" : "node test/runner.js -t functionale" },
   "homepage": "https://github.com/christkv/mongodb-legacy"
 }
