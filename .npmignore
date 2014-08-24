@@ -16,6 +16,7 @@ gh-pages/
 docs/
 docs/sphinx-docs
 data/
+db/
 dev/
 examples/
 test/
