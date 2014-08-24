@@ -10,10 +10,10 @@ module.exports = {
   // Raw operations
   , Query: require('./lib/connection/commands').Query
   // Tools exported for testing
-  , ServerManager: require('./test/tools/server_manager')
-  , ReplSetManager: require('./test/tools/replset_manager')
-  , MongosManager: require('./test/tools/mongos_manager')
-  , ShardingManager: require('./test/tools/sharding_manager')
+  , ServerManager: require('./lib/tools/server_manager')
+  , ReplSetManager: require('./lib/tools/replset_manager')
+  , MongosManager: require('./lib/tools/mongos_manager')
+  , ShardingManager: require('./lib/tools/sharding_manager')
   // Auth mechanisms
   , MongoCR: require('./lib/auth/mongocr')
   , X509: require('./lib/auth/x509')
