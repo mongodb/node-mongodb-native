@@ -1,7 +1,7 @@
 {
   "name": "mongodb-core",
-  "version": "0.0.1",
-  "description": "Core MongoDB driver functionality, no bells and whistles",
+  "version": "1.0.0-alpha1",
+  "description": "Core MongoDB driver functionality, no bells and whistles and meant for integration not end applications",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -15,8 +15,7 @@
     "core"
   ],
   "dependencies": {
-      "mongodb-core": "latest"
-    , "bson": "latest"
+    "bson": "0.2.12"
   },
   "devDependencies": {
     "integra": "0.1.1",
