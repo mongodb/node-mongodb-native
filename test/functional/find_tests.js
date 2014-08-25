@@ -14,9 +14,9 @@ exports.shouldCorrectlyPerformSimpleFind = {
         var doc2 = null;
 
         // Insert some test documents
-        collection.insert([{a:2}, {b:3}], configuration.writeConcernMax(), function(err, docs) {
-          doc1 = docs[0];
-          doc2 = docs[1]
+        collection.insert([{a:2}, {b:3}], configuration.writeConcernMax(), function(err, r) {
+          doc1 = r.ops[0];
+          doc2 = r.ops[1]
 
           // Ensure correct insertion testing via the cursor and the count function
           collection.find().toArray(function(err, documents) {
@@ -58,9 +58,9 @@ exports.shouldCorrectlyPeformSimpleChainedFind = {
           var doc2 = null;
 
           // Insert some test documents
-          collection.insert([{a:2}, {b:3}], configuration.writeConcernMax(), function(err, docs) {
-            doc1 = docs[0];
-            doc2 = docs[1]
+          collection.insert([{a:2}, {b:3}], configuration.writeConcernMax(), function(err, r) {
+            doc1 = r.ops[0];
+            doc2 = r.ops[1]
 
             // Ensure correct insertion testing via the cursor and the count function
             collection.find().toArray(function(err, documents) {
@@ -101,8 +101,8 @@ exports.shouldCorrectlyPeformAdvancedFinds = {
       var doc1 = null, doc2 = null, doc3 = null;
 
       // Insert some test documents
-      collection.insert([{a:1}, {a:2}, {b:3}], configuration.writeConcernMax(), function(err, docs) {
-        var doc1 = docs[0], doc2 = docs[1], doc3 = docs[2];
+      collection.insert([{a:1}, {a:2}, {b:3}], configuration.writeConcernMax(), function(err, r) {
+        var doc1 = r.ops[0], doc2 = r.ops[1], doc3 = r.ops[2];
 
         // Locate by less than
         collection.find({'a':{'$lt':10}}).toArray(function(err, documents) {
@@ -546,7 +546,8 @@ exports.shouldCorrectlyPerformFindByObjectID = {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_find_by_oid', function(err, collection) {
-        collection.save({'hello':'mike'}, configuration.writeConcernMax(), function(err, docs) {
+        collection.save({'hello':'mike'}, configuration.writeConcernMax(), function(err, r) {
+          var docs = r.ops[0];
           test.ok(docs._id instanceof ObjectID || Object.prototype.toString.call(docs._id) === '[object ObjectID]');
 
           collection.findOne({'_id':docs._id}, function(err, doc) {
@@ -741,10 +742,12 @@ exports.shouldCorrectlyFindAndModifyDocument = {
                       test.equal(3, updated_doc.b);
 
                       // Test selecting a subset of fields
-                      collection.insert({a: 100, b: 101}, configuration.writeConcernMax(), function (err, ids) {
+                      collection.insert({a: 100, b: 101}, configuration.writeConcernMax(), function (err, r) {
+                        test.equal(null, err);
+
                         collection.findAndModify({'a': 100}, [], {'$set': {'b': 5}}, {'new': true, fields: {b: 1}}, function (err, updated_doc) {
                           test.equal(2, Object.keys(updated_doc).length);
-                          test.equal(ids[0]['_id'].toHexString(), updated_doc._id.toHexString());
+                          test.equal(r.ops[0]['_id'].toHexString(), updated_doc._id.toHexString());
                           test.equal(5, updated_doc.b);
                           test.equal("undefined", typeof updated_doc.a);
                           db.close();
@@ -804,12 +807,12 @@ exports['ShouldCorrectlyLocatePostAndIncValues'] = {
         // Test return new document on change
         collection.insert({title:'Tobi',
             author:'Brian',
-            newTitle:'Woot', meta:{visitors:0}}, configuration.writeConcernMax(), function(err, docs) {
+            newTitle:'Woot', meta:{visitors:0}}, configuration.writeConcernMax(), function(err, r) {
           // Fetch the id
-          var id = docs[0]._id
+          var id = r.ops[0]._id
 
-          collection.update({_id:id}, {$inc:{ 'meta.visitors': 1 }}, configuration.writeConcernMax(), function(err, result) {
-            test.equal(1, result);
+          collection.update({_id:id}, {$inc:{ 'meta.visitors': 1 }}, configuration.writeConcernMax(), function(err, r) {
+            test.equal(1, r.result.n);
             test.equal(null, err);
 
             collection.findOne({_id:id}, function(err, item) {
@@ -1277,13 +1280,15 @@ exports.shouldCorrectlyExecuteFindAndModifyShouldGenerateCorrectBSON = {
       }
 
       db.createCollection('shouldCorrectlyExecuteFindAndModify', function(err, collection) {
-        collection.insert(wrapingObject, configuration.writeConcernMax(), function(err, doc) {
+        test.equal(null, err);
+
+        collection.insert(wrapingObject, configuration.writeConcernMax(), function(err, r) {
           test.equal(null, err);
 
-          collection.findOne({_id:doc[0]._id, 'funds.remaining': {$gte: 3.0}, 'transactions.id': {$ne: transaction.transactionId}}, function(err, item) {
+          collection.findOne({_id:r.ops[0]._id, 'funds.remaining': {$gte: 3.0}, 'transactions.id': {$ne: transaction.transactionId}}, function(err, item) {
             test.ok(item != null)
 
-            collection.findAndModify({_id:doc[0]._id, 'funds.remaining': {$gte: 3.0}, 'transactions.id': {$ne: transaction.transactionId}}, [], {$push: {transactions: transaction}}, {new: true, safe: true}, function(err, result) {
+            collection.findAndModify({_id:r.ops[0]._id, 'funds.remaining': {$gte: 3.0}, 'transactions.id': {$ne: transaction.transactionId}}, [], {$push: {transactions: transaction}}, {new: true, safe: true}, function(err, result) {
               db.close();
               test.done();
             });
@@ -1461,10 +1466,15 @@ exports.shouldCorrectlyErrorOutFindAndModifyOnDuplicateRecord = {
   test: function(configuration, test) {
     var p_client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
     p_client.open(function(err, p_client) {
+      test.equal(err, null);
+
       p_client.createCollection('shouldCorrectlyErrorOutFindAndModifyOnDuplicateRecord', function(err, collection) {
+        test.equal(err, null);
+  
         // Test return old document on change
-        collection.insert([{'login':'user1'}, {'login':'user2'}], configuration.writeConcernMax(), function(err, docs) {
-          var id = docs[1]._id;
+        collection.insert([{'login':'user1'}, {'login':'user2'}], configuration.writeConcernMax(), function(err, r) {
+          test.equal(err, null);
+          var id = r.ops[1]._id;
           // Set an index
           collection.ensureIndex('login', {unique:true, w:1}, function(err, result) {
             // Attemp to modify document

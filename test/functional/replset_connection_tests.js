@@ -790,7 +790,7 @@ exports['Should correctly connect to a replicaset with additional options'] = {
 
       db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
         test.equal(null, err);
-        test.equal(1, result);
+        test.equal(1, result.result.n);
 
         db.close();
         restartAndDone(configuration, test);

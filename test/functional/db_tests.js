@@ -72,12 +72,12 @@ exports.shouldCorrectlyPerformAutomaticConnect = {
         // Let's insert a document
         var collection = automatic_connect_client.collection('test_object_id_generation_data2');
         // Insert another test document and collect using ObjectId
-        collection.insert({"name":"Patty", "age":34}, configuration.writeConcernMax(), function(err, ids) {
-          test.equal(1, ids.length);
-          test.ok(ids[0]._id.toHexString().length == 24);
+        collection.insert({"name":"Patty", "age":34}, configuration.writeConcernMax(), function(err, r) {
+          test.equal(1, r.ops.length);
+          test.ok(r.ops[0]._id.toHexString().length == 24);
 
           collection.findOne({"name":"Patty"}, function(err, document) {
-            test.equal(ids[0]._id.toHexString(), document._id.toHexString());
+            test.equal(r.ops[0]._id.toHexString(), document._id.toHexString());
             // Let's close the db
             automatic_connect_client.close();
             test.done();
@@ -727,30 +727,38 @@ exports.shouldCorrectlyResaveDBRef = {
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.dropCollection('test_resave_dbref', function() {
+        test.equal(null, err);
+
         db.createCollection('test_resave_dbref', function(err, collection) {
+          test.equal(null, err);
 
-          collection.insert({'name': 'parent'}, {safe : true}, function(err, objs) {
-             test.ok(objs && objs.length == 1 && objs[0]._id != null);
-             var parent = objs[0];
-             var child = {'name' : 'child', 'parent' : new DBRef("test_resave_dbref",  parent._id)};
+          collection.insert({'name': 'parent'}, {safe : true}, function(err, r) {
+            test.equal(null, err);
+            test.ok(r.ops.length == 1 && r.ops[0]._id != null);
+            var parent = r.ops[0];
+            var child = {'name' : 'child', 'parent' : new DBRef("test_resave_dbref",  parent._id)};
 
-             collection.insert(child, {safe : true}, function(err, objs) {
+            collection.insert(child, {safe : true}, function(err, objs) {
+              test.equal(null, err);
 
-               collection.findOne({'name' : 'child'}, function(err, child) { //Child deserialized
-                  test.ok(child != null);
+              collection.findOne({'name' : 'child'}, function(err, child) { //Child deserialized
+                test.ok(child != null);
 
-                  collection.save(child, {save : true}, function(err) {
+                collection.save(child, {save : true}, function(err) {
+                  test.equal(null, err);
 
-                    collection.findOne({'parent' : new DBRef("test_resave_dbref",  parent._id)},
-                      function(err, child) {
-                        test.ok(child != null);//!!!! Main test point!
-                        db.close();
-                        test.done();
-                      })
-                  });
-               });
-             });
+                  collection.findOne({'parent' : new DBRef("test_resave_dbref",  parent._id)},
+                    function(err, child) {
+                      test.ok(child != null);//!!!! Main test point!
+                      db.close();
+                      test.done();
+                  })
+                });
+              });
+            });
           });
         });
       });
@@ -784,12 +792,14 @@ exports.shouldCorrectlyDereferenceDbRefExamples = {
 
       // Create a dereference example
       secondDb.createCollection('test_deref_examples', function(err, collection) {
+        test.equal(null, err);
 
         // Insert a document in the collection
-        collection.insert({'a':1}, configuration.writeConcernMax(), function(err, ids) {
+        collection.insert({'a':1}, configuration.writeConcernMax(), function(err, r) {
+          test.equal(null, err);
 
           // Let's build a db reference and resolve it
-          var dbRef = new DBRef('test_deref_examples', ids[0]._id, 'integration_tests_2');
+          var dbRef = new DBRef('test_deref_examples', r.ops[0]._id, 'integration_tests_2');
 
           setTimeout(function() {
             // Resolve it including a db resolve
@@ -797,7 +807,7 @@ exports.shouldCorrectlyDereferenceDbRefExamples = {
               test.equal(1, item.a);
 
               // Let's build a db reference and resolve it
-              var dbRef = new DBRef('test_deref_examples', ids[0]._id);
+              var dbRef = new DBRef('test_deref_examples', r.ops[0]._id);
 
               // Simple local resolve
               secondDb.dereference(dbRef, function(err, item) {

@@ -244,8 +244,8 @@ exports.shouldCorrectlyHandleMultipleDocumentInsert = {
       var collection = db.collection('test_multiple_insert');
       var docs = [{a:1}, {a:2}];
 
-      collection.insert(docs, configuration.writeConcernMax(), function(err, ids) {
-        ids.forEach(function(doc) {
+      collection.insert(docs, configuration.writeConcernMax(), function(err, r) {
+        r.ops.forEach(function(doc) {
           test.ok(((doc['_id']) instanceof ObjectID || Object.prototype.toString.call(doc['_id']) === '[object ObjectID]'));
         });
 
@@ -434,8 +434,8 @@ exports.shouldCorrectlyInsertAndUpdateDocumentWithNewScriptContext = {
         user_collection.remove({}, configuration.writeConcernMax(), function(err, result) {
           //first, create a user object
           var newUser = { name : 'Test Account', settings : {} };
-          user_collection.insert([newUser], configuration.writeConcernMax(), getResult(function(users){
-              var user = users[0];
+          user_collection.insert([newUser], configuration.writeConcernMax(), getResult(function(r){
+              var user = r.ops[0];
 
               var scriptCode = "settings.block = []; settings.block.push('test');";
               var context = { settings : { thisOneWorks : "somestring" } };
@@ -706,7 +706,9 @@ exports.shouldThrowErrorIfSerializingFunction = {
       var func = function() { return 1};
       // Insert the update
       collection.insert({i:1, z:func }, {w:1, serializeFunctions:true}, function(err, result) {
-        collection.findOne({_id:result[0]._id}, function(err, object) {
+        test.equal(null, err);
+
+        collection.findOne({_id:result.ops[0]._id}, function(err, object) {
           test.equal(func.toString(), object.z.code);
           test.equal(1, object.i);
           db.close();
@@ -775,9 +777,9 @@ exports.shouldCorrectlyCallCallbackWithDbDriverInStrictMode = {
       collection.insert({_id : "12345678123456781234567812345678", field: '1'}, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
-        collection.update({ '_id': "12345678123456781234567812345678" }, { '$set': { 'field': 0 }}, configuration.writeConcernMax(), function(err, numberOfUpdates) {
+        collection.update({ '_id': "12345678123456781234567812345678" }, { '$set': { 'field': 0 }}, configuration.writeConcernMax(), function(err, r) {
           test.equal(null, err);
-          test.equal(1, numberOfUpdates);
+          test.equal(1, r.result.n);
           db.close();
           test.done();
         });
@@ -915,7 +917,7 @@ exports.shouldCorrectlyFailWhenNoObjectToUpdate = {
 
       collection.update({_id : new ObjectID()}, { email : 'update' }, configuration.writeConcernMax(),
         function(err, result) {
-          test.equal(0, result);
+          test.equal(0, result.result.n);
           db.close();
           test.done();
         }
@@ -1058,7 +1060,7 @@ exports['Should Correctly allow for control of serialization of functions on com
       collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
 
         collection.update({str:"String"}, {$set:{c:1, d:function(){}}}, {w:1, serializeFunctions:false}, function(err, result) {
-          test.equal(1, result);
+          test.equal(1, result.result.n);
 
           collection.findOne({str:"String"}, function(err, item) {
             test.equal(null, item.d);
@@ -1153,8 +1155,8 @@ exports['Should Correctly fail to update returning 0 results'] = {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('Should_Correctly_fail_to_update_returning_0_results');
-      collection.update({a:1}, {$set: {a:1}}, configuration.writeConcernMax(), function(err, numberOfUpdated) {
-        test.equal(0, numberOfUpdated);
+      collection.update({a:1}, {$set: {a:1}}, configuration.writeConcernMax(), function(err, r) {
+        test.equal(0, r.result.n);
         db.close();
         test.done();
       });
@@ -1192,9 +1194,9 @@ exports['Should Correctly update two fields including a sub field'] = {
         test.equal(null, err);
 
         // Update two fields
-        collection.update({_id:doc._id}, {$set:{Prop1:'p1_2', 'More.Sub2':'s2_2'}}, configuration.writeConcernMax(), function(err, numberOfUpdatedDocs) {
+        collection.update({_id:doc._id}, {$set:{Prop1:'p1_2', 'More.Sub2':'s2_2'}}, configuration.writeConcernMax(), function(err, r) {
           test.equal(null, err);
-          test.equal(1, numberOfUpdatedDocs);
+          test.equal(1, r.result.n);
 
           collection.findOne({_id:doc._id}, function(err, item) {
             test.equal(null, err);
@@ -1280,14 +1282,14 @@ exports.shouldCorrectlyPerformUpsertAgainstNewDocumentAndExistingOne = {
 
       // Upsert a new doc
       collection.update({a:1}, {a:1}, {upsert:true, w:1, fullResult:true}, function(err, result) {
-        if(result.updatedExisting) test.equal(false, result.updatedExisting);
-        test.equal(1, result.n);
-        test.ok(result.upserted != null);
+        if(result.result.updatedExisting) test.equal(false, result.result.updatedExisting);
+        test.equal(1, result.result.n);
+        test.ok(result.result.upserted != null);
 
         // Upsert an existing doc
         collection.update({a:1}, {a:1}, {upsert:true, w:1, fullResult:true}, function(err, result) {
           if(result.updatedExisting) test.equal(true, result.updatedExisting);          
-          test.equal(1, result.n);
+          test.equal(1, result.result.n);
           db.close();
           test.done();
         });
@@ -1428,9 +1430,9 @@ exports.shouldCorrectlyUseCustomObjectToUpdateDocument = {
         query.a.b['c'] = 1;
 
         // Update document
-        collection.update(query, {$set: {'a.b.d':1}}, configuration.writeConcernMax(), function(err, numberUpdated) {
+        collection.update(query, {$set: {'a.b.d':1}}, configuration.writeConcernMax(), function(err, r) {
           test.equal(null, err);
-          test.equal(1, numberUpdated);
+          test.equal(1, r.result.n);
 
           db.close();
           test.done();

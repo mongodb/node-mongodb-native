@@ -654,14 +654,13 @@ exports.shouldCorrectlyExecuteSave = {
     db.open(function(err, db) {
       db.createCollection('test_save', function(err, collection) {
         var doc = {'hello':'world'};
-        collection.save(doc, configuration.writeConcernMax(), function(err, docs) {
-          test.ok(docs._id != null);
+        collection.save(doc, configuration.writeConcernMax(), function(err, r) {
+          test.ok(r.ops[0]._id != null);
 
           collection.count(function(err, count) {
             test.equal(1, count);
-            doc = docs;
 
-            collection.save(doc, configuration.writeConcernMax(), function(err, doc2) {
+            collection.save(r.ops[0], configuration.writeConcernMax(), function(err, doc2) {
 
               collection.count(function(err, count) {
                 test.equal(1, count);
@@ -782,9 +781,9 @@ exports.shouldCorrectlyUpdateWithNoDocs = {
         var id = new ObjectID(null)
         var doc = {_id:id, a:1};
 
-        collection.update({"_id":id}, doc, configuration.writeConcernMax(), function(err, numberofupdateddocs) {
+        collection.update({"_id":id}, doc, configuration.writeConcernMax(), function(err, r) {
           test.equal(null, err);
-          test.equal(0, numberofupdateddocs);
+          test.equal(0, r.result.n);
           
           db.close();
           test.done();
@@ -865,7 +864,7 @@ exports.shouldCorrectlyUpsertASimpleDocument = {
         // Update the document using an upsert operation, ensuring creation if it does not exist
         collection.update({a:1}, {b:2, a:1}, {upsert:true, w: 1}, function(err, result) {
           test.equal(null, err);
-          test.equal(1, result);
+          test.equal(1, result.result.n);
 
           // Fetch the document that we modified and check if it got inserted correctly
           collection.findOne({a:1}, function(err, item) {
@@ -910,9 +909,9 @@ exports.shouldCorrectlyUpdateMultipleDocuments = {
           var o = configuration.writeConcernMax();
           o.multi = true
           // Update multiple documents using the multi option
-          collection.update({a:1}, {$set:{b:0}}, o, function(err, numberUpdated) {
+          collection.update({a:1}, {$set:{b:0}}, o, function(err, r) {
             test.equal(null, err);
-            test.equal(2, numberUpdated);
+            test.equal(2, r.result.n);
 
             // Fetch all the documents and verify that we have changed the b value
             collection.find().toArray(function(err, items) {
@@ -1077,14 +1076,14 @@ exports.shouldCorrectlyExecuteInsertUpdateDeleteSafeMode = {
       db.createCollection('test_should_execute_insert_update_delete_safe_mode', function(err, collection) {
         test.equal('test_should_execute_insert_update_delete_safe_mode', collection.collectionName);
 
-        collection.insert({i:1}, configuration.writeConcernMax(), function(err, ids) {
-          test.equal(1, ids.length);
-          test.ok(ids[0]._id.toHexString().length == 24);
+        collection.insert({i:1}, configuration.writeConcernMax(), function(err, r) {
+          test.equal(1, r.ops.length);
+          test.ok(r.ops[0]._id.toHexString().length == 24);
 
           // Update the record
           collection.update({i:1}, {"$set":{i:2}}, configuration.writeConcernMax(), function(err, result) {
             test.equal(null, err);
-            test.equal(1, result);
+            test.equal(1, r.result.n);
 
             // Remove safely
             collection.remove({}, configuration.writeConcernMax(), function(err, result) {
@@ -1118,6 +1117,8 @@ exports.shouldPerformMultipleSaves = {
 
         //insert new user
         collection.save(doc, configuration.writeConcernMax(), function(err, r) {
+          test.equal(null, err);
+
           collection.find({}, {name: 1}).limit(1).toArray(function(err, users){
             var user = users[0]
 
@@ -1128,7 +1129,7 @@ exports.shouldPerformMultipleSaves = {
 
               collection.save(user, configuration.writeConcernMax(), function(err, result){
                 test.equal(null, err);
-                test.equal(1, result);
+                test.equal(1, result.result.n);
                 db.close();
                 test.done();
               })
@@ -1168,6 +1169,7 @@ exports.shouldCorrectlySaveDocumentWithNestedArray = {
             username: 'amit' };
           //insert new user
           collection.save(doc, configuration.writeConcernMax(), function(err, doc) {
+              test.equal(null, err);
 
               collection.find({}).limit(1).toArray(function(err, users) {
                 test.equal(null, err);
@@ -1180,7 +1182,7 @@ exports.shouldCorrectlySaveDocumentWithNestedArray = {
                   // Update again
                   collection.update({_id:new ObjectID(user._id.toString())}, {friends:user.friends}, {upsert:true, w: 1}, function(err, result) {
                     test.equal(null, err);
-                    test.equal(1, result);
+                    test.equal(1, result.result.n);
 
                     db.close();
                     test.done();

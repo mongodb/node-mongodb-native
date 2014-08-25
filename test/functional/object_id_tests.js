@@ -13,23 +13,23 @@ exports.shouldCorrectlyGenerateObjectID = {
 
       var collection = db.collection('test_object_id_generation.data');
       // Insert test documents (creates collections and test fetch by query)
-      collection.insert({name:"Fred", age:42}, {w:1}, function(err, ids) {
-        test.equal(1, ids.length);
-        test.ok(ids[0]['_id'].toHexString().length == 24);
+      collection.insert({name:"Fred", age:42}, {w:1}, function(err, r) {
+        test.equal(1, r.ops.length);
+        test.ok(r.ops[0]['_id'].toHexString().length == 24);
         // Locate the first document inserted
         collection.findOne({name:"Fred"}, function(err, document) {
-          test.equal(ids[0]['_id'].toHexString(), document._id.toHexString());
+          test.equal(r.ops[0]['_id'].toHexString(), document._id.toHexString());
           number_of_tests_done++;
         });
       });
 
       // Insert another test document and collect using ObjectId
-      collection.insert({name:"Pat", age:21}, {w:1}, function(err, ids) {
-        test.equal(1, ids.length);
-        test.ok(ids[0]['_id'].toHexString().length == 24);
+      collection.insert({name:"Pat", age:21}, {w:1}, function(err, r) {
+        test.equal(1, r.ops.length);
+        test.ok(r.ops[0]['_id'].toHexString().length == 24);
         // Locate the first document inserted
-        collection.findOne(ids[0]['_id'], function(err, document) {
-          test.equal(ids[0]['_id'].toHexString(), document._id.toHexString());
+        collection.findOne(r.ops[0]['_id'], function(err, document) {
+          test.equal(r.ops[0]['_id'].toHexString(), document._id.toHexString());
           number_of_tests_done++;
         });
       });
@@ -37,13 +37,13 @@ exports.shouldCorrectlyGenerateObjectID = {
       // Manually created id
       var objectId = new ObjectID(null);
       // Insert a manually created document with generated oid
-      collection.insert({"_id":objectId, name:"Donald", age:95}, {w:1}, function(err, ids) {
-        test.equal(1, ids.length);
-        test.ok(ids[0]['_id'].toHexString().length == 24);
-        test.equal(objectId.toHexString(), ids[0]['_id'].toHexString());
+      collection.insert({"_id":objectId, name:"Donald", age:95}, {w:1}, function(err, r) {
+        test.equal(1, r.ops.length);
+        test.ok(r.ops[0]['_id'].toHexString().length == 24);
+        test.equal(objectId.toHexString(), r.ops[0]['_id'].toHexString());
         // Locate the first document inserted
-        collection.findOne(ids[0]['_id'], function(err, document) {
-          test.equal(ids[0]['_id'].toHexString(), document._id.toHexString());
+        collection.findOne(r.ops[0]['_id'], function(err, document) {
+          test.equal(r.ops[0]['_id'].toHexString(), document._id.toHexString());
           test.equal(objectId.toHexString(), document._id.toHexString());
           number_of_tests_done++;
         });

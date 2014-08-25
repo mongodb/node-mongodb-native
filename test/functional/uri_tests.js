@@ -20,7 +20,7 @@ exports['Should correctly connect using MongoClient to a single server using con
 
       db.collection('mongoclient_test').update({a:1}, {b:1}, {upsert:true}, function(err, result) {
         test.equal(null, err);
-        test.equal(1, result);
+        test.equal(1, result.result.n);
 
         db.close();
         test.done();
@@ -60,7 +60,7 @@ exports['Should correctly connect using MongoClient to a single server using con
 
       db.collection('mongoclient_test').update({a:1}, {b:1}, {upsert:true}, function(err, result) {
         test.equal(null, err);
-        test.equal(1, result);
+        test.equal(1, result.result.n);
 
         db.close();
         test.done();
@@ -87,7 +87,7 @@ exports['Should correctly allow for w:0 overriding on the connect url'] = {
 
       db.collection('mongoclient_test').update({a:1}, {b:1}, {upsert:true}, function(err, result) {
         test.equal(null, err);
-        test.equal(null, result);
+        test.equal(1, result.result.ok);
 
         db.close();
         test.done();

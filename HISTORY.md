@@ -3,6 +3,7 @@
 - gridfs stream only available through .stream() method due to overlapping names on Gridstore object and streams in 0.10.x and higher of node
 - remove third result on update and remove and return the whole result document instead (getting rid of the weird 3 result parameters)
     - Might break some application
+- Returns the actual mongodb-core result
 - MongoClient only has the connect method (no ability instantiate with Server, ReplSet or similar)
 - Removed Grid class
 - GridStore only supports w+ for metadata updates, no appending to file as it's not thread safe and can cause corruption of the data
