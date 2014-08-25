@@ -87,7 +87,9 @@ exports['Should correctly allow for w:0 overriding on the connect url'] = {
 
       db.collection('mongoclient_test').update({a:1}, {b:1}, {upsert:true}, function(err, result) {
         test.equal(null, err);
-        test.equal(1, result.result.ok);
+
+        if(result) test.equal(1, result.result.ok);
+        else test.equal(null, result);
 
         db.close();
         test.done();
