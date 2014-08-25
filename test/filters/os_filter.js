@@ -8,9 +8,18 @@ var OSFilter = function() {
     if(test.metadata.requires.os == null) return false;
     // Get the os
     var os = test.metadata.requires.os;
+
+    // console.log("----------------------------------------------------------")
+    // console.log(test.metadata.requires.os)
+    // console.log(platform)
+    // console.log(os[0] == '!')
+    // console.log(os != ("!" + platform))
+
+    if(os == platform) return false
     // If !platform only allow running if the platform match
     if(os[0] == '!' && os != ("!" + platform)) return false;
-    if(os == platform) return true
+    // console.log("---------------------------------------------------------- 1")
+    // console.log("---------------------------------------------------------- 2")
     return true;
   }
 }

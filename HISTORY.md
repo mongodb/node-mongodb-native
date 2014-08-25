@@ -5,3 +5,4 @@
     - Might break some application
 - MongoClient only has the connect method (no ability instantiate with Server, ReplSet or similar)
 - Removed Grid class
+- GridStore only supports w+ for metadata updates, no appending to file as it's not thread safe and can cause corruption of the data

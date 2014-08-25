@@ -180,18 +180,27 @@ exports['Should Correctly Authenticate on Win32 using kerberos with MongoClient'
       , MongoClient = configuration.require.MongoClient
       , Server = configuration.require.Server;
 
+    console.log("------------------------------------------------------------ 0")
+
     // KDC Server
     var server = "ldaptest.10gen.cc";
     var principal = "drivers@LDAPTEST.10GEN.CC";
     var pass = process.env['LDAPTEST_PASSWORD'];
+    var pass = 'powerbook17';
     var urlEncodedPrincipal = encodeURIComponent(principal);
+
+    console.log("------------------------------------------------------------ 1 :: " + urlEncodedPrincipal)
 
     // Let's write the actual connection code
     MongoClient.connect(format("mongodb://%s:%s@%s/test?authMechanism=GSSAPI&maxPoolSize=1", urlEncodedPrincipal, pass, server), function(err, db) {
+    console.log("------------------------------------------------------------ 2")
+    console.dir(err)
       test.equal(null, err);
       test.ok(db != null);
+    console.log("------------------------------------------------------------ 3")
 
       db.collection('test').find().toArray(function(err, docs) {
+    console.log("------------------------------------------------------------ 4")
         test.equal(null, err);
         test.ok(true, docs[0].kerberos);
         test.done();

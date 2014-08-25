@@ -26,6 +26,14 @@ var shallowClone = function(obj) {
   return copy;
 }
 
+// Skipping parameters
+var startupOptions = {
+    skipStartup: false
+  , skipRestart: false
+  , skipShutdown: false
+  , skip: false
+}
+
 /**
  * Standalone MongoDB Configuration
  */
@@ -65,19 +73,22 @@ var createConfiguration = function(options) {
       replicasetName: replicasetName,
 
       start: function(callback) {
-        manager.start({purge:true, signal:-9}, function(err) {
-          if(err) throw err;
+        // if(startupOptions.skipStartup) return callback();
+        // manager.start({purge:true, signal:-9}, function(err) {
+        //   if(err) throw err;
           callback();
-        });
+        // });
       },
 
       stop: function(callback) {
-        manager.stop({signal: -15}, function() {
+        // if(startupOptions.skipShutdown) return callback();
+        // manager.stop({signal: -15}, function() {
           callback();
-        });        
+        // });        
       },
 
       restart: function(callback) {
+        if(startupOptions.skipRestart) return callback();
         manager.restart({purge:true, kill:true}, function() {
           setTimeout(function() {
             callback();
@@ -176,58 +187,58 @@ var runner = new Runner({
 });
 
 var testFiles =[
-    '/test/functional/mongo_client_tests.js'
-  , '/test/functional/collection_tests.js'
-  , '/test/functional/db_tests.js'
-  , '/test/functional/cursor_tests.js'
-  , '/test/functional/insert_tests.js'
-  , '/test/functional/aggregation_tests.js'
-  , '/test/functional/admin_tests.js'
-  , '/test/functional/connection_tests.js'
-  , '/test/functional/cursorstream_tests.js'
-  , '/test/functional/custom_pk_tests.js'
-  , '/test/functional/domain_tests.js'
-  , '/test/functional/error_tests.js'
-  , '/test/functional/find_tests.js'
-  , '/test/functional/geo_tests.js'
-  , '/test/functional/index_tests.js'
-  , '/test/functional/mapreduce_tests.js'
-  , '/test/functional/maxtimems_tests.js'
-  , '/test/functional/multiple_db_tests.js'
-  , '/test/functional/object_id_tests.js'
-  , '/test/functional/raw_tests.js'
-  , '/test/functional/readpreference_tests.js'
-  , '/test/functional/remove_tests.js'
-  , '/test/functional/unicode_tests.js'
-  , '/test/functional/uri_tests.js'
-  , '/test/functional/url_parser_tests.js'
+  //   '/test/functional/mongo_client_tests.js'
+  // , '/test/functional/collection_tests.js'
+  // , '/test/functional/db_tests.js'
+  // , '/test/functional/cursor_tests.js'
+  // , '/test/functional/insert_tests.js'
+  // , '/test/functional/aggregation_tests.js'
+  // , '/test/functional/admin_tests.js'
+  // , '/test/functional/connection_tests.js'
+  // , '/test/functional/cursorstream_tests.js'
+  // , '/test/functional/custom_pk_tests.js'
+  // , '/test/functional/domain_tests.js'
+  // , '/test/functional/error_tests.js'
+  // , '/test/functional/find_tests.js'
+  // , '/test/functional/geo_tests.js'
+  // , '/test/functional/index_tests.js'
+  // , '/test/functional/mapreduce_tests.js'
+  // , '/test/functional/maxtimems_tests.js'
+  // , '/test/functional/multiple_db_tests.js'
+  // , '/test/functional/object_id_tests.js'
+  // , '/test/functional/raw_tests.js'
+  // , '/test/functional/readpreference_tests.js'
+  // , '/test/functional/remove_tests.js'
+  // , '/test/functional/unicode_tests.js'
+  // , '/test/functional/uri_tests.js'
+  // , '/test/functional/url_parser_tests.js'
   , '/test/functional/gridfs_tests.js'
-  , '/test/functional/bulk_tests.js'
+  // , '/test/functional/bulk_tests.js'
 
-  // Replicaset tests
-  , '/test/functional/replset_failover_tests.js'
-  , '/test/functional/replset_connection_tests.js'
-  , '/test/functional/replset_operations_tests.js'
-  , '/test/functional/replset_read_preference_tests.js'
+  // // Replicaset tests
+  // , '/test/functional/replset_failover_tests.js'
+  // , '/test/functional/replset_connection_tests.js'
+  // , '/test/functional/replset_operations_tests.js'
+  // , '/test/functional/replset_read_preference_tests.js'
 
-  // Sharding tests
-  , '/test/functional/sharding_failover_tests.js'
-  , '/test/functional/sharding_connection_tests.js'
-  , '/test/functional/sharding_read_preference_tests.js'
+  // // Sharding tests
+  // , '/test/functional/sharding_failover_tests.js'
+  // , '/test/functional/sharding_connection_tests.js'
+  // , '/test/functional/sharding_read_preference_tests.js'
 
-  // SSL tests
-  , '/test/functional/ssl_mongoclient_tests.js'
-  , '/test/functional/ssl_validation_tests.js'
-  , '/test/functional/ssl_x509_connect_tests.js'
+  // // SSL tests
+  // , '/test/functional/ssl_mongoclient_tests.js'
+  // , '/test/functional/ssl_validation_tests.js'
+  // , '/test/functional/ssl_x509_connect_tests.js'
 
-  // LDAP Tests
-  , '/test/functional/ldap_tests.js'  
+  // // LDAP Tests
+  // , '/test/functional/ldap_tests.js'  
 
-  // Kerberos Tests
-  , '/test/functional/kerberos_tests.js'  
+  // // Kerberos Tests
+  // , '/test/functional/kerberos_tests.js'  
 
-  // Authentication Tests
-  , '/test/functional/authentication_tests.js'  
+  // // Authentication Tests
+  // , '/test/functional/authentication_tests.js'  
 ]
 
 // Add all the tests to run
@@ -258,13 +269,13 @@ testFiles.forEach(function(t) {
 // }));
 
 // Add a Node version plugin
-runner.plugin(new NodeVersionFilter());
+runner.plugin(new NodeVersionFilter(startupOptions));
 // Add a MongoDB version plugin
-runner.plugin(new MongoDBVersionFilter());
+runner.plugin(new MongoDBVersionFilter(startupOptions));
 // Add a Topology filter plugin
-runner.plugin(new MongoDBTopologyFilter());
+runner.plugin(new MongoDBTopologyFilter(startupOptions));
 // Add a OS filter plugin
-runner.plugin(new OSFilter())
+runner.plugin(new OSFilter(startupOptions))
 
 // Exit when done
 runner.on('exit', function(errors, results) {
@@ -367,27 +378,11 @@ if(argv.t == 'functional') {
         return new m.Server(host, port, serverOptions);
       }, 
     });
-
-  // } else if(argv.e == 'ssl_replset') {
-  //   // Create ssl server
-  //   config = createConfiguration({
-  //       sslOnNormalPorts: null
-  //     , fork:null
-  //     , port: 31000
-  //     , sslPEMKeyFile: __dirname + "/functional/ssl/server.pem"
-  //     , url: "mongodb://%slocalhost:31000/integration_tests?ssl=true"
-      
-  //     , topology: function(host, port, serverOptions) {
-  //       var m = require('../');
-  //       host = host || 'localhost'; port = port || 31000;
-  //       serverOptions = shallowClone(serverOptions);
-  //       serverOptions.poolSize = 1;
-  //       serverOptions.ssl = true;
-  //       return new m.Server(host, port, serverOptions);
-  //     }, 
-  //   });
-  // } else if(argv.e == 'ldap' || ) {
-  // } else if(argv.e == 'kerberos') {
+  } else if(argv.e == 'ldap' || argv.e == 'kerberos') {
+    startupOptions.skipStartup = true;
+    startupOptions.skipRestart = true;
+    startupOptions.skipShutdown = true;
+    startupOptions.skip = true;
   }
 
   // If we have a test we are filtering by

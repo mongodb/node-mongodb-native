@@ -1994,53 +1994,6 @@ exports.shouldCorrectlySetFilenameForGridstoreOpen = {
 /**
  * @ignore
  */
-exports.shouldCorrectlyAppendToFileCorrectly = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , ObjectID = configuration.require.ObjectID;
-
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
-      var id = new ObjectID();
-      var gridStore = new GridStore(db, id, "test_gs_read_length", "w", {chunk_size:5});
-      gridStore.open(function(err, gridStore) {
-        gridStore.write("hello world!", function(err, gridStore) {
-          gridStore.close(function(err, result) {
-
-            // Open in append mode and keep writing
-            gridStore = new GridStore(db, id, "test_gs_read_length", "w+", {chunk_size:5});
-            gridStore.open(function(err, gridStore) {
-              gridStore.write("again again!", function(err, gridStore) {
-                gridStore.close(function(err, result) {
-
-                  // Open the gridstore
-                  gridStore = new GridStore(db, id, "r");
-                  gridStore.open(function(err, gridStore) {
-                    test.equal(null, err);
-                    test.equal("test_gs_read_length", gridStore.filename);
-
-                    gridStore.read(function(err, data) {
-                      test.equal("hello world!again again!", data.toString());
-                      db.close();
-                      test.done();
-                    })
-                  });
-                });
-              });
-            });
-          });
-        });
-      });
-    });
-  }
-}
-
-/**
- * @ignore
- */
 exports.shouldCorrectlySaveFileAndThenOpenChangeContentTypeAndSaveAgain = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
@@ -2450,7 +2403,7 @@ exports.shouldWriteFileWithMongofilesAndReadWithNodeJS = {
 /**
  * @ignore
  */
-exports['Should correctly append content to file and have correct chunk numbers'] = {
+exports['Should fail when attempting to append to a file'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
@@ -2493,23 +2446,10 @@ exports['Should correctly append content to file and have correct chunk numbers'
 
               // Write the buffer again
               gridStore.write(buffer, function(err, gridStore) {
-                test.equal(null, err);
+                test.ok(err != null);
 
-                // Close the file again
-                gridStore.close(function(err, result) {
-                  test.equal(null, err);
-
-                  var chunkCollection = gridStore.chunkCollection();
-                  chunkCollection.find({files_id: fileId}, {data:0}).sort({n: 1}).toArray(function(err, chunks) {
-                    test.equal(null, err);
-                    test.equal(2, chunks.length);
-                    test.equal(0, chunks[0].n);
-                    test.equal(1, chunks[1].n);
-
-                    db.close();
-                    test.done();
-                  });
-                });
+                db.close();
+                test.done();
               });
             });
           });
@@ -3351,55 +3291,6 @@ exports.shouldCorrectlySeekAcrossChunks = {
               });
             });
 
-          });
-        });
-      });
-    });
-  }
-}
-
-/**
- * @ignore
- */
-exports.shouldCorrectlyAppendToFile = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , ObjectID = configuration.require.ObjectID;
-    var fs_db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-
-    fs_db.open(function(err, fs_db) {
-      fs_db.dropDatabase(function(err, done) {
-        var id = new ObjectID();
-
-        var gridStore = new GridStore(fs_db, "test_gs_append", "w");
-        gridStore.open(function(err, gridStore) {
-          gridStore.write("hello, world!", function(err, gridStore) {
-            gridStore.close(function(err, result) {
-
-              var gridStore2 = new GridStore(fs_db, "test_gs_append", "w+");
-              gridStore2.open(function(err, gridStore) {
-                gridStore2.write(" how are you?", function(err, gridStore) {
-                  gridStore2.close(function(err, result) {
-
-                    fs_db.collection('fs.chunks', function(err, collection) {
-                      collection.count(function(err, count) {
-                        test.equal(1, count);
-
-                        GridStore.read(fs_db, 'test_gs_append', function(err, data) {
-                          test.equal("hello, world! how are you?", data.toString('ascii'));
-
-                          fs_db.close();
-                          test.done();
-                        });
-                      });
-                    });
-                  });
-                });
-              });
-            });
           });
         });
       });
@@ -4546,5 +4437,29 @@ exports.shouldStreamDocumentsUsingTheReadStreamDestroyFunction = {
       });
     });
     // DOC_END
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['should fail when seeking on a write enabled gridstore object'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var GridStore = configuration.require.GridStore;
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      var gridStore = new GridStore(db, "test_gs_metadata", "w", {'content_type':'image/jpg'});
+      gridStore.open(function(err, gridStore) {
+        gridStore.seek(0, function(err, g) {
+          test.ok(err != null);
+          db.close();
+          test.done();
+        });
+      });
+    });
   }
 }
