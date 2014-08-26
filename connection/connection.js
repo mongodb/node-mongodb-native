@@ -216,7 +216,7 @@ var Connection = function(options) {
    * @return {boolean}
    */
   this.isConnected = function() {
-    return !connection.destroyed && connection.writable && connection.readable;
+    return !connection.destroyed && connection.writable;
   }
 
   //
