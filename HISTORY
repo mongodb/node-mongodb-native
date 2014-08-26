@@ -1,8 +1,19 @@
-1.4.9
+1.4.9 2014-08-26
 ----------------
 - Check _bsonType for Binary (Issue #1202, https://github.com/mchapman)
 - Remove duplicate Cursor constructor (Issue #1201, https://github.com/KenPowers)
 - Added missing parameter in the documentation (Issue #1199, https://github.com/wpjunior)
+- Documented third parameter on the update callback(Issue #1196, https://github.com/gabmontes)
+- NODE-240 Operations on SSL connection hang on node 0.11.x
+- NODE-235 writeResult is not being passed on when error occurs in insert
+- NODE-229 Allow count to work with query hints
+- NODE-233 collection.save() does not support fullResult
+- NODE-244 Should parseError also emit a `disconnected` event?
+- NODE-246 Cursors are inefficiently constructed and consequently cannot be promisified.
+- NODE-248 Crash with X509 auth
+- NODE-252 Uncaught Exception in Base.__executeAllServerSpecificErrorCallbacks
+- Bumped BSON parser to 0.2.12
+
 
 1.4.8 2014-08-01
 ----------------
