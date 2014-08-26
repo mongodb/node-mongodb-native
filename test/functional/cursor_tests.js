@@ -2854,3 +2854,64 @@ exports.shouldCorrectlyUseFindAndCursorCount = {
     // DOC_END
   }
 }
+
+/**
+ * @ignore
+ */
+exports['should correctly apply hint to count command for cursor'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'], mongodb: ">2.5.5" } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+
+    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
+    // DOC_START
+    // Establish connection to db
+    db.open(function(err, db) {
+      var col = db.collection('count_hint');
+
+      col.insert([{i:1}, {i:2}], {w:1}, function(err, docs) {
+        test.equal(null, err);
+
+        col.ensureIndex({i:1}, function(err, r) {
+          test.equal(null, err);
+
+          col.find({i:1}, {hint: "_id_"}).count(function(err, count) {
+            test.equal(null, err);
+            test.equal(1, count);
+
+            col.find({}, {hint: "_id_"}).count(function(err, count) {
+              test.equal(null, err);
+              test.equal(2, count);
+
+              col.find({i:1}, {hint: "BAD HINT"}).count(function(err, count) {
+                test.ok(err != null);
+
+                col.ensureIndex({x:1}, {sparse:true}, function(err, r) {
+                  test.equal(null, err);
+
+                  col.find({i:1}, {hint: "x_1"}).count(function(err, count) {
+                    test.equal(null, err);
+                    test.equal(0, count);
+
+                    col.find({}, {hint: "x_1"}).count(function(err, count) {
+                      test.equal(null, err);
+                      test.equal(2, count);
+
+                      db.close();
+                      test.done();
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+    // DOC_END
+  }
+}
