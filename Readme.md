@@ -276,7 +276,7 @@ where `docs` can be a single document or an array of documents.
 
 Useful options:
 
-* `safe:true` Should always set if you have a callback.
+* `w:1` Should always set if you have a callback.
 
 See also: [MongoDB docs for insert](http://www.mongodb.org/display/DOCS/Inserting).
 
@@ -297,14 +297,14 @@ See also: [MongoDB docs for insert](http://www.mongodb.org/display/DOCS/Insertin
 ```
 
 Note that there's no reason to pass a callback to the insert or update commands
-unless you use the `safe:true` option. If you don't specify `safe:true`, then
+unless you use the `w:1` option. If you don't specify `w:1`, then
 your callback will be called immediately.
 
 ### Update: update and insert (upsert)
 
 The update operation will update the first document that matches your query
 (or all documents that match if you use `multi:true`).
-If `safe:true`, `upsert` is not set, and no documents match, your callback will return 0 documents updated.
+If `w:1`, `upsert` is not set, and no documents match, your callback will return 0 documents updated.
 
 See the [MongoDB docs](http://www.mongodb.org/display/DOCS/Updating) for
 the modifier (`$inc`, `$set`, `$push`, etc.) formats.
@@ -317,7 +317,7 @@ Signature:
 
 Useful options:
 
-* `safe:true` Should always set if you have a callback.
+* `w:1` Should always set if you have a callback.
 * `multi:true` If set, all matching documents are updated, not just the first.
 * `upsert:true` Atomically inserts the document if no documents matched.
 
