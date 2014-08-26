@@ -1,6 +1,6 @@
 # MongoClient or how to connect in a new and better way
 From driver version **1.2** we introduced a new connection Class that has the same name across all of our official drivers.
-This is to ensure that we present a recognizable front for all our API's. This does not mean that your existing application will break, 
+This is to ensure that we present a recognizable front for all our API's. This does not mean that your existing application will break,
 but rather that we encourage you to use the new connection api to simplify your application development.
 
 Furthermore, the new connection class **MongoClient** acknowledges all writes to MongoDB, in contrast to the existing connection class Db that has acknowledgements turned off. Let's take a tour of the MongoClient functions.
@@ -15,7 +15,7 @@ Furthermore, the new connection class **MongoClient** acknowledges all writes to
 
     MongoClient.connect
 
-Outlined above is the complete MongoClient interface. The methods **open**, **close** and **db** work 
+Outlined above is the complete MongoClient interface. The methods **open**, **close** and **db** work
 very similar to the existing methods on the **Db** class. The main difference is that the constructor is missing the **database name** from Db. Let's show a simple connection using **open** as a code example speaks a thousand words.
 
     var MongoClient = require('mongodb').MongoClient
@@ -38,7 +38,7 @@ So, with a minimal change in our app, we can apply the new MongoClient connectio
 
 The URL format is unified across official drivers from 10gen with some options not supported on some drivers due to natural reasons. The ones not supported by the Node.js driver are left out for simplicities sake.
 
-### Basic parts of the url 
+### Basic parts of the url
   * **mongodb://** is a required prefix to identify that this is a string in the standard connection format.
 
   * **username:password@** is optional. If given, the driver will attempt to login to a database after connecting to a database server.
@@ -145,7 +145,7 @@ The url format can be used with MongoClient.connect. Where possible MongoClient 
 
 
 ### A replicaset connect using no acknowledgment by default and readPreference for secondary
-  
+
     var MongoClient = require('mongodb').MongoClient;
 
     MongoClient.connect("mongodb://localhost:30000,localhost:30001/integration_test_?w=0&readPreference=secondary", function(err, db) {
@@ -162,7 +162,7 @@ The url format can be used with MongoClient.connect. Where possible MongoClient 
     });
 
 ### A sharded connect using no acknowledgment by default and readPreference for secondary
-  
+
     var MongoClient = require('mongodb').MongoClient;
 
     MongoClient.connect("mongodb://localhost:50000,localhost:50001/integration_test_?w=0&readPreference=secondary", function(err, db) {
@@ -186,23 +186,23 @@ A Connection Pool is a cache of database connections maintained by the driver so
     var express = require('express');
     var mongodb = require('mongodb');
     var app = express();
- 
+
     var MongoClient = require('mongodb').MongoClient;
     var db;
- 
+
     // Initialize connection once
     MongoClient.connect("mongodb://localhost:27017/integration_test", function(err, database) {
       if(err) throw err;
- 
+
       db = database;
 
       // Start the application after the database connection is ready
       app.listen(3000);
       console.log("Listening on port 3000");
     });
- 
+
     // Reuse database object in request handlers
-    app.get("/", function(req, res) { 
+    app.get("/", function(req, res) {
       db.collection("replicaset_mongo_client_collection").find({}, function(err, docs) {
         docs.each(function(err, doc) {
           if(doc) {
@@ -260,6 +260,7 @@ Below are all the options supported for db/server/replset/mongos.
   *  **recordQueryStats** {Boolean, default:false}, record query statistics during execution.
   *  **retryMiliSeconds** {Number, default:5000}, number of milliseconds between retries.
   *  **numberOfRetries** {Number, default:5}, number of retries off connection.
+  *  **bufferMaxEntries** {Number, default: -1}, sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited.
 
 ## server: A hash of options at the server level not supported by the url.
   *  **readPreference** {String, default:null}, set's the read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST)
