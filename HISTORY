@@ -1,3 +1,8 @@
+1.4.9
+----------------
+- Check _bsonType for Binary (Issue #1202, https://github.com/mchapman)
+- 
+
 1.4.8 2014-08-01
 ----------------
 - NODE-205 correctly emit authenticate event
