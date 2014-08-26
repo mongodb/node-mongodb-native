@@ -921,3 +921,24 @@ exports['should correctly set language_override option'] = {
     });
   }
 }
+
+exports['ensure index failure when duplicate records found'] = {
+  requires: {},
+
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    db.open(function(err, db) {
+      var collection = db.collection("duplicate_records_1");
+      collection.insert([{a:1}, {a:1}], function(err, result) {
+        test.equal(null, err);
+
+        collection.ensureIndex({a:1}, {unique:true}, function(err, result) {
+          test.ok(err != null);
+
+          db.close();
+          test.done();
+        });
+      });
+    });
+  }
+}
