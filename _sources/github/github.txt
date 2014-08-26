@@ -60,7 +60,7 @@ Web frameworks using MongoDB
          :header-rows: 0
 
          * - **Activity Level**
-           - .. image:: ../static/active.png
+           - .. image:: ../static/nonactive.png
          * - **Last push**
            - 19:30:24 on 8/3/2014
          * - **Homepage**
@@ -111,7 +111,7 @@ Object Document Modeling Libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 22:0:0 on 26/6/2014
+           - 21:2:12 on 22/7/2014
          * - **Homepage**
            - http://http://mongoosejs.com
          * - **Url**
@@ -119,9 +119,9 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/LearnBoost/mongoose.git
          * - **Forks**
-           - 767
+           - 776
          * - **Watchers**
-           - 5235
+           - 5356
 
 .. topic:: mongo-model
 
@@ -216,7 +216,7 @@ Content Management Systems
          * - **Forks**
            - 288
          * - **Watchers**
-           - 1479
+           - 1486
 
 Grid FS libraries or tools
 --------------------------
@@ -266,7 +266,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Clone Url**
            - https://github.com/guileen/node-mongoskin.git
          * - **Forks**
-           - 7
+           - 4
          * - **Watchers**
            - 43
 
@@ -314,7 +314,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 17
          * - **Watchers**
-           - 134
+           - 135
 
 .. topic:: node-mongodb-wrapper
 
@@ -373,7 +373,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 18:37:43 on 9/5/2014
+           - 12:14:4 on 8/7/2014
          * - **Homepage**
            - http://http://simonenko.su/projects/easymongo
          * - **Url**
@@ -383,7 +383,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 13
          * - **Watchers**
-           - 98
+           - 99
 
 REST api's around MongoDB or resource based libraries
 -----------------------------------------------------
@@ -407,9 +407,9 @@ REST api's around MongoDB or resource based libraries
          * - **Clone Url**
            - https://github.com/tdegrunt/mongodb-rest.git
          * - **Forks**
-           - 96
+           - 100
          * - **Watchers**
-           - 323
+           - 329
 
 .. topic:: lazyBum
 
@@ -556,7 +556,7 @@ Queue libraries using MongoDB
          * - **Forks**
            - 5
          * - **Watchers**
-           - 92
+           - 93
 
 Logging libraries or applications
 ---------------------------------
@@ -628,7 +628,7 @@ Logging libraries or applications
          * - **Forks**
            - 1
          * - **Watchers**
-           - 32
+           - 33
 
 Monitoring applications or libraries
 ------------------------------------
@@ -703,7 +703,7 @@ General frameworks over MongoDB
          * - **Forks**
            - 3
          * - **Watchers**
-           - 41
+           - 42
 
 Translation libraries or frameworks
 -----------------------------------
@@ -776,9 +776,9 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 373
+           - 371
          * - **Watchers**
-           - 3331
+           - 3357
 
 Libraries for the connect middleware
 ------------------------------------
@@ -825,9 +825,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 158
+           - 168
          * - **Watchers**
-           - 568
+           - 578
 
 Libraries or applications for continous integration
 ---------------------------------------------------
@@ -851,9 +851,9 @@ Libraries or applications for continous integration
          * - **Clone Url**
            - https://github.com/ryankee/concrete.git
          * - **Forks**
-           - 67
+           - 66
          * - **Watchers**
-           - 428
+           - 435
 
 Exampe applications
 -------------------

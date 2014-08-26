@@ -321,7 +321,7 @@ and reusing the database variable returned by the callback:
     });
 
     // Reuse database object in request handlers
-    app.get("/", function(req, res) { 
+    app.get("/", function(req, res) {
       db.collection("replicaset_mongo_client_collection").find({}, function(err, docs) {
         docs.each(function(err, doc) {
           if(doc) {
@@ -402,6 +402,9 @@ db: A hash of options at the db level overriding or adjusting functionality not 
    between retries.
 -  **numberOfRetries** {Number, default:5}, number of retries off
    connection.
+-  **bufferMaxEntries** {Number, default: -1}, sets a cap on how many
+   operations the driver will buffer up before giving up on getting a
+   working connection, default is -1 which is unlimited.
 
 server: A hash of options at the server level not supported by the url.
 -----------------------------------------------------------------------

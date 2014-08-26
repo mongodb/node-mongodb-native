@@ -62,6 +62,19 @@ Constants
    "Cursor.CLOSED", "2", "Cursor closed"
    "Cursor.GET_MORE", "3", "Cursor performing a get more"
 
+-----------------------
+Cursor.cloneWithOptions
+-----------------------
+
+
+Clones a given cursor but uses new options
+
+.. js:function:: Cursor.cloneWithOptions(cursor)
+
+   :param cursor cursor: the cursor to clone.
+   :returns: object [options] additional options for the collection when cloning.
+
+
 ------
 rewind
 ------
