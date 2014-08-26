@@ -69,6 +69,7 @@ module.exports = function(configurations) {
         , '/test/tests/functional/fluent_api/batch_write_unordered_tests.js'
         , '/test/tests/functional/fluent_api/batch_write_concerns_tests.js'
         , '/test/tests/functional/update_with_write_concern.js'
+        , '/test/tests/functional/full_result_tests.js'
       ]
     );
 
