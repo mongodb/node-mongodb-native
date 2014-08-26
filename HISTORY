@@ -1,7 +1,8 @@
 1.4.9
 ----------------
 - Check _bsonType for Binary (Issue #1202, https://github.com/mchapman)
-- 
+- Remove duplicate Cursor constructor (Issue #1201, https://github.com/KenPowers)
+- Added missing parameter in the documentation (Issue #1199, https://github.com/wpjunior)
 
 1.4.8 2014-08-01
 ----------------
