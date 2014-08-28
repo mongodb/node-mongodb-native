@@ -1067,7 +1067,7 @@ exports['Should Correctly allow for control of serialization of functions on com
 
             // Execute a safe insert with replication to two servers
             collection.findAndModify({str:"String"}, [['a', 1]], {'$set':{'f':function() {}}}, {new:true, safe: true, serializeFunctions:true}, function(err, result) {
-              test.ok(result.f instanceof Code)
+              test.ok(result.value.f instanceof Code)
               db.close();
               test.done();
             })

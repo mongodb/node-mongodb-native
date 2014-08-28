@@ -718,38 +718,38 @@ exports.shouldCorrectlyFindAndModifyDocument = {
         collection.insert({'a':1, 'b':2}, configuration.writeConcernMax(), function(err, doc) {
           // Let's modify the document in place
           collection.findAndModify({'a':1}, [['a', 1]], {'$set':{'b':3}}, {'new':true}, function(err, updated_doc) {
-            test.equal(1, updated_doc.a);
-            test.equal(3, updated_doc.b);
+            test.equal(1, updated_doc.value.a);
+            test.equal(3, updated_doc.value.b);
 
             // Test return old document on change
             collection.insert({'a':2, 'b':2}, configuration.writeConcernMax(), function(err, doc) {
               // Let's modify the document in place
               collection.findAndModify({'a':2}, [['a', 1]], {'$set':{'b':3}}, configuration.writeConcernMax(), function(err, result, object) {
-                test.equal(2, result.a);
-                test.equal(2, result.b);
+                test.equal(2, result.value.a);
+                test.equal(2, result.value.b);
 
                 // Test remove object on change
                 collection.insert({'a':3, 'b':2}, configuration.writeConcernMax(), function(err, doc) {
                   
                   // Let's modify the document in place
                   collection.findAndModify({'a':3}, [], {'$set':{'b':3}}, {remove: true}, function(err, updated_doc) {
-                    test.equal(3, updated_doc.a);
-                    test.equal(2, updated_doc.b);
+                    test.equal(3, updated_doc.value.a);
+                    test.equal(2, updated_doc.value.b);
 
                     // Let's upsert!
                     collection.findAndModify({'a':4}, [], {'$set':{'b':3}}, {'new': true, upsert: true}, function(err, updated_doc) {
-                      test.equal(4, updated_doc.a);
-                      test.equal(3, updated_doc.b);
+                      test.equal(4, updated_doc.value.a);
+                      test.equal(3, updated_doc.value.b);
 
                       // Test selecting a subset of fields
                       collection.insert({a: 100, b: 101}, configuration.writeConcernMax(), function (err, r) {
                         test.equal(null, err);
 
                         collection.findAndModify({'a': 100}, [], {'$set': {'b': 5}}, {'new': true, fields: {b: 1}}, function (err, updated_doc) {
-                          test.equal(2, Object.keys(updated_doc).length);
-                          test.equal(r.ops[0]['_id'].toHexString(), updated_doc._id.toHexString());
-                          test.equal(5, updated_doc.b);
-                          test.equal("undefined", typeof updated_doc.a);
+                          test.equal(2, Object.keys(updated_doc.value).length);
+                          test.equal(r.ops[0]['_id'].toHexString(), updated_doc.value._id.toHexString());
+                          test.equal(5, updated_doc.value.b);
+                          test.equal("undefined", typeof updated_doc.value.a);
                           db.close();
                           test.done();
                         });
@@ -782,8 +782,8 @@ exports.shouldCorrectlyFindAndModifyDocumentAndReturnSelectedFieldsOnly = {
         collection.insert({'a':1, 'b':2}, configuration.writeConcernMax(), function(err, doc) {
           // Let's modify the document in place
           collection.findAndModify({'a':1}, [['a', 1]], {'$set':{'b':3}}, {'new':true, 'fields': {a:1}}, function(err, updated_doc) {
-            test.equal(2, Object.keys(updated_doc).length);
-            test.equal(1, updated_doc.a);
+            test.equal(2, Object.keys(updated_doc.value).length);
+            test.equal(1, updated_doc.value.a);
             db.close();
             test.done();
           });
@@ -869,7 +869,7 @@ exports['Should correctly return null when attempting to modify a non-existing d
       db.createCollection('AttemptToFindAndModifyNonExistingDocument', function(err, collection) {
         // Let's modify the document in place
         collection.findAndModify({name: 'test1'}, [], {$set: {name: 'test2'}}, {}, function(err, updated_doc) {
-          test.equal(null, updated_doc);
+          test.equal(null, updated_doc.value);
           test.ok(err == null || err.errmsg.match("No matching object found"))
           db.close();
           test.done();
@@ -979,8 +979,8 @@ exports.shouldCorrectlyFindAndModifyDocumentWithDBStrict = {
         collection.insert({'a':2, 'b':2}, configuration.writeConcernMax(), function(err, doc) {
           // Let's modify the document in place
           collection.findAndModify({'a':2}, [['a', 1]], {'$set':{'b':3}}, {new:true}, function(err, result) {
-            test.equal(2, result.a)
-            test.equal(3, result.b)
+            test.equal(2, result.value.a)
+            test.equal(3, result.value.b)
             p_client.close();
             test.done();
           })
@@ -1042,12 +1042,12 @@ exports['Should correctly return new modified document'] = {
 
           // Find and modify returning the new object
           collection.findAndModify({_id:id}, [], {$set : {'c.c': 100}}, {new:true}, function(err, item) {
-            test.equal(doc._id.toString(), item._id.toString());
-            test.equal(doc.a, item.a);
-            test.equal(doc.b, item.b);
-            test.equal(doc.c.a, item.c.a);
-            test.equal(doc.c.b, item.c.b);
-            test.equal(100, item.c.c);
+            test.equal(doc._id.toString(), item.value._id.toString());
+            test.equal(doc.a, item.value.a);
+            test.equal(doc.b, item.value.b);
+            test.equal(doc.c.a, item.value.c.a);
+            test.equal(doc.c.b, item.value.c.b);
+            test.equal(100, item.value.c.c);
             db.close();
             test.done();
           })
@@ -1240,7 +1240,7 @@ exports.shouldCorrectlyHandlerErrorForFindAndModifyWhenNoRecordExists = {
       db.createCollection('shouldCorrectlyHandlerErrorForFindAndModifyWhenNoRecordExists', function(err, collection) {
         collection.findAndModify({'a':1}, [], {'$set':{'b':3}}, {'new': true}, function(err, updated_doc) {
           test.equal(null, err);
-          test.equal(null, updated_doc);
+          test.equal(null, updated_doc.value);
           db.close();
           test.done();
         });
@@ -1566,8 +1566,8 @@ exports.shouldPerformSimpleFindAndModifyOperations = {
           // Simple findAndModify command returning the new document
           collection.findAndModify({a:1}, [['a', 1]], {$set:{b1:1}}, {new:true}, function(err, doc) {
             test.equal(null, err);
-            test.equal(1, doc.a);
-            test.equal(1, doc.b1);
+            test.equal(1, doc.value.a);
+            test.equal(1, doc.value.b1);
 
             // Simple findAndModify command returning the new document and
             // removing it at the same time
@@ -1584,8 +1584,8 @@ exports.shouldPerformSimpleFindAndModifyOperations = {
                 collection.findAndModify({d:1}, [['b', 1]],
                   {d:1, f:1}, {new:true, upsert:true, w:1}, function(err, doc) {
                     test.equal(null, err);
-                    test.equal(1, doc.d);
-                    test.equal(1, doc.f);
+                    test.equal(1, doc.value.d);
+                    test.equal(1, doc.value.f);
 
                     db.close();
                     test.done();
@@ -1630,8 +1630,8 @@ exports.shouldPerformSimpleFindAndRemove = {
           // removing it at the same time
           collection.findAndRemove({b:1}, [['b', 1]], function(err, doc) {
             test.equal(null, err);
-            test.equal(1, doc.b);
-            test.equal(1, doc.d);
+            test.equal(1, doc.value.b);
+            test.equal(1, doc.value.d);
 
             // Verify that the document is gone
             collection.findOne({b:1}, function(err, item) {
@@ -2254,7 +2254,7 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors']
           test.ok(cursors.length > 0);
 
           for(var i = 0; i < cursors.length; i++) {
-            cursors[i].get(function(err, items) {
+            cursors[i].toArray(function(err, items) {
               test.equal(err, null);
 
               // Add docs to results array

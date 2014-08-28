@@ -12,6 +12,8 @@ CHANGES
     + seek will fail if attempt to use with w or w+
     + write will fail if attempted with w+ or r
     + w+ only works for updating metadata on a file
+- Cursor toArray and each resets and re-runs the cursor
+- FindAndModify returns whole result document instead of just value
 
 TODO
 ====

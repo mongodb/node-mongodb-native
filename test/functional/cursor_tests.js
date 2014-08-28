@@ -45,7 +45,7 @@ exports.shouldCorrectlyExecuteToArray = {
  * @ignore
  * @api private
  */
-exports.shouldCorrectlyExecuteToArrayAndFailOnFurtherCursorAccess = {
+exports.cursorShouldBeAbleToResetOnToArrayRunningQueryAgain = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
@@ -61,11 +61,12 @@ exports.shouldCorrectlyExecuteToArrayAndFailOnFurtherCursorAccess = {
           cursor.toArray(function(err, items) {
             // Should fail if called again (cursor should be closed)
             cursor.toArray(function(err, items) {
-              test.equal("Cursor is closed", err.message);
+              test.equal(null, err);
 
               // Should fail if called again (cursor should be closed)
               cursor.each(function(err, item) {
-                test.equal("Cursor is closed", err.message);
+                test.ok(err != null);
+
                 // Let's close the db
                 db.close();
                 test.done();
@@ -108,16 +109,14 @@ exports.shouldCorrectlyFailToArrayDueToFinishedEachOperation = {
 
           // Grab a cursor
           var cursor = collection.find();
-
           // Execute the each command, triggers for each document
           cursor.each(function(err, item) {
 
             // If the item is null then the cursor is exhausted/empty and closed
             if(item == null) {
-
               // Show that the cursor is closed
               cursor.toArray(function(err, items) {
-                test.ok(err != null);
+                test.equal(null, err);
 
                 // Let's close the db
                 db.close();
@@ -197,10 +196,10 @@ exports.shouldCorrectlyExecuteCursorCount = {
               test.ok(count.constructor == Number);
 
               collection.find({}, {'limit':5}).count(function(err, count) {
-                test.equal(10, count);
+                test.equal(5, count);
 
                 collection.find({}, {'skip':5}).count(function(err, count) {
-                  test.equal(10, count);
+                  test.equal(5, count);
 
                   db.collection('acollectionthatdoesn').count(function(err, count) {
                     test.equal(0, count);
