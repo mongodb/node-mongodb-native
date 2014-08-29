@@ -145,6 +145,7 @@ exports['should correctly execute find method using crud api'] = {
           clonedCursor.explain(function(err, result) {
             test.equal(null, err);
             test.ok(result != null);
+
             db.close();
             test.done();            
           });
@@ -294,7 +295,6 @@ exports['should correctly execute insert methods using crud api'] = {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
     // Establish connection to db
     db.open(function(err, db) {
-      // var col = db.collection('t2');
 
       //
       // Legacy insert method
@@ -357,8 +357,10 @@ exports['should correctly execute insert methods using crud api'] = {
           db.collection('t2_5').bulkWrite({
             operations: [
                 { insert: { a: 1 } }
-              , { update: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
-              , { remove: { q: {c:1}, limit:1 } }]
+              , { updateOne: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
+              , { updateMany: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
+              , { removeOne: { q: {c:1} } }
+              , { removeMany: { q: {c:1} } }]
             , ordered: true
           }, {w:1}, function(err, r) {
             test.equal(null, err);
@@ -387,6 +389,7 @@ exports['should correctly execute update methods using crud api'] = {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
     // Establish connection to db
     db.open(function(err, db) {
+
       //
       // Legacy update method
       // -------------------------------------------------
@@ -475,6 +478,7 @@ exports['should correctly execute remove methods using crud api'] = {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
     // Establish connection to db
     db.open(function(err, db) {
+
       //
       // Legacy update method
       // -------------------------------------------------
@@ -546,6 +550,7 @@ exports['should correctly execute findAndModify methods using crud api'] = {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
     // Establish connection to db
     db.open(function(err, db) {
+
       //
       // findOneAndRemove method
       // -------------------------------------------------
@@ -622,6 +627,41 @@ exports['should correctly execute findAndModify methods using crud api'] = {
       }
 
       findOneAndRemove();
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['should correctly execute distinct method using crud api'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    // Establish connection to db
+    db.open(function(err, db) {
+
+      db.collection('t6').insert([{a:1, b:0}, {a:1, b:1}, {a:1, b:2}, {a:1}], function(err) {
+        test.equal(null, err);
+
+        db.collection('t6').distinct({
+            fieldName: 'b'
+          , filter: {a:1}
+          , maxTimeMS: 100
+        }, function(err, result) {
+          test.equal(null, err);
+          test.equal(0, result[0]);
+          test.equal(1, result[1]);
+          test.equal(2, result[2]);
+
+          db.close();
+          test.done();
+        });
+      });
     });
   }
 }
