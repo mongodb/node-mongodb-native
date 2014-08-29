@@ -329,6 +329,8 @@ exports['should correctly execute insert methods using crud api'] = {
         db.collection('t2_3').insertOne({a:1}, {w:1}, function(err, r) {
           test.equal(null, err);
           test.equal(1, r.result.n);
+          test.equal(1, r.insertedCount);
+          test.ok(r.insertedId != null);
           
           insertMany();
         });
@@ -338,9 +340,12 @@ exports['should correctly execute insert methods using crud api'] = {
       // Insert many method
       // -------------------------------------------------
       var insertMany = function() {
-        db.collection('t2_4').insertMany([{a:1}, {a:1}], {w:1}, function(err, r) {
+        var docs = [{a:1}, {a:1}];
+        db.collection('t2_4').insertMany(docs, {w:1}, function(err, r) {
           test.equal(null, err);
           test.equal(2, r.result.n);
+          test.equal(2, r.insertedCount);
+          test.equal(2, r.insertedIds.length);
           
           bulkWrite();
         });
@@ -367,6 +372,14 @@ exports['should correctly execute insert methods using crud api'] = {
             test.equal(1, r.nInserted);
             test.equal(1, r.nUpserted);
             test.equal(1, r.nRemoved);
+
+            // Crud fields
+            test.equal(1, r.insertedCount);
+            test.equal(1, r.matchedCount);
+            test.equal(0, r.modifiedCount);
+            test.equal(1, r.removedCount);
+            test.equal(1, r.upsertedCount);
+            test.equal(1, r.upsertedIds.length);
 
             db.close();
             test.done();
@@ -406,15 +419,34 @@ exports['should correctly execute update methods using crud api'] = {
       // Update one method
       // -------------------------------------------------
       var updateOne = function() {
-        db.collection('t3_2').updateOne({
-            filter: { a: 1 }
-          , update: { $set: { a: 1 } }
-          , upsert: true
-        }, function(err, r) {
+        db.collection('t3_2').insertMany([{c:1}], {w:1}, function(err, r) {
           test.equal(null, err);
           test.equal(1, r.result.n);
           
-          replaceOne();
+          db.collection('t3_2').updateOne({
+              filter: { a: 1 }
+            , update: { $set: { a: 1 } }
+            , upsert: true
+          }, function(err, r) {
+            test.equal(null, err);
+            test.equal(1, r.result.n);
+            test.equal(1, r.matchedCount);
+            test.equal(1, r.modifiedCount);
+            test.ok(r.upsertedId != null);
+
+            db.collection('t3_2').updateOne({
+                filter: { c: 1 }
+              , update: { $set: { a: 1 } }
+            }, function(err, r) {
+              test.equal(null, err);
+              test.equal(1, r.result.n);
+              test.equal(1, r.matchedCount);
+              test.equal(1, r.modifiedCount);
+              test.ok(r.upsertedId == null);
+            
+              replaceOne();
+            });
+          });
         });
       }
 
@@ -427,6 +459,12 @@ exports['should correctly execute update methods using crud api'] = {
           , replacement: { a : 2 }
           , upsert: true
         }, function(err, r) {
+          test.equal(null, err);
+          test.equal(1, r.result.n);
+          test.equal(1, r.matchedCount);
+          test.equal(1, r.modifiedCount);
+          test.ok(r.upsertedId != null);
+
           db.collection('t3_3').replaceOne({
               filter: { a: 2 }
             , replacement: { a : 3 }
@@ -435,6 +473,10 @@ exports['should correctly execute update methods using crud api'] = {
             test.equal(null, err);
             test.equal(1, r.result.n);
             test.ok(r.result.upserted == null);
+
+            test.equal(1, r.matchedCount);
+            test.equal(1, r.modifiedCount);
+            test.ok(r.upsertedId == null);
             
             updateMany();
           });
@@ -456,9 +498,23 @@ exports['should correctly execute update methods using crud api'] = {
           }, {w:1}, function(err, r) {
             test.equal(null, err);
             test.equal(2, r.result.n);
+            test.equal(2, r.matchedCount);
+            test.equal(2, r.modifiedCount);
+            test.ok(r.upsertedId == null);
+
+            db.collection('t3_4').updateMany({
+                filter: { c: 1 }
+              , update: { $set: { d: 2 } }
+              , upsert: true
+            }, {w:1}, function(err, r) {
+              test.equal(null, err);
+              test.equal(1, r.matchedCount);
+              test.equal(1, r.modifiedCount);
+              test.ok(r.upsertedId != null);
             
-            db.close();
-            test.done();
+              db.close();
+              test.done();
+            });
           });
         });
       }
@@ -509,6 +565,7 @@ exports['should correctly execute remove methods using crud api'] = {
           }, function(err, r) {
             test.equal(null, err);
             test.equal(1, r.result.n);
+            test.equal(1, r.removedCount);
             
             removeMany();
           });
@@ -528,6 +585,7 @@ exports['should correctly execute remove methods using crud api'] = {
           }, function(err, r) {
             test.equal(null, err);
             test.equal(2, r.result.n);
+            test.equal(2, r.removedCount);
             
             db.close();
             test.done();
