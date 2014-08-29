@@ -108,6 +108,15 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
   }
 
   /**
+   * Clone the cursor
+   * @method
+   * @return {Cursor}
+   */  
+  this.clone = function() {
+    return topology.cursor(ns, cmd, options);
+  }
+
+  /**
    * Retrieve the next document from the cursor
    * @method
    * @param {resultCallback} callback A callback function
@@ -284,6 +293,7 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
         this.kill();
       }
 
+      currentLimit = 0;
       init = false;
       dead = false;
       killed = false;
