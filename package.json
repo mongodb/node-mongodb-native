@@ -1,6 +1,6 @@
 {
   "name": "mongodb-core",
-  "version": "1.0.0-alpha4",
+  "version": "1.0.0-alpha5",
   "description": "Core MongoDB driver functionality, no bells and whistles and meant for integration not end applications",
   "main": "index.js",
   "scripts": {
@@ -25,7 +25,7 @@
     "jsdoc": "3.3.0-alpha8"
   },
   "optionalDependencies": {
-    "kerberos": "0.0.3"
+    "kerberos": "0.0.4"
   },
   "author": "Christian Kvalheim",
   "license": "Apache 2.0",
