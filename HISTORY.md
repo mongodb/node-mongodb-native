@@ -14,7 +14,10 @@ CHANGES
     + w+ only works for updating metadata on a file
 - Cursor toArray and each resets and re-runs the cursor
 - FindAndModify returns whole result document instead of just value
+- Extend cursor to allow for setting all the options via methods instead of dealing with the current messed up find
+- Removed db.dereference method
+- Removed db.cursorInfo method
+- Removed db.stats method
 
 TODO
 ====
-- Extend cursor to allow for setting all the options via methods instead of dealing with the current messed up find

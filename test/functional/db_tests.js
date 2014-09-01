@@ -307,65 +307,6 @@ exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunction = {
 }
 
 /**
- * @ignore
- */
-exports.shouldCorrectlyDereferenceDbRef = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var DBRef = configuration.require.DBRef
-      , ObjectID = configuration.require.ObjectID;
-
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
-      db.createCollection('test_deref', function(err, collection) {
-        collection.insert({'a':1}, configuration.writeConcernMax(), function(err, ids) {
-          collection.remove({}, configuration.writeConcernMax(), function(err, result) {
-            collection.count(function(err, count) {
-              test.equal(0, count);
-
-              // Execute deref a db reference
-              db.dereference(new DBRef("test_deref", new ObjectID()), function(err, result) {
-                collection.insert({'x':'hello'}, configuration.writeConcernMax(), function(err, ids) {
-                  collection.findOne(function(err, document) {
-                    test.equal('hello', document.x);
-
-                    db.dereference(new DBRef("test_deref", document._id), function(err, result) {
-                      test.equal('hello', document.x);
-
-                      db.dereference(new DBRef("test_deref", 4), function(err, result) {
-                        var obj = {'_id':4};
-
-                        collection.insert(obj, configuration.writeConcernMax(), function(err, ids) {
-                          db.dereference(new DBRef("test_deref", 4), function(err, document) {
-                            test.equal(obj['_id'], document._id);
-                            collection.remove({}, configuration.writeConcernMax(), function(err, result) {
-                              collection.insert({'x':'hello'}, configuration.writeConcernMax(), function(err, ids) {
-                                db.dereference(new DBRef("test_deref", null), function(err, result) {
-                                  test.equal(null, result);
-                                  // Let's close the db
-                                  db.close();
-                                  test.done();
-                                });
-                              });
-                            });
-                          });
-                        });
-                      });
-                    });
-                  });
-                });
-              });
-            })
-          })
-        })
-      });
-    });
-  }
-}
-
-/**
  * An example of illegal and legal renaming of a collection
  *
  * @_class collection
@@ -763,65 +704,6 @@ exports.shouldCorrectlyResaveDBRef = {
         });
       });
     });
-  }
-}
-
-/**
- * An example of dereferencing values.
- *
- * @_class db
- * @_function dereference
- * @ignore
- */
-exports.shouldCorrectlyDereferenceDbRefExamples = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var DBRef = configuration.require.DBRef;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
-    // DOC_START
-    // Establish connection to db
-    db.open(function(err, db) {
-      test.equal(null, err);
-
-      // Get a second db
-      var secondDb = db.db('integration_tests_2');
-
-      // Create a dereference example
-      secondDb.createCollection('test_deref_examples', function(err, collection) {
-        test.equal(null, err);
-
-        // Insert a document in the collection
-        collection.insert({'a':1}, configuration.writeConcernMax(), function(err, r) {
-          test.equal(null, err);
-
-          // Let's build a db reference and resolve it
-          var dbRef = new DBRef('test_deref_examples', r.ops[0]._id, 'integration_tests_2');
-
-          setTimeout(function() {
-            // Resolve it including a db resolve
-            db.dereference(dbRef, function(err, item) {
-              test.equal(1, item.a);
-
-              // Let's build a db reference and resolve it
-              var dbRef = new DBRef('test_deref_examples', r.ops[0]._id);
-
-              // Simple local resolve
-              secondDb.dereference(dbRef, function(err, item) {
-                test.equal(1, item.a);
-
-                db.close();
-                test.done();
-              });
-            });            
-          }, 500);
-        });
-      });
-    });
-    // DOC_END
   }
 }
 
@@ -1292,114 +1174,7 @@ exports.shouldCreateComplexEnsureIndexDb = {
 }
 
 /**
- * A Simple example of returning current cursor information in MongoDB
- *
- * @_class db
- * @_function cursorInfo
- */
-exports.shouldCorrectlyReturnCursorInformation = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
-    // DOC_START
-    // Establish connection to db
-    db.open(function(err, db) {
-
-      // Create a collection we want to drop later
-      db.createCollection('cursor_information_collection', function(err, collection) {
-        test.equal(null, err);
-
-        // Create a bunch of documents so we can force the creation of a cursor
-        var docs = [];
-        for(var i = 0; i < 1000; i++) {
-          docs.push({a:'hello world hello world hello world hello world hello world hello world hello world hello world'});
-        }
-
-        // Insert a bunch of documents for the index
-        collection.insert(docs, configuration.writeConcernMax(), function(err, result) {
-          test.equal(null, err);
-
-          // Let's set a cursor
-          var cursor = collection.find({}, {batchSize:10});
-          cursor.nextObject(function(err, item) {
-            test.equal(null, err);
-
-            // Let's grab the information about the cursors on the database
-            db.cursorInfo(function(err, cursorInformation) {
-              test.ok(cursorInformation.totalOpen > 0);
-
-              db.close();
-              test.done();
-            });
-          });
-        });
-      });
-    });
-    // DOC_END
-  }
-}
-
-/**
- * An examples showing the creation and dropping of an index
- *
- * @_class db
- * @_function dropIndex
- */
-exports.shouldCorrectlyCreateAndDropIndex = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
-    // DOC_START
-    // Establish connection to db
-    db.open(function(err, db) {
-
-      // Create a collection we want to drop later
-      db.createCollection('create_and_drop_an_index', function(err, collection) {
-        test.equal(null, err);
-
-        // Insert a bunch of documents for the index
-        collection.insert([{a:1, b:1}, {a:1, b:1}
-          , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax(), function(err, result) {
-          test.equal(null, err);
-
-          // Create an index on the a field
-          collection.ensureIndex({a:1, b:1}
-            , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
-
-            // Drop the index
-            db.dropIndex("create_and_drop_an_index", "a_1_b_1", function(err, result) {
-              test.equal(null, err);
-
-              // Verify that the index is gone
-              collection.indexInformation(function(err, indexInformation) {
-                test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
-                test.equal(null, indexInformation.a_1_b_1);
-
-                db.close();
-                test.done();
-              });
-            });
-          });
-        });
-      });
-    });
-    // DOC_END
-  }
-}
-
-/**
  * An example showing how to force a reindex of a collection.
- *
- * @_class db
- * @_function reIndex
  */
 exports.shouldCorrectlyForceReindexOnCollection = {
   metadata: {
@@ -1429,7 +1204,7 @@ exports.shouldCorrectlyForceReindexOnCollection = {
             , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
 
             // Force a reindex of the collection
-            db.reIndex('create_and_drop_all_indexes', function(err, result) {
+            collection.reIndex('create_and_drop_all_indexes', function(err, result) {
               test.equal(null, err);
               test.equal(true, result);
 
