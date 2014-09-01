@@ -1090,13 +1090,13 @@ exports.shouldCreateOnDbComplexIndexOnTwoFields = {
         test.equal(null, err);
 
         // Insert a bunch of documents for the index
-        collection.insert([{a:1, b:1}, {a:1, b:1}
+        collection.insert([{a:1, b:1}
           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
 
           // Create an index on the a field
           db.createIndex('more_complex_index_test', {a:1, b:1}
-            , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
+            , {unique:true, background:true, w:1}, function(err, indexName) {
 
             // Show that duplicate records got dropped
             collection.find({}).toArray(function(err, items) {
@@ -1143,13 +1143,13 @@ exports.shouldCreateComplexEnsureIndexDb = {
         test.equal(null, err);
 
         // Insert a bunch of documents for the index
-        collection.insert([{a:1, b:1}, {a:1, b:1}
+        collection.insert([{a:1, b:1}
           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
 
           // Create an index on the a field
           db.ensureIndex('more_complex_ensure_index_db_test', {a:1, b:1}
-            , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
+            , {unique:true, background:true, w:1}, function(err, indexName) {
 
             // Show that duplicate records got dropped
             collection.find({}).toArray(function(err, items) {
@@ -1195,13 +1195,13 @@ exports.shouldCorrectlyForceReindexOnCollection = {
         test.equal(null, err);
 
         // Insert a bunch of documents for the index
-        collection.insert([{a:1, b:1}, {a:1, b:1}
+        collection.insert([{a:1, b:1}
           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
 
           // Create an index on the a field
           collection.ensureIndex({a:1, b:1}
-            , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
+            , {unique:true, background:true, w:1}, function(err, indexName) {
 
             // Force a reindex of the collection
             collection.reIndex('create_and_drop_all_indexes', function(err, result) {
@@ -1250,13 +1250,13 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = {
         test.equal(null, err);
 
         // Insert a bunch of documents for the index
-        collection.insert([{a:1, b:1}, {a:1, b:1}
+        collection.insert([{a:1, b:1}
           , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
 
           // Create an index on the a field
           collection.ensureIndex({a:1, b:1}
-            , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
+            , {unique:true, background:true, w:1}, function(err, indexName) {
 
             // Fetch basic indexInformation for collection
             db.indexInformation('more_index_information_test', function(err, indexInformation) {
