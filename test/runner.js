@@ -214,7 +214,7 @@ var testFiles =[
   , '/test/functional/url_parser_tests.js'
   , '/test/functional/gridfs_tests.js'
   , '/test/functional/bulk_tests.js'
-  , '/test/functional/crud_api_tests.js'
+  // , '/test/functional/crud_api_tests.js'
 
   // Replicaset tests
   , '/test/functional/replset_failover_tests.js'

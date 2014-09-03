@@ -170,7 +170,6 @@ exports.shouldAccessToCollections = {
           // Insert test documents (creates collections)
           db.collection('test.spiderman', function(err, spiderman_collection) {
             spiderman_collection.insert({foo:5}, configuration.writeConcernMax(), function(err, r) {
-
               db.collection('test.mario', function(err, mario_collection) {
                 mario_collection.insert({bar:0}, configuration.writeConcernMax(), function(err, r) {
                   // Assert collections
@@ -276,23 +275,24 @@ exports.shouldCorrectlyRetriveCollectionNames = {
     
           test.ok(found);
           // Insert a document in an non-existing collection should create the collection
-          db.collection('test_collection_names2', function(err, collection) {
-            collection.insert({a:1}, configuration.writeConcernMax(), function(err, r) {
-              db.collectionNames(function(err, documents) {
-                documents.forEach(function(document) {
-                  if(document.name == configuration.database + '.test_collection_names2') found = true;
-                  if(document.name == configuration.database + '.test_collection_names') found2 = true;
-                });
+          var collection = db.collection('test_collection_names2');
+          collection.insert({a:1}, configuration.writeConcernMax(), function(err, r) {
+            test.equal(null, err);
 
-                test.ok(found);
-                test.ok(found2);
-                
-                // Let's close the db
-                db.close();
-                test.done();
+            db.collectionNames(function(err, documents) {
+              documents.forEach(function(document) {
+                if(document.name == configuration.database + '.test_collection_names2') found = true;
+                if(document.name == configuration.database + '.test_collection_names') found2 = true;
               });
-            })
-          });
+
+              test.ok(found);
+              test.ok(found2);
+              
+              // Let's close the db
+              db.close();
+              test.done();
+            });
+          })
         });
       });
     });

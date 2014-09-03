@@ -18,6 +18,7 @@ data/
 dev/
 examples/
 test/
+out/
 performance/
 .coverage_data/
 
