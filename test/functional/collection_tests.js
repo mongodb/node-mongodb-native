@@ -312,21 +312,20 @@ exports.shouldCorrectlyRetrieveCollectionInfo = {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_collections_info', function(err, r) {
-        db.collectionsInfo(function(err, cursor) {
-          // Fetch all the collection info
-          cursor.toArray(function(err, documents) {
-            test.ok(documents.length > 1);
+        var cursor = db.collectionsInfo();
+        // Fetch all the collection info
+        cursor.toArray(function(err, documents) {
+          test.ok(documents.length > 1);
 
-            var found = false;
-            documents.forEach(function(document) {
-              if(document.name == configuration.database + '.test_collections_info') found = true;
-            });
-            
-            test.ok(found);
-            // Let's close the db
-            db.close();
-            test.done();
+          var found = false;
+          documents.forEach(function(document) {
+            if(document.name == configuration.database + '.test_collections_info') found = true;
           });
+          
+          test.ok(found);
+          // Let's close the db
+          db.close();
+          test.done();
         });
       });
     });

@@ -492,16 +492,12 @@ exports.shouldCorrectlyRetrieveCollectionInformation = {
           test.equal(1, items.length);
 
           // Return the information of a all collections, using the callback format
-          db.collectionsInfo(function(err, cursor) {
+          db.collectionsInfo().toArray(function(err, items) {
+            test.ok(items.length > 0);
 
-            // Turn the cursor into an array of results
-            cursor.toArray(function(err, items) {
-              test.ok(items.length > 0);
-
-              db.close();
-              test.done();
-            });
-          })
+            db.close();
+            test.done();
+          });
         });
       });
     });
