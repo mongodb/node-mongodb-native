@@ -21,5 +21,8 @@
     "examples": [
       "test/functional/operation_example_tests.js"
     ]
+  },
+  "examples": {
+    "indent": 4
   }
 }

@@ -22,7 +22,7 @@
   "devDependencies": {
       "integra": "0.1.6"
     , "optimist": "0.6.1"
-    , "bson": "0.2.12"
+    , "bson": "~0.2"
     , "jsdoc": "3.3.0-alpha9"
   },
   "author": "Christian Kvalheim",
