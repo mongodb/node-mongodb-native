@@ -306,7 +306,7 @@ var bsonInstance = null;
  * @param {array} seedlist A list of seeds for the replicaset
  * @param {boolean} options.setName The Replicaset set name
  * @param {boolean} [options.secondaryOnlyConnectionAllowed=false] Allow connection to a secondary only replicaset
- * @param {number} [options.haInterval=10000] The High availability period for replicaset inquiry
+ * @param {number} [options.haInterval=5000] The High availability period for replicaset inquiry
  * @param {boolean} [options.emitError=false] Server will emit errors events
  * @param {Cursor} [options.cursorFactory=Cursor] The cursor factory class used for all query cursors
  * @param {string} options.host The server host
@@ -1449,7 +1449,7 @@ inherits(ReplSet, EventEmitter);
  * The replset high availability event
  *
  * @event ReplSet#ha
- * @type {ReplSet}
+ * @type {function}
  * @param {string} type The stage in the high availability event (start|end)
  * @param {boolean} data.norepeat This is a repeating high availability process or a single execution only
  * @param {number} data.id The id for this high availability request
@@ -1460,7 +1460,7 @@ inherits(ReplSet, EventEmitter);
  * A server member left the replicaset
  *
  * @event ReplSet#left
- * @type {ReplSet}
+ * @type {function}
  * @param {string} type The type of member that left (primary|secondary|arbiter)
  * @param {Server} server The server object that left
  */
@@ -1469,7 +1469,7 @@ inherits(ReplSet, EventEmitter);
  * A server member joined the replicaset
  *
  * @event ReplSet#joined
- * @type {ReplSet}
+ * @type {function}
  * @param {string} type The type of member that joined (primary|secondary|arbiter)
  * @param {Server} server The server object that joined
  */

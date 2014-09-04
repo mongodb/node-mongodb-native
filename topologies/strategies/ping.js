@@ -23,8 +23,8 @@ var Ping = function(options) {
   var logger = Logger('Ping', options);
  
   // Ping interval
-  var pingInterval = options.pingInterval || 5000;
-  var acceptableLatency = options.acceptableLatency || 250;
+  var pingInterval = options.pingInterval || 10000;
+  var acceptableLatency = options.acceptableLatency || 15;
 
   // Debug options
   var debug = typeof options.debug == 'boolean' ? options.debug : false;
