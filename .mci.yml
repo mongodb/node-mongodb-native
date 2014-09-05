@@ -1,0 +1,181 @@
+stepback: true
+pre:
+  - command: expansions.fetch
+    params:
+      keys:
+        - local_key: "aws_key"
+          remote_key: "project_aws_key"
+        - local_key: "aws_secret"
+          remote_key: "project_aws_secret"
+  - command: shell.exec
+    params:
+      script: |
+        # Get NodeJS
+        if [ "${windows|}" = "true" ]; then
+          # NodeJS packages node.exe and npm separately for windows
+          wget http://nodejs.org/dist/v${node_version}/x64/node.exe
+          chmod 755 node.exe
+          wget http://nodejs.org/dist/npm/npm-1.4.9.tgz
+          tar -zxvf npm-1.4.9.tgz
+        else
+          wget http://nodejs.org/dist/v${node_version}/node-v${node_version}-linux-x64.tar.gz
+          tar -zxvf node-v${node_version}-linux-x64.tar.gz
+          mv node-v${node_version}-linux-x64 node
+          rm node-*.tar.gz
+        fi
+post:
+  - command: shell.exec
+    params:
+      script: |
+        # Remove NodeJS
+        rm -rf node
+
+functions:
+  "clean src" :
+    command: shell.exec
+    params:
+      script: |
+        # Make sure our src directory is clean
+        rm -rf src
+  "fetch source" :
+    command: git.get_project
+    params:
+      directory: src
+  "fetch artifacts" :
+    command: s3.get
+    params:
+      aws_key: ${aws_key}
+      aws_secret: ${aws_secret}
+      remote_file: node-mongodb-native-3.0/${build_id}.tgz
+      bucket: mciuploads
+      extract_to: src
+  "download MongoDB":
+    command: shell.exec
+    params:
+      working_dir: src
+      script: |
+        if [ "${windows|}" = "true" ]; then
+          wget http://fastdl.mongodb.org/${mongodb_arch}/mongodb-${mongodb_path}-${mongodb_version}.zip
+          unzip mongodb-${mongodb_path}-${mongodb_version}.zip
+        else
+          wget http://fastdl.mongodb.org/linux/mongodb-${mongodb_path}-${mongodb_version}.tgz
+          tar -zxvf mongodb-${mongodb_path}-${mongodb_version}.tgz
+        fi
+        # Move mongod and mongos to src directory
+        mv mongodb-${mongodb_path}-${mongodb_version}/bin/* ./
+        # Clean up
+        rm -rf mongodb-${mongodb_path}-*
+
+## tasks 
+tasks: 
+- name: compile
+  commands:
+    - func: "clean src"
+    - command: git.get_project
+      params:
+        directory: src
+    - command: shell.exec
+      params:
+        working_dir: src
+        script: |
+          # Necessary on ubuntu to run npm without sudo. Also necessary for
+          # Windows because we need to set environment variables below
+          mkdir ~/tmp/
+          if [ "${windows|}" = "true" ]; then
+            # Make sure required environment variables (mostly TEMP and TMP)
+            # are set, because agent loses them and node can't spawn processes
+            # without them (https://github.com/Nodeclipse/nodeclipse-1/issues/81)
+            export TEMP=~/tmp/
+            export TMP=~/tmp/
+          fi
+          # Install NPM modules
+          ${npm_cmd} install
+    - func: "download MongoDB"
+    - command: archive.targz_pack
+      params:
+        target: "target.tgz"
+        source_dir: "src"
+        include:
+          - test/**
+          - lib/**
+          - node_modules/**
+          - package.json
+          - mongo*
+    - command: s3.put
+      params:
+        aws_key: ${aws_key}
+        aws_secret: ${aws_secret}
+        local_file: target.tgz
+        remote_file: node-mongodb-native-3.0/${build_id}.tgz
+        bucket: mciuploads
+        permissions: public-read
+        content_type: application/tar
+- name: functional
+  depends_on:
+  - name: compile
+  commands:
+    - func: "clean src"
+    - func: "fetch artifacts"
+    - command: shell.exec
+      params:
+        working_dir: src
+        script: |
+          # Make sure mongod and mongos are on the PATH
+          export PATH=$PATH:./
+          if [ "${windows|}" = "true" ]; then
+            # Make sure required environment variables (mostly TEMP and TMP)
+            # are set, because agent loses them and node can't spawn processes
+            # without them (https://github.com/Nodeclipse/nodeclipse-1/issues/81)
+            mkdir ~/tmp
+            export PATH=$PATH:../
+            export TEMP=~/tmp/
+            export TMP=~/tmp/
+          fi
+          # Run actual tests
+          ${node_cmd} ./test/functional_test_runner.js -t functional -r report.json
+
+buildvariants:
+- name: ubuntu-1204-node-0.10-mongodb-2.6
+  display_name: "Ubuntu: 0.10/2.6"
+  expansions:
+    node_version: 0.10.26
+    mongodb_version: 2.6.1
+    mongodb_arch: linux
+    mongodb_path: linux-x86_64
+    npm_cmd: ../node/bin/npm
+    node_cmd: ../node/bin/node
+  run_on: 
+  - ubuntu1204-test
+  tasks:
+  - name: compile
+  - name: functional
+- name: ubuntu-1204-node-0.10-mongodb-2.4
+  display_name: "Ubuntu: 0.10/2.4"
+  modules: ~
+  expansions:
+    node_version: 0.10.26
+    mongodb_version: 2.4.10
+    mongodb_arch: linux
+    mongodb_path: linux-x86_64
+    npm_cmd: ../node/bin/npm
+    node_cmd: ../node/bin/node
+  run_on: 
+  - ubuntu1204-test
+  tasks:
+  - name: compile
+  - name: functional
+- name: win64-node-0.10-mongodb-2.6
+  display_name: "Windows: 0.10/2.6"
+  expansions:
+    node_version: 0.10.26
+    mongodb_version: 2.6.3
+    windows: true
+    mongodb_arch: win32
+    mongodb_path: win32-x86_64-2008plus
+    npm_cmd: ../node.exe ../npm/bin/npm-cli.js
+    node_cmd: ../node.exe
+  run_on:
+  - windows-64-test
+  tasks:
+  - name: compile
+  - name: functional
