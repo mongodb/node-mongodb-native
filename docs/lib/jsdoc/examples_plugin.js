@@ -8,28 +8,19 @@ var indent = env.conf.examples && env.conf.examples.indent ? env.conf.examples.i
 
 // State for the plugin
 var tests = {};
-var currentClass = null;
+var example = {};
 
 exports.defineTags = function(dictionary) {
   dictionary.defineTag('example-class', {
       onTagged: function(doclet, tag) {
-        if(!doclet.example) doclet.example = {};
-        if(!tests[tag.text]) tests[tag.text] = {};
-        // Current doclet scope
-        doclet.example.class = tag.text;
+        example.class = tag.text;
       }
   });  
 
   dictionary.defineTag('example-method', {
       onTagged: function(doclet, tag) {
-        if(!doclet.example) doclet.example = {};
-        if(doclet.example.class) {
-          doclet.example.method = tag.text;   
-          tests[doclet.example.class][tag.text] = {
-              method: tag.text
-            , meta: doclet.meta
-          }
-        }
+        example.method = tag.text;
+        doclet.example = example;
       }
   });  
 }
@@ -67,6 +58,7 @@ var formatCode = function(object) {
       addLines = true;
     } else if(lines[i].indexOf('// END') != -1) {
       addLines = false;
+      break;
     } else if(lines[i].indexOf('// LINE') != -1) {
       finalLines.push(lines[i].split("// LINE ")[1]);
     } else if(lines[i].indexOf('// REMOVE-LINE') != -1) {
@@ -107,36 +99,35 @@ exports.handlers = {
     newDoclet: function(e) {
       // Do we have an annotated test
       if(e.doclet.example) {
-        // console.log("------------------------------------------------ new doclet")
-        // console.dir(e.doclet)
-
         // Get the method
         var filename = f("%s/%s", e.doclet.meta.path, e.doclet.meta.filename);
         // Read the whole file
         var data = fs.readFileSync(filename, 'utf8');
         // Get the substring
         var code = data.substr(e.doclet.meta.range[0], e.doclet.meta.range[1]);
-
-        // Locate the test function and add it to the hash
-        var classInstance = tests[e.doclet.example.class];
-        var method = classInstance[e.doclet.example.method];
-        method.description = e.doclet.description;
-        method.code = code;
-        // Null out the example
-        delete e.doclet['example'];
-      } else if(e.doclet.kind == 'class') {
-        if(tests[e.doclet.name]) currentClass = tests[e.doclet.name];
-      } else if(e.doclet.kind == 'function') {
-        // Do we have a test
-        if(currentClass && currentClass[e.doclet.name]) {
+        // Add to the tests
+        if(tests[e.doclet.example.class] == null) 
+          tests[e.doclet.example.class] = {};
+        if(tests[e.doclet.example.class][e.doclet.example.method] == null)
+          tests[e.doclet.example.class][e.doclet.example.method] = [];
+        // Save the test
+        tests[e.doclet.example.class][e.doclet.example.method].push({
+            description: e.doclet.description
+          , code: code
+        });
+      } else if(e.doclet.kind == 'function' && e.doclet.scope == 'instance') {
+        if(tests[e.doclet.memberof] != null 
+          && tests[e.doclet.memberof][e.doclet.name] != null) {
           if(e.doclet.examples == null) e.doclet.examples = [];
-          // Create the content
-          e.doclet.examples.push(formatCode(currentClass[e.doclet.name]));
+          // Add all the items
+          tests[e.doclet.memberof][e.doclet.name].forEach(function(x) {
+            e.doclet.examples.push(formatCode(x));
+          });
         }
       }
     },
 
     fileComplete: function() {
-      currentClass = null;
+      // currentClass = null;
     }
 }
