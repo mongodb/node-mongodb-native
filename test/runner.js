@@ -200,7 +200,6 @@ var testFiles =[
   , '/test/functional/domain_tests.js'
   , '/test/functional/error_tests.js'
   , '/test/functional/find_tests.js'
-  , '/test/functional/geo_tests.js'
   , '/test/functional/index_tests.js'
   , '/test/functional/mapreduce_tests.js'
   , '/test/functional/maxtimems_tests.js'

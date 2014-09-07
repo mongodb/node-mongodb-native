@@ -58,46 +58,6 @@ exports['Should correctly handle error when no server up in replicaset'] = {
   }
 }
 
-/**
- * Simple replicaset connection setup, requires a running replicaset on the correct ports
- *
- * @_class db
- * @_function open
- */
-exports['Should correctly connect with default replicasetNoOption'] = {
-  metadata: { requires: { topology: 'replicaset' } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var ReplSet = configuration.require.ReplSet
-      , Server = configuration.require.Server
-      , Db = configuration.require.Db;
-
-    // Replica configuration
-    var replSet = new ReplSet([
-        new Server(configuration.host, configuration.port),
-        new Server(configuration.host, configuration.port + 1),
-        new Server(configuration.host, configuration.port + 2)
-      ]
-      , {rs_name:configuration.replicasetName}
-    );
-
-    // DOC_LINE var replSet = new ReplSetServers([
-    // DOC_LINE   new Server('localhost', 30000),
-    // DOC_LINE   new Server('localhost', 30001),
-    // DOC_LINE   new Server('localhost', 30002)
-    // DOC_LINE ]);
-    // DOC_START
-    var db = new Db('integration_test_', replSet, {w:0});
-    db.open(function(err, p_db) {
-      test.equal(null, err);
-      p_db.close();
-      restartAndDone(configuration, test);
-    });
-    // DOC_END
-  }
-}
-
 exports['Should correctly connect with default replicaset'] = {
   metadata: { requires: { topology: 'replicaset' } },
   

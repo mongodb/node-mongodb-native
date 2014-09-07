@@ -110,55 +110,6 @@ exports.shouldCorrectlyUseSameConnectionsForTwoDifferentDbs = {
 }
 
 /**
- * Simple example connecting to two different databases sharing the socket connections below.
- *
- * @_class db
- * @_function db
- */
-exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstances = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
-
-    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
-    // DOC_START
-    // Establish connection to db  
-    db.open(function(err, db) {
-      test.equal(null, err);
-      
-      // Reference a different database sharing the same connections
-      // for the data transfer
-      var secondDb = db.db("integration_tests_2");
-      
-      // Fetch the collections
-      var multipleColl1 = db.collection("multiple_db_instances");
-      var multipleColl2 = secondDb.collection("multiple_db_instances");
-      
-      // Write a record into each and then count the records stored
-      multipleColl1.insert({a:1}, {w:1}, function(err, result) {      
-        multipleColl2.insert({a:1}, {w:1}, function(err, result) {
-          
-          // Count over the results ensuring only on record in each collection
-          multipleColl1.count(function(err, count) {
-            test.equal(1, count);
-
-            multipleColl2.count(function(err, count) {
-              test.equal(1, count);
-
-              db.close();
-              test.done();
-            });
-          });
-        });
-      });
-    });
-    // DOC_END
-  }
-}
-
-/**
  * @ignore
  */
 exports.shouldCorrectlyHandleMultipleDbsFindAndModifies = {

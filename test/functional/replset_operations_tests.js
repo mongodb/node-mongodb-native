@@ -329,46 +329,6 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
   }
 }
 
-/**
- * Example of a simple url connection string to a replicaset, with acknowledgement of writes.
- *
- * @_class mongoclient
- * @_function MongoClient.connect
- */
-exports['Should correctly connect to a replicaset'] = {
-  metadata: { requires: { topology: 'replicaset' } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var mongo = configuration.require
-      , MongoClient = mongo.MongoClient;
-
-    // Create url
-    var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
-      , format("%s:%s", configuration.host, configuration.port)
-      , format("%s:%s", configuration.host, configuration.host + 1)
-      , "integration_test_"
-      , configuration.replicasetName
-      , "primary");
-
-    MongoClient.connect(url, function(err, db) {
-    // DOC_LINE MongoClient.connect("mongodb://localhost:30000,localhost:30001,localhost:30002/integration_test_?w=1", function(err, db) {
-    // DOC_START  
-      test.equal(null, err);
-      test.ok(db != null);
-
-      db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
-        test.equal(null, err);
-        test.equal(1, result.result.n);
-
-        db.close();
-        restartAndDone(configuration, test);
-      });
-    });
-    // DOC_END
-  }
-}
-
 exports['Should Correctly group using replicaset'] = {
   metadata: { requires: { topology: 'replicaset' } },
   

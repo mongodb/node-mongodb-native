@@ -5,9 +5,9 @@
       "test/functional/operation_example_tests.js",
       // "lib/admin.js", 
       // "lib/aggregation_cursor.js", 
-      "lib/collection.js"
+      "lib/collection.js",
       // "lib/cursor.js",
-      // "lib/db.js", 
+      "lib/db.js"
       // "lib/mongo_client.js", 
       // "lib/mongos.js", 
       // "lib/read_preference.js", 

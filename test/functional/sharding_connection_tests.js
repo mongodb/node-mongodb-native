@@ -1,40 +1,6 @@
 var f = require('util').format;
 
 /**
- * Example of a simple url connection string to a shard, with acknowledgement of writes.
- *
- * @_class mongoclient
- * @_function MongoClient.connect
- */
-exports['Should connect to mongos proxies using connectiong string'] = {
-  metadata: { requires: { topology: 'mongos' } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var MongoClient = configuration.require.MongoClient;
-
-    var url = f('mongodb://%s:%s,%s:%s/sharded_test_db?w=1'
-      , configuration.host, configuration.port
-      , configuration.host, configuration.port + 1);
-
-    // DOC_START
-    MongoClient.connect(url, function(err, db) {
-      test.equal(null, err);
-      test.ok(db != null);
-
-      db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
-        test.equal(null, err);
-        test.equal(1, result);
-
-        db.close();
-        test.done();
-      });    
-    });
-    // DOC_END
-  }
-}
-
-/**
  * @ignore
  */
 exports['Should connect to mongos proxies using connectiong string and options'] = {
