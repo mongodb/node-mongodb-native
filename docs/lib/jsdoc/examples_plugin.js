@@ -1,4 +1,4 @@
-'use strict';
+  'use strict';
 
 var f = require('util').format
   , fs = require('fs');
@@ -119,10 +119,17 @@ exports.handlers = {
         if(tests[e.doclet.memberof] != null 
           && tests[e.doclet.memberof][e.doclet.name] != null) {
           if(e.doclet.examples == null) e.doclet.examples = [];
+          // console.log("-----------------------------------------")
+          // console.dir(e.doclet.memberof)
+          // console.dir(Object.keys(tests))
+          // console.dir(e.doclet.name)
+          // console.dir(tests[e.doclet.memberof][e.doclet.name])
           // Add all the items
-          tests[e.doclet.memberof][e.doclet.name].forEach(function(x) {
-            e.doclet.examples.push(formatCode(x));
-          });
+          if(Array.isArray(tests[e.doclet.memberof][e.doclet.name])) {
+            tests[e.doclet.memberof][e.doclet.name].forEach(function(x) {
+              e.doclet.examples.push(formatCode(x));
+            });            
+          }
         }
       }
     },
