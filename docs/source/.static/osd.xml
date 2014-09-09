@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+<ShortName>MongoDB Help</ShortName>
+<LongName>Google Custom Search of MongoDB documentation and wiki</LongName>
+<Description>Google Custom Search of MongoDB documentation (docs.mongodb.org) and wiki (www.mongodb.org/display/DOCS)</Description>
+<Tags>mongodb mongo mongodocs</Tags>
+<Query role="example" searchTerms="mongodb"/>
+<Image height="16" width="16" type="image/vnd.microsoft.icon">http://media.mongodb.org/favicon.ico</Image>
+<Developer>MongoDB, Inc.</Developer>
+<Contact>sitesearch@mongodb.com</Contact>
+<Url type="text/html" rel="results" template="http://www.google.com/cse?cx=017213726194841070573:WMX6838984&amp;ie=UTF-8&amp;q={searchTerms}" />
+<Url type="application/opensearchdescription+xml" rel="self" template="http://docs.mongodb.org/osd.xml"/>
+<Attribution>Google Custom Search by MongoDB.com</Attribution>
+</OpenSearchDescription>

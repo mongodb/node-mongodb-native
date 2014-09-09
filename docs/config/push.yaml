@@ -1,0 +1,18 @@
+target: push
+paths:
+  remote: /data/sites/docs
+  local: public
+  static: [ 'manual', '.htaccess', 'sitemap.xml.gz' ]
+options: [ 'branched', 'recursive' ]
+env: publication
+dependency: push-if-up-to-date
+---
+target: stage
+paths:
+  remote: /srv/public/test
+  local: public
+  static: [ 'manual', 'sitemap.xml.gz' ]
+options: [ 'branched', 'recursive' ]
+env: staging
+dependency: stage-if-up-to-date
+...
