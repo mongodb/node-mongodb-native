@@ -11,7 +11,8 @@ theme:
   repo: 'docs'
   jira: 'NODE'
   sitename: 'MongoDB Node.JS Driver'
-  nav_excluded: []
+  nav_excluded: 
+    - '/resources'
 sidebars:
   '**':
     - 'pagenav.html'
