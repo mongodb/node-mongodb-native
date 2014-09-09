@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<sitemap>
+<loc>http://docs.mongodb.org/manual/sitemap.xml.gz</loc>
+</sitemap>
+<sitemap>
+<loc>http://docs.mongodb.org/v2.4/sitemap.xml.gz</loc>
+</sitemap>
+<sitemap>
+<loc>http://docs.mongodb.org/v2.2/sitemap.xml.gz</loc>
+</sitemap>
+<sitemap>
+<loc>http://docs.mongodb.org/ecosystem/sitemap.xml.gz</loc>
+</sitemap>
+</sitemapindex>

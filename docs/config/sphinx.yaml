@@ -1,0 +1,74 @@
+# The items in the ``builders`` list are the name of Sphinx builders
+# supported by ``sphinx-build``.
+#
+# The ``prerequsites`` list stores all targets that must build before
+# sphinx can begin.
+#
+# The ``generated-source`` list stores all the targets that generate rst.
+
+prerequisites: []
+generated-source:
+  - tables
+  - api
+  - toc
+  - intersphinx
+  - images
+### --- ####
+root-base:
+  languages: ['es', 'fr', 'ja', 'it', 'zh']
+web-base:
+  inherit: root-base
+  excluded_files: []
+  tags:
+    - web
+print-base:
+  inherit: root-base
+  tags:
+    - print
+### --- ####
+dirhtml:
+  builder: dirhtml
+  inherit: web-base
+html:
+  builder: html
+  inherit: web-base
+latex:
+  builder: latex
+  inherit: print-base
+epub:
+  builder: epub
+  inherit: print-base
+singlehtml:
+  builder: singlehtml
+  inherit: root-base
+  tags:
+    - web
+man:
+  builder: man
+  inherit: root-base
+  tags:
+    - manpage
+gettext:
+  builder: gettext
+  tags:
+    - print
+    - web
+    - manpage
+json:
+  builder: json
+  inherit: root-base
+  tags:
+    - print
+    - web
+    - manpage
+linkcheck:
+  builder: linkcheck
+  inherit: root-base
+  tags:
+    - web
+texinfo:
+  builder: texinfo
+  inherit: root-base
+  tags:
+    - print
+...
