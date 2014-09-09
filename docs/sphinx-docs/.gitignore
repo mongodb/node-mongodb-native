@@ -1,7 +1,10 @@
-build/
-source/api-generated
-source/api-bson-generated
-source/api-articles
-source/markdown-docs
-source/changelog
-source/github
+build
+docs-tools
+source/includes/hash.rst
+source/api-bson-generated/
+source/api-generated/
+sphinx-docs/source/markdown-docs/
+source/github/
+source/api-articles/
+source/changelog/
+source/markdown-docs/

@@ -1,0 +1,40 @@
+name: pymongo
+url: http://api.mongodb.org/python/current/
+path: pymongo.inv
+---
+name: metadriver
+url: http://docs.mongodb.org/meta-driver/latest/
+path: metadriver.inv
+---
+name: python
+url: https://docs.python.org/2/
+path: python2.inv
+---
+name: python2
+url: https://docs.python.org/2/
+path: python2.inv
+---
+name: python3
+url: https://docs.python.org/3/
+path: python3.inv
+---
+name: sphinx
+url: http://sphinx-doc.org/
+path: sphinx.inv
+---
+name: django
+url: https://django.readthedocs.org/en/latest/
+path: django.inv
+---
+# name: djangomongodbengine
+# url: http://django-mongodb.org/
+# path: djangomongodb.inv
+# ---
+name: djangotoolbox
+url: http://djangotoolbox.readthedocs.org/en/latest/
+path: djangotoolbox.inv
+---
+name: mongodb
+url: http://docs.mongodb.org/manual/
+path: mongodb.inv
+...
