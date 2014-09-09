@@ -41,10 +41,7 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
   // Initial query
   var query = null;
 
-  // Unpack options
-  var batchSize = options.batchSize || cmd.batchSize || 0;
-  var limit = options.limit || cmd.limit || 0;
-  var skip = options.skip || cmd.skip || 0;
+  // Current limit processed, used to cut the number of returned docs correctly
   var currentLimit = 0;
 
   // Cursor connection
@@ -53,13 +50,20 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
   // Do we have a not connected handler
   var disconnectHandler = options.disconnectHandler;
 
-  // All internal state
+  // Cursor reference
   var self = this;
-  var cursorId = null;
-  var documents = options.documents || [];
-  var dead = false;
-  var killed = false;
-  var init = false;
+
+  // All internal state
+  var cursorState = {
+      cursorId: null
+    , documents: options.documents || []
+    , dead: false
+    , killed: false
+    , init: false
+    , limit: options.limit || cmd.limit || 0
+    , skip: options.skip || cmd.skip || 0
+    , batchSize: options.batchSize || cmd.batchSize || 0
+  }
 
   // Callback controller
   var callbacks = null;
@@ -67,34 +71,37 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
   // Logger
   var logger = Logger('Cursor', options);
 
+  // Wire protocol handler
+  var wireProtocolHandler = topologyOptions.wireProtocolHandler;
+
   // 
   // Did we pass in a cursor id
   if(typeof cmd == 'number') {
-    cursorId = Long.fromNumber(cmd);
+    cursorState.cursorId = Long.fromNumber(cmd);
   } else if(cmd instanceof Long) {
-    cursorId = cmd;
+    cursorState.cursorId = cmd;
   }
 
   // Allow the manipulation of the batch size of the cursor
   // after creation has happened
   Object.defineProperty(this, 'cursorBatchSize', {
       enumerable:true,
-      set: function(value) { batchSize = value; }
-    , get: function() { return batchSize; }
+      set: function(value) { cursorState.batchSize = value; }
+    , get: function() { return cursorState.batchSize; }
   });
 
   // Allow the manipulation of the cursor limit
   Object.defineProperty(this, 'cursorLimit', {
       enumerable:true,
-      set: function(value) { limit = value; }
-    , get: function() { return limit; }
+      set: function(value) { cursorState.limit = value; }
+    , get: function() { return cursorState.limit; }
   });
 
   // Allow the manipulation of the cursor skip
   Object.defineProperty(this, 'cursorSkip', {
       enumerable:true,
-      set: function(value) { skip = value; }
-    , get: function() { return skip; }
+      set: function(value) { cursorState.skip = value; }
+    , get: function() { return cursorState.skip; }
   });
 
   //
@@ -124,10 +131,10 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
    * @param {resultCallback} callback A callback function
    */
   this.next = function(callback) {
-    if(killed) return handleCallback(callback, null, null);
-    if(dead) return handleCallback(callback, new MongoError("cursor is dead"));    
+    if(cursorState.killed) return handleCallback(callback, null, null);
+    if(cursorState.dead) return handleCallback(callback, new MongoError("cursor is dead"));    
     // We have just started the cursor
-    if(!init) {
+    if(!cursorState.init) {
       // Topology is not connected, save the call in the provided store to be
       // Executed at some point when the handler deems it's reconnected
       if(!topology.isConnected(options) && disconnectHandler != null) {
@@ -146,32 +153,26 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
       }
 
       // Set as init
-      init = true;
-      // Establish type of command
-      if(cmd.find) {
-        query = setupClassicFind(ns, cmd, topology, options)
-      } else if(cursorId != null) {
-      } else if(cmd) {
-        query = setupCommand(ns, cmd, topology, options);
-      } else {
-        throw new MongoError(f("command %s does not return a cursor", JSON.stringify(cmd)));
-      }      
+      cursorState.init = true;
+
+      // Get the right wire protocol command
+      query = wireProtocolHandler.command(bson, ns, cmd, cursorState, topology, options);
     }
 
     // Process exhaust messages
     var processExhaustMessages = function(err, result) {
       if(err) {
-        dead = true;
+        cursorState.dead = true;
         callbacks.unregister(query.requestId);
         return callback(err);
       }
 
       // Concatenate all the documents
-      documents = documents.concat(result.documents);
+      cursorState.documents = cursorState.documents.concat(result.documents);
 
       // If we have no documents left
       if(Long.ZERO.equals(result.cursorId)) {
-        cursorId = Long.ZERO;
+        cursorState.cursorId = Long.ZERO;
         callbacks.unregister(query.requestId);
         return self.next(callback);
       }
@@ -180,45 +181,45 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
       callbacks.register(result.requestId, processExhaustMessages)
 
       // Initial result
-      if(cursorId == null) {
-        cursorId = result.cursorId;
+      if(cursorState.cursorId == null) {
+        cursorState.cursorId = result.cursorId;
         self.next(callback);
       }
     }    
 
     // If we have exhaust
-    if(options.exhaust && cursorId == null) {
+    if(options.exhaust && cursorState.cursorId == null) {
       // Handle all the exhaust responses
       callbacks.register(query.requestId, processExhaustMessages);
       // Write the initial command out
       return connection.write(query);
-    } else if(options.exhaust && documents.length > 0) {
-      return handleCallback(callback, null, documents.shift());
-    } else if(options.exhaust && Long.ZERO.equals(cursorId)) {
+    } else if(options.exhaust && cursorState.documents.length > 0) {
+      return handleCallback(callback, null, cursorState.documents.shift());
+    } else if(options.exhaust && Long.ZERO.equals(cursorState.cursorId)) {
       callbacks.unregister(query.requestId);
       return handleCallback(callback, null, null);
     } else if(options.exhaust) {
       return setTimeout(function() {
-        if(Long.ZERO.equals(cursorId)) return;
+        if(Long.ZERO.equals(cursorState.cursorId)) return;
         self.next(callback);
       }, 1);
     }
 
     // If we don't have a cursorId execute the first query
-    if(cursorId == null) {
+    if(cursorState.cursorId == null) {
       execInitialQuery(query, function(err, r) {
         if(err) return handleCallback(callback, err, null);
-        if(documents.length == 0) return handleCallback(callback, null, null);
+        if(cursorState.documents.length == 0) return handleCallback(callback, null, null);
         self.next(callback);
       });
-    } else if(documents.length == 0 && !Long.ZERO.equals(cursorId)) {
+    } else if(cursorState.documents.length == 0 && !Long.ZERO.equals(cursorState.cursorId)) {
       execGetMore(function(err, doc) {
         if(err) return handleCallback(callback, err);
-        if(documents.length == 0 && Long.ZERO.equals(cursorId)) dead = true;
+        if(cursorState.documents.length == 0 && Long.ZERO.equals(cursorState.cursorId)) cursorState.dead = true;
         // Tailable cursor getMore result, notify owner about it
         // No attempt is made here to retry, this is left to the user of the
         // core module to handle to keep core simple
-        if(documents.length == 0 && options.tailable) {
+        if(cursorState.documents.length == 0 && options.tailable) {
           return handleCallback(callback, MongoError.create({
               message: "No more documents in tailed cursor"
             , tailable: options.tailable
@@ -226,31 +227,31 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
           }));
         }
 
-        if(limit > 0 && currentLimit >= limit) {
-          dead = true;
-          documents = [];
+        if(cursorState.limit > 0 && currentLimit >= cursorState.limit) {
+          cursorState.dead = true;
+          cursorState.documents = [];
           return handleCallback(callback, null, null);
         }
 
         self.next(callback);
       });
-    } else if(documents.length == 0 && options.tailable) { 
+    } else if(cursorState.documents.length == 0 && options.tailable) { 
       return handleCallback(callback, MongoError.create({
           message: "No more documents in tailed cursor"
         , tailable: options.tailable
         , awaitData: options.awaitData
       }));
-    } else if(documents.length == 0 && Long.ZERO.equals(cursorId)) {
-      dead = true;
+    } else if(cursorState.documents.length == 0 && Long.ZERO.equals(cursorState.cursorId)) {
+      cursorState.dead = true;
       handleCallback(callback, null, null);
     } else {
-      if(limit > 0 && currentLimit >= limit) {
-        dead = true;
+      if(cursorState.limit > 0 && currentLimit >= cursorState.limit) {
+        cursorState.dead = true;
         return handleCallback(callback, null, null);
       }
 
       currentLimit += 1;
-      handleCallback(callback, null, documents.shift());
+      handleCallback(callback, null, cursorState.documents.shift());
     }
   }
 
@@ -260,7 +261,7 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
    * @return {boolean} A boolean signifying if the cursor is dead or not
    */
   this.isDead = function() {
-    return dead == true;
+    return cursorState.dead == true;
   }
 
   /**
@@ -269,7 +270,7 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
    * @return {number} The number of items in the buffered documents
    */
   this.bufferedCount = function() {
-    return documents.length;
+    return cursorState.documents.length;
   }
 
   /**
@@ -278,8 +279,8 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
    * @return {Array} An array of buffered documents
    */
   this.readBufferedDocuments = function(number) {
-    var length = number < documents.length ? number : documents.length;
-    var elements = documents.splice(0, length);
+    var length = number < cursorState.documents.length ? number : cursorState.documents.length;
+    var elements = cursorState.documents.splice(0, length);
     currentLimit = currentLimit + length;
     return elements;
   }
@@ -290,17 +291,17 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
    * @return {null}
    */  
   this.rewind = function() {
-    if(init) {
-      if(!dead) {
+    if(cursorState.init) {
+      if(!cursorState.dead) {
         this.kill();
       }
 
       currentLimit = 0;
-      init = false;
-      dead = false;
-      killed = false;
-      documents = [];
-      cursorId = null;
+      cursorState.init = false;
+      cursorState.dead = false;
+      cursorState.killed = false;
+      cursorState.documents = [];
+      cursorState.cursorId = null;
     }  
   }
 
@@ -311,46 +312,57 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
    */
   this.kill = function(callback) {
     // Set cursor to dead
-    dead = true;
-    killed = true;
+    cursorState.dead = true;
+    cursorState.killed = true;
     // Remove documents
-    documents = [];
+    cursorState.documents = [];
     // If no cursor id just return
-    if(cursorId == null || cursorId.isZero()) {
+    if(cursorState.cursorId == null || cursorState.cursorId.isZero()) {
       if(callback) callback(null, null);
       return;
     }
 
+    // We have a wire protocol handler
+    if(wireProtocolHandler) 
+      return wireProtocolHandler.killCursor(bson, cursorState.cursorId, connection, callback);
+
     // Create a kill cursor command
-    var killCursor = new KillCursor(bson, [cursorId]);
+    var killCursor = new KillCursor(bson, [cursorState.cursorId]);
     // Execute the kill cursor command
     if(connection && connection.isConnected()) connection.write(killCursor);
     // Set cursor to 0
-    cursorId = Long.ZERO;
+    cursorState.cursorId = Long.ZERO;
     // Return to caller
     if(callback) callback(null, null);
   }
-
 
   //
   // Execute getMore command
   var execGetMore = function(callback) {
     if(logger.isDebug()) logger.debug(f("schedule getMore call for query [%s]", JSON.stringify(query)))
+
+    // Determine if it's a raw query
+    var raw = options.raw || cmd.raw;
+
+    // We have a wire protocol handler
+    if(wireProtocolHandler) 
+      return wireProtocolHandler.getMore(bson, ns, cursorState, cursorState.batchSize, raw, connection, callbacks, options, callback);
+
     // Create getMore command
-    var getMore = new GetMore(bson, ns, cursorId, {numberToReturn: batchSize});
+    var getMore = new GetMore(bson, ns, cursorState.cursorId, {numberToReturn: cursorState.batchSize});
 
     // Query callback
     var queryCallback = function(err, r) {
       if(err) return callback(err);  
-      documents = r.documents;
-      cursorId = r.cursorId;
+      cursorState.documents = r.documents;
+      cursorState.cursorId = r.cursorId;
       // Return
       callback(null);
     }
 
     // If we have a raw query decorate the function
-    if(options.raw || cmd.raw) {
-      queryCallback.raw = options.raw || cmd.raw;
+    if(raw) {
+      queryCallback.raw = raw;
     }
     
     // Register a callback
@@ -382,10 +394,10 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
           && typeof result.documents[0].cursor != 'string') {
             var id = result.documents[0].cursor.id;
             // Promote id to long if needed
-            cursorId = typeof id == 'number' ? Long.fromNumber(id) : id;
+            cursorState.cursorId = typeof id == 'number' ? Long.fromNumber(id) : id;
             // If we have a firstBatch set it
             if(Array.isArray(result.documents[0].cursor.firstBatch)) {
-              documents = result.documents[0].cursor.firstBatch;
+              cursorState.documents = result.documents[0].cursor.firstBatch;
             }
 
             // Return after processing command cursor
@@ -393,15 +405,15 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
         }
 
         if(Array.isArray(result.documents[0].result)) {
-          documents = result.documents[0].result;
-          cursorId = Long.ZERO;
+          cursorState.documents = result.documents[0].result;
+          cursorState.cursorId = Long.ZERO;
           return callback(null, null);
         }
       }
 
       // Otherwise fall back to regular find path
-      cursorId = result.cursorId;
-      documents = result.documents;
+      cursorState.cursorId = result.cursorId;
+      cursorState.documents = result.documents;
       callback(null, null);
     }
 
@@ -415,134 +427,6 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
 
     // Write the initial command out
     connection.write(query);
-  }
-
-  //
-  // Execute a find command
-  var setupClassicFind = function(ns, cmd, topology, options) {
-    var readPreference = options.readPreference || new ReadPreference('primary');
-    if(typeof readPreference == 'string') readPreference = new ReadPreference(readPreference);
-    if(!(readPreference instanceof ReadPreference)) throw new MongoError('readPreference must be a ReadPreference instance');
-
-    // Ensure we have at least some options
-    options = options || {};
-    // Set the optional batchSize
-    batchSize = cmd.batchSize || batchSize;
-    var numberToReturn = 0;
-    
-    // Unpack the limit and batchSize values
-    if(limit == 0) {
-      numberToReturn = batchSize;
-    } else if(limit < 0 || limit < batchSize || (limit > 0 && batchSize == 0)) {
-      numberToReturn = limit;
-    } else {
-      numberToReturn = batchSize;
-    }
-
-    var numberToSkip = skip || 0;
-    // Build actual find command
-    var findCmd = {};
-    // Using special modifier
-    var usesSpecialModifier = false;
-
-    // We have a Mongos topology, check if we need to add a readPreference
-    if(topology.type == 'mongos' && readPreference) {
-      findCmd['$readPreference'] = readPreference.toJSON();
-      usesSpecialModifier = true;
-    }
-
-    // Add special modifiers to the query
-    if(cmd.sort) findCmd['orderby'] = cmd.sort, usesSpecialModifier = true;
-    if(cmd.hint) findCmd['$hint'] = cmd.hint, usesSpecialModifier = true;
-    if(cmd.snapshot) findCmd['$snapshot'] = cmd.snapshot, usesSpecialModifier = true;
-    if(cmd.returnKey) findCmd['$returnKey'] = cmd.returnKey, usesSpecialModifier = true;
-    if(cmd.maxScan) findCmd['$maxScan'] = cmd.maxScan, usesSpecialModifier = true;
-    if(cmd.min) findCmd['$min'] = cmd.min, usesSpecialModifier = true;
-    if(cmd.max) findCmd['$max'] = cmd.max, usesSpecialModifier = true;
-    if(cmd.showDiskLoc) findCmd['$showDiskLoc'] = cmd.showDiskLoc, usesSpecialModifier = true;
-    if(cmd.comment) findCmd['$comment'] = cmd.comment, usesSpecialModifier = true;
-    if(cmd.maxTimeMS) findCmd['$maxTimeMS'] = cmd.maxTimeMS, usesSpecialModifier = true;
-
-    // If we have explain, return a single document and close cursor
-    if(cmd.explain) {
-      numberToReturn = -1;
-      usesSpecialModifier = true;
-      findCmd['$explain'] = true;
-    }
-
-    // If we have a special modifier
-    if(usesSpecialModifier) {      
-      findCmd['$query'] = cmd.query;
-    } else {
-      findCmd = cmd.query;
-    }
-
-    // Build Query object
-    var query = new Query(bson, ns, findCmd, {
-        numberToSkip: numberToSkip, numberToReturn: numberToReturn
-      , checkKeys: false, returnFieldSelector: cmd.fields
-    });
-
-    // Set query flags
-    query.slaveOk = readPreference.slaveOk();
-
-    // Set up the option bits for wire protocol
-    if(options.tailable) { query.tailable = options.tailable; }
-    if(options.oplogReply)query.oplogReply = options.oplogReply;
-    if(options.noCursorTimeout) query.noCursorTimeout = options.noCursorTimeout;
-    if(options.awaitData) query.awaitData = options.awaitData;
-    if(options.exhaust) query.exhaust = options.exhaust;
-    if(options.partial) query.partial = options.partial;
-    // Return the query
-    return query;
-  }  
-
-  //
-  // Set up a command cursor
-  var setupCommand = function(ns, cmd, topology, options) {
-    var readPreference = options.readPreference || new ReadPreference('primary');
-    if(typeof readPreference == 'string') readPreference = new ReadPreference(readPreference);
-    if(!(readPreference instanceof ReadPreference)) throw new MongoError('readPreference must be a ReadPreference instance');
-
-    // Set empty options object
-    options = options || {}
-
-    // Final query
-    var finalCmd = {};
-    for(var name in cmd) {
-      finalCmd[name] = cmd[name];
-    }
-
-    // Build command namespace
-    var parts = ns.split(/\./);
-    // Remove namespace db
-    parts.pop()
-    // Add command for initial execution
-    parts.push("$cmd");
-
-    // We have a Mongos topology, check if we need to add a readPreference
-    if(topology.type == 'mongos' && readPreference) {
-      finalCmd['$readPreference'] = readPreference.toJSON();
-    }
-
-    // Build Query object
-    var query = new Query(bson, parts.join("."), finalCmd, {
-        numberToSkip: 0, numberToReturn: -1
-      , checkKeys: false
-    });
-
-    // Set query flags
-    query.slaveOk = readPreference.slaveOk();
-
-    // Options
-    if(options.tailable) query.tailable = options.tailable;
-    if(options.oplogReply)query.oplogReply = options.oplogReply;
-    if(options.noCursorTimeout) query.noCursorTimeout = options.noCursorTimeout;
-    if(options.awaitdata) query.awaitdata = options.awaitdata;
-    if(options.exhaust) query.exhaust = options.exhaust;
-    if(options.partial) query.partial = options.partial;
-    // Return the query
-    return query;
   }
 }
 
