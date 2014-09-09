@@ -42,6 +42,67 @@ exports.cursorShouldBeAbleToResetOnToArrayRunningQueryAgain = {
  * @ignore
  * @api private
  */
+exports['cursor should close after first next operation'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      db.createCollection('close_on_next', function(err, collection) {
+
+        collection.insert([{'a':1}, {'a':1}, {'a':1}], configuration.writeConcernMax(), function(err, ids) {
+          var cursor = collection.find({});
+          cursor.batchSize(2);
+          cursor.next(function(err, d) {
+            test.equal(null, err);
+
+            cursor.close();
+            db.close();
+            test.done();            
+          });
+        });
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ * @api private
+ */
+exports['cursor should trigger getMore'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      db.createCollection('trigger_get_more', function(err, collection) {
+
+        collection.insert([{'a':1}, {'a':1}, {'a':1}], configuration.writeConcernMax(), function(err, ids) {
+          var cursor = collection.find({});
+          cursor.batchSize(2);
+          cursor.toArray(function(err, docs) {
+            test.equal(null, err);
+
+            db.close();
+            test.done();            
+          });
+        });
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ * @api private
+ */
 exports.shouldCorrectlyExecuteCursorExplain = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
