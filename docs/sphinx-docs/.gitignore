@@ -8,3 +8,7 @@ source/github/
 source/api-articles/
 source/changelog/
 source/markdown-docs/
+fabfile
+source/index.txt
+source/.static/sitemap.xml
+source/.static/osd.xml

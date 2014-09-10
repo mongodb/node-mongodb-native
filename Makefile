@@ -23,6 +23,7 @@ test_auth:
 
 generate_docs:
 	$(NODE) dev/tools/build-docs.js
+	cd docs/sphinx-docs/; giza quickstart; make
 	make --directory=./docs/sphinx-docs --file=makefile html
 
 .PHONY: total
