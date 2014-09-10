@@ -7,6 +7,7 @@ var Runner = require('integra').Runner
   , MongoDBTopologyFilter = require('./filters/mongodb_topology_filter')
   , OSFilter = require('./filters/os_filter')
   , TravisFilter = require('./filters/travis_filter')
+  , DisabledFilter = require('./filters/disabled_filter')
   , FileFilter = require('integra').FileFilter
   , TestNameFilter = require('integra').TestNameFilter
   , path = require('path')
@@ -181,7 +182,7 @@ var createConfiguration = function(options) {
 
 // Set up the runner
 var runner = new Runner({
-    logLevel:'info'
+    logLevel:'error'
   , runners: 1
   , failFast: true
 });
@@ -231,6 +232,9 @@ var testFiles =[
   , '/test/functional/ssl_validation_tests.js'
   , '/test/functional/ssl_x509_connect_tests.js'
 
+  // SCRAM tests
+  , '/test/functional/scram_tests.js'
+
   // LDAP Tests
   , '/test/functional/ldap_tests.js'  
 
@@ -276,6 +280,8 @@ runner.plugin(new MongoDBVersionFilter(startupOptions));
 runner.plugin(new MongoDBTopologyFilter(startupOptions));
 // Add a OS filter plugin
 runner.plugin(new OSFilter(startupOptions))
+// Add a Disable filter plugin
+runner.plugin(new DisabledFilter(startupOptions))
 
 // Exit when done
 runner.on('exit', function(errors, results) {
@@ -378,7 +384,7 @@ if(argv.t == 'functional') {
         return new m.Server(host, port, serverOptions);
       }, 
     });
-  } else if(argv.e == 'ldap' || argv.e == 'kerberos') {
+  } else if(argv.e == 'ldap' || argv.e == 'kerberos' || argv.e == 'scram') {
     startupOptions.skipStartup = true;
     startupOptions.skipRestart = true;
     startupOptions.skipShutdown = true;

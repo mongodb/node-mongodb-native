@@ -122,7 +122,8 @@ exports.shouldCorrectlyRetriveCollectionNames = {
           var found2 = false;
     
           documents.forEach(function(document) {
-            if(document.name == configuration.database + '.test_collection_names') found = true;
+            if(document.name == configuration.database + '.test_collection_names' 
+              ||  document.name == "test_collection_names") found = true;
           });
     
           test.ok(found);
@@ -133,8 +134,10 @@ exports.shouldCorrectlyRetriveCollectionNames = {
 
             db.collectionNames(function(err, documents) {
               documents.forEach(function(document) {
-                if(document.name == configuration.database + '.test_collection_names2') found = true;
-                if(document.name == configuration.database + '.test_collection_names') found2 = true;
+                if(document.name == configuration.database + '.test_collection_names2' 
+                  || document.name == 'test_collection_names2') found = true;
+                if(document.name == configuration.database + '.test_collection_names'
+                  || document.name == 'test_collection_names') found2 = true;
               });
 
               test.ok(found);
