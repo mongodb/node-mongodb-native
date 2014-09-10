@@ -26,110 +26,12 @@ exports.shouldCreateASimpleIndexOnASingleField = function(configuration, test) {
 
           // Peform a query, with explain to show we hit the query
           collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
-            test.deepEqual([[2, 2]], explanation[0].indexBounds.a);
+            test.equal(null, err);
+            test.ok(explanation != null);
 
             db.close();
             test.done();
           });
-        });
-      });
-    });
-  });
-  // DOC_END
-}
-
-/**
- * A more complex createIndex using a compound unique index in the background and dropping duplicated documents
- *
- * @_class collection
- * @_function createIndex
- */
-exports.shouldCreateComplexIndexOnTwoFields = function(configuration, test) {
-  var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
-
-  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
-  // DOC_START
-  // Establish connection to db
-  db.open(function(err, db) {
-
-    // Create a collection we want to drop later
-    db.createCollection('more_complex_index_test', function(err, collection) {
-      test.equal(null, err);
-
-      // Insert a bunch of documents for the index
-      collection.insert([{a:1, b:1}, {a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
-        test.equal(null, err);
-
-        var options = {unique:true, background:true, dropDups:true, w:1};
-        // Create an index on the a field
-        collection.createIndex({a:1, b:1}
-          , options, function(err, indexName) {
-
-          test.ok(!options.readPreference);
-          // Show that duplicate records got dropped
-          collection.find({}).toArray(function(err, items) {
-            test.equal(null, err);
-            test.equal(4, items.length);
-
-            // Peform a query, with explain to show we hit the query
-            collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
-              test.equal(null, err);
-              test.ok(explanation[0].indexBounds.a != null);
-              test.ok(explanation[0].indexBounds.b != null);
-
-              db.close();
-              test.done();
-            });
-          })
-        });
-      });
-    });
-  });
-  // DOC_END
-}
-
-/**
- * A more complex ensureIndex using a compound unique index in the background and dropping duplicated documents.
- *
- * @_class collection
- * @_function ensureIndex
- */
-exports.shouldCreateComplexEnsureIndex = function(configuration, test) {
-  var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
-
-  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
-  // DOC_START
-  // Establish connection to db
-  db.open(function(err, db) {
-
-    // Create a collection we want to drop later
-    db.createCollection('more_complex_ensure_index_test', function(err, collection) {
-      test.equal(null, err);
-
-      // Insert a bunch of documents for the index
-      collection.insert([{a:1, b:1}, {a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
-        test.equal(null, err);
-
-        // Create an index on the a field
-        collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
-          // Show that duplicate records got dropped
-          collection.find({}).toArray(function(err, items) {
-            test.equal(null, err);
-            test.equal(4, items.length);
-
-            // Peform a query, with explain to show we hit the query
-            collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
-              test.equal(null, err);
-              test.ok(explanation[0].indexBounds.a != null);
-              test.ok(explanation[0].indexBounds.b != null);
-
-              db.close();
-              test.done();
-            });
-          })
         });
       });
     });
@@ -156,13 +58,13 @@ exports.shouldCorrectlyShowAllTheResultsFromIndexInformation = function(configur
       test.equal(null, err);
 
       // Insert a bunch of documents for the index
-      collection.insert([{a:1, b:1}, {a:1, b:1}
+      collection.insert([{a:1, b:1}, {a:1, b:2}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
         test.equal(null, err);
 
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
+          , {unique:true, background:true, w:1}, function(err, indexName) {
 
           // Fetch basic indexInformation for collection
           collection.indexInformation(function(err, indexInformation) {
@@ -204,13 +106,13 @@ exports.shouldCorrectlyCreateAndDropIndex = function(configuration, test) {
       test.equal(null, err);
 
       // Insert a bunch of documents for the index
-      collection.insert([{a:1, b:1}, {a:1, b:1}
+      collection.insert([{a:1, b:1}, {a:1, b:2}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
         test.equal(null, err);
 
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
+          , {unique:true, background:true, w:1}, function(err, indexName) {
 
           // Drop the index
           collection.dropIndex("a_1_b_1", function(err, result) {
@@ -251,17 +153,17 @@ exports.shouldCorrectlyCreateAndDropAllIndex = function(configuration, test) {
       test.equal(null, err);
 
       // Insert a bunch of documents for the index
-      collection.insert([{a:1, b:1}, {a:1, b:1}
+      collection.insert([{a:1, b:1}, {a:1, b:2}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {w:1}, function(err, result) {
         test.equal(null, err);
 
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
+          , {unique:true, background:true, w:1}, function(err, indexName) {
 
           // Create an additional index
           collection.ensureIndex({c:1}
-            , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
+            , {unique:true, background:true, w:1}, function(err, indexName) {
 
             // Drop the index
             collection.dropAllIndexes(function(err, result) {
@@ -304,13 +206,13 @@ exports.shouldCorrectlyIndexAndForceReindexOnCollection = function(configuration
       test.equal(null, err);
 
       // Insert a bunch of documents for the index
-      collection.insert([{a:1, b:1}, {a:1, b:1}
+      collection.insert([{a:1, b:1}, {a:1, b:2}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {w:1}, function(err, result) {
         test.equal(null, err);
 
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, dropDups:true, w:1}, function(err, indexName) {
+          , {unique:true, background:true, w:1}, function(err, indexName) {
 
           // Force a reindex of the collection
           collection.reIndex(function(err, result) {
@@ -319,8 +221,8 @@ exports.shouldCorrectlyIndexAndForceReindexOnCollection = function(configuration
 
             // Verify that the index is gone
             collection.indexInformation(function(err, indexInformation) {
-              test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
-              test.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
+              test.equal(null, err);
+              test.ok(indexInformation != null);
 
               db.close();
               test.done();
@@ -351,25 +253,13 @@ exports.shouldCorrectlyExtractIndexInformation = function(configuration, test) {
             test.ok(collectionInfo['a_1'] != null);
             test.deepEqual([["a", 1]], collectionInfo['a_1']);
 
-            db.indexInformation(function(err, collectionInfo2) {
-              var count1 = 0, count2 = 0;
-              // Get count of indexes
-              for(var i in collectionInfo) { count1 += 1;}
-              for(var i in collectionInfo2) { count2 += 1;}
-
-              // Tests
-              test.ok(count2 >= count1);
-              test.ok(collectionInfo2['_id_'] != null);
-              test.equal('_id', collectionInfo2['_id_'][0][0]);
-              test.ok(collectionInfo2['a_1'] != null);
-              test.deepEqual([["a", 1]], collectionInfo2['a_1']);
-              test.ok((collectionInfo[indexName] != null));
-              test.deepEqual([["a", 1]], collectionInfo[indexName]);
-
-              // Let's close the db
-              db.close();
-              test.done();
-            });
+            try {
+              db.indexInformation(function(err, collectionInfo2) {});
+              test.ok(false);
+            } catch(err) {}
+            // Let's close the db
+            db.close();
+            test.done();
           });
         });
       })

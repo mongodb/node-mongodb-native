@@ -241,7 +241,8 @@ exports.shouldCorrectlyRetriveCollectionNames = function(configuration, test) {
         var found2 = false;
   
         documents.forEach(function(document) {
-          if(document.name == configuration.db_name + '.test_collection_names') found = true;
+          if(document.name == configuration.db_name + '.test_collection_names'
+            || document.name == 'test_collection_names') found = true;
         });
   
         test.ok(found);
@@ -250,8 +251,10 @@ exports.shouldCorrectlyRetriveCollectionNames = function(configuration, test) {
           collection.insert({a:1}, {w: 1}, function(err, r) {
             db.collectionNames(function(err, documents) {
               documents.forEach(function(document) {
-                if(document.name == configuration.db_name + '.test_collection_names2') found = true;
-                if(document.name == configuration.db_name + '.test_collection_names') found2 = true;
+                if(document.name == configuration.db_name + '.test_collection_names2'
+                  || document.name == 'test_collection_names2') found = true;
+                if(document.name == configuration.db_name + '.test_collection_names'
+                  || document.name == 'test_collection_names') found2 = true;
               });
 
               test.ok(found);
