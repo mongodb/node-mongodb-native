@@ -77,6 +77,8 @@ exports['Should correctly execute update using fullResult'] = {
 
       // Create a collection to hold our documents
       db.createCollection('test_full_result_1', function(err, collection) {
+        test.equal(null, err);
+        test.ok(collection != null);
 
         // Insert a test document
         collection.update({a:1}, {b:1}, {w:1, fullResult:true}, function(err, result) {
