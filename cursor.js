@@ -46,6 +46,8 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
 
   // Cursor connection
   var connection = null;
+  // Cursor server
+  var server = null;
 
   // Do we have a not connected handler
   var disconnectHandler = options.disconnectHandler;
@@ -70,9 +72,6 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
 
   // Logger
   var logger = Logger('Cursor', options);
-
-  // Wire protocol handler
-  var wireProtocolHandler = topologyOptions.wireProtocolHandler;
 
   // 
   // Did we pass in a cursor id
@@ -143,7 +142,7 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
 
       try {
         // Get a server
-        var server = topology.getServer(options);
+        server = topology.getServer(options);
         // Get a connection
         connection = server.getConnection();
         // Get the callbacks
@@ -156,7 +155,7 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
       cursorState.init = true;
 
       // Get the right wire protocol command
-      query = wireProtocolHandler.command(bson, ns, cmd, cursorState, topology, options);
+      query = server.wireProtocolHandler.command(bson, ns, cmd, cursorState, topology, options);
     }
 
     // Process exhaust messages
@@ -316,59 +315,25 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
     cursorState.killed = true;
     // Remove documents
     cursorState.documents = [];
+
     // If no cursor id just return
-    if(cursorState.cursorId == null || cursorState.cursorId.isZero()) {
+    if(cursorState.cursorId == null || cursorState.cursorId.isZero() || cursorState.init == false) {
       if(callback) callback(null, null);
       return;
     }
 
-    // We have a wire protocol handler
-    if(wireProtocolHandler) 
-      return wireProtocolHandler.killCursor(bson, cursorState.cursorId, connection, callback);
-
-    // Create a kill cursor command
-    var killCursor = new KillCursor(bson, [cursorState.cursorId]);
-    // Execute the kill cursor command
-    if(connection && connection.isConnected()) connection.write(killCursor);
-    // Set cursor to 0
-    cursorState.cursorId = Long.ZERO;
-    // Return to caller
-    if(callback) callback(null, null);
+    // Execute command
+    server.wireProtocolHandler.killCursor(bson, cursorState.cursorId, connection, callback);
   }
 
   //
   // Execute getMore command
   var execGetMore = function(callback) {
     if(logger.isDebug()) logger.debug(f("schedule getMore call for query [%s]", JSON.stringify(query)))
-
     // Determine if it's a raw query
     var raw = options.raw || cmd.raw;
-
     // We have a wire protocol handler
-    if(wireProtocolHandler) 
-      return wireProtocolHandler.getMore(bson, ns, cursorState, cursorState.batchSize, raw, connection, callbacks, options, callback);
-
-    // Create getMore command
-    var getMore = new GetMore(bson, ns, cursorState.cursorId, {numberToReturn: cursorState.batchSize});
-
-    // Query callback
-    var queryCallback = function(err, r) {
-      if(err) return callback(err);  
-      cursorState.documents = r.documents;
-      cursorState.cursorId = r.cursorId;
-      // Return
-      callback(null);
-    }
-
-    // If we have a raw query decorate the function
-    if(raw) {
-      queryCallback.raw = raw;
-    }
-    
-    // Register a callback
-    callbacks.register(getMore.requestId, queryCallback);
-    // Write out the getMore command
-    connection.write(getMore);
+    server.wireProtocolHandler.getMore(bson, ns, cursorState, cursorState.batchSize, raw, connection, callbacks, options, callback);
   }
 
   // 
