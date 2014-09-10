@@ -1,4 +1,5 @@
 /**
+ * rm -rf data; mkdir data; mongod --dbpath=./data --setParameter authenticationMechanisms=SCRAM-SHA-1 --auth
  * @ignore
  */
 exports['should correctly create a new user and authenticate using scram'] = {
