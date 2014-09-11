@@ -1,0 +1,19 @@
+project: 'MongoDB Node.JS Driver'
+master_doc: 'index'
+logo: ".static/logo.png"
+paths:
+  static: ['source/.static']
+theme:
+  name: 'drivers'
+  project: 'node.js'
+  google_analytics: 'UA-0000000-0'
+  book_path_base: 'Manual'
+  repo: 'docs'
+  jira: 'NODE'
+  sitename: 'MongoDB Node.JS Driver'
+  nav_excluded: 
+    - '/resources'
+sidebars:
+  '**':
+    - 'pagenav.html'
+...

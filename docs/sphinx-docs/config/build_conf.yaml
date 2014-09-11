@@ -1,0 +1,46 @@
+git:
+  remote:
+    upstream: 'mongodb/node-mongodb-native'
+    tools: 'mongodb/docs-tools'
+project:
+  name: 'MongoDB Node.JS Driver'
+  tag: 'nodejs'
+  url: 'http://docs.example.org'
+  title: 'MongoDB Node.JS Driver'
+  branched: true
+  siteroot: true
+version:
+  release: '1.4.10'
+  branch: '1.4'
+system:
+  make:
+    generated:
+      - 'meta'
+      - 'integration'
+      - 'push'
+      - 'sphinx'
+    static:
+      - 'makefile.compatibility'
+      - 'makefile.clean'
+      - 'makefile.dtf'
+  files:
+    - 'intersphinx.yaml'
+    - 'push.yaml'
+    - 'pdfs.yaml'
+    - 'sphinx_local.yaml'
+    # - images: '/source/images/metadata.yaml'
+    # - includes: '/source/includes/metadata.yaml'
+assets:
+  - branch: master
+    path: build/docs-tools
+    repository: https://github.com/mongodb/docs-tools.git
+paths:
+  output: 'build'
+  source: 'source'
+  includes: 'source/includes'
+  images: 'source/images'
+  tools: 'bin'
+  buildsystem: 'build/docs-tools'
+  builddata: 'config'
+  locale: 'locale'
+...

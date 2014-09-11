@@ -10,7 +10,7 @@ test_functional:
 	node test/runner.js -t functional
 
 test_ssl:
-	node test/runner.js -t ssl	
+	node test/runner.js -t ssl
 
 test_replicaset:
 	node test/runner.js -t replicaset
@@ -23,6 +23,7 @@ test_auth:
 
 generate_docs:
 	$(NODE) dev/tools/build-docs.js
-	make --directory=./docs/sphinx-docs --file=Makefile html
+	cd docs/sphinx-docs/; giza quickstart; make
+	make --directory=./docs/sphinx-docs --file=makefile html
 
 .PHONY: total
