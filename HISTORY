@@ -1,3 +1,7 @@
+1.4.11 2014-09-
+-----------------
+- Hardened result handling in command, insert, update, remove for issue where no result is returned.
+
 1.4.10 2014-09-04
 -----------------
 - Fixed BSON and Kerberos compilation issues
