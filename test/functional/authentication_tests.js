@@ -69,36 +69,44 @@ exports['Should correctly authenticate against normal db'] = {
       db1.open(function(err, db) {
         test.equal(null, err);
 
-        db.addUser('user', 'user', function(err, result) {
-          test.equal(null, err);
+        // An admin user must be defined for db level authentication to work correctly
+        db.admin().addUser('admin', 'admin', function(err, result) {
 
-          // An admin user must be defined for db level authentication to work correctly
-          db.admin().addUser('admin', 'admin', function(err, result) {
+          // Authenticate against admin
+          db.admin().authenticate('admin', 'admin', function(err, result) {
 
-            // Attempt to save a document
-            db.collection('test').insert({a:1}, function(err, result) {
-              test.ok(err != null);
+            db.addUser('user', 'user', function(err, result) {
+              test.equal(null, err);
 
-              // Login the user
-              db.authenticate("user", "user", function(err, result) {
-                test.equal(null, err);
-                test.ok(result);
+              // Logout admin
+              db.admin().logout(function(err, result) {
 
+                // Attempt to save a document
                 db.collection('test').insert({a:1}, function(err, result) {
-                  test.equal(null, err);
+                  test.ok(err != null);
 
-                  // Logout the user
-                  db.logout(function(err, result) {
+                  // Login the user
+                  db.authenticate("user", "user", function(err, result) {
                     test.equal(null, err);
+                    test.ok(result);
 
-                    // Attempt to save a document
                     db.collection('test').insert({a:1}, function(err, result) {
-                      test.ok(err != null);
-                      db1.close();
+                      test.equal(null, err);
 
-                      // restart server
-                      configuration.restart(function() {
-                        test.done();
+                      // Logout the user
+                      db.logout(function(err, result) {
+                        test.equal(null, err);
+
+                        // Attempt to save a document
+                        db.collection('test').insert({a:1}, function(err, result) {
+                          test.ok(err != null);
+                          db1.close();
+
+                          // restart server
+                          configuration.restart(function() {
+                            test.done();
+                          });
+                        });
                       });
                     });
                   });
@@ -143,11 +151,13 @@ exports['Should correctly reapply the authentications'] = {
                 test.equal(null, err);
 
                 // Bounce server
-                configuration.restart(function() {
+                configuration.restart({purge: false}, function() {
 
+            // // Login the user
+            // db.admin().authenticate("admin", "admin", function(err, result) {
                   // Reconnect should reapply the credentials
                   db.collection('test').insert({a:1}, function(err, result) {
-                    test.equal(null, err);
+                    // test.equal(null, err);
                     db1.close();
 
                     // restart server
@@ -156,6 +166,7 @@ exports['Should correctly reapply the authentications'] = {
                     });
                   });
                 });
+              // });
               });
             });
           });
@@ -382,28 +393,40 @@ exports.shouldCorrectlyAuthenticateUsingPrimary = {
       db.open(function(err, p_db) {
         test.equal(null, err);
 
-        db.addUser("me", "secret", {w:3}, function(err, result) {
+        // Add a user
+        db.admin().addUser("admin", "admin", {w:3}, function(err, result) {
+          test.equal(null, err);
 
-          // Just set auths for the manager to handle it correctly
-          replSetManager.setCredentials("mongocr", "admin", "me", "secret");
+          // Log in to admin
+          db.admin().authenticate("admin", "admin", function(err, result) {
+            test.equal(null, err);
 
-          // Close the connection
-          db.close();
+            // Add a user to the db
+            db.addUser("me", "secret", {w:3}, function(err, result) {
+              test.equal(null, err);
 
-          // connection string
-          var config = f("mongodb://me:secret@localhost:%s/node-native-test?replicaSet=%s"
-            , replSetManager.startPort, replSetManager.replicasetName);
-          // Connect
-          MongoClient.connect(config, function(error, client) {
-            test.equal(null, error);
+              // Just set auths for the manager to handle it correctly
+              replSetManager.setCredentials("mongocr", "node-native-test", "me", "secret");
 
-            client.collectionNames(function(error, names) {
-              test.equal(null, error);
-              
-              client.close();
+              // Close the connection
+              db.close();
 
-              replSetManager.stop(function() {
-                test.done();
+              // connection string
+              var config = f("mongodb://me:secret@localhost:%s/node-native-test?replicaSet=%s"
+                , replSetManager.startPort, replSetManager.replicasetName);
+              // Connect
+              MongoClient.connect(config, function(error, client) {
+                test.equal(null, error);
+
+                client.collectionNames(function(error, names) {
+                  test.equal(null, error);
+                  
+                  client.close();
+
+                  replSetManager.stop(function() {
+                    test.done();
+                  });
+                });
               });
             });
           });
@@ -438,29 +461,39 @@ exports.shouldCorrectlyAuthenticateWithTwoSeeds = {
       db.open(function(err, p_db) {
         test.equal(null, err);
 
-        db.addUser("me", "secret", {w:3}, function(err, result) {
-          // Just set auths for the manager to handle it correctly
-          replSetManager.setCredentials("mongocr", "admin", "me", "secret");
+        // Add a user
+        db.admin().addUser("admin", "admin", {w:3}, function(err, result) {
+          test.equal(null, err);
 
-          // Close the connection
-          db.close();
+          // Log in to admin
+          db.admin().authenticate("admin", "admin", function(err, result) {
+            test.equal(null, err);
 
-          // connection string
-          var config = f("mongodb://me:secret@localhost:%s,localhost:%s/node-native-test?replicaSet=%s"
-              , replSetManager.startPort, replSetManager.startPort + 1, replSetManager.replicasetName);
-          // Connect
-          MongoClient.connect(config, function(error, client) {
-            test.equal(null, error);
+            db.addUser("me", "secret", {w:3}, function(err, result) {
+              // Just set auths for the manager to handle it correctly
+              replSetManager.setCredentials("mongocr", "node-native-test", "me", "secret");
 
-            client.collectionNames(function(error, names) {
-              test.equal(null, err);
-              
-              client.close();
+              // Close the connection
+              db.close();
 
-              replSetManager.stop(function() {
-                test.done();
+              // connection string
+              var config = f("mongodb://me:secret@localhost:%s,localhost:%s/node-native-test?replicaSet=%s"
+                  , replSetManager.startPort, replSetManager.startPort + 1, replSetManager.replicasetName);
+              // Connect
+              MongoClient.connect(config, function(error, client) {
+                test.equal(null, error);
+
+                client.collectionNames(function(error, names) {
+                  test.equal(null, err);
+                  
+                  client.close();
+
+                  replSetManager.stop(function() {
+                    test.done();
+                  });
+                })
               });
-            })
+            });
           });
         });
       });
@@ -493,57 +526,67 @@ exports.shouldCorrectlyAuthenticateWithOnlySecondarySeed = {
       db.open(function(err, p_db) {
         test.equal(null, err);
 
-        p_db.admin().addUser("me", "secret", {w:3}, function(err, result) {
+        // Add a user
+        p_db.admin().addUser("admin", "admin", {w:3}, function(err, result) {
           test.equal(null, err);
 
-          // Close the connection
-          p_db.close();
+          // Log in to admin
+          p_db.admin().authenticate("admin", "admin", function(err, result) {
+            test.equal(null, err);
 
-          // Just set auths for the manager to handle it correctly
-          replSetManager.setCredentials("mongocr", "admin", "me", "secret");
+            p_db.admin().addUser("me", "secret", {w:3}, function(err, result) {
+              test.equal(null, err);
 
-          // connection string
-          var config = f("mongodb://me:secret@localhost:%s/node-native-test?authSource=admin&readPreference=secondary&replicaSet=%s&maxPoolSize=1"
-            , replSetManager.startPort, replSetManager.replicasetName);
-          // Connect
-          MongoClient.connect(config, function(error, client) {
-            client.on('fullsetup', function() {
-              test.equal(null, error);
+              // Close the connection
+              p_db.close();
 
-              client.collection('test').insert({a:1}, function(err, r) {
-                test.equal(null, err);
-                
-                // Logout
-                client.logout(function() {
+              // Just set auths for the manager to handle it correctly
+              replSetManager.setCredentials("mongocr", "admin", "me", "secret");
 
-                  // Should fail
-                  client.collection('test').findOne(function(err, r) {
-                    test.ok(err != null);
+              // connection string
+              var config = f("mongodb://me:secret@localhost:%s/node-native-test?authSource=admin&readPreference=secondary&replicaSet=%s&maxPoolSize=1"
+                , replSetManager.startPort, replSetManager.replicasetName);
+              // Connect
+              MongoClient.connect(config, function(error, client) {
+                client.on('fullsetup', function() {
+                  test.equal(null, error);
 
-                    // Authenticate
-                    client.admin().authenticate("me", "secret", function(err, r) {
-                      test.equal(null, err);
-                      test.ok(r);
+                  client.collection('test').insert({a:1}, function(err, r) {
+                    test.equal(null, err);
+                    
+                    // Logout
+                    client.logout(function() {
 
-                      // Shutdown the first secondary
-                      replSetManager.shutdown('secondary', {signal:-9}, function(err, result) {
+                      // Should fail
+                      client.collection('test').findOne(function(err, r) {
+                        test.ok(err != null);
 
-                        // Shutdown the second secondary
-                        replSetManager.shutdown('secondary', {signal:-9}, function(err, result) {
+                        // Authenticate
+                        client.admin().authenticate("me", "secret", function(err, r) {
+                          test.equal(null, err);
+                          test.ok(r);
 
-                          // Let's restart a secondary
-                          replSetManager.restartServer('secondary', function(err, result) {
-                            
-                            // Let's restart a secondary
-                            replSetManager.restartServer('secondary', function(err, result) {
-                              // Should fail
-                              client.collection('test').findOne(function(err) {
-                                test.equal(null, err);
+                          // Shutdown the first secondary
+                          replSetManager.shutdown('secondary', {signal:-9}, function(err, result) {
 
-                                client.close();
+                            // Shutdown the second secondary
+                            replSetManager.shutdown('secondary', {signal:-9}, function(err, result) {
 
-                                replSetManager.stop(function() {
-                                  test.done();
+                              // Let's restart a secondary
+                              replSetManager.restartServer('secondary', function(err, result) {
+                                
+                                // Let's restart a secondary
+                                replSetManager.restartServer('secondary', function(err, result) {
+                                  // Should fail
+                                  client.collection('test').findOne(function(err) {
+                                    test.equal(null, err);
+
+                                    client.close();
+
+                                    replSetManager.stop(function() {
+                                      test.done();
+                                    });
+                                  });
                                 });
                               });
                             });
@@ -553,8 +596,8 @@ exports.shouldCorrectlyAuthenticateWithOnlySecondarySeed = {
                     });
                   });
                 });
-              })
-            })
+              });
+            });
           });
         });
       });
@@ -944,46 +987,56 @@ exports.shouldCorrectlyAuthWithSecondaryAfterKillPrimary = {
       db.open(function(err, db_p) {
         test.equal(null, err);
 
-        // Just set auths for the manager to handle it correctly
-        replSetManager.setCredentials("mongocr", "admin", "me", "secret");
-
-        db_p.collection('test').insert({a:1}, {w:1}, function(err, result) {
+        // Add a user
+        db_p.admin().addUser("admin", "admin", {w:3}, function(err, result) {
           test.equal(null, err);
 
-          db_p.addUser('test', 'test', {w:3}, function(err, result) {
-            test.equal(null, err);                
-            test.ok(result != null);
+          // Log in to admin
+          db_p.admin().authenticate("admin", "admin", function(err, result) {
+            test.equal(null, err);
 
-            db_p.authenticate('test', 'test', function(err, result) {
+            // Just set auths for the manager to handle it correctly
+            replSetManager.setCredentials("mongocr", "test", "me", "secret");
+
+            db_p.collection('test').insert({a:1}, {w:1}, function(err, result) {
               test.equal(null, err);
-              test.equal(true, result);
 
-              // Step down the primary
-              replSetManager.shutdown('primary', function(err, result) {
+              db_p.addUser('test', 'test', {w:3}, function(err, result) {
+                test.equal(null, err);                
+                test.ok(result != null);
 
-                db.serverConfig.on('joined', function(t) {
-                  if(t == 'primary') {
-                    var counter = 1000;
-                    var errors = 0;
+                db_p.authenticate('test', 'test', function(err, result) {
+                  test.equal(null, err);
+                  test.equal(true, result);
 
-                    for(var i = 0; i < counter; i++) {
-                      db_p.collection('test').find({a:1}).setReadPreference(ReadPreference.SECONDARY).toArray(function(err, r) {
-                        test.equal(null, err);
-                        counter = counter - 1;
+                  // Step down the primary
+                  replSetManager.shutdown('primary', function(err, result) {
 
-                        if(counter == 0) {
-                          test.equal(0, errors)
+                    db.serverConfig.on('joined', function(t) {
+                      if(t == 'primary') {
+                        var counter = 1000;
+                        var errors = 0;
 
-                          db_p.close();
+                        for(var i = 0; i < counter; i++) {
+                          db_p.collection('test').find({a:1}).setReadPreference(ReadPreference.SECONDARY).toArray(function(err, r) {
+                            test.equal(null, err);
+                            counter = counter - 1;
 
-                          replSetManager.stop(function() {
-                            test.done();
+                            if(counter == 0) {
+                              test.equal(0, errors)
+
+                              db_p.close();
+
+                              replSetManager.stop(function() {
+                                test.done();
+                              });
+                            }
                           });
-                        }
-                      });
-                    }                        
-                  }
-                });
+                        }                        
+                      }
+                    });
+                  });
+                })
               });
             });
           });
@@ -1082,39 +1135,49 @@ exports.shouldCorrectlyAuthAgainstNormalDbUsingMongoClient = {
 
       var dbName = 'foo';
 
-      new Db(dbName, replSet, {w:3}).open(function(err, db_p) {
-        db_p.addUser("me", "secret", {w:3}, function runWhatever(err, result) {
-          // Just set auths for the manager to handle it correctly
-          replSetManager.setCredentials("mongocr", "admin", "me", "secret");
-
+      new Db(dbName, replSet, {w:'majority'}).open(function(err, db_p) {
+        // Add a user
+        db_p.admin().addUser("admin", "admin", {w:3}, function(err, result) {
           test.equal(null, err);
-          test.ok(result != null);
-          db_p.close();
 
-          MongoClient.connect(f("mongodb://me:secret@%s:%s/%s?rs_name=%s&readPreference=secondary&w=3"
-            , 'localhost', replSetManager.startPort, dbName, replSetManager.replicasetName), function(err, db) {
+          // Log in to admin
+          db_p.admin().authenticate("admin", "admin", function(err, result) {
+            test.equal(null, err);
+
+            db_p.addUser("me", "secret", {w:3}, function runWhatever(err, result) {
+              // Just set auths for the manager to handle it correctly
+              replSetManager.setCredentials("mongocr", "admin", "me", "secret");
+
               test.equal(null, err);
-              db.on('fullsetup', function(err, db) {
-                test.equal(null, err);
+              test.ok(result != null);
+              db_p.close();
 
-                // Insert document
-                db.collection('authcollectiontest').insert({a:1}, {w:'majority'}, function(err, result) {
+              MongoClient.connect(f("mongodb://me:secret@%s:%s/%s?rs_name=%s&readPreference=secondary&w=3"
+                , 'localhost', replSetManager.startPort, dbName, replSetManager.replicasetName), function(err, db) {
                   test.equal(null, err);
-
-                  // Find the document
-                  db.collection('authcollectiontest').find().toArray(function(err, docs) {
+                  db.on('fullsetup', function(err, db) {
                     test.equal(null, err);
-                    test.equal(1, docs.length);
-                    test.equal(1, docs[0].a);
 
-                    db.close();
+                    // Insert document
+                    db.collection('authcollectiontest1').insert({a:1}, {w:3}, function(err, result) {
+                      test.equal(null, err);
 
-                    replSetManager.stop(function() {
-                      test.done();
+                      // Find the document
+                      db.collection('authcollectiontest1').find().toArray(function(err, docs) {
+                        test.equal(null, err);
+                        test.equal(1, docs.length);
+                        test.equal(1, docs[0].a);
+
+                        db.close();
+
+                        replSetManager.stop(function() {
+                          test.done();
+                        });
+                      });
                     });
                   });
-                });
               });
+            });
           });
         });
       });
@@ -1207,32 +1270,42 @@ exports['should correctly connect and authenticate against admin database using 
       db.open(function(err, p_db) {
         test.equal(null, err);
 
-        db.addUser("me", "secret", {w:'majority'}, function(err, result) {
-          // Just set auths for the manager to handle it correctly
-          shardedManager.setCredentials("mongocr", "admin", "me", "secret");
+        // Add a user
+        db.admin().addUser("admin", "admin", {w:'majority'}, function(err, result) {
+          test.equal(null, err);
 
-          // Close the connection
-          db.close();
+          // Log in to admin
+          db.admin().authenticate("admin", "admin", function(err, result) {
+            test.equal(null, err);
 
-          setTimeout(function() {
-            // connection string
-            var config = f("mongodb://me:secret@localhost:%s/node-native-test"
-              , shardedManager.mongosStartPort);
-            // Connect
-            MongoClient.connect(config, function(error, client) {
-              test.equal(null, error);
+            db.addUser("me", "secret", {w:'majority'}, function(err, result) {
+              // Just set auths for the manager to handle it correctly
+              shardedManager.setCredentials("mongocr", "node-native-test", "me", "secret");
 
-              client.collectionNames(function(error, names) {
-                test.equal(null, error);
-                
-                client.close();
+              // Close the connection
+              db.close();
 
-                shardedManager.stop(function() {
-                  test.done();
-                });
-              });
-            });            
-          }, 5000);
+              setTimeout(function() {
+                // connection string
+                var config = f("mongodb://me:secret@localhost:%s/node-native-test"
+                  , shardedManager.mongosStartPort);
+                // Connect
+                MongoClient.connect(config, function(error, client) {
+                  test.equal(null, error);
+
+                  client.collectionNames(function(error, names) {
+                    test.equal(null, error);
+                    
+                    client.close();
+
+                    shardedManager.stop(function() {
+                      test.done();
+                    });
+                  });
+                });            
+              }, 5000);
+            });
+          });
         });
       });
     });
@@ -1261,50 +1334,60 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
       db.open(function(err, p_db) {
         test.equal(null, err);
 
-        db.addUser("me", "secret", {w:'majority'}, function(err, result) {
+        // Add a user
+        db.admin().addUser("admin", "admin", {w:'majority'}, function(err, result) {
+          test.equal(null, err);
 
-          // Just set auths for the manager to handle it correctly
-          shardedManager.setCredentials("mongocr", "admin", "me", "secret");
+          // Log in to admin
+          db.admin().authenticate("admin", "admin", function(err, result) {
+            test.equal(null, err);
 
-          // Close the connection
-          db.close();
+            db.addUser("me", "secret", {w:'majority'}, function(err, result) {
 
-          // connection string
-          var config = f("mongodb://me:secret@localhost:%s/node-native-test"
-            , shardedManager.mongosStartPort);
-          // Connect
-          MongoClient.connect(config, function(error, client) {
-            test.equal(null, error);
+              // Just set auths for the manager to handle it correctly
+              shardedManager.setCredentials("mongocr", "admin", "me", "secret");
 
-            client.collectionNames(function(error, names) {
-              test.equal(null, error);
+              // Close the connection
+              db.close();
 
-              // Kill the mongos proxy
-              shardedManager.remove('mongos', {index: 0}, function(err, serverDetails1) {
+              // connection string
+              var config = f("mongodb://me:secret@localhost:%s/node-native-test"
+                , shardedManager.mongosStartPort);
+              // Connect
+              MongoClient.connect(config, function(error, client) {
+                test.equal(null, error);
 
-                shardedManager.remove('mongos', {index: 1}, function(err, serverDetails2) {
+                client.collectionNames(function(error, names) {
+                  test.equal(null, error);
 
-                  client.collectionNames(function(error, names) {
-                    test.equal(null, error);
-                  });
+                  // Kill the mongos proxy
+                  shardedManager.remove('mongos', {index: 0}, function(err, serverDetails1) {
 
-                  shardedManager.add(serverDetails1, function(err, result) {
-                    
-                    shardedManager.add(serverDetails2, function(err, result) {
-                      
+                    shardedManager.remove('mongos', {index: 1}, function(err, serverDetails2) {
+
                       client.collectionNames(function(error, names) {
                         test.equal(null, error);
+                      });
 
-                        client.close();
+                      shardedManager.add(serverDetails1, function(err, result) {
+                        
+                        shardedManager.add(serverDetails2, function(err, result) {
+                          
+                          client.collectionNames(function(error, names) {
+                            test.equal(null, error);
 
-                        shardedManager.stop(function() {
-                          test.done();
+                            client.close();
+
+                            shardedManager.stop(function() {
+                              test.done();
+                            });
+                          });
                         });
                       });
                     });
-                  });
+                  });              
                 });
-              });              
+              });
             });
           });
         });

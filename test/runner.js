@@ -88,9 +88,12 @@ var createConfiguration = function(options) {
         });        
       },
 
-      restart: function(callback) {
+      restart: function(options, callback) {
+        if(typeof options == 'function') callback = options, options = {};
         if(startupOptions.skipRestart) return callback();
-        manager.restart({purge:true, kill:true}, function() {
+        var purge = typeof options.purge == 'boolean' ? options.purge : true;
+        var kill = typeof options.kill == 'boolean' ? options.kill : true;
+        manager.restart({purge:purge, kill:kill}, function() {
           setTimeout(function() {
             callback();
           }, 1000);          
