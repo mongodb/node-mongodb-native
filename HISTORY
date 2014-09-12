@@ -2,6 +2,8 @@
 -----------------
 - Hardened result handling in command, insert, update, remove for issue where no result is returned.
 - NODE-267 undefined variable util used in unordered.js instead of utils.
+- Added support for 2.8 listIndexes and listCollections
+- Added support for 2.8 SCRAM-SHA-1 mechanism
 
 1.4.10 2014-09-04
 -----------------
