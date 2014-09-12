@@ -384,11 +384,26 @@ if(argv.t == 'functional') {
         return new m.Server(host, port, serverOptions);
       }, 
     });
-  } else if(argv.e == 'ldap' || argv.e == 'kerberos' || argv.e == 'scram') {
+  } else if(argv.e == 'ldap' || argv.e == 'kerberos') {
     startupOptions.skipStartup = true;
     startupOptions.skipRestart = true;
     startupOptions.skipShutdown = true;
     startupOptions.skip = true;
+  } else if(argv.e == 'scram') {
+    // Create ssl server
+    config = createConfiguration({
+        fork:null
+      , auth: null
+      , setParameter: 'authenticationMechanisms=SCRAM-SHA-1'
+
+      , topology: function(host, port, serverOptions) {
+        var m = require('../');
+        host = host || 'localhost'; port = port || 27017;
+        serverOptions = shallowClone(serverOptions);
+        serverOptions.poolSize = 1;
+        return new m.Server(host, port, serverOptions);
+      }, 
+    });    
   }
 
   // If we have a test we are filtering by
