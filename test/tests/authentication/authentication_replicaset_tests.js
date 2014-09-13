@@ -60,29 +60,38 @@ exports.shouldCorrectlyAuthenticateUsingPrimary = function(configuration, test) 
 
   var db = new Db('node-native-test', replSet, {w:1, native_parser: (process.env['TEST_NATIVE'] != null)});
   db.open(function(err, p_db) {
-    db.addUser("me", "secret", {w:3}, function(err, result) {
-      replicaset.setAuths("me", "secret");
-      db.close();
+    p_db.admin().addUser("admin", "admin", {w:3}, function(err, result) {
+      test.equal(null, err);
 
-      // connection string
-      var config = format("mongodb://me:secret@localhost:%s/node-native-test", configuration.startPort);
-      // Connect
-      Db.connect(config, function(error, client) {
-        if (error) {
-          console.log("Received connection error (" + error + ") with " + config)
-        } else {
-          // console.log("Connected with " + config)
-          client.collectionNames(function(error, names) {
+      // Log in to admin
+      p_db.admin().authenticate("admin", "admin", function(err, result) {
+        test.equal(null, err);
+
+        db.addUser("me", "secret", {w:3}, function(err, result) {
+          replicaset.setAuths("me", "secret");
+          db.close();
+
+          // connection string
+          var config = format("mongodb://me:secret@localhost:%s/node-native-test", configuration.startPort);
+          // Connect
+          Db.connect(config, function(error, client) {
             if (error) {
-              console.log("Error querying (" + error + ") with " + config)
+              console.log("Received connection error (" + error + ") with " + config)
             } else {
-              // console.log("Queried with " + config)
+              // console.log("Connected with " + config)
+              client.collectionNames(function(error, names) {
+                if (error) {
+                  console.log("Error querying (" + error + ") with " + config)
+                } else {
+                  // console.log("Queried with " + config)
+                }
+                
+                client.close();
+                test.done();
+              })
             }
-            
-            client.close();
-            test.done();
-          })
-        }
+          });
+        });
       });
     });
   });
@@ -107,29 +116,38 @@ exports.shouldCorrectlyAuthenticateWithTwoSeeds = function(configuration, test) 
 
   var db = new Db('node-native-test', replSet, {w:1, native_parser: (process.env['TEST_NATIVE'] != null)});
   db.open(function(err, p_db) {
-    db.addUser("me", "secret", {w:3}, function(err, result) {
-      replicaset.setAuths("me", "secret");
-      db.close();
+    p_db.admin().addUser("admin", "admin", {w:3}, function(err, result) {
+      test.equal(null, err);
 
-      // connection string
-      var config = format("mongodb://me:secret@localhost:%s,localhost:%s/node-native-test", configuration.startPort, configuration.startPort + 1);
-      // Connect
-      Db.connect(config, function(error, client) {
-        if (error) {
-          console.log("Received connection error (" + error + ") with " + config)
-        } else {
-          // console.log("Connected with " + config)
-          client.collectionNames(function(error, names) {
+      // Log in to admin
+      p_db.admin().authenticate("admin", "admin", function(err, result) {
+        test.equal(null, err);
+
+        db.addUser("me", "secret", {w:3}, function(err, result) {
+          replicaset.setAuths("me", "secret");
+          db.close();
+
+          // connection string
+          var config = format("mongodb://me:secret@localhost:%s,localhost:%s/node-native-test", configuration.startPort, configuration.startPort + 1);
+          // Connect
+          Db.connect(config, function(error, client) {
             if (error) {
-              console.log("Error querying (" + error + ") with " + config)
+              console.log("Received connection error (" + error + ") with " + config)
             } else {
-              // console.log("Queried with " + config)
+              // console.log("Connected with " + config)
+              client.collectionNames(function(error, names) {
+                if (error) {
+                  console.log("Error querying (" + error + ") with " + config)
+                } else {
+                  // console.log("Queried with " + config)
+                }
+                
+                client.close();
+                test.done();
+              })
             }
-            
-            client.close();
-            test.done();
-          })
-        }
+          });
+        });
       });
     });
   });
@@ -154,30 +172,39 @@ exports.shouldCorrectlyAuthenticateWithOnlySecondarySeed = function(configuratio
 
   var db = new Db('node-native-test', replSet, {w:1, native_parser: (process.env['TEST_NATIVE'] != null)});
   db.open(function(err, p_db) {
-    db.addUser("me", "secret", {w:3}, function(err, result) {
-      replicaset.setAuths("me", "secret");
-      // Close the connection
-      db.close();
+    p_db.admin().addUser("admin", "admin", {w:3}, function(err, result) {
+      test.equal(null, err);
 
-      // connection string
-      var config = format("mongodb://me:secret@localhost:%s/node-native-test?slaveOk=true", configuration.startPort);
-      // Connect
-      Db.connect(config, function(error, client) {
-        if (error) {
-          console.log("Received connection error (" + error + ") with " + config)
-        } else {
-          // console.log("Connected with " + config)
-          client.collectionNames(function(error, names) {
+      // Log in to admin
+      p_db.admin().authenticate("admin", "admin", function(err, result) {
+        test.equal(null, err);
+
+        db.addUser("me", "secret", {w:3}, function(err, result) {
+          replicaset.setAuths("me", "secret");
+          // Close the connection
+          db.close();
+
+          // connection string
+          var config = format("mongodb://me:secret@localhost:%s/node-native-test?slaveOk=true", configuration.startPort);
+          // Connect
+          Db.connect(config, function(error, client) {
             if (error) {
-              console.log("Error querying (" + error + ") with " + config)
+              console.log("Received connection error (" + error + ") with " + config)
             } else {
-              // console.log("Queried with " + config)
+              // console.log("Connected with " + config)
+              client.collectionNames(function(error, names) {
+                if (error) {
+                  console.log("Error querying (" + error + ") with " + config)
+                } else {
+                  // console.log("Queried with " + config)
+                }
+                
+                client.close();
+                test.done();
+              })
             }
-            
-            client.close();
-            test.done();
-          })
-        }
+          });
+        });
       });
     });
   });
@@ -736,98 +763,46 @@ exports.shouldCorrectlyAuthAgainstNormalDbUsingMongoClient = function(configurat
   var dbName = configuration.db_name;
 
   new Db(dbName, replSet, {w:3}).open(function(err, db_p) {
-    db_p.addUser("me", "secret", {w:3}, function runWhatever(err, result) {
-      replicaset.setAuths("me", "secret");
-
+    // Add a user
+    db_p.admin().addUser("admin", "admin", {w:3}, function(err, result) {
       test.equal(null, err);
-      test.ok(result != null);
-      db_p.close();
 
-      MongoClient.connect(format("mongodb://me:secret@%s:%s/%s?rs_name=%s&readPreference=secondary&w=3"
-        , replicaset.host, replicaset.ports[0], dbName, replicaset.name), function(err, db) {
+      // Log in to admin
+      db_p.admin().authenticate("admin", "admin", function(err, result) {
+        test.equal(null, err);
+
+        db_p.addUser("me", "secret", {w:3}, function runWhatever(err, result) {
+          // Just set auths for the manager to handle it correctly
+          replicaset.setAuths("me", "secret");
+
           test.equal(null, err);
+          test.ok(result != null);
+          db_p.close();
 
-          // Insert document
-          db.collection('authcollectiontest').insert({a:1}, {w:'majority'}, function(err, result) {
+          MongoClient.connect(format("mongodb://me:secret@%s:%s/%s?rs_name=%s&readPreference=secondary&w=3"
+            , replicaset.host, replicaset.ports[0], dbName, replicaset.name), function(err, db) {
             test.equal(null, err);
 
-            // Find the document
-            db.collection('authcollectiontest').find().toArray(function(err, docs) {
+            // Insert document
+            db.collection('authcollectiontest1').insert({a:1}, {w:3}, function(err, result) {
               test.equal(null, err);
-              test.equal(1, docs.length);
-              test.equal(1, docs[0].a);
 
-              db.close();
-              test.done();
+              // Find the document
+              db.collection('authcollectiontest1').find().toArray(function(err, docs) {
+                test.equal(null, err);
+                test.equal(1, docs.length);
+                test.equal(1, docs[0].a);
+
+                db.close();
+                test.done();
+              });
             });
           });
+        });
       });
     });
   });
 }
-
-// /**
-//  * @ignore
-//  */
-// exports['Should correctly connect and query when short connection timeout'] = {
-//   // Add a tag that our runner can trigger on
-//   // in this case we are setting that node needs to be higher than 0.10.X to run
-//   requires: {mongodb: "=2.4.X"},
-  
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var Db = configuration.getMongoPackage().Db
-//       , Server = configuration.getMongoPackage().Server
-//       , MongoClient = configuration.getMongoPackage().MongoClient
-//       , ReplSetServers = configuration.getMongoPackage().ReplSetServers
-//       , ReadPreference = configuration.getMongoPackage().ReadPreference;
-
-//     var replicaset = configuration.getReplicasetManager();
-
-//     var replSet = new ReplSetServers( [
-//         new Server( replicaset.host, replicaset.ports[1]),
-//         new Server( replicaset.host, replicaset.ports[0]),
-//       ],
-//       {rs_name:replicaset.name, poolSize:1, readPreference: ReadPreference.SECONDARY}
-//     );
-
-//     var dbName = configuration.db_name;
-//     var connectTimeoutMS = 100;
-
-//     new Db(dbName, replSet, {w:3}).open(function(err, db_p) {    
-//       db_p.addUser("me", "secret", {w:3}, function runWhatever(err, result) {
-//         test.equal(null, err);
-//         test.ok(result != null);
-//         db_p.close();
-
-//         MongoClient.connect(format("mongodb://me:secret@%s:%s/%s?rs_name=%s&readPreference=secondary&w=3&connectTimeoutMS=%s"
-//           , replicaset.host, replicaset.ports[0], dbName, replicaset.name, connectTimeoutMS), function(err, db) {
-//             test.equal(null, err);
-
-//             // Insert document
-//             db.collection('authcollectiontest').insert({a:1}, function(err, result) {
-//               test.equal(null, err);
-
-//               var numberOfItems = 100;
-//               for(var i = 0; i < 100; i++) {
-//                 db.collection('authcollectiontest').find().toArray(function(err, docs) {
-//                   numberOfItems = numberOfItems - 1;
-//                   test.equal(null, err);
-//                   test.equal(1, docs.length);
-//                   test.equal(1, docs[0].a);
-
-//                   if(numberOfItems == 0) {
-//                     db.close();
-//                     test.done();                  
-//                   }
-//                 });
-//               }
-//             });
-//         });
-//       });
-//     });
-//   }
-// }
 
 /**
  * @ignore

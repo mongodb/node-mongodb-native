@@ -57,12 +57,13 @@ if(argv.t == 'functional') {
   });
 
   replicaset_runners.runner_auth.on('end', function() {
-    sharded_runners.runner_auth.run('sharded_auth', run_options);
+    process.exit(0);
+    // sharded_runners.runner_auth.run('sharded_auth', run_options);
   });
 
-  sharded_runners.runner_auth.on('end', function() {
-    process.exit(0);
-  });
+  // sharded_runners.runner_auth.on('end', function() {
+  //   process.exit(0);
+  // });
 
   // Start chain of auth tests
   standalone_runners.runner_auth.run('single_server_auth', run_options);

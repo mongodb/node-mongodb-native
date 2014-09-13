@@ -54,36 +54,46 @@ exports['Should correctly authenticate against normal db'] = function(configurat
   configuration.restart({purgedirectories: true}, function() {
     var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:1});
     db1.open(function(err, db) {
-      db.addUser('user', 'user', function(err, result) {
-        test.equal(null, err);
+      test.equal(null, err);
 
-        // An admin user must be defined for db level authentication to work correctly
-        db.admin().addUser('admin', 'admin', function(err, result) {
+      // An admin user must be defined for db level authentication to work correctly
+      db.admin().addUser('admin', 'admin', function(err, result) {
 
-          // Attempt to save a document
-          db.collection('test').insert({a:1}, function(err, result) {
-            test.ok(err != null);
+        // Authenticate against admin
+        db.admin().authenticate('admin', 'admin', function(err, result) {
 
-            // Login the user
-            db.authenticate("user", "user", function(err, result) {
-              test.equal(null, err);
-              test.ok(result);
+          db.addUser('user', 'user', function(err, result) {
+            test.equal(null, err);
 
+            // Logout admin
+            db.admin().logout(function(err, result) {
+
+              // Attempt to save a document
               db.collection('test').insert({a:1}, function(err, result) {
-                test.equal(null, err);
+                test.ok(err != null);
 
-                // Logout the user
-                db.logout(function(err, result) {
+                // Login the user
+                db.authenticate("user", "user", function(err, result) {
                   test.equal(null, err);
+                  test.ok(result);
 
-                  // Attempt to save a document
                   db.collection('test').insert({a:1}, function(err, result) {
-                    test.ok(err != null);
+                    test.equal(null, err);
 
-                    // restart server
-                    configuration.restart({purgedirectories: true}, function() {
-                      db1.close();
-                      test.done();
+                    // Logout the user
+                    db.logout(function(err, result) {
+                      test.equal(null, err);
+
+                      // Attempt to save a document
+                      db.collection('test').insert({a:1}, function(err, result) {
+                        test.ok(err != null);
+                        db1.close();
+
+                        // restart server
+                        configuration.restart({purgedirectories: true}, function() {
+                          test.done();
+                        });
+                      });
                     });
                   });
                 });

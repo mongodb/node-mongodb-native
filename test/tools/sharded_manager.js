@@ -269,7 +269,7 @@ var setupShards = function(self, callback) {
       var command = self.replicasetManagers[i].name + "/localhost:" + self.replicasetManagers[i].startPort;
       // Run the add shard commands
       db.command({addshard:command}, function(err, result) {
-        if(result.errmsg) {
+        if(result && result.errmsg) {
           // Close db
           db.close();
           // Wait and re-try
