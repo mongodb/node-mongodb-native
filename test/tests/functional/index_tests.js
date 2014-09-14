@@ -25,7 +25,7 @@ exports.shouldCreateASimpleIndexOnASingleField = function(configuration, test) {
           test.equal("a_1", indexName);
 
           // Peform a query, with explain to show we hit the query
-          collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
+          collection.find({a:2}, {}, {explain:true}).toArray(function(err, explanation) {
             test.equal(null, err);
             test.ok(explanation != null);
 
@@ -770,7 +770,7 @@ exports['should correctly apply hint to find'] = function(configuration, test) {
         collection.indexInformation({full:false}, function(err, indexInformation) {
           test.equal(null, err);
 
-          collection.find({}, {hint:"a_1"}).toArray(function(err, docs) {
+          collection.find({}, {}, {hint:"a_1"}).toArray(function(err, docs) {
             test.equal(null, err);
             test.equal(1, docs[0].a);
             db.close();

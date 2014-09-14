@@ -191,7 +191,7 @@ exports.shouldCorrectlyPerformFindWithSort = function(configuration, test) {
             doc4 = docs[3]
 
             // Test sorting (ascending)
-            collection.find({'a': {'$lt':10}}, {'sort': [['a', 1]]}).toArray(function(err, documents) {
+            collection.find({'a': {'$lt':10}}, {}, {'sort': [['a', 1]]}).toArray(function(err, documents) {
               test.equal(4, documents.length);
               test.equal(1, documents[0].a);
               test.equal(2, documents[1].a);
@@ -199,7 +199,7 @@ exports.shouldCorrectlyPerformFindWithSort = function(configuration, test) {
               test.equal(4, documents[3].a);
 
               // Test sorting (descending)
-              collection.find({'a': {'$lt':10}}, {'sort': [['a', -1]]}).toArray(function(err, documents) {
+              collection.find({'a': {'$lt':10}}, {}, {'sort': [['a', -1]]}).toArray(function(err, documents) {
                 test.equal(4, documents.length);
                 test.equal(4, documents[0].a);
                 test.equal(3, documents[1].a);
@@ -207,7 +207,7 @@ exports.shouldCorrectlyPerformFindWithSort = function(configuration, test) {
                 test.equal(1, documents[3].a);
 
                 // Test sorting (descending), sort is hash
-                collection.find({'a': {'$lt':10}}, {sort: {a: -1}}).toArray(function(err, documents) {
+                collection.find({'a': {'$lt':10}}, {}, {sort: {a: -1}}).toArray(function(err, documents) {
                   test.equal(4, documents.length);
                   test.equal(4, documents[0].a);
                   test.equal(3, documents[1].a);
@@ -215,7 +215,7 @@ exports.shouldCorrectlyPerformFindWithSort = function(configuration, test) {
                   test.equal(1, documents[3].a);
 
                   // Sorting using array of names, assumes ascending order
-                  collection.find({'a': {'$lt':10}}, {'sort': ['a']}).toArray(function(err, documents) {
+                  collection.find({'a': {'$lt':10}}, {}, {'sort': ['a']}).toArray(function(err, documents) {
                     test.equal(4, documents.length);
                     test.equal(1, documents[0].a);
                     test.equal(2, documents[1].a);
@@ -223,7 +223,7 @@ exports.shouldCorrectlyPerformFindWithSort = function(configuration, test) {
                     test.equal(4, documents[3].a);
 
                     // Sorting using single name, assumes ascending order
-                    collection.find({'a': {'$lt':10}}, {'sort': 'a'}).toArray(function(err, documents) {
+                    collection.find({'a': {'$lt':10}}, {}, {'sort': 'a'}).toArray(function(err, documents) {
                       test.equal(4, documents.length);
                       test.equal(1, documents[0].a);
                       test.equal(2, documents[1].a);
@@ -231,14 +231,14 @@ exports.shouldCorrectlyPerformFindWithSort = function(configuration, test) {
                       test.equal(4, documents[3].a);
 
                       // Sorting using single name, assumes ascending order, sort is hash
-                      collection.find({'a': {'$lt':10}}, {sort: {'a':1}}).toArray(function(err, documents) {
+                      collection.find({'a': {'$lt':10}}, {}, {sort: {'a':1}}).toArray(function(err, documents) {
                         test.equal(4, documents.length);
                         test.equal(1, documents[0].a);
                         test.equal(2, documents[1].a);
                         test.equal(3, documents[2].a);
                         test.equal(4, documents[3].a);
 
-                        collection.find({'a': {'$lt':10}}, {'sort': ['b', 'a']}).toArray(function(err, documents) {
+                        collection.find({'a': {'$lt':10}}, {}, {'sort': ['b', 'a']}).toArray(function(err, documents) {
                           test.equal(4, documents.length);
                           test.equal(2, documents[0].a);
                           test.equal(4, documents[1].a);
@@ -246,12 +246,12 @@ exports.shouldCorrectlyPerformFindWithSort = function(configuration, test) {
                           test.equal(3, documents[3].a);
 
                           // Sorting using empty array, no order guarantee should not blow up
-                          collection.find({'a': {'$lt':10}}, {'sort': []}).toArray(function(err, documents) {
+                          collection.find({'a': {'$lt':10}}, {}, {'sort': []}).toArray(function(err, documents) {
                             test.equal(4, documents.length);
 
                             /* NONACTUAL */
                             // Sorting using ordered hash
-                            collection.find({'a': {'$lt':10}}, {'sort': {a:-1}}).toArray(function(err, documents) {
+                            collection.find({'a': {'$lt':10}}, {}, {'sort': {a:-1}}).toArray(function(err, documents) {
                               // Fail test if not an error
                               test.equal(4, documents.length);
                               // Let's close the db
@@ -295,27 +295,27 @@ exports.shouldCorrectlyPerformFindWithLimit = function(configuration, test) {
             doc4 = docs[3]
 
             // Test limits
-            collection.find({}, {'limit': 1}).toArray(function(err, documents) {
+            collection.find({}, {}, {'limit': 1}).toArray(function(err, documents) {
               test.equal(1, documents.length);
             });
 
-            collection.find({}, {'limit': 2}).toArray(function(err, documents) {
+            collection.find({}, {}, {'limit': 2}).toArray(function(err, documents) {
               test.equal(2, documents.length);
             });
 
-            collection.find({}, {'limit': 3}).toArray(function(err, documents) {
+            collection.find({}, {}, {'limit': 3}).toArray(function(err, documents) {
               test.equal(3, documents.length);
             });
 
-            collection.find({}, {'limit': 4}).toArray(function(err, documents) {
+            collection.find({}, {}, {'limit': 4}).toArray(function(err, documents) {
               test.equal(4, documents.length);
             });
 
-            collection.find({}, {}).toArray(function(err, documents) {
+            collection.find({}, {}, {}).toArray(function(err, documents) {
               test.equal(4, documents.length);
             });
 
-            collection.find({}, {'limit':99}).toArray(function(err, documents) {
+            collection.find({}, {}, {'limit':99}).toArray(function(err, documents) {
               test.equal(4, documents.length);
               // Let's close the db
               db.close();
@@ -394,7 +394,7 @@ exports.shouldCorrectlyFindNoRecords = function(configuration, test) {
   db.open(function(err, db) {
     db.createCollection('test_find_one_no_records', function(err, r) {
       db.collection('test_find_one_no_records', function(err, collection) {
-        collection.find({'a':1}, {}).toArray(function(err, documents) {
+        collection.find({'a':1}, {}, {}).toArray(function(err, documents) {
           test.equal(0, documents.length);
           // Let's close the db
           db.close();
@@ -445,15 +445,15 @@ exports.shouldCorrectlyPerformFindsWithHintTurnedOn = function(configuration, te
     db.createCollection('test_hint', function(err, collection) {
       collection.insert({'a':1}, {w:1}, function(err, ids) {
         db.createIndex(collection.collectionName, "a", {w:1}, function(err, indexName) {
-          collection.find({'a':1}, {'hint':'a'}).toArray(function(err, items) {
+          collection.find({'a':1}, {}, {'hint':'a'}).toArray(function(err, items) {
             test.equal(1, items.length);
           });
 
-          collection.find({'a':1}, {'hint':['a']}).toArray(function(err, items) {
+          collection.find({'a':1}, {}, {'hint':['a']}).toArray(function(err, items) {
             test.equal(1, items.length);
           });
 
-          collection.find({'a':1}, {'hint':{'a':1}}).toArray(function(err, items) {
+          collection.find({'a':1}, {}, {'hint':{'a':1}}).toArray(function(err, items) {
             test.equal(1, items.length);
           });
 
@@ -536,7 +536,7 @@ exports.shouldCorrectlyReturnDocumentWithOriginalStructure= function(configurati
       };
 
       collection.insert(doc, {w:1}, function(err, docs) {
-        collection.findOne({'_id':doc._id}, {w:1,fields: undefined}, function(err, doc) {
+        collection.findOne({'_id':doc._id}, {}, {w:1,fields: undefined}, function(err, doc) {
           if (err) console.error('error', err);
           test.equal(2, doc.comments.length);
           test.equal('number 1', doc.comments[0].title);
@@ -960,10 +960,10 @@ exports['Should correctly pass timeout options to cursor'] = function(configurat
   var db = configuration.newDbInstance({w:1}, {poolSize:1});
   db.open(function(err, db) {
     db.createCollection('timeoutFalse', function(err, collection) {
-      collection.find({},{timeout:false},function(err, cursor) {
+      collection.find({},{},{timeout:false},function(err, cursor) {
         test.equal(false, cursor.timeout);
       });
-      collection.find({},{timeout:true},function(err, cursor) {
+      collection.find({},{},{timeout:true},function(err, cursor) {
         test.equal(true, cursor.timeout);
       });
       collection.find({},{},function(err, cursor) {
@@ -1127,12 +1127,12 @@ exports['Should Correctly find a Document using findOne excluding _id field'] = 
       // insert doc
       collection.insert(doc, {w:1}, function(err, result) {
         // Get one document, excluding the _id field
-        collection.findOne({a:1}, {fields:{'_id': 0}}, function(err, item) {
+        collection.findOne({a:1}, {}, {fields:{'_id': 0}}, function(err, item) {
           test.equal(null, item._id);
           test.equal(1, item.a);
           test.equal(2, item.c);
 
-          collection.find({a:1}, {fields:{'_id':0}}).toArray(function(err, items) {
+          collection.find({a:1}, {}, {fields:{'_id':0}}).toArray(function(err, items) {
             var item = items[0]
             test.equal(null, item._id);
             test.equal(1, item.a);
@@ -1617,7 +1617,7 @@ exports.shouldPeformASimpleExplainQuery = function(configuration, test) {
         test.equal(null, err);
 
         // Peform a simple find and return all the documents
-        collection.find({}, {explain:true}).toArray(function(err, docs) {
+        collection.find({}, {}, {explain:true}).toArray(function(err, docs) {
           test.equal(null, err);
           test.equal(1, docs.length);
 
@@ -1653,7 +1653,7 @@ exports.shouldPeformASimpleLimitSkipQuery = function(configuration, test) {
         test.equal(null, err);
 
         // Peform a simple find and return all the documents
-        collection.find({}, {skip:1, limit:1, fields:{b:1}}).toArray(function(err, docs) {
+        collection.find({}, {}, {skip:1, limit:1, fields:{b:1}}).toArray(function(err, docs) {
           test.equal(null, err);
           test.equal(1, docs.length);
           test.equal(null, docs[0].a);
@@ -1710,7 +1710,7 @@ exports.shouldPeformASimpleLimitSkipFindOneQuery = function(configuration, test)
         test.equal(null, err);
 
         // Peform a simple find and return all the documents
-        collection.findOne({a:2}, {fields:{b:1}}, function(err, doc) {
+        collection.findOne({a:2}, {}, {fields:{b:1}}, function(err, doc) {
           test.equal(null, err);
           test.equal(null, doc.a);
           test.equal(2, doc.b);
@@ -1782,7 +1782,7 @@ exports.shouldPeformASimpleLimitSkipFindWithFields2 = function(configuration, te
         test.equal(null, err);
 
         // Peform a simple find and return all the documents
-        collection.find({a:2}, {fields: ['b']}).toArray(function(err, docs) {
+        collection.find({a:2}, {}, {fields: ['b']}).toArray(function(err, docs) {
           test.equal(null, err);
           test.equal(1, docs.length);
           test.equal(null, docs[0].a);
@@ -2031,7 +2031,7 @@ exports.shouldCorrectlyDoFindMinMax = function(configuration, test) {
           test.equal(null, err);
           test.equal(10, docs[0].max)
 
-          collection.find({"_id": {$in:['some', 'value', 123]}}, {fields: {"_id":1, "max":1}}).toArray(function(err, docs) {        
+          collection.find({"_id": {$in:['some', 'value', 123]}}, {}, {fields: {"_id":1, "max":1}}).toArray(function(err, docs) {        
             test.equal(null, err);
             test.equal(10, docs[0].max)
 
@@ -2346,6 +2346,7 @@ exports['Should correctly sort using text search on 2.6 or higher in find'] = {
 
             collection.find(
                 {$text: {$search: 'spam'}}
+              , {}
               , {fields: {_id: false, s: true, score: {$meta: 'textScore'}}}
             ).sort({score: {$meta: 'textScore'}}).toArray(function(err, items) {
               test.equal(null, err);

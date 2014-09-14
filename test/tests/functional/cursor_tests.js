@@ -160,11 +160,11 @@ exports.shouldCorrectlyExecuteCursorCount = function(configuration, test) {
               test.ok(count.constructor == Number);
             });
 
-            collection.find({}, {'limit':5}).count(function(err, count) {
+            collection.find({}, {}, {'limit':5}).count(function(err, count) {
               test.equal(10, count);
             });
 
-            collection.find({}, {'skip':5}).count(function(err, count) {
+            collection.find({}, {}, {'skip':5}).count(function(err, count) {
               test.equal(10, count);
             });
 
@@ -647,7 +647,7 @@ exports.shouldCorrectlyHandleChangesInBatchSizes = function(configuration, test)
       }
 
       collection.insert(docs, {w:1}, function() {
-        collection.find({}, {batchSize : batchSize}, function(err, cursor) {
+        collection.find({}, {}, {batchSize : batchSize}, function(err, cursor) {
           //1st
           cursor.nextObject(function(err, items) {
             //cursor.items should contain 1 since nextObject already popped one
@@ -720,7 +720,7 @@ exports.shouldCorrectlyHandleBatchSize = function(configuration, test) {
       }
 
       collection.insert(docs, {w:1}, function() {
-        collection.find({}, {batchSize : batchSize}, function(err, cursor) {
+        collection.find({}, {}, {batchSize : batchSize}, function(err, cursor) {
           //1st
           cursor.nextObject(function(err, items) {
             test.equal(1, cursor.items.length);
@@ -776,7 +776,7 @@ exports.shouldHandleWhenLimitBiggerThanBatchSize = function(configuration, test)
       }
 
       collection.insert(docs, {w:1}, function() {
-        var cursor = collection.find({}, {batchSize : batchSize, limit : limit});
+        var cursor = collection.find({}, {}, {batchSize : batchSize, limit : limit});
         //1st
         cursor.nextObject(function(err, items) {
           test.equal(2, cursor.items.length);
@@ -827,7 +827,7 @@ exports.shouldHandleLimitLessThanBatchSize = function(configuration, test) {
       }
 
       collection.insert(docs, {w:1}, function() {
-        var cursor = collection.find({}, {batchSize : batchSize, limit : limit});
+        var cursor = collection.find({}, {}, {batchSize : batchSize, limit : limit});
         //1st
         cursor.nextObject(function(err, items) {
           test.equal(1, cursor.items.length);
@@ -983,7 +983,7 @@ exports.shouldCorrectlyRefillViaGetMoreCommand = function(configuration, test) {
 
           var total = 0;
           var i = 0;
-          var cursor = collection.find({}, {}).each(function(err, item) {
+          var cursor = collection.find({}, {}, {}).each(function(err, item) {
           if(item != null) {
             total = total + item.a;
           } else {
@@ -1114,13 +1114,13 @@ exports.shouldCorrectlyExecuteCursorCountWithFields = function(configuration, te
   db.open(function(err, db) {
     db.createCollection('test_count_with_fields', function(err, collection) {
       collection.save({'x':1, 'a':2}, {w:1}, function(err, doc) {
-        collection.find({}, {'fields':['a']}).toArray(function(err, items) {
+        collection.find({}, {}, {'fields':['a']}).toArray(function(err, items) {
           test.equal(1, items.length);
           test.equal(2, items[0].a);
           test.equal(null, items[0].x);
         });
 
-        collection.findOne({}, {'fields':['a']}, function(err, item) {
+        collection.findOne({}, {}, {'fields':['a']}, function(err, item) {
           test.equal(2, item.a);
           test.equal(null, item.x);
           db.close();
@@ -1140,7 +1140,7 @@ exports.shouldCorrectlyCountWithFieldsUsingExclude = function(configuration, tes
   db.open(function(err, db) {
     db.createCollection('test_count_with_fields_using_exclude', function(err, collection) {
       collection.save({'x':1, 'a':2}, {w:1}, function(err, doc) {
-        collection.find({}, {'fields':{'x':0}}).toArray(function(err, items) {
+        collection.find({}, {}, {'fields':{'x':0}}).toArray(function(err, items) {
           test.equal(1, items.length);
           test.equal(2, items[0].a);
           test.equal(null, items[0].x);
@@ -1524,7 +1524,7 @@ exports['cursor stream errors'] = {
             , closed = 0
             , i = 0
 
-          var stream = collection.find({}, { batchSize: 5 }).stream();
+          var stream = collection.find({}, {}, { batchSize: 5 }).stream();
 
           stream.on('data', function (doc) {
             if (++i === 5) {
@@ -2005,7 +2005,7 @@ exports.shouldCloseDeadTailableCursors = function(configuration, test) {
 
       insert(function query () {
         var conditions = { id: { $gte: lastId }};
-        var stream = collection.find(conditions, { tailable: true }).stream();
+        var stream = collection.find(conditions, {}, { tailable: true }).stream();
 
         stream.on('data', function (doc) {
           lastId = doc.id;
@@ -2049,7 +2049,7 @@ exports.shouldAwaitData = function(configuration, test) {
     db.createCollection('should_await_data', options, function(err, collection) {
       collection.insert({a:1}, {w:1}, function(err, result) {
         // Create cursor with awaitdata, and timeout after the period specified
-        collection.find({}, {tailable:true, awaitdata:true, numberOfRetries:1}).each(function(err, result) {
+        collection.find({}, {}, {tailable:true, awaitdata:true, numberOfRetries:1}).each(function(err, result) {
           if(err != null) {
             db.close();
             test.done();
@@ -2072,7 +2072,7 @@ exports.shouldNotAwaitDataWhenFalse = function(configuration, test) {
     db.createCollection('should_not_await_data_when_false', options, function(err, collection) {
       collection.insert({a:1}, {w:1}, function(err, result) {
         // should not timeout
-        collection.find({}, {tailable:true, awaitdata:false}).each(function(err, result) {
+        collection.find({}, {}, {tailable:true, awaitdata:false}).each(function(err, result) {
           if(err != null) {
 	    test.equal("Error: Connection was destroyed by application", err);
           }
@@ -2320,7 +2320,7 @@ exports.shouldFailToTailANormalCollection = function(configuration, test) {
     for(var i = 0; i < 100; i++) docs.push({a:i, OrderNumber:i});
 
     collection.insert(docs, {w:1}, function(err, ids) {
-      collection.find({}, {tailable:true}).each(function(err, doc) {
+      collection.find({}, {}, {tailable:true}).each(function(err, doc) {
         test.ok(err instanceof Error);
         db.close();
         test.done();
@@ -2442,25 +2442,25 @@ exports['should correctly apply hint to count command for cursor'] = {
         col.ensureIndex({i:1}, function(err, r) {
           test.equal(null, err);
 
-          col.find({i:1}, {hint: "_id_"}).count(function(err, count) {
+          col.find({i:1}, {}, {hint: "_id_"}).count(function(err, count) {
             test.equal(null, err);
             test.equal(1, count);
 
-            col.find({}, {hint: "_id_"}).count(function(err, count) {
+            col.find({}, {}, {hint: "_id_"}).count(function(err, count) {
               test.equal(null, err);
               test.equal(2, count);
 
-              col.find({i:1}, {hint: "BAD HINT"}).count(function(err, count) {
+              col.find({i:1}, {}, {hint: "BAD HINT"}).count(function(err, count) {
                 test.ok(err != null);
 
                 col.ensureIndex({x:1}, {sparse:true}, function(err, r) {
                   test.equal(null, err);
 
-                  col.find({i:1}, {hint: "x_1"}).count(function(err, count) {
+                  col.find({i:1}, {}, {hint: "x_1"}).count(function(err, count) {
                     test.equal(null, err);
                     test.equal(0, count);
 
-                    col.find({}, {hint: "x_1"}).count(function(err, count) {
+                    col.find({}, {}, {hint: "x_1"}).count(function(err, count) {
                       test.equal(null, err);
                       test.equal(2, count);
 

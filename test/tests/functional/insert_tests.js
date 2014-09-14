@@ -1578,7 +1578,7 @@ exports.shouldCorrectlyInsertSimpleRegExpDocument = function(configuration, test
   db.open(function(err, db) {
     db.createCollection('test_regex', function(err, collection) {
       collection.insert({'b':regexp}, {w:1}, function(err, ids) {
-        collection.find({}, {'fields': ['b']}).toArray(function(err, items) {
+        collection.find({}, {}, {'fields': ['b']}).toArray(function(err, items) {
           test.equal(("" + regexp), ("" + items[0].b));
           // Let's close the db
           db.close();
@@ -1599,7 +1599,7 @@ exports.shouldCorrectlyInsertSimpleUTF8Regexp = function(configuration, test) {
     collection.insert({'b':regexp}, {w:1}, function(err, ids) {
       test.equal(null, err)
 
-      collection.find({}, {'fields': ['b']}).toArray(function(err, items) {
+      collection.find({}, {}, {'fields': ['b']}).toArray(function(err, items) {
         test.equal(null, err)
         test.equal(("" + regexp), ("" + items[0].b));
         // Let's close the db
