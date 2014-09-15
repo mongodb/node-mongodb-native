@@ -12,6 +12,7 @@ pids
 lib-cov
 data/
 out/
+docs/public
 
 # Directory for dbs
 db

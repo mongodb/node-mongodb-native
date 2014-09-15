@@ -1,1 +1,0 @@
-crud_operations.md
