@@ -8,6 +8,6 @@ menu:
 next: /overview/introduction
 prev: /overview/introduction
 title: Connecting To MongoDB
-weight: 20
+weight: 1
 ---
 querying.md

@@ -8,6 +8,6 @@ menu:
 next: /overview/introduction
 prev: /overview/introduction
 title: Querying
-weight: 20
+weight: 4
 ---
 querying.md

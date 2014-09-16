@@ -8,6 +8,6 @@ menu:
 next: /overview/introduction
 prev: /overview/introduction
 title: Streams
-weight: 20
+weight: 6
 ---
 querying.md

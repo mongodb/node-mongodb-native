@@ -12,56 +12,44 @@ title: Contributing to Hugo
 weight: 30
 ---
 
-All contributions to Hugo are welcome. Whether you want to scratch an itch, or simply contribute to the project, feel free to pick something from the roadmap
-or contact [spf13](http://spf13.com) about what may make sense
-to do next.
+To contribute to the project *we encourage pull requests allowing for discussion of code changes.*
 
-You should fork the project and make your changes.  *We encourage pull requests to discuss code changes.*
+## Contributing
 
+When you are ready to send us a pull request make sure you perform the following steps first.
 
-When you're ready to create a pull request, be sure to:
+  *  Ensure you have at least one test case that covers the new code. If you are wondering how to do this please feel free to ask in the pull request for help.
+  *  Ensure you run the tests. `node test/runner.js -t functional`
+  *  Squash all your commits into a single commit. `git rebase -i`. You can force update your pull request as history for it is not important for us to keep.
 
-  * Have test cases for the new code.  If you have questions about how to do it, please ask in your pull request.
-  * Run `go fmt`
-  * Squash your commits into a single commit.  `git rebase -i`.  It's okay to force update your pull request.
-  * Make sure `go test ./...` passes, and `go build` completes.  Our Travis CI loop will catch most things that are missing.  The exception: Windows.  We run on Windows from time to time, but if you have access, please check on a Windows machine too.
+## Contribution Steps
 
-## Contribution Overview
+1. Fork the Node.js driver from https://github.com/mongodb/node-mongodb-native
+2. Create a new feature branch (`git checkout -b feature`)
+3. Commit your changes using git (`git commit -a -m 'My changes'`)
+4. Run tests suite (ensure mongodb is in path) (`node test/runner.js -t functional`)
+5. Squash the commits (`git rebase -i`)
+6. Push the new branch to your github fork (`git push origin feature`)
+7. Create a new Pull Request on github.
 
-1. Fork Hugo from https://github.com/spf13/hugo
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Commit passing tests to validate changes.
-5. Run `go fmt`
-6. Squash commits into a single (or logically grouped) commits (`git rebase -i`)
-7. Push to the branch (`git push origin my-new-feature`)
-8. Create new Pull Request
+# Running Tests
 
+## Clone repository locally
 
-# Building from source
+    git clone https://github.com/mongodb/node-mongodb-native
+    cd node-mongodb-native
+    npm install
 
-## Clone locally (for contributors):
+## Running The Test Suite
 
-    git clone https://github.com/spf13/hugo
-    cd hugo
-    go get
+Make sure the *mongod* executable is in your shell or command line *path*. Then run the functional test suite.
 
-Because Go expects all of your libraries to be found in either
-$GOROOT or $GOPATH, it's helpful to symlink the project to one
-of the following paths:
+    node test/runner.js -t functional
 
- * ln -s /path/to/your/hugo $GOPATH/src/github.com/spf13/hugo
- * ln -s /path/to/your/hugo $GOROOT/src/pkg/github.com/spf13/hugo
+To run the replicaset test suite do
 
-## Running Hugo
+    node test/runner.js -t functional -e replicaset
 
-    cd /path/to/hugo
-    go install github.com/spf13/hugo/hugo
-    go run main.go
+To run the sharded test suite do
 
-## Building Hugo
-
-    cd /path/to/hugo
-    go build -o hugo main.go
-    mv hugo /usr/local/bin/
-
+    node test/runner.js -t functional -e sharded

@@ -8,6 +8,6 @@ menu:
 next: /overview/introduction
 prev: /overview/introduction
 title: Aggregation
-weight: 20
+weight: 5
 ---
 querying.md

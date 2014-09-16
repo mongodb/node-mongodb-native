@@ -9,30 +9,19 @@ title: Mailing List
 weight: 10
 ---
 
-Hugo has two mailing lists:
-
-## Announcements
-Very low traffic. Only releases will be emailed here.
-
-https://groups.google.com/forum/#!forum/hugo-announce
+The Node.js MongoDB driver has one main Mailing list.
 
 ## Discussion
 For all questions and discussions:
 
-https://groups.google.com/forum/#!forum/hugo-discuss
+https://groups.google.com/forum/#!forum/node-mongodb-native
 
 # Other Resources
 
-## GoNuts
+## Issues
 
-For general Go questions or discussion please refer to the Go mailing list.
-
-https://groups.google.com/forum/#!forum/golang-nuts
-
-## GitHub Issues
-
-https://github.com/spf13/hugo/issues
+https://jira.mongodb.org/browse/NODE
 
 ## Twitter
 
-Hugo doesn't have its own Twitter handle, but feel free to tweet [@spf13](http://twitter.com/spf13).
+The Node.js driver doesn't have its own Twitter handle, but feel free to tweet it's main developer at [@christkv](http://twitter.com/christkv).

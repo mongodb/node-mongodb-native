@@ -8,6 +8,6 @@ menu:
 next: /overview/introduction
 prev: /overview/introduction
 title: GridFS
-weight: 20
+weight: 7
 ---
 querying.md

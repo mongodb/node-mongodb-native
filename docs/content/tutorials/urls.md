@@ -8,6 +8,6 @@ menu:
 next: /overview/introduction
 prev: /overview/introduction
 title: Connection URI
-weight: 20
+weight: 2
 ---
 querying.md

@@ -8,6 +8,6 @@ menu:
 next: /overview/introduction
 prev: /overview/introduction
 title: CRUD Operations
-weight: 20
+weight: 3
 ---
 querying.md
