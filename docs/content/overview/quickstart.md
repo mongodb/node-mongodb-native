@@ -5,8 +5,8 @@ date: 2013-07-01
 menu:
   main:
     parent: getting started
-next: /overview/installing
-prev: /overview/introduction
+next: /overview/introduction
+prev: /overview/installing
 title: QuickStart
 weight: 20
 ---

@@ -21,6 +21,7 @@ examples/
 test/
 out/
 performance/
+public/
 .coverage_data/
 docs/public
 

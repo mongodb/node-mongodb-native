@@ -8,6 +8,7 @@ MetaDataFormat = "yaml"
 [[menu.main]]
     name = "api"
     pre = "<i class='fa fa-file-text'></i>"
+    url = "/api-docs/index.html"
     weight = -90
 [[menu.main]]
     name = "about driver"
