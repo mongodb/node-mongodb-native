@@ -1,4 +1,4 @@
-1.4.11 2014-09-
+1.4.11 2014-09-16
 -----------------
 - Hardened result handling in command, insert, update, remove for issue where no result is returned.
 - NODE-267 undefined variable util used in unordered.js instead of utils.
