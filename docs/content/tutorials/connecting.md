@@ -5,7 +5,7 @@ date: 2013-07-01
 menu:
   main:
     parent: tutorials
-next: /tutorials/crud_operations
+next: /tutorials/urls
 prev: /tutorials/gridfs
 title: Connecting To MongoDB
 weight: 1
@@ -151,52 +151,105 @@ Let's break down the **URI** string.
 
 # MongoClient.connect Optional Parameters
 ---------------------------------------
-There are options that are specific for the Node.js driver that are not covered by the commong **URI** specification used for **MongoClient.connect**. These control details off the driver behavior
+The driver has many more options for tweaking than what's available through the **URI** specification. These can be passed to the driver using an optional parameters object. The top level fields in the options object are.
 
+* **db**, Options that affect the Db instance returned by the MongoClient.connect method.
+* **replSet**, Options that modify the Replicaset topology connection behavior.
+* **mongos**, Options that modify the Mongos topology connection behavior.
+* **server**, Options that modify the Server topology connection behavior.
+
+A simple example connecting to a single server setting all returned queries to be raw BSON buffers and adjusting the poolSize to be 10 connections for this connection.
+
+```js
+var MongoClient = require('mongodb').MongoClient
+  , assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://dave:password@localhost:27017/myproject';
+// Use connect method to connect to the Server
+MongoClient.connect(url, {
+    db: {
+      raw: true
+    }, 
+    server: {
+      poolSize: 10
+    }
+  }, function(err, db) {
+  assert.equal(null, err);
+  console.log("Connected correctly to server");
+
+  db.close();
+});
+```
+
+Let's look at the individual options for each of the top level fields.
 
 ## Data base level options
 
-  *  **w**, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write
-  *  **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
-  *  **fsync**, (Boolean, default:false) write waits for fsync before returning
-  *  **journal**, (Boolean, default:false) write waits for journal sync before returning
-  *  **readPreference** {String}, the preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
-  *  **native_parser** {Boolean, default:false}, use c++ bson parser.
-  *  **forceServerObjectId** {Boolean, default:false}, force server to create _id fields instead of client.
-  *  **pkFactory** {Object}, object overriding the basic ObjectID primary key generation.
-  *  **serializeFunctions** {Boolean, default:false}, serialize functions.
-  *  **raw** {Boolean, default:false}, perform operations using raw bson buffers.
-  *  **recordQueryStats** {Boolean, default:false}, record query statistics during execution.
-  *  **retryMiliSeconds** {Number, default:5000}, number of milliseconds between retries.
-  *  **numberOfRetries** {Number, default:5}, number of retries off connection.
-  *  **bufferMaxEntries** {Number, default: -1}, sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited.
+*  **w**, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write
+*  **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+*  **fsync**, (Boolean, default:false) write waits for fsync before returning
+*  **journal**, (Boolean, default:false) write waits for journal sync before returning
+*  **readPreference** {String}, the preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+*  **native_parser** {Boolean, default:false}, use c++ bson parser.
+*  **forceServerObjectId** {Boolean, default:false}, force server to create _id fields instead of client.
+*  **pkFactory** {Object}, object overriding the basic ObjectID primary key generation.
+*  **serializeFunctions** {Boolean, default:false}, serialize functions.
+*  **raw** {Boolean, default:false}, perform operations using raw bson buffers.
+*  **retryMiliSeconds** {Number, default:5000}, number of milliseconds between retries.
+*  **numberOfRetries** {Number, default:5}, number of retries off connection.
+*  **bufferMaxEntries** {Number, default: -1}, sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited.
 
 ## Individual Server Level Options
 
-  *  **readPreference** {String, default:null}, set's the read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST)
-  *  **ssl** {Boolean, default:false}, use ssl connection (needs to have a mongod server with ssl support)
-  *  **slaveOk** {Boolean, default:false}, legacy option allowing reads from secondary, use **readPrefrence** instead.
-  *  **poolSize** {Number, default:1}, number of connections in the connection pool, set to 1 as default for legacy reasons.
-  *  **socketOptions** {Object, default:null}, an object containing socket options to use (noDelay:(boolean), keepAlive:(number), connectTimeoutMS:(number), socketTimeoutMS:(number))
-  *  **logger** {Object, default:null}, an object representing a logger that you want to use, needs to support functions debug, log, error **({error:function(message, object) {}, log:function(message, object) {}, debug:function(message, object) {}})**.
-  *  **auto_reconnect** {Boolean, default:false}, reconnect on error.
-  *  **disableDriverBSONSizeCheck** {Boolean, default:false}, force the server to error if the BSON message is to big
+* **poolSize**, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.
+* **ssl**, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.
+* **sslValidate**, {Boolean, default: false} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).
+* **sslCA**, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).
+* **sslCert**, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).
+* **sslKey**, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).
+* **sslPass**, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).
+* **socketOptions.autoReconnect**, {Boolean, default: true} Reconnect on error.
+* **socketOptions.noDelay**, {Boolean, default: true} TCP Socket NoDelay option.
+* **socketOptions.keepAlive**, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start. 
+* **socketOptions.connectTimeoutMS**, {Number, default: 0} TCP Connection timeout setting.
+* **socketOptions.socketTimeoutMS**, {Number, default: 0} TCP Socket timeout setting.
 
 ## Replicaset Level Options
 
-  *  **ha** {Boolean, default:true}, turn on high availability.
-  *  **haInterval** {Number, default:2000}, time between each replicaset status check.
-  *  **reconnectWait** {Number, default:1000}, time to wait in milliseconds before attempting reconnect.
-  *  **retries** {Number, default:30}, number of times to attempt a replicaset reconnect.
-  *  **rs_name** {String}, the name of the replicaset to connect to.
-  *  **socketOptions** {Object, default:null}, an object containing socket options to use (noDelay:(boolean), keepAlive:(number), connectTimeoutMS:(number), socketTimeoutMS:(number))
-  *  **readPreference** {String}, the preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
-  *  **strategy** {String, default:null}, selection strategy for reads choose between (ping and statistical, default is round-robin)
-  *  **secondaryAcceptableLatencyMS** {Number, default:15}, sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)
-  *  **connectArbiter** {Boolean, default:false}, sets if the driver should connect to arbiters or not.
+*  **ha** {Boolean, default:true}, turn on high availability.
+*  **haInterval** {Number, default:5000}, time between each replicaset status check.
+*  **replicaSet** {String}, the name of the replicaset to connect to.
+*  **secondaryAcceptableLatencyMS** {Number, default:15}, sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)
+*  **connectWithNoPrimary** {Boolean, default:false}, Sets if the driver should connect even if no primary is available.
+* **poolSize**, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.
+* **ssl**, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.
+* **sslValidate**, {Boolean, default: false} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).
+* **sslCA**, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).
+* **sslCert**, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).
+* **sslKey**, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).
+* **sslPass**, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).
+* **socketOptions.autoReconnect**, {Boolean, default: true} Reconnect on error.
+* **socketOptions.noDelay**, {Boolean, default: true} TCP Socket NoDelay option.
+* **socketOptions.keepAlive**, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start. 
+* **socketOptions.connectTimeoutMS**, {Number, default: 0} TCP Connection timeout setting.
+* **socketOptions.socketTimeoutMS**, {Number, default: 0} TCP Socket timeout setting.
 
 ## Mongos Proxy Level Options
 
-  *  **socketOptions** {Object, default:null}, an object containing socket options to use (noDelay:(boolean), keepAlive:(number), connectTimeoutMS:(number), socketTimeoutMS:(number))
-  *  **ha** {Boolean, default:true}, turn on high availability, attempts to reconnect to down proxies
-  *  **haInterval** {Number, default:2000}, time between each replicaset status check.
+*  **ha** {Boolean, default:true}, turn on high availability.
+*  **haInterval** {Number, default:5000}, time between each replicaset status check.
+*  **replicaSet** {String}, the name of the replicaset to connect to.
+*  **secondaryAcceptableLatencyMS** {Number, default:15}, sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)
+* **poolSize**, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.
+* **ssl**, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.
+* **sslValidate**, {Boolean, default: false} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).
+* **sslCA**, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).
+* **sslCert**, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).
+* **sslKey**, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).
+* **sslPass**, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).
+* **socketOptions.autoReconnect**, {Boolean, default: true} Reconnect on error.
+* **socketOptions.noDelay**, {Boolean, default: true} TCP Socket NoDelay option.
+* **socketOptions.keepAlive**, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start. 
+* **socketOptions.connectTimeoutMS**, {Number, default: 0} TCP Connection timeout setting.
+* **socketOptions.socketTimeoutMS**, {Number, default: 0} TCP Socket timeout setting.

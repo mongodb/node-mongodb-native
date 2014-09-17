@@ -5,8 +5,8 @@ date: 2013-07-01
 menu:
   main:
     parent: tutorials
-next: /overview/introduction
-prev: /overview/introduction
+next: /tutorials/crud_operations
+prev: /tutorials/connecting
 title: Connection URI
 weight: 2
 ---
@@ -14,11 +14,10 @@ weight: 2
 
     mongodb://[username:password@]host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[database][?options]]
 
-The URL format is unified across official drivers from 10gen with some options not supported on some drivers due to natural reasons. The ones not supported by the Node.js driver are left out for simplicities sake.
+The URL format is unified across official drivers from Mongodb with some options not supported on some drivers due to implementation differences. The ones not supported by the Node.js driver are left out for simplicities sake.
 
 ### Basic parts of the url
   * **mongodb://** is a required prefix to identify that this is a string in the standard connection format.
-
   * **username:password@** is optional. If given, the driver will attempt to login to a database after connecting to a database server.
   * **host1** is the only required part of the URI. It identifies either a hostname, IP address, or unix domain socket
   * **:portX** is optional and defaults to :27017 if not provided.

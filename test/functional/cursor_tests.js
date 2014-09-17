@@ -2345,3 +2345,48 @@ exports['should correctly apply hint to count command for cursor'] = {
     // DOC_END
   }
 }
+
+/**
+ * @ignore
+ */
+exports['Terminate each after first document by returning false'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    // Establish connection to db
+    db.open(function(err, db) {
+
+      // Create a lot of documents to insert
+      var docs = []
+      for(var i = 0; i < 100; i++) {
+        docs.push({'a':i})
+      }
+
+      // Create a collection
+      db.createCollection('terminate_each_returning_false', function(err, collection) {
+        test.equal(null, err);
+
+        // Insert documents into collection
+        collection.insert(docs, configuration.writeConcernMax(), function(err, ids) {
+          test.equal(null, err);
+          var done = false;
+
+          collection.find({}).each(function(err, doc) {
+            if(doc) {
+              test.equal(done, false);
+              done = true;
+
+              db.close();
+              test.done();
+              return false;
+            }
+          })
+        });
+      });
+    });
+  }
+}
