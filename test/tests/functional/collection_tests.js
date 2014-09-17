@@ -1513,77 +1513,64 @@ exports['Should return Cursor object constructed from exposed Constructor with o
   });
 }
 
-// /**
-//  * @ignore
-//  */
-// exports['Should not return error if collection exists and createCollection is not strict'] = function(configuration, test) {
-//   console.log("--------------------------------- yo")
-//   // try this code with 1.4.10 and 1.4.11, see difference
-//   // var client = require('mongodb').MongoClient;
-//   // client.connect('mongodb://127.0.0.1:27017/test', function(err, db) {
-//   var db = configuration.newDbInstance({w:1}, {poolSize:1});
-//   db.open(function(err, db) {
-//   // if (err) throw err;
-//   console.log('connection established for db: '+db.databaseName);
-//   try {
-//   console.log("--------------------------------- yo 1")
-//   // single .createCollection call works but process not terminates
-//   db.createCollection('bugs', function(err, collection) {
-//     console.log("---------------------------------------- 0")
-//     if (err) throw err;
-//     console.log('collection opened/created: '+collection.collectionName);
-//   });
-//   console.log("--------------------------------- yo 2")
-//   // two or more .createCollection calls crashes
-//   db.createCollection('features', function(err, collection) {
-//     console.log("---------------------------------------- 1")
-//     if (err) throw err;
-//     console.log('collection opened/created: '+collection.collectionName);
+/**
+ * @ignore
+ */
+exports['Should not return error if collection exists and createCollection is not strict'] = function(configuration, test) {
+  console.log("--------------------------------- yo")
+  // try this code with 1.4.10 and 1.4.11, see difference
+  // var client = require('mongodb').MongoClient;
+  // client.connect('mongodb://127.0.0.1:27017/test', function(err, db) {
+  var db = configuration.newDbInstance({w:1}, {poolSize:1});
+  db.open(function(err, db) {
+    // if (err) throw err;
+    console.log('connection established for db: '+db.databaseName);
+    // single .createCollection call works but process not terminates
+    db.createCollection('bugs', function(err, collection) {
+      if (err) throw err;
+      console.log('collection opened/created: '+collection.collectionName);
+    });
+    // two or more .createCollection calls crashes
+    db.createCollection('features', function(err, collection) {
+      if (err) throw err;
+      console.log('collection opened/created: '+collection.collectionName);
 
-//     db.createCollection('features', function(err, collection) {
-//       console.log("---------------------------------------- 1")
-//       if (err) throw err;
-//       console.log('collection opened/created: '+collection.collectionName);
-//     });
+      db.createCollection('features', function(err, collection) {
+        if (err) throw err;
+        console.log('collection opened/created: '+collection.collectionName);
+      });
+    });
+  })
 
-//   });
-//   console.log("--------------------------------- yo 3")
+  // // Get refernce to Cursor constructor
+  // var Cursor = require('../../../').Cursor;
+  // // Get db instance
+  // var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-// } catch (err) {
-//   console.dir(err)
-// }
+  // // Establish connection to db
+  // db.open(function(err, db) {
+  //   db.createCollection('should_not_exist_as_a_col', function(err, r) {
+  //     console.log("---------------------------------------------------- 0")
+  //     console.dir(err)
+  //     console.dir(r)
+  //     test.equal(null, err);
 
-//   })
-
-//   // // Get refernce to Cursor constructor
-//   // var Cursor = require('../../../').Cursor;
-//   // // Get db instance
-//   // var db = configuration.newDbInstance({w:0}, {poolSize:1});
-
-//   // // Establish connection to db
-//   // db.open(function(err, db) {
-//   //   db.createCollection('should_not_exist_as_a_col', function(err, r) {
-//   //     console.log("---------------------------------------------------- 0")
-//   //     console.dir(err)
-//   //     console.dir(r)
-//   //     test.equal(null, err);
-
-//   //     db.createCollection('should_not_exist_as_a_col', function(err, r) {
-//   //       console.log("---------------------------------------------------- 0")
-//   //       console.dir(err)
-//   //       console.dir(r)
-//   //       db.createCollection('should_not_exist_as_a_col');
-//   //       // test.equal(null, err);
-//   //       db.close();
-//   //       test.done();
-//   //     });
-//   //   });
-//   //   // // Fetch the collection
-//   //   // var collection = db.collection('foo1');
-//   //   // // Find the saved document
-//   //   // var cursor = collection.find();
-//   //   // test.equal(cursor.constructor, Cursor);
-//   //   // test.equal(cursor.constructor.prototype, Cursor.prototype);
-//   //   // test.done();
-//   // });
-// }
+  //     db.createCollection('should_not_exist_as_a_col', function(err, r) {
+  //       console.log("---------------------------------------------------- 0")
+  //       console.dir(err)
+  //       console.dir(r)
+  //       db.createCollection('should_not_exist_as_a_col');
+  //       // test.equal(null, err);
+  //       db.close();
+  //       test.done();
+  //     });
+  //   });
+  //   // // Fetch the collection
+  //   // var collection = db.collection('foo1');
+  //   // // Find the saved document
+  //   // var cursor = collection.find();
+  //   // test.equal(cursor.constructor, Cursor);
+  //   // test.equal(cursor.constructor.prototype, Cursor.prototype);
+  //   // test.done();
+  // });
+}
