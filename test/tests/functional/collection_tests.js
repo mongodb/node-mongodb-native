@@ -1500,8 +1500,6 @@ exports['Should return Cursor object constructed from exposed Constructor with o
   // Get db instance
   var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
-  // DOC_START
   // Establish connection to db
   db.open(function(err, db) {
 
@@ -1513,5 +1511,41 @@ exports['Should return Cursor object constructed from exposed Constructor with o
     test.equal(cursor.constructor.prototype, Cursor.prototype);
     test.done();
   });
-  // DOC_END
+}
+
+/**
+ * @ignore
+ */
+exports['Should not return error if collection exists and createCollection is not strict'] = function(configuration, test) {
+  // Get refernce to Cursor constructor
+  var Cursor = require('../../../').Cursor;
+  // Get db instance
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+
+  // Establish connection to db
+  db.open(function(err, db) {
+    db.createCollection('should_not_exist_as_a_col', function(err, r) {
+      console.log("---------------------------------------------------- 0")
+      console.dir(err)
+      console.dir(r)
+      test.equal(null, err);
+
+      db.createCollection('should_not_exist_as_a_col', function(err, r) {
+        console.log("---------------------------------------------------- 0")
+        console.dir(err)
+        console.dir(r)
+        db.createCollection('should_not_exist_as_a_col');
+        // test.equal(null, err);
+        db.close();
+        test.done();
+      });
+    });
+    // // Fetch the collection
+    // var collection = db.collection('foo1');
+    // // Find the saved document
+    // var cursor = collection.find();
+    // test.equal(cursor.constructor, Cursor);
+    // test.equal(cursor.constructor.prototype, Cursor.prototype);
+    // test.done();
+  });
 }
