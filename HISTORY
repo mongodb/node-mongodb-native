@@ -1,3 +1,8 @@
+1.4.12 2014-09-
+-----------------
+- Added better handling of errors on cursor timeouts when calling getMore
+- 
+
 1.4.11 2014-09-16
 -----------------
 - Hardened result handling in command, insert, update, remove for issue where no result is returned.
