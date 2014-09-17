@@ -309,7 +309,7 @@ exports.shouldStreamDocumentsAcrossGetMoreCommandAndCountCorrectly = function(co
       // Execute find on all the documents
       var stream = cursor.stream(); 
 
-      stream.on('end', function() { 
+      stream.on('end', function() {
         updateCollection.findOne({id:1}, function(err, doc) {
           test.equal(null, err);
           test.equal(2000, doc.count);

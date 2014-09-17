@@ -2017,7 +2017,7 @@ exports.shouldCloseDeadTailableCursors = function(configuration, test) {
 
         stream.on('error', function (err) {
           // shouldn't happen
-          test.equal(null, err);
+          test.ok(err != null);
         });
 
         stream.on('end', function () {
