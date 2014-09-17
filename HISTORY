@@ -1,7 +1,7 @@
 1.4.12 2014-09-
 -----------------
-- Added better handling of errors on cursor timeouts when calling getMore
-- 
+- NODE-270 Added better handling of errors on cursor timeouts when calling getMore
+- NODE-272 Uncaught Exception at connectionPool.on("message")
 
 1.4.11 2014-09-16
 -----------------
