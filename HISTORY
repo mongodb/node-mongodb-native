@@ -1,7 +1,8 @@
-1.4.12 2014-09-
+1.4.12 2014-09-17
 -----------------
 - NODE-270 Added better handling of errors on cursor timeouts when calling getMore
 - NODE-272 Uncaught Exception at connectionPool.on("message")
+- Fixed regression where createIndex sometimes reported index as already existing in non-strict mode due to parallel execution of create commands.
 
 1.4.11 2014-09-16
 -----------------
@@ -31,7 +32,6 @@
 - NODE-248 Crash with X509 auth
 - NODE-252 Uncaught Exception in Base.__executeAllServerSpecificErrorCallbacks
 - Bumped BSON parser to 0.2.12
-
 
 1.4.8 2014-08-01
 ----------------

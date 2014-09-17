@@ -2074,7 +2074,7 @@ exports.shouldNotAwaitDataWhenFalse = function(configuration, test) {
         // should not timeout
         collection.find({}, {tailable:true, awaitdata:false}).each(function(err, result) {
           if(err != null) {
-	    test.equal("Error: Connection was destroyed by application", err);
+	          test.equal("Error: Connection was destroyed by application", err);
           }
         });
 
@@ -2187,10 +2187,6 @@ exports.shouldCorrectlyPerformResumeOnCursorStreamWithNoDuplicates = function(co
         stream.pause();
         stream.resume();
         stream.on("data", function(item) {
-          // console.log(item)
-          // var key = item._id.toHexString();
-          // test.ok(dup_check[key] == null);
-          // dup_check[key] = true;
         });
 
         stream.on("end", function() {
