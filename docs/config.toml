@@ -16,6 +16,11 @@ MetaDataFormat = "yaml"
     weight = -110
     identifier = "about"
 [[menu.main]]
+    name = "legacy docs 1.4.X"
+    pre = "<i class='fa fa-file-text'></i>"
+    url = "http://mongodb.github.io/node-mongodb-native/"
+    weight = -105
+[[menu.main]]
     name = "getting started"
     pre = "<i class='fa fa-road'></i>"
     weight = -100
@@ -24,6 +29,10 @@ MetaDataFormat = "yaml"
     pre = "<i class='fa fa-book'></i>"
     weight = -40
 [[menu.main]]
+    name = "articles"
+    pre = "<i class='fa fa-book'></i>"
+    weight = -30
+[[menu.main]]
     name = "community"
     pre = "<i class='fa fa-group'></i>"
-    weight = -50
+    weight = -60

@@ -4,9 +4,9 @@ aliases:
 date: 2013-07-01
 menu:
   main:
-    parent: getting started
-next: /overview/node_knockout_article2
-prev: /overview/quickstart
+    parent: articles
+next: /articles/node_knockout_article_2
+prev: /articles/node_knockout_article_3
 title: Node Knockout, Basics
 weight: 30
 ---
