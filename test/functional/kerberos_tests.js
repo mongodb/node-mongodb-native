@@ -163,6 +163,7 @@ exports['Should Correctly Authenticate on Win32 using kerberos with MongoClient'
     var server = "ldaptest.10gen.cc";
     var principal = "drivers@LDAPTEST.10GEN.CC";
     var pass = process.env['LDAPTEST_PASSWORD'];
+    if(pass == null) throw new Error("The env parameter LDAPTEST_PASSWORD must be set");
     var urlEncodedPrincipal = encodeURIComponent(principal);
 
     // Let's write the actual connection code
@@ -195,6 +196,7 @@ exports['Should Correctly Authenticate using kerberos on Win32 with MongoClient 
     var server = "ldaptest.10gen.cc";
     var principal = "drivers@LDAPTEST.10GEN.CC";
     var pass = process.env['LDAPTEST_PASSWORD'];
+    if(pass == null) throw new Error("The env parameter LDAPTEST_PASSWORD must be set");
     var urlEncodedPrincipal = encodeURIComponent(principal);
 
     // Let's write the actual connection code
@@ -248,6 +250,7 @@ exports['Should Correctly Authenticate on Win32 authenticate method manually'] =
     var server = "ldaptest.10gen.cc";
     var principal = "drivers@LDAPTEST.10GEN.CC";
     var pass = process.env['LDAPTEST_PASSWORD'];
+    if(pass == null) throw new Error("The env parameter LDAPTEST_PASSWORD must be set");
     var urlEncodedPrincipal = encodeURIComponent(principal);
 
     var db = new Db('test', new Server(server, 27017), {w:1});
@@ -283,6 +286,7 @@ exports['Should Fail to Authenticate due to illegal service name on win32'] = {
     var server = "ldaptest.10gen.cc";
     var principal = "drivers@LDAPTEST.10GEN.CC";
     var pass = process.env['LDAPTEST_PASSWORD'];
+    if(pass == null) throw new Error("The env parameter LDAPTEST_PASSWORD must be set");
     var urlEncodedPrincipal = encodeURIComponent(principal);
 
     // Let's write the actual connection code
