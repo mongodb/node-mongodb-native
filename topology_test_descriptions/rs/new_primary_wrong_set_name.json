@@ -1,0 +1,61 @@
+{
+    "description": "New primary with wrong setName", 
+    "phases": [
+        {
+            "outcome": {
+                "servers": {
+                    "A:27017": {
+                        "setName": "rs", 
+                        "type": "RSPrimary"
+                    }, 
+                    "B:27017": {
+                        "setName": null, 
+                        "type": "Unknown"
+                    }
+                }, 
+                "setName": "rs", 
+                "topologyType": "ReplicaSetWithPrimary"
+            }, 
+            "responses": [
+                [
+                    "A:27017", 
+                    {
+                        "hosts": [
+                            "A", 
+                            "B"
+                        ], 
+                        "ismaster": true, 
+                        "ok": 1, 
+                        "setName": "rs"
+                    }
+                ]
+            ]
+        }, 
+        {
+            "outcome": {
+                "servers": {
+                    "A:27017": {
+                        "setName": "rs", 
+                        "type": "RSPrimary"
+                    }
+                }, 
+                "setName": "rs", 
+                "topologyType": "ReplicaSetWithPrimary"
+            }, 
+            "responses": [
+                [
+                    "B:27017", 
+                    {
+                        "hosts": [
+                            "A"
+                        ], 
+                        "ismaster": true, 
+                        "ok": 1, 
+                        "setName": "wrong"
+                    }
+                ]
+            ]
+        }
+    ], 
+    "uri": "mongodb://A/?replicaSet=rs"
+}

@@ -1,0 +1,31 @@
+{
+    "description": "Direct connection to RSPrimary via external IP", 
+    "phases": [
+        {
+            "outcome": {
+                "servers": {
+                    "A:27017": {
+                        "setName": "rs", 
+                        "type": "RSPrimary"
+                    }
+                }, 
+                "setName": null, 
+                "topologyType": "Single"
+            }, 
+            "responses": [
+                [
+                    "A:27017", 
+                    {
+                        "hosts": [
+                            "B:27017"
+                        ], 
+                        "ismaster": true, 
+                        "ok": 1, 
+                        "setName": "rs"
+                    }
+                ]
+            ]
+        }
+    ], 
+    "uri": "mongodb://A/?connect=direct"
+}
