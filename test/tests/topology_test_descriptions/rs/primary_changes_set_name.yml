@@ -1,0 +1,57 @@
+description: "Primary changes setName"
+
+uri: "mongodb://A/?replicaSet=rs"
+
+phases: [
+
+    # Primary is discovered normally.
+    {
+        responses: [
+
+                ["A:27017", {
+
+                    ok: 1,
+                    ismaster: true,
+                    hosts: ["A"],
+                    setName: "rs"
+                }]
+        ],
+
+        outcome: {
+
+            servers: {
+
+                "A:27017": {
+
+                    type: "RSPrimary",
+                    setName: "rs"
+                }
+            },
+
+            topologyType: "ReplicaSetWithPrimary",
+            setName: "rs"
+        }
+    },
+
+    # Primary changes its setName. Remove it and change the topologyType.
+    {
+        responses: [
+
+                ["A:27017", {
+
+                    ok: 1,
+                    ismaster: true,
+                    hosts: ["A"],
+                    setName: "wrong"
+                }]
+        ],
+
+        outcome: {
+
+            servers: {},
+
+            topologyType: "ReplicaSetNoPrimary",
+            setName: "rs"
+        }
+    }
+]

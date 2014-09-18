@@ -1,0 +1,37 @@
+{
+    "description": "RSOther discovered", 
+    "phases": [
+        {
+            "outcome": {
+                "servers": {
+                    "a:27017": {
+                        "setName": null, 
+                        "type": "Unknown"
+                    }, 
+                    "b:27017": {
+                        "setName": "rs", 
+                        "type": "RSOther"
+                    }
+                }, 
+                "setName": "rs", 
+                "topologyType": "ReplicaSetNoPrimary"
+            }, 
+            "responses": [
+                [
+                    "b:27017", 
+                    {
+                        "hosts": [
+                            "a:27017", 
+                            "b:27017"
+                        ], 
+                        "ismaster": false, 
+                        "ok": 1, 
+                        "secondary": false, 
+                        "setName": "rs"
+                    }
+                ]
+            ]
+        }
+    ], 
+    "uri": "mongodb://a,b/?replicaSet=rs"
+}

@@ -1,0 +1,32 @@
+description: "Connect to standalone"
+
+uri: "mongodb://a/?connect=direct"
+
+phases: [
+
+    {
+        responses: [
+
+                ["a:27017", {
+
+                    ok: 1,
+                    ismaster: true
+                }]
+        ],
+
+        outcome: {
+
+            servers: {
+
+                "a:27017": {
+
+                    type: "Standalone",
+                    setName:
+                }
+            },
+
+            topologyType: "Single",
+            setName:
+        }
+    }
+]

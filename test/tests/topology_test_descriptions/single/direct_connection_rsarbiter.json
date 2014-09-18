@@ -1,0 +1,32 @@
+{
+    "description": "Connect to RSArbiter", 
+    "phases": [
+        {
+            "outcome": {
+                "servers": {
+                    "a:27017": {
+                        "setName": "rs", 
+                        "type": "RSArbiter"
+                    }
+                }, 
+                "setName": null, 
+                "topologyType": "Single"
+            }, 
+            "responses": [
+                [
+                    "a:27017", 
+                    {
+                        "arbiterOnly": true, 
+                        "hosts": [
+                            "a"
+                        ], 
+                        "ismaster": false, 
+                        "ok": 1, 
+                        "setName": "rs"
+                    }
+                ]
+            ]
+        }
+    ], 
+    "uri": "mongodb://a/?connect=direct"
+}
