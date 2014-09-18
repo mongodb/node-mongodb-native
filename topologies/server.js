@@ -642,7 +642,9 @@ var Server = function(options) {
             // Notify end of command
             notifyStrategies('endOperation', [self, error, result, new Date()]);
             if(error) return callback(MongoError.create(error));
-            callback(null, new CommandResult(result.documents[0], connections));
+            // Execute callback, catch and rethrow if needed
+            try { callback(null, new CommandResult(result.documents[0], connections)); }
+            catch(err) { process.nextTick(function() { throw err}); }
           }
         });
       }
@@ -666,7 +668,9 @@ var Server = function(options) {
         || result.documents[0]['errmsg']
         || result.documents[0]['err']
         || result.documents[0]['code']) return callback(MongoError.create(result.documents[0]));
-      callback(null, new CommandResult(result.documents[0], connection));
+        // Execute callback, catch and rethrow if needed
+        try { callback(null, new CommandResult(result.documents[0], connection)); }
+        catch(err) { process.nextTick(function() { throw err}); }
     });
   }
 
