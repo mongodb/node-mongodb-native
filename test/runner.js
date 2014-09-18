@@ -9,12 +9,11 @@ var Runner = require('integra').Runner
   , TravisFilter = require('./filters/travis_filter')
   , FileFilter = require('integra').FileFilter
   , TestNameFilter = require('integra').TestNameFilter
-  , ServerManager = require('./tools/server_manager')
-  , ReplSetManager = require('./tools/replset_manager')
-  , ShardingManager = require('./tools/sharding_manager')
-  , LegacySupport = require('../lib/legacy/legacy_support');
+  , ServerManager = require('../lib/tools/server_manager')
+  , ReplSetManager = require('../lib/tools/replset_manager')
+  , ShardingManager = require('../lib/tools/sharding_manager');
 
-var smokePlugin = require('./tools/smoke_plugin.js');
+var smokePlugin = require('../lib/tools/smoke_plugin.js');
 var argv = require('optimist')
     .usage('Usage: $0 -t [target] -e [environment] -n [name] -f [filename] -r [smoke report file]')
     .demand(['t'])
@@ -42,7 +41,6 @@ var Configuration = function(options) {
     return new _mongo.Server({
         host: self.host
       , port: self.port
-      , fallback: new LegacySupport()
     });
   }
 
@@ -52,29 +50,29 @@ var Configuration = function(options) {
     return {    
       start: function(callback) {
         var self = this;
-        // if(skipStart) return callback();
-        // // Start the db
-        // manager.start({purge:true, signal: -9}, function(err) {
-        //   var server = topology(this, mongo);
-        //   // Set up connect
-        //   server.once('connect', function() {
-        //     // Drop the database
-        //     server.command(f("%s.$cmd", self.db), {dropDatabase: 1}, function(err, r) {
-        //       server.destroy();
+        if(skipStart) return callback();
+        // Start the db
+        manager.start({purge:true, signal: -9}, function(err) {
+          var server = topology(this, mongo);
+          // Set up connect
+          server.once('connect', function() {
+            // Drop the database
+            server.command(f("%s.$cmd", self.db), {dropDatabase: 1}, function(err, r) {
+              server.destroy();
               callback();
-        //     });
-        //   });
+            });
+          });
           
-        //   // Connect
-        //   server.connect();
-        // });
+          // Connect
+          server.connect();
+        });
       },
 
       stop: function(callback) {
-        // if(skipTermination) return callback();
-        // manager.stop({signal: -15}, function() {
+        if(skipTermination) return callback();
+        manager.stop({signal: -15}, function() {
           callback();
-        // });        
+        });        
       },
 
       restart: function(callback) {
@@ -145,7 +143,6 @@ var testFiles =[
   , '/test/tests/functional/extend_pick_strategy_tests.js'
   , '/test/tests/functional/mongos_tests.js'
   , '/test/tests/functional/extend_cursor_tests.js'
-  , '/test/tests/functional/legacy_support_tests.js'
   , '/test/tests/functional/pool_tests.js'
   , '/test/tests/functional/connection_tests.js'
 ]
@@ -281,12 +278,3 @@ if(argv.t == 'functional') {
   // Run the configuration
   runner.run(Configuration(config));
 }
-
-
-// // Run the tests
-// runner.run(Configuration(config));
-
-
-
-
-
