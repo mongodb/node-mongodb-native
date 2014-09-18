@@ -8,7 +8,7 @@ menu:
     parent: community
 next: /tutorials/github_pages_blog
 prev: /community/press
-title: Contributing to Hugo
+title: Contributing
 weight: 30
 ---
 

@@ -45,15 +45,15 @@ MongoClient.connect(url, function(err, db) {
 });
 ```
 
-The first insert inserts a single document into the *inserts* collection. Notice that we are not explicitly creating a new *inserts* collection as the server will create it implicitly when we insert the first document. The method **Db.createIndex** only really needs to be used when creating non standard collections such as capped collections or where other parameters than the default collections need to be applied.
+The first insert inserts a single document into the *inserts* collection. Notice that we are not explicitly creating a new *inserts* collection as the server will create it implicitly when we insert the first document. The method `Db.createIndex` only really needs to be used when creating non standard collections such as capped collections or where other parameters than the default collections need to be applied.
 
 The insert method also accepts an second argument that can be an options object. This object can have the following fields.
 
-*  **w**, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
-*  **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
-*  **journal**, (Boolean, default:false) write waits for journal sync.
-*  **serializeFunctions**, (Boolean, default:false) serialize functions on an object to mongodb, by default the driver does not serialize any functions on the passed in documents.
-*  **forceServerObjectId**, (Boolean, default:false) Force server to assign _id values instead of driver.
+*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
+*  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
+*  `journal`, (Boolean, default:false) write waits for journal sync.
+*  `serializeFunctions`, (Boolean, default:false) serialize functions on an object to mongodb, by default the driver does not serialize any functions on the passed in documents.
+*  `forceServerObjectId`, (Boolean, default:false) Force server to assign _id values instead of driver.
 
 Let's look at a simple example where we are writing to a replicaset and we wish to ensure that we serialize a passed in function as well as have the server assign the *_id* for each document.
 
@@ -137,11 +137,11 @@ MongoClient.connect(url, function(err, db) {
 
 The *update* method also accepts an second argument that can be an options object. This object can have the following fields.
 
-*  **w**, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
-*  **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
-*  **journal**, (Boolean, default:false) write waits for journal sync.
-*  **multi**, (Boolean, default:false) Update one/all documents with operation.
-*  **upsert**, (Boolean, default:false) Update operation is an upsert.
+*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
+*  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
+*  `journal`, (Boolean, default:false) write waits for journal sync.
+*  `multi`, (Boolean, default:false) Update one/all documents with operation.
+*  `upsert`, (Boolean, default:false) Update operation is an upsert.
 
 Just as for *insert* the *update* method allows you to specify a per operation write concern using the *w*, *wtimeout* and *fsync* parameters
 
@@ -187,10 +187,10 @@ MongoClient.connect(url, function(err, db) {
 
 The *remove* method also accepts an second argument that can be an options object. This object can have the following fields.
 
-*  **w**, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
-*  **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
-*  **journal**, (Boolean, default:false) write waits for journal sync.
-*  **single**, (Boolean, default:false) Removes the first document found.
+*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
+*  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
+*  `journal`, (Boolean, default:false) write waits for journal sync.
+*  `single`, (Boolean, default:false) Removes the first document found.
 
 Just as for *update* and *insert* the *remove* method allows you to specify a per operation write concern using the *w*, *wtimeout* and *fsync* parameters
 
@@ -237,12 +237,12 @@ MongoClient.connect(url, function(err, db) {
 
 The *findAndModify* method also accepts an second argument that can be an options object. This object can have the following fields.
 
-*  **w**, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
-*  **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
-*  **journal**, (Boolean, default:false) write waits for journal sync.
-*  **remove**, (Boolean, default:false) Set to true to remove the object before returning.
-*  **upsert**, (Boolean, default:false) Perform an upsert operation.
-*  **new**, (Boolean, default:false) Set to true if you want to return the modified object rather than the original. Ignored for remove.
+*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
+*  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
+*  `journal`, (Boolean, default:false) write waits for journal sync.
+*  `remove`, (Boolean, default:false) Set to true to remove the object before returning.
+*  `upsert`, (Boolean, default:false) Perform an upsert operation.
+*  `new`, (Boolean, default:false) Set to true if you want to return the modified object rather than the original. Ignored for remove.
 
 The *findAndRemove* function is a simplified version of the *findAndRemove* function, especially defined to help remove a document. Let's look at an example of usage.
 
@@ -276,9 +276,9 @@ MongoClient.connect(url, function(err, db) {
 
 Just as for *findAndModify* it allows for an object of options to be passed in that can have the following fields.
 
-*  **w**, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
-*  **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
-*  **journal**, (Boolean, default:false) write waits for journal sync.
+*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
+*  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
+*  `journal`, (Boolean, default:false) write waits for journal sync.
 
 This covers the basic write operations. Let's have a look at the Bulk write operations next.
 
