@@ -130,6 +130,260 @@ exports.aggregationExample2 = {
 }
 
 /**
+ * Correctly call the aggregation using a cursor and toArray
+ *
+ * @example-class AggregationCursor
+ * @example-method toArray
+ * @ignore
+ */
+exports['Aggregation Cursor toArray Test'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl'] } },  
+  
+  // The actual test we wish to run
+  test: function(configure, test) {
+    var db = configure.newDbInstance({w:1}, {poolSize:1});
+
+    db.open(function(err, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
+      // Some docs for insertion
+      var docs = [{
+          title : "this is my title", author : "bob", posted : new Date() ,
+          pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+          comments : [
+            { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+          ]}];
+
+      // Create a collection
+      var collection = db.collection('aggregation_toArray_example');
+      // Insert the docs
+      collection.insert(docs, {w: 1}, function(err, result) {
+
+        // Execute aggregate, notice the pipeline is expressed as an Array
+        var cursor = collection.aggregate([
+            { $project : {
+              author : 1,
+              tags : 1
+            }},
+            { $unwind : "$tags" },
+            { $group : {
+              _id : {tags : "$tags"},
+              authors : { $addToSet : "$author" }
+            }}
+          ], { cursor: { batchSize: 1 } });
+
+        // Get all the aggregation results
+        cursor.toArray(function(err, docs) {
+          test.equal(null, err);
+          test.equal(2, docs.length);
+          test.done();
+          db.close();
+        });
+      });
+    });
+    // END
+  }
+}
+
+/**
+ * Correctly call the aggregation using a cursor and next
+ *
+ * @example-class AggregationCursor
+ * @example-method next
+ * @ignore
+ */
+exports['Aggregation Cursor toArray Test'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl'] } },  
+  
+  // The actual test we wish to run
+  test: function(configure, test) {
+    var db = configure.newDbInstance({w:1}, {poolSize:1});
+
+    db.open(function(err, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
+      // Some docs for insertion
+      var docs = [{
+          title : "this is my title", author : "bob", posted : new Date() ,
+          pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+          comments : [
+            { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+          ]}];
+
+      // Create a collection
+      var collection = db.collection('aggregation_next_example');
+      // Insert the docs
+      collection.insert(docs, {w: 1}, function(err, result) {
+
+        // Execute aggregate, notice the pipeline is expressed as an Array
+        var cursor = collection.aggregate([
+            { $project : {
+              author : 1,
+              tags : 1
+            }},
+            { $unwind : "$tags" },
+            { $group : {
+              _id : {tags : "$tags"},
+              authors : { $addToSet : "$author" }
+            }}
+          ], { cursor: { batchSize: 1 } });
+
+        // Get all the aggregation results
+        cursor.next(function(err, docs) {
+          test.equal(null, err);
+          test.done();
+          db.close();
+        });
+      });
+    });
+    // END
+  }
+}
+
+/**
+ * Correctly call the aggregation using a cursor and each
+ *
+ * @example-class AggregationCursor
+ * @example-method each
+ * @ignore
+ */
+exports['Aggregation Cursor each Test'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl'] } },  
+  
+  // The actual test we wish to run
+  test: function(configure, test) {
+    var db = configure.newDbInstance({w:1}, {poolSize:1});
+
+    db.open(function(err, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
+      // Some docs for insertion
+      var docs = [{
+          title : "this is my title", author : "bob", posted : new Date() ,
+          pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+          comments : [
+            { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+          ]}];
+
+      // Create a collection
+      var collection = db.collection('aggregation_each_example');
+      // Insert the docs
+      collection.insert(docs, {w: 1}, function(err, result) {
+
+        // Execute aggregate, notice the pipeline is expressed as an Array
+        var cursor = collection.aggregate([
+            { $project : {
+              author : 1,
+              tags : 1
+            }},
+            { $unwind : "$tags" },
+            { $group : {
+              _id : {tags : "$tags"},
+              authors : { $addToSet : "$author" }
+            }}
+          ], { cursor: { batchSize: 1 } });
+
+        // Get all the aggregation results
+        cursor.each(function(err, docs) {          
+          test.equal(null, err);
+
+          if(docs == null) {
+            test.done();
+            db.close();
+          }
+        });
+      });
+    });
+    // END
+  }
+}
+
+/**
+ * Correctly call the aggregation using a cursor and forEach
+ *
+ * @example-class AggregationCursor
+ * @example-method forEach
+ * @ignore
+ */
+exports['Aggregation Cursor forEach Test'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl'] } },  
+  
+  // The actual test we wish to run
+  test: function(configure, test) {
+    var db = configure.newDbInstance({w:1}, {poolSize:1});
+
+    db.open(function(err, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
+      // Some docs for insertion
+      var docs = [{
+          title : "this is my title", author : "bob", posted : new Date() ,
+          pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+          comments : [
+            { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+          ]}];
+
+      // Create a collection
+      var collection = db.collection('aggregation_forEach_example');
+      // Insert the docs
+      collection.insert(docs, {w: 1}, function(err, result) {
+
+        // Execute aggregate, notice the pipeline is expressed as an Array
+        var cursor = collection.aggregate([
+            { $project : {
+              author : 1,
+              tags : 1
+            }},
+            { $unwind : "$tags" },
+            { $group : {
+              _id : {tags : "$tags"},
+              authors : { $addToSet : "$author" }
+            }}
+          ], { cursor: { batchSize: 1 } });
+
+        var count = 0;
+        // Get all the aggregation results
+        cursor.forEach(function(doc) {
+          test.ok(doc != null);
+          count = count + 1;
+        }, function(err) {
+          test.equal(null, err);
+          test.equal(2, count);
+
+          test.done();
+          db.close();
+        });
+      });
+    });
+    // END
+  }
+}
+
+/**
  * Correctly call the aggregation using a read stream
  *
  * @example-class Collection
@@ -4694,6 +4948,56 @@ exports.shouldCorrectlyFailToArrayDueToFinishedEachOperation = {
               test.done();
             });
           };
+        });
+      });
+    });
+    // END
+  }
+}
+
+/**
+ * A simple example iterating over a query using the forEach function of the cursor.
+ *
+ * @example-class Cursor
+ * @example-method forEach
+ * @ignore
+ */
+exports['Should correctly iterate over cursor using forEach'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+
+    db.open(function(err, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
+    // REMOVE-LINE test.done();
+    // BEGIN
+
+      // Create a collection
+      var collection = db.collection('test_to_a_after_for_each');
+
+      // Insert a document in the collection
+      collection.insert({'a':1}, configuration.writeConcernMax(), function(err, ids) {
+        // Count of documents returned
+        var count = 0;
+        // Grab a cursor
+        var cursor = collection.find();
+        // Execute the each command, triggers for each document
+        cursor.forEach(function(doc) {
+          test.ok(doc != null);
+          count = count + 1;
+        }, function(err) {
+          test.equal(null, err);
+          test.equal(1, count);
+          db.close();
+          test.done();
         });
       });
     });
