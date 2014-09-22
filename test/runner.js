@@ -219,6 +219,9 @@ var testFiles =[
   , '/test/functional/bulk_tests.js'
   , '/test/functional/operation_example_tests.js'
 
+  // Logging tests
+  , '/test/functional/logger_tests.js'
+
   // Replicaset tests
   , '/test/functional/replset_failover_tests.js'
   , '/test/functional/replset_connection_tests.js'
