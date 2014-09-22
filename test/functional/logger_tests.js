@@ -15,7 +15,7 @@ exports['Should correctly Enable logging'] = {
 
       // Logging setup
       Logger.setLevel('debug');
-      Logger.filterOn('class', ['Db']);
+      Logger.filter('class', ['Db']);
 
       // Status
       var logged = false;

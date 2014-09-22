@@ -5,7 +5,7 @@ date: 2013-07-01
 menu:
   main:
     parent: tutorials
-next: /tutorials/connecting
+next: /tutorials/logging
 prev: /tutorials/streams
 title: GridFS
 weight: 7
