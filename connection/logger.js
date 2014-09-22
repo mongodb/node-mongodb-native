@@ -1,4 +1,5 @@
-var f = require('util').format;
+var f = require('util').format
+  , MongoError = require('../error');
 
 // Filters for classes
 var classFilters = {};
@@ -12,6 +13,9 @@ var currentLogger = null;
 // Actual logger class
 var Logger = function(className, options) {
   options = options || {};
+
+  // Current reference
+  var self = this;
 
   // Current logger
   if(currentLogger == null && options.logger) {
@@ -31,30 +35,39 @@ var Logger = function(className, options) {
   // Return the object with methods
   return {
     debug: function(message, object) {
-      if(this.isDebug() && (classFilters[className] && Object.keys(filteredClasses).length > 0)) return;
-      var dateTime = new Date().getTime();
-      var msg = f("[%s-%s:%s] %s %s", 'DEBUG', className, pid, dateTime, message);
-      currentLogger(msg, {
+      if(this.isDebug() 
+        && classFilters[className] && (filteredClasses[className] || Object.keys(filteredClasses).length == 0)) {
+        var dateTime = new Date().getTime();
+        var msg = f("[%s-%s:%s] %s %s", 'DEBUG', className, pid, dateTime, message);        
+        var state = {
           type: 'debug', message: message, className: className, pid: pid, date: dateTime
-      });
+        };
+        currentLogger(msg, state);
+      }
     },
 
     info: function(message, object) {
-      if(this.isInfo() && (classFilters[className] && Object.keys(filteredClasses).length > 0)) return;
-      var dateTime = new Date().getTime();
-      var msg = f("[%s-%s:%s] %s %s", 'INFO', className, pid, dateTime, message);
-      currentLogger(msg, {
+      if(this.isInfo()
+        && classFilters[className] && (filteredClasses[className] || Object.keys(filteredClasses).length == 0)) {
+        var dateTime = new Date().getTime();
+        var msg = f("[%s-%s:%s] %s %s", 'INFO', className, pid, dateTime, message);
+        var state = {
           type: 'info', message: message, className: className, pid: pid, date: dateTime
-      });
+        };
+        currentLogger(msg, state);
+      }
     },
 
     error: function(message, object) {
-      if(this.isError()  && (classFilters[className] && Object.keys(filteredClasses).length > 0)) return;
-      var dateTime = new Date().getTime();
-      var msg = f("[%s-%s:%s] %s %s", 'ERROR', className, pid, dateTime, message);
-      currentLogger(msg, {
+      if(this.isError() 
+        && classFilters[className] && (filteredClasses[className] || Object.keys(filteredClasses).length == 0)) {
+        var dateTime = new Date().getTime();
+        var msg = f("[%s-%s:%s] %s %s", 'ERROR', className, pid, dateTime, message);
+        var state = {
           type: 'error', message: message, className: className, pid: pid, date: dateTime
-      });
+        };
+        currentLogger(msg, state);
+      }
     },
 
     isInfo: function() {
@@ -71,15 +84,21 @@ var Logger = function(className, options) {
   }
 }
 
+Logger.reset = function() {
+  level = 'error';
+  filteredClasses = {};
+}
+
 Logger.currentLogger = function() {
   return currentLogger;
 }
 
 Logger.setCurrentLogger = function(logger) {
+  if(typeof logger != 'function') throw new MongoError("current logger must be a function");
   currentLogger = logger;
 }
 
-Logger.filter = function(type, values) {
+Logger.filterOn = function(type, values) {
   if(type == 'class' && Array.isArray(values)) {
     filteredClasses = {};
 
