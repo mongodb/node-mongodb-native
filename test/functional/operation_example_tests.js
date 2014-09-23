@@ -2526,11 +2526,11 @@ exports.shouldCorrectlyRenameCollection = {
 
               // Attemp to rename the first collection to a name that does not exist
               // this will be succesful
-              collection1.rename('test_rename_collection3', function(err, collection) {
-                test.equal("test_rename_collection3", collection.collectionName);
+              collection1.rename('test_rename_collection3', function(err, collection2) {
+                test.equal("test_rename_collection3", collection2.collectionName);
 
                 // Ensure that the collection is pointing to the new one
-                collection1.count(function(err, count) {
+                collection2.count(function(err, count) {
                   test.equal(2, count);
                   db.close();
                   test.done();
