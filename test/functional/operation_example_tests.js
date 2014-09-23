@@ -769,7 +769,7 @@ exports.shouldCorrectlyDropCollectionWithDropFunction = {
       collection.drop(function(err, reply) {
 
         // Ensure we don't have the collection in the set of names
-        db.collectionNames(function(err, replies) {
+        db.listCollections(function(err, replies) {
 
           var found = false;
           // For each collection in the list of collection names in this db look for the
@@ -3185,58 +3185,13 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallback =
 }
 
 /**
- * An example of retrieving the information of all the collections.
+ * An example of retrieving the collections list for a database.
  *
  * @example-class Db
- * @example-method collectionsInfo
+ * @example-method listCollections
  * @ignore
  */
-exports.shouldCorrectlyRetrieveCollectionInformation = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open(function(err, db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-      test.equal(null, err);
-
-      // Create a collection
-      db.createCollection('test_collections_info', function(err, collection) {
-        test.equal(null, err);
-
-        // Return the information of a single collection name
-        db.collectionsInfo("test_collections_info").toArray(function(err, items) {
-          test.equal(1, items.length);
-
-          // Return the information of a all collections, using the callback format
-          db.collectionsInfo().toArray(function(err, items) {
-            test.ok(items.length > 0);
-
-            db.close();
-            test.done();
-          });
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
- * An example of retrieving the collection names for a database.
- *
- * @example-class Db
- * @example-method collectionNames
- * @ignore
- */
-exports.shouldCorrectlyRetrieveCollectionNames = {
+exports.shouldCorrectlyRetrievelistCollections = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
@@ -3255,15 +3210,64 @@ exports.shouldCorrectlyRetrieveCollectionNames = {
       // Create a collection
       var collection = db.collection('test_collections_info');
       // Return the information of a single collection name
-      db.collectionNames("test_collections_info", function(err, items) {
+      db.listCollections("test_collections_info", function(err, items) {
         test.equal(1, items.length);
 
         // Return the information of a all collections, using the callback format
-        db.collectionNames(function(err, items) {
+        db.listCollections(function(err, items) {
           test.ok(items.length > 0);
 
           db.close();
           test.done();
+        });
+      });
+    });
+    // END
+  }
+}
+
+/**
+ * An example of retrieving the collection names for a database using a filter
+ *
+ * @example-class Db
+ * @example-method listCollections
+ * @ignore
+ */
+exports.shouldCorrectlyRetrievelistCollections = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+
+    db.open(function(err, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
+      test.equal(null, err);
+
+      // Create a collection
+      var collection = db.collection('test_collections_info2');
+      collection.insert({a:1}, function(err, r) {
+        test.equal(null, err);
+
+        // Return the information of a single collection name
+        db.listCollections({
+          filter: {
+            name: /test_collections_info2/
+          }}, function(err, items) {
+          test.equal(1, items.length);
+
+          // Return the information of a all collections, using the callback format
+          db.listCollections(function(err, items) {
+            test.ok(items.length > 0);
+
+            db.close();
+            test.done();
+          });
         });
       });
     });
@@ -3630,7 +3634,7 @@ exports.shouldCorrectlyExecuteACommandAgainstTheServer = {
               test.equal(null, err);
 
               // Verify that the collection is gone
-              db.collectionNames("a_simple_create_drop_collection", function(err, names) {
+              db.listCollections("a_simple_create_drop_collection", function(err, names) {
                 test.equal(0, names.length);
 
                 db.close();
@@ -3724,11 +3728,11 @@ exports.shouldCorrectlyRenameACollection = {
                 test.equal(1, count);
 
                 // Verify that the collection is gone
-                db.collectionNames("simple_rename_collection", function(err, names) {
+                db.listCollections("simple_rename_collection", function(err, names) {
                   test.equal(0, names.length);
 
                   // Verify that the new collection exists
-                  db.collectionNames("simple_rename_collection_2", function(err, names) {
+                  db.listCollections("simple_rename_collection_2", function(err, names) {
                     test.equal(1, names.length);
 
                     db.close();

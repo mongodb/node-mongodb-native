@@ -12,7 +12,7 @@ exports.shouldCorrectExecuteBasicCollectionMethods = {
         // Verify that all the result are correct coming back (should contain the value ok)
         test.equal('test_collection_methods', collection.collectionName);
         // Let's check that the collection was created correctly
-        db.collectionNames(function(err, documents) {
+        db.listCollections(function(err, documents) {
           var found = false;
           documents.forEach(function(document) {
             if(document.name == "integration_tests_.test_collection_methods") found = true;
@@ -20,7 +20,7 @@ exports.shouldCorrectExecuteBasicCollectionMethods = {
           test.ok(true, found);
 
           // Let's check that the collection was created correctly
-          db.collectionNames({namesOnly:true}, function(err, names) {
+          db.listCollections({namesOnly:true}, function(err, names) {
             test.ok(typeof names[0] == 'string');
 
             // Rename the collection and check that it's gone
@@ -108,7 +108,7 @@ exports.shouldAccessToCollections = {
 /**
  * @ignore
  */
-exports.shouldCorrectlyRetriveCollectionNames = {
+exports.shouldCorrectlyRetrivelistCollections = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run
@@ -117,7 +117,7 @@ exports.shouldCorrectlyRetriveCollectionNames = {
       db.createCollection('test_collection_names', function(err, r) {
         test.equal(null, err);
 
-        db.collectionNames(function(err, documents) {
+        db.listCollections(function(err, documents) {
           var found = false;
           var found2 = false;
     
@@ -132,7 +132,7 @@ exports.shouldCorrectlyRetriveCollectionNames = {
           collection.insert({a:1}, configuration.writeConcernMax(), function(err, r) {
             test.equal(null, err);
 
-            db.collectionNames(function(err, documents) {
+            db.listCollections(function(err, documents) {
               documents.forEach(function(document) {
                 if(document.name == configuration.database + '.test_collection_names2' 
                   || document.name == 'test_collection_names2') found = true;
@@ -148,39 +148,6 @@ exports.shouldCorrectlyRetriveCollectionNames = {
               test.done();
             });
           })
-        });
-      });
-    });
-  }
-}
-
-/**
- * @ignore
- */
-exports.shouldCorrectlyRetrieveCollectionInfo = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var Cursor = configuration.require.Cursor;
-
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
-      db.createCollection('test_collections_info', function(err, r) {
-        var cursor = db.collectionsInfo();
-        // Fetch all the collection info
-        cursor.toArray(function(err, documents) {
-          test.ok(documents.length > 1);
-
-          var found = false;
-          documents.forEach(function(document) {
-            if(document.name == configuration.database + '.test_collections_info') found = true;
-          });
-          
-          test.ok(found);
-          // Let's close the db
-          db.close();
-          test.done();
         });
       });
     });
@@ -316,7 +283,7 @@ exports.shouldFailToInsertDueToIllegalKeys = {
 /**
  * @ignore
  */
-exports.shouldFailDueToIllegalCollectionNames = {
+exports.shouldFailDueToIllegallistCollections = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
   
   // The actual test we wish to run

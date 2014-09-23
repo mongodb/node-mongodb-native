@@ -18,6 +18,9 @@
 - Removed db.dereference method
 - Removed db.cursorInfo method
 - Removed db.stats method
+- Removed db.collectionNames not needed anymore as it's just a specialized case of listCollections
+- Removed db.collectionInfo removed due to not being compatible with new storage engines in 2.8 as they need to use the listCollections command due to system collections not working for namespaces.
+- Added db.listCollections to replace several methods above
 
 1.4.10 2014-09-04
 -----------------
