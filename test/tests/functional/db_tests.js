@@ -569,6 +569,7 @@ exports.shouldCorrectlyAccessACollection = function(configuration, test) {
 
     // Grab a collection with a callback but no safe operation
     db.collection('test_correctly_access_collections', function(err, col2) {
+      console.dir(err)
       test.equal(null, err);
 
       // Grab a collection with a callback in safe mode, ensuring it exists (should fail as it's not created)
@@ -577,6 +578,7 @@ exports.shouldCorrectlyAccessACollection = function(configuration, test) {
 
         // Create the collection
         db.createCollection('test_correctly_access_collections', function(err, result) {
+          test.equal(null, err);
 
           // Retry to get the collection, should work as it's now created
           db.collection('test_correctly_access_collections', {strict:true}, function(err, col3) {
