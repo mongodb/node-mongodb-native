@@ -450,12 +450,12 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
   query.slaveOk = readPreference.slaveOk();
 
   // Set up the option bits for wire protocol
-  if(options.tailable) { query.tailable = options.tailable; }
-  if(options.oplogReply)query.oplogReply = options.oplogReply;
-  if(options.noCursorTimeout) query.noCursorTimeout = options.noCursorTimeout;
-  if(options.awaitData) query.awaitData = options.awaitData;
-  if(options.exhaust) query.exhaust = options.exhaust;
-  if(options.partial) query.partial = options.partial;
+  if(typeof cmd.tailable == 'boolean') query.tailable = options.tailable;
+  if(typeof cmd.oplogReply == 'boolean') query.oplogReply = options.oplogReply;
+  if(typeof cmd.noCursorTimeout == 'boolean') query.noCursorTimeout = options.noCursorTimeout;
+  if(typeof cmd.awaitData == 'boolean') query.awaitData = options.awaitData;
+  if(typeof cmd.exhaust == 'boolean') query.exhaust = options.exhaust;
+  if(typeof cmd.partial == 'boolean') query.partial = options.partial;
   // Return the query
   return query;
 }  

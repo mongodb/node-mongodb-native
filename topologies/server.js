@@ -902,10 +902,7 @@ var Server = function(options) {
   //   , showDiskLoc: <boolean>
   //   , comment: <string>
   //   , maxTimeMS: <n>
-  // }  
-  // // Options
-  // {
-  //     raw: <boolean>
+  //   , raw: <boolean>
   //   , readPreference: <ReadPreference>
   //   , tailable: <boolean>
   //   , oplogReply: <boolean>
@@ -922,11 +919,6 @@ var Server = function(options) {
    * @param {{object}|{Long}} cmd Can be either a command returning a cursor or a cursorId
    * @param {object} [options.batchSize=0] Batchsize for the operation
    * @param {array} [options.documents=[]] Initial documents list for cursor
-   * @param {boolean} [options.tailable=false] Tailable flag set
-   * @param {boolean} [options.oplogReply=false] oplogReply flag set
-   * @param {boolean} [options.awaitdata=false] awaitdata flag set
-   * @param {boolean} [options.exhaust=false] exhaust flag set
-   * @param {boolean} [options.partial=false] partial flag set
    * @param {opResultCallback} callback A callback function
    */
   this.cursor = function(ns, cmd, cursorOptions) {

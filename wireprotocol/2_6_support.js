@@ -236,12 +236,12 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
   query.slaveOk = readPreference.slaveOk();
 
   // Options
-  if(options.tailable) query.tailable = options.tailable;
-  if(options.oplogReply)query.oplogReply = options.oplogReply;
-  if(options.noCursorTimeout) query.noCursorTimeout = options.noCursorTimeout;
-  if(options.awaitdata) query.awaitdata = options.awaitdata;
-  if(options.exhaust) query.exhaust = options.exhaust;
-  if(options.partial) query.partial = options.partial;
+  if(typeof options.tailable == 'boolean') query.tailable = options.tailable;
+  if(typeof options.oplogReply == 'boolean') query.oplogReply = options.oplogReply;
+  if(typeof options.noCursorTimeout == 'boolean') query.noCursorTimeout = options.noCursorTimeout;
+  if(typeof options.awaitdata == 'boolean') query.awaitdata = options.awaitdata;
+  if(typeof options.exhaust == 'boolean') query.exhaust = options.exhaust;
+  if(typeof options.partial == 'boolean') query.partial = options.partial;
   // Return the query
   return query;
 }
