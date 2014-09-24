@@ -4,7 +4,7 @@
         {
             "outcome": {
                 "servers": {
-                    "A:27017": {
+                    "a:27017": {
                         "setName": "rs", 
                         "type": "RSPrimary"
                     }
@@ -14,10 +14,10 @@
             }, 
             "responses": [
                 [
-                    "A:27017", 
+                    "a:27017", 
                     {
                         "hosts": [
-                            "B:27017"
+                            "b:27017"
                         ], 
                         "ismaster": true, 
                         "ok": 1, 
@@ -27,5 +27,5 @@
             ]
         }
     ], 
-    "uri": "mongodb://A/?connect=direct"
+    "uri": "mongodb://a/?connect=direct"
 }

@@ -145,6 +145,9 @@ var testFiles =[
   , '/test/tests/functional/extend_cursor_tests.js'
   , '/test/tests/functional/pool_tests.js'
   , '/test/tests/functional/connection_tests.js'
+  , '/test/tests/functional/single_topology_tests.js'
+  , '/test/tests/functional/rs_topology_tests.js'
+  , '/test/tests/functional/rs_topology_state_tests.js'
 ]
 
 // Add all the tests to run
@@ -211,8 +214,10 @@ if(argv.t == 'functional') {
   var config = {
       host: 'localhost'
     , port: 27017
-    , skipStart: false
-    , skipTermination: false
+    // , skipStart: false
+    // , skipTermination: false
+    , skipStart: true
+    , skipTermination: true
     , manager: new ServerManager({
         dbpath: path.join(path.resolve('db'), f("data-%d", 27017))
       , logpath: path.join(path.resolve('db'), f("data-%d.log", 27017))
@@ -238,6 +243,8 @@ if(argv.t == 'functional') {
           dbpath: path.join(path.resolve('db'))
         , logpath: path.join(path.resolve('db'))
         , tags: [{loc: "ny"}, {loc: "sf"}, {loc: "sf"}]
+        , arbiters: 1
+        , passives: 1
       })
     }
   } else if(argv.e == 'sharded') {

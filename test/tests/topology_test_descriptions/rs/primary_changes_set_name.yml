@@ -1,6 +1,6 @@
 description: "Primary changes setName"
 
-uri: "mongodb://A/?replicaSet=rs"
+uri: "mongodb://a/?replicaSet=rs"
 
 phases: [
 
@@ -8,11 +8,11 @@ phases: [
     {
         responses: [
 
-                ["A:27017", {
+                ["a:27017", {
 
                     ok: 1,
                     ismaster: true,
-                    hosts: ["A"],
+                    hosts: ["a"],
                     setName: "rs"
                 }]
         ],
@@ -21,7 +21,7 @@ phases: [
 
             servers: {
 
-                "A:27017": {
+                "a:27017": {
 
                     type: "RSPrimary",
                     setName: "rs"
@@ -37,11 +37,11 @@ phases: [
     {
         responses: [
 
-                ["A:27017", {
+                ["a:27017", {
 
                     ok: 1,
                     ismaster: true,
-                    hosts: ["A"],
+                    hosts: ["a"],
                     setName: "wrong"
                 }]
         ],

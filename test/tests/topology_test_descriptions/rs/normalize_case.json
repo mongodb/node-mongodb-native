@@ -3,7 +3,6 @@
     "phases": [
         {
             "outcome": {
-                "clusterType": "ReplicaSetWithPrimary", 
                 "servers": {
                     "a:27017": {
                         "setName": "rs", 
@@ -18,7 +17,8 @@
                         "type": "Unknown"
                     }
                 }, 
-                "setName": "rs"
+                "setName": "rs", 
+                "topologyType": "ReplicaSetWithPrimary"
             }, 
             "responses": [
                 [
