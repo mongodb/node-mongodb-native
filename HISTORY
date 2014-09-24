@@ -1,3 +1,7 @@
+1.4.15 2015-09-24
+-----------------
+- Fix issues with collection.options
+
 1.4.14 2015-09-24
 -----------------
 - Args leak to global namespace fix.
