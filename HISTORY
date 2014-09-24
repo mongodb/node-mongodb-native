@@ -1,3 +1,9 @@
+1.4.13 2015-09-24
+-----------------
+- NODE-283 Collection rename now always returns a new Collection object
+- Added listCollections helper to Db.prototype
+- Scram default authentication mechanism on 2.8 or higher if none is specified
+
 1.4.12 2014-09-17
 -----------------
 - NODE-270 Added better handling of errors on cursor timeouts when calling getMore
