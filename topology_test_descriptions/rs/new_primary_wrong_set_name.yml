@@ -1,6 +1,6 @@
 description: "New primary with wrong setName"
 
-uri: "mongodb://A/?replicaSet=rs"
+uri: "mongodb://a/?replicaSet=rs"
 
 phases: [
 
@@ -8,11 +8,11 @@ phases: [
     {
         responses: [
 
-                ["A:27017", {
+                ["a:27017", {
 
                     ok: 1,
                     ismaster: true,
-                    hosts: ["A", "B"],
+                    hosts: ["a", "b"],
                     setName: "rs"
                 }]
         ],
@@ -21,13 +21,13 @@ phases: [
 
             servers: {
 
-                "A:27017": {
+                "a:27017": {
 
                     type: "RSPrimary",
                     setName: "rs"
                 },
 
-                "B:27017": {
+                "b:27017": {
 
                     type: "Unknown",
                     setName:
@@ -44,11 +44,11 @@ phases: [
     {
         responses: [
 
-                ["B:27017", {
+                ["b:27017", {
 
                     ok: 1,
                     ismaster: true,
-                    hosts: ["A"],
+                    hosts: ["a"],
                     setName: "wrong"
                 }]
         ],
@@ -57,7 +57,7 @@ phases: [
 
             servers: {
 
-                "A:27017": {
+                "a:27017": {
 
                     type: "RSPrimary",
                     setName: "rs"

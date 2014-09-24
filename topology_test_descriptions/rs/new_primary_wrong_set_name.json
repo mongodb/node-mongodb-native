@@ -4,11 +4,11 @@
         {
             "outcome": {
                 "servers": {
-                    "A:27017": {
+                    "a:27017": {
                         "setName": "rs", 
                         "type": "RSPrimary"
                     }, 
-                    "B:27017": {
+                    "b:27017": {
                         "setName": null, 
                         "type": "Unknown"
                     }
@@ -18,11 +18,11 @@
             }, 
             "responses": [
                 [
-                    "A:27017", 
+                    "a:27017", 
                     {
                         "hosts": [
-                            "A", 
-                            "B"
+                            "a", 
+                            "b"
                         ], 
                         "ismaster": true, 
                         "ok": 1, 
@@ -34,7 +34,7 @@
         {
             "outcome": {
                 "servers": {
-                    "A:27017": {
+                    "a:27017": {
                         "setName": "rs", 
                         "type": "RSPrimary"
                     }
@@ -44,10 +44,10 @@
             }, 
             "responses": [
                 [
-                    "B:27017", 
+                    "b:27017", 
                     {
                         "hosts": [
-                            "A"
+                            "a"
                         ], 
                         "ismaster": true, 
                         "ok": 1, 
@@ -57,5 +57,5 @@
             ]
         }
     ], 
-    "uri": "mongodb://A/?replicaSet=rs"
+    "uri": "mongodb://a/?replicaSet=rs"
 }

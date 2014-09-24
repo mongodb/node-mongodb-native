@@ -42,7 +42,7 @@ phases: [
 
             },
 
-            clusterType: "ReplicaSetWithPrimary",
+            topologyType: "ReplicaSetWithPrimary",
             setName: "rs"
         }
     }
