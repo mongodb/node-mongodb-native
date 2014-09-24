@@ -1,3 +1,7 @@
+1.4.14 2015-09-24
+-----------------
+- Args leak to global namespace fix.
+
 1.4.13 2015-09-24
 -----------------
 - NODE-283 Collection rename now always returns a new Collection object
