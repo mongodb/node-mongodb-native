@@ -42,6 +42,7 @@ var cloneOptions = function(options) {
 var State = function() {
   var secondaries = [];
   var arbiters = [];
+  var passives = [];
   var primary = null;
 
   Object.defineProperty(this, 'primary', {
@@ -57,6 +58,11 @@ var State = function() {
   Object.defineProperty(this, 'arbiters', {
       enumerable:true
     , get: function() { return arbiters; }
+  });
+
+  Object.defineProperty(this, 'passives', {
+      enumerable:true
+    , get: function() { return passives; }
   });
 
   /**
@@ -93,7 +99,7 @@ var State = function() {
   }
 
   /**
-   * Is the given address a primary
+   * Is the given address a secondary
    * @method
    * @param {string} address Server address
    * @return {boolean}
@@ -102,6 +108,23 @@ var State = function() {
     // Check if the server is a secondary at the moment
     for(var i = 0; i < secondaries.length; i++) {
       if(secondaries[i].equals(address)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Is the given address a secondary
+   * @method
+   * @param {string} address Server address
+   * @return {boolean}
+   */
+  this.isPassive = function(address) {
+    // Check if the server is a secondary at the moment
+    for(var i = 0; i < passives.length; i++) {
+      if(passives[i].equals(address)) {
         return true;
       }
     }
@@ -119,6 +142,14 @@ var State = function() {
     if(primary && primary.equals(address)) return true;
     for(var i = 0; i < secondaries.length; i++) {
       if(secondaries[i].equals(address)) return true;
+    }
+
+    for(var i = 0; i < arbiters.length; i++) {
+      if(arbiters[i].equals(address)) return true;
+    }
+
+    for(var i = 0; i < passives.length; i++) {
+      if(passives[i].equals(address)) return true;
     }
 
     return false;
@@ -168,10 +199,28 @@ var State = function() {
       return 'primary';
     }
 
+    // console.log("------------------------- REMOVE SERVER from state pre")
+    // console.dir(secondaries.map(function(x) { return x.name }))
     // Filter out the server from the secondaries
     secondaries = secondaries.filter(function(s) {
+      // console.log("" + server.name + " = " + s.name)
       return !s.equals(server);
     });
+
+    // Filter out the server from the arbiters
+    arbiters = arbiters.filter(function(s) {
+      // console.log("" + server.name + " = " + s.name)
+      return !s.equals(server);
+    });
+
+    // Filter out the server from the passives
+    passives = passives.filter(function(s) {
+      // console.log("" + server.name + " = " + s.name)
+      return !s.equals(server);
+    });
+
+    // console.log("------------------------- REMOVE SERVER from state after")
+    // console.dir(secondaries.map(function(x) { return x.name }))
 
     // Return that it's a secondary
     return 'secondary';
@@ -279,7 +328,7 @@ var State = function() {
   /**
    * Add server to list of secondaries
    * @method
-   * @param {Server} server Server we wish to promote
+   * @param {Server} server Server we wish to add
    */
   this.addSecondary = function(server) {
     add(secondaries, server);
@@ -288,10 +337,19 @@ var State = function() {
   /**
    * Add server to list of arbiters
    * @method
-   * @param {Server} server Server we wish to promote
+   * @param {Server} server Server we wish to add
    */
   this.addArbiter = function(server) {
     add(arbiters, server);
+  }
+
+  /**
+   * Add server to list of passives
+   * @method
+   * @param {Server} server Server we wish to add
+   */
+  this.addPassive = function(server) {
+    add(passives, server);
   }
 }
 
@@ -356,7 +414,7 @@ var ReplSet = function(seedlist, options) {
   //
   // Factory overrides
   //
-  var Cursor = options.cursorFactory || BasicCursor;
+  var Cursor = options.cursorFactory || Cursor;
 
   // BSON Parser, ensure we have a single instance
   if(bsonInstance == null) {
@@ -435,6 +493,10 @@ var ReplSet = function(seedlist, options) {
 
   Object.defineProperty(this, 'haInterval', {
     enumerable:true, get: function() { return haInterval; }
+  });
+
+  Object.defineProperty(this, 'state', {
+    enumerable:true, get: function() { return replState; }
   });
 
   //
@@ -600,6 +662,11 @@ var ReplSet = function(seedlist, options) {
               replState.promotePrimary(server);
               self.emit('reconnect', server);
               self.emit('joined', 'primary', server);
+          } else if(ismaster.secondary && ismaster.passive && setName == ismaster.setName
+            && !replState.isPassive(ismaster.me)) {
+              if(logger.isInfo()) logger.info(f('[%s] promoting %s to secondary', id, ismaster.me));
+              replState.addPassive(server);
+              self.emit('joined', 'passive', server);
           } else if(ismaster.secondary && setName == ismaster.setName
             && !replState.isSecondary(ismaster.me)) {
               if(logger.isInfo()) logger.info(f('[%s] promoting %s to secondary', id, ismaster.me));
@@ -617,7 +684,13 @@ var ReplSet = function(seedlist, options) {
 
           // Add any new servers
           if(err == null && ismaster.ismaster && Array.isArray(ismaster.hosts)) {
-            processHosts(ismaster.hosts);
+            // Hosts to process
+            var hosts = ismaster.hosts;
+            // Add arbiters to list of hosts if we have any
+            if(Array.isArray(ismaster.arbiters)) hosts = hosts.concat(ismaster.arbiters);
+            if(Array.isArray(ismaster.passives)) hosts = hosts.concat(ismaster.passives);
+            // Process all the hsots
+            processHosts(hosts);
           }
 
           // No read Preferences strategies
@@ -671,7 +744,7 @@ var ReplSet = function(seedlist, options) {
     // If no more initial servers and new scheduled servers to connect
     if(initialConnectionServers.length == 0 && Object.keys(connectingServers).length == 0 && !fullsetup) {
       fullsetup = true;
-      self.emit('fullsetup');
+      self.emit('fullsetup', self);
     }
   }
 
@@ -828,6 +901,9 @@ var ReplSet = function(seedlist, options) {
       // Log information
       if(logger.isInfo()) logger.info(f('[%s] connectHandler %s', id, JSON.stringify(replState)));    
 
+          // console.log("================================= ismaster")
+          // console.log(ismaster)
+
       // It's a master set it
       if(ismaster.ismaster && setName == ismaster.setName) {
         replState.promotePrimary(server);
@@ -849,6 +925,15 @@ var ReplSet = function(seedlist, options) {
           if(addedToList) {
             if(logger.isInfo()) logger.info(f('[%s] promoting %s to arbiter', id, ismaster.me));
             self.emit('joined', 'arbiter', server);
+          }
+      } else if(!ismaster.ismaster && setName == ismaster.setName
+        && ismaster.secondary && ismaster.passive) {
+          addedToList = addToList(ismaster, replState.passives, server);
+
+          // Emit primary
+          if(addedToList) {
+            if(logger.isInfo()) logger.info(f('[%s] promoting %s to passive', id, ismaster.me));
+            self.emit('joined', 'passive', server);
           }
       } else if(!ismaster.ismaster && setName == ismaster.setName
         && ismaster.secondary) {
@@ -875,8 +960,13 @@ var ReplSet = function(seedlist, options) {
         server.on('message', messageHandler);        
       }
 
+      // Hosts to process
+      var hosts = ismaster.hosts;
+      // Add arbiters to list of hosts if we have any
+      if(Array.isArray(ismaster.arbiters)) hosts = hosts.concat(ismaster.arbiters);
+      if(Array.isArray(ismaster.passives)) hosts = hosts.concat(ismaster.passives);
       // Add any new servers
-      processHosts(ismaster.hosts);
+      processHosts(hosts);
 
       if(initialConnectionServers.length == 0 && Object.keys(connectingServers).length == 0 
         && !replState.isPrimaryConnected() && !secondaryOnlyConnectionAllowed && state == CONNECTING) {

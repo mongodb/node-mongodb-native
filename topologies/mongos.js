@@ -265,6 +265,10 @@ var Mongos = function(seedlist, options) {
     enumerable:true, get: function() { return haInterval; }
   });
 
+  Object.defineProperty(this, 'state', {
+    enumerable:true, get: function() { return mongosState; }
+  });  
+
   //
   // Inquires about state changes
   //

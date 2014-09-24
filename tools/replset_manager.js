@@ -41,6 +41,7 @@ var ReplSetManager = function(replsetOptions) {
   // Get the settings
   var secondaries = replsetOptions.secondaries || 2;
   var arbiters = replsetOptions.arbiters || 0;
+  var passives = replsetOptions.passives || 1;
   var replSet = replsetOptions.replSet = replsetOptions.replSet || 'rs';
   var version = 1;
   var configSet = null;
@@ -51,6 +52,7 @@ var ReplSetManager = function(replsetOptions) {
   var serverAddresses = [];
   var secondaryServers = [];
   var arbiterServers = [];
+  var passiveServers = [];
   var primaryServer = [];;
 
   // Get the keys
@@ -74,6 +76,10 @@ var ReplSetManager = function(replsetOptions) {
 
   Object.defineProperty(this, 'secondaries', {
     enumerable:true, get: function() { return secondaryServers.slice(0); }
+  });
+
+  Object.defineProperty(this, 'passives', {
+    enumerable:true, get: function() { return passiveServers.slice(0); }
   });
 
   Object.defineProperty(this, 'arbiters', {
@@ -171,6 +177,15 @@ var ReplSetManager = function(replsetOptions) {
       }      
     }
 
+    // For all servers add the members
+    for(var i = 0; i < passives; i++, _id++) {
+      configSet.members[_id] = {
+          _id: _id
+        , host: serverManagers[_id].name
+        , priority: 0
+      }      
+    }
+
     // Do we have tags to add to our config
     if(Array.isArray(tags)) {
       for(var i = 0; i < tags.length; i++) {
@@ -246,7 +261,7 @@ var ReplSetManager = function(replsetOptions) {
     }
 
     // Create server instances
-    var totalServers = secondaries + arbiters + 1;
+    var totalServers = secondaries + arbiters + passives + 1;
     var serversLeft = totalServers;
     var purge = typeof options.purge == 'boolean' ? options.purge : true;
     var kill = typeof options.kill == 'boolean' ? options.kill : true;
@@ -480,7 +495,16 @@ var ReplSetManager = function(replsetOptions) {
     manager.start(options, callback);
   }
 
+  this.getServerManagerByType = function(type, callback) {
+    return getServerManagerByType(type, callback);
+  }
+
   this.remove = function(t, callback) {  
+    if(typeof t == 'function') {
+      callback = t; 
+      t = 'secondary';
+    }
+    
     // Get primary manager 
     getServerManagerByType('primary', function(err, manager) {
       if(err) return callback(err, null);
@@ -505,7 +529,7 @@ var ReplSetManager = function(replsetOptions) {
           server.destroy();
 
           // Locate a secondary and remove it
-          getServerManagerByType('secondary', function(err, m) {
+          getServerManagerByType(t, function(err, m) {
             if(err) return callback(err);
 
             // Remove from the list of the result
