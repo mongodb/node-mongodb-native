@@ -26,33 +26,24 @@ var parseTopologyTests = function(dir, excludes) {
 }
 
 var executeState = function(assert, test) {
-  console.log(test.description)
   var state = new State({
     emit: function(){}
   }, {
     id: 1, setName: 'rs', connectingServers: {}, secondaryOnlyConnectionAllowed: false
   })
   
-  console.log("------------------------------------------------------ DATA")
-  // console.log(JSON.stringify(test, null, 2))
-
   // Let's do the steps
   for(var i = 0; i < test.phases.length; i++) {
     // Get the phase
     var phase = test.phases[i];
-    console.log("----------------------------------------------- execute Phase")
-    console.log(JSON.stringify(phase, null, 2))
-    // console.log(JSON.stringify(phase, null, 2))
     // Process the responses, running them through the spec
     for(var j = 0; j < phase.responses.length; j++) {
       // Get all the ismasters, set the me variable
       phase.responses[j][1].me = phase.responses[j][0];      
-    // console.log(JSON.stringify(phase.responses[j][1], null, 2))
       
       // Execute an update
       var update = function(_ismaster, _name) {
         state.update(_ismaster, {name: _name, equals: function(s) {
-          // console.log(_name + " EQUALS " + s.name)
           return s.name == _name;
         }, destroy: function() {}});
       }
@@ -83,10 +74,6 @@ var testOutcome = function(assert, state, outcome) {
     if(s.type == 'RSPrimary') {
       assert.equal(name, state.primary.name);
     } else if(s.type == 'RSSecondary') {
-      // console.log("------------------------------------------- RSSecondary")
-      // console.log(name)
-      // console.dir(state.secondaries)
-
       assert.equal(1, state.secondaries.filter(function(x) {
         return x.name == name;
       }).length);
@@ -106,12 +93,6 @@ var testOutcome = function(assert, state, outcome) {
       assert.ok(state.primary == null || state.primary.name != name);
     }
   }
-
-  // console.log("----------------------------------------------- testOutcome")
-  // console.dir(state)
-  // // console.dir(JSON.stringify(state))
-  // console.log(JSON.stringify(outcome, null, 2))
-  // console.dir(outcome)
 }
 
 exports['Should Correctly Handle State transitions Tests'] = {
@@ -122,16 +103,12 @@ exports['Should Correctly Handle State transitions Tests'] = {
   },
 
   test: function(configuration, test) {
-    // console.log("---------------------------------------------- 0")
     var tests = parseTopologyTests(f('%s/../topology_test_descriptions/rs', __dirname), [
         'hosts_differ_from_seeds.json'
       ]);
-    // console.dir(tests)
-    // tests = tests.slice(13, 14)
 
     // Execute all the states
     for(var i = 0; i < tests.length; i++) {
-      console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
       executeState(test, tests[i]);
     }
 

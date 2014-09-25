@@ -556,12 +556,10 @@ exports['Primary becomes standalone'] = {
         var server = new ReplSet(config, options);
         server.on('fullsetup', function(_server) {
           server.on('joined', function(_type, _server) {
-            // console.log("---------------------------------- joined :: " + _type + " :: " + _server.name)
             joined[_type].push(_server);
           });
 
           server.on('left', function(_type, _server) {
-            // console.log("---------------------------------- left :: " + _type + " :: " + _server.name)
             left[_type].push(_server);
           });
 
@@ -584,8 +582,6 @@ exports['Primary becomes standalone'] = {
                     // Wait for primary
                     waitForPrimary(ReplSet, 30, config, options, function(err, r) {
                       test.equal(null, err);
-                      // console.dir(left)
-                      // console.dir(joined)
                       test.equal(1, left.primary.length);
                       test.equal(1, left.secondary.length);
                       test.equal(1, joined.primary.length);
