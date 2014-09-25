@@ -1,3 +1,7 @@
+var Logger = require('../connection/logger')
+  , f = require('util').format
+  , MongoError = require('../error');
+
 var DISCONNECTED = 'disconnected';
 var CONNECTING = 'connecting';
 var CONNECTED = 'connected';
@@ -11,11 +15,20 @@ var DESTROYED = 'destroyed';
  * @property {array} arbiters List of arbiters
  * @return {State} A cursor instance
  */
-var State = function() {
+var State = function(replSet, options) {
   var secondaries = [];
   var arbiters = [];
   var passives = [];
   var primary = null;
+  // Initial state is disconnected
+  var state = DISCONNECTED;
+  // Get a logger instance
+  var logger = Logger('ReplSet', options);
+  // Unpacked options
+  var id = options.id;
+  var setName = options.setName;
+  var connectingServers = options.connectingServers;
+  var secondaryOnlyConnectionAllowed = options.secondaryOnlyConnectionAllowed;
 
   Object.defineProperty(this, 'primary', {
       enumerable:true
@@ -35,6 +48,17 @@ var State = function() {
   Object.defineProperty(this, 'passives', {
       enumerable:true
     , get: function() { return passives; }
+  });
+
+  Object.defineProperty(this, 'setName', {
+      enumerable:true
+    , get: function() { return setName; }
+  });
+
+  Object.defineProperty(this, 'state', {
+      enumerable:true
+    , get: function() { return state; }
+    , set: function(value) { state = value; }
   });
 
   /**
@@ -171,31 +195,30 @@ var State = function() {
       return 'primary';
     }
 
-    // console.log("------------------------- REMOVE SERVER from state pre")
-    // console.dir(secondaries.map(function(x) { return x.name }))
-    // Filter out the server from the secondaries
-    secondaries = secondaries.filter(function(s) {
-      // console.log("" + server.name + " = " + s.name)
-      return !s.equals(server);
-    });
-
+    var length = arbiters.length;
     // Filter out the server from the arbiters
     arbiters = arbiters.filter(function(s) {
-      // console.log("" + server.name + " = " + s.name)
       return !s.equals(server);
     });
+    if(arbiters.length < length) return 'arbiter';
 
+    var length = passives.length;
     // Filter out the server from the passives
     passives = passives.filter(function(s) {
-      // console.log("" + server.name + " = " + s.name)
       return !s.equals(server);
     });
+    if(passives.length < length) return 'passive';
 
-    // console.log("------------------------- REMOVE SERVER from state after")
-    // console.dir(secondaries.map(function(x) { return x.name }))
+    // var length = secondaries.length;
+    // Filter out the server from the secondaries
+    secondaries = secondaries.filter(function(s) {
+      return !s.equals(server);
+    });
+    // if(secondaries.length < length) return 'secondary';
+    return 'secondary';
 
     // Return that it's a secondary
-    return 'secondary';
+    return null;
   }
 
   /**
@@ -291,10 +314,11 @@ var State = function() {
   var add = function(list, server) {
     // Check if the server is a secondary at the moment
     for(var i = 0; i < list.length; i++) {
-      if(list[i].equals(server)) return;
+      if(list[i].equals(server)) return false;
     }
 
-    list.push(server);    
+    list.push(server);
+    return true; 
   }
 
   /**
@@ -303,7 +327,7 @@ var State = function() {
    * @param {Server} server Server we wish to add
    */
   this.addSecondary = function(server) {
-    add(secondaries, server);
+    return add(secondaries, server);
   }
 
   /**
@@ -312,7 +336,7 @@ var State = function() {
    * @param {Server} server Server we wish to add
    */
   this.addArbiter = function(server) {
-    add(arbiters, server);
+    return add(arbiters, server);
   }
 
   /**
@@ -321,7 +345,180 @@ var State = function() {
    * @param {Server} server Server we wish to add
    */
   this.addPassive = function(server) {
-    add(passives, server);
+    return add(passives, server);
+  }
+
+  // // Add to server list if not there
+  // var addToList = function(ismaster, list, server) {
+  //   // Clean up
+  //   delete connectingServers[server.name];
+
+  //   // Iterate over all the list items
+  //   for(var i = 0; i < list.length; i++) {
+  //     console.log("####################### EQUAL")
+  //     console.log(list[i].name + " :: " + server.name)
+  //     if(list[i].equals(server)) {
+  //     console.log("####################### EQUAL1")
+  //       server.destroy();
+  //       return false;
+  //     }
+  //   }
+
+  //     console.log("####################### EQUAL 1")
+  //   // Add to list
+  //   list.push(server);
+  //   return true;
+  // }
+
+  this.updateHA = function(ismaster, server) {
+    // console.log("---------------------------------------- updateHA")
+    var self = this;
+    // Let's check what kind of server this is
+    if(ismaster.ismaster && setName == ismaster.setName
+      && !self.isPrimary(ismaster.me)) {
+        
+        if(logger.isInfo()) logger.info(f('[%s] promoting %s to primary', id, ismaster.me));
+        self.promotePrimary(server);
+        replSet.emit('reconnect', server);
+        replSet.emit('joined', 'primary', server);
+    } else if(ismaster.secondary && ismaster.passive && setName == ismaster.setName
+      && !self.isPassive(ismaster.me)) {
+        
+        if(logger.isInfo()) logger.info(f('[%s] promoting %s to secondary', id, ismaster.me));
+        self.addPassive(server);
+        replSet.emit('joined', 'passive', server);
+    } else if(ismaster.secondary && setName == ismaster.setName
+      && !self.isSecondary(ismaster.me)) {
+        
+        if(logger.isInfo()) logger.info(f('[%s] promoting %s to secondary', id, ismaster.me));
+        self.addSecondary(server);
+        replSet.emit('joined', 'secondary', server);
+    } else if(ismaster.arbiterOnly && setName == ismaster.setName) {
+      
+      if(logger.isInfo()) logger.info(f('[%s] promoting %s to ariter', id, ismaster.me));
+      self.addArbiter(server);
+      replSet.emit('joined', 'arbiter', server);
+    } else if(!ismaster.ismaster && !ismaster.secondary && !ismaster.arbiterOnly) {
+      if(logger.isInfo()) logger.info(f('[%s] removing %s from set', id, ismaster.me));
+      replSet.emit('left', self.remove(server), server);
+    }    
+  }
+
+  /**
+   * Update the state given a specific ismaster result
+   * @method
+   * @param {object} ismaster IsMaster result
+   * @param {Server} server IsMaster Server source
+   */
+  this.update = function(ismaster, server) {
+    // console.log("------------------------------------------------ 0")
+    var self = this;
+    // Not in a known connection valid state
+    if(!ismaster.ismaster && !ismaster.secondary && !ismaster.arbiterOnly) {
+      self.remove(server);
+    // console.log("------------------------------------------------ 0")
+      return false;
+    }
+
+    // console.log("------------------------------------------------ 1")
+    // Check if the replicaset name matches the provided one
+    if(ismaster.setName && setName != ismaster.setName) {
+      if(logger.isError()) logger.error(f('[%s] server in replset %s is not part of the specified setName %s', id, ismaster.setName, setName));
+      self.remove(server);
+      // if(result) replSet.emit('left', result, server);
+      replSet.emit('error', new MongoError("provided setName for Replicaset Connection does not match setName found in server seedlist"));
+      return false;
+    }
+
+    // console.log("------------------------------------------------ 2")
+    // Log information
+    if(logger.isInfo()) logger.info(f('[%s] updating replicaset state %s', id, JSON.stringify(replState)));    
+
+    // It's a master set it
+    if(ismaster.ismaster && setName == ismaster.setName) {
+      this.promotePrimary(server);
+    // console.log("------------------------------------------------ 3")
+      
+      if(logger.isInfo()) logger.info(f('[%s] promoting %s to primary', id, ismaster.me));
+      // Emit primary
+      replSet.emit('joined', 'primary', primary);
+
+      // We are connected
+      if(state == CONNECTING) {
+        state = CONNECTED;
+          // console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ CONNECT 1")
+        replSet.emit('connect', replSet);
+      }
+    } else if(!ismaster.ismaster && setName == ismaster.setName
+      && ismaster.arbiterOnly) {
+        if(self.addArbiter(server)) {
+          if(logger.isInfo()) logger.info(f('[%s] promoting %s to arbiter', id, ismaster.me));
+          replSet.emit('joined', 'arbiter', server);
+          return true;
+        };
+
+        return false;
+    //     var addedToList = addToList(ismaster, arbiters, server);
+    // // console.log("------------------------------------------------ 4")
+
+    //     // Emit primary
+    //     if(addedToList) {
+    //       if(logger.isInfo()) logger.info(f('[%s] promoting %s to arbiter', id, ismaster.me));
+    //       replSet.emit('joined', 'arbiter', server);
+    //     }
+    } else if(!ismaster.ismaster && setName == ismaster.setName
+      && ismaster.secondary && ismaster.passive) {
+        if(self.addPassive(server)) {
+          if(logger.isInfo()) logger.info(f('[%s] promoting %s to passive', id, ismaster.me));
+          replSet.emit('joined', 'passive', server);
+          return true;
+        };
+
+        return false;
+
+    //     var addedToList = addToList(ismaster, passives, server);
+    // // console.log("------------------------------------------------ 5")
+
+    //     // Emit primary
+    //     if(addedToList) {
+    //       if(logger.isInfo()) logger.info(f('[%s] promoting %s to passive', id, ismaster.me));
+    //       replSet.emit('joined', 'passive', server);
+    //     }
+    } else if(!ismaster.ismaster && setName == ismaster.setName
+      && ismaster.secondary) {
+    // console.log("------------------------------------------------ 6")
+        if(self.addSecondary(server)) {
+          if(logger.isInfo()) logger.info(f('[%s] promoting %s to passive', id, ismaster.me));
+          replSet.emit('joined', 'secondary', server);
+          
+          if(secondaryOnlyConnectionAllowed && state == CONNECTING) {
+            state = CONNECTED;
+            replSet.emit('connect', replSet);
+          }
+
+          return true;
+        };
+
+        return false;
+
+        // var addedToList = addToList(ismaster, secondaries, server);
+
+        // // Emit primary
+        // if(addedToList) {
+        //   if(logger.isInfo()) logger.info(f('[%s] promoting %s to secondary', id, ismaster.me));
+        //   replSet.emit('joined', 'secondary', server);
+        // }
+        
+        // // We can connect with only a secondary
+        // if(secondaryOnlyConnectionAllowed && state == CONNECTING) {
+        //   state = CONNECTED;
+        //   // console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ CONNECT 2")
+        //   replSet.emit('connect', replSet);            
+        // }
+    }
+    // console.log("------------------------------------------------ 7")
+
+    return true;
   }
 }
 
