@@ -338,8 +338,10 @@ var ReplSet = function(seedlist, options) {
           var ismaster = r.result;
           if(logger.isDebug()) logger.debug(f('[%s] monitoring process ismaster %s', id, JSON.stringify(ismaster)));
 
+    // console.log("------------------------------------------------ HA 0")
           // Update the replicaset state
-          replState.updateHA(ismaster, server);
+          replState.update(ismaster, server);
+    // console.log("------------------------------------------------ HA 1")
 
           // // Let's check what kind of server this is
           // if(ismaster.ismaster && setName == ismaster.setName
