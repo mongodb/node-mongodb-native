@@ -335,6 +335,48 @@ exports.shouldCorrectlyRetriveCollectionOptions = function(configuration, test) 
 }
 
 /**
+ * @ignore
+ */
+exports.shouldCorrectlyThrowDueToCollectionOptions = function(configuration, test) {
+  var Collection = configuration.getMongoPackage().Collection;
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+
+  // Establish connection to db
+  db.open(function(err, db) {
+
+    // Let's fetch the collection options
+    db.collection('this_collection_does_not_exist').options(function(err, options) {
+      test.ok(err.message.indexOf('.this_collection_does_not_exist') != -1);
+
+      db.close();
+      test.done();
+    });
+  });
+}
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyThrowDueToFindWithNoObject = function(configuration, test) {
+  var Collection = configuration.getMongoPackage().Collection;
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+
+  // Establish connection to db
+  db.open(function(err, db) {
+
+    // Let's perform a find with no object
+    try {
+      db.collection('this_collection_does_not_exist').find('string');
+      test.ok(false);
+    } catch(err) {
+      test.ok(err.message.indexOf('query selector must be an object') != -1);
+      db.close();
+      test.done();      
+    }
+  });
+}
+
+/**
  * An example showing how to establish if it's a capped collection
  *
  * @_class collection
