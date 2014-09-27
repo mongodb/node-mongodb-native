@@ -1,3 +1,8 @@
+1.4.17 2015-09-27
+-----------------
+- NODE-286 collection/query.js references undefined MongoError
+- NODE-287 "MongoError is not defined" in options command
+
 1.4.16 2015-09-26
 -----------------
 - Fix minor issue due to MongoError usage in options and listCollections
