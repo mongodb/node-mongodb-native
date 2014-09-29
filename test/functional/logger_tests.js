@@ -3,7 +3,7 @@
  * @ignore
  */
 exports['Should correctly Enable logging'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {

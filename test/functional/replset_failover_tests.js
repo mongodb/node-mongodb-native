@@ -92,20 +92,20 @@ exports['Should correctly recover from secondary shutdowns'] = {
 
       // Wait for left events
       db.serverConfig.on('left', function(t, s) {
+        console.log("-- left :: " + t + " :: " + s.name)
         left[s.name] = ({type: t, server: s});
 
         // Restart the servers
-        if(Object.keys(left).length == 3) {
+        if(Object.keys(left).length == 2) {
+          db.serverConfig.removeAllListeners('left')
           // Wait for close event due to primary stepdown
           db.serverConfig.on('joined', function(t, d, s) {
-            if('primary' == t && left[s.name]) {
-              joined++;
-              primary = true;
-            } else if('secondary' == t && left[s.name]) {
+          console.log("-- joined :: " + t + " :: " + s.name)
+            if('secondary' == t && left[s.name]) {
               joined++;
             }
 
-            if(joined >= Object.keys(left).length && primary) {
+            if(joined >= Object.keys(left).length) {
               db.collection('replset_insert0').insert({a:1}, function(err, result) {
                 test.equal(null, err);
 
@@ -237,8 +237,6 @@ exports['Should work correctly with inserts after bringing master back'] = {
     // Get a new instance
     var db = new Db('integration_test_', replSet, {w:1});
     db.on('fullsetup', function(err, db) {
-      test.equal(null, err);
-
       // Drop collection on replicaset
       db.dropCollection('shouldWorkCorrectlyWithInserts', function(err, r) {
 
@@ -356,7 +354,6 @@ exports['Should correctly read from secondary even if primary is down'] = {
 
     var db = new Db('integration_test_', replSet, {w:0, readPreference:ReadPreference.PRIMARY_PREFERRED});
     db.on('fullsetup', function(err, p_db) {
-      test.ok(err == null);
       var collection = p_db.collection('notempty');
 
       // Insert a document

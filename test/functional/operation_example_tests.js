@@ -1,3 +1,5 @@
+var f = require('util').format;
+
 /**************************************************************************
  *
  * COLLECTION TESTS
@@ -4042,7 +4044,7 @@ exports['Should correctly connect with default replicasetNoOption'] = {
     // BEGIN
       test.equal(null, err);
       p_db.close();
-      restartAndDone(configuration, test);
+      test.done();
     });
     // END
   }
@@ -5706,9 +5708,9 @@ exports['Should correctly connect to a replicaset'] = {
       , MongoClient = mongo.MongoClient;
 
     // Create url
-    var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
-      , format("%s:%s", configuration.host, configuration.port)
-      , format("%s:%s", configuration.host, configuration.host + 1)
+    var url = f("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
+      , f("%s:%s", configuration.host, configuration.port)
+      , f("%s:%s", configuration.host, configuration.host + 1)
       , "integration_test_"
       , configuration.replicasetName
       , "primary");
@@ -5729,7 +5731,7 @@ exports['Should correctly connect to a replicaset'] = {
         test.equal(1, result.result.n);
 
         db.close();
-        restartAndDone(configuration, test);
+        test.done();
       });
     });
     // END
