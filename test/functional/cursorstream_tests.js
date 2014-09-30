@@ -1,5 +1,5 @@
 exports.shouldStreamDocumentsWithPauseAndResumeForFetching = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -57,7 +57,7 @@ exports.shouldStreamDocumentsWithPauseAndResumeForFetching = {
 }
 
 exports.shouldStream10KDocuments = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -116,7 +116,7 @@ exports.shouldStream10KDocuments = {
 }
 
 exports.shouldTriggerMassiveAmountOfGetMores = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -162,7 +162,7 @@ exports.shouldTriggerMassiveAmountOfGetMores = {
 }
 
 exports.shouldStreamDocumentsAcrossGetMoreCommandAndCountCorrectly = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {

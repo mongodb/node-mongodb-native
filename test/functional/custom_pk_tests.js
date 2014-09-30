@@ -2,7 +2,7 @@
  * @ignore
  */
 exports.shouldCreateRecordsWithCustomPKFactory = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {

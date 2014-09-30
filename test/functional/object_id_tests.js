@@ -2,7 +2,7 @@
  * @ignore
  */
 exports.shouldCorrectlyGenerateObjectID = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -64,7 +64,7 @@ exports.shouldCorrectlyGenerateObjectID = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieve24CharacterHexStringFromToString = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -81,7 +81,7 @@ exports.shouldCorrectlyRetrieve24CharacterHexStringFromToString = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieve24CharacterHexStringFromToJSON = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -98,7 +98,7 @@ exports.shouldCorrectlyRetrieve24CharacterHexStringFromToJSON = {
  * @ignore
  */
 exports.shouldCorrectlyCreateOIDNotUsingObjectID = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -132,7 +132,7 @@ exports.shouldCorrectlyCreateOIDNotUsingObjectID = {
  * @ignore
  */
 exports.shouldCorrectlyGenerateObjectIDFromTimestamp = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -150,7 +150,7 @@ exports.shouldCorrectlyGenerateObjectIDFromTimestamp = {
  * @ignore
  */
 exports.shouldCorrectlyCreateAnObjectIDAndOverrideTheTimestamp = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -172,7 +172,7 @@ exports.shouldCorrectlyCreateAnObjectIDAndOverrideTheTimestamp = {
  * @ignore
  */
 exports.shouldCorrectlyInsertWithObjectId = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {

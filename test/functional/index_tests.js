@@ -2,7 +2,7 @@
  * @ignore
  */
 exports.shouldCorrectlyExtractIndexInformation = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -12,15 +12,18 @@ exports.shouldCorrectlyExtractIndexInformation = {
         collection.insert({a:1}, {w:1}, function(err, ids) {
           // Create an index on the collection
           db.createIndex(collection.collectionName, 'a', {w:1}, function(err, indexName) {
+            test.equal(null, err);
             test.equal("a_1", indexName);
+
             // Let's fetch the index information
             db.indexInformation(collection.collectionName, function(err, collectionInfo) {
+              test.equal(null, err);
               test.ok(collectionInfo['_id_'] != null);
               test.equal('_id', collectionInfo['_id_'][0][0]);
               test.ok(collectionInfo['a_1'] != null);
               test.deepEqual([["a", 1]], collectionInfo['a_1']);
 
-              db.indexInformation(function(err, collectionInfo2) {
+              db.indexInformation(collection.collectionName, function(err, collectionInfo2) {
                 var count1 = 0, count2 = 0;
                 // Get count of indexes
                 for(var i in collectionInfo) { count1 += 1;}
@@ -51,7 +54,7 @@ exports.shouldCorrectlyExtractIndexInformation = {
  * @ignore
  */
 exports.shouldCorrectlyHandleMultipleColumnIndexes = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -126,7 +129,7 @@ exports.shouldCorrectlyHandleUniqueIndex = {
  * @ignore
  */
 exports.shouldCorrectlyCreateSubfieldIndex = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -161,7 +164,7 @@ exports.shouldCorrectlyCreateSubfieldIndex = {
  * @ignore
  */
 exports.shouldCorrectlyDropIndexes = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -193,7 +196,7 @@ exports.shouldCorrectlyDropIndexes = {
  * @ignore
  */
 exports.shouldThrowErrorOnAttemptingSafeCreateIndexWithNoCallback = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -217,7 +220,7 @@ exports.shouldThrowErrorOnAttemptingSafeCreateIndexWithNoCallback = {
  * @ignore
  */
 exports.shouldThrowErrorOnAttemptingSafeEnsureIndexWithNoCallback = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -241,7 +244,7 @@ exports.shouldThrowErrorOnAttemptingSafeEnsureIndexWithNoCallback = {
  * @ignore
  */
 exports.shouldCorrectlyHandleDistinctIndexes = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -271,7 +274,7 @@ exports.shouldCorrectlyHandleDistinctIndexes = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteEnsureIndex = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -312,7 +315,7 @@ exports.shouldCorrectlyExecuteEnsureIndex = {
  * @ignore
  */
 exports.shouldCorrectlyCreateAndUseSparseIndex = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -349,7 +352,7 @@ exports.shouldCorrectlyCreateAndUseSparseIndex = {
 exports.shouldCorrectlyHandleGeospatialIndexes = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { mongodb: ">1.9.1", topology: ['single', 'replicaset', 'sharded', 'ssl'] } },  
+  metadata: { requires: { mongodb: ">1.9.1", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },  
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -382,7 +385,7 @@ exports.shouldCorrectlyHandleGeospatialIndexes = {
 exports.shouldCorrectlyHandleGeospatialIndexesAlteredRange = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { mongodb: ">1.9.1", topology: ['single', 'replicaset', 'sharded', 'ssl'] } },  
+  metadata: { requires: { mongodb: ">1.9.1", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },  
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -416,7 +419,7 @@ exports.shouldCorrectlyHandleGeospatialIndexesAlteredRange = {
  * @ignore
  */
 exports.shouldThrowDuplicateKeyErrorWhenCreatingIndex = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -441,7 +444,7 @@ exports.shouldThrowDuplicateKeyErrorWhenCreatingIndex = {
  * @ignore
  */
 exports.shouldThrowDuplicateKeyErrorWhenDriverInStrictMode = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -467,7 +470,7 @@ exports.shouldThrowDuplicateKeyErrorWhenDriverInStrictMode = {
  * @ignore
  */
 exports.shouldCorrectlyUseMinMaxForSettingRangeInEnsureIndex = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -495,7 +498,7 @@ exports.shouldCorrectlyUseMinMaxForSettingRangeInEnsureIndex = {
  * @ignore
  */
 exports['Should correctly create an index with overriden name'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -521,7 +524,7 @@ exports['Should correctly create an index with overriden name'] = {
 }
 
 exports['should handle index declarations using objects from other contexts'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -542,7 +545,7 @@ exports['should handle index declarations using objects from other contexts'] = 
 }
 
 exports['should correctly return error message when applying unique index to duplicate documents'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -563,7 +566,7 @@ exports['should correctly return error message when applying unique index to dup
 }
 
 exports['should correctly drop index with no callback'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -585,7 +588,7 @@ exports['should correctly drop index with no callback'] = {
 }
 
 exports['should correctly apply hint to find'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -615,7 +618,7 @@ exports['should correctly apply hint to find'] = {
 }
 
 exports['should correctly set language_override option'] = {
-  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'replicaset', 'sharded', 'ssl'] } },  
+  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },  
   
   // The actual test we wish to run
   test: function(configuration, test) {

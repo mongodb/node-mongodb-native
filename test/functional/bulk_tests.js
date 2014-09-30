@@ -1,5 +1,5 @@
 exports['Should correctly handle ordered single batch api write command error'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -53,7 +53,7 @@ exports['Should correctly handle ordered single batch api write command error'] 
 }
 
 exports['Should correctly handle ordered multiple batch api write command error'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -104,7 +104,7 @@ exports['Should correctly handle ordered multiple batch api write command error'
 }
 
 exports['Should fail due to ordered document being to big'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -136,7 +136,7 @@ exports['Should fail due to ordered document being to big'] = {
 }
 
 exports['Should correctly split up ordered messages into more batches'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -176,7 +176,7 @@ exports['Should correctly split up ordered messages into more batches'] = {
 }
 
 exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations using write commands'] = {
-  metadata: { requires: { mongodb: '>2.5.4', topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { mongodb: '>2.5.4', topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -257,7 +257,7 @@ exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations
 }
 
 exports['Should Correctly Execute Ordered Batch of Write Operations with duplicate key errors on updates'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -303,7 +303,7 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with duplica
 }
 
 exports['Should Correctly Execute Ordered Batch of Write Operations with upserts causing duplicate key errors on updates'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -360,7 +360,7 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with upserts
 }
 
 exports['Should correctly perform ordered upsert with custom _id'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -397,7 +397,7 @@ exports['Should correctly perform ordered upsert with custom _id'] = {
 }
 
 exports['Should throw an error when no operations in ordered batch'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -422,7 +422,7 @@ exports['Should throw an error when no operations in ordered batch'] = {
 }
 
 exports['Should correctly execute ordered batch using w:0'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -458,7 +458,7 @@ exports['Should correctly execute ordered batch using w:0'] = {
 }
 
 exports['Should correctly handle single unordered batch API'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -515,7 +515,7 @@ exports['Should correctly handle single unordered batch API'] = {
 }
 
 exports['Should correctly handle multiple unordered batch API'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -594,7 +594,7 @@ exports['Should correctly handle multiple unordered batch API'] = {
 }
 
 exports['Should fail due to document being to big for unordered batch'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -626,7 +626,7 @@ exports['Should fail due to document being to big for unordered batch'] = {
 }
 
 exports['Should correctly split up messages into more batches for unordered batches'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -666,7 +666,7 @@ exports['Should correctly split up messages into more batches for unordered batc
 }
 
 exports['Should Correctly Fail Unordered Batch Operation due to illegal Operations'] = {
-  metadata: { requires: { mongodb: '>2.5.4', topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { mongodb: '>2.5.4', topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -754,7 +754,7 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
 }
 
 exports['Should Correctly Execute Unordered Batch with duplicate key errors on updates'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -798,7 +798,7 @@ exports['Should Correctly Execute Unordered Batch with duplicate key errors on u
 }
 
 exports['Should Correctly Execute Unordered Batch of with upserts causing duplicate key errors on updates'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -855,7 +855,7 @@ exports['Should Correctly Execute Unordered Batch of with upserts causing duplic
 }
 
 exports['Should correctly perform unordered upsert with custom _id'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -892,7 +892,7 @@ exports['Should correctly perform unordered upsert with custom _id'] = {
 }
 
 exports['Should prohibit batch finds with no selector'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -925,7 +925,7 @@ exports['Should prohibit batch finds with no selector'] = {
 }
 
 exports['Should throw an error when no operations in unordered batch'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -950,7 +950,7 @@ exports['Should throw an error when no operations in unordered batch'] = {
 }
 
 exports['Should correctly execute unordered batch using w:0'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {

@@ -62,7 +62,7 @@ exports.shouldCorrectlyEmitErrorOnAllDbsOnPoolClose = {
  * @ignore
  */
 exports.shouldCorrectlyUseSameConnectionsForTwoDifferentDbs = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -113,7 +113,7 @@ exports.shouldCorrectlyUseSameConnectionsForTwoDifferentDbs = {
  * @ignore
  */
 exports.shouldCorrectlyHandleMultipleDbsFindAndModifies = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {

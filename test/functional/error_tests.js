@@ -1,5 +1,5 @@
 exports.shouldFailInsertDueToUniqueIndex = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -23,7 +23,7 @@ exports.shouldFailInsertDueToUniqueIndex = {
 
 // Test the error reporting functionality
 exports.shouldFailInsertDueToUniqueIndexStrict = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -50,7 +50,7 @@ exports.shouldFailInsertDueToUniqueIndexStrict = {
 }
 
 exports['mixing included and excluded fields should return an error object with message'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -71,7 +71,7 @@ exports['mixing included and excluded fields should return an error object with 
 }
 
 exports['should handle error throw in user callback'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -91,7 +91,7 @@ exports['should handle error throw in user callback'] = {
 }
 
 exports['Should handle uncaught error correctly'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -109,7 +109,7 @@ exports['Should handle uncaught error correctly'] = {
 }
 
 exports['Should handle throw error in db operation correctly'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -130,7 +130,7 @@ exports['Should handle throw error in db operation correctly'] = {
 exports['Should handle MongoClient uncaught error correctly'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { node: ">0.10.0", topology: ['single', 'replicaset', 'sharded', 'ssl'] } },    
+  metadata: { requires: { node: ">0.10.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },    
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -152,7 +152,7 @@ exports['Should handle MongoClient uncaught error correctly'] = {
 }
 
 exports['Should handle MongoClient throw error in db operation correctly'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -173,7 +173,7 @@ exports['Should handle MongoClient throw error in db operation correctly'] = {
 exports['Should handle Error thrown during operation'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { node: ">0.10.0", topology: ['single', 'replicaset', 'sharded', 'ssl'] } },  
+  metadata: { requires: { node: ">0.10.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },  
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -207,7 +207,7 @@ exports['Should handle Error thrown during operation'] = {
  * @ignore
  */
 exports.shouldCorrectlyHandleThrownError = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -234,7 +234,7 @@ exports.shouldCorrectlyHandleThrownError = {
 exports.shouldCorrectlyHandleThrownErrorInRename = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { node: ">0.10.0", topology: ['single', 'replicaset', 'sharded', 'ssl'] } },  
+  metadata: { requires: { node: ">0.10.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },  
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -265,7 +265,7 @@ exports.shouldCorrectlyHandleThrownErrorInRename = {
  * @ignore
  */
 exports.shouldCorrectlyHandleExceptionsInCursorNext = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -292,7 +292,7 @@ exports.shouldCorrectlyHandleExceptionsInCursorNext = {
  * @ignore
  */
 exports.shouldCorrectlyHandleExceptionsInCursorEach = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {

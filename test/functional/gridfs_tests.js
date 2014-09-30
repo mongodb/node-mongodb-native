@@ -6,7 +6,7 @@ var fs = require('fs')
  * @ignore
  */
 exports.shouldCreateNewGridStoreObject = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -38,7 +38,7 @@ exports.shouldCreateNewGridStoreObject = {
  * @ignore
  */
 exports.shouldCreateNewGridStoreObjectWithIntId = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -71,7 +71,7 @@ exports.shouldCreateNewGridStoreObjectWithIntId = {
  * @ignore
  */
 exports.shouldCreateNewGridStoreObjectWithStringId = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -104,7 +104,7 @@ exports.shouldCreateNewGridStoreObjectWithStringId = {
  * @ignore
  */
 exports.shouldCorrectlySafeFileAndReadFileByObjectId = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -135,7 +135,7 @@ exports.shouldCorrectlySafeFileAndReadFileByObjectId = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteGridStoreExists = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -172,7 +172,7 @@ exports.shouldCorrectlyExecuteGridStoreExists = {
  * @ignore
  */
 exports.shouldCorrectlyPeformGridStoreReadLength = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -202,7 +202,7 @@ exports.shouldCorrectlyPeformGridStoreReadLength = {
  * @ignore
  */
 exports.shouldCorrectlyReadFromFileWithOffset = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -236,7 +236,7 @@ exports.shouldCorrectlyReadFromFileWithOffset = {
  * @ignore
  */
 exports.shouldCorrectlyHandleMultipleChunkGridStore = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -284,7 +284,7 @@ exports.shouldCorrectlyHandleMultipleChunkGridStore = {
  * @ignore
  */
 exports.shouldCorrectlyHandleUnlinkingWeirdName = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -339,7 +339,7 @@ exports.shouldCorrectlyHandleUnlinkingWeirdName = {
  * @ignore
  */
 exports.shouldCorrectlyUnlinkAnArrayOfFiles = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -396,7 +396,7 @@ exports.shouldCorrectlyUnlinkAnArrayOfFiles = {
  * @ignore
  */
 exports.shouldCorrectlyWriteFileToGridStore = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -433,7 +433,7 @@ exports.shouldCorrectlyWriteFileToGridStore = {
  * @ignore
  */
 exports.shouldCorrectlyWriteFileToGridStoreUsingObjectId = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -471,7 +471,7 @@ exports.shouldCorrectlyWriteFileToGridStoreUsingObjectId = {
  * @ignore
  */
 exports.shouldCorrectlyPerformWorkingFiledRead = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -503,7 +503,7 @@ exports.shouldCorrectlyPerformWorkingFiledRead = {
  * @ignore
  */
 exports.shouldCorrectlyPerformWorkingFiledReadWithChunkSizeLessThanFileSize = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -555,7 +555,7 @@ exports.shouldCorrectlyPerformWorkingFiledReadWithChunkSizeLessThanFileSize = {
  * @ignore
  */
 exports.shouldCorrectlyPerformWorkingFiledWithBigFile = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -624,7 +624,7 @@ exports.shouldCorrectlyPerformWorkingFiledWithBigFile = {
  * @ignore
  */
 exports.shouldCorrectlyPerformWorkingFiledWriteWithDifferentChunkSizes = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -708,7 +708,7 @@ exports.shouldCorrectlyPerformWorkingFiledWriteWithDifferentChunkSizes = {
  * @ignore
  */
 exports.shouldCorrectlyReadAndWriteFile = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -740,7 +740,7 @@ exports.shouldCorrectlyReadAndWriteFile = {
  * @ignore
  */
 exports.shouldCorrectlyReadAndWriteBuffersMultipleChunks = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -780,7 +780,7 @@ exports.shouldCorrectlyReadAndWriteBuffersMultipleChunks = {
  * @ignore
  */
 exports.shouldCorrectlyReadAndWriteBuffersSingleChunks = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -819,7 +819,7 @@ exports.shouldCorrectlyReadAndWriteBuffersSingleChunks = {
  * @ignore
  */
 exports.shouldCorrectlyReadAndWriteBuffersUsingNormalWriteWithMultipleChunks = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -859,7 +859,7 @@ exports.shouldCorrectlyReadAndWriteBuffersUsingNormalWriteWithMultipleChunks = {
  * @ignore
  */
 exports.shouldCorrectlyReadAndWriteBuffersSingleChunksAndVerifyExistance = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -898,7 +898,7 @@ exports.shouldCorrectlyReadAndWriteBuffersSingleChunksAndVerifyExistance = {
  * @ignore
  */
 exports.shouldCorrectlySaveDataByObjectID = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -932,7 +932,7 @@ exports.shouldCorrectlySaveDataByObjectID = {
  * @ignore
  */
 exports.shouldCheckExistsByUsingRegexp = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -965,7 +965,7 @@ exports.shouldCheckExistsByUsingRegexp = {
  * @ignore
  */
 exports.shouldCorrectlyOpenGridStoreWithDifferentRoot = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -991,7 +991,7 @@ exports.shouldCorrectlyOpenGridStoreWithDifferentRoot = {
  * @ignore
  */
 exports.shouldCorrectlySetFilenameForGridstoreOpen = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1024,7 +1024,7 @@ exports.shouldCorrectlySetFilenameForGridstoreOpen = {
  * @ignore
  */
 exports.shouldCorrectlySaveFileAndThenOpenChangeContentTypeAndSaveAgain = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1067,7 +1067,7 @@ exports.shouldCorrectlySaveFileAndThenOpenChangeContentTypeAndSaveAgain = {
  * @ignore
  */
 exports.shouldCorrectlySaveFileWithoutFilenameAndThenOpenAddFilenameAndSaveAgain = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1113,7 +1113,7 @@ exports.shouldCorrectlySaveFileWithoutFilenameAndThenOpenAddFilenameAndSaveAgain
  * @ignore
  */
 exports.shouldCorrectlySaveFileAndThenOpenChangeFilenameAndSaveAgain = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1159,7 +1159,7 @@ exports.shouldCorrectlySaveFileAndThenOpenChangeFilenameAndSaveAgain = {
  * @ignore
  */
 exports.shouldCorrectlySaveFileAndThenAppendChangeFilenameAndSaveAgain = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1203,7 +1203,7 @@ exports.shouldCorrectlySaveFileAndThenAppendChangeFilenameAndSaveAgain = {
  * @ignore
  */
 exports.shouldCorrectlyHandleSeekWithStream = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1250,7 +1250,7 @@ exports.shouldCorrectlyHandleSeekWithStream = {
  * @ignore
  */
 exports.shouldCorrectlyHandleSeekIntoSecondChunkWithStream = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1296,7 +1296,7 @@ exports.shouldCorrectlyHandleSeekIntoSecondChunkWithStream = {
  * @ignore
  */
 exports['Should correctly handle multiple seeks'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1343,7 +1343,7 @@ exports['Should correctly handle multiple seeks'] = {
  * @ignore
  */
 exports['Should correctly handle multiple seeks over several chunks'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1433,7 +1433,7 @@ exports.shouldWriteFileWithMongofilesAndReadWithNodeJS = {
  * @ignore
  */
 exports['Should fail when attempting to append to a file'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1492,7 +1492,7 @@ exports['Should fail when attempting to append to a file'] = {
  * @ignore
  */
 exports.shouldCorrectlyStreamWriteToGridStoreObject = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1525,7 +1525,7 @@ exports.shouldCorrectlyStreamWriteToGridStoreObject = {
  * @ignore
  */
 exports.shouldCorrectlyStreamReadFromGridStoreObject = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1561,7 +1561,7 @@ exports.shouldCorrectlyStreamReadFromGridStoreObject = {
  * @ignore
  */
 exports.shouldCorrectlyWriteLargeFileStringAndReadBack = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1622,7 +1622,7 @@ exports.shouldCorrectlyWriteLargeFileStringAndReadBack = {
  * @ignore
  */
 exports.shouldCorrectlyWriteLargeFileBufferAndReadBack = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1683,7 +1683,7 @@ exports.shouldCorrectlyWriteLargeFileBufferAndReadBack = {
  * @ignore
  */
 exports['Should return same data for streaming as for direct read'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1752,7 +1752,7 @@ exports['Should return same data for streaming as for direct read'] = {
  * @ignore
  */
 exports.shouldCorrectlyFailDueToMissingChunks = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1788,7 +1788,7 @@ exports.shouldCorrectlyFailDueToMissingChunks = {
  * @ignore
  */
 exports.shouldCorrectlyWriteASmallPayload = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1833,7 +1833,7 @@ exports.shouldCorrectlyWriteASmallPayload = {
  * @ignore
  */
 exports.shouldCorrectlyWriteSmallFileUsingABuffer = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1872,7 +1872,7 @@ exports.shouldCorrectlyWriteSmallFileUsingABuffer = {
  * @ignore
  */
 exports.shouldSaveSmallFileToGridStore = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1908,7 +1908,7 @@ exports.shouldSaveSmallFileToGridStore = {
  * @ignore
  */
 exports.shouldCorrectlyOverwriteFile = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1945,7 +1945,7 @@ exports.shouldCorrectlyOverwriteFile = {
  * @ignore
  */
 exports.shouldCorrectlySeekWithString = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2041,7 +2041,7 @@ exports.shouldCorrectlySeekWithString = {
  * @ignore
  */
 exports.shouldCorrectlySeekAcrossChunks = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2092,7 +2092,7 @@ exports.shouldCorrectlySeekAcrossChunks = {
  * @ignore
  */
 exports.shouldCorrectlySaveEmptyFile = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2131,7 +2131,7 @@ exports.shouldCorrectlySaveEmptyFile = {
  * @ignore
  */
 exports.shouldEnsureThatChunkSizeCannotBeChangedDuringRead = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2163,7 +2163,7 @@ exports.shouldEnsureThatChunkSizeCannotBeChangedDuringRead = {
  * @ignore
  */
 exports.shouldEnsureChunkSizeCannotChangeAfterDataHasBeenWritten = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2191,7 +2191,7 @@ exports.shouldEnsureChunkSizeCannotChangeAfterDataHasBeenWritten = {
  * @ignore
  */
 exports.shouldCorrectlyStore8bitValues = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2228,7 +2228,7 @@ exports.shouldCorrectlyStore8bitValues = {
  * @ignore
  */
 exports.shouldAllowChangingChunkSize = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2259,7 +2259,7 @@ exports.shouldAllowChangingChunkSize = {
  * @ignore
  */
 exports.shouldAllowChangingChunkSizeAtCreationOfGridStore = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2288,7 +2288,7 @@ exports.shouldAllowChangingChunkSizeAtCreationOfGridStore = {
  * @ignore
  */
 exports.shouldCorrectlyCalculateMD5 = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2333,7 +2333,7 @@ exports.shouldCorrectlyCalculateMD5 = {
  * @ignore
  */
 exports.shouldCorrectlyUpdateUploadDate = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2383,7 +2383,7 @@ exports.shouldCorrectlyUpdateUploadDate = {
  * @ignore
  */
 exports.shouldCorrectlySaveContentType = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2427,7 +2427,7 @@ exports.shouldCorrectlySaveContentType = {
  * @ignore
  */
 exports.shouldCorrectlySaveContentTypeWhenPassedInAtGridStoreCreation = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2457,7 +2457,7 @@ exports.shouldCorrectlySaveContentTypeWhenPassedInAtGridStoreCreation = {
  * @ignore
  */
 exports.shouldCorrectlyReportIllegalMode = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2480,7 +2480,7 @@ exports.shouldCorrectlyReportIllegalMode = {
  * @ignore
  */
 exports.shouldCorrectlySaveAndRetrieveFileMetadata = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2522,7 +2522,7 @@ exports.shouldCorrectlySaveAndRetrieveFileMetadata = {
  * @ignore
  */
 exports.shouldNotThrowErrorOnClosingOfGridObject = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2555,7 +2555,7 @@ exports.shouldNotThrowErrorOnClosingOfGridObject = {
  * @ignore
  */
 exports.shouldNotThrowErrorOnClose = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2594,7 +2594,7 @@ exports.shouldNotThrowErrorOnClose = {
  * @ignore
  */
 exports.shouldCorrectlySafeFileUsingIntAsIdKey = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2652,7 +2652,7 @@ exports.shouldCorrectlySafeFileUsingIntAsIdKey = {
  * @ignore
  */
 exports.shouldCorrectlyReadWithPositionOffset = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2695,7 +2695,7 @@ exports.shouldCorrectlyReadWithPositionOffset = {
  * @ignore
  */
 exports.shouldCorrectlyWrite = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2741,7 +2741,7 @@ exports.shouldCorrectlyWrite = {
  * @ignore
  */
 exports.shouldCorrectlyReturnErrorMessageOnNoFileExisting = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2763,7 +2763,7 @@ exports.shouldCorrectlyReturnErrorMessageOnNoFileExisting = {
  * @ignore
  */
 exports['should fail when seeking on a write enabled gridstore object'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
