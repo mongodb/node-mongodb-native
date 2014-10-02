@@ -7935,3 +7935,434 @@ exports['Should correctly execute unordered batch with no errors'] = {
     // END
   }
 }
+
+/**************************************************************************
+ *
+ * CRUD TESTS
+ *
+ *************************************************************************/
+
+/**
+ * Example of a simple insertOne operation
+ *
+ * @example-class Collection
+ * @example-method insertOne
+ * @ignore
+ */
+exports['Should correctly execute insertOne operation'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
+      // Get the collection
+      var col = db.collection('insert_one');
+      col.insertOne({a:1}, function(err, r) {
+        test.equal(null, err);
+        test.equal(1, r.insertedCount);
+        // Finish up test
+        db.close();
+        test.done();
+      });
+    });
+    // END
+  }
+}
+
+/**
+ * Example of a simple insertMany operation
+ *
+ * @example-class Collection
+ * @example-method insertMany
+ * @ignore
+ */
+exports['Should correctly execute insertMany operation'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
+      // Get the collection
+      var col = db.collection('insert_many');
+      col.insertMany([{a:1}, {a:2}], function(err, r) {
+        test.equal(null, err);
+        test.equal(2, r.insertedCount);
+        // Finish up test
+        db.close();
+        test.done();
+      });
+    });
+    // END
+  }
+}
+
+/**
+ * Example of a simple updateOne operation
+ *
+ * @example-class Collection
+ * @example-method updateOne
+ * @ignore
+ */
+exports['Should correctly execute updateOne operation'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
+      // Get the collection
+      var col = db.collection('update_one');
+      col.updateOne({a:1}
+        , {$set: {a:2}}
+        , {upsert:true}, function(err, r) {
+        test.equal(null, err);
+        test.equal(1, r.matchedCount);
+        test.equal(0, r.modifiedCount);
+        test.equal(1, r.upsertedCount);
+        // Finish up test
+        db.close();
+        test.done();
+      });
+    });
+    // END
+  }
+}
+
+/**
+ * Example of a simple updateMany operation
+ *
+ * @example-class Collection
+ * @example-method updateMany
+ * @ignore
+ */
+exports['Should correctly execute updateMany operation'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
+      // Get the collection
+      var col = db.collection('update_many');
+      col.insertMany([{a:1}, {a:1}], function(err, r) {
+        test.equal(null, err);
+        test.equal(2, r.insertedCount);
+
+        // Update all documents
+        col.updateMany({a:1}, {$set: {b: 1}}, function(err, r) {
+          test.equal(null, err);
+          test.equal(2, r.matchedCount);
+          test.equal(2, r.modifiedCount);
+
+          // Finish up test
+          db.close();
+          test.done();
+        });
+      });
+    });
+    // END
+  }
+}
+
+/**
+ * Example of a simple removeOne operation
+ *
+ * @example-class Collection
+ * @example-method removeOne
+ * @ignore
+ */
+exports['Should correctly execute removeOne operation'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
+      // Get the collection
+      var col = db.collection('remove_one');
+      col.insertMany([{a:1}, {a:1}], function(err, r) {
+        test.equal(null, err);
+        test.equal(2, r.insertedCount);
+
+        col.removeOne({a:1}, function(err, r) {
+          test.equal(null, err);
+          test.equal(1, r.deletedCount);
+          // Finish up test
+          db.close();
+          test.done();
+        });
+      });
+    });
+    // END
+  }
+}
+
+/**
+ * Example of a simple removeMany operation
+ *
+ * @example-class Collection
+ * @example-method removeMany
+ * @ignore
+ */
+exports['Should correctly execute removeMany operation'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
+      // Get the collection
+      var col = db.collection('remove_many');
+      col.insertMany([{a:1}, {a:1}], function(err, r) {
+        test.equal(null, err);
+        test.equal(2, r.insertedCount);
+
+        // Update all documents
+        col.removeMany({a:1}, function(err, r) {
+          test.equal(null, err);
+          test.equal(2, r.deletedCount);
+
+          // Finish up test
+          db.close();
+          test.done();
+        });
+      });
+    });
+    // END
+  }
+}
+
+/**
+ * Example of a simple bulkWrite operation
+ *
+ * @example-class Collection
+ * @example-method bulkWrite
+ * @ignore
+ */
+exports['Should correctly execute bulkWrite operation'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
+      // Get the collection
+      var col = db.collection('bulk_write');
+      col.insertMany([{c:1}], {w:1}, function(err, r) {
+        test.equal(null, err);
+        test.equal(1, r.result.n);
+
+        col.bulkWrite([
+            { insertOne: { a: 1 } }
+          , { insertMany: [{ g: 1 }, { g: 2 }] }
+          , { updateOne: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
+          , { updateMany: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
+          , { removeOne: { q: {c:1} } }
+          , { removeMany: { q: {c:1} } }]
+        , {ordered:true, w:1}, function(err, r) {
+          test.equal(null, err);
+          test.equal(3, r.nInserted);
+          test.equal(1, r.nUpserted);
+          test.equal(1, r.nRemoved);
+
+          // Crud fields
+          test.equal(3, r.insertedCount);
+          test.equal(1, r.matchedCount);
+          test.equal(0, r.modifiedCount);
+          test.equal(1, r.removedCount);
+          test.equal(1, r.upsertedCount);
+          test.equal(1, r.upsertedIds.length);
+
+          // Ordered bulk operation
+          db.close();
+          test.done();
+        });
+      });
+    });
+    // END
+  }
+}
+
+/**
+ * Example of a simple findOneAndDelete operation
+ *
+ * @example-class Collection
+ * @example-method findOneAndDelete
+ * @ignore
+ */
+exports['Should correctly execute findOneAndDelete operation'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
+      // Get the collection
+      var col = db.collection('find_one_and_delete');
+      col.insertMany([{a:1, b:1}], {w:1}, function(err, r) {
+        test.equal(null, err);
+        test.equal(1, r.result.n);
+        
+        col.findOneAndDelete({a:1}
+          , { projection: {b:1}, sort: {a:1} }
+          , function(err, r) {
+            test.equal(null, err);
+            test.equal(1, r.lastErrorObject.n);
+            test.equal(1, r.value.b);
+
+            db.close();
+            test.done();
+        });
+      });
+    });
+    // END
+  }
+}
+
+/**
+ * Example of a simple findOneAndReplace operation
+ *
+ * @example-class Collection
+ * @example-method findOneAndReplace
+ * @ignore
+ */
+exports['Should correctly execute findOneAndReplace operation'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
+      // Get the collection
+      var col = db.collection('find_one_and_replace');
+      col.insertMany([{a:1, b:1}], {w:1}, function(err, r) {
+        test.equal(null, err);
+        test.equal(1, r.result.n);
+        
+        col.findOneAndReplace({a:1}
+          , {c:1, b:1}
+          , { 
+                projection: {b:1, c:1}
+              , sort: {a:1}
+              , returnOriginal: false
+              , upsert: true 
+            }
+          , function(err, r) {
+            test.equal(null, err);
+            test.equal(1, r.lastErrorObject.n);
+            test.equal(1, r.value.b);
+            test.equal(1, r.value.c);
+
+            db.close();
+            test.done();
+        });
+      });
+    });      
+    // END
+  }
+}
+
+/**
+ * Example of a simple findOneAndUpdate operation
+ *
+ * @example-class Collection
+ * @example-method findOneAndUpdate
+ * @ignore
+ */
+exports['Should correctly execute findOneAndUpdate operation'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
+      // Get the collection
+      var col = db.collection('find_one_and_update');
+      col.insertMany([{a:1, b:1}], {w:1}, function(err, r) {
+        test.equal(null, err);
+        test.equal(1, r.result.n);
+        
+        col.findOneAndUpdate({a:1}
+          , {$set: {d:1}}
+          , {
+                projection: {b:1, d:1}
+              , sort: {a:1}
+              , returnOriginal: false
+              , upsert: true
+            }
+          , function(err, r) {
+            test.equal(null, err);
+            test.equal(1, r.lastErrorObject.n);
+            test.equal(1, r.value.b);
+            test.equal(1, r.value.d);
+
+            db.close();
+            test.done();
+        });
+      });
+    });
+    // END
+  }
+}

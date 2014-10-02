@@ -16,7 +16,7 @@ The driver crud operations are defined as the operations performed to insert/upd
 ## Write Methods
 
 ### Inserting Documents
-The *insert* method exists on the *Collection* class and is used to insert documents into MongoDB. Code speaks a thousand words so let's see two simple examples of inserting documents.
+The *insertOne* and *insertMany* methods exists on the *Collection* class and is used to insert documents into MongoDB. Code speaks a thousand words so let's see two simple examples of inserting documents.
 
 ```js
 var MongoClient = require('mongodb').MongoClient
@@ -30,14 +30,14 @@ MongoClient.connect(url, function(err, db) {
   console.log("Connected correctly to server");
 
   // Insert a single document
-  db.collection('inserts').insert({a:1}, function(err, r) {
+  db.collection('inserts').insertOne({a:1}, function(err, r) {
     assert.equal(null, err);
-    assert.equal(1, r.result.n);
+    assert.equal(1, r.insertedCount);
 
     // Insert multiple documents
-    db.collection('inserts').insert([{a:2}, {a:3}], function(err, r) {
+    db.collection('inserts').insertMany([{a:2}, {a:3}], function(err, r) {
       assert.equal(null, err);
-      assert.equal(2, r.result.n);
+      assert.equal(2, r.insertedCount);
 
       db.close();
     });
@@ -47,7 +47,7 @@ MongoClient.connect(url, function(err, db) {
 
 The first insert inserts a single document into the *inserts* collection. Notice that we are not explicitly creating a new *inserts* collection as the server will create it implicitly when we insert the first document. The method `Db.createIndex` only really needs to be used when creating non standard collections such as capped collections or where other parameters than the default collections need to be applied.
 
-The insert method also accepts an second argument that can be an options object. This object can have the following fields.
+The *insertOne* and *insertMany* methods also accepts an second argument that can be an options object. This object can have the following fields.
 
 *  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
 *  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
@@ -69,7 +69,7 @@ MongoClient.connect(url, function(err, db) {
   console.log("Connected correctly to server");
 
   // Insert a single document
-  db.collection('inserts').insert({
+  db.collection('inserts').insertOne({
         a:1
       , b: function() { return 'hello'; }
     }, {
@@ -79,16 +79,16 @@ MongoClient.connect(url, function(err, db) {
       , forceServerObjectId: true
     }, function(err, r) {
     assert.equal(null, err);
-    assert.equal(1, r.result.n);
+    assert.equal(1, r.insertedCount);
     db.close();
   });
 });
 ```
 
-That wraps up the *insert* method. Next let's look at the *update* method.
+That wraps up the *insert* methods. Next let's look at the *update* methods.
 
 ### Updating Documents
-The *update* method exists on the *Collection* class and is used to update and upsert documents into MongoDB. Let's look at a couple of usage examples.
+The *updateOne* and *updateMany* methods exists on the *Collection* class and is used to update and upsert documents into MongoDB. Let's look at a couple of usage examples.
 
 ```js
 var MongoClient = require('mongodb').MongoClient
@@ -103,30 +103,26 @@ MongoClient.connect(url, function(err, db) {
 
   var col = db.collection('updates');
   // Insert a single document
-  col.insert([{a:1}, {a:2}, {a:2}], function(err, r) {
+  col.insertMany([{a:1}, {a:2}, {a:2}], function(err, r) {
     assert.equal(null, err);
-    assert.equal(3, r.result.n);
+    assert.equal(3, r.insertedCount);
 
     // Update a single document
-    col.update({a:1}, {$set: {b: 1}}, {
-      multi: false
-    }, function(err, r) {
+    col.updateOne({a:1}, {$set: {b: 1}}, function(err, r) {
       assert.equal(null, err);
-      assert.equal(1, r.result.n);
+      assert.equal(1, r.matchedCount);
 
       // Update multiple documents
-      col.update({a:2}, {$set: {b: 1}}, {
-        multi: true
-      }, function(err, r) {
+      col.updateMany({a:2}, {$set: {b: 1}}, function(err, r) {
         assert.equal(null, err);
-        assert.equal(2, r.result.n);
+        assert.equal(2, r.matchedCount);
 
         // Upsert a single document
-        col.update({a:3}, {$set: {b: 1}}, {
+        col.updateOne({a:3}, {$set: {b: 1}}, {
           upsert: true
         }, function(err, r) {
           assert.equal(null, err);
-          assert.equal(2, r.result.n);
+          assert.equal(2, r.matchedCount);
           db.close();
         });
       });
