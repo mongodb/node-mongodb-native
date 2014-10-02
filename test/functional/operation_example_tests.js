@@ -8192,35 +8192,30 @@ exports['Should correctly execute bulkWrite operation'] = {
     // BEGIN
       // Get the collection
       var col = db.collection('bulk_write');
-      col.insertMany([{c:1}], {w:1}, function(err, r) {
+      col.bulkWrite([
+          { insertOne: { a: 1 } }
+        , { insertMany: [{ g: 1 }, { g: 2 }] }
+        , { updateOne: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
+        , { updateMany: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
+        , { removeOne: { q: {c:1} } }
+        , { removeMany: { q: {c:1} } }]
+      , {ordered:true, w:1}, function(err, r) {
         test.equal(null, err);
-        test.equal(1, r.result.n);
+        test.equal(3, r.nInserted);
+        test.equal(1, r.nUpserted);
+        test.equal(1, r.nRemoved);
 
-        col.bulkWrite([
-            { insertOne: { a: 1 } }
-          , { insertMany: [{ g: 1 }, { g: 2 }] }
-          , { updateOne: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
-          , { updateMany: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
-          , { removeOne: { q: {c:1} } }
-          , { removeMany: { q: {c:1} } }]
-        , {ordered:true, w:1}, function(err, r) {
-          test.equal(null, err);
-          test.equal(3, r.nInserted);
-          test.equal(1, r.nUpserted);
-          test.equal(1, r.nRemoved);
+        // Crud fields
+        test.equal(3, r.insertedCount);
+        test.equal(1, r.matchedCount);
+        test.equal(0, r.modifiedCount);
+        test.equal(1, r.removedCount);
+        test.equal(1, r.upsertedCount);
+        test.equal(1, r.upsertedIds.length);
 
-          // Crud fields
-          test.equal(3, r.insertedCount);
-          test.equal(1, r.matchedCount);
-          test.equal(0, r.modifiedCount);
-          test.equal(1, r.removedCount);
-          test.equal(1, r.upsertedCount);
-          test.equal(1, r.upsertedIds.length);
-
-          // Ordered bulk operation
-          db.close();
-          test.done();
-        });
+        // Ordered bulk operation
+        db.close();
+        test.done();
       });
     });
     // END

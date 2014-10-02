@@ -51,7 +51,7 @@ The *insertOne* and *insertMany* methods also accepts an second argument that ca
 
 *  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
 *  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
-*  `journal`, (Boolean, default:false) write waits for journal sync.
+*  `j`, (Boolean, default:false) write waits for journal sync.
 *  `serializeFunctions`, (Boolean, default:false) serialize functions on an object to mongodb, by default the driver does not serialize any functions on the passed in documents.
 *  `forceServerObjectId`, (Boolean, default:false) Force server to assign _id values instead of driver.
 
@@ -111,18 +111,21 @@ MongoClient.connect(url, function(err, db) {
     col.updateOne({a:1}, {$set: {b: 1}}, function(err, r) {
       assert.equal(null, err);
       assert.equal(1, r.matchedCount);
+      assert.equal(1, r.modifiedCount);
 
       // Update multiple documents
       col.updateMany({a:2}, {$set: {b: 1}}, function(err, r) {
         assert.equal(null, err);
         assert.equal(2, r.matchedCount);
+        assert.equal(2, r.modifiedCount);
 
         // Upsert a single document
         col.updateOne({a:3}, {$set: {b: 1}}, {
           upsert: true
         }, function(err, r) {
           assert.equal(null, err);
-          assert.equal(2, r.matchedCount);
+          assert.equal(0, r.matchedCount);
+          assert.equal(1, r.upsertedCount);
           db.close();
         });
       });
@@ -135,14 +138,14 @@ The *update* method also accepts an second argument that can be an options objec
 
 *  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
 *  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
-*  `journal`, (Boolean, default:false) write waits for journal sync.
+*  `j`, (Boolean, default:false) write waits for journal sync.
 *  `multi`, (Boolean, default:false) Update one/all documents with operation.
 *  `upsert`, (Boolean, default:false) Update operation is an upsert.
 
 Just as for *insert* the *update* method allows you to specify a per operation write concern using the *w*, *wtimeout* and *fsync* parameters
 
 ### Removing Documents
-The *remove* method exists on the *Collection* class and is used to remove documents from MongoDB. Let's look at a couple of usage examples.
+The *removeOne* and *removeMany* methods exist on the *Collection* class and is used to remove documents from MongoDB. Let's look at a couple of usage examples.
 
 ```js
 var MongoClient = require('mongodb').MongoClient
@@ -157,23 +160,21 @@ MongoClient.connect(url, function(err, db) {
 
   var col = db.collection('removes');
   // Insert a single document
-  col.insert([{a:1}, {a:2}, {a:2}], function(err, r) {
+  col.insertMany([{a:1}, {a:2}, {a:2}], function(err, r) {
     assert.equal(null, err);
-    assert.equal(3, r.result.n);
+    assert.equal(3, r.insertedCount);
 
     // Update a single document
-    col.remove({a:1}, {$set: {b: 1}}, {
-      single: true
-    }, function(err, r) {
+    col.removeOne({a:1}
+      , {$set: {b: 1}}, function(err, r) {
       assert.equal(null, err);
-      assert.equal(1, r.result.n);
+      assert.equal(1, r.deletedCount);
 
       // Update multiple documents
-      col.remove({a:2}, {$set: {b: 1}}, {
-        single: false
-      }, function(err, r) {
+      col.removeMany({a:2}
+        , {$set: {b: 1}}, function(err, r) {
         assert.equal(null, err);
-        assert.equal(2, r.result.n);
+        assert.equal(2, r.deletedCount);
         db.close();
       });
     });
@@ -185,13 +186,13 @@ The *remove* method also accepts an second argument that can be an options objec
 
 *  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
 *  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
-*  `journal`, (Boolean, default:false) write waits for journal sync.
+*  `j`, (Boolean, default:false) write waits for journal sync.
 *  `single`, (Boolean, default:false) Removes the first document found.
 
 Just as for *update* and *insert* the *remove* method allows you to specify a per operation write concern using the *w*, *wtimeout* and *fsync* parameters
 
 ### FindAndModify and FindAndRemove
-The two methods *findAndModify* and *findAndRemove* are special commands that allows the user to update or upsert a document and have the modified or existing document returned. It comes at a cost as the operation takes a write lock for the duration of the operation as it needs to ensure the modification is *atomic*. Let's look at *findAndModify* first using an example.
+The two methods *findOneAndUpdate*, *findOneAndDelete* and *findOneAndReplace* are special commands that allows the user to update or upsert a document and have the modified or existing document returned. It comes at a cost as the operation takes a write lock for the duration of the operation as it needs to ensure the modification is *atomic*. Let's look at *findOneAndUpdate* first using an example.
 
 ```js
 var MongoClient = require('mongodb').MongoClient
@@ -211,17 +212,16 @@ MongoClient.connect(url, function(err, db) {
     assert.equal(3, r.result.n);
 
     // Modify and return the modified document
-    col.findAndModify({a:1}, [[a,1]], {$set: {b: 1}}, {
-        new: true
+    col.findOneAndUpdate({a:1}, {$set: {b: 1}}, {
+        returnOriginal: false
+      , sort: [[a,1]]
       , upsert: true
     }, function(err, doc) {
       assert.equal(null, err);
       assert.equal(1, r.value.b);
 
       // Remove and return a document
-      col.findAndModify({a:2}, {$set: {b: 1}}, {
-        remove: true
-      }, function(err, r) {
+      col.findOneAndDelete({a:2}, function(err, r) {
         assert.equal(null, err);
         assert.ok(r.value.b == null);
         db.close();
@@ -231,16 +231,17 @@ MongoClient.connect(url, function(err, db) {
 });
 ```
 
-The *findAndModify* method also accepts an second argument that can be an options object. This object can have the following fields.
+The *findOneAndUpdate* method also accepts an second argument that can be an options object. This object can have the following fields.
 
 *  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
 *  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
-*  `journal`, (Boolean, default:false) write waits for journal sync.
-*  `remove`, (Boolean, default:false) Set to true to remove the object before returning.
+*  `j`, (Boolean, default:false) write waits for journal sync.
 *  `upsert`, (Boolean, default:false) Perform an upsert operation.
-*  `new`, (Boolean, default:false) Set to true if you want to return the modified object rather than the original. Ignored for remove.
+*  `sort`, (Object, default:null) Sort for find operation.
+*  `projection`, (Object, default:null) Projection for returned result
+*  `returnOriginal`, (Boolean, default:true) Set to false if you want to return the modified object rather than the original. Ignored for remove.
 
-The *findAndRemove* function is a simplified version of the *findAndRemove* function, especially defined to help remove a document. Let's look at an example of usage.
+The *findAndRemove* function is a function especially defined to help remove a document. Let's look at an example of usage.
 
 ```js
 var MongoClient = require('mongodb').MongoClient
@@ -260,7 +261,9 @@ MongoClient.connect(url, function(err, db) {
     assert.equal(3, r.result.n);
 
     // Remove a document from MongoDB and return it
-    col.findAndRemove({a:1}, [[a,1]], {$set: {b: 1}}
+    col.findOneAndRemove({a:1}, {
+        sort: [[a,1]]
+      }
       , function(err, doc) {
         assert.equal(null, err);
         assert.ok(r.value.b == null);
@@ -270,11 +273,57 @@ MongoClient.connect(url, function(err, db) {
 });
 ```
 
-Just as for *findAndModify* it allows for an object of options to be passed in that can have the following fields.
+Just as for *findOneAndUpdate* it allows for an object of options to be passed in that can have the following fields.
 
 *  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
 *  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
-*  `journal`, (Boolean, default:false) write waits for journal sync.
+*  `j`, (Boolean, default:false) write waits for journal sync.
+*  `sort`, (Object, default:null) Sort for find operation.
+
+### BulkWrite
+The *bulkWrite* function allows for a simple set of bulk operations to be done in a non fluent way as in comparison to the bulk API discussed next. Let's look at an example.
+
+```js
+var MongoClient = require('mongodb').MongoClient
+  , assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://localhost:27017/myproject';
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log("Connected correctly to server");
+
+  // Get the collection
+  var col = db.collection('bulk_write');
+  col.bulkWrite([
+      { insertOne: { a: 1 } }
+    , { insertMany: [{ g: 1 }, { g: 2 }] }
+    , { updateOne: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
+    , { updateMany: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
+    , { removeOne: { q: {c:1} } }
+    , { removeMany: { q: {c:1} } }]
+  , {ordered:true, w:1}, function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.insertedCount);
+    assert.equal(1, r.matchedCount);
+    assert.equal(0, r.modifiedCount);
+    assert.equal(1, r.removedCount);
+    assert.equal(1, r.upsertedCount);
+    assert.equal(1, r.upsertedIds.length);
+
+    // Ordered bulk operation
+    db.close();
+  });
+});
+```
+
+As we can see the *bulkWrite* function takes an array of operation that can be objects of either *insertOne*, *insertMany*, *updateOne*, *updateMany*, *removeOne* or *removeMany*. It also takes a second parameter that takes the following options.
+
+*  `ordered`, (Boolean, default:true) Execute in order or out of order.
+*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
+*  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
+*  `j`, (Boolean, default:false) write waits for journal sync.
 
 This covers the basic write operations. Let's have a look at the Bulk write operations next.
 
@@ -374,9 +423,9 @@ MongoClient.connect(url, function(err, db) {
 
   var col = db.collection('find');
   // Insert a single document
-  col.insert([{a:1}, {a:1}, {a:1}], function(err, r) {
+  col.insertMany([{a:1}, {a:1}, {a:1}], function(err, r) {
     assert.equal(null, err);
-    assert.equal(3, r.result.n);
+    assert.equal(3, r.insertedCount);
 
     // Get first two documents that match the query
     col.find({a:1}).limit(2).toArray(function(err, docs) {
@@ -407,9 +456,9 @@ MongoClient.connect(url, function(err, db) {
 
   var col = db.collection('find');
   // Insert a single document
-  col.insert([{a:1}, {a:1}, {a:1}], function(err, r) {
+  col.insertMany([{a:1}, {a:1}, {a:1}], function(err, r) {
     assert.equal(null, err);
-    assert.equal(3, r.result.n);
+    assert.equal(3, r.insertedCount);
 
     // Get first documents from cursor
     col.find({a:1}).limit(2).next(function(err, doc) {
@@ -436,9 +485,9 @@ MongoClient.connect(url, function(err, db) {
 
   var col = db.collection('find');
   // Insert a single document
-  col.insert([{a:1}, {a:1}, {a:1}], function(err, r) {
+  col.insertMany([{a:1}, {a:1}, {a:1}], function(err, r) {
     assert.equal(null, err);
-    assert.equal(3, r.result.n);
+    assert.equal(3, r.insertedCount);
 
     // Get first documents from cursor using each
     col.find({a:1}).limit(2).each(function(err, doc) {
