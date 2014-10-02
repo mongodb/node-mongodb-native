@@ -218,6 +218,7 @@ var testFiles =[
   , '/test/functional/gridfs_tests.js'
   , '/test/functional/bulk_tests.js'
   , '/test/functional/operation_example_tests.js'
+  , '/test/functional/crud_api_tests.js'
 
   // Logging tests
   , '/test/functional/logger_tests.js'

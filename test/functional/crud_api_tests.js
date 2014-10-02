@@ -347,34 +347,69 @@ exports['should correctly execute insert methods using crud api'] = {
           test.equal(2, r.insertedCount);
           test.equal(2, r.insertedIds.length);
           
-          bulkWrite();
+          // Ordered bulk unordered
+          bulkWriteUnOrdered();
         });
       }
 
       //
-      // Bulk write method
+      // Bulk write method unordered
       // -------------------------------------------------
-      var bulkWrite = function() {
+      var bulkWriteUnOrdered = function() {
         db.collection('t2_5').insertMany([{c:1}], {w:1}, function(err, r) {
           test.equal(null, err);
           test.equal(1, r.result.n);
   
-          db.collection('t2_5').bulkWrite({
-            operations: [
-                { insert: { a: 1 } }
-              , { updateOne: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
-              , { updateMany: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
-              , { removeOne: { q: {c:1} } }
-              , { removeMany: { q: {c:1} } }]
-            , ordered: true
-          }, {w:1}, function(err, r) {
+          db.collection('t2_5').bulkWrite([
+              { insertOne: { a: 1 } }
+            , { insertMany: [{ g: 1 }, { g: 2 }] }
+            , { updateOne: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
+            , { updateMany: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
+            , { removeOne: { q: {c:1} } }
+            , { removeMany: { q: {c:1} } }]
+          , {ordered:false, w:1}, function(err, r) {
             test.equal(null, err);
-            test.equal(1, r.nInserted);
+            test.equal(3, r.nInserted);
             test.equal(1, r.nUpserted);
             test.equal(1, r.nRemoved);
 
             // Crud fields
-            test.equal(1, r.insertedCount);
+            test.equal(3, r.insertedCount);
+            test.equal(1, r.matchedCount);
+            test.equal(0, r.modifiedCount);
+            test.equal(1, r.removedCount);
+            test.equal(1, r.upsertedCount);
+            test.equal(1, r.upsertedIds.length);
+
+            // Ordered bulk operation
+            bulkWriteOrdered();
+          });
+        });
+      }
+
+      //
+      // Bulk write method ordered
+      // -------------------------------------------------
+      var bulkWriteOrdered = function() {
+        db.collection('t2_6').insertMany([{c:1}], {w:1}, function(err, r) {
+          test.equal(null, err);
+          test.equal(1, r.result.n);
+  
+          db.collection('t2_6').bulkWrite([
+              { insertOne: { a: 1 } }
+            , { insertMany: [{ g: 1 }, { g: 2 }] }
+            , { updateOne: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
+            , { updateMany: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
+            , { removeOne: { q: {c:1} } }
+            , { removeMany: { q: {c:1} } }]
+          , {ordered:true, w:1}, function(err, r) {
+            test.equal(null, err);
+            test.equal(3, r.nInserted);
+            test.equal(1, r.nUpserted);
+            test.equal(1, r.nRemoved);
+
+            // Crud fields
+            test.equal(3, r.insertedCount);
             test.equal(1, r.matchedCount);
             test.equal(0, r.modifiedCount);
             test.equal(1, r.removedCount);
@@ -423,21 +458,17 @@ exports['should correctly execute update methods using crud api'] = {
           test.equal(null, err);
           test.equal(1, r.result.n);
           
-          db.collection('t3_2').updateOne({
-              filter: { a: 1 }
-            , update: { $set: { a: 1 } }
-            , upsert: true
-          }, function(err, r) {
+          db.collection('t3_2').updateOne({ a: 1 }
+            , { $set: { a: 1 } }
+            , { upsert: true }, function(err, r) {
             test.equal(null, err);
             test.equal(1, r.result.n);
             test.equal(1, r.matchedCount);
             test.equal(1, r.modifiedCount);
             test.ok(r.upsertedId != null);
 
-            db.collection('t3_2').updateOne({
-                filter: { c: 1 }
-              , update: { $set: { a: 1 } }
-            }, function(err, r) {
+            db.collection('t3_2').updateOne({ c: 1 }
+              , { $set: { a: 1 } }, function(err, r) {
               test.equal(null, err);
               test.equal(1, r.result.n);
               test.equal(1, r.matchedCount);
@@ -454,22 +485,18 @@ exports['should correctly execute update methods using crud api'] = {
       // Replace one method
       // -------------------------------------------------
       var replaceOne = function() {
-        db.collection('t3_3').replaceOne({
-            filter: { a: 1 }
-          , replacement: { a : 2 }
-          , upsert: true
-        }, function(err, r) {
+        db.collection('t3_3').replaceOne({ a: 1 }
+          , { a : 2 }
+          , { upsert: true }, function(err, r) {
           test.equal(null, err);
           test.equal(1, r.result.n);
           test.equal(1, r.matchedCount);
           test.equal(1, r.modifiedCount);
           test.ok(r.upsertedId != null);
 
-          db.collection('t3_3').replaceOne({
-              filter: { a: 2 }
-            , replacement: { a : 3 }
-            , upsert: true
-          }, function(err, r) {
+          db.collection('t3_3').replaceOne({ a: 2 }
+            , { a : 3 }
+            , { upsert: true }, function(err, r) {
             test.equal(null, err);
             test.equal(1, r.result.n);
             test.ok(r.result.upserted == null);
@@ -491,22 +518,18 @@ exports['should correctly execute update methods using crud api'] = {
           test.equal(null, err);
           test.equal(2, r.result.n);
   
-          db.collection('t3_4').updateMany({
-              filter: { a: 1 }
-            , update: { $set: { a: 2 } }
-            , upsert: true
-          }, {w:1}, function(err, r) {
+          db.collection('t3_4').updateMany({ a: 1 }
+            , { $set: { a: 2 } }
+            , { upsert: true, w: 1 }, function(err, r) {
             test.equal(null, err);
             test.equal(2, r.result.n);
             test.equal(2, r.matchedCount);
             test.equal(2, r.modifiedCount);
             test.ok(r.upsertedId == null);
 
-            db.collection('t3_4').updateMany({
-                filter: { c: 1 }
-              , update: { $set: { d: 2 } }
-              , upsert: true
-            }, {w:1}, function(err, r) {
+            db.collection('t3_4').updateMany({ c: 1 }
+              , { $set: { d: 2 } }
+              , { upsert: true, w: 1 }, function(err, r) {
               test.equal(null, err);
               test.equal(1, r.matchedCount);
               test.equal(1, r.modifiedCount);
@@ -560,14 +583,13 @@ exports['should correctly execute remove methods using crud api'] = {
           test.equal(null, err);
           test.equal(2, r.result.n);
 
-          db.collection('t4_2').removeOne({
-            filter: { a: 1 }
-          }, function(err, r) {
-            test.equal(null, err);
-            test.equal(1, r.result.n);
-            test.equal(1, r.removedCount);
-            
-            removeMany();
+          db.collection('t4_2').removeOne({ a: 1 }
+            , function(err, r) {
+              test.equal(null, err);
+              test.equal(1, r.result.n);
+              test.equal(1, r.removedCount);
+              
+              removeMany();
           });
         });
       }
@@ -580,15 +602,14 @@ exports['should correctly execute remove methods using crud api'] = {
           test.equal(null, err);
           test.equal(2, r.result.n);
 
-          db.collection('t4_3').removeMany({
-            filter: { a: 1 }
-          }, function(err, r) {
-            test.equal(null, err);
-            test.equal(2, r.result.n);
-            test.equal(2, r.removedCount);
-            
-            db.close();
-            test.done();
+          db.collection('t4_3').removeMany({ a: 1 }
+            , function(err, r) {
+              test.equal(null, err);
+              test.equal(2, r.result.n);
+              test.equal(2, r.removedCount);
+              
+              db.close();
+              test.done();
           });
         });
       }
@@ -617,16 +638,14 @@ exports['should correctly execute findAndModify methods using crud api'] = {
           test.equal(null, err);
           test.equal(1, r.result.n);
           
-          db.collection('t5_1').findOneAndRemove({
-              filter: {a:1}
-            , projection: {b:1}
-            , sort: {a:1}
-          }, function(err, r) {
-            test.equal(null, err);
-            test.equal(1, r.lastErrorObject.n);
-            test.equal(1, r.value.b);
+          db.collection('t5_1').findOneAndDelete({a:1}
+            , { projection: {b:1}, sort: {a:1} }
+            , function(err, r) {
+              test.equal(null, err);
+              test.equal(1, r.lastErrorObject.n);
+              test.equal(1, r.value.b);
 
-            findOneAndReplace();
+              findOneAndReplace();
           });
         });
       }
@@ -639,20 +658,21 @@ exports['should correctly execute findAndModify methods using crud api'] = {
           test.equal(null, err);
           test.equal(1, r.result.n);
           
-          db.collection('t5_2').findOneAndReplace({
-              filter: {a:1}
-            , replacement: {c:1, b:1}
-            , projection: {b:1, c:1}
-            , sort: {a:1}
-            , returnReplaced: true
-            , upsert: true
-          }, function(err, r) {
-            test.equal(null, err);
-            test.equal(1, r.lastErrorObject.n);
-            test.equal(1, r.value.b);
-            test.equal(1, r.value.c);
+          db.collection('t5_2').findOneAndReplace({a:1}
+            , {c:1, b:1}
+            , { 
+                  projection: {b:1, c:1}
+                , sort: {a:1}
+                , returnOriginal: false
+                , upsert: true 
+              }
+            , function(err, r) {
+              test.equal(null, err);
+              test.equal(1, r.lastErrorObject.n);
+              test.equal(1, r.value.b);
+              test.equal(1, r.value.c);
 
-            findOneAndUpdate();
+              findOneAndUpdate();
           });
         });
       }
@@ -665,61 +685,27 @@ exports['should correctly execute findAndModify methods using crud api'] = {
           test.equal(null, err);
           test.equal(1, r.result.n);
           
-          db.collection('t5_3').findOneAndUpdate({
-              filter: {a:1}
-            , update: {$set: {d:1}}
-            , projection: {b:1, d:1}
-            , sort: {a:1}
-            , returnReplaced: true
-            , upsert: true
-          }, function(err, r) {
-            test.equal(null, err);
-            test.equal(1, r.lastErrorObject.n);
-            test.equal(1, r.value.b);
-            test.equal(1, r.value.d);
+          db.collection('t5_3').findOneAndUpdate({a:1}
+            , {$set: {d:1}}
+            , {
+                  projection: {b:1, d:1}
+                , sort: {a:1}
+                , returnOriginal: false
+                , upsert: true
+              }
+            , function(err, r) {
+              test.equal(null, err);
+              test.equal(1, r.lastErrorObject.n);
+              test.equal(1, r.value.b);
+              test.equal(1, r.value.d);
 
-            db.close();
-            test.done();
+              db.close();
+              test.done();
           });
         });
       }
 
       findOneAndRemove();
-    });
-  }
-}
-
-/**
- * @ignore
- */
-exports['should correctly execute distinct method using crud api'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-    // Establish connection to db
-    db.open(function(err, db) {
-
-      db.collection('t6').insert([{a:1, b:0}, {a:1, b:1}, {a:1, b:2}, {a:1}], function(err) {
-        test.equal(null, err);
-
-        db.collection('t6').distinct({
-            fieldName: 'b'
-          , filter: {a:1}
-          , maxTimeMS: 100
-        }, function(err, result) {
-          test.equal(null, err);
-          test.equal(0, result[0]);
-          test.equal(1, result[1]);
-          test.equal(2, result[2]);
-
-          db.close();
-          test.done();
-        });
-      });
     });
   }
 }
