@@ -1,3 +1,8 @@
+2.0.0-alpha2 2014-10-02
+-----------------------
+- CRUD API (insertOne, insertMany, updateOne, updateMany, removeOne, removeMany, bulkWrite, findAndDelete, findAndUpdate, findAndReplace)
+- Cluster Management Spec compatible
+
 2.0.0-alpha1 2014-09-08
 -----------------------
 - Insert method allows only up 1000 pr batch for legacy as well as 2.6 mode
