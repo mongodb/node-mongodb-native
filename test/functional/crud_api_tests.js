@@ -377,7 +377,7 @@ exports['should correctly execute insert methods using crud api'] = {
             test.equal(3, r.insertedCount);
             test.equal(1, r.matchedCount);
             test.equal(0, r.modifiedCount);
-            test.equal(1, r.removedCount);
+            test.equal(1, r.deletedCount);
             test.equal(1, r.upsertedCount);
             test.equal(1, r.upsertedIds.length);
 
@@ -412,7 +412,7 @@ exports['should correctly execute insert methods using crud api'] = {
             test.equal(3, r.insertedCount);
             test.equal(1, r.matchedCount);
             test.equal(0, r.modifiedCount);
-            test.equal(1, r.removedCount);
+            test.equal(1, r.deletedCount);
             test.equal(1, r.upsertedCount);
             test.equal(1, r.upsertedIds.length);
 
@@ -464,7 +464,6 @@ exports['should correctly execute update methods using crud api'] = {
             test.equal(null, err);
             test.equal(1, r.result.n);
             test.equal(1, r.matchedCount);
-            test.equal(1, r.modifiedCount);
             test.ok(r.upsertedId != null);
 
             db.collection('t3_2').updateOne({ c: 1 }
@@ -472,7 +471,6 @@ exports['should correctly execute update methods using crud api'] = {
               test.equal(null, err);
               test.equal(1, r.result.n);
               test.equal(1, r.matchedCount);
-              test.equal(1, r.modifiedCount);
               test.ok(r.upsertedId == null);
             
               replaceOne();
@@ -491,7 +489,6 @@ exports['should correctly execute update methods using crud api'] = {
           test.equal(null, err);
           test.equal(1, r.result.n);
           test.equal(1, r.matchedCount);
-          test.equal(1, r.modifiedCount);
           test.ok(r.upsertedId != null);
 
           db.collection('t3_3').replaceOne({ a: 2 }
@@ -502,7 +499,6 @@ exports['should correctly execute update methods using crud api'] = {
             test.ok(r.result.upserted == null);
 
             test.equal(1, r.matchedCount);
-            test.equal(1, r.modifiedCount);
             test.ok(r.upsertedId == null);
             
             updateMany();
@@ -524,7 +520,6 @@ exports['should correctly execute update methods using crud api'] = {
             test.equal(null, err);
             test.equal(2, r.result.n);
             test.equal(2, r.matchedCount);
-            test.equal(2, r.modifiedCount);
             test.ok(r.upsertedId == null);
 
             db.collection('t3_4').updateMany({ c: 1 }
@@ -532,7 +527,6 @@ exports['should correctly execute update methods using crud api'] = {
               , { upsert: true, w: 1 }, function(err, r) {
               test.equal(null, err);
               test.equal(1, r.matchedCount);
-              test.equal(1, r.modifiedCount);
               test.ok(r.upsertedId != null);
             
               db.close();
@@ -587,7 +581,7 @@ exports['should correctly execute remove methods using crud api'] = {
             , function(err, r) {
               test.equal(null, err);
               test.equal(1, r.result.n);
-              test.equal(1, r.removedCount);
+              test.equal(1, r.deletedCount);
               
               removeMany();
           });
@@ -606,7 +600,7 @@ exports['should correctly execute remove methods using crud api'] = {
             , function(err, r) {
               test.equal(null, err);
               test.equal(2, r.result.n);
-              test.equal(2, r.removedCount);
+              test.equal(2, r.deletedCount);
               
               db.close();
               test.done();
