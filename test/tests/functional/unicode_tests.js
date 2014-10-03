@@ -121,7 +121,7 @@ exports.shouldCorrectlyHandleUT8KeyNames = function(configuration, test) {
     db.createCollection('test_utf8_key_name', function(err, collection) { 
       collection.insert({'šđžčćŠĐŽČĆ':1}, {w:1}, function(err, ids) { 
             // finished_test({test_utf8_key_name:'ok'}); 
-        collection.find({}, {'fields': ['šđžčćŠĐŽČĆ']}).toArray(function(err, items) { 
+        collection.find({}, {}, {'fields': ['šđžčćŠĐŽČĆ']}).toArray(function(err, items) { 
           test.equal(1, items[0]['šđžčćŠĐŽČĆ']); 
           // Let's close the db 
           db.close();

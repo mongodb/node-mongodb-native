@@ -20,7 +20,7 @@ exports.shouldCorrectlySaveDocumentsAndReturnAsRaw = function(configuration, tes
           test.equal(2.3, objects[2].c);
           
           // Execute findOne
-          collection.findOne({a:1}, {raw:true}, function(err, item) {
+          collection.findOne({a:1}, {}, {raw:true}, function(err, item) {
             test.ok(Buffer.isBuffer(item));
             var object = db.bson.deserialize(item);
             test.equal(1, object.a)            
