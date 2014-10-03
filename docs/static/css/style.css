@@ -431,3 +431,25 @@ h1.top-menu {
 .navigation:hover {
     background-color: rgba(0,0,0,0.1);
 }
+
+.section-nav {
+    display: inline-block;
+    border-color: #dbdbdb;
+    border-color: #ccc;
+    border-width: 4px 4px 4px 4px;
+    font-family: FontAwesome;
+    color: white;
+    font-style: normal;
+    font-weight: normal;
+    text-align: center;
+    padding-left: 50px;
+    font-size: 1.65em;
+}
+
+.section-active {
+    color: #ff4088;
+}
+
+.section-start {
+    padding-left: 0px    
+}

@@ -18,7 +18,7 @@ MetaDataFormat = "yaml"
 [[menu.main]]
     name = "legacy docs 1.4.X"
     pre = "<i class='fa fa-file-text'></i>"
-    url = "http://mongodb.github.io/node-mongodb-native/"
+    url = "http://mongodb.github.io/node-mongodb-native/1.4/"
     weight = -105
 [[menu.main]]
     name = "getting started"
