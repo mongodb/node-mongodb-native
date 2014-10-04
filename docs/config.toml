@@ -8,17 +8,17 @@ MetaDataFormat = "yaml"
 [[menu.main]]
     name = "api"
     pre = "<i class='fa fa-file-text'></i>"
-    url = "/api-docs/index.html"
+    url = "api-docs/index.html"
     weight = -90
 [[menu.main]]
     name = "driver portal"
     pre = "<i class='fa fa-file-text'></i>"
-    url = "/"
+    url = "./"
     weight = -115
 [[menu.main]]
     name = "legacy docs 1.4.X"
     pre = "<i class='fa fa-file-text'></i>"
-    url = "/1.4"
+    url = "1.4/"
     weight = -110
 [[menu.main]]
     name = "about driver"
