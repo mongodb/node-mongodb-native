@@ -10,6 +10,11 @@ menu:
 title: Release Notes
 weight: 50
 ---
+2.0.0-alpha2 2014-10-02
+-----------------------
+- CRUD API (insertOne, insertMany, updateOne, updateMany, removeOne, removeMany, bulkWrite, findOneAndDelete, findOneAndUpdate, findOneAndReplace)
+- Cluster Management Spec compatible
+
 2.0.0-alpha1 2014-09-08
 -----------------------
 - Insert method allows only up 1000 pr batch for legacy as well as 2.6 mode
@@ -30,6 +35,9 @@ weight: 50
 - Removed db.dereference method
 - Removed db.cursorInfo method
 - Removed db.stats method
+- Removed db.collectionNames not needed anymore as it's just a specialized case of listCollections
+- Removed db.collectionInfo removed due to not being compatible with new storage engines in 2.8 as they need to use the listCollections command due to system collections not working for namespaces.
+- Added db.listCollections to replace several methods above
 
 1.4.10 2014-09-04
 -----------------
