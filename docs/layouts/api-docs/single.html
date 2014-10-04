@@ -10,11 +10,11 @@
 
     <title>{{.Title}}</title>
 
-    <link href="/css/bootstrap-theme.css" rel="stylesheet">
-    <link href="/assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
-    <link href="/css/style.css" rel="stylesheet">
-    <link href="/css/style-responsive.css" rel="stylesheet" />
-    <link href="/css/monokai_sublime.css" rel="stylesheet" />
+    <link href="{{.Site.BaseUrl}}/css/bootstrap-theme.css" rel="stylesheet">
+    <link href="{{.Site.BaseUrl}}/assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="{{.Site.BaseUrl}}/css/style.css" rel="stylesheet">
+    <link href="{{.Site.BaseUrl}}/css/style-responsive.css" rel="stylesheet" />
+    <link href="{{.Site.BaseUrl}}/css/monokai_sublime.css" rel="stylesheet" />
 
   </head>
 
@@ -30,14 +30,14 @@
             </div>
 
             <!--logo start-->
-            <a href="/" class="logo"><img src="/img/logo-mongodb-header.png" style="height:40px;"></a>
+            <a href="{{.Site.BaseUrl}}/.." class="logo"><img src="{{.Site.BaseUrl}}/img/logo-mongodb-header.png" style="height:40px;"></a>
             <!--logo end-->
             <div class="top-nav notification-row">
                 <!-- notification dropdown end-->
                 <div class="hidden-xs nav-github pull-right">
-                    <span rel="show-github" data-user="spf13" data-repo="hugo" data-type="follow"></span>
-                    <span rel="show-github" data-user="spf13" data-repo="hugo"></span>
-                    <span rel="show-github" data-user="spf13" data-repo="hugo" data-type="fork"></span>
+                    <span rel="show-github" data-user="mongodb" data-repo="node-mongodb-native"></span>
+                    <span rel="show-github" data-user="mongodb" data-repo="node-mongodb-native" data-type="fork"></span>
+                    <a href='http://travis-ci.org/mongodb/node-mongodb-native'><img src='https://secure.travis-ci.org/mongodb/node-mongodb-native.png'/><a>
                 </div>
             </div>
 
@@ -78,14 +78,14 @@
   </section>
   <!-- container section end -->
     <!-- javascripts -->
-    <script src="/js/jquery-2.1.1.min.js"></script>
-    <script src="/js/jquery.scrollTo.min.js"></script>
-    <script src="/js/bootstrap.min.js"></script>
+    <script src="{{.Site.BaseUrl}}/js/jquery-2.1.1.min.js"></script>
+    <script src="{{.Site.BaseUrl}}/js/jquery.scrollTo.min.js"></script>
+    <script src="{{.Site.BaseUrl}}/js/bootstrap.min.js"></script>
     <!--custom script for all page-->
-    <script src="/js/highlight.pack.js"></script>
+    <script src="{{.Site.BaseUrl}}/js/highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
-    <script src="/js/scripts.js"></script>
-    <script async defer id="github-bjs" src="/js/buttons.js"></script>
+    <script src="{{.Site.BaseUrl}}/js/scripts.js"></script>
+    <script async defer id="github-bjs" src="{{.Site.BaseUrl}}/js/buttons.js"></script>
     {{ template "partials/analytics.html" . }}
   </body>
 </html>
