@@ -13,12 +13,12 @@ MetaDataFormat = "yaml"
 [[menu.main]]
     name = "driver portal"
     pre = "<i class='fa fa-file-text'></i>"
-    url = "/#REPLACE/"
+    url = "#REPLACE/"
     weight = -115
 [[menu.main]]
     name = "legacy docs 1.4.X"
     pre = "<i class='fa fa-file-text'></i>"
-    url = "/#REPLACE/1.4"
+    url = "#REPLACE/1.4"
     weight = -110
 [[menu.main]]
     name = "about driver"
