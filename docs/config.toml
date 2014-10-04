@@ -11,15 +11,20 @@ MetaDataFormat = "yaml"
     url = "/api-docs/index.html"
     weight = -90
 [[menu.main]]
-    name = "about driver"
-    pre = "<i class='fa fa-gift'></i>"
-    weight = -110
-    identifier = "about"
+    name = "driver portal"
+    pre = "<i class='fa fa-file-text'></i>"
+    url = "/"
+    weight = -115
 [[menu.main]]
     name = "legacy docs 1.4.X"
     pre = "<i class='fa fa-file-text'></i>"
-    url = "http://mongodb.github.io/node-mongodb-native/1.4/"
+    url = "/1.4"
+    weight = -110
+[[menu.main]]
+    name = "about driver"
+    pre = "<i class='fa fa-gift'></i>"
     weight = -105
+    identifier = "about"
 [[menu.main]]
     name = "getting started"
     pre = "<i class='fa fa-road'></i>"
