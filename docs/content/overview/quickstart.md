@@ -13,7 +13,7 @@ weight: 20
 
 QuickStart
 ==========
-The quickstart guide will show you how to set up a simple application using node.js and MongoDB. It scope is only how to set up the driver and perform the simple crud operations. For more inn depth coverage we encourage reading the tutorials.
+The quickstart guide will show you how to set up a simple application using Core driver and MongoDB. It scope is only how to set up the driver and perform the simple crud operations. For more inn depth coverage we encourage reading the tutorials.
 
 Create the package.json file
 ----------------------------
@@ -37,7 +37,7 @@ Create a **package.json** using your favorite text editor and fill it in.
     "url": "git://github.com/christkv/myfirstproject.git"
   },
   "dependencies": {
-    "mongodb": "~2.0"
+    "mongodb-core": "~1.0"
   },
   "author": "Christian Kvalheim",
   "license": "Apache 2.0",
@@ -86,6 +86,34 @@ MongoClient.connect(url, function(err, db) {
   db.close();
 });
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Given that you booted up the **mongod** process earlier the application should connect successfully and print **Connected correctly to server** to the console.
 

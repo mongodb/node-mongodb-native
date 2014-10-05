@@ -24,7 +24,7 @@ When you are ready to send us a pull request make sure you perform the following
 
 ## Contribution Steps
 
-1. Fork the Node.js driver from https://github.com/mongodb/node-mongodb-native
+1. Fork the Node.js driver from https://github.com/christkv/mongodb-core
 2. Create a new feature branch (`git checkout -b feature`)
 3. Commit your changes using git (`git commit -a -m 'My changes'`)
 4. Run tests suite (ensure mongodb is in path) (`node test/runner.js -t functional`)
@@ -36,7 +36,7 @@ When you are ready to send us a pull request make sure you perform the following
 
 ## Clone repository locally
 
-    git clone https://github.com/mongodb/node-mongodb-native
+    git clone https://github.com/christkv/mongodb-core
     cd node-mongodb-native
     npm install
 

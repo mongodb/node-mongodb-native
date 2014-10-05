@@ -4,7 +4,6 @@ JSDOC = jsdoc
 name = all
 
 generate_docs:
-	# cp -R ./HISTORY.md ./docs/content/meta/release-notes.md
 	cp -R ./docs/history-header.md ./docs/content/meta/release-notes.md
 	more ./HISTORY.md >> ./docs/content/meta/release-notes.md
 	hugo -s docs/ -d ../public

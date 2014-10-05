@@ -16,11 +16,6 @@ MetaDataFormat = "yaml"
     url = "/learn-mongodb-docs/"
     weight = -115
 [[menu.main]]
-    name = "legacy docs 1.4.X"
-    pre = "<i class='fa fa-file-text'></i>"
-    url = "/learn-mongodb-docs/1.4"
-    weight = -110
-[[menu.main]]
     name = "about driver"
     pre = "<i class='fa fa-gift'></i>"
     weight = -105
@@ -33,10 +28,6 @@ MetaDataFormat = "yaml"
     name = "tutorials"
     pre = "<i class='fa fa-book'></i>"
     weight = -40
-[[menu.main]]
-    name = "articles"
-    pre = "<i class='fa fa-book'></i>"
-    weight = -30
 [[menu.main]]
     name = "community"
     pre = "<i class='fa fa-group'></i>"

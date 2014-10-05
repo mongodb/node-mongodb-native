@@ -10,17 +10,17 @@ title: Driver introduction
 weight: 10
 ---
 
-## What is Node.js Native?
+## What is MongoDB Core
 
-Node.js Native is the MongoDB official Node.js driver allowing you to use MongoDB in you applications.
+The MongoDB core driver is the minimal viable driver and contains no abstractions of any kind. It's the basis on what the 2.X or higher driver builds on.
 
-## What does Node.js Native?
+## Who would use this ?
 
-The Node.js driver handles the connections to a single MongoDB server, a replicaset or a set of Mongos proxies in a sharded system. It let's your application interact with the server and lets it perform operations against the database.
+The target audience of this module are developers building higher level abstractions like ODM's, queue managers, caches and others where the additional layers of abstraction and helpers in the main driver is not needed. The lack of all of these abstractions should also help if you are trying to implement your own driver in another language or plan to write your own specialized MongoDB Node.js driver.
 
 ## Next Steps
 
  * [Install Driver](/overview/installing)
  * [Quick start](/overview/quickstart)
  * [Join the Mailing List](/community/mailing-list)
- * [Star us on GitHub](https://github.com/mongodb/node-mongodb-native)
+ * [Star us on GitHub](https://github.com/christkv/mongodb-core)

@@ -11,15 +11,15 @@ title: Installing The Driver
 weight: 15
 ---
 
-## Installing MongoDB Node.js driver using NPM
+## Installing The MongoDB Core driver using NPM
 
-Installing the MongoDB Node.js driver using NPM is very easy. First you need to ensure you have Node.js and NPM correctly set up and in your path. Installing the driver is as easy as.
+Installing the MongoDB Core driver using NPM is very easy. First you need to ensure you have Node.js and NPM correctly set up and in your path. Installing the driver is as easy as.
 
 ```js
-npm install mongodb
+npm install mongodb-core
 ```
 
-## Installing MongoDB Node.js driver as part of your project
+## Installing MongoDB Core driver as part of your project
 
 Setting up the Node.js driver for your project is a simple as adding it to the **package.json** dependencies section. An example **package.json** file is shown below.
 
@@ -34,7 +34,7 @@ Setting up the Node.js driver for your project is a simple as adding it to the *
     "url": "git://github.com/christkv/myfirstproject.git"
   },
   "dependencies": {
-    "mongodb": "~2.0"
+    "mongodb-core": "~1.0"
   },
   "author": "Christian Kvalheim",
   "license": "Apache 2.0",
