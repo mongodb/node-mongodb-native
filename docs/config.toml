@@ -1,0 +1,38 @@
+baseurl = "http://mongodb.github.io"
+MetaDataFormat = "yaml"
+
+[indexes]
+  tag = "tags"
+  group = "groups"
+
+[[menu.main]]
+    name = "api"
+    pre = "<i class='fa fa-file-text'></i>"
+    url = "/api-docs/index.html"
+    weight = -90
+[[menu.main]]
+    name = "about driver"
+    pre = "<i class='fa fa-gift'></i>"
+    weight = -110
+    identifier = "about"
+[[menu.main]]
+    name = "legacy docs 1.4.X"
+    pre = "<i class='fa fa-file-text'></i>"
+    url = "http://mongodb.github.io/node-mongodb-native/1.4/"
+    weight = -105
+[[menu.main]]
+    name = "getting started"
+    pre = "<i class='fa fa-road'></i>"
+    weight = -100
+[[menu.main]]
+    name = "tutorials"
+    pre = "<i class='fa fa-book'></i>"
+    weight = -40
+[[menu.main]]
+    name = "articles"
+    pre = "<i class='fa fa-book'></i>"
+    weight = -30
+[[menu.main]]
+    name = "community"
+    pre = "<i class='fa fa-group'></i>"
+    weight = -60

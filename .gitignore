@@ -16,6 +16,7 @@ data
 out
 public
 docs/public
+public
 
 npm-debug.log
 node_modules
