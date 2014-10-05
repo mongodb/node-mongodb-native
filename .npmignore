@@ -22,6 +22,8 @@ examples/
 test/
 performance/
 .coverage_data/
+public/
+docs/public/
 
 external-libs/bson/build/
 external-libs/bson/build/.wafpickle-7

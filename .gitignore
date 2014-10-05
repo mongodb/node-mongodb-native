@@ -14,6 +14,8 @@ results
 db
 data
 out
+public
+docs/public
 
 npm-debug.log
 node_modules
