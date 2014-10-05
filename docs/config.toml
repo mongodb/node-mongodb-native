@@ -1,5 +1,6 @@
 baseurl = "http://mongodb.github.io"
 MetaDataFormat = "yaml"
+title = "MongoDB 2.0.0 Driver"
 
 [indexes]
   tag = "tags"
@@ -13,12 +14,12 @@ MetaDataFormat = "yaml"
 [[menu.main]]
     name = "driver portal"
     pre = "<i class='fa fa-file-text'></i>"
-    url = "/learn-mongodb-docs/"
+    url = "/#REPLACE/"
     weight = -115
 [[menu.main]]
     name = "legacy docs 1.4.X"
     pre = "<i class='fa fa-file-text'></i>"
-    url = "/learn-mongodb-docs/1.4"
+    url = "/#REPLACE/1.4"
     weight = -110
 [[menu.main]]
     name = "about driver"
