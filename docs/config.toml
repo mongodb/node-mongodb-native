@@ -1,5 +1,6 @@
 baseurl = "http://mongodb.github.io"
 MetaDataFormat = "yaml"
+title = "MongoDB Core 1.0.0"
 
 [indexes]
   tag = "tags"
