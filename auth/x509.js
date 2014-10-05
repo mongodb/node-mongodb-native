@@ -15,9 +15,9 @@ var AuthSession = function(db, username, password) {
 }
 
 /**
- * Creates a new MongoCR authentication mechanism
+ * Creates a new X509 authentication mechanism
  * @class
- * @return {MongoCR} A cursor instance
+ * @return {X509} A cursor instance
  */
 var X509 = function() {
   var authStore = [];

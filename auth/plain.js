@@ -16,9 +16,9 @@ var AuthSession = function(db, username, password) {
 }
 
 /**
- * Creates a new MongoCR authentication mechanism
+ * Creates a new Plain authentication mechanism
  * @class
- * @return {MongoCR} A cursor instance
+ * @return {Plain} A cursor instance
  */
 var Plain = function() {
   var authStore = [];
