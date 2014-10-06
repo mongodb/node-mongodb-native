@@ -923,7 +923,7 @@ var Server = function(options) {
    */
   this.cursor = function(ns, cmd, cursorOptions) {
     cursorOptions = cursorOptions || {};
-    var FinalCursor = cursorOptions.cursorFactory || Cursor;
+    var FinalCursor = cursorOptions.cursorFactory || BasicCursor;
     return new FinalCursor(bson, ns, cmd, cursorOptions, self, options);
   }
 
