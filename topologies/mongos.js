@@ -856,7 +856,7 @@ var Mongos = function(seedlist, options) {
   /**
    * All raw connections
    * @method
-   * @return {array}
+   * @return {Connection[]}
    */
   this.connections = function() {
     return mongosState.getAllConnections();

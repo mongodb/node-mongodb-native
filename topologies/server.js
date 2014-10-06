@@ -837,7 +837,7 @@ var Server = function(options) {
   /**
    * All raw connections
    * @method
-   * @return {array}
+   * @return {Connection[]}
    */
   this.connections = function() {
     return pool.getAll();

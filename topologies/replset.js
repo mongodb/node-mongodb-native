@@ -1058,7 +1058,7 @@ var ReplSet = function(seedlist, options) {
   /**
    * All raw connections
    * @method
-   * @return {array}
+   * @return {Connection[]}
    */
   this.connections = function() {
     return replState.getAllConnections();
