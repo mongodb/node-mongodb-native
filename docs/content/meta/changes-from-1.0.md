@@ -44,6 +44,7 @@ Added the following method
 A collection instance has also had several changes made to it. Most importantly we now return the `mongodb-core` result objects directly with all the associated information returned from the server instead of the current selective information returned in the 1.4.x version.
 
 We've added the following new methods
+
 * `collection.insertOne` Insert a single document.
 * `collection.insertMany` Insert an array of documents.
 * `collection.replaceOne` Replace an existing document fully.
