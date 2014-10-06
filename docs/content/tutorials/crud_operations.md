@@ -25,8 +25,6 @@ var Server = require('mongodb-core').Server
 var server = new Server({host: 'localhost', port: 27017});
 // Wait for the connection event
 server.on('connect', function(server) {
-  assert.equal(null, err);
-
   // Execute the insert
   server.insert('integration_tests.inserts_example1', [{a:1}], {
     writeConcern: {w:1}, ordered:true
@@ -70,8 +68,6 @@ var Server = require('mongodb-core').Server
 var server = new Server({host: 'localhost', port: 27017});
 // Wait for the connection event
 server.on('connect', function(server) {
-  assert.equal(null, err);
-
   // Execute the update
   server.update('integration_tests.inserts_example2', [{
     q: {a: 1}, u: {'$set': {b:1}}, multi:true
@@ -114,8 +110,6 @@ var Server = require('mongodb-core').Server
 var server = new Server({host: 'localhost', port: 27017});
 // Wait for the connection event
 server.on('connect', function(server) {
-  assert.equal(null, err);
-
   // Execute the update
   server.remove('integration_tests.inserts_example2', [{
     q: {a: 1}, limit:1
@@ -151,8 +145,6 @@ var Server = require('mongodb-core').Server
 var server = new Server({host: 'localhost', port: 27017});
 // Wait for the connection event
 server.on('connect', function(server) {
-  assert.equal(null, err);
-
   // Execute the command
   server.command("system.$cmd"
     , {ismaster: true}
@@ -185,14 +177,12 @@ var Server = require('mongodb-core').Server
 var server = new Server({host: 'localhost', port: 27017});
 // Wait for the connection event
 server.on('connect', function(server) {
-  assert.equal(null, err);
-
   // Execute the write
   var cursor = _server.cursor('integration_tests.inserts_example4', {
       find: 'integration_tests.example4'
     , query: {a:1}
   }, {
-
+    readPreference: new ReadPreference('secondary');
   });
 
   // Get the first document

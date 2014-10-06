@@ -26,7 +26,6 @@ var Server = require('mongodb-core').Server
 var server = new Server({host: 'localhost', port: 27017});
 // Wait for the connection event
 server.on('connect', function(server) {
-  assert.equal(null, err);
   server.destroy();
 });
 
@@ -71,7 +70,6 @@ var server = new ReplSet(
   , {setName: 'rs'});
 // Wait for the connection event
 server.on('connect', function(server) {
-  assert.equal(null, err);
   server.destroy();
 });
 
@@ -114,7 +112,6 @@ var server = new Mongos(
   );
 // Wait for the connection event
 server.on('connect', function(server) {
-  assert.equal(null, err);
   server.destroy();
 });
 
@@ -153,8 +150,6 @@ var Server = require('mongodb-core').Server
 var server = new Server({host: 'localhost', port: 27017});
 // Wait for the connection event
 server.on('connect', function(server) {
-  assert.equal(null, err);
-
   server.auth('mongocr', 'admin', 'test', 'test', function(err, session) {    
     server.destroy();
   });

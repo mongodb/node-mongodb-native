@@ -60,8 +60,6 @@ var server = new Server({
 
 // Wait for the connection event
 server.on('connect', function(server) {
-  assert.equal(null, err);
-
   // Execute find
   var cursor = _server.cursor('db.test', {
       find: f("%s.inserts_extend_cursors", configuration.db)
