@@ -16,64 +16,73 @@ The driver lets you log at 3 different levels. These are `debug`, `info` and `er
 
 ## Setting Log level
 
-Setting the log level is pretty easy. Let's look at example of adjusting it for our application only logging the Db class.
+Setting the log level is pretty easy. Let's look at example of adjusting it for our application only logging the Server class.
 
 ```js
-var MongoClient = require('mongodb').MongoClient
-  , Logger = require('mongodb').Logger
+var Server = require('mongodb-core').Server
+  , Logger = require('mongodb-core').Logger
   , assert = require('assert');
 
-// Connection URL
-var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
+var server = new Server({host: 'localhost', port: 27017});
+// Wait for the connection event
+server.on('connect', function(server) {
   assert.equal(null, err);
-  console.log("Connected correctly to server");
 
   // Set debug level
   Logger.setLevel('debug');
 
-  // Insert a single document
-  db.command({ismaster:true}, function(err, d) {
+  // Execute the insert
+  server.insert('integration_tests.inserts_example1', [{a:1}], {
+    writeConcern: {w:1}, ordered:true
+  }, function(err, results) {
     assert.equal(null, err);
-    db.close();
+    assert.equal(1, results.result.n);
+
+    server.destroy();
   });
 });
+
+// Start connecting
+server.connect();
 ```
 
 Setting the level is as easy as calling the method `setLevel` with the string value `debug`, `info` or `error`. Log level is set globally.
 
 ## Filtering On specific classes
 
-Say you are only interested in logging a specific class. You can tell the Logger to only log specific class names. Let's take an example Where we only log the `Db` class.
+Say you are only interested in logging a specific class. You can tell the Logger to only log specific class names. Let's take an example Where we only log the `Server` class.
 
 ```js
-var MongoClient = require('mongodb').MongoClient
-  , Logger = require('mongodb').Logger
+var Server = require('mongodb-core').Server
+  , Logger = require('mongodb-core').Logger
   , assert = require('assert');
 
-// Connection URL
-var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
+var server = new Server({host: 'localhost', port: 27017});
+// Wait for the connection event
+server.on('connect', function(server) {
   assert.equal(null, err);
-  console.log("Connected correctly to server");
 
   // Set debug level
   Logger.setLevel('debug');
-  Logger.filter('class', ['Db']);
+  Logger.filter('class', ['Server']);
 
-  // Insert a single document
-  db.command({ismaster:true}, function(err, d) {
+  // Execute the insert
+  server.insert('integration_tests.inserts_example1', [{a:1}], {
+    writeConcern: {w:1}, ordered:true
+  }, function(err, results) {
     assert.equal(null, err);
-    db.close();
+    assert.equal(1, results.result.n);
+
+    server.destroy();
   });
 });
+
+// Start connecting
+server.connect();
 ```
 
-This will only log statements on the `Db` class. The available classes in the driver are.
+This will only log statements on the `Server` class. The available classes in the driver are.
 
-* `Db`: The Db instance log statements
 * `Server`: A server instance (either standalone, a mongos or replicaset member)
 * `ReplSet`: Replicaset related log statements
 * `Mongos`: Mongos related log statements
@@ -108,16 +117,14 @@ Pretty simple and straightforward.
 Let's say you don't want the log statements to go to `console.log` but want to send them to a new location or maybe transform them before you send them on. Let's define our custom logger.
 
 ```js
-var MongoClient = require('mongodb').MongoClient
-  , Logger = require('mongodb').Logger
+var Server = require('mongodb-core').Server
+  , Logger = require('mongodb-core').Logger
   , assert = require('assert');
 
-// Connection URL
-var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
+var server = new Server({host: 'localhost', port: 27017});
+// Wait for the connection event
+server.on('connect', function(server) {
   assert.equal(null, err);
-  console.log("Connected correctly to server");
 
   // Set debug level
   Logger.setLevel('debug');
@@ -127,12 +134,19 @@ MongoClient.connect(url, function(err, db) {
     console.log(msg, context);
   });
 
-  // Insert a single document
-  db.command({ismaster:true}, function(err, d) {
+  // Execute the insert
+  server.insert('integration_tests.inserts_example1', [{a:1}], {
+    writeConcern: {w:1}, ordered:true
+  }, function(err, results) {
     assert.equal(null, err);
-    db.close();
+    assert.equal(1, results.result.n);
+
+    server.destroy();
   });
 });
+
+// Start connecting
+server.connect();
 ```
 
-That wraps up the Logging support in the driver.
+That wraps up the Logging support in the core driver.

@@ -11,12 +11,10 @@ title: QuickStart
 weight: 20
 ---
 
-QuickStart
-==========
+# QuickStart
 The quickstart guide will show you how to set up a simple application using Core driver and MongoDB. It scope is only how to set up the driver and perform the simple crud operations. For more inn depth coverage we encourage reading the tutorials.
 
-Create the package.json file
-----------------------------
+## Create the package.json file
 Let's create a directory where our application will live. In our case we will put this under our projects directory.
 
 ```
@@ -66,8 +64,7 @@ mongod --dbpath=/data --port 27017
 
 You should see the **mongod** process start up and print some status information.
 
-Connecting to MongoDB
----------------------
+## Connecting to MongoDB
 Let's create a new **app.js** file that we will use to show the basic CRUD operations using the MongoDB driver.
 
 First let's add code to connect to the server. Notice that there is no concept of a database here and we use the topology directly to perform the connection.
@@ -124,13 +121,49 @@ server.on('connect', function(_server) {
   _server.command('system.$cmd', {ismaster: true}, function(err, result) {
 
     // Perform a document insert
-    _server.insert('myproject.inserts1', [{a:1}], {
+    _server.insert('myproject.inserts1', [{a:1}, {a:2}], {
       writeConcern: {w:1}, ordered:true
     }, function(err, results) {
       assert.equal(null, err);
+      assert.equal(2, results.result.n);      
 
       // Perform a document update
-      
+      _server.update('myproject.inserts1', [{
+        q: {a: 1}, u: {'$set': {b:1}}
+      }], {
+        writeConcern: {w:1}, ordered:true
+      }, function(err, results) {
+        assert.equal(null, err);
+        assert.equal(1, results.result.n);
+
+        // Remove a document
+        _server.remove('myproject.inserts1', [{
+          q: {a: 1}, limit: 1
+        }], {
+          writeConcern: {w:1}, ordered:true
+        }, function(err, results) {
+          assert.equal(null, err);
+          assert.equal(1, results.result.n);
+
+          // Get a document
+          var cursor = _server.cursor('integration_tests.inserts_example4', {
+              find: 'integration_tests.example4'
+            , query: {a:1}
+          });
+
+          // Get the first document
+          cursor.next(function(err, doc) {
+            assert.equal(null, err);
+            assert.equal(2, doc.a);
+
+            // Execute the ismaster command
+            _server.command("system.$cmd"
+              , {ismaster: true}, function(err, result) {
+                assert.equal(null, err)
+                _server.destroy();              
+            });
+          });
+      });
     });
 
     test.done();
@@ -148,6 +181,30 @@ server.on('reconnect', function() {
 // Start connection
 server.connect();
 ```
+
+The core driver does not contain any helpers or abstractions only the core crud operations. These consist of the following commands.
+
+* `insert`, Insert takes an array of 1 or more documents to be inserted against the topology and allows you to specify a write concern and if you wish to execute the inserts in order or out of order.
+* `update`, Update takes an array of 1 or more update commands to be executed against the server topology and also allows you to specify a write concern and if you wish to execute the updates in order or out of order.
+* `remove`, Remove takes an array of 1 or more remove commands to be executed against the server topology and also allows you to specify a write concern and if you wish to execute the removes in order or out of order.
+* `cursor`, Returns you a cursor for either the 'virtual' `find` command, a command that returns a cursor id or a plain cursor id. Read the cursor tutorial for more inn depth coverage.
+* `command`, Executes a command against MongoDB and returns the result.
+* `auth`, Authenticates the current topology using a supported authentication scheme.
+
+The Core Driver is a building block for library builders and is not meant for usage by end users as it lacks a lot of features the end user might need such as automatic buffering of operations when a primary is changing in a replicaset or the db and collections abstraction.
+
+## Next steps
+
+The next steps is to get more inn depth information about how the different aspects of the core driver works and how to leverage them to extend the functionality of the cursors. Please view the tutorials for more detailed information.
+
+
+
+
+
+
+
+
+
 
 
 

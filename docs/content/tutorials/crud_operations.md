@@ -11,496 +11,236 @@ title: CRUD Operations
 weight: 3
 ---
 # Driver CRUD Operations
-The driver crud operations are defined as the operations performed to insert/update/remove and query for documents. In this tutorial we will cover both the basic CRUD methods as well as the specialized *findAndModify* based methods and the new Bulk API methods allowing for efficient bulk write operations. But let's start with a simple introduction to the insert, update and remove operations that are on the collection class.
 
-## Write Methods
+The Core Driver CRUD operations are defined by the methods available on the driver topologies in the form of the `insert`, `update`, `remove`, `cursor` and `command`.
 
-### Inserting Documents
-The *insertOne* and *insertMany* methods exists on the *Collection* class and is used to insert documents into MongoDB. Code speaks a thousand words so let's see two simple examples of inserting documents.
+## Inserting Documents
 
-```js
-var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
-
-// Connection URL
-var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log("Connected correctly to server");
-
-  // Insert a single document
-  db.collection('inserts').insertOne({a:1}, function(err, r) {
-    assert.equal(null, err);
-    assert.equal(1, r.insertedCount);
-
-    // Insert multiple documents
-    db.collection('inserts').insertMany([{a:2}, {a:3}], function(err, r) {
-      assert.equal(null, err);
-      assert.equal(2, r.insertedCount);
-
-      db.close();
-    });
-  });
-});
-```
-
-The first insert inserts a single document into the *inserts* collection. Notice that we are not explicitly creating a new *inserts* collection as the server will create it implicitly when we insert the first document. The method `Db.createIndex` only really needs to be used when creating non standard collections such as capped collections or where other parameters than the default collections need to be applied.
-
-The *insertOne* and *insertMany* methods also accepts an second argument that can be an options object. This object can have the following fields.
-
-*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
-*  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
-*  `j`, (Boolean, default:false) write waits for journal sync.
-*  `serializeFunctions`, (Boolean, default:false) serialize functions on an object to mongodb, by default the driver does not serialize any functions on the passed in documents.
-*  `forceServerObjectId`, (Boolean, default:false) Force server to assign _id values instead of driver.
-
-Let's look at a simple example where we are writing to a replicaset and we wish to ensure that we serialize a passed in function as well as have the server assign the *_id* for each document.
+Inserting documents is fairly straightforward. Let's look at an example.
 
 ```js
-var MongoClient = require('mongodb').MongoClient
+var Server = require('mongodb-core').Server
   , assert = require('assert');
 
-// Connection URL
-var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
+var server = new Server({host: 'localhost', port: 27017});
+// Wait for the connection event
+server.on('connect', function(server) {
   assert.equal(null, err);
-  console.log("Connected correctly to server");
 
-  // Insert a single document
-  db.collection('inserts').insertOne({
-        a:1
-      , b: function() { return 'hello'; }
-    }, {
-        w: 'majority'
-      , wtimeout: 10000
-      , serializeFunctions: true
-      , forceServerObjectId: true
-    }, function(err, r) {
+  // Execute the insert
+  server.insert('integration_tests.inserts_example1', [{a:1}], {
+    writeConcern: {w:1}, ordered:true
+  }, function(err, results) {
     assert.equal(null, err);
-    assert.equal(1, r.insertedCount);
-    db.close();
+    assert.equal(1, results.result.n);
+
+    server.destroy();
   });
 });
+
+// Start connecting
+server.connect();
 ```
 
-That wraps up the *insert* methods. Next let's look at the *update* methods.
+The insert method takes an array of documents to insert and an additional options object containing the write concern and if the commands are executed in order or not.
 
-### Updating Documents
-The *updateOne* and *updateMany* methods exists on the *Collection* class and is used to update and upsert documents into MongoDB. Let's look at a couple of usage examples.
+* `writeConcern.w` **{string|number}** The write concern, either a number or a name like *majority*.
+* `writeConcern.wtimeout` **{number}** The write concern max timeout.
+* `writeConcern.j` **{boolean}** Wait for write to journal.
+* `writeConcern.fsync` **{boolean}** Wait for fsync (deprecated).
+* `order` **{boolean, default:true}** Execute the inserts in order or out of order.
+
+## Updating Documents
+
+Updating documents is also fairly straightforward with the main difference being that the actual documents passed in need a specific set of options for each operation.
+
+### Update operation document
+An update operation document is made up of the following fields.
+
+* `q` **{object}** The query object to select the document(s) to update.
+* `u` **{object}** The update statement to be applied to the document(s) selected by the query.
+* `multi` **{boolean, default:false}** Update one or one and more documents.
+
+Let's look at a simple code example.
 
 ```js
-var MongoClient = require('mongodb').MongoClient
+var Server = require('mongodb-core').Server
   , assert = require('assert');
 
-// Connection URL
-var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
+var server = new Server({host: 'localhost', port: 27017});
+// Wait for the connection event
+server.on('connect', function(server) {
   assert.equal(null, err);
-  console.log("Connected correctly to server");
 
-  var col = db.collection('updates');
-  // Insert a single document
-  col.insertMany([{a:1}, {a:2}, {a:2}], function(err, r) {
+  // Execute the update
+  server.update('integration_tests.inserts_example2', [{
+    q: {a: 1}, u: {'$set': {b:1}}, multi:true
+  }], {
+    writeConcern: {w:1}, ordered:true
+  }, function(err, results) {
     assert.equal(null, err);
-    assert.equal(3, r.insertedCount);
-
-    // Update a single document
-    col.updateOne({a:1}, {$set: {b: 1}}, function(err, r) {
-      assert.equal(null, err);
-      assert.equal(1, r.matchedCount);
-      assert.equal(1, r.modifiedCount);
-
-      // Update multiple documents
-      col.updateMany({a:2}, {$set: {b: 1}}, function(err, r) {
-        assert.equal(null, err);
-        assert.equal(2, r.matchedCount);
-        assert.equal(2, r.modifiedCount);
-
-        // Upsert a single document
-        col.updateOne({a:3}, {$set: {b: 1}}, {
-          upsert: true
-        }, function(err, r) {
-          assert.equal(null, err);
-          assert.equal(0, r.matchedCount);
-          assert.equal(1, r.upsertedCount);
-          db.close();
-        });
-      });
-    });
+    server.destroy();
   });
 });
+
+// Start connecting
+server.connect();
 ```
 
-The *update* method also accepts an second argument that can be an options object. This object can have the following fields.
+The options are the same as for the insert operation.
 
-*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
-*  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
-*  `j`, (Boolean, default:false) write waits for journal sync.
-*  `multi`, (Boolean, default:false) Update one/all documents with operation.
-*  `upsert`, (Boolean, default:false) Update operation is an upsert.
+* `writeConcern.w` **{string|number}** The write concern, either a number or a name like *majority*.
+* `writeConcern.wtimeout` **{number}** The write concern max timeout.
+* `writeConcern.j` **{boolean}** Wait for write to journal.
+* `writeConcern.fsync` **{boolean}** Wait for fsync (deprecated).
+* `order` **{boolean, default:true}** Execute the inserts in order or out of order.
 
-Just as for *insert* the *update* method allows you to specify a per operation write concern using the *w*, *wtimeout* and *fsync* parameters
+## Removing Documents
 
-### Removing Documents
-The *removeOne* and *removeMany* methods exist on the *Collection* class and is used to remove documents from MongoDB. Let's look at a couple of usage examples.
+Removing documents is also fairly straightforward with the main difference being that the actual documents passed in need a specific set of options for each operation.
+
+### Remove operation document
+A remove operation document is made up of the following fields.
+
+* `q` **{object}** The query object to select the document(s) to remove.
+* `limit` **{number, default:1}** Remove one or all matching documents. Possible values are 1 or 0.
+
+Let's look at a simple code example.
 
 ```js
-var MongoClient = require('mongodb').MongoClient
+var Server = require('mongodb-core').Server
   , assert = require('assert');
 
-// Connection URL
-var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
+var server = new Server({host: 'localhost', port: 27017});
+// Wait for the connection event
+server.on('connect', function(server) {
   assert.equal(null, err);
-  console.log("Connected correctly to server");
 
-  var col = db.collection('removes');
-  // Insert a single document
-  col.insertMany([{a:1}, {a:2}, {a:2}], function(err, r) {
+  // Execute the update
+  server.remove('integration_tests.inserts_example2', [{
+    q: {a: 1}, limit:1
+  }], {
+    writeConcern: {w:1}, ordered:true
+  }, function(err, results) {
     assert.equal(null, err);
-    assert.equal(3, r.insertedCount);
-
-    // Update a single document
-    col.removeOne({a:1}
-      , {$set: {b: 1}}, function(err, r) {
-      assert.equal(null, err);
-      assert.equal(1, r.deletedCount);
-
-      // Update multiple documents
-      col.removeMany({a:2}
-        , {$set: {b: 1}}, function(err, r) {
-        assert.equal(null, err);
-        assert.equal(2, r.deletedCount);
-        db.close();
-      });
-    });
+    server.destroy();
   });
 });
+
+// Start connecting
+server.connect();
 ```
 
-The *remove* method also accepts an second argument that can be an options object. This object can have the following fields.
+The options are the same as for the insert and update operation.
 
-*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
-*  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
-*  `j`, (Boolean, default:false) write waits for journal sync.
-*  `single`, (Boolean, default:false) Removes the first document found.
+* `writeConcern.w` **{string|number}** The write concern, either a number or a name like *majority*.
+* `writeConcern.wtimeout` **{number}** The write concern max timeout.
+* `writeConcern.j` **{boolean}** Wait for write to journal.
+* `writeConcern.fsync` **{boolean}** Wait for fsync (deprecated).
+* `order` **{boolean, default:true}** Execute the inserts in order or out of order.
 
-Just as for *update* and *insert* the *remove* method allows you to specify a per operation write concern using the *w*, *wtimeout* and *fsync* parameters
+## Executing a Command against MongoDB
 
-### FindAndModify and FindAndRemove
-The two methods *findOneAndUpdate*, *findOneAndDelete* and *findOneAndReplace* are special commands that allows the user to update or upsert a document and have the modified or existing document returned. It comes at a cost as the operation takes a write lock for the duration of the operation as it needs to ensure the modification is *atomic*. Let's look at *findOneAndUpdate* first using an example.
+Executing a command is also fairly straightforward but allows for the usage of readPreferences. The Core driver does not enforce the correct readPreferences on write commands so be aware that you need to ensure a `findAndModify` command is correctly routed to a primary instead of a secondary when the topology is a replicaset. Let's look at an example.
 
 ```js
-var MongoClient = require('mongodb').MongoClient
+var Server = require('mongodb-core').Server
+  , ReadPreference = require('mongodb-core').ReadPreference
   , assert = require('assert');
 
-// Connection URL
-var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
+var server = new Server({host: 'localhost', port: 27017});
+// Wait for the connection event
+server.on('connect', function(server) {
   assert.equal(null, err);
-  console.log("Connected correctly to server");
 
-  var col = db.collection('findAndModify');
-  // Insert a single document
-  col.insert([{a:1}, {a:2}, {a:2}], function(err, r) {
-    assert.equal(null, err);
-    assert.equal(3, r.result.n);
-
-    // Modify and return the modified document
-    col.findOneAndUpdate({a:1}, {$set: {b: 1}}, {
-        returnOriginal: false
-      , sort: [[a,1]]
-      , upsert: true
-    }, function(err, doc) {
-      assert.equal(null, err);
-      assert.equal(1, r.value.b);
-
-      // Remove and return a document
-      col.findOneAndDelete({a:2}, function(err, r) {
-        assert.equal(null, err);
-        assert.ok(r.value.b == null);
-        db.close();
-      });
-    });
+  // Execute the command
+  server.command("system.$cmd"
+    , {ismaster: true}
+    , {
+      readPreference: new ReadPreference('secondary')
+    }, function(err, result) {
+      assert.equal(null, err)
+      server.destroy();
   });
 });
+
+// Start connecting
+server.connect();
 ```
 
-The *findOneAndUpdate* method also accepts an second argument that can be an options object. This object can have the following fields.
+The first parameter is the database to execute the command against. This is typically the special `system.$cmd` collection. It accepts a command and an options object that can contain the following options.
 
-*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
-*  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
-*  `j`, (Boolean, default:false) write waits for journal sync.
-*  `upsert`, (Boolean, default:false) Perform an upsert operation.
-*  `sort`, (Object, default:null) Sort for find operation.
-*  `projection`, (Object, default:null) Projection for returned result
-*  `returnOriginal`, (Boolean, default:true) Set to false if you want to return the modified object rather than the original. Ignored for remove.
+* `readPreference`, **{ReadPreference}** Specify read preference if command supports it
+* `connection` **{Connection}** Specify connection object to execute command against
 
-The *findAndRemove* function is a function especially defined to help remove a document. Let's look at an example of usage.
+## Executing Queries against MongoDB
+
+Executing queries against MongoDB is done using the `cursor` method on the topology. The cursor can then be used with the `next` method to iterate over all the results. The Low level Core driver does not implement streams or other methods this is left to library developers to implement by extending the cursor using the `cursorFactory` option. Let's look at a simple example first and then look at the options available.
 
 ```js
-var MongoClient = require('mongodb').MongoClient
+var Server = require('mongodb-core').Server
+  , ReadPreference = require('mongodb-core').ReadPreference
   , assert = require('assert');
 
-// Connection URL
-var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
+var server = new Server({host: 'localhost', port: 27017});
+// Wait for the connection event
+server.on('connect', function(server) {
   assert.equal(null, err);
-  console.log("Connected correctly to server");
 
-  var col = db.collection('findAndModify');
-  // Insert a single document
-  col.insert([{a:1}, {a:2}, {a:2}], function(err, r) {
+  // Execute the write
+  var cursor = _server.cursor('integration_tests.inserts_example4', {
+      find: 'integration_tests.example4'
+    , query: {a:1}
+  }, {
+
+  });
+
+  // Get the first document
+  cursor.next(function(err, doc) {
     assert.equal(null, err);
-    assert.equal(3, r.result.n);
-
-    // Remove a document from MongoDB and return it
-    col.findOneAndRemove({a:1}, {
-        sort: [[a,1]]
-      }
-      , function(err, doc) {
-        assert.equal(null, err);
-        assert.ok(r.value.b == null);
-        db.close();
-    });
+    server.destroy();
   });
 });
+
+// Start connecting
+server.connect();
 ```
 
-Just as for *findOneAndUpdate* it allows for an object of options to be passed in that can have the following fields.
+The cursor accepts commands that return a cursor id such as the `aggregation` command and the virtual `find` command or a `Long` cursorId that signals an existing cursor where we start iterating using the `getmore` command. We can also optionally pass in an array of documents that represents a first batch or even just an array of documents to emulate a cursor.
 
-*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
-*  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
-*  `j`, (Boolean, default:false) write waits for journal sync.
-*  `sort`, (Object, default:null) Sort for find operation.
+The following options can be set on a cursor.
 
-### BulkWrite
-The *bulkWrite* function allows for a simple set of bulk operations to be done in a non fluent way as in comparison to the bulk API discussed next. Let's look at an example.
+* `readPreference`, **{ReadPreference}** Specify read preference if command supports it.
+* `batchSize`, **{number, default:0}** Batchsize for the operation.
+* `documents`, **{object[]}** Initial documents list for cursor.
 
-```js
-var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
+### The Virtual Find Method
 
-// Connection URL
-var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log("Connected correctly to server");
+To simplify the way the code is we have defined the current way of doing queries in MongoDB as a virtual find command. This find command is a document with the following fields.
 
-  // Get the collection
-  var col = db.collection('bulk_write');
-  col.bulkWrite([
-      { insertOne: { a: 1 } }
-    , { insertMany: [{ g: 1 }, { g: 2 }] }
-    , { updateOne: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
-    , { updateMany: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
-    , { removeOne: { q: {c:1} } }
-    , { removeMany: { q: {c:1} } }]
-  , {ordered:true, w:1}, function(err, r) {
-    assert.equal(null, err);
-    assert.equal(3, r.insertedCount);
-    assert.equal(1, r.matchedCount);
-    assert.equal(0, r.modifiedCount);
-    assert.equal(1, r.removedCount);
-    assert.equal(1, r.upsertedCount);
-    assert.equal(1, r.upsertedIds.length);
+* `find` {string} The namespace where the query is executed against. **db.collection**.
+* `query` {object} The query criteria/selector for the cursor.
+* `limit` {number, default:0} The number of documents to limit the query too.
+* `skip` {number, default:0} The number of documents to skip.
+* `fields` {object} The projection of the returned documents.
+* `hint` {object|string} The index hint to use with the query.
+* `explain` {boolean} Execute the query using explain.
+* `snapshot` {boolean} Execute the query as a snapshot.
+* `batchSize` {number, default:0} The batch size to use on the getMore commands.
+* `returnKey` {boolean} Return only the key for each document.
+* `maxScan` {number} Constrain the query only to scan a max number of documents before stopping.
+* `min` {number} Specify the minimum inclusive lower bound for a specific index  in order to constrain the results.
+* `max` {number} Specify the maximum inclusive upper bound for a specific index  in order to constrain the results.
+* `showDiskLoc` {boolean} Return the disk location for all the documents.
+* `command` {string} Print comment to log when query is executed.
+* `maxTimeMS` {number} Terminate the query after X milliseconds.
+* `raw` {boolean, default:false} Return raw BSON document Buffers instead of parsing them into JS objects.
+* `readPreference` {ReadPreference} Set the read preference for the query.
+* `tailable` {boolean} Create a tailable cursor against the collection.
+* `oplogReplay` {boolean} Signal that we wish to perform an op log replay.
+* `noCursorTimeout` {boolean} Signal that we do not wish the cursor to time out.
+* `awaitdata` {boolean} Signal that we wish to perform an awaitData on a tailable cursor.
+* `exhaust` {boolean} Perform an exhaust query.
+* `partial` {boolean} Allow a partial result to be returned from a sharded system.
 
-    // Ordered bulk operation
-    db.close();
-  });
-});
-```
-
-As we can see the *bulkWrite* function takes an array of operation that can be objects of either *insertOne*, *insertMany*, *updateOne*, *updateMany*, *removeOne* or *removeMany*. It also takes a second parameter that takes the following options.
-
-*  `ordered`, (Boolean, default:true) Execute in order or out of order.
-*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
-*  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
-*  `j`, (Boolean, default:false) write waits for journal sync.
-
-This covers the basic write operations. Let's have a look at the Bulk write operations next.
-
-## Bulk Write Operations
-The bulk write operations make it easy to write groups of operations together to MongoDB. There are some caveats and to get the best performance you need to be running against MongoDB *2.6* or higher that support the new write commands. Bulk operations are split into *ordered* and *unordered* bulk operations. An *ordered* bulk operation guarantees the order of execution of writes while the *unordered* bulk operation makes no assumptions about the order of execution. In the Node.js driver the *unordered* bulk operations will group operations according to type and write them in parallel. Let's have a look at how to build an ordered bulk operation.
-
-```js
-var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
-
-// Connection URL
-var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log("Connected correctly to server");
-
-  var col = db.collection('bulkops');
-  // Create ordered bulk, for unordered initializeUnorderedBulkOp()
-  var bulk = col.initializeOrderedBulkOp();
-  // Insert 10 documents
-  for(var i = 0; i < 10; i++) {
-    bulk.insert({a: i});
-  }
-
-  // Next perform some upserts
-  for(var i = 0; i < 10; i++) {
-    bulk.find({b:i}).upsert().updateOne({b:1});
-  }
-
-  // Finally perform a remove operation
-  bulk.find({b:1}).removeOne();
-
-  // Execute the bulk with a journal write concern
-  bulk.execute(function(err, result) {
-    assert.equal(null, err);
-    db.close();
-  });
-});
-```
-
-We will not cover the results object here as it's documented in the driver API. The Bulk API handles all the splitting of operations into multiple writes and also emulates 2.6 and higher write commands for 2.4 and earlier servers.
-
-There is are some important things to keep in mind when using the bulk API and especially the *ordered* bulk API mode. The write commands are single operation type. That means they can only do insert/update and remove. If you f.ex do the following combination of operations.
-
-    Insert {a:1}
-    Update {a:1} to {a:1, b:1}
-    Insert {a:2}
-    Remove {b:1}
-    Insert {a:3}
-
-This will result in the driver issuing 4 write commands to the server.
-
-    Insert Command with {a:1}
-    Update Command {a:1} to {a:1, b:1}
-    Insert Command with {a:2}
-    Remove Command with {b:1}
-    Insert Command with {a:3}    
-
-If you instead organize the your *ordered* in the following manner.
-
-    Insert {a:1}
-    Insert {a:2}
-    Insert {a:3}
-    Update {a:1} to {a:1, b:1}
-    Remove {b:1}
-
-The number of write commands issued by the driver will be.
-
-    Insert Command with {a:1}, {a:2}, {a:3}
-    Update Command {a:1} to {a:1, b:1}
-    Remove Command with {b:1}
-
-Allowing for more efficient and faster bulk write operation.
-
-For *unordered* bulk operations this is not important as the driver sorts operations by type and executes them in parallel.
-
-This covers write operations for MongoDB. Let's look at querying for documents next.
-
-## Read Methods
-The main method for querying the database are the *find* and the *aggregate* method. In this CRUD tutorial we will focus on *find* only as *aggregate* has it's own [Aggregation Tutorial](/tutorials/aggregation)
-
-The *method* return a cursor that allows us to operate on the data. The *cursor* also implements the Node.js 0.10.x or higher stream interface allowing us to pipe the results to other streams. We will not cover streams here as they are covered in the [Streams Tutorial](/tutorials/streams)
-
-Let's look at a simple find example that materializes all the documents from a query using the toArray but limits the number of returned results to 2 documents.
-
-```js
-var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
-
-// Connection URL
-var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log("Connected correctly to server");
-
-  var col = db.collection('find');
-  // Insert a single document
-  col.insertMany([{a:1}, {a:1}, {a:1}], function(err, r) {
-    assert.equal(null, err);
-    assert.equal(3, r.insertedCount);
-
-    // Get first two documents that match the query
-    col.find({a:1}).limit(2).toArray(function(err, docs) {
-      assert.equal(null, err);
-      assert.equal(2, docs.length);
-      db.close();
-    });
-  });
-});
-```
-
-The cursor returned by the *find* method has a lot of methods that allow for chaining of options for a query. Once the query is ready to be executed you can retrieve the documents using the *next*, *each* and *toArray* methods. If the query returns a lot of documents it's preferable to use the *next* or *each* methods as the *toArray* method will materialize all the documents into memory before calling the callback function potentially using a lot of memory if the query returns a lot of documents.
-
-We won't look at the options we can set on the cursor as they can be viewed in the [Cursor API documentation](/api-docs).
-
-We already looked at *toArray* method above. Let's take a look at the *next* method.
-
-```js
-var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
-
-// Connection URL
-var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log("Connected correctly to server");
-
-  var col = db.collection('find');
-  // Insert a single document
-  col.insertMany([{a:1}, {a:1}, {a:1}], function(err, r) {
-    assert.equal(null, err);
-    assert.equal(3, r.insertedCount);
-
-    // Get first documents from cursor
-    col.find({a:1}).limit(2).next(function(err, doc) {
-      assert.equal(null, err);
-      assert.ok(doc != null);
-      db.close();
-    });
-  });
-});
-```
-
-The *next* method allows the application to read one document at a time using callbacks. Let's look at the *each* method next.
-
-```js
-var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
-
-// Connection URL
-var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log("Connected correctly to server");
-
-  var col = db.collection('find');
-  // Insert a single document
-  col.insertMany([{a:1}, {a:1}, {a:1}], function(err, r) {
-    assert.equal(null, err);
-    assert.equal(3, r.insertedCount);
-
-    // Get first documents from cursor using each
-    col.find({a:1}).limit(2).each(function(err, doc) {
-      if(doc) {
-        db.close();
-        // Got a document, terminate the each
-        return false;
-      }
-    });
-  });
-});
-```
-
-The *each* method will call the supplied callback until there are no more documents available that satisfy the query. Once the available documents is exhausted it will return *null* for the second parameter in the callback. If you wish to terminate the each early you should return false in your *each* callback. This will stop the cursor from returning documents.
-
-This covers the basic crud operations in the Node.js MongoDB driver.
+This concludes the CRUD commands documentation.
