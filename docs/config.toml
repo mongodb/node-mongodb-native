@@ -14,7 +14,7 @@ title = "MongoDB Core 1.0.0"
 [[menu.main]]
     name = "driver portal"
     pre = "<i class='fa fa-file-text'></i>"
-    url = "/learn-mongodb-docs/"
+    url = "#REPLACE/"
     weight = -115
 [[menu.main]]
     name = "about driver"
