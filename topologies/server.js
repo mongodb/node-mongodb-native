@@ -548,8 +548,8 @@ var Server = function(options) {
    * @method
    * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
    * @param {object} cmd The command hash
-   * @param {object} [options.readPreference] Specify read preference if command supports it
-   * @param {object} [options.connection] Specify connection object to execute command against
+   * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+   * @param {Connection} [options.connection] Specify connection object to execute command against
    * @param {opResultCallback} callback A callback function
    */
   this.command = function(ns, cmd, options, callback) {
@@ -846,7 +846,7 @@ var Server = function(options) {
   /**
    * Get server
    * @method
-   * @param {object} [options.readPreference={}] Read preference for the connection
+   * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
    * @return {Server}
    */
   this.getServer = function(options) {
@@ -865,7 +865,7 @@ var Server = function(options) {
   /**
    * Get connection
    * @method
-   * @param {object} [options.readPreference={}] Read preference for the connection
+   * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
    * @return {Connection}
    */
   this.getConnection = function(options) {
@@ -905,7 +905,7 @@ var Server = function(options) {
   //   , raw: <boolean>
   //   , readPreference: <ReadPreference>
   //   , tailable: <boolean>
-  //   , oplogReply: <boolean>
+  //   , oplogReplay: <boolean>
   //   , noCursorTimeout: <boolean>
   //   , awaitdata: <boolean>
   //   , exhaust: <boolean>
@@ -919,6 +919,7 @@ var Server = function(options) {
    * @param {{object}|{Long}} cmd Can be either a command returning a cursor or a cursorId
    * @param {object} [options.batchSize=0] Batchsize for the operation
    * @param {array} [options.documents=[]] Initial documents list for cursor
+   * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
    * @param {opResultCallback} callback A callback function
    */
   this.cursor = function(ns, cmd, cursorOptions) {

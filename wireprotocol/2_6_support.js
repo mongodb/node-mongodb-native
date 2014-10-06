@@ -189,7 +189,7 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
 
   // Set up the option bits for wire protocol
   if(typeof cmd.tailable == 'boolean') query.tailable = cmd.tailable;
-  if(typeof cmd.oplogReply == 'boolean') query.oplogReply = cmd.oplogReply;
+  if(typeof cmd.oplogReplay == 'boolean') query.oplogReplay = cmd.oplogReplay;
   if(typeof cmd.noCursorTimeout == 'boolean') query.noCursorTimeout = cmd.noCursorTimeout;
   if(typeof cmd.awaitData == 'boolean') query.awaitData = cmd.awaitData;
   if(typeof cmd.exhaust == 'boolean') query.exhaust = cmd.exhaust;
@@ -237,7 +237,7 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
 
   // Options
   if(typeof options.tailable == 'boolean') query.tailable = options.tailable;
-  if(typeof options.oplogReply == 'boolean') query.oplogReply = options.oplogReply;
+  if(typeof options.oplogReplay == 'boolean') query.oplogReplay = options.oplogReplay;
   if(typeof options.noCursorTimeout == 'boolean') query.noCursorTimeout = options.noCursorTimeout;
   if(typeof options.awaitdata == 'boolean') query.awaitdata = options.awaitdata;
   if(typeof options.exhaust == 'boolean') query.exhaust = options.exhaust;

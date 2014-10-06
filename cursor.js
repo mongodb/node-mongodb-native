@@ -1,10 +1,5 @@
-var Response = require('./connection/commands').Response
-  , GetMore = require('./connection/commands').GetMore
-  , Query = require('./connection/commands').Query
-  , KillCursor = require('./connection/commands').KillCursor
-  , Long = require('bson').Long
+var Long = require('bson').Long
   , Logger = require('./connection/logger')
-  , ReadPreference = require('./topologies/read_preference')
   , MongoError = require('./error')
   , f = require('util').format;  
 
@@ -26,11 +21,6 @@ var Response = require('./connection/commands').Response
  * @param {object} callbacks The callbacks storage object for the server instance
  * @param {object} [options.batchSize=0] Batchsize for the operation
  * @param {array} [options.documents=[]] Initial documents list for cursor
- * @param {boolean} [options.tailable=false] Tailable flag set
- * @param {boolean} [options.oplogReply=false] oplogReply flag set
- * @param {boolean} [options.awaitdata=false] awaitdata flag set
- * @param {boolean} [options.exhaust=false] exhaust flag set
- * @param {boolean} [options.partial=false] partial flag set
  * @return {Cursor} A cursor instance
  * @property {number} cursorBatchSize The current cursorBatchSize for the cursor
  * @property {number} cursorLimit The current cursorLimit for the cursor
