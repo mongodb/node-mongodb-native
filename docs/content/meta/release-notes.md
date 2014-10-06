@@ -10,5 +10,10 @@ menu:
 title: Release Notes
 weight: 50
 ---
-1.0.0
-------------
+1.0.0 12-10-2014
+----------------
+- Complete driver with support for Server, ReplSet and Mongos.
+- Extensible cursor.
+- ReadPreferences support.
+- Authentication support for up to 2.8.
+- Conforms to Replicaset Management and Monitoring Specification.

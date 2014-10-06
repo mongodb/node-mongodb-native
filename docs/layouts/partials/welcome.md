@@ -1,18 +1,17 @@
-## What is Node.js Native?
+## What is MongoDB Node.js Core Driver ?
 
-Node.js Native is the MongoDB official Node.js driver allowing you to use MongoDB in you applications.
+The MongodDB Node.js Core driver is a low level driver meant for people building libraries on top of MongoDB and who do not need the additional complexities of the native end user driver nor all the extra scaffolding and helpers.
 
-## What does Node.js Native?
+## What does the driver offer
 
-The Node.js driver handles the connections to a single MongoDB server, a replicaset or a set of Mongos proxies in a sharded system. It let's your application interact with the server and lets it perform operations against the database.
+I offers connecting to all the available topologies in MongoDB as well as an extensible framework for cursors and hopefully simple to read code. All the plumbing including authentication is all in this driver and as it's much smaller than the legacy 1.X driver it should be much easier to understand.
 
 ## Next Steps
 
- * [Important Changes from 1.X to 2.X](/meta/changes-from-1.0)
- * [Install Driver](/overview/installing)
- * [Quick start](/overview/quickstart)
- * [Join the Mailing List](/community/mailing-list)
+ * [Install Driver](overview/installing)
+ * [Quick start](overview/quickstart)
+ * [Join the Mailing List](community/mailing-list)
  * [Star us on GitHub](https://github.com/mongodb/node-mongodb-native)
 
 ## Statistics
-[![NPM](https://nodei.co/npm/mongodb.png?downloads=true&downloadRank=true)](https://nodei.co/npm/mongodb/) [![NPM](https://nodei.co/npm-dl/mongodb.png?months=6&height=3)](https://nodei.co/npm/mongodb/)
+[![NPM](https://nodei.co/npm/mongodb-core.png?downloads=true&downloadRank=true)](https://nodei.co/npm/mongodb-core/) [![NPM](https://nodei.co/npm-dl/mongodb-core.png?months=6&height=3)](https://nodei.co/npm/mongodb-core/)
