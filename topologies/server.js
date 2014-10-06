@@ -23,6 +23,25 @@ var inherits = require('util').inherits
   , SSPI = require('../auth/sspi')
   , ScramSHA1 = require('../auth/scram');
 
+/**
+ * @fileOverview The **Server** class is a class that represents a single server topology and is
+ * used to construct connections.
+ * 
+ * @example
+ * var Server = require('mongodb-core').Server
+ *   , ReadPreference = require('mongodb-core').ReadPreference
+ *   , assert = require('assert');
+ * 
+ * var server = new Server({host: 'localhost', port: 27017});
+ * // Wait for the connection event
+ * server.on('connect', function(server) {
+ *   server.destroy();
+ * });
+ * 
+ * // Start connecting
+ * server.connect();
+ */
+ 
 // All bson types
 var bsonTypes = [b.Long, b.ObjectID, b.Binary, b.Code, b.DBRef, b.Symbol, b.Double, b.Timestamp, b.MaxKey, b.MinKey];
 // BSON parser
