@@ -832,3 +832,27 @@ exports['ensure index failure when duplicate records found'] = {
     });
   }
 }
+
+exports['ensure correct behavior when fullResult on insert and unique index violation'] = {
+  requires: {},
+
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    db.open(function(err, db) {
+      var collection = db.collection("full_result_insert_violation");
+      collection.ensureIndex({a:1}, {unique:true}, function(err, result) {
+        test.equal(null, err);
+
+        collection.insert([{a:1}, {a:1}], {fullResult:true}, function(err, result) {
+          console.dir(err)
+          console.dir(result)
+          // test.ok(err != null);
+
+          db.close();
+          test.done();
+        });
+      });
+    });
+  }
+}
+
