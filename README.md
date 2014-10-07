@@ -1,8 +1,8 @@
 # Description
 
-The MongoDB driver is the high level part of the 2.0 or higher MongoDB driver and is meant for end users. It does not contain any abstractions or helpers outside of the basic management of MongoDB topology connections, CRUD operations and authentication.
+The MongoDB driver is the high level part of the 2.0 or higher MongoDB driver and is meant for end users.
 
-## MongoDB Node.JS Core Driver
+## MongoDB Node.JS Driver
  
 | what          | where                                          |
 |---------------|------------------------------------------------|
