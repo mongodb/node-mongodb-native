@@ -1,3 +1,7 @@
+2.0.0 2014-10-07
+----------------
+- First release of 2.0 driver
+
 2.0.0-alpha2 2014-10-02
 -----------------------
 - CRUD API (insertOne, insertMany, updateOne, updateMany, removeOne, removeMany, bulkWrite, findOneAndDelete, findOneAndUpdate, findOneAndReplace)
