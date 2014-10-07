@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keyword" content="">
+    <link rel="shortcut icon" href="/node-mongodb-native/2.0/img/favicon.png">
+
+    <title>Connection URI</title>
+
+    <link href="/node-mongodb-native/2.0/css/bootstrap-theme.css" rel="stylesheet">
+    <link href="/node-mongodb-native/2.0/assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/node-mongodb-native/2.0/css/style.css" rel="stylesheet">
+    <link href="/node-mongodb-native/2.0/css/style-responsive.css" rel="stylesheet" />
+    <link href="/node-mongodb-native/2.0/css/monokai_sublime.css" rel="stylesheet" />
+
+  </head>
+
+  <body>
+  
+  <section id="container" class="">
+
+      
+      <header class="header black-bg">
+            <div class="toggle-nav">
+                <i class="fa fa-bars"></i>
+                <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom"></div>
+            </div>
+
+            
+            <a href="/node-mongodb-native/2.0/.." class="logo"><img src="/node-mongodb-native/2.0/img/logo-mongodb-header.png" style="height:40px;"></a>
+
+            
+            <div class="top-nav notification-row">
+                
+                <div class="hidden-xs nav-github pull-right">
+                    <span rel="show-github" data-user="mongodb" data-repo="node-mongodb-native"></span>
+                    <span rel="show-github" data-user="mongodb" data-repo="node-mongodb-native" data-type="fork"></span>
+                    <a href='http://travis-ci.org/mongodb/node-mongodb-native'><img src='https://secure.travis-ci.org/mongodb/node-mongodb-native.png'/><a>
+                </div>
+            </div>
+
+            <div class="nav title-row" id="top_menu">
+                <h1 class="nav top-menu"> MongoDB 2.0.0 Driver </h1>
+            </div>
+      </header>
+      
+
+
+<aside>
+    <div id="sidebar"  class="nav-collapse ">
+        
+        <ul class="sidebar-menu">
+          
+          
+              
+                <li>
+                <a class="" href="/node-mongodb-native/">
+                    <i class='fa fa-file-text'></i>
+                    
+                    <span>driver portal</span>
+                </a>
+              
+              </li>
+          
+              
+                <li>
+                <a class="" href="/node-mongodb-native/1.4">
+                    <i class='fa fa-file-text'></i>
+                    
+                    <span>legacy docs 1.4.X</span>
+                </a>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-gift'></i>
+                
+                <span>about driver</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/2.0/meta/license/"> License </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/meta/release-notes/"> Release Notes </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/meta/changes-from-1.0/"> Migrating to 2.X </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-road'></i>
+                
+                <span>getting started</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/2.0/overview/introduction/"> Introduction </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/overview/installing/"> Installing The Driver </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/overview/quickstart/"> QuickStart </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-file-text'></i>
+                
+                <span>api</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/2.0/api-docs/"> API Documentation </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-group'></i>
+                
+                <span>community</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/2.0/community/mailing-list/"> Mailing List </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/community/contributing/"> Contributing </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu active">
+            <a href="javascript:;" class="">
+                <i class='fa fa-book'></i>
+                
+                <span>tutorials</span>
+                <span class="menu-arrow fa fa-angle-down"></span>
+            </a>
+                <ul class="sub open">
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/connecting/"> Connecting To MongoDB </a> </li>
+                    
+                    <li class="active"><a href="/node-mongodb-native/2.0/tutorials/urls/"> Connection URI </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/crud_operations/"> CRUD Operations </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/aggregation/"> Aggregation </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/streams/"> Streams </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/gridfs/"> GridFS </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/logging/"> Logging </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-book'></i>
+                
+                <span>articles</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/2.0/articles/node_knockout_article_1/"> Node Knockout, Basics </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/articles/node_knockout_article_2/"> Node Knockout, GridFS </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/articles/node_knockout_article_3/"> Node Knockout, GEO </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+            <li> <a href="https://jira.mongodb.org/browse/NODE" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
+            
+              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/tutorials/urls.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
+            
+        </ul>
+        
+    </div>
+</aside>
+
+
+
+      
+      <section id="main-content">
+          <section class="wrapper">
+
+              
+                  
+                      
+                      
+                          
+                          
+                          
+                      
+                      
+                  
+              
+
+              <div class="row">
+                  <div class="col-md-1">
+                      
+                      
+                      <a class="navigation prev" href="/tutorials/connecting">
+                      <i class="fa fa-angle-left"></i>
+                      </a>
+                      
+                      
+                  </div>
+                <div class="col-md-10">
+                    <section class="panel">
+                          
+                              
+                          
+                    <div class="panel-body">
+
+
+
+<h2 id="toc_0">The URL connection format</h2>
+
+<pre><code>mongodb://[username:password@]host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[database][?options]]
+</code></pre>
+
+<p>The URL format is unified across official drivers from Mongodb with some options not supported on some drivers due to implementation differences. The ones not supported by the Node.js driver are left out for simplicities sake.</p>
+
+<h3 id="toc_1">Basic parts of the url</h3>
+
+<ul>
+<li><code>mongodb://</code> is a required prefix to identify that this is a string in the standard connection format.</li>
+<li><code>username:password@</code> is optional. If given, the driver will attempt to login to a database after connecting to a database server.</li>
+<li><code>host1</code> is the only required part of the URI. It identifies either a hostname, IP address, or unix domain socket</li>
+<li><code>:portX</code> is optional and defaults to :27017 if not provided.</li>
+<li><code>/database</code> is the name of the database to login to and thus is only relevant if the username:password@ syntax is used. If not specified the &ldquo;admin&rdquo; database will be used by default.</li>
+<li><code>?options</code> are connection options. Note that if database is absent there is still a / required between the last host and the ? introducing the options. Options are name=value pairs and the pairs are separated by &ldquo;&amp;&ldquo;. For any unrecognized or unsupported option, a driver should log a warning and continue processing. A driver should not support any options that are not explicitly defined in this specification. This is in order to reduce the likelihood that different drivers will support overlapping that differ in small but incompatible ways (like different name, different values, or different default value).</li>
+</ul>
+
+<h3 id="toc_2">Replica set configuration:</h3>
+
+<ul>
+<li><code>replicaSet=name</code>
+
+<ul>
+<li>The driver verifies that the name of the replica set it connects to matches this name. Implies that the hosts given are a seed list, and the driver will attempt to find all members of the set.</li>
+<li>No default value.</li>
+</ul></li>
+</ul>
+
+<h3 id="toc_3">Connection Configuration:</h3>
+
+<ul>
+<li><p><code>ssl=true|false|prefer</code></p>
+
+<ul>
+<li>true: the driver initiates each connections with SSL</li>
+<li>false: the driver initiates each connection without SSL</li>
+<li>prefer: the driver tries to initiate each connection with SSL, and falls back to without SSL if it fails.</li>
+<li>Default value is false.</li>
+</ul></li>
+
+<li><p><code>connectTimeoutMS=ms</code></p>
+
+<ul>
+<li>How long a connection can take to be opened before timing out.</li>
+<li>Current driver behavior already differs on this, so the default must be left to each driver. For new implementations, the default should be to never timeout.</li>
+</ul></li>
+
+<li><p><code>socketTimeoutMS=ms</code></p>
+
+<ul>
+<li>How long a send or receive on a socket can take before timing out.</li>
+<li>Current driver behavior already differs on this, so the default must be left to each driver. For new implementations, the default should be to never timeout.</li>
+</ul></li>
+</ul>
+
+<h3 id="toc_4">Connection pool configuration:</h3>
+
+<ul>
+<li><code>maxPoolSize=n:</code> The maximum number of connections in the connection pool
+
+<ul>
+<li>Default value is 5</li>
+</ul></li>
+</ul>
+
+<h3 id="toc_5">Write concern configuration:</h3>
+
+<p>More detailed information about write concerns can be found at <a href="http://www.mongodb.org/display/DOCS/getLastError+Command">http://www.mongodb.org/display/DOCS/getLastError+Command</a></p>
+
+<ul>
+<li><p><code>w=wValue</code></p>
+
+<ul>
+<li>For numeric values above 1, the driver adds { w : wValue } to the getLastError command.</li>
+<li>wValue is typically a number, but can be any string in order to allow for specifications like &ldquo;majority&rdquo;</li>
+<li>Default value is 1.
+
+<ul>
+<li>wValue == -1 ignore network errors</li>
+<li>wValue == 0 no write acknowledgement</li>
+<li>wValue == 1 perform a write acknowledgement</li>
+<li>wValue == 2 perform a write acknowledgement across primary and one secondary</li>
+<li>wValue == &lsquo;majority&rsquo; perform a write acknowledgement across the majority of servers in the replicaset</li>
+<li>wValue == &lsquo;tag name&rsquo; perform a write acknowledgement against the replicaset tag name</li>
+</ul></li>
+</ul></li>
+
+<li><p><code>wtimeoutMS=ms</code></p>
+
+<ul>
+<li>The driver adds { wtimeout : ms } to the getlasterror command.</li>
+<li>Used in combination with w</li>
+<li>No default value</li>
+</ul></li>
+
+<li><p><code>journal=true|false</code></p>
+
+<ul>
+<li>true: Sync to journal.</li>
+<li>false: the driver does not add j to the getlasterror command</li>
+<li>Default value is false</li>
+</ul></li>
+
+<li><p><code>fsync=true|false</code></p>
+
+<ul>
+<li>true: Sync to disk.</li>
+<li>false: the driver does not add fsync to the getlasterror command</li>
+<li>Default value is false</li>
+<li>If conflicting values for fireAndForget, and any write concern are passed the driver should raise an exception about the conflict.</li>
+</ul></li>
+</ul>
+
+<h3 id="toc_6">Auth options</h3>
+
+<ul>
+<li><code>authSource=string:</code> Used when the user for authentication is stored in another database using indirect authentication.
+
+<ul>
+<li>Default value is null</li>
+</ul></li>
+</ul>
+
+<h3 id="toc_7">Read Preference</h3>
+
+<ul>
+<li><p><code>slaveOk=true|false:</code> Whether a driver connected to a replica set will send reads to slaves/secondaries.</p>
+
+<ul>
+<li>Default value is false</li>
+</ul></li>
+
+<li><p><code>readPreference=enum:</code> The read preference for this connection. If set, it overrides any slaveOk value.</p>
+
+<ul>
+<li>Enumerated values:
+
+<ul>
+<li>primary</li>
+<li>primaryPreferred</li>
+<li>secondary</li>
+<li>secondaryPreferred</li>
+<li>nearest</li>
+</ul></li>
+<li>Default value is primary</li>
+</ul></li>
+
+<li><p><code>readPreferenceTags=string.</code> A representation of a tag set as a comma-separated list of colon-separated key-value pairs, e.g. <code>dc:ny,rack:1</code>. Spaces should be stripped from beginning and end of all keys and values. To specify a list of tag sets, using multiple readPreferenceTags, e.g. <code>readPreferenceTags=dc:ny,rack:1&amp;readPreferenceTags=dc:ny&amp;readPreferenceTags=</code></p>
+
+<ul>
+<li>Note the empty value, it provides for fallback to any other secondary server if none is available</li>
+<li>Order matters when using multiple readPreferenceTags</li>
+<li>There is no default value</li>
+</ul></li>
+</ul>
+
+                      
+                      <div id="disqus_thread"></div>
+                      <script type="text/javascript">
+                           
+                          var disqus_shortname = 'nodejsmongodbdriver'; 
+
+                           
+                          (function() {
+                              var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                              dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                              (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                          })();
+                      </script>
+                      <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+                      <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+                      
+                    </div>
+                    </section>
+                </div>
+                <div class="col-md-1">
+                    
+                    
+                    <a class="navigation next" href="/tutorials/crud_operations">
+                        <i class="fa fa-angle-right"> </i>
+                    </a>
+                    
+                    
+                </div>
+              </div>
+              
+          </section>
+      </section>
+     
+  </section>
+  
+    
+    <script src="/node-mongodb-native/2.0/js/jquery-2.1.1.min.js"></script>
+    <script src="/node-mongodb-native/2.0/js/jquery.scrollTo.min.js"></script>
+    <script src="/node-mongodb-native/2.0/js/bootstrap.min.js"></script>
+    
+    <script src="/node-mongodb-native/2.0/js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="/node-mongodb-native/2.0/js/scripts.js"></script>
+    <script async defer id="github-bjs" src="/node-mongodb-native/2.0/js/buttons.js"></script>
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-29229787-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>
+

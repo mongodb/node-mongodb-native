@@ -1,0 +1,2056 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Source: lib/topologies/server.js</title>
+    
+    
+    
+    
+    
+    <meta property="og:title" content=""/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:image" content=""/>
+    
+    <meta property="og:url" content=""/>
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <script src="scripts/jquery.min.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/jaguar.css">
+    
+    
+    <script>
+    var config = {"monospaceLinks":true,"cleverLinks":true,"default":{"outputSourceFiles":true},"applicationName":"Node.js MongoDB Driver API","disqus":true,"googleAnalytics":"UA-29229787-1","openGraph":{"title":"","type":"website","image":"","site_name":"","url":""},"meta":{"title":"","description":"","keyword":""},"linenums":true};
+    </script>
+    
+
+    
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', UA-29229787-1, 'auto');
+      ga('send', 'pageview');
+    </script>    
+    
+</head>
+<body>
+<div id="wrap" class="clearfix" style="width:100%;">
+    <table style="height:100%;width:100%">
+        <tr>
+            <td valign='top'>        
+                <div class="main">
+                    <h1 class="page-title" data-filename="server.js.html">Source: lib/topologies/server.js</h1>
+                    
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>var inherits = require('util').inherits
+  , f = require('util').format
+  , bindToCurrentDomain = require('../connection/utils').bindToCurrentDomain
+  , EventEmitter = require('events').EventEmitter
+  , Pool = require('../connection/pool')
+  , b = require('bson')
+  , Query = require('../connection/commands').Query
+  , MongoError = require('../error')
+  , ReadPreference = require('./read_preference')
+  , BasicCursor = require('../cursor')
+  , CommandResult = require('./command_result')
+  , getSingleProperty = require('../connection/utils').getSingleProperty
+  , getProperty = require('../connection/utils').getProperty
+  , BSON = require('bson').native().BSON
+  , PreTwoSixWireProtocolSupport = require('../wireprotocol/2_4_support')
+  , TwoSixWireProtocolSupport = require('../wireprotocol/2_6_support')
+  , Session = require('./session')
+  , Logger = require('../connection/logger')
+  , MongoCR = require('../auth/mongocr')
+  , X509 = require('../auth/x509')
+  , Plain = require('../auth/plain')
+  , GSSAPI = require('../auth/gssapi')
+  , SSPI = require('../auth/sspi')
+  , ScramSHA1 = require('../auth/scram');
+
+/**
+ * @fileOverview The **Server** class is a class that represents a single server topology and is
+ * used to construct connections.
+ * 
+ * @example
+ * var Server = require('mongodb-core').Server
+ *   , ReadPreference = require('mongodb-core').ReadPreference
+ *   , assert = require('assert');
+ * 
+ * var server = new Server({host: 'localhost', port: 27017});
+ * // Wait for the connection event
+ * server.on('connect', function(server) {
+ *   server.destroy();
+ * });
+ * 
+ * // Start connecting
+ * server.connect();
+ */
+ 
+// All bson types
+var bsonTypes = [b.Long, b.ObjectID, b.Binary, b.Code, b.DBRef, b.Symbol, b.Double, b.Timestamp, b.MaxKey, b.MinKey];
+// BSON parser
+var bsonInstance = null;
+// Server instance id
+var serverId = 0;
+// Callbacks instance id
+var callbackId = 0;
+
+// Single store for all callbacks
+var Callbacks = function() {
+  EventEmitter.call(this);
+
+  // Self reference
+  var self = this;
+
+  // Id
+  var id = callbackId++;
+
+  Object.defineProperty(this, 'id', {
+    enumerable:true, get: function() { return id; }
+  });
+
+  Object.defineProperty(this, 'type', {
+    enumerable:true, get: function() { return 'server'; }
+  });
+
+  //
+  // Flush all callbacks
+  this.flush = function(err) {
+    var executeError = function(_id, _callbacks) {
+      _callbacks.emit(_id, err, null);
+      // Force removal as some node versions don't delete the properties on emit
+      delete self._events[id];
+    }
+
+    // Error out any current callbacks
+    for(var id in this._events) {
+      if(!isNaN(parseInt(id, 10))) {
+        executeError(id, self);
+      }
+    }
+  }
+
+  this.raw = function(id) {
+    if(this._events[id] == null) return false;
+    return this._events[id].listener.raw == true ? true : false;
+  }
+
+  this.unregister = function(id) {
+    this.removeAllListeners(id);
+  }
+
+  this.register = function(id, callback) {
+    this.once(id, bindToCurrentDomain(callback));
+  }
+}
+
+inherits(Callbacks, EventEmitter);
+
+/**
+ * @ignore
+ */
+var bindToCurrentDomain = function(callback) {
+  var domain = process.domain;
+  if(domain == null || callback == null) return callback;
+  return domain.bind(callback);
+}
+
+var DISCONNECTED = 'disconnected';
+var CONNECTING = 'connecting';
+var CONNECTED = 'connected';
+var DESTROYED = 'destroyed';
+
+/**
+ * Creates a new Server instance
+ * @class
+ * @param {boolean} [options.reconnect=true] Server will attempt to reconnect on loss of connection
+ * @param {number} [options.reconnectTries=30] Server attempt to reconnect #times
+ * @param {number} [options.reconnectInterval=1000] Server will wait # milliseconds between retries
+ * @param {boolean} [options.emitError=false] Server will emit errors events
+ * @param {Cursor} [options.cursorFactory=Cursor] The cursor factory class used for all query cursors
+ * @param {string} options.host The server host
+ * @param {number} options.port The server port
+ * @param {number} [options.size=5] Server connection pool size
+ * @param {boolean} [options.keepAlive=true] TCP Connection keep alive enabled
+ * @param {number} [options.keepAliveInitialDelay=0] Initial delay before TCP keep alive enabled
+ * @param {boolean} [options.noDelay=true] TCP Connection no delay
+ * @param {number} [options.connectionTimeout=0] TCP Connection timeout setting
+ * @param {number} [options.socketTimeout=0] TCP Socket timeout setting
+ * @param {boolean} [options.singleBufferSerializtion=true] Serialize into single buffer, trade of peak memory for serialization speed
+ * @param {boolean} [options.ssl=false] Use SSL for connection
+ * @param {Buffer} [options.ca] SSL Certificate store binary buffer
+ * @param {Buffer} [options.cert] SSL Certificate binary buffer
+ * @param {Buffer} [options.key] SSL Key file binary buffer
+ * @param {string} [options.passphrase] SSL Certificate pass phrase
+ * @param {boolean} [options.rejectUnauthorized=false] Reject unauthorized server certificates
+ * @param {boolean} [options.promoteLongs=true] Convert Long values from the db into Numbers if they fit into 53 bits
+ * @return {Server} A cursor instance
+ * @fires Server#connect
+ * @fires Server#close
+ * @fires Server#error
+ * @fires Server#timeout
+ * @fires Server#parseError
+ * @fires Server#reconnect
+ */
+var Server = function(options) {
+  var self = this;
+  // Server callbacks
+  var callbacks = new Callbacks();
+  
+  // Add event listener
+  EventEmitter.call(this);
+
+  // Logger
+  var logger = Logger('Server', options);
+  // Server state
+  var state = DISCONNECTED;
+  
+  // Reconnect option
+  var reconnect = typeof options.reconnect == 'boolean' ? options.reconnect :  true;
+  var reconnectTries = options.reconnectTries || 30;
+  var reconnectInterval = options.reconnectInterval || 1000;
+
+  // Swallow or emit errors
+  var emitError = typeof options.emitError == 'boolean' ? options.emitError : false;
+
+  // Current state
+  var currentReconnectRetry = reconnectTries;
+  // Contains the ismaster
+  var ismaster = null;
+  // Contains any alternate strategies for picking
+  var readPreferenceStrategies = options.readPreferenceStrategies;
+  // Auth providers
+  var authProviders = options.authProviders || {};
+
+  // Server instance id
+  var id = serverId++;
+
+  // Grouping tag used for debugging purposes
+  var tag = options.tag;
+
+  // Do we have a not connected handler
+  var disconnectHandler = options.disconnectHandler;
+
+  //
+  // wireProtocolHandler methods
+  //
+  var wireProtocolHandler = options.wireProtocolHandler || new PreTwoSixWireProtocolSupport();
+
+  //
+  // Factory overrides
+  //
+  var Cursor = options.cursorFactory || BasicCursor;
+
+  // BSON Parser, ensure we have a single instance
+  if(bsonInstance == null) {
+    bsonInstance = new BSON(bsonTypes);
+  }
+
+  // Pick the right bson parser
+  var bson = options.bson ? options.bson : bsonInstance;
+  // Add bson parser to options
+  options.bson = bson;
+
+  // Internal connection pool
+  var pool = null;
+
+  // Name of the server
+  var serverDetails = {
+      host: options.host
+    , port: options.port
+    , name: options.port ? f("%s:%s", options.host, options.port) : options.host
+  }
+
+  // Set error properties
+  getProperty(this, 'name', 'name', serverDetails, {});
+  getProperty(this, 'bson', 'bson', options, {});
+  getProperty(this, 'wireProtocolHandler', 'wireProtocolHandler', options, {});
+  getSingleProperty(this, 'id', id);
+
+  // Supports server
+  var supportsServer = function() {
+    return ismaster &amp;&amp; typeof ismaster.minWireVersion == 'number';
+  }
+
+  //
+  // Reconnect server
+  var reconnectServer = function() {
+    state = CONNECTING;
+    // Create a new Pool
+    pool = new Pool(options);
+    // error handler
+    var errorHandler = function(err) {
+      state = DISCONNECTED;
+      // Destroy the pool
+      pool.destroy();
+      // Adjust the number of retries
+      currentReconnectRetry = currentReconnectRetry - 1;
+      // No more retries
+      if(currentReconnectRetry &lt;= 0) {
+        self.emit('error', f('failed to connect to %s:%s after %s retries', options.host, options.port, reconnectTries));
+      } else {
+        setTimeout(function() {
+          reconnectServer();
+        }, reconnectInterval);
+      }
+    }
+
+    //
+    // Attempt to connect
+    pool.once('connect', function() {
+      // Remove any non used handlers
+      var events = ['error', 'close', 'timeout', 'parseError'];
+      events.forEach(function(e) {
+        pool.removeAllListeners(e);
+      })
+
+      // Set connected state
+      state = CONNECTED;
+
+      // Add proper handlers
+      pool.once('error', errorHandler);
+      pool.once('close', closeHandler);
+      pool.once('timeout', timeoutHandler);
+      pool.on('message', messageHandler);
+      pool.once('parseError', fatalErrorHandler);
+
+      // We need to ensure we have re-authenticated
+      var keys = Object.keys(authProviders);
+      if(keys.length == 0) return self.emit('reconnect', self);
+
+      // Execute all providers
+      var count = keys.length;
+      // Iterate over keys
+      for(var i = 0; i &lt; keys.length; i++) {
+        authProviders[keys[i]].reauthenticate(self, pool, function(err, r) {
+          count = count - 1;
+          // We are done, emit reconnect event
+          if(count == 0) {
+            return self.emit('reconnect', self);
+          }
+        });
+      }
+    });
+
+    //
+    // Handle connection failure
+    pool.once('error', errorHandler);
+    pool.once('close', errorHandler);
+    pool.once('timeout', errorHandler);
+    pool.once('parseError', errorHandler);
+
+    // Connect pool
+    pool.connect();
+  }
+
+  //
+  // createWireProtocolHandler
+  var createWireProtocolHandler = function(result) {
+    // 2.6 wire protocol handler
+    if(result &amp;&amp; result.maxWireVersion >= 2) {
+      return new TwoSixWireProtocolSupport();  
+    }
+
+    // 2.4 or earlier wire protocol handler
+    return new PreTwoSixWireProtocolSupport();
+  }
+
+  //
+  // Handlers
+  var messageHandler = function(response, connection) {
+    try {
+      // Parse the message
+      response.parse({raw: callbacks.raw(response.responseTo)});
+      if(logger.isDebug()) logger.debug(f('message [%s] received from %s', response.raw.toString('hex'), self.name));
+      callbacks.emit(response.responseTo, null, response);      
+    } catch (err) {
+      callbacks.flush(new MongoError(err));
+      self.destroy();
+    }
+  }
+
+  var errorHandler = function(err, connection) {
+    if(state == DISCONNECTED || state == DESTROYED) return;
+    // Set disconnected state
+    state = DISCONNECTED;
+    if(readPreferenceStrategies != null) notifyStrategies('error', [self]);
+    if(logger.isInfo()) logger.info(f('server %s errored out with %s', self.name, JSON.stringify(err)));
+    // Flush out all the callbacks
+    if(callbacks) callbacks.flush(new MongoError(f("server %s received an error %s", self.name, JSON.stringify(err))));
+    // Destroy all connections
+    self.destroy();    
+    // Emit error event
+    if(emitError) self.emit('error', err, self);
+    // If we specified the driver to reconnect perform it
+    if(reconnect) setTimeout(function() { currentReconnectRetry = reconnectTries, reconnectServer() }, reconnectInterval);
+  }
+
+  var fatalErrorHandler = function(err, connection) {
+    if(state == DISCONNECTED || state == DESTROYED) return;
+    // Set disconnected state
+    state = DISCONNECTED;
+
+    if(readPreferenceStrategies != null) notifyStrategies('error', [self]);
+    if(logger.isInfo()) logger.info(f('server %s errored out with %s', self.name, JSON.stringify(err)));    
+    // Flush out all the callbacks
+    if(callbacks) callbacks.flush(new MongoError(f("server %s received an error %s", self.name, JSON.stringify(err))));
+    // Emit error event
+    self.emit('error', err, self);
+    // If we specified the driver to reconnect perform it
+    if(reconnect) setTimeout(function() { currentReconnectRetry = reconnectTries, reconnectServer() }, reconnectInterval);
+    // Destroy all connections
+    self.destroy();
+  }  
+
+  var timeoutHandler = function(err, connection) {
+    if(state == DISCONNECTED || state == DESTROYED) return;
+    // Set disconnected state
+    state = DISCONNECTED;
+
+    if(readPreferenceStrategies != null) notifyStrategies('timeout', [self]);
+    if(logger.isInfo()) logger.info(f('server %s timed out', self.name));
+    // Flush out all the callbacks
+    if(callbacks) callbacks.flush(new MongoError(f("server %s timed out", self.name)));
+    // Emit error event
+    self.emit('timeout', err, self);
+    // If we specified the driver to reconnect perform it
+    if(reconnect) setTimeout(function() { currentReconnectRetry = reconnectTries, reconnectServer() }, reconnectInterval);
+    // Destroy all connections
+    self.destroy();
+  }
+
+  var closeHandler = function(err, connection) {
+    if(state == DISCONNECTED || state == DESTROYED) return;
+    // Set disconnected state
+    state = DISCONNECTED;
+
+    if(readPreferenceStrategies != null) notifyStrategies('close', [self]);
+    if(logger.isInfo()) logger.info(f('server %s closed', self.name));
+    // Flush out all the callbacks
+    if(callbacks) callbacks.flush(new MongoError(f("server %s sockets closed", self.name)));
+    // Emit error event
+    self.emit('close', err, self);
+    // If we specified the driver to reconnect perform it
+    if(reconnect) setTimeout(function() { currentReconnectRetry = reconnectTries, reconnectServer() }, reconnectInterval);
+    // Destroy all connections
+    self.destroy();
+  }
+
+  var connectHandler = function(connection) {
+    // Apply any applyAuthentications
+    applyAuthentications(function() {
+
+      // Execute an ismaster
+      self.command('system.$cmd', {ismaster:true}, function(err, r) {
+        if(err) {
+          state = DISCONNECTED;
+          return self.emit('close', err, self);
+        }
+
+        // Set the current ismaster
+        if(!err) {
+          ismaster = r.result;
+        }
+
+        // Determine the wire protocol handler
+        wireProtocolHandler = createWireProtocolHandler(ismaster);
+
+        // Set the wireProtocolHandler
+        options.wireProtocolHandler = wireProtocolHandler;
+
+        // Log the ismaster if available
+        if(logger.isInfo()) logger.info(f('server %s connected with ismaster [%s]', self.name, JSON.stringify(r.result)));
+
+        // Validate if we it's a server we can connect to
+        if(!supportsServer() &amp;&amp; wireProtocolHandler == null) {
+          state = DISCONNECTED
+          return self.emit('error', new MongoError("non supported server version"), self);
+        }
+
+        // Set the details
+        if(ismaster &amp;&amp; ismaster.me) serverDetails.name = ismaster.me;
+
+        // No read preference strategies just emit connect
+        if(readPreferenceStrategies == null) {
+          state = CONNECTED;
+          return self.emit('connect', self);
+        }
+
+        // Signal connect to all readPreferences
+        notifyStrategies('connect', [self], function(err, result) {
+          state = CONNECTED;
+          return self.emit('connect', self);
+        });        
+      });      
+    });
+  }
+
+  /**
+   * Execute a command
+   * @method
+   * @param {string} type Type of BSON parser to use (c++ or js)
+   */
+  this.setBSONParserType = function(type) {
+    var nBSON = null;
+
+    if(type == 'c++') {
+      nBSON = require('bson').native().BSON;
+    } else if(type == 'js') {
+      nBSON = require('bson').pure().BSON;
+    } else {
+      throw new MongoError(f("% parser not supported", type));
+    }
+
+    options.bson = new nBSON(bsonTypes);
+  }  
+
+  /**
+   * Returns the last known ismaster document for this server
+   * @method
+   * @return {object}
+   */
+  this.lastIsMaster = function() {
+    return ismaster;
+  }
+
+  /**
+   * Initiate server connect
+   * @method
+   */
+  this.connect = function(_options) {
+    // Set server specific settings
+    _options = _options || {}
+    if(typeof _options.promoteLongs == 'boolean') 
+      options.promoteLongs = _options.promoteLongs;
+    // Destroy existing pool
+    if(pool) {
+      pool.destroy();
+      pool = null;
+    }
+    
+    // Set the state to connection
+    state = CONNECTING;
+    // Create a new connection pool
+    if(!pool) {
+      pool = new Pool(options);      
+    }
+
+    // Add all the event handlers
+    pool.once('timeout', timeoutHandler);
+    pool.once('close', closeHandler);
+    pool.once('error', errorHandler);
+    pool.on('message', messageHandler);
+    pool.once('connect', connectHandler);
+    pool.once('parseError', fatalErrorHandler);
+
+    // Connect the pool
+    pool.connect(); 
+  }
+
+  /**
+   * Destroy the server connection
+   * @method
+   */
+  this.destroy = function() {
+    if(logger.isDebug()) logger.debug(f('destroy called on server %s', self.name));
+    // Set state as destroyed
+    state = DESTROYED;
+    // Close the pool
+    pool.destroy();
+    // Flush out all the callbacks
+    if(callbacks) callbacks.flush(new MongoError(f("server %s sockets closed", self.name)));
+  }
+
+  /**
+   * Figure out if the server is connected
+   * @method
+   * @return {boolean}
+   */
+  this.isConnected = function() {
+    if(pool) return pool.isConnected();
+    return false;
+  }
+
+  //
+  // Execute readPreference Strategies
+  var notifyStrategies = function(op, params, callback) {
+    if(typeof callback != 'function') {
+      // Notify query start to any read Preference strategies
+      for(var name in readPreferenceStrategies) {
+        if(readPreferenceStrategies[name][op]) {
+          var strat = readPreferenceStrategies[name];
+          strat[op].apply(strat, params);
+        }
+      }
+      // Finish up
+      return;
+    }
+
+    // Execute the async callbacks
+    var nPreferences = Object.keys(readPreferenceStrategies).length;
+    if(nPreferences == 0) return callback(null, null);
+    for(var name in readPreferenceStrategies) {
+      if(readPreferenceStrategies[name][op]) {
+        var strat = readPreferenceStrategies[name];
+        // Add a callback to params
+        var cParams = params.slice(0);
+        cParams.push(function(err, r) {
+          nPreferences = nPreferences - 1;
+          if(nPreferences == 0) {
+            callback(null, null);
+          }
+        })
+        // Execute the readPreference
+        strat[op].apply(strat, cParams);
+      }
+    }    
+  }
+
+  /**
+   * Execute a command
+   * @method
+   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param {object} cmd The command hash
+   * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+   * @param {Connection} [options.connection] Specify connection object to execute command against
+   * @param {opResultCallback} callback A callback function
+   */
+  this.command = function(ns, cmd, options, callback) {
+    if(typeof options == 'function') callback = options, options = {};
+    // Ensure we have no options
+    options = options || {};
+    // Do we have a read Preference it need to be of type ReadPreference
+    if(options.readPreference &amp;&amp; !(options.readPreference instanceof ReadPreference)) {
+      throw new Error("readPreference must be an instance of ReadPreference");
+    }
+
+    // Debug log
+    if(logger.isDebug()) logger.debug(f('executing command [%s] against %s', JSON.stringify({
+      ns: ns, cmd: cmd, options: options
+    }), self.name));
+
+    // Topology is not connected, save the call in the provided store to be
+    // Executed at some point when the handler deems it's reconnected
+    if(!self.isConnected() &amp;&amp; disconnectHandler != null) {
+      callback = bindToCurrentDomain(callback);
+      return disconnectHandler.add('command', ns, cmd, options, callback);
+    }
+
+    // If we have no connection error
+    if(!pool.isConnected()) return callback(new MongoError(f("no connection available to server %s", self.name)));
+    
+    // Execute on all connections
+    var onAll = typeof options.onAll == 'boolean' ? options.onAll : false;
+
+    // Check keys
+    var checkKeys = typeof options.checkKeys == 'boolean' ? options.checkKeys: false;
+
+    // Serialize function
+    var serializeFunctions = typeof options.serializeFunctions == 'boolean' ? options.serializeFunctions : false;
+
+    // Query options
+    var queryOptions = {
+      numberToSkip: 0, numberToReturn: -1, checkKeys: checkKeys
+    };
+
+    if(serializeFunctions) queryOptions.serializeFunctions = serializeFunctions;
+
+    // Create a query instance
+    var query = new Query(bson, ns, cmd, queryOptions);
+
+    // Set slave OK
+    query.slaveOk = slaveOk(options.readPreference);
+
+    // Notify query start to any read Preference strategies
+    if(readPreferenceStrategies != null)
+      notifyStrategies('startOperation', [self, query, new Date()]);
+
+    // Get a connection (either passed or from the pool)
+    var connection = options.connection || pool.get();
+
+    // Double check if we have a valid connection
+    if(!connection.isConnected()) {
+      return callback(new MongoError(f("no connection available to server %s", self.name)));
+    }
+
+    // Print cmd and execution connection if in debug mode for logging
+    if(logger.isDebug()) {
+      var json = connection.toJSON();
+      logger.debug(f('cmd [%s] about to be executed on connection with id %s at %s:%s', JSON.stringify(cmd), json.id, json.host, json.port));
+    }
+
+    // Execute multiple queries
+    if(onAll) {
+      var connections = pool.getAll();
+      var total = connections.length;
+      // We have an error
+      var error = null;
+      // Execute on all connections
+      for(var i = 0; i &lt; connections.length; i++) {
+        try {
+          query.incRequestId();
+          connections[i].write(query);
+        } catch(err) {
+          total = total - 1;
+          if(total == 0) return callback(MongoError.create(err));
+        }
+
+        // Register the callback
+        callbacks.register(query.requestId, function(err, result) {
+          if(err) error = err;
+          total = total - 1;
+
+          // Done
+          if(total == 0) {
+            // Notify end of command
+            notifyStrategies('endOperation', [self, error, result, new Date()]);
+            if(error) return callback(MongoError.create(error));
+            // Execute callback, catch and rethrow if needed
+            try { callback(null, new CommandResult(result.documents[0], connections)); }
+            catch(err) { process.nextTick(function() { throw err}); }
+          }
+        });
+      }
+
+      return;
+    }
+
+    // Execute a single command query
+    try {
+      connection.write(query);
+    } catch(err) {
+      return callback(MongoError.create(err));
+    }
+
+    // Register the callback
+    callbacks.register(query.requestId, function(err, result) {
+      // Notify end of command
+      notifyStrategies('endOperation', [self, err, result, new Date()]);
+      if(err) return callback(err);
+      if(result.documents[0]['$err'] 
+        || result.documents[0]['errmsg']
+        || result.documents[0]['err']
+        || result.documents[0]['code']) return callback(MongoError.create(result.documents[0]));
+        // Execute callback, catch and rethrow if needed
+        try { callback(null, new CommandResult(result.documents[0], connection)); }
+        catch(err) { process.nextTick(function() { throw err}); }
+    });
+  }
+
+  /**
+   * Insert one or more documents
+   * @method
+   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param {array} ops An array of documents to insert
+   * @param {boolean} [options.ordered=true] Execute in order or out of order
+   * @param {object} [options.writeConcern={}] Write concern for the operation
+   * @param {opResultCallback} callback A callback function
+   */
+  this.insert = function(ns, ops, options, callback) {
+    // Topology is not connected, save the call in the provided store to be
+    // Executed at some point when the handler deems it's reconnected
+    if(!self.isConnected() &amp;&amp; disconnectHandler != null) {
+      callback = bindToCurrentDomain(callback);
+      return disconnectHandler.add('insert', ns, ops, options, callback);
+    }
+
+    // Setup the docs as an array
+    ops = Array.isArray(ops) ? ops : [ops];
+    // Execute write
+    return wireProtocolHandler.insert(self, ismaster, ns, bson, pool, callbacks, ops, options, callback);
+  }
+
+  /**
+   * Perform one or more update operations
+   * @method
+   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param {array} ops An array of updates
+   * @param {boolean} [options.ordered=true] Execute in order or out of order
+   * @param {object} [options.writeConcern={}] Write concern for the operation
+   * @param {opResultCallback} callback A callback function
+   */
+  this.update = function(ns, ops, options, callback) {
+    // Topology is not connected, save the call in the provided store to be
+    // Executed at some point when the handler deems it's reconnected
+    if(!self.isConnected() &amp;&amp; disconnectHandler != null) {
+      callback = bindToCurrentDomain(callback);
+      return disconnectHandler.add('update', ns, ops, options, callback);
+    }
+
+    // Setup the docs as an array
+    ops = Array.isArray(ops) ? ops : [ops];
+    // Execute write
+    return wireProtocolHandler.update(self, ismaster, ns, bson, pool, callbacks, ops, options, callback);
+  }
+
+  /**
+   * Perform one or more remove operations
+   * @method
+   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param {array} ops An array of removes
+   * @param {boolean} [options.ordered=true] Execute in order or out of order
+   * @param {object} [options.writeConcern={}] Write concern for the operation
+   * @param {opResultCallback} callback A callback function
+   */
+  this.remove = function(ns, ops, options, callback) {
+    // Topology is not connected, save the call in the provided store to be
+    // Executed at some point when the handler deems it's reconnected
+    if(!self.isConnected() &amp;&amp; disconnectHandler != null) {
+      callback = bindToCurrentDomain(callback);
+      return disconnectHandler.add('remove', ns, ops, options, callback);
+    }
+
+    // Setup the docs as an array
+    ops = Array.isArray(ops) ? ops : [ops];
+    // Execute write
+    return wireProtocolHandler.remove(self, ismaster, ns, bson, pool, callbacks, ops, options, callback);
+  }
+
+  /**
+   * Authenticate using a specified mechanism
+   * @method
+   * @param {string} mechanism The Auth mechanism we are invoking
+   * @param {string} db The db we are invoking the mechanism against
+   * @param {...object} param Parameters for the specific mechanism
+   * @param {authResultCallback} callback A callback function
+   */
+  this.auth = function(mechanism, db) {
+    var args = Array.prototype.slice.call(arguments, 2);
+    var callback = args.pop();
+
+    // If we don't have the mechanism fail
+    if(authProviders[mechanism] == null &amp;&amp; mechanism != 'default') 
+      throw new MongoError(f("auth provider %s does not exist", mechanism));
+
+    // If we have the default mechanism we pick mechanism based on the wire
+    // protocol max version. If it's >= 3 then scram-sha1 otherwise mongodb-cr
+    if(mechanism == 'default' &amp;&amp; ismaster &amp;&amp; ismaster.maxWireVersion >= 3) {
+      mechanism = 'scram-sha-1';
+    } else if(mechanism == 'default') {
+      mechanism = 'mongocr';
+    }
+    
+    // Actual arguments
+    var finalArguments = [self, pool, db].concat(args.slice(0)).concat([function(err, r) {
+      if(err) return callback(err);
+      if(!r) return callback(new MongoError('could not authenticate'));
+      callback(null, new Session({}, self));
+    }]);
+
+    // Let's invoke the auth mechanism
+    authProviders[mechanism].auth.apply(authProviders[mechanism], finalArguments);
+  }
+
+  // Apply all stored authentications
+  var applyAuthentications = function(callback) {
+    // We need to ensure we have re-authenticated
+    var keys = Object.keys(authProviders);
+    if(keys.length == 0) return callback(null, null);
+
+    // Execute all providers
+    var count = keys.length;
+    // Iterate over keys
+    for(var i = 0; i &lt; keys.length; i++) {
+      authProviders[keys[i]].reauthenticate(self, pool, function(err, r) {
+        count = count - 1;
+        // We are done, emit reconnect event
+        if(count == 0) {
+          return callback(null, null);
+        }
+      });
+    }
+  }
+
+  //
+  // Plugin methods
+  //
+
+  /**
+   * Add custom read preference strategy
+   * @method
+   * @param {string} name Name of the read preference strategy
+   * @param {object} strategy Strategy object instance
+   */
+  this.addReadPreferenceStrategy = function(name, strategy) {
+    if(readPreferenceStrategies == null) readPreferenceStrategies = {};
+    readPreferenceStrategies[name] = strategy;
+  }
+
+  /**
+   * Add custom authentication mechanism
+   * @method
+   * @param {string} name Name of the authentication mechanism
+   * @param {object} provider Authentication object instance
+   */
+  this.addAuthProvider = function(name, provider) {
+    authProviders[name] = provider;
+  }
+
+  /**
+   * Compare two server instances
+   * @method
+   * @param {Server} server Server to compare equality against
+   * @return {boolean}
+   */
+  this.equals = function(server) {    
+    if(typeof server == 'string') return server == this.name;
+    return server.name == this.name;
+  }
+
+  /**
+   * All raw connections
+   * @method
+   * @return {Connection[]}
+   */
+  this.connections = function() {
+    return pool.getAll();
+  }
+
+  /**
+   * Get server
+   * @method
+   * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+   * @return {Server}
+   */
+  this.getServer = function(options) {
+    return self;
+  }
+
+  /**
+   * Get callbacks object
+   * @method
+   * @return {Callbacks}
+   */
+  this.getCallbacks = function() {
+    return callbacks;
+  }
+
+  /**
+   * Get connection
+   * @method
+   * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+   * @return {Connection}
+   */
+  this.getConnection = function(options) {
+    return pool.get();
+  }
+
+  /**
+   * Name of BSON parser currently used
+   * @method
+   * @return {string}
+   */
+  this.parserType = function() {
+    if(options.bson.serialize.toString().indexOf('[native code]') != -1)
+      return 'c++';
+    return 'js';
+  }
+
+
+  // // Command
+  // {
+  //     find: ns
+  //   , query: &lt;object>
+  //   , limit: &lt;n>
+  //   , fields: &lt;object>
+  //   , skip: &lt;n>
+  //   , hint: &lt;string>
+  //   , explain: &lt;boolean>
+  //   , snapshot: &lt;boolean>
+  //   , batchSize: &lt;n>
+  //   , returnKey: &lt;boolean>
+  //   , maxScan: &lt;n>
+  //   , min: &lt;n>
+  //   , max: &lt;n>
+  //   , showDiskLoc: &lt;boolean>
+  //   , comment: &lt;string>
+  //   , maxTimeMS: &lt;n>
+  //   , raw: &lt;boolean>
+  //   , readPreference: &lt;ReadPreference>
+  //   , tailable: &lt;boolean>
+  //   , oplogReplay: &lt;boolean>
+  //   , noCursorTimeout: &lt;boolean>
+  //   , awaitdata: &lt;boolean>
+  //   , exhaust: &lt;boolean>
+  //   , partial: &lt;boolean>
+  // }
+
+  /**
+   * Perform one or more remove operations
+   * @method
+   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+   * @param {{object}|{Long}} cmd Can be either a command returning a cursor or a cursorId
+   * @param {object} [options.batchSize=0] Batchsize for the operation
+   * @param {array} [options.documents=[]] Initial documents list for cursor
+   * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+   * @param {opResultCallback} callback A callback function
+   */
+  this.cursor = function(ns, cmd, cursorOptions) {
+    cursorOptions = cursorOptions || {};
+    var FinalCursor = cursorOptions.cursorFactory || BasicCursor;
+    return new FinalCursor(bson, ns, cmd, cursorOptions, self, options);
+  }
+
+  var slaveOk = function(r) {
+    if(r) return r.slaveOk()
+    return false;
+  }
+
+  // Add auth providers
+  this.addAuthProvider('mongocr', new MongoCR());
+  this.addAuthProvider('x509', new X509());
+  this.addAuthProvider('plain', new Plain());
+  this.addAuthProvider('gssapi', new GSSAPI());
+  this.addAuthProvider('sspi', new SSPI());
+  this.addAuthProvider('scram-sha-1', new ScramSHA1());
+}
+
+inherits(Server, EventEmitter);
+
+/**
+ * A server connect event, used to verify that the connection is up and running
+ *
+ * @event Server#connect
+ * @type {Server}
+ */
+
+/**
+ * The server connection closed, all pool connections closed
+ *
+ * @event Server#close
+ * @type {Server}
+ */
+
+/**
+ * The server connection caused an error, all pool connections closed
+ *
+ * @event Server#error
+ * @type {Server}
+ */
+
+/**
+ * The server connection timed out, all pool connections closed
+ *
+ * @event Server#timeout
+ * @type {Server}
+ */
+
+/**
+ * The driver experienced an invalid message, all pool connections closed
+ *
+ * @event Server#parseError
+ * @type {Server}
+ */
+
+/**
+ * The server reestablished the connection
+ *
+ * @event Server#reconnect
+ * @type {Server}
+ */
+
+/**
+ * This is an insert result callback
+ *
+ * @callback opResultCallback
+ * @param {error} error An error object. Set to null if no error present
+ * @param {CommandResult} command result
+ */
+
+/**
+ * This is an authentication result callback
+ *
+ * @callback authResultCallback
+ * @param {error} error An error object. Set to null if no error present
+ * @param {Session} an authenticated session
+ */
+
+module.exports = Server;</code></pre>
+        </article>
+    </section>
+
+
+
+
+
+
+                    
+                    <!-- disqus code -->
+                    <div id="disqus_thread"></div>
+                    <script type="text/javascript">
+                        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+                        var disqus_shortname = 'nodejsmongodbdriver'; // required: replace example with your forum shortname
+
+                        /* * * DON'T EDIT BELOW THIS LINE * * */
+                        (function() {
+                            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                        })();
+                    </script>
+                    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+                    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>                    
+                    <!-- // disqus code -->
+                    
+
+                    <footer>
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Tue Oct 07 2014 12:06:39 GMT+0200 (CEST)
+                    </footer>
+                </div>
+            </td>
+            <td valign='top'>
+                
+<div class="navigation">
+    <h3 class="applicationName"><a href="index.html">Node.js MongoDB Driver API</a></h3>
+
+    <div class="search">
+        <input id="search" type="text" class="form-control input-sm" placeholder="Search Documentations">
+    </div>
+    <ul class="list">
+    
+        <li class="item" data-name="Binary">
+            <span class="title">
+                <a href="Binary.html">Binary</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="Binary.SUBTYPE_BYTE_ARRAY"><a href="Binary.html#SUBTYPE_BYTE_ARRAY">SUBTYPE_BYTE_ARRAY</a></li>
+            
+                <li data-name="Binary.SUBTYPE_DEFAULT"><a href="Binary.html#SUBTYPE_DEFAULT">SUBTYPE_DEFAULT</a></li>
+            
+                <li data-name="Binary.SUBTYPE_FUNCTION"><a href="Binary.html#SUBTYPE_FUNCTION">SUBTYPE_FUNCTION</a></li>
+            
+                <li data-name="Binary.SUBTYPE_MD5"><a href="Binary.html#SUBTYPE_MD5">SUBTYPE_MD5</a></li>
+            
+                <li data-name="Binary.SUBTYPE_USER_DEFINED"><a href="Binary.html#SUBTYPE_USER_DEFINED">SUBTYPE_USER_DEFINED</a></li>
+            
+                <li data-name="Binary.SUBTYPE_UUID"><a href="Binary.html#SUBTYPE_UUID">SUBTYPE_UUID</a></li>
+            
+                <li data-name="Binary.SUBTYPE_UUID_OLD"><a href="Binary.html#SUBTYPE_UUID_OLD">SUBTYPE_UUID_OLD</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Binary#length"><a href="Binary.html#length">length</a></li>
+            
+                <li data-name="Binary#put"><a href="Binary.html#put">put</a></li>
+            
+                <li data-name="Binary#read"><a href="Binary.html#read">read</a></li>
+            
+                <li data-name="Binary#value"><a href="Binary.html#value">value</a></li>
+            
+                <li data-name="Binary#write"><a href="Binary.html#write">write</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Code">
+            <span class="title">
+                <a href="Code.html">Code</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="CommandResult">
+            <span class="title">
+                <a href="CommandResult.html">CommandResult</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="CommandResult#toJSON"><a href="CommandResult.html#toJSON">toJSON</a></li>
+            
+                <li data-name="CommandResult#toString"><a href="CommandResult.html#toString">toString</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Connection">
+            <span class="title">
+                <a href="Connection.html">Connection</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Connection#connect"><a href="Connection.html#connect">connect</a></li>
+            
+                <li data-name="Connection#destroy"><a href="Connection.html#destroy">destroy</a></li>
+            
+                <li data-name="Connection#isConnected"><a href="Connection.html#isConnected">isConnected</a></li>
+            
+                <li data-name="Connection#toJSON"><a href="Connection.html#toJSON">toJSON</a></li>
+            
+                <li data-name="Connection#toString"><a href="Connection.html#toString">toString</a></li>
+            
+                <li data-name="Connection#write"><a href="Connection.html#write">write</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="Connection#event:close"><a href="Connection.html#event:close">close</a></li>
+            
+                <li data-name="Connection#event:connect"><a href="Connection.html#event:connect">connect</a></li>
+            
+                <li data-name="Connection#event:error"><a href="Connection.html#event:error">error</a></li>
+            
+                <li data-name="Connection#event:parseError"><a href="Connection.html#event:parseError">parseError</a></li>
+            
+                <li data-name="Connection#event:timeout"><a href="Connection.html#event:timeout">timeout</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Cursor">
+            <span class="title">
+                <a href="Cursor.html">Cursor</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Cursor#bufferedCount"><a href="Cursor.html#bufferedCount">bufferedCount</a></li>
+            
+                <li data-name="Cursor#clone"><a href="Cursor.html#clone">clone</a></li>
+            
+                <li data-name="Cursor#isDead"><a href="Cursor.html#isDead">isDead</a></li>
+            
+                <li data-name="Cursor#kill"><a href="Cursor.html#kill">kill</a></li>
+            
+                <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
+            
+                <li data-name="Cursor#readBufferedDocuments"><a href="Cursor.html#readBufferedDocuments">readBufferedDocuments</a></li>
+            
+                <li data-name="Cursor#rewind"><a href="Cursor.html#rewind">rewind</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="DBRef">
+            <span class="title">
+                <a href="DBRef.html">DBRef</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Double">
+            <span class="title">
+                <a href="Double.html">Double</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Double#valueOf"><a href="Double.html#valueOf">valueOf</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Logger">
+            <span class="title">
+                <a href="Logger.html">Logger</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Logger.currentLogger"><a href="Logger.html#currentLogger">currentLogger</a></li>
+            
+                <li data-name="Logger.filter"><a href="Logger.html#filter">filter</a></li>
+            
+                <li data-name="Logger.reset"><a href="Logger.html#reset">reset</a></li>
+            
+                <li data-name="Logger.setCurrentLogger"><a href="Logger.html#setCurrentLogger">setCurrentLogger</a></li>
+            
+                <li data-name="Logger.setLevel"><a href="Logger.html#setLevel">setLevel</a></li>
+            
+                <li data-name="Logger#debug"><a href="Logger.html#debug">debug</a></li>
+            
+                <li data-name="Logger#error"><a href="Logger.html#error">error</a></li>
+            
+                <li data-name="Logger#info"><a href="Logger.html#info">info</a></li>
+            
+                <li data-name="Logger#isDebug"><a href="Logger.html#isDebug">isDebug</a></li>
+            
+                <li data-name="Logger#isError"><a href="Logger.html#isError">isError</a></li>
+            
+                <li data-name="Logger#isInfo"><a href="Logger.html#isInfo">isInfo</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Long">
+            <span class="title">
+                <a href="Long.html">Long</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="Long.MAX_VALUE"><a href="Long.html#MAX_VALUE">MAX_VALUE</a></li>
+            
+                <li data-name="Long.MIN_VALUE"><a href="Long.html#MIN_VALUE">MIN_VALUE</a></li>
+            
+                <li data-name="Long.NEG_ONE"><a href="Long.html#NEG_ONE">NEG_ONE</a></li>
+            
+                <li data-name="Long.ONE"><a href="Long.html#ONE">ONE</a></li>
+            
+                <li data-name="Long.ZERO"><a href="Long.html#ZERO">ZERO</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Long.fromBits"><a href="Long.html#fromBits">fromBits</a></li>
+            
+                <li data-name="Long.fromInt"><a href="Long.html#fromInt">fromInt</a></li>
+            
+                <li data-name="Long.fromNumber"><a href="Long.html#fromNumber">fromNumber</a></li>
+            
+                <li data-name="Long.fromString"><a href="Long.html#fromString">fromString</a></li>
+            
+                <li data-name="Long#add"><a href="Long.html#add">add</a></li>
+            
+                <li data-name="Long#and"><a href="Long.html#and">and</a></li>
+            
+                <li data-name="Long#compare"><a href="Long.html#compare">compare</a></li>
+            
+                <li data-name="Long#div"><a href="Long.html#div">div</a></li>
+            
+                <li data-name="Long#equals"><a href="Long.html#equals">equals</a></li>
+            
+                <li data-name="Long#getHighBits"><a href="Long.html#getHighBits">getHighBits</a></li>
+            
+                <li data-name="Long#getLowBits"><a href="Long.html#getLowBits">getLowBits</a></li>
+            
+                <li data-name="Long#getLowBitsUnsigned"><a href="Long.html#getLowBitsUnsigned">getLowBitsUnsigned</a></li>
+            
+                <li data-name="Long#getNumBitsAbs"><a href="Long.html#getNumBitsAbs">getNumBitsAbs</a></li>
+            
+                <li data-name="Long#greaterThan"><a href="Long.html#greaterThan">greaterThan</a></li>
+            
+                <li data-name="Long#greaterThanOrEqual"><a href="Long.html#greaterThanOrEqual">greaterThanOrEqual</a></li>
+            
+                <li data-name="Long#isNegative"><a href="Long.html#isNegative">isNegative</a></li>
+            
+                <li data-name="Long#isOdd"><a href="Long.html#isOdd">isOdd</a></li>
+            
+                <li data-name="Long#isZero"><a href="Long.html#isZero">isZero</a></li>
+            
+                <li data-name="Long#lessThan"><a href="Long.html#lessThan">lessThan</a></li>
+            
+                <li data-name="Long#lessThanOrEqual"><a href="Long.html#lessThanOrEqual">lessThanOrEqual</a></li>
+            
+                <li data-name="Long#modulo"><a href="Long.html#modulo">modulo</a></li>
+            
+                <li data-name="Long#multiply"><a href="Long.html#multiply">multiply</a></li>
+            
+                <li data-name="Long#negate"><a href="Long.html#negate">negate</a></li>
+            
+                <li data-name="Long#not"><a href="Long.html#not">not</a></li>
+            
+                <li data-name="Long#notEquals"><a href="Long.html#notEquals">notEquals</a></li>
+            
+                <li data-name="Long#or"><a href="Long.html#or">or</a></li>
+            
+                <li data-name="Long#shiftLeft"><a href="Long.html#shiftLeft">shiftLeft</a></li>
+            
+                <li data-name="Long#shiftRight"><a href="Long.html#shiftRight">shiftRight</a></li>
+            
+                <li data-name="Long#shiftRightUnsigned"><a href="Long.html#shiftRightUnsigned">shiftRightUnsigned</a></li>
+            
+                <li data-name="Long#subtract"><a href="Long.html#subtract">subtract</a></li>
+            
+                <li data-name="Long#toInt"><a href="Long.html#toInt">toInt</a></li>
+            
+                <li data-name="Long#toJSON"><a href="Long.html#toJSON">toJSON</a></li>
+            
+                <li data-name="Long#toNumber"><a href="Long.html#toNumber">toNumber</a></li>
+            
+                <li data-name="Long#toString"><a href="Long.html#toString">toString</a></li>
+            
+                <li data-name="Long#xor"><a href="Long.html#xor">xor</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MaxKey">
+            <span class="title">
+                <a href="MaxKey.html">MaxKey</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MinKey">
+            <span class="title">
+                <a href="MinKey.html">MinKey</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MongoError">
+            <span class="title">
+                <a href="MongoError.html">MongoError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MongoError.create">
+            <span class="title">
+                <a href="MongoError.create.html">MongoError.create</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Mongos">
+            <span class="title">
+                <a href="Mongos.html">Mongos</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Mongos#addAuthProvider"><a href="Mongos.html#addAuthProvider">addAuthProvider</a></li>
+            
+                <li data-name="Mongos#addReadPreferenceStrategy"><a href="Mongos.html#addReadPreferenceStrategy">addReadPreferenceStrategy</a></li>
+            
+                <li data-name="Mongos#auth"><a href="Mongos.html#auth">auth</a></li>
+            
+                <li data-name="Mongos#command"><a href="Mongos.html#command">command</a></li>
+            
+                <li data-name="Mongos#connect"><a href="Mongos.html#connect">connect</a></li>
+            
+                <li data-name="Mongos#connections"><a href="Mongos.html#connections">connections</a></li>
+            
+                <li data-name="Mongos#cursor"><a href="Mongos.html#cursor">cursor</a></li>
+            
+                <li data-name="Mongos#destroy"><a href="Mongos.html#destroy">destroy</a></li>
+            
+                <li data-name="Mongos#getConnection"><a href="Mongos.html#getConnection">getConnection</a></li>
+            
+                <li data-name="Mongos#getServer"><a href="Mongos.html#getServer">getServer</a></li>
+            
+                <li data-name="Mongos#insert"><a href="Mongos.html#insert">insert</a></li>
+            
+                <li data-name="Mongos#isConnected"><a href="Mongos.html#isConnected">isConnected</a></li>
+            
+                <li data-name="Mongos#lastIsMaster"><a href="Mongos.html#lastIsMaster">lastIsMaster</a></li>
+            
+                <li data-name="Mongos#remove"><a href="Mongos.html#remove">remove</a></li>
+            
+                <li data-name="Mongos#setBSONParserType"><a href="Mongos.html#setBSONParserType">setBSONParserType</a></li>
+            
+                <li data-name="Mongos#update"><a href="Mongos.html#update">update</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="Mongos#event:connect"><a href="Mongos.html#event:connect">connect</a></li>
+            
+                <li data-name="Mongos#event:joined"><a href="Mongos.html#event:joined">joined</a></li>
+            
+                <li data-name="Mongos#event:left"><a href="Mongos.html#event:left">left</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="ObjectID">
+            <span class="title">
+                <a href="ObjectID.html">ObjectID</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="ObjectID.createFromHexString"><a href="ObjectID.html#createFromHexString">createFromHexString</a></li>
+            
+                <li data-name="ObjectID.createFromTime"><a href="ObjectID.html#createFromTime">createFromTime</a></li>
+            
+                <li data-name="ObjectID.isValid"><a href="ObjectID.html#isValid">isValid</a></li>
+            
+                <li data-name="ObjectID#equals"><a href="ObjectID.html#equals">equals</a></li>
+            
+                <li data-name="ObjectID#generate"><a href="ObjectID.html#generate">generate</a></li>
+            
+                <li data-name="ObjectID#getTimestamp"><a href="ObjectID.html#getTimestamp">getTimestamp</a></li>
+            
+                <li data-name="ObjectID#toHexString"><a href="ObjectID.html#toHexString">toHexString</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="ReadPreference">
+            <span class="title">
+                <a href="ReadPreference.html">ReadPreference</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="ReadPreference.nearest"><a href="ReadPreference.html#nearest">nearest</a></li>
+            
+                <li data-name="ReadPreference.primary"><a href="ReadPreference.html#primary">primary</a></li>
+            
+                <li data-name="ReadPreference.primaryPreferred"><a href="ReadPreference.html#primaryPreferred">primaryPreferred</a></li>
+            
+                <li data-name="ReadPreference.secondary"><a href="ReadPreference.html#secondary">secondary</a></li>
+            
+                <li data-name="ReadPreference.secondaryPreferred"><a href="ReadPreference.html#secondaryPreferred">secondaryPreferred</a></li>
+            
+                <li data-name="ReadPreference#equals"><a href="ReadPreference.html#equals">equals</a></li>
+            
+                <li data-name="ReadPreference#slaveOk"><a href="ReadPreference.html#slaveOk">slaveOk</a></li>
+            
+                <li data-name="ReadPreference#toJSON"><a href="ReadPreference.html#toJSON">toJSON</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="ReplSet">
+            <span class="title">
+                <a href="ReplSet.html">ReplSet</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="ReplSet#addAuthProvider"><a href="ReplSet.html#addAuthProvider">addAuthProvider</a></li>
+            
+                <li data-name="ReplSet#addReadPreferenceStrategy"><a href="ReplSet.html#addReadPreferenceStrategy">addReadPreferenceStrategy</a></li>
+            
+                <li data-name="ReplSet#auth"><a href="ReplSet.html#auth">auth</a></li>
+            
+                <li data-name="ReplSet#command"><a href="ReplSet.html#command">command</a></li>
+            
+                <li data-name="ReplSet#connect"><a href="ReplSet.html#connect">connect</a></li>
+            
+                <li data-name="ReplSet#connections"><a href="ReplSet.html#connections">connections</a></li>
+            
+                <li data-name="ReplSet#cursor"><a href="ReplSet.html#cursor">cursor</a></li>
+            
+                <li data-name="ReplSet#destroy"><a href="ReplSet.html#destroy">destroy</a></li>
+            
+                <li data-name="ReplSet#getConnection"><a href="ReplSet.html#getConnection">getConnection</a></li>
+            
+                <li data-name="ReplSet#getServer"><a href="ReplSet.html#getServer">getServer</a></li>
+            
+                <li data-name="ReplSet#insert"><a href="ReplSet.html#insert">insert</a></li>
+            
+                <li data-name="ReplSet#isConnected"><a href="ReplSet.html#isConnected">isConnected</a></li>
+            
+                <li data-name="ReplSet#lastIsMaster"><a href="ReplSet.html#lastIsMaster">lastIsMaster</a></li>
+            
+                <li data-name="ReplSet#parserType"><a href="ReplSet.html#parserType">parserType</a></li>
+            
+                <li data-name="ReplSet#remove"><a href="ReplSet.html#remove">remove</a></li>
+            
+                <li data-name="ReplSet#setBSONParserType"><a href="ReplSet.html#setBSONParserType">setBSONParserType</a></li>
+            
+                <li data-name="ReplSet#update"><a href="ReplSet.html#update">update</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="ReplSet#event:connect"><a href="ReplSet.html#event:connect">connect</a></li>
+            
+                <li data-name="ReplSet#event:ha"><a href="ReplSet.html#event:ha">ha</a></li>
+            
+                <li data-name="ReplSet#event:joined"><a href="ReplSet.html#event:joined">joined</a></li>
+            
+                <li data-name="ReplSet#event:left"><a href="ReplSet.html#event:left">left</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Server">
+            <span class="title">
+                <a href="Server.html">Server</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Server#addAuthProvider"><a href="Server.html#addAuthProvider">addAuthProvider</a></li>
+            
+                <li data-name="Server#addReadPreferenceStrategy"><a href="Server.html#addReadPreferenceStrategy">addReadPreferenceStrategy</a></li>
+            
+                <li data-name="Server#auth"><a href="Server.html#auth">auth</a></li>
+            
+                <li data-name="Server#command"><a href="Server.html#command">command</a></li>
+            
+                <li data-name="Server#connect"><a href="Server.html#connect">connect</a></li>
+            
+                <li data-name="Server#connections"><a href="Server.html#connections">connections</a></li>
+            
+                <li data-name="Server#cursor"><a href="Server.html#cursor">cursor</a></li>
+            
+                <li data-name="Server#destroy"><a href="Server.html#destroy">destroy</a></li>
+            
+                <li data-name="Server#equals"><a href="Server.html#equals">equals</a></li>
+            
+                <li data-name="Server#getCallbacks"><a href="Server.html#getCallbacks">getCallbacks</a></li>
+            
+                <li data-name="Server#getConnection"><a href="Server.html#getConnection">getConnection</a></li>
+            
+                <li data-name="Server#getServer"><a href="Server.html#getServer">getServer</a></li>
+            
+                <li data-name="Server#insert"><a href="Server.html#insert">insert</a></li>
+            
+                <li data-name="Server#isConnected"><a href="Server.html#isConnected">isConnected</a></li>
+            
+                <li data-name="Server#lastIsMaster"><a href="Server.html#lastIsMaster">lastIsMaster</a></li>
+            
+                <li data-name="Server#parserType"><a href="Server.html#parserType">parserType</a></li>
+            
+                <li data-name="Server#remove"><a href="Server.html#remove">remove</a></li>
+            
+                <li data-name="Server#setBSONParserType"><a href="Server.html#setBSONParserType">setBSONParserType</a></li>
+            
+                <li data-name="Server#update"><a href="Server.html#update">update</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="Server#event:close"><a href="Server.html#event:close">close</a></li>
+            
+                <li data-name="Server#event:connect"><a href="Server.html#event:connect">connect</a></li>
+            
+                <li data-name="Server#event:error"><a href="Server.html#event:error">error</a></li>
+            
+                <li data-name="Server#event:parseError"><a href="Server.html#event:parseError">parseError</a></li>
+            
+                <li data-name="Server#event:reconnect"><a href="Server.html#event:reconnect">reconnect</a></li>
+            
+                <li data-name="Server#event:timeout"><a href="Server.html#event:timeout">timeout</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Session">
+            <span class="title">
+                <a href="Session.html">Session</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Session#command"><a href="Session.html#command">command</a></li>
+            
+                <li data-name="Session#cursor"><a href="Session.html#cursor">cursor</a></li>
+            
+                <li data-name="Session#insert"><a href="Session.html#insert">insert</a></li>
+            
+                <li data-name="Session#remove"><a href="Session.html#remove">remove</a></li>
+            
+                <li data-name="Session#update"><a href="Session.html#update">update</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="State">
+            <span class="title">
+                <a href="State.html">State</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="State#addArbiter"><a href="State.html#addArbiter">addArbiter</a></li>
+            
+                <li data-name="State#addPassive"><a href="State.html#addPassive">addPassive</a></li>
+            
+                <li data-name="State#addSecondary"><a href="State.html#addSecondary">addSecondary</a></li>
+            
+                <li data-name="State#clean"><a href="State.html#clean">clean</a></li>
+            
+                <li data-name="State#contains"><a href="State.html#contains">contains</a></li>
+            
+                <li data-name="State#destroy"><a href="State.html#destroy">destroy</a></li>
+            
+                <li data-name="State#get"><a href="State.html#get">get</a></li>
+            
+                <li data-name="State#getAll"><a href="State.html#getAll">getAll</a></li>
+            
+                <li data-name="State#getAllConnections"><a href="State.html#getAllConnections">getAllConnections</a></li>
+            
+                <li data-name="State#isPassive"><a href="State.html#isPassive">isPassive</a></li>
+            
+                <li data-name="State#isPrimary"><a href="State.html#isPrimary">isPrimary</a></li>
+            
+                <li data-name="State#isPrimaryConnected"><a href="State.html#isPrimaryConnected">isPrimaryConnected</a></li>
+            
+                <li data-name="State#isSecondary"><a href="State.html#isSecondary">isSecondary</a></li>
+            
+                <li data-name="State#isSecondaryConnected"><a href="State.html#isSecondaryConnected">isSecondaryConnected</a></li>
+            
+                <li data-name="State#lastIsMaster"><a href="State.html#lastIsMaster">lastIsMaster</a></li>
+            
+                <li data-name="State#promotePrimary"><a href="State.html#promotePrimary">promotePrimary</a></li>
+            
+                <li data-name="State#remove"><a href="State.html#remove">remove</a></li>
+            
+                <li data-name="State#toJSON"><a href="State.html#toJSON">toJSON</a></li>
+            
+                <li data-name="State#update"><a href="State.html#update">update</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Symbol">
+            <span class="title">
+                <a href="Symbol.html">Symbol</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Symbol#valueOf"><a href="Symbol.html#valueOf">valueOf</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Timestamp">
+            <span class="title">
+                <a href="Timestamp.html">Timestamp</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            <span class="subtitle">Members</span>
+            
+                <li data-name="Timestamp.MAX_VALUE"><a href="Timestamp.html#MAX_VALUE">MAX_VALUE</a></li>
+            
+                <li data-name="Timestamp.MIN_VALUE"><a href="Timestamp.html#MIN_VALUE">MIN_VALUE</a></li>
+            
+                <li data-name="Timestamp.NEG_ONE"><a href="Timestamp.html#NEG_ONE">NEG_ONE</a></li>
+            
+                <li data-name="Timestamp.ONE"><a href="Timestamp.html#ONE">ONE</a></li>
+            
+                <li data-name="Timestamp.ZERO"><a href="Timestamp.html#ZERO">ZERO</a></li>
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Timestamp.fromBits"><a href="Timestamp.html#fromBits">fromBits</a></li>
+            
+                <li data-name="Timestamp.fromInt"><a href="Timestamp.html#fromInt">fromInt</a></li>
+            
+                <li data-name="Timestamp.fromNumber"><a href="Timestamp.html#fromNumber">fromNumber</a></li>
+            
+                <li data-name="Timestamp.fromString"><a href="Timestamp.html#fromString">fromString</a></li>
+            
+                <li data-name="Timestamp#add"><a href="Timestamp.html#add">add</a></li>
+            
+                <li data-name="Timestamp#and"><a href="Timestamp.html#and">and</a></li>
+            
+                <li data-name="Timestamp#compare"><a href="Timestamp.html#compare">compare</a></li>
+            
+                <li data-name="Timestamp#div"><a href="Timestamp.html#div">div</a></li>
+            
+                <li data-name="Timestamp#equals"><a href="Timestamp.html#equals">equals</a></li>
+            
+                <li data-name="Timestamp#getHighBits"><a href="Timestamp.html#getHighBits">getHighBits</a></li>
+            
+                <li data-name="Timestamp#getLowBits"><a href="Timestamp.html#getLowBits">getLowBits</a></li>
+            
+                <li data-name="Timestamp#getLowBitsUnsigned"><a href="Timestamp.html#getLowBitsUnsigned">getLowBitsUnsigned</a></li>
+            
+                <li data-name="Timestamp#getNumBitsAbs"><a href="Timestamp.html#getNumBitsAbs">getNumBitsAbs</a></li>
+            
+                <li data-name="Timestamp#greaterThan"><a href="Timestamp.html#greaterThan">greaterThan</a></li>
+            
+                <li data-name="Timestamp#greaterThanOrEqual"><a href="Timestamp.html#greaterThanOrEqual">greaterThanOrEqual</a></li>
+            
+                <li data-name="Timestamp#isNegative"><a href="Timestamp.html#isNegative">isNegative</a></li>
+            
+                <li data-name="Timestamp#isOdd"><a href="Timestamp.html#isOdd">isOdd</a></li>
+            
+                <li data-name="Timestamp#isZero"><a href="Timestamp.html#isZero">isZero</a></li>
+            
+                <li data-name="Timestamp#lessThan"><a href="Timestamp.html#lessThan">lessThan</a></li>
+            
+                <li data-name="Timestamp#lessThanOrEqual"><a href="Timestamp.html#lessThanOrEqual">lessThanOrEqual</a></li>
+            
+                <li data-name="Timestamp#modulo"><a href="Timestamp.html#modulo">modulo</a></li>
+            
+                <li data-name="Timestamp#multiply"><a href="Timestamp.html#multiply">multiply</a></li>
+            
+                <li data-name="Timestamp#negate"><a href="Timestamp.html#negate">negate</a></li>
+            
+                <li data-name="Timestamp#not"><a href="Timestamp.html#not">not</a></li>
+            
+                <li data-name="Timestamp#notEquals"><a href="Timestamp.html#notEquals">notEquals</a></li>
+            
+                <li data-name="Timestamp#or"><a href="Timestamp.html#or">or</a></li>
+            
+                <li data-name="Timestamp#shiftLeft"><a href="Timestamp.html#shiftLeft">shiftLeft</a></li>
+            
+                <li data-name="Timestamp#shiftRight"><a href="Timestamp.html#shiftRight">shiftRight</a></li>
+            
+                <li data-name="Timestamp#shiftRightUnsigned"><a href="Timestamp.html#shiftRightUnsigned">shiftRightUnsigned</a></li>
+            
+                <li data-name="Timestamp#subtract"><a href="Timestamp.html#subtract">subtract</a></li>
+            
+                <li data-name="Timestamp#toInt"><a href="Timestamp.html#toInt">toInt</a></li>
+            
+                <li data-name="Timestamp#toJSON"><a href="Timestamp.html#toJSON">toJSON</a></li>
+            
+                <li data-name="Timestamp#toNumber"><a href="Timestamp.html#toNumber">toNumber</a></li>
+            
+                <li data-name="Timestamp#toString"><a href="Timestamp.html#toString">toString</a></li>
+            
+                <li data-name="Timestamp#xor"><a href="Timestamp.html#xor">xor</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+    </ul>
+</div>
+            </td>
+        </tr>
+    </table>
+</div>
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+<script src="scripts/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keyword" content="">
+    <link rel="shortcut icon" href="/node-mongodb-native/2.0/img/favicon.png">
+
+    <title>Streams</title>
+
+    <link href="/node-mongodb-native/2.0/css/bootstrap-theme.css" rel="stylesheet">
+    <link href="/node-mongodb-native/2.0/assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/node-mongodb-native/2.0/css/style.css" rel="stylesheet">
+    <link href="/node-mongodb-native/2.0/css/style-responsive.css" rel="stylesheet" />
+    <link href="/node-mongodb-native/2.0/css/monokai_sublime.css" rel="stylesheet" />
+
+  </head>
+
+  <body>
+  
+  <section id="container" class="">
+
+      
+      <header class="header black-bg">
+            <div class="toggle-nav">
+                <i class="fa fa-bars"></i>
+                <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom"></div>
+            </div>
+
+            
+            <a href="/node-mongodb-native/2.0/.." class="logo"><img src="/node-mongodb-native/2.0/img/logo-mongodb-header.png" style="height:40px;"></a>
+
+            
+            <div class="top-nav notification-row">
+                
+                <div class="hidden-xs nav-github pull-right">
+                    <span rel="show-github" data-user="mongodb" data-repo="node-mongodb-native"></span>
+                    <span rel="show-github" data-user="mongodb" data-repo="node-mongodb-native" data-type="fork"></span>
+                    <a href='http://travis-ci.org/mongodb/node-mongodb-native'><img src='https://secure.travis-ci.org/mongodb/node-mongodb-native.png'/><a>
+                </div>
+            </div>
+
+            <div class="nav title-row" id="top_menu">
+                <h1 class="nav top-menu"> MongoDB 2.0.0 Driver </h1>
+            </div>
+      </header>
+      
+
+
+<aside>
+    <div id="sidebar"  class="nav-collapse ">
+        
+        <ul class="sidebar-menu">
+          
+          
+              
+                <li>
+                <a class="" href="/node-mongodb-native/">
+                    <i class='fa fa-file-text'></i>
+                    
+                    <span>driver portal</span>
+                </a>
+              
+              </li>
+          
+              
+                <li>
+                <a class="" href="/node-mongodb-native/1.4">
+                    <i class='fa fa-file-text'></i>
+                    
+                    <span>legacy docs 1.4.X</span>
+                </a>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-gift'></i>
+                
+                <span>about driver</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/2.0/meta/license/"> License </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/meta/release-notes/"> Release Notes </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/meta/changes-from-1.0/"> Migrating to 2.X </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-road'></i>
+                
+                <span>getting started</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/2.0/overview/introduction/"> Introduction </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/overview/installing/"> Installing The Driver </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/overview/quickstart/"> QuickStart </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-file-text'></i>
+                
+                <span>api</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/2.0/api-docs/"> API Documentation </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-group'></i>
+                
+                <span>community</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/2.0/community/mailing-list/"> Mailing List </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/community/contributing/"> Contributing </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu active">
+            <a href="javascript:;" class="">
+                <i class='fa fa-book'></i>
+                
+                <span>tutorials</span>
+                <span class="menu-arrow fa fa-angle-down"></span>
+            </a>
+                <ul class="sub open">
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/connecting/"> Connecting To MongoDB </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/urls/"> Connection URI </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/crud_operations/"> CRUD Operations </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/aggregation/"> Aggregation </a> </li>
+                    
+                    <li class="active"><a href="/node-mongodb-native/2.0/tutorials/streams/"> Streams </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/gridfs/"> GridFS </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/logging/"> Logging </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-book'></i>
+                
+                <span>articles</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/2.0/articles/node_knockout_article_1/"> Node Knockout, Basics </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/articles/node_knockout_article_2/"> Node Knockout, GridFS </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/articles/node_knockout_article_3/"> Node Knockout, GEO </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+            <li> <a href="https://jira.mongodb.org/browse/NODE" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
+            
+              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/tutorials/streams.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
+            
+        </ul>
+        
+    </div>
+</aside>
+
+
+
+      
+      <section id="main-content">
+          <section class="wrapper">
+
+              
+                  
+                      
+                      
+                          
+                          
+                          
+                      
+                      
+                  
+              
+
+              <div class="row">
+                  <div class="col-md-1">
+                      
+                      
+                      <a class="navigation prev" href="/tutorials/aggregation">
+                      <i class="fa fa-angle-left"></i>
+                      </a>
+                      
+                      
+                  </div>
+                <div class="col-md-10">
+                    <section class="panel">
+                          
+                              
+                          
+                    <div class="panel-body">
+
+
+
+<h1 id="toc_0">Streams Support in the Node.js Driver</h1>
+
+<p>The MongoDB driver has extensive Stream support for cursors as well as for GridFS. In essence the following aspects of the driver supports Node 0.10.x or higher style streams.</p>
+
+<ul>
+<li><code>find</code> The cursor returned from the <em>find</em> method is a <em>Readable</em> stream.</li>
+<li><code>aggregate</code> The cursor returned from the <em>aggregate</em> is a <em>Readable</em> stream.</li>
+<li><code>parallelCollectionScan</code> Returns an array of one or more cursors that all are <em>Readable</em> streams.</li>
+<li><code>GridStore.prototype.stream</code> Returns a stream that implements <em>Duplex</em> allowing for writing data in <em>w</em> mode and reading data in <em>r</em> mode.</li>
+</ul>
+
+<p>We will look at a simple example for supported stream starting with the <em>find</em> command.</p>
+
+<h2 id="toc_1">Find Cursor as a Stream</h2>
+
+<p>Let&rsquo;s examine a simple query using <em>find</em> and how to use it as a node.js stream.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
+  , assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://localhost:27017/myproject';
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&quot;Connected correctly to server&quot;);
+
+  var col = db.collection('streams');
+  // Insert a single document
+  col.insert([{a:1}, {a:1}, {a:1}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.result.n);
+
+    // Get the results using a find stream
+    var cursor = col.find({});
+    cursor.on('data', function(doc) {
+      console.dir(doc);
+    });
+
+    cursor.once('end', function() {
+      db.close();
+    });
+  });
+});
+</code></pre>
+
+<p>A very simple and straight forward stream of documents. For each document the cursor will emit the <em>data</em> event and when the cursor has been exhausted it will issue the <em>end</em> event. To transform the data you can pipe the data from this stream into another stream. We will not show that here but there are a wide variety of stream based libraries available on <a href="http://npmjs.org">NPM</a>.</p>
+
+<p>The stream is in object mode meaning it will emit the actual document instances. If you for some reason need this to be a different output you can use the <code>stream</code> function on the cursor to supply a transformation method that will be called for each document before it&rsquo;s emitted. Let&rsquo;s take a look at a simple example that uses <em>JSON.stringify</em> to convert each document to it&rsquo;s JSON string representation.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
+  , assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://localhost:27017/myproject';
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&quot;Connected correctly to server&quot;);
+
+  var col = db.collection('streams');
+  // Insert a single document
+  col.insert([{a:1}, {a:1}, {a:1}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.result.n);
+
+    // Get the results using a find stream
+    var cursor = col.find({}).stream({
+      transform: function(doc) { 
+        return JSON.stringify(doc);
+      }
+    });
+
+    cursor.on('data', function(doc) {
+      console.log(doc);
+    });
+
+    cursor.once('end', function() {
+      db.close();
+    });
+  });
+});
+</code></pre>
+
+<p>That wraps up the behaviors of the <em>Readable</em> stream for the <em>find</em> method. Next let&rsquo;s look at the aggregate command.</p>
+
+<h2 id="toc_2">Aggregation Cursor as a Stream</h2>
+
+<p>The aggregation cursor behaves very much like the <em>find</em> cursor. It&rsquo;s main difference is that it does not support a <em>transform</em> method. Let&rsquo;s have a look at a simple example.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
+  , assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://localhost:27017/myproject';
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&quot;Connected correctly to server&quot;);
+
+  var col = db.collection('streams');
+  // Insert a single document
+  col.insert([{a:1}, {a:1}, {a:1}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.result.n);
+
+    // Get the results using a find stream
+    var cursor = col.aggregate([${match: {}}]);
+    cursor.on('data', function(doc) {
+      console.log(doc);
+    });
+
+    cursor.once('end', function() {
+      db.close();
+    });
+  });
+});
+</code></pre>
+
+<p>As one can see the cursor behaves in the exact same way as the cursor that is returned when invoking the <em>find</em> method. Let&rsquo;s have a look at the <em>parallelCollectionScan</em> method that is a bit of a special case as it returns one or more cursors.</p>
+
+<h2 id="toc_3">The parallelCollectionScan method</h2>
+
+<p>The <em>parallelCollectionScan</em> method is a specialized method that allows for parallel reading of a collection using multiple cursors. This method is only available when connecting to a single server or replicaset topology. Let&rsquo;s look at an example.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
+  , assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://localhost:27017/myproject';
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  var docs = [];
+  // Insert some documents
+  for(var i = 0; i &lt; 1000; i++) docs.push({a:i});
+  // Get the collection
+  var col = db.collection('parallelCollectionScan');
+  // Insert 1000 documents in a batch
+  coll.insert(docs, function(err, result) {
+    var results = [];
+    // Execute parallelCollectionScan command
+    col.parallelCollectionScan({
+      numCursors:3
+    }, function(err, cursors) {
+      assert.equal(null, err);
+      assert.ok(cursors != null);
+      assert.ok(cursors.length &gt; 0);
+
+      for(var i = 0; i &lt; cursors.length; i++) {
+        // Documents from the cursor
+        cursors[i].on('data', function(doc) {
+          results.push(doc);
+        });
+
+        // The end signal for each cursor
+        cursors[i].once('end', function() {
+          numCursors = numCursors - 1;
+          // No more cursors let's ensure we got all results
+          if(numCursors == 0) {
+            assert.equal(docs.length, results.length);
+            db.close();
+          }
+        });
+      }
+    });
+  });
+});
+</code></pre>
+
+<p>In this example we use each cursor as a stream and when all cursors have emitted the <em>end</em> event we check that the number of inserted documents match the number of emitted documents. Each cursor returned from the <em>parallelCollectionScan</em> method is functionally equivalent to the cursors returned from the the <em>find</em> method.</p>
+
+<h1 id="toc_4">GridStore the Read/Write Stream</h1>
+
+<p>Until now all the methods we have covered are <em>Readable</em> meaning they can only provide a readable stream. GridStore implements the <em>Duplex</em> stream meaning it can not only be read as a Stream (say stream a mp3 straight from your GridFS collections) but also be written to (say upload a file directly via http into GridFS). Let&rsquo;s look at the simple example of streaming a GridStore file and then one where we use an incoming stream to write to GridFS.</p>
+
+<h2 id="toc_5">Streaming a GridFS file to disk</h2>
+
+<p>Streaming a GridStore file to disk is fairly simple. The example below reads in a pdf file and saves it in GridFS. It then creates a GridStore instance pointing to the newly saved pdf file and passes the stream to a file write stream using pipe.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
+  , GridStore = require('mongoddb').GridStore
+  , assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://localhost:27017/myproject';
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  // Set up gridStore
+  var gs = new GridStore(db, 'manual.pdf', 'w');
+  var filename = './test/functional/data/manual.pdf';
+  var outputFilename = './test/functional/data/manual_out.pdf';
+  // Write the a file to it (put your own here)
+  gs.writeFile(filename, function(err, result) {   
+    // Open a readable gridStore
+    gs = new GridStore(db, 'manual.pdf', 'r');    
+    
+    // Create a file write stream
+    var fileStream = fs.createWriteStream(outputFilename);
+    fileStream.on('close', function(err) {     
+      // Read the temp file and compare
+      var compareData = fs.readFileSync(outputFilename);
+      var originalData = fs.readFileSync(filename);
+      // Validate that the data is the same
+      assert.deepEqual(originalData, compareData);      
+      db.close();
+    })
+    
+    // Pipe out the data to disk
+    var pipeResult = gs.stream().pipe(fileStream);
+  });
+});
+</code></pre>
+
+<h2 id="toc_6">Streaming a File into GridFS</h2>
+
+<p>In the case of writing a file to GridFS using streams we do the reverse piping the file read stream into a our gridstore instance.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
+  , GridStore = require('mongoddb').GridStore
+  , ObjectID = require('mongoddb').ObjectID;
+  , assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://localhost:27017/myproject';
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  // Set up gridStore
+  var stream = new GridStore(db, 'manual.pdf', 'w').stream();
+  // File we want to write to GridFS
+  var filename = './test/functional/data/manual.pdf';
+  // Create a file reader stream to an object
+  var fileStream = fs.createReadStream(filename);
+  // Finish up once the file has been all read
+  stream.on(&quot;end&quot;, function(err) {
+    // Just read the content and compare to the raw binary
+    GridStore.read(client, &quot;test_stream_write&quot;, function(err, gridData) {
+      var fileData = fs.readFileSync(filename);
+      assert.equal(fileData.toString('hex'), gridData.toString('hex'));
+      client.close();
+    })
+  });
+
+  // Pipe it through to the gridStore
+  fileStream.pipe(stream);
+});
+</code></pre>
+
+<p>This concludes the support for Node.js 0.10.x streams in the MongoDB driver.</p>
+
+                      
+                      <div id="disqus_thread"></div>
+                      <script type="text/javascript">
+                           
+                          var disqus_shortname = 'nodejsmongodbdriver'; 
+
+                           
+                          (function() {
+                              var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                              dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                              (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                          })();
+                      </script>
+                      <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+                      <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+                      
+                    </div>
+                    </section>
+                </div>
+                <div class="col-md-1">
+                    
+                    
+                    <a class="navigation next" href="/tutorials/gridfs">
+                        <i class="fa fa-angle-right"> </i>
+                    </a>
+                    
+                    
+                </div>
+              </div>
+              
+          </section>
+      </section>
+     
+  </section>
+  
+    
+    <script src="/node-mongodb-native/2.0/js/jquery-2.1.1.min.js"></script>
+    <script src="/node-mongodb-native/2.0/js/jquery.scrollTo.min.js"></script>
+    <script src="/node-mongodb-native/2.0/js/bootstrap.min.js"></script>
+    
+    <script src="/node-mongodb-native/2.0/js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="/node-mongodb-native/2.0/js/scripts.js"></script>
+    <script async defer id="github-bjs" src="/node-mongodb-native/2.0/js/buttons.js"></script>
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-29229787-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>
+

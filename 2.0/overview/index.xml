@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+      <title>Overviews on MongoDB 2.0.0 Driver </title>
+      <generator uri="https://hugo.spf13.com">Hugo</generator>
+    <link>/node-mongodb-native/2.0/overview/index.xml/</link>
+    
+    
+    
+    <updated>Mon, 01 Jul 2013 00:00:00 UTC</updated>
+    
+    <item>
+      <title>Driver introduction</title>
+      <link>/node-mongodb-native/2.0/overview/introduction/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/overview/introduction/</guid>
+      <description>
+
+&lt;h2 id=&#34;toc_0&#34;&gt;What is Node.js Native?&lt;/h2&gt;
+
+&lt;p&gt;Node.js Native is the MongoDB official Node.js driver allowing you to use MongoDB in you applications.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;What does Node.js Native?&lt;/h2&gt;
+
+&lt;p&gt;The Node.js driver handles the connections to a single MongoDB server, a replicaset or a set of Mongos proxies in a sharded system. It let&amp;rsquo;s your application interact with the server and lets it perform operations against the database.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_2&#34;&gt;Next Steps&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;/overview/installing&#34;&gt;Install Driver&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/overview/quickstart&#34;&gt;Quick start&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/community/mailing-list&#34;&gt;Join the Mailing List&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/mongodb/node-mongodb-native&#34;&gt;Star us on GitHub&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Installing The Driver</title>
+      <link>/node-mongodb-native/2.0/overview/installing/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/overview/installing/</guid>
+      <description>
+
+&lt;h2 id=&#34;toc_0&#34;&gt;Installing MongoDB Node.js driver using NPM&lt;/h2&gt;
+
+&lt;p&gt;Installing the MongoDB Node.js driver using NPM is very easy. First you need to ensure you have Node.js and NPM correctly set up and in your path. Installing the driver is as easy as.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;npm install mongodb
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;Installing MongoDB Node.js driver as part of your project&lt;/h2&gt;
+
+&lt;p&gt;Setting up the Node.js driver for your project is a simple as adding it to the &lt;strong&gt;package.json&lt;/strong&gt; dependencies section. An example &lt;strong&gt;package.json&lt;/strong&gt; file is shown below.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
+  &amp;quot;name&amp;quot;: &amp;quot;myproject&amp;quot;,
+  &amp;quot;version&amp;quot;: &amp;quot;1.0.0&amp;quot;,
+  &amp;quot;description&amp;quot;: &amp;quot;My first project&amp;quot;,
+  &amp;quot;main&amp;quot;: &amp;quot;index.js&amp;quot;,
+  &amp;quot;repository&amp;quot;: {
+    &amp;quot;type&amp;quot;: &amp;quot;git&amp;quot;,
+    &amp;quot;url&amp;quot;: &amp;quot;git://github.com/christkv/myfirstproject.git&amp;quot;
+  },
+  &amp;quot;dependencies&amp;quot;: {
+    &amp;quot;mongodb&amp;quot;: &amp;quot;~2.0&amp;quot;
+  },
+  &amp;quot;author&amp;quot;: &amp;quot;Christian Kvalheim&amp;quot;,
+  &amp;quot;license&amp;quot;: &amp;quot;Apache 2.0&amp;quot;,
+  &amp;quot;bugs&amp;quot;: {
+    &amp;quot;url&amp;quot;: &amp;quot;https://github.com/christkv/myfirstproject/issues&amp;quot;
+  },
+  &amp;quot;homepage&amp;quot;: &amp;quot;https://github.com/christkv/myfirstproject&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To install the dependency all you need is to open a shell or command line, move to the directory where the package.json file is located and type.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;npm install
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will download all the dependencies.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>QuickStart</title>
+      <link>/node-mongodb-native/2.0/overview/quickstart/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/overview/quickstart/</guid>
+      <description>
+
+&lt;h1 id=&#34;toc_0&#34;&gt;QuickStart&lt;/h1&gt;
+
+&lt;p&gt;The quickstart guide will show you how to set up a simple application using node.js and MongoDB. It scope is only how to set up the driver and perform the simple crud operations. For more inn depth coverage we encourage reading the tutorials.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;Create the package.json file&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s create a directory where our application will live. In our case we will put this under our projects directory.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;mkdir myproject
+cd myproject
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Create a &lt;strong&gt;package.json&lt;/strong&gt; using your favorite text editor and fill it in.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
+  &amp;quot;name&amp;quot;: &amp;quot;myproject&amp;quot;,
+  &amp;quot;version&amp;quot;: &amp;quot;1.0.0&amp;quot;,
+  &amp;quot;description&amp;quot;: &amp;quot;My first project&amp;quot;,
+  &amp;quot;main&amp;quot;: &amp;quot;index.js&amp;quot;,
+  &amp;quot;repository&amp;quot;: {
+    &amp;quot;type&amp;quot;: &amp;quot;git&amp;quot;,
+    &amp;quot;url&amp;quot;: &amp;quot;git://github.com/christkv/myfirstproject.git&amp;quot;
+  },
+  &amp;quot;dependencies&amp;quot;: {
+    &amp;quot;mongodb&amp;quot;: &amp;quot;~2.0&amp;quot;
+  },
+  &amp;quot;author&amp;quot;: &amp;quot;Christian Kvalheim&amp;quot;,
+  &amp;quot;license&amp;quot;: &amp;quot;Apache 2.0&amp;quot;,
+  &amp;quot;bugs&amp;quot;: {
+    &amp;quot;url&amp;quot;: &amp;quot;https://github.com/christkv/myfirstproject/issues&amp;quot;
+  },
+  &amp;quot;homepage&amp;quot;: &amp;quot;https://github.com/christkv/myfirstproject&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Save the file and return to the shell or command prompt and use &lt;strong&gt;NPM&lt;/strong&gt; to install all the dependencies.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You should see &lt;strong&gt;NPM&lt;/strong&gt; download a lot of files. Once it&amp;rsquo;s done you&amp;rsquo;ll find all the downloaded packages under the &lt;strong&gt;node_modules&lt;/strong&gt; directory.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_2&#34;&gt;Booting up a MongoDB Server&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s boot up a MongoDB server instance. Download the right MongoDB version from &lt;a href=&#34;http://www.mongodb.org&#34;&gt;MongoDB&lt;/a&gt;, open a new shell or command line and ensure the &lt;strong&gt;mongod&lt;/strong&gt; command is in the shell or command line path. Now let&amp;rsquo;s create a database directory (in our case under &lt;strong&gt;/data&lt;/strong&gt;).&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;mongod --dbpath=/data --port 27017
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You should see the &lt;strong&gt;mongod&lt;/strong&gt; process start up and print some status information.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_3&#34;&gt;Connecting to MongoDB&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s create a new &lt;strong&gt;app.js&lt;/strong&gt; file that we will use to show the basic CRUD operations using the MongoDB driver.&lt;/p&gt;
+
+&lt;p&gt;First let&amp;rsquo;s add code to connect to the server and the database &lt;strong&gt;myproject&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  db.close();
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Given that you booted up the &lt;strong&gt;mongod&lt;/strong&gt; process earlier the application should connect successfully and print &lt;strong&gt;Connected correctly to server&lt;/strong&gt; to the console.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s Add some code to show the different CRUD operations available.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_4&#34;&gt;Inserting a Document&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s create a function that will insert some documents for us.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var insertDocuments = function(db, callback) {
+  // Get the documents collection
+  var collection = db.collection(&#39;documents&#39;);
+  // Insert some documents
+  collection.insert([
+    {a : 1}, {a : 2}, {a : 3}
+  ], function(err, result) {
+    assert.equal(err, null);
+    assert.equal(3, result.result.n);
+    assert.equal(3, result.ops.length);
+    console.log(&amp;quot;Inserted 3 document into the document collection&amp;quot;);
+    callback(result);
+  });
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The insert command will return a results object that contains several fields that might be useful.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;result&lt;/strong&gt; Contains the result document from MongoDB&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;ops&lt;/strong&gt; Contains the documents inserted with added &lt;strong&gt;_id&lt;/strong&gt; fields&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;connection&lt;/strong&gt; Contains the connection used to perform the insert&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Let&amp;rsquo;s add call the &lt;strong&gt;insertDocuments&lt;/strong&gt; command to the &lt;strong&gt;MongoClient.connect&lt;/strong&gt; method callback.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  insertDocuments(db, function() {
+    db.close();
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We can now run the update &lt;strong&gt;app.js&lt;/strong&gt; file.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;node app.js
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You should see the following output after running the &lt;strong&gt;app.js&lt;/strong&gt; file.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Connected correctly to server
+Inserted 3 document into the document collection
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;toc_5&#34;&gt;Updating a document&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s look at how to do a simple document update by adding a new field &lt;strong&gt;b&lt;/strong&gt; to the document that has the field &lt;strong&gt;a&lt;/strong&gt; set to &lt;strong&gt;2&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var updateDocument = function(db, callback) {
+  // Get the documents collection
+  var collection = db.collection(&#39;documents&#39;);
+  // Insert some documents
+  collection.update({ a : 2 }
+    , { $set: { b : 1 } }, function(err, result) {
+    assert.equal(err, null);
+    assert.equal(1, result.result.n);
+    console.log(&amp;quot;Updated the document with the field a equal to 2&amp;quot;);
+    callback(result);
+  });  
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The method will update the first document where the field &lt;strong&gt;a&lt;/strong&gt; is equal to &lt;strong&gt;2&lt;/strong&gt; by adding a new field &lt;strong&gt;b&lt;/strong&gt; to the document set to &lt;strong&gt;1&lt;/strong&gt;. Let&amp;rsquo;s update the callback function from &lt;strong&gt;MongoClient.connect&lt;/strong&gt; to include the update method.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  insertDocuments(db, function() {
+    updateDocument(db, function() {
+      db.close();
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;toc_6&#34;&gt;Remove a document&lt;/h2&gt;
+
+&lt;p&gt;Next lets remove the document where the field &lt;strong&gt;a&lt;/strong&gt; equals to &lt;strong&gt;3&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var removeDocument = function(db, callback) {
+  // Get the documents collection
+  var collection = db.collection(&#39;documents&#39;);
+  // Insert some documents
+  collection.remove({ a : 3 }, function(err, result) {
+    assert.equal(err, null);
+    assert.equal(1, result.result.n);
+    console.log(&amp;quot;Removed the document with the field a equal to 3&amp;quot;);
+    callback(result);
+  });    
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will remove the first document where the field &lt;strong&gt;a&lt;/strong&gt; equals to &lt;strong&gt;3&lt;/strong&gt;. Let&amp;rsquo;s add the method to the &lt;strong&gt;MongoClient.connect&lt;/strong&gt; callback function.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  insertDocuments(db, function() {
+    updateDocument(db, function() {
+      removeDocument(db, function() {
+        db.close();
+      });
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Finally let&amp;rsquo;s retrieve all the documents using a simple find.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_7&#34;&gt;Find All Documents&lt;/h2&gt;
+
+&lt;p&gt;We will finish up the Quickstart CRUD methods by performing a simple query that returns all the documents matching the query.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var findDocuments = function(db, callback) {
+  // Get the documents collection
+  var collection = db.collection(&#39;documents&#39;);
+  // Insert some documents
+  collection.find({}).toArray(function(err, docs) {
+    assert.equal(err, null);
+    assert.equal(2, docs.length);
+    console.log(&amp;quot;Found the following records&amp;quot;);
+    console.dir(docs)
+    callback(docs);
+  });      
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This query will return all the documents in the &lt;strong&gt;documents&lt;/strong&gt; collection. Since we removed a document the total documents returned is &lt;strong&gt;2&lt;/strong&gt;. Finally let&amp;rsquo;s add the findDocument method to the &lt;strong&gt;MongoClient.connect&lt;/strong&gt; callback.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  insertDocuments(db, function() {
+    updateDocument(db, function() {
+      removeDocument(db, function() {
+        findDocuments(db, function() {
+          db.close();
+        });
+      });
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This concludes the QuickStart of connecting and performing some Basic operations using the MongoDB Node.js driver. For more detailed information you can look at the tutorials covering more specific topics of interest.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

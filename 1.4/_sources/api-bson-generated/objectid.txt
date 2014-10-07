@@ -1,0 +1,55 @@
+==========
+ObjectID()
+==========
+
+------------------
+Constructor
+------------------
+
+
+Create a new ObjectID instance
+
+
+  .. js:class:: ObjectID()
+
+   :param (string id: Can be a 24 byte hex string, 12 byte binary string or a Number.
+   :returns: objectid instance of ObjectID.
+
+
+
+------------------
+Properties
+------------------
+
+.. csv-table:: 
+   :header: "Property"
+   :widths: 30
+
+   "{number} generationTime The generation time of this ObjectId instance"
+
+--------
+toString
+--------
+
+
+Converts the id into a 24 byte hex string for printing
+
+.. js:function:: toString()
+
+   :returns: string return the 24 byte hex string representation.
+
+
+**Examples**
+
+
+------
+toJSON
+------
+
+
+Converts to its JSON representation.
+
+.. js:function:: toJSON()
+
+   :returns: string return the 24 byte hex string representation.
+

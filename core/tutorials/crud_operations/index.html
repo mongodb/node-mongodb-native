@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keyword" content="">
+    <link rel="shortcut icon" href="img/favicon.png">
+
+    <title>CRUD Operations</title>
+
+    <link href="css/bootstrap-theme.css" rel="stylesheet">
+    <link href="assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/style-responsive.css" rel="stylesheet" />
+    <link href="css/monokai_sublime.css" rel="stylesheet" />
+
+  </head>
+
+  <body>
+  
+  <section id="container" class="">
+
+      
+      <header class="header black-bg">
+            <div class="toggle-nav">
+                <i class="fa fa-bars"></i>
+                <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom"></div>
+            </div>
+
+            
+            <a href=".." class="logo"><img src="img/logo-mongodb-header.png" style="height:40px;"></a>
+
+            
+            <div class="top-nav notification-row">
+                
+                <div class="hidden-xs nav-github pull-right">
+                    <span rel="show-github" data-user="mongodb" data-repo="node-mongodb-native"></span>
+                    <span rel="show-github" data-user="mongodb" data-repo="node-mongodb-native" data-type="fork"></span>
+                    <a href='http://travis-ci.org/mongodb/node-mongodb-native'><img src='https://secure.travis-ci.org/mongodb/node-mongodb-native.png'/><a>
+                </div>
+            </div>
+
+            <div class="nav title-row" id="top_menu">
+                <h1 class="nav top-menu"> MongoDB Core 1.0.0 </h1>
+            </div>
+      </header>
+      
+
+
+<aside>
+    <div id="sidebar"  class="nav-collapse ">
+        
+        <ul class="sidebar-menu">
+          
+          
+              
+                <li>
+                <a class="" href="/node-mongodb-native/">
+                    <i class='fa fa-file-text'></i>
+                    
+                    <span>driver portal</span>
+                </a>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-gift'></i>
+                
+                <span>about driver</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/core/meta/license/"> License </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/core/meta/release-notes/"> Release Notes </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-road'></i>
+                
+                <span>getting started</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/core/overview/introduction/"> Introduction </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/core/overview/installing/"> Installing The Driver </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/core/overview/quickstart/"> QuickStart </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-file-text'></i>
+                
+                <span>api</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/core/api-docs/"> API Documentation </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-group'></i>
+                
+                <span>community</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/core/community/mailing-list/"> Mailing List </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/core/community/contributing/"> Contributing </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu active">
+            <a href="javascript:;" class="">
+                <i class='fa fa-book'></i>
+                
+                <span>tutorials</span>
+                <span class="menu-arrow fa fa-angle-down"></span>
+            </a>
+                <ul class="sub open">
+                    
+                    <li><a href="/node-mongodb-native/core/tutorials/connecting/"> Connecting To MongoDB </a> </li>
+                    
+                    <li class="active"><a href="/node-mongodb-native/core/tutorials/crud_operations/"> CRUD Operations </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/core/tutorials/logging/"> Logging </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/core/tutorials/cursor/"> Cursor </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+            <li> <a href="https://jira.mongodb.org/browse/NODE" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
+            
+              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/tutorials/crud_operations.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
+            
+        </ul>
+        
+    </div>
+</aside>
+
+
+
+      
+      <section id="main-content">
+          <section class="wrapper">
+
+              
+                  
+                      
+                      
+                          
+                          
+                          
+                      
+                      
+                  
+              
+
+              <div class="row">
+                  <div class="col-md-1">
+                      
+                      
+                      <a class="navigation prev" href="/tutorials/connecting">
+                      <i class="fa fa-angle-left"></i>
+                      </a>
+                      
+                      
+                  </div>
+                <div class="col-md-10">
+                    <section class="panel">
+                          
+                              
+                          
+                    <div class="panel-body">
+
+
+
+<h1 id="toc_0">Driver CRUD Operations</h1>
+
+<p>The Core Driver CRUD operations are defined by the methods available on the driver topologies in the form of the <code>insert</code>, <code>update</code>, <code>remove</code>, <code>cursor</code> and <code>command</code>.</p>
+
+<h2 id="toc_1">Inserting Documents</h2>
+
+<p>Inserting documents is fairly straightforward. Let&rsquo;s look at an example.</p>
+
+<pre><code class="language-js">var Server = require('mongodb-core').Server
+  , assert = require('assert');
+
+var server = new Server({host: 'localhost', port: 27017});
+// Wait for the connection event
+server.on('connect', function(server) {
+  // Execute the insert
+  server.insert('integration_tests.inserts_example1', [{a:1}], {
+    writeConcern: {w:1}, ordered:true
+  }, function(err, results) {
+    assert.equal(null, err);
+    assert.equal(1, results.result.n);
+
+    server.destroy();
+  });
+});
+
+// Start connecting
+server.connect();
+</code></pre>
+
+<p>The insert method takes an array of documents to insert and an additional options object containing the write concern and if the commands are executed in order or not.</p>
+
+<ul>
+<li><code>writeConcern.w</code> <strong>{string|number}</strong> The write concern, either a number or a name like <em>majority</em>.</li>
+<li><code>writeConcern.wtimeout</code> <strong>{number}</strong> The write concern max timeout.</li>
+<li><code>writeConcern.j</code> <strong>{boolean}</strong> Wait for write to journal.</li>
+<li><code>writeConcern.fsync</code> <strong>{boolean}</strong> Wait for fsync (deprecated).</li>
+<li><code>order</code> <strong>{boolean, default:true}</strong> Execute the inserts in order or out of order.</li>
+</ul>
+
+<h2 id="toc_2">Updating Documents</h2>
+
+<p>Updating documents is also fairly straightforward with the main difference being that the actual documents passed in need a specific set of options for each operation.</p>
+
+<h3 id="toc_3">Update operation document</h3>
+
+<p>An update operation document is made up of the following fields.</p>
+
+<ul>
+<li><code>q</code> <strong>{object}</strong> The query object to select the document(s) to update.</li>
+<li><code>u</code> <strong>{object}</strong> The update statement to be applied to the document(s) selected by the query.</li>
+<li><code>multi</code> <strong>{boolean, default:false}</strong> Update one or one and more documents.</li>
+</ul>
+
+<p>Let&rsquo;s look at a simple code example.</p>
+
+<pre><code class="language-js">var Server = require('mongodb-core').Server
+  , assert = require('assert');
+
+var server = new Server({host: 'localhost', port: 27017});
+// Wait for the connection event
+server.on('connect', function(server) {
+  // Execute the update
+  server.update('integration_tests.inserts_example2', [{
+    q: {a: 1}, u: {'$set': {b:1}}, multi:true
+  }], {
+    writeConcern: {w:1}, ordered:true
+  }, function(err, results) {
+    assert.equal(null, err);
+    server.destroy();
+  });
+});
+
+// Start connecting
+server.connect();
+</code></pre>
+
+<p>The options are the same as for the insert operation.</p>
+
+<ul>
+<li><code>writeConcern.w</code> <strong>{string|number}</strong> The write concern, either a number or a name like <em>majority</em>.</li>
+<li><code>writeConcern.wtimeout</code> <strong>{number}</strong> The write concern max timeout.</li>
+<li><code>writeConcern.j</code> <strong>{boolean}</strong> Wait for write to journal.</li>
+<li><code>writeConcern.fsync</code> <strong>{boolean}</strong> Wait for fsync (deprecated).</li>
+<li><code>order</code> <strong>{boolean, default:true}</strong> Execute the inserts in order or out of order.</li>
+</ul>
+
+<h2 id="toc_4">Removing Documents</h2>
+
+<p>Removing documents is also fairly straightforward with the main difference being that the actual documents passed in need a specific set of options for each operation.</p>
+
+<h3 id="toc_5">Remove operation document</h3>
+
+<p>A remove operation document is made up of the following fields.</p>
+
+<ul>
+<li><code>q</code> <strong>{object}</strong> The query object to select the document(s) to remove.</li>
+<li><code>limit</code> <strong>{number, default:1}</strong> Remove one or all matching documents. Possible values are 1 or 0.</li>
+</ul>
+
+<p>Let&rsquo;s look at a simple code example.</p>
+
+<pre><code class="language-js">var Server = require('mongodb-core').Server
+  , assert = require('assert');
+
+var server = new Server({host: 'localhost', port: 27017});
+// Wait for the connection event
+server.on('connect', function(server) {
+  // Execute the update
+  server.remove('integration_tests.inserts_example2', [{
+    q: {a: 1}, limit:1
+  }], {
+    writeConcern: {w:1}, ordered:true
+  }, function(err, results) {
+    assert.equal(null, err);
+    server.destroy();
+  });
+});
+
+// Start connecting
+server.connect();
+</code></pre>
+
+<p>The options are the same as for the insert and update operation.</p>
+
+<ul>
+<li><code>writeConcern.w</code> <strong>{string|number}</strong> The write concern, either a number or a name like <em>majority</em>.</li>
+<li><code>writeConcern.wtimeout</code> <strong>{number}</strong> The write concern max timeout.</li>
+<li><code>writeConcern.j</code> <strong>{boolean}</strong> Wait for write to journal.</li>
+<li><code>writeConcern.fsync</code> <strong>{boolean}</strong> Wait for fsync (deprecated).</li>
+<li><code>order</code> <strong>{boolean, default:true}</strong> Execute the inserts in order or out of order.</li>
+</ul>
+
+<h2 id="toc_6">Executing a Command against MongoDB</h2>
+
+<p>Executing a command is also fairly straightforward but allows for the usage of readPreferences. The Core driver does not enforce the correct readPreferences on write commands so be aware that you need to ensure a <code>findAndModify</code> command is correctly routed to a primary instead of a secondary when the topology is a replicaset. Let&rsquo;s look at an example.</p>
+
+<pre><code class="language-js">var Server = require('mongodb-core').Server
+  , ReadPreference = require('mongodb-core').ReadPreference
+  , assert = require('assert');
+
+var server = new Server({host: 'localhost', port: 27017});
+// Wait for the connection event
+server.on('connect', function(server) {
+  // Execute the command
+  server.command(&quot;system.$cmd&quot;
+    , {ismaster: true}
+    , {
+      readPreference: new ReadPreference('secondary')
+    }, function(err, result) {
+      assert.equal(null, err)
+      server.destroy();
+  });
+});
+
+// Start connecting
+server.connect();
+</code></pre>
+
+<p>The first parameter is the database to execute the command against. This is typically the special <code>system.$cmd</code> collection. It accepts a command and an options object that can contain the following options.</p>
+
+<ul>
+<li><code>readPreference</code>, <strong>{ReadPreference}</strong> Specify read preference if command supports it</li>
+<li><code>connection</code> <strong>{Connection}</strong> Specify connection object to execute command against</li>
+</ul>
+
+<h2 id="toc_7">Executing Queries against MongoDB</h2>
+
+<p>Executing queries against MongoDB is done using the <code>cursor</code> method on the topology. The cursor can then be used with the <code>next</code> method to iterate over all the results. The Low level Core driver does not implement streams or other methods this is left to library developers to implement by extending the cursor using the <code>cursorFactory</code> option. Let&rsquo;s look at a simple example first and then look at the options available.</p>
+
+<pre><code class="language-js">var Server = require('mongodb-core').Server
+  , ReadPreference = require('mongodb-core').ReadPreference
+  , assert = require('assert');
+
+var server = new Server({host: 'localhost', port: 27017});
+// Wait for the connection event
+server.on('connect', function(server) {
+  // Execute the write
+  var cursor = _server.cursor('integration_tests.inserts_example4', {
+      find: 'integration_tests.example4'
+    , query: {a:1}
+  }, {
+    readPreference: new ReadPreference('secondary');
+  });
+
+  // Get the first document
+  cursor.next(function(err, doc) {
+    assert.equal(null, err);
+    server.destroy();
+  });
+});
+
+// Start connecting
+server.connect();
+</code></pre>
+
+<p>The cursor accepts commands that return a cursor id such as the <code>aggregation</code> command and the virtual <code>find</code> command or a <code>Long</code> cursorId that signals an existing cursor where we start iterating using the <code>getmore</code> command. We can also optionally pass in an array of documents that represents a first batch or even just an array of documents to emulate a cursor.</p>
+
+<p>The following options can be set on a cursor.</p>
+
+<ul>
+<li><code>readPreference</code>, <strong>{ReadPreference}</strong> Specify read preference if command supports it.</li>
+<li><code>batchSize</code>, <strong>{number, default:0}</strong> Batchsize for the operation.</li>
+<li><code>documents</code>, <strong>{object[]}</strong> Initial documents list for cursor.</li>
+</ul>
+
+<h3 id="toc_8">The Virtual Find Method</h3>
+
+<p>To simplify the way the code is we have defined the current way of doing queries in MongoDB as a virtual find command. This find command is a document with the following fields.</p>
+
+<ul>
+<li><code>find</code> {string} The namespace where the query is executed against. <strong>db.collection</strong>.</li>
+<li><code>query</code> {object} The query criteria/selector for the cursor.</li>
+<li><code>limit</code> {number, default:0} The number of documents to limit the query too.</li>
+<li><code>skip</code> {number, default:0} The number of documents to skip.</li>
+<li><code>fields</code> {object} The projection of the returned documents.</li>
+<li><code>hint</code> {object|string} The index hint to use with the query.</li>
+<li><code>explain</code> {boolean} Execute the query using explain.</li>
+<li><code>snapshot</code> {boolean} Execute the query as a snapshot.</li>
+<li><code>batchSize</code> {number, default:0} The batch size to use on the getMore commands.</li>
+<li><code>returnKey</code> {boolean} Return only the key for each document.</li>
+<li><code>maxScan</code> {number} Constrain the query only to scan a max number of documents before stopping.</li>
+<li><code>min</code> {number} Specify the minimum inclusive lower bound for a specific index  in order to constrain the results.</li>
+<li><code>max</code> {number} Specify the maximum inclusive upper bound for a specific index  in order to constrain the results.</li>
+<li><code>showDiskLoc</code> {boolean} Return the disk location for all the documents.</li>
+<li><code>command</code> {string} Print comment to log when query is executed.</li>
+<li><code>maxTimeMS</code> {number} Terminate the query after X milliseconds.</li>
+<li><code>raw</code> {boolean, default:false} Return raw BSON document Buffers instead of parsing them into JS objects.</li>
+<li><code>readPreference</code> {ReadPreference} Set the read preference for the query.</li>
+<li><code>tailable</code> {boolean} Create a tailable cursor against the collection.</li>
+<li><code>oplogReplay</code> {boolean} Signal that we wish to perform an op log replay.</li>
+<li><code>noCursorTimeout</code> {boolean} Signal that we do not wish the cursor to time out.</li>
+<li><code>awaitdata</code> {boolean} Signal that we wish to perform an awaitData on a tailable cursor.</li>
+<li><code>exhaust</code> {boolean} Perform an exhaust query.</li>
+<li><code>partial</code> {boolean} Allow a partial result to be returned from a sharded system.</li>
+</ul>
+
+<p>This concludes the CRUD commands documentation.</p>
+
+                      
+                      <div id="disqus_thread"></div>
+                      <script type="text/javascript">
+                           
+                          var disqus_shortname = 'nodejsmongodbdriver'; 
+
+                           
+                          (function() {
+                              var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                              dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                              (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                          })();
+                      </script>
+                      <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+                      <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+                      
+                    </div>
+                    </section>
+                </div>
+                <div class="col-md-1">
+                    
+                    
+                    <a class="navigation next" href="/tutorials/logging">
+                        <i class="fa fa-angle-right"> </i>
+                    </a>
+                    
+                    
+                </div>
+              </div>
+              
+          </section>
+      </section>
+     
+  </section>
+  
+    
+    <script src="js/jquery-2.1.1.min.js"></script>
+    <script src="js/jquery.scrollTo.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    
+    <script src="js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="js/scripts.js"></script>
+    <script async defer id="github-bjs" src="js/buttons.js"></script>
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-29229787-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>
+

@@ -1,0 +1,1004 @@
+=======
+Admin()
+=======
+
+------------------
+Constructor
+------------------
+
+
+Allows the user to access the admin functionality of MongoDB
+
+
+  .. js:class:: Admin()
+
+   :param object db: Current db instance we wish to perform Admin operations on.
+   :returns: function Constructor for Admin type.
+
+
+
+---------
+buildInfo
+---------
+
+
+Retrieve the server information for the current
+instance of the db client
+
+.. js:function:: buildInfo(callback)
+
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from buildInfo or null if an error occured.
+   :returns: null Returns no result
+
+
+**Examples**
+
+  
+  
+  Retrieve the buildInfo for the current MongoDB instance
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db  
+     db.open(function(err, db) {
+     
+       // Use the admin database for the operation
+       var adminDb = db.admin();
+     
+       // Add the new user to the admin database
+       adminDb.addUser('admin3', 'admin3', function(err, result) {
+     
+         // Authenticate using the newly added user
+         adminDb.authenticate('admin3', 'admin3', function(err, result) {
+           assert.ok(result);
+           
+           // Retrive the build information for the MongoDB instance
+           adminDb.buildInfo(function(err, info) {
+             assert.ok(err == null);
+             
+             adminDb.removeUser('admin3', function(err, result) {
+               assert.ok(result);
+     
+               db.close();
+             });
+           });
+         });
+       });
+     });            
+
+
+------------
+serverStatus
+------------
+
+
+Retrieve this db's server status.
+
+.. js:function:: serverStatus(callback)
+
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from serverStatus or null if an error occured.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  Retrieve the current server Info
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db  
+     db.open(function(err, db) {
+     
+       // Grab a collection object
+       var collection = db.collection('test');
+     
+       // Force the creation of the collection by inserting a document
+       // Collections are not created until the first document is inserted
+       collection.insert({'a':1}, {w: 1}, function(err, doc) {
+     
+         // Use the admin database for the operation
+         var adminDb = db.admin();
+     
+         // Add the new user to the admin database
+         adminDb.addUser('admin13', 'admin13', function(err, result) {
+     
+           // Authenticate using the newly added user
+           adminDb.authenticate('admin13', 'admin13', function(err, result) {
+            
+             // Retrive the server Info
+             adminDb.serverStatus(function(err, info) {
+               assert.equal(null, err);
+               assert.ok(info != null);
+              
+               adminDb.removeUser('admin13', function(err, result) {
+                 assert.ok(result);
+     
+                 db.close();
+               });
+             });
+           });
+         });
+       });
+     });
+
+
+--------------
+profilingLevel
+--------------
+
+
+Retrieve the current profiling Level for MongoDB
+
+.. js:function:: profilingLevel(callback)
+
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from profilingLevel or null if an error occured.
+   :returns: null Returns no result
+
+
+**Examples**
+
+  
+  
+  Retrieve the current profiling level set for the MongoDB instance
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db  
+     db.open(function(err, db) {
+       
+       // Grab a collection object
+       var collection = db.collection('test');
+     
+       // Force the creation of the collection by inserting a document
+       // Collections are not created until the first document is inserted
+       collection.insert({'a':1}, {w: 1}, function(err, doc) {
+     
+         // Use the admin database for the operation
+         var adminDb = db.admin();
+     
+         // Add the new user to the admin database
+         adminDb.addUser('admin5', 'admin5', function(err, result) {
+     
+           // Authenticate using the newly added user
+           adminDb.authenticate('admin5', 'admin5', function(err, replies) {
+     
+             // Retrive the profiling level
+             adminDb.profilingLevel(function(err, level) {
+     
+               adminDb.removeUser('admin5', function(err, result) {
+                 assert.ok(result);
+     
+                 db.close();
+               });
+             });
+           });
+         });
+       });
+     });
+
+
+----
+ping
+----
+
+
+Ping the MongoDB server and retrieve results
+
+.. js:function:: ping(callback)
+
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from ping or null if an error occured.
+   :returns: null Returns no result
+
+
+**Examples**
+
+  
+  
+  An example of how to add a user to the admin database
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Use the admin database for the operation
+       var adminDb = db.admin();
+         
+       // Add the new user to the admin database
+       adminDb.addUser('admin9', 'admin9', function(err, result) {
+         
+         // Authenticate using the newly added user
+         adminDb.authenticate('admin9', 'admin9', function(err, result) {
+           assert.ok(result);
+           
+           // Ping the server
+           adminDb.ping(function(err, pingResult) {
+             assert.equal(null, err);
+     
+             adminDb.removeUser('admin9', function(err, result) {
+               assert.ok(result);
+     
+               db.close();
+             });
+           });
+         });
+       });
+     });
+
+
+------------
+authenticate
+------------
+
+
+Authenticate against MongoDB
+
+.. js:function:: authenticate(username, password, callback)
+
+   :param string username: The user name for the authentication.
+   :param string password: The password for the authentication.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from authenticate or null if an error occured.
+   :returns: null Returns no result
+
+
+**Examples**
+
+  
+  
+  Authenticate against MongoDB Admin user
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     db.open(function(err, db) {
+       // Grab a collection object
+       var collection = db.collection('test');
+     
+       // Force the creation of the collection by inserting a document
+       // Collections are not created until the first document is inserted
+       collection.insert({'a':1}, {w:1}, function(err, doc) {
+     
+         // Use the admin database for the operation
+         var adminDb = db.admin();
+     
+         // Add the new user to the admin database
+         adminDb.addUser('admin2', 'admin2', function(err, result) {
+     
+           // Authenticate using the newly added user
+           adminDb.authenticate('admin2', 'admin2', function(err, result) {
+             assert.ok(result);
+     
+             adminDb.removeUser('admin2', function(err, result) {
+               assert.ok(result);
+     
+               db.close();
+             });
+           });
+         });
+       });
+     });
+
+
+------
+logout
+------
+
+
+Logout current authenticated user
+
+.. js:function:: logout([options], callback)
+
+   :param object [options]: Optional parameters to the command.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from logout or null if an error occured.
+   :returns: null Returns no result
+
+
+**Examples**
+
+  
+  
+  An example of how add a user, authenticate and logout
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Use the admin database for the operation
+       var adminDb = db.admin();
+         
+       // Add the new user to the admin database
+       adminDb.addUser('admin10', 'admin10', function(err, result) {
+         
+         // Authenticate using the newly added user
+         adminDb.authenticate('admin10', 'admin10', function(err, result) {
+           assert.ok(result);
+           
+           // Logout the user
+           adminDb.logout(function(err, result) {
+             assert.equal(true, result);
+             
+             adminDb.removeUser('admin10', function(err, result) {
+               assert.ok(result);
+     
+               db.close();
+             });
+           });
+         });                
+       });
+     });
+
+
+-------
+addUser
+-------
+
+
+Add a user to the MongoDB server, if the user exists it will
+overwrite the current password
+
+
+
+Options
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning, from MongoDB 2.6 on, fsync cannot be combined with journal
+ - **j**, (Boolean, default:false) write waits for journal sync before returning
+
+.. js:function:: addUser(username, password[, options], callback)
+
+   :param string username: The user name for the authentication.
+   :param string password: The password for the authentication.
+   :param object [options]: additional options during update.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from addUser or null if an error occured.
+   :returns: null Returns no result
+
+
+**Examples**
+
+  
+  
+  An example of how to add a user to the admin database
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Use the admin database for the operation
+       var adminDb = db.admin();
+         
+       // Add the new user to the admin database
+       adminDb.addUser('admin11', 'admin11', function(err, result) {
+         
+         // Authenticate using the newly added user
+         adminDb.authenticate('admin11', 'admin11', function(err, result) {
+           assert.ok(result);
+           
+           adminDb.removeUser('admin11', function(err, result) {
+             assert.ok(result);
+     
+             db.close();
+           });
+         });                
+       });
+     });
+
+
+----------
+removeUser
+----------
+
+
+Remove a user from the MongoDB server
+
+
+
+Options
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where &lt; 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning, from MongoDB 2.6 on, fsync cannot be combined with journal
+ - **j**, (Boolean, default:false) write waits for journal sync before returning
+
+.. js:function:: removeUser(username[, options], callback)
+
+   :param string username: The user name for the authentication.
+   :param object [options]: additional options during update.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from removeUser or null if an error occured.
+   :returns: null Returns no result
+
+
+**Examples**
+
+  
+  
+  An example of how to remove a user from the admin database
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Use the admin database for the operation
+       var adminDb = db.admin();
+         
+       // Add the new user to the admin database
+       adminDb.addUser('admin12', 'admin12', function(err, result) {
+         
+         // Authenticate using the newly added user
+         adminDb.authenticate('admin12', 'admin12', function(err, result) {
+           assert.ok(result);
+           
+           // Remove the user
+           adminDb.removeUser('admin12', function(err, result) {              
+             assert.equal(null, err);
+             assert.equal(true, result);
+             
+             // Authenticate using the removed user should fail
+             adminDb.authenticate('admin12', 'admin12', function(err, result) {
+               assert.ok(err != null);
+               assert.ok(!result);
+     
+               db.close();
+             });
+           })            
+         });                
+       });
+     });
+
+
+-----------------
+setProfilingLevel
+-----------------
+
+
+Set the current profiling level of MongoDB
+
+.. js:function:: setProfilingLevel(level, callback)
+
+   :param string level: The new profiling level (off, slow_only, all)
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from setProfilingLevel or null if an error occured.
+   :returns: null Returns no result
+
+
+**Examples**
+
+  
+  
+  An example of how to use the setProfilingInfo
+  Use this command to set the Profiling level on the MongoDB server
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db  
+     db.open(function(err, db) {
+       
+       // Grab a collection object
+       var collection = db.collection('test');
+     
+       // Force the creation of the collection by inserting a document
+       // Collections are not created until the first document is inserted
+       collection.insert({'a':1}, {w: 1}, function(err, doc) {
+     
+         // Use the admin database for the operation
+         var adminDb = db.admin();
+     
+         // Add the new user to the admin database
+         adminDb.addUser('admin6', 'admin6', function(err, result) {
+     
+           // Authenticate using the newly added user
+           adminDb.authenticate('admin6', 'admin6', function(err, replies) {                                
+             
+             // Set the profiling level to only profile slow queries
+             adminDb.setProfilingLevel('slow_only', function(err, level) {
+               
+               // Retrive the profiling level and verify that it's set to slow_only
+               adminDb.profilingLevel(function(err, level) {
+                 assert.equal('slow_only', level);
+     
+                 // Turn profiling off
+                 adminDb.setProfilingLevel('off', function(err, level) {
+                   
+                   // Retrive the profiling level and verify that it's set to off
+                   adminDb.profilingLevel(function(err, level) {
+                     assert.equal('off', level);
+     
+                     // Set the profiling level to log all queries
+                     adminDb.setProfilingLevel('all', function(err, level) {
+     
+                       // Retrive the profiling level and verify that it's set to all
+                       adminDb.profilingLevel(function(err, level) {
+                         assert.equal('all', level);
+     
+                         // Attempt to set an illegal profiling level
+                         adminDb.setProfilingLevel('medium', function(err, level) {
+                           assert.ok(err instanceof Error);
+                           assert.equal("Error: illegal profiling level value medium", err.message);
+                         
+                           adminDb.removeUser('admin6', function(err, result) {
+                             assert.ok(result);
+     
+                             db.close();
+                           });
+                         });
+                       })
+                     });
+                   })
+                 });
+               })
+             });
+           });
+         });
+       });
+     });
+
+
+-------------
+profilingInfo
+-------------
+
+
+Retrive the current profiling information for MongoDB
+
+.. js:function:: profilingInfo(callback)
+
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from profilingInfo or null if an error occured.
+   :returns: null Returns no result
+
+
+**Examples**
+
+  
+  
+  An example of how to use the profilingInfo
+  Use this command to pull back the profiling information currently set for Mongodb
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db  
+     db.open(function(err, db) {
+     
+       // Grab a collection object
+       var collection = db.collection('test');
+     
+       // Force the creation of the collection by inserting a document
+       // Collections are not created until the first document is inserted
+       collection.insert({'a':1}, {w: 1}, function(doc) {
+     
+         // Use the admin database for the operation
+         var adminDb = db.admin();
+     
+         // Add the new user to the admin database
+         adminDb.addUser('admin7', 'admin7', function(err, result) {
+     
+           // Authenticate using the newly added user
+           adminDb.authenticate('admin7', 'admin7', function(err, replies) {
+             
+             // Set the profiling level to all
+             adminDb.setProfilingLevel('all', function(err, level) {
+               
+               // Execute a query command
+               collection.find().toArray(function(err, items) {
+     
+                 // Turn off profiling
+                 adminDb.setProfilingLevel('off', function(err, level) {
+                   
+                   // Retrive the profiling information
+                   adminDb.profilingInfo(function(err, infos) {
+                     assert.ok(infos.constructor == Array);
+                     assert.ok(infos.length >= 1);
+                     assert.ok(infos[0].ts.constructor == Date);
+                     assert.ok(infos[0].millis.constructor == Number);
+                   
+                     adminDb.removeUser('admin7', function(err, result) {
+                       assert.ok(result);
+     
+                       db.close();
+                     });
+                   });
+                 });
+               });
+             });
+           });
+         });
+       });
+     });
+
+
+-------
+command
+-------
+
+
+Execute a db command against the Admin database
+
+.. js:function:: command(command[, options], callback)
+
+   :param object command: A command object `{ping:1}`.
+   :param object [options]: Optional parameters to the command.
+   :param function callback: this will be called after executing this method. The command always return the whole result of the command as the second parameter.
+   :returns: null Returns no result
+
+
+**Examples**
+
+  
+  
+  Retrieve the buildInfo using the command function
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db  
+     db.open(function(err, db) {
+     
+       // Use the admin database for the operation
+       var adminDb = db.admin();
+     
+       // Add the new user to the admin database
+       adminDb.addUser('admin4', 'admin4', function(err, result) {
+     
+         // Authenticate using the newly added user
+         adminDb.authenticate('admin4', 'admin4', function(err, result) {
+           assert.ok(result);
+           
+           // Retrive the build information using the admin command
+           adminDb.command({buildInfo:1}, function(err, info) {
+             assert.ok(err == null);
+     
+             adminDb.removeUser('admin4', function(err, result) {
+               assert.ok(result);
+     
+               db.close();
+             });
+           });
+         });
+       });
+     });
+
+
+------------------
+validateCollection
+------------------
+
+
+Validate an existing collection
+
+.. js:function:: validateCollection(collectionName[, options], callback)
+
+   :param string collectionName: The name of the collection to validate.
+   :param object [options]: Optional parameters to the command.
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from validateCollection or null if an error occured.
+   :returns: null Returns no result
+
+
+**Examples**
+
+  
+  
+  An example of how to use the validateCollection command
+  Use this command to check that a collection is valid (not corrupt) and to get various statistics.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db  
+     db.open(function(err, db) {
+     
+       // Grab a collection object
+       var collection = db.collection('test');
+         
+       // Force the creation of the collection by inserting a document
+       // Collections are not created until the first document is inserted
+       collection.insert({'a':1}, {w: 1}, function(err, doc) {
+         
+         // Use the admin database for the operation
+         var adminDb = db.admin();
+           
+         // Add the new user to the admin database
+         adminDb.addUser('admin8', 'admin8', function(err, result) {
+           
+           // Authenticate using the newly added user
+           adminDb.authenticate('admin8', 'admin8', function(err, replies) {
+             
+             // Validate the 'test' collection
+             adminDb.validateCollection('test', function(err, doc) {
+     
+               // Pre 1.9.1 servers
+               if(doc.result != null) {
+                 assert.ok(doc.result != null);
+                 assert.ok(doc.result.match(/firstExtent/) != null);                    
+               } else {
+                 assert.ok(doc.firstExtent != null);
+               }
+     
+               adminDb.removeUser('admin8', function(err, result) {
+                 assert.ok(result);
+     
+                 db.close();
+               });
+             });
+           });                
+         });
+       });
+     });
+
+
+-------------
+listDatabases
+-------------
+
+
+List the available databases
+
+.. js:function:: listDatabases(callback)
+
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from listDatabases or null if an error occured.
+   :returns: null Returns no result
+
+
+**Examples**
+
+  
+  
+  An example of listing all available databases.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Use the admin database for the operation
+       var adminDb = db.admin();
+         
+       // List all the available databases
+       adminDb.listDatabases(function(err, dbs) {
+         assert.equal(null, err);
+         assert.ok(dbs.databases.length > 0);
+         
+         db.close();
+       });
+     });
+
+
+----------------
+replSetGetStatus
+----------------
+
+
+Get ReplicaSet status
+
+.. js:function:: replSetGetStatus(callback)
+
+   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occured, or null otherwise. While the second parameter will contain the results from replSetGetStatus or null if an error occured.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  Retrieve the current replicaset status if the server is running as part of a replicaset
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db  
+     db.open(function(err, db) {
+     
+       // Grab a collection object
+       var collection = db.collection('test');
+     
+       // Force the creation of the collection by inserting a document
+       // Collections are not created until the first document is inserted
+       collection.insert({'a':1}, {w: 1}, function(err, doc) {
+     
+         // Use the admin database for the operation
+         var adminDb = db.admin();
+     
+         // Add the new user to the admin database
+         adminDb.addUser('admin14', 'admin14', function(err, result) {
+           assert.equal(null, err);
+           assert.ok(result != null);
+     
+           // Authenticate using the newly added user
+           adminDb.authenticate('admin14', 'admin14', function(err, result) {
+             assert.equal(null, err); 
+             assert.equal(true, result);
+            
+             // Retrive the server Info, returns error if we are not
+             // running a replicaset
+             adminDb.replSetGetStatus(function(err, info) {
+     
+               adminDb.removeUser('admin14', function(err, result) {
+                 assert.equal(null, err);
+                 assert.ok(result);
+     
+                 db.close();
+               });
+             })
+           });
+         });
+       });
+     });
+

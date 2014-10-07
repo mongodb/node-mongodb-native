@@ -1,0 +1,1073 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+      <title>Recent Content on MongoDB Core 1.0.0 </title>
+      <generator uri="https://hugo.spf13.com">Hugo</generator>
+    <link>/node-mongodb-native/core/index.xml/</link>
+    
+    
+    
+    <updated>Mon, 01 Jul 2013 00:00:00 UTC</updated>
+    
+    <item>
+      <title>Connecting To MongoDB</title>
+      <link>/node-mongodb-native/core/tutorials/connecting/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/core/tutorials/connecting/</guid>
+      <description>
+
+&lt;h1 id=&#34;toc_0&#34;&gt;Connecting To MongoDB&lt;/h1&gt;
+
+&lt;p&gt;Connecting to MongoDB using the driver is done using the Topology classes &lt;code&gt;Server&lt;/code&gt;, &lt;code&gt;ReplSet&lt;/code&gt; and &lt;code&gt;Mongos&lt;/code&gt;. There is no auto detection of the server topology as this is a low level driver.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;Single Server Connection&lt;/h2&gt;
+
+&lt;p&gt;We have a single MongoDB server instance running on the port &lt;em&gt;27017&lt;/em&gt; Let&amp;rsquo;s connect using the driver and &lt;em&gt;MongoClient.connect&lt;/em&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var Server = require(&#39;mongodb-core&#39;).Server
+  , assert = require(&#39;assert&#39;);
+
+var server = new Server({host: &#39;localhost&#39;, port: 27017});
+// Wait for the connection event
+server.on(&#39;connect&#39;, function(server) {
+  server.destroy();
+});
+
+// Start connecting
+server.connect();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s break down the connection options available.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;reconnect&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; Server will attempt to reconnect on loss of connection&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;reconnectTries&lt;/code&gt; &lt;strong&gt;{number, default:30}&lt;/strong&gt; Server attempt to reconnect #times&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;reconnectInterval&lt;/code&gt; &lt;strong&gt;{number, default:1000}&lt;/strong&gt; Server will wait # milliseconds between retries&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;emitError&lt;/code&gt; &lt;strong&gt;{boolean, default:false}&lt;/strong&gt; Server will emit errors events&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cursorFactory&lt;/code&gt; &lt;strong&gt;{Cursor, default:Cursor}&lt;/strong&gt; The cursor factory class used for all query cursors&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;host&lt;/code&gt; &lt;strong&gt;{string}&lt;/strong&gt; The server host&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;port&lt;/code&gt; &lt;strong&gt;{number}&lt;/strong&gt; The server port&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;size&lt;/code&gt; &lt;strong&gt;{number, default:5}&lt;/strong&gt; Server connection pool size&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;keepAlive&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; TCP Connection keep alive enabled&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;keepAliveInitialDelay&lt;/code&gt; &lt;strong&gt;{number, default:0}&lt;/strong&gt; Initial delay before TCP keep alive enabled&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;noDelay&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; TCP Connection no delay&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;connectionTimeout&lt;/code&gt; &lt;strong&gt;{number, default:0}&lt;/strong&gt; TCP Connection timeout setting&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketTimeout&lt;/code&gt; &lt;strong&gt;{number, default:0}&lt;/strong&gt; TCP Socket timeout setting&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;singleBufferSerializtion&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; Serialize into single buffer, trade of peak memory for serialization speed&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ssl&lt;/code&gt; &lt;strong&gt;{boolean, default:false}&lt;/strong&gt; Use SSL for connection&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ca&lt;/code&gt; &lt;strong&gt;{Buffer}&lt;/strong&gt; SSL Certificate store binary buffer&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cert&lt;/code&gt; &lt;strong&gt;{Buffer}&lt;/strong&gt; SSL Certificate binary buffer&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;key&lt;/code&gt; &lt;strong&gt;{Buffer}&lt;/strong&gt; SSL Key file binary buffer&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;passphrase&lt;/code&gt; &lt;strong&gt;{string}&lt;/strong&gt; SSL Certificate pass phrase&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;rejectUnauthorized&lt;/code&gt; &lt;strong&gt;{boolean, default:false}&lt;/strong&gt; Reject unauthorized server certificates&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;promoteLongs&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; Convert Long values from the db into Numbers if they fit into 53 bits&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;toc_2&#34;&gt;Replicaset Connection&lt;/h2&gt;
+
+&lt;p&gt;We wish to connect to a ReplicaSet consisting of one primary and 1 or more secondaries. To Do this we need to supply the driver with a seedlist of servers and the name of the ReplicaSet we wish to connect to. Let&amp;rsquo;s take a look at a code example.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var ReplSet = require(&#39;mongodb-core&#39;).ReplSet
+  , assert = require(&#39;assert&#39;);
+
+var server = new ReplSet(
+    [{host: &#39;localhost&#39;, port: 31000}, {host: &#39;localhost&#39;, port: 31001}]
+  , {setName: &#39;rs&#39;});
+// Wait for the connection event
+server.on(&#39;connect&#39;, function(server) {
+  server.destroy();
+});
+
+// Start connecting
+server.connect();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s break down the connection options available.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;setName&lt;/code&gt; &lt;strong&gt;{string}&lt;/strong&gt; The Replicaset set name&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;secondaryOnlyConnectionAllowed&lt;/code&gt; &lt;strong&gt;{boolean, default:false}&lt;/strong&gt; Allow connection to a secondary only replicaset&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;haInterval&lt;/code&gt; &lt;strong&gt;{number, default:5000}&lt;/strong&gt; The High availability period for replicaset inquiry&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;emitError&lt;/code&gt; &lt;strong&gt;{boolean, default:false}&lt;/strong&gt; Server will emit errors events&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cursorFactory&lt;/code&gt; &lt;strong&gt;{Cursor, default:Cursor}&lt;/strong&gt; The cursor factory class used for all query cursors&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;size&lt;/code&gt; &lt;strong&gt;{number, default:5}&lt;/strong&gt; Server connection pool size&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;keepAlive&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; TCP Connection keep alive enabled&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;keepAliveInitialDelay&lt;/code&gt; &lt;strong&gt;{number, default:0}&lt;/strong&gt; Initial delay before TCP keep alive enabled&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;noDelay&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; TCP Connection no delay&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;connectionTimeout&lt;/code&gt; &lt;strong&gt;{number, default:0}&lt;/strong&gt; TCP Connection timeout setting&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketTimeout&lt;/code&gt; &lt;strong&gt;{number, default:0}&lt;/strong&gt; TCP Socket timeout setting&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;singleBufferSerializtion&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; Serialize into single buffer, trade of peak memory for serialization speed&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ssl&lt;/code&gt; &lt;strong&gt;{boolean, default:false}&lt;/strong&gt; Use SSL for connection&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ca&lt;/code&gt; &lt;strong&gt;{Buffer}&lt;/strong&gt; SSL Certificate store binary buffer&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cert&lt;/code&gt; &lt;strong&gt;{Buffer}&lt;/strong&gt; SSL Certificate binary buffer&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;key&lt;/code&gt; &lt;strong&gt;{Buffer}&lt;/strong&gt; SSL Key file binary buffer&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;passphrase&lt;/code&gt; &lt;strong&gt;{string}&lt;/strong&gt; SSL Certificate pass phrase&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;rejectUnauthorized&lt;/code&gt; &lt;strong&gt;{boolean, default:false}&lt;/strong&gt; Reject unauthorized server certificates&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;promoteLongs&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; Convert Long values from the db into Numbers if they fit into 53 bits&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;toc_3&#34;&gt;Mongos Proxy Connection&lt;/h2&gt;
+
+&lt;p&gt;We wish to connect to a set of &lt;code&gt;mongos&lt;/code&gt; proxies. Just as in the case of connecting to a ReplicaSet we can provide a seed list of &lt;code&gt;mongos&lt;/code&gt; proxies. This allows the driver to perform failover between proxies automatically in case of a proxy process having been shut down. Let&amp;rsquo;s look at an example of code connecting to a set of proxies.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var Mongos = require(&#39;mongodb-core&#39;).Mongos
+  , assert = require(&#39;assert&#39;);
+
+var server = new Mongos(
+    [{host: &#39;localhost&#39;, port: 50000}, {host: &#39;localhost&#39;, port: 50001}]
+  );
+// Wait for the connection event
+server.on(&#39;connect&#39;, function(server) {
+  server.destroy();
+});
+
+// Start connecting
+server.connect();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s break down the connection options available.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;reconnectTries&lt;/code&gt; &lt;strong&gt;{number, default:30}&lt;/strong&gt; Reconnect retries for HA if no servers available&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;haInterval&lt;/code&gt; &lt;strong&gt;{number, default:5000}&lt;/strong&gt; The High availability period for replicaset inquiry&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;emitError&lt;/code&gt; &lt;strong&gt;{boolean, default:false}&lt;/strong&gt; Server will emit errors events&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cursorFactory&lt;/code&gt; &lt;strong&gt;{Cursor, default:Cursor}&lt;/strong&gt; The cursor factory class used for all query cursors&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;size&lt;/code&gt; &lt;strong&gt;{number, default:5}&lt;/strong&gt; Server connection pool size&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;keepAlive&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; TCP Connection keep alive enabled&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;keepAliveInitialDelay&lt;/code&gt; &lt;strong&gt;{number, default:0}&lt;/strong&gt; Initial delay before TCP keep alive enabled&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;noDelay&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; TCP Connection no delay&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;connectionTimeout&lt;/code&gt; &lt;strong&gt;{number, default:0}&lt;/strong&gt; TCP Connection timeout setting&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketTimeout&lt;/code&gt; &lt;strong&gt;{number, default:0}&lt;/strong&gt; TCP Socket timeout setting&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;singleBufferSerializtion&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; Serialize into single buffer, trade of peak memory for serialization speed&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ssl&lt;/code&gt; &lt;strong&gt;{boolean, default:false}&lt;/strong&gt; Use SSL for connection&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ca&lt;/code&gt; &lt;strong&gt;{Buffer}&lt;/strong&gt; SSL Certificate store binary buffer&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cert&lt;/code&gt; &lt;strong&gt;{Buffer}&lt;/strong&gt; SSL Certificate binary buffer&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;key&lt;/code&gt; &lt;strong&gt;{Buffer}&lt;/strong&gt; SSL Key file binary buffer&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;passphrase&lt;/code&gt; &lt;strong&gt;{string}&lt;/strong&gt; SSL Certificate pass phrase&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;rejectUnauthorized&lt;/code&gt; &lt;strong&gt;{boolean, default:false}&lt;/strong&gt; Reject unauthorized server certificates&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;promoteLongs&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; Convert Long values from the db into Numbers if they fit into 53 bits&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;toc_4&#34;&gt;Authentication using the Core Driver&lt;/h2&gt;
+
+&lt;p&gt;Authentication is fairly easy to perform and is done using the &lt;code&gt;auth&lt;/code&gt; method on the connected topology instance. Let&amp;rsquo;s look at a simple example of authenticating using the &lt;code&gt;MongoCR&lt;/code&gt; authentication strategy.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var Server = require(&#39;mongodb-core&#39;).Server
+  , assert = require(&#39;assert&#39;);
+
+var server = new Server({host: &#39;localhost&#39;, port: 27017});
+// Wait for the connection event
+server.on(&#39;connect&#39;, function(server) {
+  server.auth(&#39;mongocr&#39;, &#39;admin&#39;, &#39;test&#39;, &#39;test&#39;, function(err, session) {    
+    server.destroy();
+  });
+});
+
+// Start connecting
+server.connect();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The first argument is the authentication mechanism you wish to use, the second argument is the database you wish to authenticate against and the rest of the parameters are authentication mechanism specific with the last parameter being the callback function. The authentication is performed against all connections on the topology. The driver currently provides the following authentication mechanisms.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;mongocr&lt;/code&gt; The current default MongoDB authentication mechanism.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;x509&lt;/code&gt; Using a X509 Certificate for the authentication.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;plain&lt;/code&gt; Use LDAP for authentication using $external.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;gssapi&lt;/code&gt; Linux Kerberos authentication using MIT library.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sspi&lt;/code&gt; Windows Kerberos authentication using SSPI.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;scram-sha-1&lt;/code&gt; 2.8 or higher default authentication mechanism.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This covers connection and authentication using the Core driver.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>CRUD Operations</title>
+      <link>/node-mongodb-native/core/tutorials/crud_operations/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/core/tutorials/crud_operations/</guid>
+      <description>
+
+&lt;h1 id=&#34;toc_0&#34;&gt;Driver CRUD Operations&lt;/h1&gt;
+
+&lt;p&gt;The Core Driver CRUD operations are defined by the methods available on the driver topologies in the form of the &lt;code&gt;insert&lt;/code&gt;, &lt;code&gt;update&lt;/code&gt;, &lt;code&gt;remove&lt;/code&gt;, &lt;code&gt;cursor&lt;/code&gt; and &lt;code&gt;command&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;Inserting Documents&lt;/h2&gt;
+
+&lt;p&gt;Inserting documents is fairly straightforward. Let&amp;rsquo;s look at an example.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var Server = require(&#39;mongodb-core&#39;).Server
+  , assert = require(&#39;assert&#39;);
+
+var server = new Server({host: &#39;localhost&#39;, port: 27017});
+// Wait for the connection event
+server.on(&#39;connect&#39;, function(server) {
+  // Execute the insert
+  server.insert(&#39;integration_tests.inserts_example1&#39;, [{a:1}], {
+    writeConcern: {w:1}, ordered:true
+  }, function(err, results) {
+    assert.equal(null, err);
+    assert.equal(1, results.result.n);
+
+    server.destroy();
+  });
+});
+
+// Start connecting
+server.connect();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The insert method takes an array of documents to insert and an additional options object containing the write concern and if the commands are executed in order or not.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;writeConcern.w&lt;/code&gt; &lt;strong&gt;{string|number}&lt;/strong&gt; The write concern, either a number or a name like &lt;em&gt;majority&lt;/em&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;writeConcern.wtimeout&lt;/code&gt; &lt;strong&gt;{number}&lt;/strong&gt; The write concern max timeout.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;writeConcern.j&lt;/code&gt; &lt;strong&gt;{boolean}&lt;/strong&gt; Wait for write to journal.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;writeConcern.fsync&lt;/code&gt; &lt;strong&gt;{boolean}&lt;/strong&gt; Wait for fsync (deprecated).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;order&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; Execute the inserts in order or out of order.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;toc_2&#34;&gt;Updating Documents&lt;/h2&gt;
+
+&lt;p&gt;Updating documents is also fairly straightforward with the main difference being that the actual documents passed in need a specific set of options for each operation.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_3&#34;&gt;Update operation document&lt;/h3&gt;
+
+&lt;p&gt;An update operation document is made up of the following fields.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;q&lt;/code&gt; &lt;strong&gt;{object}&lt;/strong&gt; The query object to select the document(s) to update.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;u&lt;/code&gt; &lt;strong&gt;{object}&lt;/strong&gt; The update statement to be applied to the document(s) selected by the query.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;multi&lt;/code&gt; &lt;strong&gt;{boolean, default:false}&lt;/strong&gt; Update one or one and more documents.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Let&amp;rsquo;s look at a simple code example.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var Server = require(&#39;mongodb-core&#39;).Server
+  , assert = require(&#39;assert&#39;);
+
+var server = new Server({host: &#39;localhost&#39;, port: 27017});
+// Wait for the connection event
+server.on(&#39;connect&#39;, function(server) {
+  // Execute the update
+  server.update(&#39;integration_tests.inserts_example2&#39;, [{
+    q: {a: 1}, u: {&#39;$set&#39;: {b:1}}, multi:true
+  }], {
+    writeConcern: {w:1}, ordered:true
+  }, function(err, results) {
+    assert.equal(null, err);
+    server.destroy();
+  });
+});
+
+// Start connecting
+server.connect();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The options are the same as for the insert operation.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;writeConcern.w&lt;/code&gt; &lt;strong&gt;{string|number}&lt;/strong&gt; The write concern, either a number or a name like &lt;em&gt;majority&lt;/em&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;writeConcern.wtimeout&lt;/code&gt; &lt;strong&gt;{number}&lt;/strong&gt; The write concern max timeout.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;writeConcern.j&lt;/code&gt; &lt;strong&gt;{boolean}&lt;/strong&gt; Wait for write to journal.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;writeConcern.fsync&lt;/code&gt; &lt;strong&gt;{boolean}&lt;/strong&gt; Wait for fsync (deprecated).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;order&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; Execute the inserts in order or out of order.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;toc_4&#34;&gt;Removing Documents&lt;/h2&gt;
+
+&lt;p&gt;Removing documents is also fairly straightforward with the main difference being that the actual documents passed in need a specific set of options for each operation.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_5&#34;&gt;Remove operation document&lt;/h3&gt;
+
+&lt;p&gt;A remove operation document is made up of the following fields.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;q&lt;/code&gt; &lt;strong&gt;{object}&lt;/strong&gt; The query object to select the document(s) to remove.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;limit&lt;/code&gt; &lt;strong&gt;{number, default:1}&lt;/strong&gt; Remove one or all matching documents. Possible values are 1 or 0.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Let&amp;rsquo;s look at a simple code example.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var Server = require(&#39;mongodb-core&#39;).Server
+  , assert = require(&#39;assert&#39;);
+
+var server = new Server({host: &#39;localhost&#39;, port: 27017});
+// Wait for the connection event
+server.on(&#39;connect&#39;, function(server) {
+  // Execute the update
+  server.remove(&#39;integration_tests.inserts_example2&#39;, [{
+    q: {a: 1}, limit:1
+  }], {
+    writeConcern: {w:1}, ordered:true
+  }, function(err, results) {
+    assert.equal(null, err);
+    server.destroy();
+  });
+});
+
+// Start connecting
+server.connect();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The options are the same as for the insert and update operation.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;writeConcern.w&lt;/code&gt; &lt;strong&gt;{string|number}&lt;/strong&gt; The write concern, either a number or a name like &lt;em&gt;majority&lt;/em&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;writeConcern.wtimeout&lt;/code&gt; &lt;strong&gt;{number}&lt;/strong&gt; The write concern max timeout.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;writeConcern.j&lt;/code&gt; &lt;strong&gt;{boolean}&lt;/strong&gt; Wait for write to journal.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;writeConcern.fsync&lt;/code&gt; &lt;strong&gt;{boolean}&lt;/strong&gt; Wait for fsync (deprecated).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;order&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; Execute the inserts in order or out of order.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;toc_6&#34;&gt;Executing a Command against MongoDB&lt;/h2&gt;
+
+&lt;p&gt;Executing a command is also fairly straightforward but allows for the usage of readPreferences. The Core driver does not enforce the correct readPreferences on write commands so be aware that you need to ensure a &lt;code&gt;findAndModify&lt;/code&gt; command is correctly routed to a primary instead of a secondary when the topology is a replicaset. Let&amp;rsquo;s look at an example.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var Server = require(&#39;mongodb-core&#39;).Server
+  , ReadPreference = require(&#39;mongodb-core&#39;).ReadPreference
+  , assert = require(&#39;assert&#39;);
+
+var server = new Server({host: &#39;localhost&#39;, port: 27017});
+// Wait for the connection event
+server.on(&#39;connect&#39;, function(server) {
+  // Execute the command
+  server.command(&amp;quot;system.$cmd&amp;quot;
+    , {ismaster: true}
+    , {
+      readPreference: new ReadPreference(&#39;secondary&#39;)
+    }, function(err, result) {
+      assert.equal(null, err)
+      server.destroy();
+  });
+});
+
+// Start connecting
+server.connect();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The first parameter is the database to execute the command against. This is typically the special &lt;code&gt;system.$cmd&lt;/code&gt; collection. It accepts a command and an options object that can contain the following options.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;readPreference&lt;/code&gt;, &lt;strong&gt;{ReadPreference}&lt;/strong&gt; Specify read preference if command supports it&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;connection&lt;/code&gt; &lt;strong&gt;{Connection}&lt;/strong&gt; Specify connection object to execute command against&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;toc_7&#34;&gt;Executing Queries against MongoDB&lt;/h2&gt;
+
+&lt;p&gt;Executing queries against MongoDB is done using the &lt;code&gt;cursor&lt;/code&gt; method on the topology. The cursor can then be used with the &lt;code&gt;next&lt;/code&gt; method to iterate over all the results. The Low level Core driver does not implement streams or other methods this is left to library developers to implement by extending the cursor using the &lt;code&gt;cursorFactory&lt;/code&gt; option. Let&amp;rsquo;s look at a simple example first and then look at the options available.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var Server = require(&#39;mongodb-core&#39;).Server
+  , ReadPreference = require(&#39;mongodb-core&#39;).ReadPreference
+  , assert = require(&#39;assert&#39;);
+
+var server = new Server({host: &#39;localhost&#39;, port: 27017});
+// Wait for the connection event
+server.on(&#39;connect&#39;, function(server) {
+  // Execute the write
+  var cursor = _server.cursor(&#39;integration_tests.inserts_example4&#39;, {
+      find: &#39;integration_tests.example4&#39;
+    , query: {a:1}
+  }, {
+    readPreference: new ReadPreference(&#39;secondary&#39;);
+  });
+
+  // Get the first document
+  cursor.next(function(err, doc) {
+    assert.equal(null, err);
+    server.destroy();
+  });
+});
+
+// Start connecting
+server.connect();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The cursor accepts commands that return a cursor id such as the &lt;code&gt;aggregation&lt;/code&gt; command and the virtual &lt;code&gt;find&lt;/code&gt; command or a &lt;code&gt;Long&lt;/code&gt; cursorId that signals an existing cursor where we start iterating using the &lt;code&gt;getmore&lt;/code&gt; command. We can also optionally pass in an array of documents that represents a first batch or even just an array of documents to emulate a cursor.&lt;/p&gt;
+
+&lt;p&gt;The following options can be set on a cursor.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;readPreference&lt;/code&gt;, &lt;strong&gt;{ReadPreference}&lt;/strong&gt; Specify read preference if command supports it.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;batchSize&lt;/code&gt;, &lt;strong&gt;{number, default:0}&lt;/strong&gt; Batchsize for the operation.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;documents&lt;/code&gt;, &lt;strong&gt;{object[]}&lt;/strong&gt; Initial documents list for cursor.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;toc_8&#34;&gt;The Virtual Find Method&lt;/h3&gt;
+
+&lt;p&gt;To simplify the way the code is we have defined the current way of doing queries in MongoDB as a virtual find command. This find command is a document with the following fields.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;find&lt;/code&gt; {string} The namespace where the query is executed against. &lt;strong&gt;db.collection&lt;/strong&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;query&lt;/code&gt; {object} The query criteria/selector for the cursor.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;limit&lt;/code&gt; {number, default:0} The number of documents to limit the query too.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;skip&lt;/code&gt; {number, default:0} The number of documents to skip.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;fields&lt;/code&gt; {object} The projection of the returned documents.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;hint&lt;/code&gt; {object|string} The index hint to use with the query.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;explain&lt;/code&gt; {boolean} Execute the query using explain.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;snapshot&lt;/code&gt; {boolean} Execute the query as a snapshot.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;batchSize&lt;/code&gt; {number, default:0} The batch size to use on the getMore commands.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;returnKey&lt;/code&gt; {boolean} Return only the key for each document.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;maxScan&lt;/code&gt; {number} Constrain the query only to scan a max number of documents before stopping.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;min&lt;/code&gt; {number} Specify the minimum inclusive lower bound for a specific index  in order to constrain the results.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;max&lt;/code&gt; {number} Specify the maximum inclusive upper bound for a specific index  in order to constrain the results.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;showDiskLoc&lt;/code&gt; {boolean} Return the disk location for all the documents.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;command&lt;/code&gt; {string} Print comment to log when query is executed.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;maxTimeMS&lt;/code&gt; {number} Terminate the query after X milliseconds.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;raw&lt;/code&gt; {boolean, default:false} Return raw BSON document Buffers instead of parsing them into JS objects.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;readPreference&lt;/code&gt; {ReadPreference} Set the read preference for the query.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;tailable&lt;/code&gt; {boolean} Create a tailable cursor against the collection.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;oplogReplay&lt;/code&gt; {boolean} Signal that we wish to perform an op log replay.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;noCursorTimeout&lt;/code&gt; {boolean} Signal that we do not wish the cursor to time out.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;awaitdata&lt;/code&gt; {boolean} Signal that we wish to perform an awaitData on a tailable cursor.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;exhaust&lt;/code&gt; {boolean} Perform an exhaust query.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;partial&lt;/code&gt; {boolean} Allow a partial result to be returned from a sharded system.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This concludes the CRUD commands documentation.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Logging</title>
+      <link>/node-mongodb-native/core/tutorials/logging/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/core/tutorials/logging/</guid>
+      <description>
+
+&lt;h1 id=&#34;toc_0&#34;&gt;Logging&lt;/h1&gt;
+
+&lt;p&gt;The driver lets you log at 3 different levels. These are &lt;code&gt;debug&lt;/code&gt;, &lt;code&gt;info&lt;/code&gt; and &lt;code&gt;error&lt;/code&gt;. By default the log level is at &lt;code&gt;error&lt;/code&gt;. You can change the level, only allow specific classes to log and provide your own logger implementation. Let&amp;rsquo;s look at how we control the log level.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;Setting Log level&lt;/h2&gt;
+
+&lt;p&gt;Setting the log level is pretty easy. Let&amp;rsquo;s look at example of adjusting it for our application only logging the Server class.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var Server = require(&#39;mongodb-core&#39;).Server
+  , Logger = require(&#39;mongodb-core&#39;).Logger
+  , assert = require(&#39;assert&#39;);
+
+var server = new Server({host: &#39;localhost&#39;, port: 27017});
+// Wait for the connection event
+server.on(&#39;connect&#39;, function(server) {
+  assert.equal(null, err);
+
+  // Set debug level
+  Logger.setLevel(&#39;debug&#39;);
+
+  // Execute the insert
+  server.insert(&#39;integration_tests.inserts_example1&#39;, [{a:1}], {
+    writeConcern: {w:1}, ordered:true
+  }, function(err, results) {
+    assert.equal(null, err);
+    assert.equal(1, results.result.n);
+
+    server.destroy();
+  });
+});
+
+// Start connecting
+server.connect();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Setting the level is as easy as calling the method &lt;code&gt;setLevel&lt;/code&gt; with the string value &lt;code&gt;debug&lt;/code&gt;, &lt;code&gt;info&lt;/code&gt; or &lt;code&gt;error&lt;/code&gt;. Log level is set globally.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_2&#34;&gt;Filtering On specific classes&lt;/h2&gt;
+
+&lt;p&gt;Say you are only interested in logging a specific class. You can tell the Logger to only log specific class names. Let&amp;rsquo;s take an example Where we only log the &lt;code&gt;Server&lt;/code&gt; class.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var Server = require(&#39;mongodb-core&#39;).Server
+  , Logger = require(&#39;mongodb-core&#39;).Logger
+  , assert = require(&#39;assert&#39;);
+
+var server = new Server({host: &#39;localhost&#39;, port: 27017});
+// Wait for the connection event
+server.on(&#39;connect&#39;, function(server) {
+  assert.equal(null, err);
+
+  // Set debug level
+  Logger.setLevel(&#39;debug&#39;);
+  Logger.filter(&#39;class&#39;, [&#39;Server&#39;]);
+
+  // Execute the insert
+  server.insert(&#39;integration_tests.inserts_example1&#39;, [{a:1}], {
+    writeConcern: {w:1}, ordered:true
+  }, function(err, results) {
+    assert.equal(null, err);
+    assert.equal(1, results.result.n);
+
+    server.destroy();
+  });
+});
+
+// Start connecting
+server.connect();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will only log statements on the &lt;code&gt;Server&lt;/code&gt; class. The available classes in the driver are.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Server&lt;/code&gt;: A server instance (either standalone, a mongos or replicaset member)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ReplSet&lt;/code&gt;: Replicaset related log statements&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Mongos&lt;/code&gt;: Mongos related log statements&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Cursor&lt;/code&gt;: Cursor log statements&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Pool&lt;/code&gt;: Connection Pool specific log statements&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Connection&lt;/code&gt;: Singular connection specific log statements&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Ping&lt;/code&gt;: Replicaset ping inquiry log statements&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;You can add your own classes to the logger if you wish by creating your own logger instances. Let&amp;rsquo;s look at a simple example on how to add our custom class to the Logger.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var Logger = require(&#39;mongodb&#39;).Logger
+  , assert = require(&#39;assert&#39;);
+
+var A = function() {
+  var logger = Logger(&#39;A&#39;, options);
+
+  this.do = function() {
+    if(logger.isInfo()) logger.info(&#39;logging A&#39;, {});
+  }
+}
+
+// Execute A
+var a = new A();
+a.do();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Pretty simple and straightforward.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_3&#34;&gt;Custom logger&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s say you don&amp;rsquo;t want the log statements to go to &lt;code&gt;console.log&lt;/code&gt; but want to send them to a new location or maybe transform them before you send them on. Let&amp;rsquo;s define our custom logger.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var Server = require(&#39;mongodb-core&#39;).Server
+  , Logger = require(&#39;mongodb-core&#39;).Logger
+  , assert = require(&#39;assert&#39;);
+
+var server = new Server({host: &#39;localhost&#39;, port: 27017});
+// Wait for the connection event
+server.on(&#39;connect&#39;, function(server) {
+  assert.equal(null, err);
+
+  // Set debug level
+  Logger.setLevel(&#39;debug&#39;);
+  
+  // Set our own logger
+  Logger.setCurrentLogger(function(msg, context) {
+    console.log(msg, context);
+  });
+
+  // Execute the insert
+  server.insert(&#39;integration_tests.inserts_example1&#39;, [{a:1}], {
+    writeConcern: {w:1}, ordered:true
+  }, function(err, results) {
+    assert.equal(null, err);
+    assert.equal(1, results.result.n);
+
+    server.destroy();
+  });
+});
+
+// Start connecting
+server.connect();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;That wraps up the Logging support in the core driver.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Cursor</title>
+      <link>/node-mongodb-native/core/tutorials/cursor/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/core/tutorials/cursor/</guid>
+      <description>
+
+&lt;h1 id=&#34;toc_0&#34;&gt;Extending the functionality of the Driver Cursor&lt;/h1&gt;
+
+&lt;p&gt;The Core Driver cursor is a very minimalist cursor by design and only supports a single &lt;code&gt;next&lt;/code&gt; method to iterate over the query results. In this tutorial we will examine how we can extend the cursor to support an additional &lt;code&gt;toArray&lt;/code&gt; method and show how we can configure our topology to always return the new extended Cursor on all &lt;code&gt;cursor&lt;/code&gt; method calls.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s look at the code.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var Server = require(&#39;mongodb-core&#39;).Server
+  , Cursor = require(&#39;mongodb-core&#39;).Cursor
+  , inherits = require(&#39;util&#39;).inherits
+
+//
+// Create an extended cursor that adds a toArray function
+var ExtendedCursor = function(bson, ns, cmd, options, connection, callbacks, options) {
+  Cursor.apply(this, Array.prototype.slice.call(arguments, 0));
+  var self = this;
+
+  // Resolve all the next
+  var getAllNexts = function(items, callback) {
+    self.next(function(err, item) {
+      if(err) return callback(err);
+      if(item == null) return callback(null, null);
+      items.push(item);
+      getAllNexts(items, callback);
+    });
+  }
+
+  // Adding a toArray function to the cursor
+  this.toArray = function(callback) {
+    var items = [];
+
+    getAllNexts(items, function(err, r) {
+      if(err) return callback(err, null);          
+      callback(null, items);
+    });
+  }
+}
+
+// Extend the Cursor
+inherits(ExtendedCursor, Cursor);
+
+// Connect using new cursor
+var server = new Server({
+    host: &#39;localhost&#39;
+  , port: 27017
+  , cursorFactory: ExtendedCursor
+});
+
+// Wait for the connection event
+server.on(&#39;connect&#39;, function(server) {
+  // Execute find
+  var cursor = _server.cursor(&#39;db.test&#39;, {
+      find: f(&amp;quot;%s.inserts_extend_cursors&amp;quot;, configuration.db)
+    , query: {}
+  });
+
+  // Execute next
+  cursor.toArray(function(err, items) {
+    test.equal(null, err);
+
+    // Execute find
+    var cursor = _server.cursor(&#39;db.test&#39;, {
+        find: f(&amp;quot;%s.inserts_extend_cursors&amp;quot;, configuration.db)
+      , query: {}
+    }, {cursorFactory: ExtendedCursor});
+
+    // Execute next
+    cursor.toArray(function(err, items) {
+      test.equal(null, err);
+      server.destroy();
+    });
+  });
+});
+
+// Start connecting
+server.connect();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;It&amp;rsquo;s fairly straight forward to create the new cursor factory. We extend the &lt;code&gt;Cursor&lt;/code&gt; class and add the new &lt;code&gt;toArray&lt;/code&gt; method. We then specify the new &lt;code&gt;ExtendedCursor&lt;/code&gt; factory as the &lt;code&gt;cursorFactory&lt;/code&gt; when we create the new &lt;code&gt;Server&lt;/code&gt; connection. From then on every time we call the &lt;code&gt;cursor&lt;/code&gt; method we receive an instance of the &lt;code&gt;ExtendedCursor&lt;/code&gt; that we specified. We can even override a specific &lt;code&gt;cursor&lt;/code&gt; method call by passing it a different &lt;code&gt;cursorFactory&lt;/code&gt; in the options allowing for complete flexibility in using different types of cursor.&lt;/p&gt;
+
+&lt;p&gt;That covers how to customize the cursor for your needs.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Mailing List</title>
+      <link>/node-mongodb-native/core/community/mailing-list/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/core/community/mailing-list/</guid>
+      <description>
+
+&lt;p&gt;The Node.js MongoDB driver has one main Mailing list.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_0&#34;&gt;Discussion&lt;/h2&gt;
+
+&lt;p&gt;For all questions and discussions:&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://groups.google.com/forum/#!forum/node-mongodb-native&#34;&gt;https://groups.google.com/forum/#!forum/node-mongodb-native&lt;/a&gt;&lt;/p&gt;
+
+&lt;h1 id=&#34;toc_1&#34;&gt;Other Resources&lt;/h1&gt;
+
+&lt;h2 id=&#34;toc_2&#34;&gt;Issues&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://jira.mongodb.org/browse/NODE&#34;&gt;https://jira.mongodb.org/browse/NODE&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_3&#34;&gt;Twitter&lt;/h2&gt;
+
+&lt;p&gt;The Node.js driver doesn&amp;rsquo;t have its own Twitter handle, but feel free to tweet it&amp;rsquo;s main developer at &lt;a href=&#34;http://twitter.com/christkv&#34;&gt;@christkv&lt;/a&gt;.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Driver introduction</title>
+      <link>/node-mongodb-native/core/overview/introduction/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/core/overview/introduction/</guid>
+      <description>
+
+&lt;h2 id=&#34;toc_0&#34;&gt;What is MongoDB Core&lt;/h2&gt;
+
+&lt;p&gt;The MongoDB core driver is the minimal viable driver and contains no abstractions of any kind. It&amp;rsquo;s the basis on what the 2.X or higher driver builds on.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;Who would use this ?&lt;/h2&gt;
+
+&lt;p&gt;The target audience of this module are developers building higher level abstractions like ODM&amp;rsquo;s, queue managers, caches and others where the additional layers of abstraction and helpers in the main driver is not needed. The lack of all of these abstractions should also help if you are trying to implement your own driver in another language or plan to write your own specialized MongoDB Node.js driver.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_2&#34;&gt;Next Steps&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;/overview/installing&#34;&gt;Install Driver&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/overview/quickstart&#34;&gt;Quick start&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/community/mailing-list&#34;&gt;Join the Mailing List&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/christkv/mongodb-core&#34;&gt;Star us on GitHub&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>API Documentation</title>
+      <link>/node-mongodb-native/core/api-docs/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/core/api-docs/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Installing The Driver</title>
+      <link>/node-mongodb-native/core/overview/installing/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/core/overview/installing/</guid>
+      <description>
+
+&lt;h2 id=&#34;toc_0&#34;&gt;Installing The MongoDB Core driver using NPM&lt;/h2&gt;
+
+&lt;p&gt;Installing the MongoDB Core driver using NPM is very easy. First you need to ensure you have Node.js and NPM correctly set up and in your path. Installing the driver is as easy as.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;npm install mongodb-core
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;Installing MongoDB Core driver as part of your project&lt;/h2&gt;
+
+&lt;p&gt;Setting up the Node.js driver for your project is a simple as adding it to the &lt;strong&gt;package.json&lt;/strong&gt; dependencies section. An example &lt;strong&gt;package.json&lt;/strong&gt; file is shown below.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
+  &amp;quot;name&amp;quot;: &amp;quot;myproject&amp;quot;,
+  &amp;quot;version&amp;quot;: &amp;quot;1.0.0&amp;quot;,
+  &amp;quot;description&amp;quot;: &amp;quot;My first project&amp;quot;,
+  &amp;quot;main&amp;quot;: &amp;quot;index.js&amp;quot;,
+  &amp;quot;repository&amp;quot;: {
+    &amp;quot;type&amp;quot;: &amp;quot;git&amp;quot;,
+    &amp;quot;url&amp;quot;: &amp;quot;git://github.com/christkv/myfirstproject.git&amp;quot;
+  },
+  &amp;quot;dependencies&amp;quot;: {
+    &amp;quot;mongodb-core&amp;quot;: &amp;quot;~1.0&amp;quot;
+  },
+  &amp;quot;author&amp;quot;: &amp;quot;Christian Kvalheim&amp;quot;,
+  &amp;quot;license&amp;quot;: &amp;quot;Apache 2.0&amp;quot;,
+  &amp;quot;bugs&amp;quot;: {
+    &amp;quot;url&amp;quot;: &amp;quot;https://github.com/christkv/myfirstproject/issues&amp;quot;
+  },
+  &amp;quot;homepage&amp;quot;: &amp;quot;https://github.com/christkv/myfirstproject&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To install the dependency all you need is to open a shell or command line, move to the directory where the package.json file is located and type.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;npm install
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will download all the dependencies.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>QuickStart</title>
+      <link>/node-mongodb-native/core/overview/quickstart/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/core/overview/quickstart/</guid>
+      <description>
+
+&lt;h1 id=&#34;toc_0&#34;&gt;QuickStart&lt;/h1&gt;
+
+&lt;p&gt;The quickstart guide will show you how to set up a simple application using Core driver and MongoDB. It scope is only how to set up the driver and perform the simple crud operations. For more inn depth coverage we encourage reading the tutorials.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;Create the package.json file&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s create a directory where our application will live. In our case we will put this under our projects directory.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;mkdir myproject
+cd myproject
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Create a &lt;strong&gt;package.json&lt;/strong&gt; using your favorite text editor and fill it in.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
+  &amp;quot;name&amp;quot;: &amp;quot;myproject&amp;quot;,
+  &amp;quot;version&amp;quot;: &amp;quot;1.0.0&amp;quot;,
+  &amp;quot;description&amp;quot;: &amp;quot;My first project&amp;quot;,
+  &amp;quot;main&amp;quot;: &amp;quot;index.js&amp;quot;,
+  &amp;quot;repository&amp;quot;: {
+    &amp;quot;type&amp;quot;: &amp;quot;git&amp;quot;,
+    &amp;quot;url&amp;quot;: &amp;quot;git://github.com/christkv/myfirstproject.git&amp;quot;
+  },
+  &amp;quot;dependencies&amp;quot;: {
+    &amp;quot;mongodb-core&amp;quot;: &amp;quot;~1.0&amp;quot;
+  },
+  &amp;quot;author&amp;quot;: &amp;quot;Christian Kvalheim&amp;quot;,
+  &amp;quot;license&amp;quot;: &amp;quot;Apache 2.0&amp;quot;,
+  &amp;quot;bugs&amp;quot;: {
+    &amp;quot;url&amp;quot;: &amp;quot;https://github.com/christkv/myfirstproject/issues&amp;quot;
+  },
+  &amp;quot;homepage&amp;quot;: &amp;quot;https://github.com/christkv/myfirstproject&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Save the file and return to the shell or command prompt and use &lt;strong&gt;NPM&lt;/strong&gt; to install all the dependencies.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You should see &lt;strong&gt;NPM&lt;/strong&gt; download a lot of files. Once it&amp;rsquo;s done you&amp;rsquo;ll find all the downloaded packages under the &lt;strong&gt;node_modules&lt;/strong&gt; directory.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_2&#34;&gt;Booting up a MongoDB Server&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s boot up a MongoDB server instance. Download the right MongoDB version from &lt;a href=&#34;http://www.mongodb.org&#34;&gt;MongoDB&lt;/a&gt;, open a new shell or command line and ensure the &lt;strong&gt;mongod&lt;/strong&gt; command is in the shell or command line path. Now let&amp;rsquo;s create a database directory (in our case under &lt;strong&gt;/data&lt;/strong&gt;).&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;mongod --dbpath=/data --port 27017
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You should see the &lt;strong&gt;mongod&lt;/strong&gt; process start up and print some status information.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_3&#34;&gt;Connecting to MongoDB&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s create a new &lt;strong&gt;app.js&lt;/strong&gt; file that we will use to show the basic CRUD operations using the MongoDB driver.&lt;/p&gt;
+
+&lt;p&gt;First let&amp;rsquo;s add code to connect to the server. Notice that there is no concept of a database here and we use the topology directly to perform the connection.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var Server = require(&#39;mongodb-core&#39;).Server
+  , assert = require(&#39;assert&#39;);
+
+// Set up server connection
+var server = new Server({
+    host: &#39;localhost&#39;
+  , port: 27017
+  , reconnect: true
+  , reconnectInterval: 50
+});
+
+// Add event listeners
+server.on(&#39;connect&#39;, function(_server) {
+  console.log(&#39;connected&#39;);
+  test.done();
+});
+
+server.on(&#39;close&#39;, function() {
+  console.log(&#39;closed&#39;);
+});
+
+server.on(&#39;reconnect&#39;, function() {
+  console.log(&#39;reconnect&#39;);
+});
+
+// Start connection
+server.connect();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To connect to a replicaset we would use the &lt;code&gt;ReplSet&lt;/code&gt; class and for a set of Mongos proxies we use the &lt;code&gt;Mongos&lt;/code&gt; class. Each topology class offer the same CRUD operations and you operate on the topology directly. Let&amp;rsquo;s look at an example exercising all the different available CRUD operations.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var Server = require(&#39;mongodb-core&#39;).Server
+  , assert = require(&#39;assert&#39;);
+
+// Set up server connection
+var server = new Server({
+    host: &#39;localhost&#39;
+  , port: 27017
+  , reconnect: true
+  , reconnectInterval: 50
+});
+
+// Add event listeners
+server.on(&#39;connect&#39;, function(_server) {
+  console.log(&#39;connected&#39;);
+
+  // Execute the ismaster command
+  _server.command(&#39;system.$cmd&#39;, {ismaster: true}, function(err, result) {
+
+    // Perform a document insert
+    _server.insert(&#39;myproject.inserts1&#39;, [{a:1}, {a:2}], {
+      writeConcern: {w:1}, ordered:true
+    }, function(err, results) {
+      assert.equal(null, err);
+      assert.equal(2, results.result.n);      
+
+      // Perform a document update
+      _server.update(&#39;myproject.inserts1&#39;, [{
+        q: {a: 1}, u: {&#39;$set&#39;: {b:1}}
+      }], {
+        writeConcern: {w:1}, ordered:true
+      }, function(err, results) {
+        assert.equal(null, err);
+        assert.equal(1, results.result.n);
+
+        // Remove a document
+        _server.remove(&#39;myproject.inserts1&#39;, [{
+          q: {a: 1}, limit: 1
+        }], {
+          writeConcern: {w:1}, ordered:true
+        }, function(err, results) {
+          assert.equal(null, err);
+          assert.equal(1, results.result.n);
+
+          // Get a document
+          var cursor = _server.cursor(&#39;integration_tests.inserts_example4&#39;, {
+              find: &#39;integration_tests.example4&#39;
+            , query: {a:1}
+          });
+
+          // Get the first document
+          cursor.next(function(err, doc) {
+            assert.equal(null, err);
+            assert.equal(2, doc.a);
+
+            // Execute the ismaster command
+            _server.command(&amp;quot;system.$cmd&amp;quot;
+              , {ismaster: true}, function(err, result) {
+                assert.equal(null, err)
+                _server.destroy();              
+            });
+          });
+      });
+    });
+
+    test.done();
+  });
+});
+
+server.on(&#39;close&#39;, function() {
+  console.log(&#39;closed&#39;);
+});
+
+server.on(&#39;reconnect&#39;, function() {
+  console.log(&#39;reconnect&#39;);
+});
+
+// Start connection
+server.connect();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The core driver does not contain any helpers or abstractions only the core crud operations. These consist of the following commands.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;insert&lt;/code&gt;, Insert takes an array of 1 or more documents to be inserted against the topology and allows you to specify a write concern and if you wish to execute the inserts in order or out of order.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;update&lt;/code&gt;, Update takes an array of 1 or more update commands to be executed against the server topology and also allows you to specify a write concern and if you wish to execute the updates in order or out of order.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;remove&lt;/code&gt;, Remove takes an array of 1 or more remove commands to be executed against the server topology and also allows you to specify a write concern and if you wish to execute the removes in order or out of order.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;cursor&lt;/code&gt;, Returns you a cursor for either the &amp;lsquo;virtual&amp;rsquo; &lt;code&gt;find&lt;/code&gt; command, a command that returns a cursor id or a plain cursor id. Read the cursor tutorial for more inn depth coverage.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;command&lt;/code&gt;, Executes a command against MongoDB and returns the result.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;auth&lt;/code&gt;, Authenticates the current topology using a supported authentication scheme.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The Core Driver is a building block for library builders and is not meant for usage by end users as it lacks a lot of features the end user might need such as automatic buffering of operations when a primary is changing in a replicaset or the db and collections abstraction.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_4&#34;&gt;Next steps&lt;/h2&gt;
+
+&lt;p&gt;The next steps is to get more inn depth information about how the different aspects of the core driver works and how to leverage them to extend the functionality of the cursors. Please view the tutorials for more detailed information.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Contributing</title>
+      <link>/node-mongodb-native/core/community/contributing/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/core/community/contributing/</guid>
+      <description>
+
+&lt;p&gt;To contribute to the project &lt;em&gt;we encourage pull requests allowing for discussion of code changes.&lt;/em&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_0&#34;&gt;Contributing&lt;/h2&gt;
+
+&lt;p&gt;When you are ready to send us a pull request make sure you perform the following steps first.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Ensure you have at least one test case that covers the new code. If you are wondering how to do this please feel free to ask in the pull request for help.&lt;/li&gt;
+&lt;li&gt;Ensure you run the tests. &lt;code&gt;node test/runner.js -t functional&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Squash all your commits into a single commit. &lt;code&gt;git rebase -i&lt;/code&gt;. You can force update your pull request as history for it is not important for us to keep.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;Contribution Steps&lt;/h2&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Fork the Node.js driver from &lt;a href=&#34;https://github.com/christkv/mongodb-core&#34;&gt;https://github.com/christkv/mongodb-core&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Create a new feature branch (&lt;code&gt;git checkout -b feature&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Commit your changes using git (&lt;code&gt;git commit -a -m &#39;My changes&#39;&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Run tests suite (ensure mongodb is in path) (&lt;code&gt;node test/runner.js -t functional&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Squash the commits (&lt;code&gt;git rebase -i&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Push the new branch to your github fork (&lt;code&gt;git push origin feature&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Create a new Pull Request on github.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h1 id=&#34;toc_2&#34;&gt;Running Tests&lt;/h1&gt;
+
+&lt;h2 id=&#34;toc_3&#34;&gt;Clone repository locally&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;git clone https://github.com/christkv/mongodb-core
+cd node-mongodb-native
+npm install
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;toc_4&#34;&gt;Running The Test Suite&lt;/h2&gt;
+
+&lt;p&gt;Make sure the &lt;em&gt;mongod&lt;/em&gt; executable is in your shell or command line &lt;em&gt;path&lt;/em&gt;. Then run the functional test suite.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;node test/runner.js -t functional
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To run the replicaset test suite do&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;node test/runner.js -t functional -e replicaset
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To run the sharded test suite do&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;node test/runner.js -t functional -e sharded
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>License</title>
+      <link>/node-mongodb-native/core/meta/license/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/core/meta/license/</guid>
+      <description>
+
+&lt;h2 id=&#34;toc_0&#34;&gt;Licensed Under Apache License 2.0&lt;/h2&gt;
+
+&lt;p&gt;Licensed under the Apache License, Version 2.0 (the &amp;ldquo;License&amp;rdquo;); you may not use this file except in compliance with the License. You may obtain a copy of the License at&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;http://www.apache.org/licenses/LICENSE-2.0&#34;&gt;http://www.apache.org/licenses/LICENSE-2.0&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an &amp;ldquo;AS IS&amp;rdquo; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Release Notes</title>
+      <link>/node-mongodb-native/core/meta/release-notes/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/core/meta/release-notes/</guid>
+      <description>
+
+&lt;h2 id=&#34;toc_0&#34;&gt;1.0.0&lt;/h2&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

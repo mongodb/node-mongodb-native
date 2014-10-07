@@ -1,0 +1,2659 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+      <title>Recent Content on MongoDB 2.0.0 Driver </title>
+      <generator uri="https://hugo.spf13.com">Hugo</generator>
+    <link>/node-mongodb-native/2.0/index.xml/</link>
+    
+    
+    
+    <updated>Mon, 01 Jul 2013 00:00:00 UTC</updated>
+    
+    <item>
+      <title>Connecting To MongoDB</title>
+      <link>/node-mongodb-native/2.0/tutorials/connecting/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/tutorials/connecting/</guid>
+      <description>
+
+&lt;h1 id=&#34;toc_0&#34;&gt;Connecting To MongoDB&lt;/h1&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;Connecting to MongoDB using the driver is primarily done using the &lt;code&gt;MongoClient.connect&lt;/code&gt; method and a URI. Let&amp;rsquo;s look at how we connect to a couple of different server topologies.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;Single Server Connection&lt;/h2&gt;
+
+&lt;p&gt;We have a single MongoDB server instance running on the port &lt;em&gt;27017&lt;/em&gt; Let&amp;rsquo;s connect using the driver and &lt;em&gt;MongoClient.connect&lt;/em&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  db.close();
+});    
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s break down the &lt;code&gt;URI&lt;/code&gt; string we passed as the first argument to MongoClient.connect.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;mongodb://&lt;/code&gt; is the protocol definition&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;localhost:27017&lt;/code&gt; is the server we are connecting to&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;/myproject&lt;/code&gt; is the database we wish to connect to&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;toc_2&#34;&gt;Replicaset Server Connection&lt;/h2&gt;
+
+&lt;p&gt;We wish to connect to a ReplicaSet consisting of one primary and 1 or more secondaries. To Do this we need to supply the driver with a seedlist of servers and the name of the ReplicaSet we wish to connect to. Let&amp;rsquo;s take a look at a code example.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017,localhost:27018/myproject?replicaSet=foo&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  db.close();
+});    
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s break down the &lt;code&gt;URI&lt;/code&gt; string.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;mongodb://&lt;/code&gt; is the protocol definition&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;localhost:27017,localhost:27018&lt;/code&gt; is the servers we are connecting to to discover the topology of the ReplicaSet.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;/myproject&lt;/code&gt; is the database we wish to connect to&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;replicaSet=foo&lt;/code&gt; is the name of the ReplicaSet we are connecting to. This ensures we are connecting to the correct Replicaset.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;toc_3&#34;&gt;Mongos Proxy Connection&lt;/h2&gt;
+
+&lt;p&gt;We wish to connect to a set of &lt;code&gt;mongos&lt;/code&gt; proxies. Just as in the case of connecting to a ReplicaSet we can provide a seed list of &lt;code&gt;mongos&lt;/code&gt; proxies. This allows the driver to perform failover between proxies automatically in case of a proxy process having been shut down. Let&amp;rsquo;s look at an example of code connecting to a set of proxies.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:50000,localhost:50001/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  db.close();
+});    
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s break down the &lt;code&gt;URI&lt;/code&gt; string.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;mongodb://&lt;/code&gt; is the protocol definition&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;localhost:50000,localhost:50001&lt;/code&gt; is the &lt;em&gt;mongos&lt;/em&gt; proxies we are connecting to.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;/myproject&lt;/code&gt; is the database we wish to connect to&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;toc_4&#34;&gt;Authentication&lt;/h2&gt;
+
+&lt;h3 id=&#34;toc_5&#34;&gt;Against The Specified Database&lt;/h3&gt;
+
+&lt;p&gt;&lt;code&gt;MongoClient.connect&lt;/code&gt; also allows us to specify authentication credentials as part of the &lt;code&gt;URI&lt;/code&gt;. Let&amp;rsquo;s assume there is a user &lt;em&gt;dave&lt;/em&gt; with the password &lt;em&gt;password&lt;/em&gt; on the database &lt;em&gt;protected&lt;/em&gt;. To correctly authenticate we will do the following.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://dave:password@localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  db.close();
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s break down the &lt;code&gt;URI&lt;/code&gt; string.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;mongodb://&lt;/code&gt; is the protocol definition&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;dave:password&lt;/code&gt; is the user name and password for the database&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;localhost:27017&lt;/code&gt; is the server we are connecting to&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;/myproject&lt;/code&gt; is the database we wish to connect to&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;em&gt;The password and username must be URI encoded to allow for all any possible illegal characters&lt;/em&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_6&#34;&gt;Indirectly Against Another Database&lt;/h3&gt;
+
+&lt;p&gt;In some cases you might have to authenticate against another database than the one you intend to connect to. This is referred to as delegated authentication. Say you wish to connect to the &lt;em&gt;myproject&lt;/em&gt; database but the user is defined in the &lt;em&gt;admin&lt;/em&gt; database. Let&amp;rsquo;s look at how we would accomplish this.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://dave:password@localhost:27017/myproject?authSource=admin&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  db.close();
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s break down the &lt;code&gt;URI&lt;/code&gt; string.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;mongodb://&lt;/code&gt; is the protocol definition&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;dave:password&lt;/code&gt; is the user name and password for the database&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;localhost:27017&lt;/code&gt; is the server we are connecting to&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;/myproject&lt;/code&gt; is the database we wish to connect to&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;authSource=admin&lt;/code&gt; is the database we wish to authenticate against&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&#34;toc_7&#34;&gt;MongoClient.connect Optional Parameters&lt;/h1&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;The driver has many more options for tweaking than what&amp;rsquo;s available through the &lt;code&gt;URI&lt;/code&gt; specification. These can be passed to the driver using an optional parameters object. The top level fields in the options object are.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;db&lt;/code&gt;, Options that affect the Db instance returned by the MongoClient.connect method.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;replSet&lt;/code&gt;, Options that modify the Replicaset topology connection behavior.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;mongos&lt;/code&gt;, Options that modify the Mongos topology connection behavior.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;server&lt;/code&gt;, Options that modify the Server topology connection behavior.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;A simple example connecting to a single server setting all returned queries to be raw BSON buffers and adjusting the poolSize to be 10 connections for this connection.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://dave:password@localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, {
+    db: {
+      raw: true
+    }, 
+    server: {
+      poolSize: 10
+    }
+  }, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  db.close();
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s look at the individual options for each of the top level fields.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_8&#34;&gt;Data base level options&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 is no acknowledgment of write and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;wtimeout&lt;/code&gt;, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;fsync&lt;/code&gt;, (Boolean, default:false) write waits for fsync before returning&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;journal&lt;/code&gt;, (Boolean, default:false) write waits for journal sync before returning&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;readPreference&lt;/code&gt; {String}, the preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;native_parser&lt;/code&gt; {Boolean, default:false}, use c++ bson parser.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;forceServerObjectId&lt;/code&gt; {Boolean, default:false}, force server to create _id fields instead of client.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;pkFactory&lt;/code&gt; {Object}, object overriding the basic ObjectID primary key generation.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;serializeFunctions&lt;/code&gt; {Boolean, default:false}, serialize functions.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;raw&lt;/code&gt; {Boolean, default:false}, perform operations using raw bson buffers.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;retryMiliSeconds&lt;/code&gt; {Number, default:5000}, number of milliseconds between retries.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;numberOfRetries&lt;/code&gt; {Number, default:5}, number of retries off connection.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;bufferMaxEntries&lt;/code&gt; {Number, default: -1}, sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;toc_9&#34;&gt;Individual Server Level Options&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;poolSize&lt;/code&gt;, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ssl&lt;/code&gt;, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslValidate&lt;/code&gt;, {Boolean, default: false} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslCA&lt;/code&gt;, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslCert&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslKey&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslPass&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketOptions.autoReconnect&lt;/code&gt;, {Boolean, default: true} Reconnect on error.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketOptions.noDelay&lt;/code&gt;, {Boolean, default: true} TCP Socket NoDelay option.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketOptions.keepAlive&lt;/code&gt;, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketOptions.connectTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Connection timeout setting.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketOptions.socketTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Socket timeout setting.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;toc_10&#34;&gt;Replicaset Level Options&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;ha&lt;/code&gt; {Boolean, default:true}, turn on high availability.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;haInterval&lt;/code&gt; {Number, default:5000}, time between each replicaset status check.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;replicaSet&lt;/code&gt; {String}, the name of the replicaset to connect to.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;secondaryAcceptableLatencyMS&lt;/code&gt; {Number, default:15}, sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;connectWithNoPrimary&lt;/code&gt; {Boolean, default:false}, Sets if the driver should connect even if no primary is available.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;poolSize&lt;/code&gt;, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ssl&lt;/code&gt;, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslValidate&lt;/code&gt;, {Boolean, default: false} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslCA&lt;/code&gt;, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslCert&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslKey&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslPass&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketOptions.autoReconnect&lt;/code&gt;, {Boolean, default: true} Reconnect on error.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketOptions.noDelay&lt;/code&gt;, {Boolean, default: true} TCP Socket NoDelay option.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketOptions.keepAlive&lt;/code&gt;, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketOptions.connectTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Connection timeout setting.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketOptions.socketTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Socket timeout setting.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;toc_11&#34;&gt;Mongos Proxy Level Options&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;ha&lt;/code&gt; {Boolean, default:true}, turn on high availability.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;haInterval&lt;/code&gt; {Number, default:5000}, time between each replicaset status check.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;replicaSet&lt;/code&gt; {String}, the name of the replicaset to connect to.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;secondaryAcceptableLatencyMS&lt;/code&gt; {Number, default:15}, sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;poolSize&lt;/code&gt;, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ssl&lt;/code&gt;, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslValidate&lt;/code&gt;, {Boolean, default: false} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslCA&lt;/code&gt;, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslCert&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslKey&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslPass&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketOptions.autoReconnect&lt;/code&gt;, {Boolean, default: true} Reconnect on error.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketOptions.noDelay&lt;/code&gt;, {Boolean, default: true} TCP Socket NoDelay option.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketOptions.keepAlive&lt;/code&gt;, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketOptions.connectTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Connection timeout setting.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketOptions.socketTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Socket timeout setting.&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Connection URI</title>
+      <link>/node-mongodb-native/2.0/tutorials/urls/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/tutorials/urls/</guid>
+      <description>
+
+&lt;h2 id=&#34;toc_0&#34;&gt;The URL connection format&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;mongodb://[username:password@]host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[database][?options]]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The URL format is unified across official drivers from Mongodb with some options not supported on some drivers due to implementation differences. The ones not supported by the Node.js driver are left out for simplicities sake.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_1&#34;&gt;Basic parts of the url&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;mongodb://&lt;/code&gt; is a required prefix to identify that this is a string in the standard connection format.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;username:password@&lt;/code&gt; is optional. If given, the driver will attempt to login to a database after connecting to a database server.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;host1&lt;/code&gt; is the only required part of the URI. It identifies either a hostname, IP address, or unix domain socket&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;:portX&lt;/code&gt; is optional and defaults to :27017 if not provided.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;/database&lt;/code&gt; is the name of the database to login to and thus is only relevant if the username:password@ syntax is used. If not specified the &amp;ldquo;admin&amp;rdquo; database will be used by default.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;?options&lt;/code&gt; are connection options. Note that if database is absent there is still a / required between the last host and the ? introducing the options. Options are name=value pairs and the pairs are separated by &amp;ldquo;&amp;amp;&amp;ldquo;. For any unrecognized or unsupported option, a driver should log a warning and continue processing. A driver should not support any options that are not explicitly defined in this specification. This is in order to reduce the likelihood that different drivers will support overlapping that differ in small but incompatible ways (like different name, different values, or different default value).&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;toc_2&#34;&gt;Replica set configuration:&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;replicaSet=name&lt;/code&gt;
+
+&lt;ul&gt;
+&lt;li&gt;The driver verifies that the name of the replica set it connects to matches this name. Implies that the hosts given are a seed list, and the driver will attempt to find all members of the set.&lt;/li&gt;
+&lt;li&gt;No default value.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;toc_3&#34;&gt;Connection Configuration:&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;code&gt;ssl=true|false|prefer&lt;/code&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;true: the driver initiates each connections with SSL&lt;/li&gt;
+&lt;li&gt;false: the driver initiates each connection without SSL&lt;/li&gt;
+&lt;li&gt;prefer: the driver tries to initiate each connection with SSL, and falls back to without SSL if it fails.&lt;/li&gt;
+&lt;li&gt;Default value is false.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;code&gt;connectTimeoutMS=ms&lt;/code&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;How long a connection can take to be opened before timing out.&lt;/li&gt;
+&lt;li&gt;Current driver behavior already differs on this, so the default must be left to each driver. For new implementations, the default should be to never timeout.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;code&gt;socketTimeoutMS=ms&lt;/code&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;How long a send or receive on a socket can take before timing out.&lt;/li&gt;
+&lt;li&gt;Current driver behavior already differs on this, so the default must be left to each driver. For new implementations, the default should be to never timeout.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;toc_4&#34;&gt;Connection pool configuration:&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;maxPoolSize=n:&lt;/code&gt; The maximum number of connections in the connection pool
+
+&lt;ul&gt;
+&lt;li&gt;Default value is 5&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;toc_5&#34;&gt;Write concern configuration:&lt;/h3&gt;
+
+&lt;p&gt;More detailed information about write concerns can be found at &lt;a href=&#34;http://www.mongodb.org/display/DOCS/getLastError+Command&#34;&gt;http://www.mongodb.org/display/DOCS/getLastError+Command&lt;/a&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;code&gt;w=wValue&lt;/code&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;For numeric values above 1, the driver adds { w : wValue } to the getLastError command.&lt;/li&gt;
+&lt;li&gt;wValue is typically a number, but can be any string in order to allow for specifications like &amp;ldquo;majority&amp;rdquo;&lt;/li&gt;
+&lt;li&gt;Default value is 1.
+
+&lt;ul&gt;
+&lt;li&gt;wValue == -1 ignore network errors&lt;/li&gt;
+&lt;li&gt;wValue == 0 no write acknowledgement&lt;/li&gt;
+&lt;li&gt;wValue == 1 perform a write acknowledgement&lt;/li&gt;
+&lt;li&gt;wValue == 2 perform a write acknowledgement across primary and one secondary&lt;/li&gt;
+&lt;li&gt;wValue == &amp;lsquo;majority&amp;rsquo; perform a write acknowledgement across the majority of servers in the replicaset&lt;/li&gt;
+&lt;li&gt;wValue == &amp;lsquo;tag name&amp;rsquo; perform a write acknowledgement against the replicaset tag name&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;code&gt;wtimeoutMS=ms&lt;/code&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;The driver adds { wtimeout : ms } to the getlasterror command.&lt;/li&gt;
+&lt;li&gt;Used in combination with w&lt;/li&gt;
+&lt;li&gt;No default value&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;code&gt;journal=true|false&lt;/code&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;true: Sync to journal.&lt;/li&gt;
+&lt;li&gt;false: the driver does not add j to the getlasterror command&lt;/li&gt;
+&lt;li&gt;Default value is false&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;code&gt;fsync=true|false&lt;/code&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;true: Sync to disk.&lt;/li&gt;
+&lt;li&gt;false: the driver does not add fsync to the getlasterror command&lt;/li&gt;
+&lt;li&gt;Default value is false&lt;/li&gt;
+&lt;li&gt;If conflicting values for fireAndForget, and any write concern are passed the driver should raise an exception about the conflict.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;toc_6&#34;&gt;Auth options&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;authSource=string:&lt;/code&gt; Used when the user for authentication is stored in another database using indirect authentication.
+
+&lt;ul&gt;
+&lt;li&gt;Default value is null&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;toc_7&#34;&gt;Read Preference&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;code&gt;slaveOk=true|false:&lt;/code&gt; Whether a driver connected to a replica set will send reads to slaves/secondaries.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Default value is false&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;code&gt;readPreference=enum:&lt;/code&gt; The read preference for this connection. If set, it overrides any slaveOk value.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Enumerated values:
+
+&lt;ul&gt;
+&lt;li&gt;primary&lt;/li&gt;
+&lt;li&gt;primaryPreferred&lt;/li&gt;
+&lt;li&gt;secondary&lt;/li&gt;
+&lt;li&gt;secondaryPreferred&lt;/li&gt;
+&lt;li&gt;nearest&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Default value is primary&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;&lt;code&gt;readPreferenceTags=string.&lt;/code&gt; A representation of a tag set as a comma-separated list of colon-separated key-value pairs, e.g. &lt;code&gt;dc:ny,rack:1&lt;/code&gt;. Spaces should be stripped from beginning and end of all keys and values. To specify a list of tag sets, using multiple readPreferenceTags, e.g. &lt;code&gt;readPreferenceTags=dc:ny,rack:1&amp;amp;readPreferenceTags=dc:ny&amp;amp;readPreferenceTags=&lt;/code&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Note the empty value, it provides for fallback to any other secondary server if none is available&lt;/li&gt;
+&lt;li&gt;Order matters when using multiple readPreferenceTags&lt;/li&gt;
+&lt;li&gt;There is no default value&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>CRUD Operations</title>
+      <link>/node-mongodb-native/2.0/tutorials/crud_operations/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/tutorials/crud_operations/</guid>
+      <description>
+
+&lt;h1 id=&#34;toc_0&#34;&gt;Driver CRUD Operations&lt;/h1&gt;
+
+&lt;p&gt;The driver crud operations are defined as the operations performed to insert/update/remove and query for documents. In this tutorial we will cover both the basic CRUD methods as well as the specialized &lt;em&gt;findAndModify&lt;/em&gt; based methods and the new Bulk API methods allowing for efficient bulk write operations. But let&amp;rsquo;s start with a simple introduction to the insert, update and remove operations that are on the collection class.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;Write Methods&lt;/h2&gt;
+
+&lt;h3 id=&#34;toc_2&#34;&gt;Inserting Documents&lt;/h3&gt;
+
+&lt;p&gt;The &lt;em&gt;insertOne&lt;/em&gt; and &lt;em&gt;insertMany&lt;/em&gt; methods exists on the &lt;em&gt;Collection&lt;/em&gt; class and is used to insert documents into MongoDB. Code speaks a thousand words so let&amp;rsquo;s see two simple examples of inserting documents.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Insert a single document
+  db.collection(&#39;inserts&#39;).insertOne({a:1}, function(err, r) {
+    assert.equal(null, err);
+    assert.equal(1, r.insertedCount);
+
+    // Insert multiple documents
+    db.collection(&#39;inserts&#39;).insertMany([{a:2}, {a:3}], function(err, r) {
+      assert.equal(null, err);
+      assert.equal(2, r.insertedCount);
+
+      db.close();
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The first insert inserts a single document into the &lt;em&gt;inserts&lt;/em&gt; collection. Notice that we are not explicitly creating a new &lt;em&gt;inserts&lt;/em&gt; collection as the server will create it implicitly when we insert the first document. The method &lt;code&gt;Db.createIndex&lt;/code&gt; only really needs to be used when creating non standard collections such as capped collections or where other parameters than the default collections need to be applied.&lt;/p&gt;
+
+&lt;p&gt;The &lt;em&gt;insertOne&lt;/em&gt; and &lt;em&gt;insertMany&lt;/em&gt; methods also accepts an second argument that can be an options object. This object can have the following fields.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 is no acknowledgment of write and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;wtimeout&lt;/code&gt;, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;j&lt;/code&gt;, (Boolean, default:false) write waits for journal sync.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;serializeFunctions&lt;/code&gt;, (Boolean, default:false) serialize functions on an object to mongodb, by default the driver does not serialize any functions on the passed in documents.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;forceServerObjectId&lt;/code&gt;, (Boolean, default:false) Force server to assign _id values instead of driver.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Let&amp;rsquo;s look at a simple example where we are writing to a replicaset and we wish to ensure that we serialize a passed in function as well as have the server assign the &lt;em&gt;_id&lt;/em&gt; for each document.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Insert a single document
+  db.collection(&#39;inserts&#39;).insertOne({
+        a:1
+      , b: function() { return &#39;hello&#39;; }
+    }, {
+        w: &#39;majority&#39;
+      , wtimeout: 10000
+      , serializeFunctions: true
+      , forceServerObjectId: true
+    }, function(err, r) {
+    assert.equal(null, err);
+    assert.equal(1, r.insertedCount);
+    db.close();
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;That wraps up the &lt;em&gt;insert&lt;/em&gt; methods. Next let&amp;rsquo;s look at the &lt;em&gt;update&lt;/em&gt; methods.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_3&#34;&gt;Updating Documents&lt;/h3&gt;
+
+&lt;p&gt;The &lt;em&gt;updateOne&lt;/em&gt; and &lt;em&gt;updateMany&lt;/em&gt; methods exists on the &lt;em&gt;Collection&lt;/em&gt; class and is used to update and upsert documents into MongoDB. Let&amp;rsquo;s look at a couple of usage examples.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  var col = db.collection(&#39;updates&#39;);
+  // Insert a single document
+  col.insertMany([{a:1}, {a:2}, {a:2}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.insertedCount);
+
+    // Update a single document
+    col.updateOne({a:1}, {$set: {b: 1}}, function(err, r) {
+      assert.equal(null, err);
+      assert.equal(1, r.matchedCount);
+      assert.equal(1, r.modifiedCount);
+
+      // Update multiple documents
+      col.updateMany({a:2}, {$set: {b: 1}}, function(err, r) {
+        assert.equal(null, err);
+        assert.equal(2, r.matchedCount);
+        assert.equal(2, r.modifiedCount);
+
+        // Upsert a single document
+        col.updateOne({a:3}, {$set: {b: 1}}, {
+          upsert: true
+        }, function(err, r) {
+          assert.equal(null, err);
+          assert.equal(0, r.matchedCount);
+          assert.equal(1, r.upsertedCount);
+          db.close();
+        });
+      });
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;em&gt;update&lt;/em&gt; method also accepts an second argument that can be an options object. This object can have the following fields.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 is no acknowledgment of write and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;wtimeout&lt;/code&gt;, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;j&lt;/code&gt;, (Boolean, default:false) write waits for journal sync.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;multi&lt;/code&gt;, (Boolean, default:false) Update one/all documents with operation.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;upsert&lt;/code&gt;, (Boolean, default:false) Update operation is an upsert.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Just as for &lt;em&gt;insert&lt;/em&gt; the &lt;em&gt;update&lt;/em&gt; method allows you to specify a per operation write concern using the &lt;em&gt;w&lt;/em&gt;, &lt;em&gt;wtimeout&lt;/em&gt; and &lt;em&gt;fsync&lt;/em&gt; parameters&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_4&#34;&gt;Removing Documents&lt;/h3&gt;
+
+&lt;p&gt;The &lt;em&gt;removeOne&lt;/em&gt; and &lt;em&gt;removeMany&lt;/em&gt; methods exist on the &lt;em&gt;Collection&lt;/em&gt; class and is used to remove documents from MongoDB. Let&amp;rsquo;s look at a couple of usage examples.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  var col = db.collection(&#39;removes&#39;);
+  // Insert a single document
+  col.insertMany([{a:1}, {a:2}, {a:2}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.insertedCount);
+
+    // Update a single document
+    col.removeOne({a:1}
+      , {$set: {b: 1}}, function(err, r) {
+      assert.equal(null, err);
+      assert.equal(1, r.deletedCount);
+
+      // Update multiple documents
+      col.removeMany({a:2}
+        , {$set: {b: 1}}, function(err, r) {
+        assert.equal(null, err);
+        assert.equal(2, r.deletedCount);
+        db.close();
+      });
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;em&gt;remove&lt;/em&gt; method also accepts an second argument that can be an options object. This object can have the following fields.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 is no acknowledgment of write and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;wtimeout&lt;/code&gt;, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;j&lt;/code&gt;, (Boolean, default:false) write waits for journal sync.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;single&lt;/code&gt;, (Boolean, default:false) Removes the first document found.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Just as for &lt;em&gt;update&lt;/em&gt; and &lt;em&gt;insert&lt;/em&gt; the &lt;em&gt;remove&lt;/em&gt; method allows you to specify a per operation write concern using the &lt;em&gt;w&lt;/em&gt;, &lt;em&gt;wtimeout&lt;/em&gt; and &lt;em&gt;fsync&lt;/em&gt; parameters&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_5&#34;&gt;FindAndModify and FindAndRemove&lt;/h3&gt;
+
+&lt;p&gt;The two methods &lt;em&gt;findOneAndUpdate&lt;/em&gt;, &lt;em&gt;findOneAndDelete&lt;/em&gt; and &lt;em&gt;findOneAndReplace&lt;/em&gt; are special commands that allows the user to update or upsert a document and have the modified or existing document returned. It comes at a cost as the operation takes a write lock for the duration of the operation as it needs to ensure the modification is &lt;em&gt;atomic&lt;/em&gt;. Let&amp;rsquo;s look at &lt;em&gt;findOneAndUpdate&lt;/em&gt; first using an example.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  var col = db.collection(&#39;findAndModify&#39;);
+  // Insert a single document
+  col.insert([{a:1}, {a:2}, {a:2}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.result.n);
+
+    // Modify and return the modified document
+    col.findOneAndUpdate({a:1}, {$set: {b: 1}}, {
+        returnOriginal: false
+      , sort: [[a,1]]
+      , upsert: true
+    }, function(err, doc) {
+      assert.equal(null, err);
+      assert.equal(1, r.value.b);
+
+      // Remove and return a document
+      col.findOneAndDelete({a:2}, function(err, r) {
+        assert.equal(null, err);
+        assert.ok(r.value.b == null);
+        db.close();
+      });
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;em&gt;findOneAndUpdate&lt;/em&gt; method also accepts an second argument that can be an options object. This object can have the following fields.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 is no acknowledgment of write and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;wtimeout&lt;/code&gt;, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;j&lt;/code&gt;, (Boolean, default:false) write waits for journal sync.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;upsert&lt;/code&gt;, (Boolean, default:false) Perform an upsert operation.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sort&lt;/code&gt;, (Object, default:null) Sort for find operation.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;projection&lt;/code&gt;, (Object, default:null) Projection for returned result&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;returnOriginal&lt;/code&gt;, (Boolean, default:true) Set to false if you want to return the modified object rather than the original. Ignored for remove.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The &lt;em&gt;findAndRemove&lt;/em&gt; function is a function especially defined to help remove a document. Let&amp;rsquo;s look at an example of usage.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  var col = db.collection(&#39;findAndModify&#39;);
+  // Insert a single document
+  col.insert([{a:1}, {a:2}, {a:2}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.result.n);
+
+    // Remove a document from MongoDB and return it
+    col.findOneAndRemove({a:1}, {
+        sort: [[a,1]]
+      }
+      , function(err, doc) {
+        assert.equal(null, err);
+        assert.ok(r.value.b == null);
+        db.close();
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Just as for &lt;em&gt;findOneAndUpdate&lt;/em&gt; it allows for an object of options to be passed in that can have the following fields.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 is no acknowledgment of write and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;wtimeout&lt;/code&gt;, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;j&lt;/code&gt;, (Boolean, default:false) write waits for journal sync.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sort&lt;/code&gt;, (Object, default:null) Sort for find operation.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;toc_6&#34;&gt;BulkWrite&lt;/h3&gt;
+
+&lt;p&gt;The &lt;em&gt;bulkWrite&lt;/em&gt; function allows for a simple set of bulk operations to be done in a non fluent way as in comparison to the bulk API discussed next. Let&amp;rsquo;s look at an example.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Get the collection
+  var col = db.collection(&#39;bulk_write&#39;);
+  col.bulkWrite([
+      { insertOne: { a: 1 } }
+    , { insertMany: [{ g: 1 }, { g: 2 }] }
+    , { updateOne: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
+    , { updateMany: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
+    , { removeOne: { q: {c:1} } }
+    , { removeMany: { q: {c:1} } }]
+  , {ordered:true, w:1}, function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.insertedCount);
+    assert.equal(1, r.matchedCount);
+    assert.equal(0, r.modifiedCount);
+    assert.equal(1, r.removedCount);
+    assert.equal(1, r.upsertedCount);
+    assert.equal(1, r.upsertedIds.length);
+
+    // Ordered bulk operation
+    db.close();
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;As we can see the &lt;em&gt;bulkWrite&lt;/em&gt; function takes an array of operation that can be objects of either &lt;em&gt;insertOne&lt;/em&gt;, &lt;em&gt;insertMany&lt;/em&gt;, &lt;em&gt;updateOne&lt;/em&gt;, &lt;em&gt;updateMany&lt;/em&gt;, &lt;em&gt;removeOne&lt;/em&gt; or &lt;em&gt;removeMany&lt;/em&gt;. It also takes a second parameter that takes the following options.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;ordered&lt;/code&gt;, (Boolean, default:true) Execute in order or out of order.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 is no acknowledgment of write and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;wtimeout&lt;/code&gt;, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;j&lt;/code&gt;, (Boolean, default:false) write waits for journal sync.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This covers the basic write operations. Let&amp;rsquo;s have a look at the Bulk write operations next.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_7&#34;&gt;Bulk Write Operations&lt;/h2&gt;
+
+&lt;p&gt;The bulk write operations make it easy to write groups of operations together to MongoDB. There are some caveats and to get the best performance you need to be running against MongoDB &lt;em&gt;2.6&lt;/em&gt; or higher that support the new write commands. Bulk operations are split into &lt;em&gt;ordered&lt;/em&gt; and &lt;em&gt;unordered&lt;/em&gt; bulk operations. An &lt;em&gt;ordered&lt;/em&gt; bulk operation guarantees the order of execution of writes while the &lt;em&gt;unordered&lt;/em&gt; bulk operation makes no assumptions about the order of execution. In the Node.js driver the &lt;em&gt;unordered&lt;/em&gt; bulk operations will group operations according to type and write them in parallel. Let&amp;rsquo;s have a look at how to build an ordered bulk operation.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  var col = db.collection(&#39;bulkops&#39;);
+  // Create ordered bulk, for unordered initializeUnorderedBulkOp()
+  var bulk = col.initializeOrderedBulkOp();
+  // Insert 10 documents
+  for(var i = 0; i &amp;lt; 10; i++) {
+    bulk.insert({a: i});
+  }
+
+  // Next perform some upserts
+  for(var i = 0; i &amp;lt; 10; i++) {
+    bulk.find({b:i}).upsert().updateOne({b:1});
+  }
+
+  // Finally perform a remove operation
+  bulk.find({b:1}).removeOne();
+
+  // Execute the bulk with a journal write concern
+  bulk.execute(function(err, result) {
+    assert.equal(null, err);
+    db.close();
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We will not cover the results object here as it&amp;rsquo;s documented in the driver API. The Bulk API handles all the splitting of operations into multiple writes and also emulates 2.6 and higher write commands for 2.4 and earlier servers.&lt;/p&gt;
+
+&lt;p&gt;There is are some important things to keep in mind when using the bulk API and especially the &lt;em&gt;ordered&lt;/em&gt; bulk API mode. The write commands are single operation type. That means they can only do insert/update and remove. If you f.ex do the following combination of operations.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Insert {a:1}
+Update {a:1} to {a:1, b:1}
+Insert {a:2}
+Remove {b:1}
+Insert {a:3}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will result in the driver issuing 4 write commands to the server.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Insert Command with {a:1}
+Update Command {a:1} to {a:1, b:1}
+Insert Command with {a:2}
+Remove Command with {b:1}
+Insert Command with {a:3}    
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you instead organize the your &lt;em&gt;ordered&lt;/em&gt; in the following manner.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Insert {a:1}
+Insert {a:2}
+Insert {a:3}
+Update {a:1} to {a:1, b:1}
+Remove {b:1}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The number of write commands issued by the driver will be.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Insert Command with {a:1}, {a:2}, {a:3}
+Update Command {a:1} to {a:1, b:1}
+Remove Command with {b:1}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Allowing for more efficient and faster bulk write operation.&lt;/p&gt;
+
+&lt;p&gt;For &lt;em&gt;unordered&lt;/em&gt; bulk operations this is not important as the driver sorts operations by type and executes them in parallel.&lt;/p&gt;
+
+&lt;p&gt;This covers write operations for MongoDB. Let&amp;rsquo;s look at querying for documents next.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_8&#34;&gt;Read Methods&lt;/h2&gt;
+
+&lt;p&gt;The main method for querying the database are the &lt;em&gt;find&lt;/em&gt; and the &lt;em&gt;aggregate&lt;/em&gt; method. In this CRUD tutorial we will focus on &lt;em&gt;find&lt;/em&gt; only as &lt;em&gt;aggregate&lt;/em&gt; has it&amp;rsquo;s own &lt;a href=&#34;/tutorials/aggregation&#34;&gt;Aggregation Tutorial&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;The &lt;em&gt;method&lt;/em&gt; return a cursor that allows us to operate on the data. The &lt;em&gt;cursor&lt;/em&gt; also implements the Node.js 0.10.x or higher stream interface allowing us to pipe the results to other streams. We will not cover streams here as they are covered in the &lt;a href=&#34;/tutorials/streams&#34;&gt;Streams Tutorial&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s look at a simple find example that materializes all the documents from a query using the toArray but limits the number of returned results to 2 documents.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  var col = db.collection(&#39;find&#39;);
+  // Insert a single document
+  col.insertMany([{a:1}, {a:1}, {a:1}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.insertedCount);
+
+    // Get first two documents that match the query
+    col.find({a:1}).limit(2).toArray(function(err, docs) {
+      assert.equal(null, err);
+      assert.equal(2, docs.length);
+      db.close();
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The cursor returned by the &lt;em&gt;find&lt;/em&gt; method has a lot of methods that allow for chaining of options for a query. Once the query is ready to be executed you can retrieve the documents using the &lt;em&gt;next&lt;/em&gt;, &lt;em&gt;each&lt;/em&gt; and &lt;em&gt;toArray&lt;/em&gt; methods. If the query returns a lot of documents it&amp;rsquo;s preferable to use the &lt;em&gt;next&lt;/em&gt; or &lt;em&gt;each&lt;/em&gt; methods as the &lt;em&gt;toArray&lt;/em&gt; method will materialize all the documents into memory before calling the callback function potentially using a lot of memory if the query returns a lot of documents.&lt;/p&gt;
+
+&lt;p&gt;We won&amp;rsquo;t look at the options we can set on the cursor as they can be viewed in the &lt;a href=&#34;/api-docs&#34;&gt;Cursor API documentation&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;We already looked at &lt;em&gt;toArray&lt;/em&gt; method above. Let&amp;rsquo;s take a look at the &lt;em&gt;next&lt;/em&gt; method.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  var col = db.collection(&#39;find&#39;);
+  // Insert a single document
+  col.insertMany([{a:1}, {a:1}, {a:1}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.insertedCount);
+
+    // Get first documents from cursor
+    col.find({a:1}).limit(2).next(function(err, doc) {
+      assert.equal(null, err);
+      assert.ok(doc != null);
+      db.close();
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;em&gt;next&lt;/em&gt; method allows the application to read one document at a time using callbacks. Let&amp;rsquo;s look at the &lt;em&gt;each&lt;/em&gt; method next.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  var col = db.collection(&#39;find&#39;);
+  // Insert a single document
+  col.insertMany([{a:1}, {a:1}, {a:1}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.insertedCount);
+
+    // Get first documents from cursor using each
+    col.find({a:1}).limit(2).each(function(err, doc) {
+      if(doc) {
+        db.close();
+        // Got a document, terminate the each
+        return false;
+      }
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;em&gt;each&lt;/em&gt; method will call the supplied callback until there are no more documents available that satisfy the query. Once the available documents is exhausted it will return &lt;em&gt;null&lt;/em&gt; for the second parameter in the callback. If you wish to terminate the each early you should return false in your &lt;em&gt;each&lt;/em&gt; callback. This will stop the cursor from returning documents.&lt;/p&gt;
+
+&lt;p&gt;This covers the basic crud operations in the Node.js MongoDB driver.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Aggregation</title>
+      <link>/node-mongodb-native/2.0/tutorials/aggregation/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/tutorials/aggregation/</guid>
+      <description>
+
+&lt;h1 id=&#34;toc_0&#34;&gt;Using the Aggregation Framework&lt;/h1&gt;
+
+&lt;p&gt;The aggregation framework lets you transform and apply grouping, summations and other operations on the documents before they are returned to the application. It&amp;rsquo;s a very powerful unix pipe like framework. In this tutorial we will explore the &lt;strong&gt;aggregate&lt;/strong&gt; method on the &lt;em&gt;Collection&lt;/em&gt; class and see how it can be used to return a cursor we can iterate over. This cursor also implements the Node.js 0.10.x stream interface which we will not cover in this tutorial. For more information about streams and the Node.js driver please look in the &lt;a href=&#34;/tutorials/streams&#34;&gt;Streams Tutorial&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s start with a simple example that returns a cursor to iterate over the results from a simple &lt;em&gt;$match&lt;/em&gt; and &lt;em&gt;$sum&lt;/em&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  var col = db.collection(&#39;aggregate&#39;);
+  // Insert a single document
+  col.insert([{a:1}, {a:1}, {a:1}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.result.n);
+
+    // Get first two documents that match the query
+    col.aggregate([
+          {$match: {}}
+        , {$group:
+            {_id: &#39;$a&#39;, total: {$sum: &#39;$a&#39;} }
+          }
+      ]).toArray(function(err, docs) {
+      assert.equal(null, err);
+      assert.equal(3, docs[0].total);
+      db.close();
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;When executing the &lt;em&gt;aggregate&lt;/em&gt; method as a cursor it&amp;rsquo;s important to understand that on MongoDB 2.6 or higher this will use the native cursor support for the aggregation framework on the server. If the server is 2.4 or earlier it will emulate the cursor behavior with a virtual cursor. If a callback is included in the &lt;em&gt;aggregate&lt;/em&gt; command it will fall back to the legacy mode that returns the first 16MB of results.&lt;/p&gt;
+
+&lt;p&gt;The cursor returned by the &lt;em&gt;aggregate&lt;/em&gt; command has the same available method as the &lt;em&gt;find&lt;/em&gt; cursor, namely the &lt;em&gt;toArray&lt;/em&gt;, &lt;em&gt;next&lt;/em&gt; and &lt;em&gt;each&lt;/em&gt; methods.&lt;/p&gt;
+
+&lt;p&gt;We already looked at &lt;em&gt;toArray&lt;/em&gt; method above. Let&amp;rsquo;s take a look at the &lt;em&gt;next&lt;/em&gt; method.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  var col = db.collection(&#39;aggregate&#39;);
+  // Insert a single document
+  col.insert([{a:1}, {a:1}, {a:1}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.result.n);
+
+    // Get first two documents that match the query
+    col.aggregate([
+          {$match: {}}
+        , {$group:
+            {_id: &#39;$a&#39;, total: {$sum: &#39;$a&#39;} }
+          }
+      ]).next(function(err, doc) {
+      assert.equal(null, err);
+      assert.equal(3, doc.total);
+      db.close();
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;em&gt;next&lt;/em&gt; method allows the application to read one document at a time using callbacks. Let&amp;rsquo;s look at the &lt;em&gt;each&lt;/em&gt; method next.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  var col = db.collection(&#39;aggregate&#39;);
+  // Insert a single document
+  col.insert([{a:1}, {a:1}, {a:1}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.result.n);
+
+    // Get first two documents that match the query
+    col.aggregate([
+          {$match: {}}
+        , {$group:
+            {_id: &#39;$a&#39;, total: {$sum: &#39;$a&#39;} }
+          }
+      ]).each(function(err, doc) {
+        if(doc) {
+          db.close();
+          // Got a document, terminate the each
+          return false;
+        }
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;em&gt;each&lt;/em&gt; method will call the supplied callback until there are no more documents available that satisfy the query. Once the available documents is exhausted it will return &lt;em&gt;null&lt;/em&gt; for the second parameter in the callback. If you wish to terminate the each early you should return false in your &lt;em&gt;each&lt;/em&gt; callback. This will stop the cursor from returning documents.&lt;/p&gt;
+
+&lt;p&gt;This covers the &lt;em&gt;aggregation&lt;/em&gt; support in the Node.js MongoDB driver.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Streams</title>
+      <link>/node-mongodb-native/2.0/tutorials/streams/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/tutorials/streams/</guid>
+      <description>
+
+&lt;h1 id=&#34;toc_0&#34;&gt;Streams Support in the Node.js Driver&lt;/h1&gt;
+
+&lt;p&gt;The MongoDB driver has extensive Stream support for cursors as well as for GridFS. In essence the following aspects of the driver supports Node 0.10.x or higher style streams.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;find&lt;/code&gt; The cursor returned from the &lt;em&gt;find&lt;/em&gt; method is a &lt;em&gt;Readable&lt;/em&gt; stream.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;aggregate&lt;/code&gt; The cursor returned from the &lt;em&gt;aggregate&lt;/em&gt; is a &lt;em&gt;Readable&lt;/em&gt; stream.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;parallelCollectionScan&lt;/code&gt; Returns an array of one or more cursors that all are &lt;em&gt;Readable&lt;/em&gt; streams.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;GridStore.prototype.stream&lt;/code&gt; Returns a stream that implements &lt;em&gt;Duplex&lt;/em&gt; allowing for writing data in &lt;em&gt;w&lt;/em&gt; mode and reading data in &lt;em&gt;r&lt;/em&gt; mode.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;We will look at a simple example for supported stream starting with the &lt;em&gt;find&lt;/em&gt; command.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;Find Cursor as a Stream&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s examine a simple query using &lt;em&gt;find&lt;/em&gt; and how to use it as a node.js stream.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  var col = db.collection(&#39;streams&#39;);
+  // Insert a single document
+  col.insert([{a:1}, {a:1}, {a:1}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.result.n);
+
+    // Get the results using a find stream
+    var cursor = col.find({});
+    cursor.on(&#39;data&#39;, function(doc) {
+      console.dir(doc);
+    });
+
+    cursor.once(&#39;end&#39;, function() {
+      db.close();
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A very simple and straight forward stream of documents. For each document the cursor will emit the &lt;em&gt;data&lt;/em&gt; event and when the cursor has been exhausted it will issue the &lt;em&gt;end&lt;/em&gt; event. To transform the data you can pipe the data from this stream into another stream. We will not show that here but there are a wide variety of stream based libraries available on &lt;a href=&#34;http://npmjs.org&#34;&gt;NPM&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;The stream is in object mode meaning it will emit the actual document instances. If you for some reason need this to be a different output you can use the &lt;code&gt;stream&lt;/code&gt; function on the cursor to supply a transformation method that will be called for each document before it&amp;rsquo;s emitted. Let&amp;rsquo;s take a look at a simple example that uses &lt;em&gt;JSON.stringify&lt;/em&gt; to convert each document to it&amp;rsquo;s JSON string representation.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  var col = db.collection(&#39;streams&#39;);
+  // Insert a single document
+  col.insert([{a:1}, {a:1}, {a:1}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.result.n);
+
+    // Get the results using a find stream
+    var cursor = col.find({}).stream({
+      transform: function(doc) { 
+        return JSON.stringify(doc);
+      }
+    });
+
+    cursor.on(&#39;data&#39;, function(doc) {
+      console.log(doc);
+    });
+
+    cursor.once(&#39;end&#39;, function() {
+      db.close();
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;That wraps up the behaviors of the &lt;em&gt;Readable&lt;/em&gt; stream for the &lt;em&gt;find&lt;/em&gt; method. Next let&amp;rsquo;s look at the aggregate command.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_2&#34;&gt;Aggregation Cursor as a Stream&lt;/h2&gt;
+
+&lt;p&gt;The aggregation cursor behaves very much like the &lt;em&gt;find&lt;/em&gt; cursor. It&amp;rsquo;s main difference is that it does not support a &lt;em&gt;transform&lt;/em&gt; method. Let&amp;rsquo;s have a look at a simple example.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  var col = db.collection(&#39;streams&#39;);
+  // Insert a single document
+  col.insert([{a:1}, {a:1}, {a:1}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.result.n);
+
+    // Get the results using a find stream
+    var cursor = col.aggregate([${match: {}}]);
+    cursor.on(&#39;data&#39;, function(doc) {
+      console.log(doc);
+    });
+
+    cursor.once(&#39;end&#39;, function() {
+      db.close();
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;As one can see the cursor behaves in the exact same way as the cursor that is returned when invoking the &lt;em&gt;find&lt;/em&gt; method. Let&amp;rsquo;s have a look at the &lt;em&gt;parallelCollectionScan&lt;/em&gt; method that is a bit of a special case as it returns one or more cursors.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_3&#34;&gt;The parallelCollectionScan method&lt;/h2&gt;
+
+&lt;p&gt;The &lt;em&gt;parallelCollectionScan&lt;/em&gt; method is a specialized method that allows for parallel reading of a collection using multiple cursors. This method is only available when connecting to a single server or replicaset topology. Let&amp;rsquo;s look at an example.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  var docs = [];
+  // Insert some documents
+  for(var i = 0; i &amp;lt; 1000; i++) docs.push({a:i});
+  // Get the collection
+  var col = db.collection(&#39;parallelCollectionScan&#39;);
+  // Insert 1000 documents in a batch
+  coll.insert(docs, function(err, result) {
+    var results = [];
+    // Execute parallelCollectionScan command
+    col.parallelCollectionScan({
+      numCursors:3
+    }, function(err, cursors) {
+      assert.equal(null, err);
+      assert.ok(cursors != null);
+      assert.ok(cursors.length &amp;gt; 0);
+
+      for(var i = 0; i &amp;lt; cursors.length; i++) {
+        // Documents from the cursor
+        cursors[i].on(&#39;data&#39;, function(doc) {
+          results.push(doc);
+        });
+
+        // The end signal for each cursor
+        cursors[i].once(&#39;end&#39;, function() {
+          numCursors = numCursors - 1;
+          // No more cursors let&#39;s ensure we got all results
+          if(numCursors == 0) {
+            assert.equal(docs.length, results.length);
+            db.close();
+          }
+        });
+      }
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In this example we use each cursor as a stream and when all cursors have emitted the &lt;em&gt;end&lt;/em&gt; event we check that the number of inserted documents match the number of emitted documents. Each cursor returned from the &lt;em&gt;parallelCollectionScan&lt;/em&gt; method is functionally equivalent to the cursors returned from the the &lt;em&gt;find&lt;/em&gt; method.&lt;/p&gt;
+
+&lt;h1 id=&#34;toc_4&#34;&gt;GridStore the Read/Write Stream&lt;/h1&gt;
+
+&lt;p&gt;Until now all the methods we have covered are &lt;em&gt;Readable&lt;/em&gt; meaning they can only provide a readable stream. GridStore implements the &lt;em&gt;Duplex&lt;/em&gt; stream meaning it can not only be read as a Stream (say stream a mp3 straight from your GridFS collections) but also be written to (say upload a file directly via http into GridFS). Let&amp;rsquo;s look at the simple example of streaming a GridStore file and then one where we use an incoming stream to write to GridFS.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_5&#34;&gt;Streaming a GridFS file to disk&lt;/h2&gt;
+
+&lt;p&gt;Streaming a GridStore file to disk is fairly simple. The example below reads in a pdf file and saves it in GridFS. It then creates a GridStore instance pointing to the newly saved pdf file and passes the stream to a file write stream using pipe.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , GridStore = require(&#39;mongoddb&#39;).GridStore
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  // Set up gridStore
+  var gs = new GridStore(db, &#39;manual.pdf&#39;, &#39;w&#39;);
+  var filename = &#39;./test/functional/data/manual.pdf&#39;;
+  var outputFilename = &#39;./test/functional/data/manual_out.pdf&#39;;
+  // Write the a file to it (put your own here)
+  gs.writeFile(filename, function(err, result) {   
+    // Open a readable gridStore
+    gs = new GridStore(db, &#39;manual.pdf&#39;, &#39;r&#39;);    
+    
+    // Create a file write stream
+    var fileStream = fs.createWriteStream(outputFilename);
+    fileStream.on(&#39;close&#39;, function(err) {     
+      // Read the temp file and compare
+      var compareData = fs.readFileSync(outputFilename);
+      var originalData = fs.readFileSync(filename);
+      // Validate that the data is the same
+      assert.deepEqual(originalData, compareData);      
+      db.close();
+    })
+    
+    // Pipe out the data to disk
+    var pipeResult = gs.stream().pipe(fileStream);
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;toc_6&#34;&gt;Streaming a File into GridFS&lt;/h2&gt;
+
+&lt;p&gt;In the case of writing a file to GridFS using streams we do the reverse piping the file read stream into a our gridstore instance.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , GridStore = require(&#39;mongoddb&#39;).GridStore
+  , ObjectID = require(&#39;mongoddb&#39;).ObjectID;
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  // Set up gridStore
+  var stream = new GridStore(db, &#39;manual.pdf&#39;, &#39;w&#39;).stream();
+  // File we want to write to GridFS
+  var filename = &#39;./test/functional/data/manual.pdf&#39;;
+  // Create a file reader stream to an object
+  var fileStream = fs.createReadStream(filename);
+  // Finish up once the file has been all read
+  stream.on(&amp;quot;end&amp;quot;, function(err) {
+    // Just read the content and compare to the raw binary
+    GridStore.read(client, &amp;quot;test_stream_write&amp;quot;, function(err, gridData) {
+      var fileData = fs.readFileSync(filename);
+      assert.equal(fileData.toString(&#39;hex&#39;), gridData.toString(&#39;hex&#39;));
+      client.close();
+    })
+  });
+
+  // Pipe it through to the gridStore
+  fileStream.pipe(stream);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This concludes the support for Node.js 0.10.x streams in the MongoDB driver.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>GridFS</title>
+      <link>/node-mongodb-native/2.0/tutorials/gridfs/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/tutorials/gridfs/</guid>
+      <description>
+
+&lt;h1 id=&#34;toc_0&#34;&gt;GridFS Support&lt;/h1&gt;
+
+&lt;p&gt;GridFS is a scalable MongoDB &lt;em&gt;filesystem&lt;/em&gt; for storing and retrieving large files. The default limit for a MongoDB record is 16MB, so to store data that is larger than this limit, GridFS can be used. GridFS shards the data into smaller chunks automatically.  See &lt;a href=&#34;http://www.mongodb.org/display/DOCS/GridFS+Specification&#34;&gt;MongoDB documentation&lt;/a&gt; for details.&lt;/p&gt;
+
+&lt;p&gt;GridStore is a single file inside GridFS that can be managed by the script.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;Open a GridFS file&lt;/h2&gt;
+
+&lt;p&gt;Opening a GridStore (a single file in GridFS) is a bit similar to opening a database. At first you need to create a GridStore object and then &lt;code&gt;open&lt;/code&gt; it.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var gs = new GridStore(db, filename, mode[, options])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Where&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;db&lt;/code&gt; is the database object&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;filename&lt;/code&gt; is the name of the file in GridFS that needs to be accessed/created&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;mode&lt;/code&gt; indicated the operation, can be one of:
+
+&lt;ul&gt;
+&lt;li&gt;&amp;ldquo;r&amp;rdquo; (Read): Looks for the file information in fs.files collection, or creates a new id for this object.&lt;/li&gt;
+&lt;li&gt;&amp;ldquo;w&amp;rdquo; (Write): Erases all chunks if the file already exist.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;options&lt;/code&gt; can be used to specify some metadata for the file, for example &lt;code&gt;content_type&lt;/code&gt;, &lt;code&gt;metadata&lt;/code&gt; and &lt;code&gt;chunk_size&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Example:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var gs = new GridStore(db, &amp;quot;test.png&amp;quot;, &amp;quot;w&amp;quot;, {
+  &amp;quot;content_type&amp;quot;: &amp;quot;image/png&amp;quot;,
+  &amp;quot;metadata&amp;quot;:{
+      &amp;quot;author&amp;quot;: &amp;quot;Daniel&amp;quot;
+  },
+  &amp;quot;chunk_size&amp;quot;: 1024*4
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;After a GridStore object is created, it needs to be opened.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;gs.open(function(err, gs) {
+  // gs is the intialized GridStore object
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Opened GridStore objects have a set of useful exposed properties&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;gs.length&lt;/code&gt; - length of the file in bytes&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;gs.contentType&lt;/code&gt; - the content type for the file&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;gs.uploadDate&lt;/code&gt; - when the file was uploaded&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;gs.metadata&lt;/code&gt; - metadata that was saved with the file&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;gs.chunkSize&lt;/code&gt; - chunk size&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Example&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;gs.open(function(err, gs){
+  console.log(&amp;quot;this file was uploaded at &amp;quot;+gs.uploadDate);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;toc_2&#34;&gt;Writing to GridFS&lt;/h2&gt;
+
+&lt;p&gt;Writing can be done with &lt;code&gt;write&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;gs.write(data, callback)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;where &lt;code&gt;data&lt;/code&gt; is a &lt;code&gt;Buffer&lt;/code&gt; or a string, callback gets two parameters - an error object (if error occured) and result value which indicates if the write was successful or not.&lt;/p&gt;
+
+&lt;p&gt;While the GridStore is not closed, every write is appended to the opened GridStore.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_3&#34;&gt;Writing a file to GridFS&lt;/h2&gt;
+
+&lt;p&gt;This function opens the GridStore, streams the contents of the file into GridStore, and closes the GridStore.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;gs.writeFile( file, callback )
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;where&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;file&lt;/code&gt; is a file descriptor, or a string file path&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;callback&lt;/code&gt; is a function with two parameters - error object (if error occured) and the GridStore object.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;toc_4&#34;&gt;Reading from a GridFS file&lt;/h2&gt;
+
+&lt;p&gt;Reading from GridStore can be done with &lt;code&gt;read&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;gs.read([size], callback)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;where&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;size&lt;/code&gt; is the length of the data to be read&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;callback&lt;/code&gt; is a callback function with two parameters - error object (if an error occured) and data (binary string)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;toc_5&#34;&gt;Streaming from GridFS&lt;/h2&gt;
+
+&lt;p&gt;You can stream data as it comes from the database using &lt;code&gt;stream&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;gs.stream([autoclose=false])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;where&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;autoclose&lt;/code&gt; If true current GridStore will be closed when EOF and &amp;lsquo;close&amp;rsquo; event will be fired&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The function returns &lt;a href=&#34;http://nodejs.org/docs/v0.4.12/api/streams.html#readable_Stream&#34;&gt;read stream&lt;/a&gt; based on this GridStore file. It supports the events &amp;lsquo;read&amp;rsquo;, &amp;lsquo;error&amp;rsquo;, &amp;lsquo;close&amp;rsquo; and &amp;lsquo;end&amp;rsquo;.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_6&#34;&gt;Delete a GridFS file&lt;/h2&gt;
+
+&lt;p&gt;GridStore files can be unlinked with &lt;code&gt;unlink&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;GridStore.unlink(db, name, callback)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Where&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;db&lt;/code&gt; is the database object&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;name&lt;/code&gt; is either the name of a GridStore object or an array of GridStore object names&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;callback&lt;/code&gt; is the callback function&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;toc_7&#34;&gt;Closing a GridFS file&lt;/h2&gt;
+
+&lt;p&gt;GridStore needs to be closed after usage. This can be done with &lt;code&gt;close&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;gs.close(callback)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;toc_8&#34;&gt;Check if a GridFS file exists&lt;/h2&gt;
+
+&lt;p&gt;Checking if a file exists in GridFS can be done with &lt;code&gt;exist&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;GridStore.exist(db, filename, callback)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Where&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;db&lt;/code&gt; is the database object&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;filename&lt;/code&gt; is the name of the file to be checked or a regular expression&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;callback&lt;/code&gt; is a callback function with two parameters - an error object (if an error occured) and a boolean value indicating if the file exists or not&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;toc_9&#34;&gt;Seek to a Specific position for Reading&lt;/h2&gt;
+
+&lt;p&gt;Seeking can be done with &lt;code&gt;seek&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;gs.seek(position);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This function moves the internal pointer to the specified position.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Logging</title>
+      <link>/node-mongodb-native/2.0/tutorials/logging/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/tutorials/logging/</guid>
+      <description>
+
+&lt;h1 id=&#34;toc_0&#34;&gt;Logging&lt;/h1&gt;
+
+&lt;p&gt;The driver lets you log at 3 different levels. These are &lt;code&gt;debug&lt;/code&gt;, &lt;code&gt;info&lt;/code&gt; and &lt;code&gt;error&lt;/code&gt;. By default the log level is at &lt;code&gt;error&lt;/code&gt;. You can change the level, only allow specific classes to log and provide your own logger implementation. Let&amp;rsquo;s look at how we control the log level.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;Setting Log level&lt;/h2&gt;
+
+&lt;p&gt;Setting the log level is pretty easy. Let&amp;rsquo;s look at example of adjusting it for our application only logging the Db class.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , Logger = require(&#39;mongodb&#39;).Logger
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Set debug level
+  Logger.setLevel(&#39;debug&#39;);
+
+  // Insert a single document
+  db.command({ismaster:true}, function(err, d) {
+    assert.equal(null, err);
+    db.close();
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Setting the level is as easy as calling the method &lt;code&gt;setLevel&lt;/code&gt; with the string value &lt;code&gt;debug&lt;/code&gt;, &lt;code&gt;info&lt;/code&gt; or &lt;code&gt;error&lt;/code&gt;. Log level is set globally.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_2&#34;&gt;Filtering On specific classes&lt;/h2&gt;
+
+&lt;p&gt;Say you are only interested in logging a specific class. You can tell the Logger to only log specific class names. Let&amp;rsquo;s take an example Where we only log the &lt;code&gt;Db&lt;/code&gt; class.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , Logger = require(&#39;mongodb&#39;).Logger
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Set debug level
+  Logger.setLevel(&#39;debug&#39;);
+  Logger.filter(&#39;class&#39;, [&#39;Db&#39;]);
+
+  // Insert a single document
+  db.command({ismaster:true}, function(err, d) {
+    assert.equal(null, err);
+    db.close();
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will only log statements on the &lt;code&gt;Db&lt;/code&gt; class. The available classes in the driver are.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Db&lt;/code&gt;: The Db instance log statements&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Server&lt;/code&gt;: A server instance (either standalone, a mongos or replicaset member)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ReplSet&lt;/code&gt;: Replicaset related log statements&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Mongos&lt;/code&gt;: Mongos related log statements&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Cursor&lt;/code&gt;: Cursor log statements&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Pool&lt;/code&gt;: Connection Pool specific log statements&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Connection&lt;/code&gt;: Singular connection specific log statements&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Ping&lt;/code&gt;: Replicaset ping inquiry log statements&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;You can add your own classes to the logger if you wish by creating your own logger instances. Let&amp;rsquo;s look at a simple example on how to add our custom class to the Logger.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var Logger = require(&#39;mongodb&#39;).Logger
+  , assert = require(&#39;assert&#39;);
+
+var A = function() {
+  var logger = Logger(&#39;A&#39;, options);
+
+  this.do = function() {
+    if(logger.isInfo()) logger.info(&#39;logging A&#39;, {});
+  }
+}
+
+// Execute A
+var a = new A();
+a.do();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Pretty simple and straightforward.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_3&#34;&gt;Custom logger&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s say you don&amp;rsquo;t want the log statements to go to &lt;code&gt;console.log&lt;/code&gt; but want to send them to a new location or maybe transform them before you send them on. Let&amp;rsquo;s define our custom logger.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , Logger = require(&#39;mongodb&#39;).Logger
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Set debug level
+  Logger.setLevel(&#39;debug&#39;);
+  
+  // Set our own logger
+  Logger.setCurrentLogger(function(msg, context) {
+    console.log(msg, context);
+  });
+
+  // Insert a single document
+  db.command({ismaster:true}, function(err, d) {
+    assert.equal(null, err);
+    db.close();
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;That wraps up the Logging support in the driver.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Mailing List</title>
+      <link>/node-mongodb-native/2.0/community/mailing-list/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/community/mailing-list/</guid>
+      <description>
+
+&lt;p&gt;The Node.js MongoDB driver has one main Mailing list.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_0&#34;&gt;Discussion&lt;/h2&gt;
+
+&lt;p&gt;For all questions and discussions:&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://groups.google.com/forum/#!forum/node-mongodb-native&#34;&gt;https://groups.google.com/forum/#!forum/node-mongodb-native&lt;/a&gt;&lt;/p&gt;
+
+&lt;h1 id=&#34;toc_1&#34;&gt;Other Resources&lt;/h1&gt;
+
+&lt;h2 id=&#34;toc_2&#34;&gt;Issues&lt;/h2&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://jira.mongodb.org/browse/NODE&#34;&gt;https://jira.mongodb.org/browse/NODE&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_3&#34;&gt;Twitter&lt;/h2&gt;
+
+&lt;p&gt;The Node.js driver doesn&amp;rsquo;t have its own Twitter handle, but feel free to tweet it&amp;rsquo;s main developer at &lt;a href=&#34;http://twitter.com/christkv&#34;&gt;@christkv&lt;/a&gt;.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Driver introduction</title>
+      <link>/node-mongodb-native/2.0/overview/introduction/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/overview/introduction/</guid>
+      <description>
+
+&lt;h2 id=&#34;toc_0&#34;&gt;What is Node.js Native?&lt;/h2&gt;
+
+&lt;p&gt;Node.js Native is the MongoDB official Node.js driver allowing you to use MongoDB in you applications.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;What does Node.js Native?&lt;/h2&gt;
+
+&lt;p&gt;The Node.js driver handles the connections to a single MongoDB server, a replicaset or a set of Mongos proxies in a sharded system. It let&amp;rsquo;s your application interact with the server and lets it perform operations against the database.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_2&#34;&gt;Next Steps&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;/overview/installing&#34;&gt;Install Driver&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/overview/quickstart&#34;&gt;Quick start&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/community/mailing-list&#34;&gt;Join the Mailing List&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/mongodb/node-mongodb-native&#34;&gt;Star us on GitHub&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>API Documentation</title>
+      <link>/node-mongodb-native/2.0/api-docs/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/api-docs/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Installing The Driver</title>
+      <link>/node-mongodb-native/2.0/overview/installing/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/overview/installing/</guid>
+      <description>
+
+&lt;h2 id=&#34;toc_0&#34;&gt;Installing MongoDB Node.js driver using NPM&lt;/h2&gt;
+
+&lt;p&gt;Installing the MongoDB Node.js driver using NPM is very easy. First you need to ensure you have Node.js and NPM correctly set up and in your path. Installing the driver is as easy as.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;npm install mongodb
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;Installing MongoDB Node.js driver as part of your project&lt;/h2&gt;
+
+&lt;p&gt;Setting up the Node.js driver for your project is a simple as adding it to the &lt;strong&gt;package.json&lt;/strong&gt; dependencies section. An example &lt;strong&gt;package.json&lt;/strong&gt; file is shown below.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
+  &amp;quot;name&amp;quot;: &amp;quot;myproject&amp;quot;,
+  &amp;quot;version&amp;quot;: &amp;quot;1.0.0&amp;quot;,
+  &amp;quot;description&amp;quot;: &amp;quot;My first project&amp;quot;,
+  &amp;quot;main&amp;quot;: &amp;quot;index.js&amp;quot;,
+  &amp;quot;repository&amp;quot;: {
+    &amp;quot;type&amp;quot;: &amp;quot;git&amp;quot;,
+    &amp;quot;url&amp;quot;: &amp;quot;git://github.com/christkv/myfirstproject.git&amp;quot;
+  },
+  &amp;quot;dependencies&amp;quot;: {
+    &amp;quot;mongodb&amp;quot;: &amp;quot;~2.0&amp;quot;
+  },
+  &amp;quot;author&amp;quot;: &amp;quot;Christian Kvalheim&amp;quot;,
+  &amp;quot;license&amp;quot;: &amp;quot;Apache 2.0&amp;quot;,
+  &amp;quot;bugs&amp;quot;: {
+    &amp;quot;url&amp;quot;: &amp;quot;https://github.com/christkv/myfirstproject/issues&amp;quot;
+  },
+  &amp;quot;homepage&amp;quot;: &amp;quot;https://github.com/christkv/myfirstproject&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To install the dependency all you need is to open a shell or command line, move to the directory where the package.json file is located and type.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;npm install
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will download all the dependencies.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>QuickStart</title>
+      <link>/node-mongodb-native/2.0/overview/quickstart/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/overview/quickstart/</guid>
+      <description>
+
+&lt;h1 id=&#34;toc_0&#34;&gt;QuickStart&lt;/h1&gt;
+
+&lt;p&gt;The quickstart guide will show you how to set up a simple application using node.js and MongoDB. It scope is only how to set up the driver and perform the simple crud operations. For more inn depth coverage we encourage reading the tutorials.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;Create the package.json file&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s create a directory where our application will live. In our case we will put this under our projects directory.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;mkdir myproject
+cd myproject
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Create a &lt;strong&gt;package.json&lt;/strong&gt; using your favorite text editor and fill it in.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
+  &amp;quot;name&amp;quot;: &amp;quot;myproject&amp;quot;,
+  &amp;quot;version&amp;quot;: &amp;quot;1.0.0&amp;quot;,
+  &amp;quot;description&amp;quot;: &amp;quot;My first project&amp;quot;,
+  &amp;quot;main&amp;quot;: &amp;quot;index.js&amp;quot;,
+  &amp;quot;repository&amp;quot;: {
+    &amp;quot;type&amp;quot;: &amp;quot;git&amp;quot;,
+    &amp;quot;url&amp;quot;: &amp;quot;git://github.com/christkv/myfirstproject.git&amp;quot;
+  },
+  &amp;quot;dependencies&amp;quot;: {
+    &amp;quot;mongodb&amp;quot;: &amp;quot;~2.0&amp;quot;
+  },
+  &amp;quot;author&amp;quot;: &amp;quot;Christian Kvalheim&amp;quot;,
+  &amp;quot;license&amp;quot;: &amp;quot;Apache 2.0&amp;quot;,
+  &amp;quot;bugs&amp;quot;: {
+    &amp;quot;url&amp;quot;: &amp;quot;https://github.com/christkv/myfirstproject/issues&amp;quot;
+  },
+  &amp;quot;homepage&amp;quot;: &amp;quot;https://github.com/christkv/myfirstproject&amp;quot;
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Save the file and return to the shell or command prompt and use &lt;strong&gt;NPM&lt;/strong&gt; to install all the dependencies.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You should see &lt;strong&gt;NPM&lt;/strong&gt; download a lot of files. Once it&amp;rsquo;s done you&amp;rsquo;ll find all the downloaded packages under the &lt;strong&gt;node_modules&lt;/strong&gt; directory.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_2&#34;&gt;Booting up a MongoDB Server&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s boot up a MongoDB server instance. Download the right MongoDB version from &lt;a href=&#34;http://www.mongodb.org&#34;&gt;MongoDB&lt;/a&gt;, open a new shell or command line and ensure the &lt;strong&gt;mongod&lt;/strong&gt; command is in the shell or command line path. Now let&amp;rsquo;s create a database directory (in our case under &lt;strong&gt;/data&lt;/strong&gt;).&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;mongod --dbpath=/data --port 27017
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You should see the &lt;strong&gt;mongod&lt;/strong&gt; process start up and print some status information.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_3&#34;&gt;Connecting to MongoDB&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s create a new &lt;strong&gt;app.js&lt;/strong&gt; file that we will use to show the basic CRUD operations using the MongoDB driver.&lt;/p&gt;
+
+&lt;p&gt;First let&amp;rsquo;s add code to connect to the server and the database &lt;strong&gt;myproject&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  db.close();
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Given that you booted up the &lt;strong&gt;mongod&lt;/strong&gt; process earlier the application should connect successfully and print &lt;strong&gt;Connected correctly to server&lt;/strong&gt; to the console.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s Add some code to show the different CRUD operations available.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_4&#34;&gt;Inserting a Document&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s create a function that will insert some documents for us.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var insertDocuments = function(db, callback) {
+  // Get the documents collection
+  var collection = db.collection(&#39;documents&#39;);
+  // Insert some documents
+  collection.insert([
+    {a : 1}, {a : 2}, {a : 3}
+  ], function(err, result) {
+    assert.equal(err, null);
+    assert.equal(3, result.result.n);
+    assert.equal(3, result.ops.length);
+    console.log(&amp;quot;Inserted 3 document into the document collection&amp;quot;);
+    callback(result);
+  });
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The insert command will return a results object that contains several fields that might be useful.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;result&lt;/strong&gt; Contains the result document from MongoDB&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;ops&lt;/strong&gt; Contains the documents inserted with added &lt;strong&gt;_id&lt;/strong&gt; fields&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;connection&lt;/strong&gt; Contains the connection used to perform the insert&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Let&amp;rsquo;s add call the &lt;strong&gt;insertDocuments&lt;/strong&gt; command to the &lt;strong&gt;MongoClient.connect&lt;/strong&gt; method callback.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  insertDocuments(db, function() {
+    db.close();
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We can now run the update &lt;strong&gt;app.js&lt;/strong&gt; file.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;node app.js
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You should see the following output after running the &lt;strong&gt;app.js&lt;/strong&gt; file.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Connected correctly to server
+Inserted 3 document into the document collection
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;toc_5&#34;&gt;Updating a document&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s look at how to do a simple document update by adding a new field &lt;strong&gt;b&lt;/strong&gt; to the document that has the field &lt;strong&gt;a&lt;/strong&gt; set to &lt;strong&gt;2&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var updateDocument = function(db, callback) {
+  // Get the documents collection
+  var collection = db.collection(&#39;documents&#39;);
+  // Insert some documents
+  collection.update({ a : 2 }
+    , { $set: { b : 1 } }, function(err, result) {
+    assert.equal(err, null);
+    assert.equal(1, result.result.n);
+    console.log(&amp;quot;Updated the document with the field a equal to 2&amp;quot;);
+    callback(result);
+  });  
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The method will update the first document where the field &lt;strong&gt;a&lt;/strong&gt; is equal to &lt;strong&gt;2&lt;/strong&gt; by adding a new field &lt;strong&gt;b&lt;/strong&gt; to the document set to &lt;strong&gt;1&lt;/strong&gt;. Let&amp;rsquo;s update the callback function from &lt;strong&gt;MongoClient.connect&lt;/strong&gt; to include the update method.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  insertDocuments(db, function() {
+    updateDocument(db, function() {
+      db.close();
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;toc_6&#34;&gt;Remove a document&lt;/h2&gt;
+
+&lt;p&gt;Next lets remove the document where the field &lt;strong&gt;a&lt;/strong&gt; equals to &lt;strong&gt;3&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var removeDocument = function(db, callback) {
+  // Get the documents collection
+  var collection = db.collection(&#39;documents&#39;);
+  // Insert some documents
+  collection.remove({ a : 3 }, function(err, result) {
+    assert.equal(err, null);
+    assert.equal(1, result.result.n);
+    console.log(&amp;quot;Removed the document with the field a equal to 3&amp;quot;);
+    callback(result);
+  });    
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will remove the first document where the field &lt;strong&gt;a&lt;/strong&gt; equals to &lt;strong&gt;3&lt;/strong&gt;. Let&amp;rsquo;s add the method to the &lt;strong&gt;MongoClient.connect&lt;/strong&gt; callback function.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  insertDocuments(db, function() {
+    updateDocument(db, function() {
+      removeDocument(db, function() {
+        db.close();
+      });
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Finally let&amp;rsquo;s retrieve all the documents using a simple find.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_7&#34;&gt;Find All Documents&lt;/h2&gt;
+
+&lt;p&gt;We will finish up the Quickstart CRUD methods by performing a simple query that returns all the documents matching the query.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var findDocuments = function(db, callback) {
+  // Get the documents collection
+  var collection = db.collection(&#39;documents&#39;);
+  // Insert some documents
+  collection.find({}).toArray(function(err, docs) {
+    assert.equal(err, null);
+    assert.equal(2, docs.length);
+    console.log(&amp;quot;Found the following records&amp;quot;);
+    console.dir(docs)
+    callback(docs);
+  });      
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This query will return all the documents in the &lt;strong&gt;documents&lt;/strong&gt; collection. Since we removed a document the total documents returned is &lt;strong&gt;2&lt;/strong&gt;. Finally let&amp;rsquo;s add the findDocument method to the &lt;strong&gt;MongoClient.connect&lt;/strong&gt; callback.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  insertDocuments(db, function() {
+    updateDocument(db, function() {
+      removeDocument(db, function() {
+        findDocuments(db, function() {
+          db.close();
+        });
+      });
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This concludes the QuickStart of connecting and performing some Basic operations using the MongoDB Node.js driver. For more detailed information you can look at the tutorials covering more specific topics of interest.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Contributing</title>
+      <link>/node-mongodb-native/2.0/community/contributing/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/community/contributing/</guid>
+      <description>
+
+&lt;p&gt;To contribute to the project &lt;em&gt;we encourage pull requests allowing for discussion of code changes.&lt;/em&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_0&#34;&gt;Contributing&lt;/h2&gt;
+
+&lt;p&gt;When you are ready to send us a pull request make sure you perform the following steps first.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Ensure you have at least one test case that covers the new code. If you are wondering how to do this please feel free to ask in the pull request for help.&lt;/li&gt;
+&lt;li&gt;Ensure you run the tests. &lt;code&gt;node test/runner.js -t functional&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Squash all your commits into a single commit. &lt;code&gt;git rebase -i&lt;/code&gt;. You can force update your pull request as history for it is not important for us to keep.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;Contribution Steps&lt;/h2&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Fork the Node.js driver from &lt;a href=&#34;https://github.com/mongodb/node-mongodb-native&#34;&gt;https://github.com/mongodb/node-mongodb-native&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Create a new feature branch (&lt;code&gt;git checkout -b feature&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Commit your changes using git (&lt;code&gt;git commit -a -m &#39;My changes&#39;&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Run tests suite (ensure mongodb is in path) (&lt;code&gt;node test/runner.js -t functional&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Squash the commits (&lt;code&gt;git rebase -i&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Push the new branch to your github fork (&lt;code&gt;git push origin feature&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Create a new Pull Request on github.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h1 id=&#34;toc_2&#34;&gt;Running Tests&lt;/h1&gt;
+
+&lt;h2 id=&#34;toc_3&#34;&gt;Clone repository locally&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;git clone https://github.com/mongodb/node-mongodb-native
+cd node-mongodb-native
+npm install
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;toc_4&#34;&gt;Running The Test Suite&lt;/h2&gt;
+
+&lt;p&gt;Make sure the &lt;em&gt;mongod&lt;/em&gt; executable is in your shell or command line &lt;em&gt;path&lt;/em&gt;. Then run the functional test suite.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;node test/runner.js -t functional
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To run the replicaset test suite do&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;node test/runner.js -t functional -e replicaset
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To run the sharded test suite do&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;node test/runner.js -t functional -e sharded
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Node Knockout, Basics</title>
+      <link>/node-mongodb-native/2.0/articles/node_knockout_article_1/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/articles/node_knockout_article_1/</guid>
+      <description>
+
+&lt;h1 id=&#34;toc_0&#34;&gt;A Basic introduction to Mongo DB&lt;/h1&gt;
+
+&lt;p&gt;Mongo DB has rapidly grown to become a popular database for web applications and is a perfect fit for Node.JS applications, letting you write Javascript for the client, backend and database layer. Its schemaless nature is a better match to our constantly evolving data structures in web applications, and the integrated support for location queries is a bonus that&amp;rsquo;s hard to ignore. Throw in Replica Sets for scaling, and we&amp;rsquo;re looking at really nice platform to grow your storage needs now and in the future.&lt;/p&gt;
+
+&lt;p&gt;Now to shamelessly plug my driver. It can be downloaded via npm, or fetched from the github repository. To install via npm, do the following:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;npm install mongodb&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;or go fetch it from github at &lt;a href=&#34;https://github.com/mongodb/node-mongodb-native&#34;&gt;https://github.com/mongodb/node-mongodb-native&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Once this business is taken care of, let&amp;rsquo;s move through the types available for the driver and then how to connect to your Mongo DB instance before facing the usage of some CRUD operations.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;Mongo DB data types&lt;/h2&gt;
+
+&lt;p&gt;So there is an important thing to keep in mind when working with Mongo DB, and that is the slight mapping difference between types Mongo DB supports and native Javascript data types. Let&amp;rsquo;s have a look at the types supported out of the box and then how types are promoted by the driver to fit as close to native Javascript types as possible.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Float&lt;/strong&gt; is a 8 byte and is directly convertible to the Javascript type Number&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Double class&lt;/strong&gt; a special class representing a float value, this is especially useful when using capped collections where you need to ensure your values are always floats.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Integers&lt;/strong&gt; is a bit trickier due to the fact that Javascript represents all Numbers as 64 bit floats meaning that the maximum integer value is at a 53 bit. Mongo has two types for integers, a 32 bit and a 64 bit. The driver will try to fit the value into 32 bits if it can and promote it to 64 bits if it has to. Similarly it will deserialize attempting to fit it into 53 bits if it can. If it cannot it will return an instance of &lt;strong&gt;Long&lt;/strong&gt; to avoid losing precision.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Long class&lt;/strong&gt; a special class that lets you store 64 bit integers and also lets you operate on the 64 bit integers.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Date&lt;/strong&gt; maps directly to a Javascript Date&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;RegExp&lt;/strong&gt; maps directly to a Javascript RegExp&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;String&lt;/strong&gt; maps directly to a Javascript String (encoded in utf8)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Binary class&lt;/strong&gt; a special class that lets you store data in Mongo DB&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Code class&lt;/strong&gt; a special class that lets you store javascript functions in Mongo DB, can also provide a scope to run the method in&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;ObjectID class&lt;/strong&gt; a special class that holds a MongoDB document identifier (the equivalent to a Primary key)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;DbRef class&lt;/strong&gt; a special class that lets you include a reference in a document pointing to another object&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Symbol class&lt;/strong&gt; a special class that lets you specify a symbol, not really relevant for javascript but for languages that supports the concept of symbols.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;As we see the number type can be a little tricky due to the way integers are implemented in Javascript. The latest driver will do correct conversion up to 53 bits of complexity. If you need to handle big integers the recommendation is to use the Long class to operate on the numbers.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_2&#34;&gt;Getting that connection to the database&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s get around to setting up a connection with the Mongo DB database. Jumping straight into the code let&amp;rsquo;s do direct connection and then look at the code.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;// Retrieve
+var MongoClient = require(&#39;mongodb&#39;).MongoClient;
+
+// Connect to the db
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/exampleDb&amp;quot;, function(err, db) {
+  if(!err) {
+    console.log(&amp;quot;We are connected&amp;quot;);
+  }
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s have a quick look at how the connection code works. The &lt;strong&gt;Db.connect&lt;/strong&gt;
+method let&amp;rsquo;s use use a uri to connect to the Mongo database, where
+&lt;strong&gt;localhost:27017&lt;/strong&gt; is the server host and port and &lt;strong&gt;exampleDb&lt;/strong&gt; the db
+we wish to connect to. After the url notice the hash containing the
+&lt;strong&gt;auto_reconnect&lt;/strong&gt; key. Auto reconnect tells the driver to retry sending
+a command to the server if there is a failure during its execution.&lt;/p&gt;
+
+&lt;p&gt;Another useful option you can pass in is&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;poolSize&lt;/strong&gt;, this allows you to control how many tcp connections are
+opened in parallel. The default value for this is 5 but you can set it
+as high as you want. The driver will use a round-robin strategy to
+dispatch and read from the tcp connection.&lt;/p&gt;
+
+&lt;p&gt;We are up and running with a connection to the database. Let&amp;rsquo;s move on
+and look at what collections are and how they work.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_3&#34;&gt;Mongo DB and Collections&lt;/h2&gt;
+
+&lt;p&gt;Collections are the equivalent of tables in traditional databases and contain all your documents. A database can have many collections. So how do we go about defining and using collections. Well there are a couple of methods that we can use. Let&amp;rsquo;s jump straight into code and then look at the code.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;the requires and and other initializing stuff omitted for brevity&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;// Retrieve
+var MongoClient = require(&#39;mongodb&#39;).MongoClient;
+
+// Connect to the db
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/exampleDb&amp;quot;, function(err, db) {
+  if(err) { return console.dir(err); }
+
+  db.collection(&#39;test&#39;, function(err, collection) {});
+
+  db.collection(&#39;test&#39;, {w:1}, function(err, collection) {});
+
+  db.createCollection(&#39;test&#39;, function(err, collection) {});
+
+  db.createCollection(&#39;test&#39;, {w:1}, function(err, collection) {});
+
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Three different ways of creating a collection object but slightly different in behavior. Let&amp;rsquo;s go through them and see what they do&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db.collection(&#39;test&#39;, function(err, collection) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This function will not actually create a collection on the database until you actually insert the first document.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db.collection(&#39;test&#39;, {strict:true}, function(err, collection) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Notice the &lt;strong&gt;{strict:true}&lt;/strong&gt; option. This option will make the driver check if the collection exists and issue an error if it does not.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db.createCollection(&#39;test&#39;, function(err, collection) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This command will create the collection on the Mongo DB database before returning the collection object. If the collection already exists it will ignore the creation of the collection.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db.createCollection(&#39;test&#39;, {strict:true}, function(err, collection) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;strong&gt;{strict:true}&lt;/strong&gt; option will make the method return an error if the collection already exists.&lt;/p&gt;
+
+&lt;p&gt;With an open db connection and a collection defined we are ready to do some CRUD operation on the data.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_4&#34;&gt;And then there was CRUD&lt;/h2&gt;
+
+&lt;p&gt;So let&amp;rsquo;s get dirty with the basic operations for Mongo DB. The Mongo DB wire protocol is built around 4 main operations &lt;strong&gt;insert/update/remove/query&lt;/strong&gt;. Most operations on the database are actually queries with special json objects defining the operation on the database. But I&amp;rsquo;m getting ahead of myself. Let&amp;rsquo;s go back and look at insert first and do it with some code.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;the requires and and other initializing stuff omitted for brevity&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;// Retrieve
+var MongoClient = require(&#39;mongodb&#39;).MongoClient;
+
+// Connect to the db
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/exampleDb&amp;quot;, function(err, db) {
+  if(err) { return console.dir(err); }
+
+  var collection = db.collection(&#39;test&#39;);
+  var doc1 = {&#39;hello&#39;:&#39;doc1&#39;};
+  var doc2 = {&#39;hello&#39;:&#39;doc2&#39;};
+  var lotsOfDocs = [{&#39;hello&#39;:&#39;doc3&#39;}, {&#39;hello&#39;:&#39;doc4&#39;}];
+
+  collection.insert(doc1);
+
+  collection.insert(doc2, {w:1}, function(err, result) {});
+
+  collection.insert(lotsOfDocs, {w:1}, function(err, result) {});
+
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A couple of variations on the theme of inserting a document as we can see. To understand why it&amp;rsquo;s important to understand how Mongo DB works during inserts of documents.&lt;/p&gt;
+
+&lt;p&gt;Mongo DB has asynchronous &lt;strong&gt;insert/update/remove&lt;/strong&gt; operations. This means that when you issue an &lt;strong&gt;insert&lt;/strong&gt; operation its a fire and forget operation where the database does not reply with the status of the insert operation. To retrieve the status of the operation you have to issue a query to retrieve the last error status of the connection. To make it simpler to the developer the driver implements the &lt;strong&gt;{w:1}&lt;/strong&gt; options so that this is done automatically when inserting the document. &lt;strong&gt;{w:1}&lt;/strong&gt; becomes especially important when you do &lt;strong&gt;update&lt;/strong&gt; or &lt;strong&gt;remove&lt;/strong&gt; as otherwise it&amp;rsquo;s not possible to determine the amount of documents modified or removed.&lt;/p&gt;
+
+&lt;p&gt;Now let&amp;rsquo;s go through the different types of inserts shown in the code above.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;collection.insert(doc1);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Taking advantage of the async behavior and not needing confirmation about the persisting of the data to Mongo DB we just fire off the insert (we are doing live analytics, loosing a couple of records does not matter).&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;collection.insert(doc2, {w:1}, function(err, result) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;That document needs to stick. Using the &lt;strong&gt;{w:1}&lt;/strong&gt; option ensure you get the error back if the document fails to insert correctly.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;collection.insert(lotsOfDocs, {w:1}, function(err, result) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A batch insert of document with any errors being reported. This is much more efficient if you need to insert large batches of documents as you incur a lot less overhead.&lt;/p&gt;
+
+&lt;p&gt;Right that&amp;rsquo;s the basics of insert&amp;rsquo;s ironed out. We got some documents in there but want to update them as we need to change the content of a field. Let&amp;rsquo;s have a look at a simple example and then we will dive into how Mongo DB updates work and how to do them efficiently.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;the requires and and other initializing stuff omitted for brevity&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;// Retrieve
+var MongoClient = require(&#39;mongodb&#39;).MongoClient;
+
+// Connect to the db
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/exampleDb&amp;quot;, function(err, db) {
+  if(err) { return console.dir(err); }
+
+  var collection = db.collection(&#39;test&#39;);
+  var doc = {mykey:1, fieldtoupdate:1};
+
+  collection.insert(doc, {w:1}, function(err, result) {
+    collection.update({mykey:1}, {$set:{fieldtoupdate:2}}, {w:1}, function(err, result) {});
+  });
+
+  var doc2 = {mykey:2, docs:[{doc1:1}]};
+
+  collection.insert(doc2, {w:1}, function(err, result) {
+    collection.update({mykey:2}, {$push:{docs:{doc2:1}}}, {w:1}, function(err, result) {});
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Alright before we look at the code we want to understand how document updates work and how to do the efficiently. The most basic and less efficient way is to replace the whole document, this is not really the way to go if you want to change just a field in your document. Luckily Mongo DB provides a whole set of operations that let you modify just pieces of the document &lt;a href=&#34;http://www.mongodb.org/display/DOCS/Atomic+Operations&#34;&gt;Atomic operations documentation&lt;/a&gt;. Basically outlined below.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;$inc - increment a particular value by a certain amount&lt;/li&gt;
+&lt;li&gt;$set - set a particular value&lt;/li&gt;
+&lt;li&gt;$unset - delete a particular field (v1.3+)&lt;/li&gt;
+&lt;li&gt;$push - append a value to an array&lt;/li&gt;
+&lt;li&gt;$pushAll - append several values to an array&lt;/li&gt;
+&lt;li&gt;$addToSet - adds value to the array only if its not in the array already&lt;/li&gt;
+&lt;li&gt;$pop - removes the last element in an array&lt;/li&gt;
+&lt;li&gt;$pull - remove a value(s) from an existing array&lt;/li&gt;
+&lt;li&gt;$pullAll - remove several value(s) from an existing array&lt;/li&gt;
+&lt;li&gt;$rename - renames the field&lt;/li&gt;
+&lt;li&gt;$bit - bitwise operations&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Now that the operations are outline let&amp;rsquo;s dig into the specific cases show in the code example.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;collection.update({mykey:1}, {$set:{fieldtoupdate:2}}, {w:1}, function(err, result) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Right so this update will look for the document that has a field &lt;strong&gt;mykey&lt;/strong&gt; equal to &lt;strong&gt;1&lt;/strong&gt; and apply an update to the field &lt;strong&gt;fieldtoupdate&lt;/strong&gt; setting the value to &lt;strong&gt;2&lt;/strong&gt;. Since we are using the &lt;strong&gt;{w:1}&lt;/strong&gt; option the result parameter in the callback will return the value &lt;strong&gt;1&lt;/strong&gt; indicating that 1 document was modified by the update statement.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;collection.update({mykey:2}, {$push:{docs:{doc2:1}}}, {w:1}, function(err, result) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This updates adds another document to the field &lt;strong&gt;docs&lt;/strong&gt; in the document identified by &lt;strong&gt;{mykey:2}&lt;/strong&gt; using the atomic operation &lt;strong&gt;$push&lt;/strong&gt;. This allows you to modify keep such structures as queues in Mongo DB.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s have a look at the remove operation for the driver. As before let&amp;rsquo;s start with a piece of code.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;the requires and and other initializing stuff omitted for brevity&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;// Retrieve
+var MongoClient = require(&#39;mongodb&#39;).MongoClient;
+
+// Connect to the db
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/exampleDb&amp;quot;, function(err, db) {
+  if(err) { return console.dir(err); }
+
+  var collection = db.collection(&#39;test&#39;);
+  var docs = [{mykey:1}, {mykey:2}, {mykey:3}];
+
+  collection.insert(docs, {w:1}, function(err, result) {
+
+    collection.remove({mykey:1});
+
+    collection.remove({mykey:2}, {w:1}, function(err, result) {});
+
+    collection.remove();
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s examine the 3 remove variants and what they do.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;collection.remove({mykey:1});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This leverages the fact that Mongo DB is asynchronous and that it does not return a result for &lt;strong&gt;insert/update/remove&lt;/strong&gt; to allow for &lt;strong&gt;synchronous&lt;/strong&gt; style execution. This particular remove query will remove the document where &lt;strong&gt;mykey&lt;/strong&gt; equals &lt;strong&gt;1&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;collection.remove({mykey:2}, {w:1}, function(err, result) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This remove statement removes the document where &lt;strong&gt;mykey&lt;/strong&gt; equals &lt;strong&gt;2&lt;/strong&gt; but since we are using &lt;strong&gt;{w:1}&lt;/strong&gt; it will back to Mongo DB to get the status of the remove operation and return the number of documents removed in the result variable.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;collection.remove();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This last one will remove all documents in the collection.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_5&#34;&gt;Time to Query&lt;/h2&gt;
+
+&lt;p&gt;Queries is of course a fundamental part of interacting with a database and Mongo DB is no exception. Fortunately for us it has a rich query interface with cursors and close to SQL concepts for slicing and dicing your datasets. To build queries we have lots of operators to choose from &lt;a href=&#34;http://www.mongodb.org/display/DOCS/Advanced+Queries&#34;&gt;Mongo DB advanced queries&lt;/a&gt;. There are literarily tons of ways to search and ways to limit the query. Let&amp;rsquo;s look at some simple code for dealing with queries in different ways.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;the requires and and other initializing stuff omitted for brevity&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;// Retrieve
+var MongoClient = require(&#39;mongodb&#39;).MongoClient;
+
+// Connect to the db
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/exampleDb&amp;quot;, function(err, db) {
+  if(err) { return console.dir(err); }
+
+  var collection = db.collection(&#39;test&#39;);
+  var docs = [{mykey:1}, {mykey:2}, {mykey:3}];
+
+  collection.insert(docs, {w:1}, function(err, result) {
+
+    collection.find().toArray(function(err, items) {});
+
+    var stream = collection.find({mykey:{$ne:2}}).stream();
+    stream.on(&amp;quot;data&amp;quot;, function(item) {});
+    stream.on(&amp;quot;end&amp;quot;, function() {});
+
+    collection.findOne({mykey:1}, function(err, item) {});
+
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Before we start picking apart the code there is one thing that needs to be understood, the &lt;strong&gt;find&lt;/strong&gt; method does not execute the actual query. It builds an instance of &lt;strong&gt;Cursor&lt;/strong&gt; that you then use to retrieve the data. This lets you manage how you retrieve the data from Mongo DB and keeps state about your current Cursor state on Mongo DB. Now let&amp;rsquo;s pick apart the queries we have here and look at what they do.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;collection.find().toArray(function(err, items) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This query will fetch all the document in the collection and return them as an array of items. Be careful with the function &lt;strong&gt;toArray&lt;/strong&gt; as it might cause a lot of memory usage as it will instantiate all the document into memory before returning the final array of items. If you have a big resultset you could run into memory issues.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var stream = collection.find({mykey:{$ne:2}}).stream();
+stream.on(&amp;quot;data&amp;quot;, function(item) {});
+stream.on(&amp;quot;end&amp;quot;, function() {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This is the preferred way if you have to retrieve a lot of data for streaming, as data is deserialized a &lt;strong&gt;data&lt;/strong&gt; event is emitted. This keeps the resident memory usage low as the documents are streamed to you. Very useful if you are pushing documents out via websockets or some other streaming socket protocol. Once there is no more document the driver will emit the &lt;strong&gt;end&lt;/strong&gt; event to notify the application that it&amp;rsquo;s done.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;collection.findOne({mykey:1}, function(err, item) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This is special supported function to retrieve just one specific document bypassing the need for a cursor object.&lt;/p&gt;
+
+&lt;p&gt;That&amp;rsquo;s pretty much it for the quick intro on how to use the database. I have also included a list of links to where to go to find more information and also a sample crude location application I wrote using express JS and mongo DB.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_6&#34;&gt;Links and stuff&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/mongodb/node-mongodb-native/tree/master/examples&#34;&gt;The driver examples, good starting point for basic usage&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/mongodb/node-mongodb-native/tree/master/test&#34;&gt;All the integration tests, they have tons of different usage cases&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.mongodb.org/display/DOCS/Advanced+Queries&#34;&gt;The Mongo DB wiki pages such as the advanced query link&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/christkv/mongodb-presentation&#34;&gt;A silly simple location based application using Express JS and Mongo DB&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Node Knockout, GridFS</title>
+      <link>/node-mongodb-native/2.0/articles/node_knockout_article_2/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/articles/node_knockout_article_2/</guid>
+      <description>
+
+&lt;h1 id=&#34;toc_0&#34;&gt;A primer for GridFS using the Mongo DB driver&lt;/h1&gt;
+
+&lt;p&gt;In the first tutorial we targeted general usage of the database. But Mongo DB is much more than this. One of the additional very useful features is to act as a file storage system. This is accomplish in Mongo by having a file collection and a chunks collection where each document in the chunks collection makes up a &lt;strong&gt;Block&lt;/strong&gt; of the file. In this tutorial we will look at how to use the GridFS functionality and what functions are available.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;A simple example&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s dive straight into a simple example on how to write a file to the grid using the simplified Grid class.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  Grid = mongo.Grid;
+
+// Connect to the db
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/exampleDb&amp;quot;, function(err, db) {
+  if(err) return console.dir(err);
+
+  var grid = new Grid(db, &#39;fs&#39;);    
+  var buffer = new Buffer(&amp;quot;Hello world&amp;quot;);
+  grid.put(buffer, {metadata:{category:&#39;text&#39;}, content_type: &#39;text&#39;}, function(err, fileInfo) {
+    if(!err) {
+      console.log(&amp;quot;Finished writing file to Mongo&amp;quot;);
+    }
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;All right let&amp;rsquo;s dissect the example. The first thing you&amp;rsquo;ll notice is the statement&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var grid = new Grid(db, &#39;fs&#39;);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Since GridFS is actually a special structure stored as collections you&amp;rsquo;ll notice that we are using the db connection that we used in the previous tutorial to operate on collections and documents. The second parameter &lt;strong&gt;&amp;lsquo;fs&amp;rsquo;&lt;/strong&gt; allows you to change the collections you want to store the data in. In this example the collections would be &lt;strong&gt;fs_files&lt;/strong&gt; and &lt;strong&gt;fs_chunks&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;Having a live grid instance we now go ahead and create some test data stored in a Buffer instance, although you can pass in a string instead. We then write our data to disk.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var buffer = new Buffer(&amp;quot;Hello world&amp;quot;);
+grid.put(buffer, {metadata:{category:&#39;text&#39;}, content_type: &#39;text&#39;}, function(err, fileInfo) {
+  if(!err) {
+    console.log(&amp;quot;Finished writing file to Mongo&amp;quot;);
+  }
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s deconstruct the call we just made. The &lt;strong&gt;put&lt;/strong&gt; call will write the data you passed in as one or more chunks. The second parameter is a hash of options for the Grid class. In this case we wish to annotate the file we are writing to Mongo DB with some metadata and also specify a content type. Each file entry in GridFS has support for metadata documents which might be very useful if you are for example storing images in you Mongo DB and need to store all the data associated with the image.&lt;/p&gt;
+
+&lt;p&gt;One important thing is to take not that the put method return a document containing a &lt;strong&gt;_id&lt;/strong&gt;, this is an &lt;strong&gt;ObjectID&lt;/strong&gt; identifier that you&amp;rsquo;ll need to use if you wish to retrieve the file contents later.&lt;/p&gt;
+
+&lt;p&gt;Right so we have written out first file, let&amp;rsquo;s look at the other two simple functions supported by the Grid class.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;the requires and and other initializing stuff omitted for brevity&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  Grid = mongo.Grid;
+
+// Connect to the db
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/exampleDb&amp;quot;, function(err, db) {
+  if(err) return console.dir(err);
+
+  var grid = new Grid(db, &#39;fs&#39;);    
+  var buffer = new Buffer(&amp;quot;Hello world&amp;quot;);
+  grid.put.(buffer, {metadata:{category:&#39;text&#39;}, content_type: &#39;text&#39;}, function(err, fileInfo) {        
+    grid.get(fileInfo._id, function(err, data) {
+      console.log(&amp;quot;Retrieved data: &amp;quot; + data.toString());
+      grid.delete(fileInfo._id, function(err, result) {
+      });        
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s have a look at the two operations &lt;strong&gt;get&lt;/strong&gt; and &lt;strong&gt;delete&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;grid.get(fileInfo._id, function(err, data) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;strong&gt;get&lt;/strong&gt; method takes an ObjectID as the first argument and as we can se in the code we are using the one provided in &lt;strong&gt;fileInfo._id&lt;/strong&gt;. This will read all the chunks for the file and return it as a Buffer object.&lt;/p&gt;
+
+&lt;p&gt;The &lt;strong&gt;delete&lt;/strong&gt; method also takes an ObjectID as the first argument but will delete the file entry and the chunks associated with the file in Mongo.&lt;/p&gt;
+
+&lt;p&gt;This &lt;strong&gt;api&lt;/strong&gt; is the simplest one you can use to interact with GridFS but it&amp;rsquo;s not suitable for all kinds of files. One of it&amp;rsquo;s main drawbacks is you are trying to write large files to Mongo. This api will require you to read the entire file into memory when writing and reading from Mongo which most likely is not feasible if you have to store large files like Video or RAW Pictures. Luckily this is not the only way to work with GridFS. That&amp;rsquo;s not to say this api is not useful. If you are storing tons of small files the memory usage vs the simplicity might be a worthwhile tradeoff. Let&amp;rsquo;s dive into some of the more advanced ways of using GridFS.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_2&#34;&gt;Advanced GridFS or how not to run out of memory&lt;/h2&gt;
+
+&lt;p&gt;As we just said controlling memory consumption for you file writing and reading is key if you want to scale up the application. That means not reading in entire files before either writing or reading from Mongo DB. The good news is, it&amp;rsquo;s supported. Let&amp;rsquo;s throw some code out there straight away and look at how to do chunk sized streaming writes and reads.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;the requires and and other initializing stuff omitted for brevity&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var fileId = new ObjectID();
+var gridStore = new GridStore(db, fileId, &amp;quot;w&amp;quot;, {root:&#39;fs&#39;});
+gridStore.chunkSize = 1024 * 256;
+
+gridStore.open(function(err, gridStore) {
+ Step(
+   function writeData() {
+     var group = this.group();
+
+     for(var i = 0; i &amp;lt; 1000000; i += 5000) {
+       gridStore.write(new Buffer(5000), group());
+     }   
+   },
+
+   function doneWithWrite() {
+     gridStore.close(function(err, result) {
+       console.log(&amp;quot;File has been written to GridFS&amp;quot;);
+     });
+   }
+ )
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Before we jump into picking apart the code let&amp;rsquo;s look at&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var gridStore = new GridStore(db, fileId, &amp;quot;w&amp;quot;, {root:&#39;fs&#39;});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Notice the parameter &lt;strong&gt;&amp;ldquo;w&amp;rdquo;&lt;/strong&gt; this is important. It tells the driver that you are planning to write a new file. The parameters you can use here are.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&amp;ldquo;r&amp;rdquo;&lt;/strong&gt; - read only. This is the default mode&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&amp;ldquo;w&amp;rdquo;&lt;/strong&gt; - write in truncate mode. Existing data will be overwritten&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&amp;ldquo;w+&amp;rdquo;&lt;/strong&gt; - write in edit mode&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Right so there is a fair bit to digest here. We are simulating writing a file that&amp;rsquo;s about 1MB big to  Mongo DB using GridFS. To do this we are writing it in chunks of 5000 bytes. So to not live with a difficult callback setup we are using the Step library with its&amp;rsquo; group functionality to ensure that we are notified when all of the writes are done. After all the writes are done Step will invoke the next function (or step) called &lt;strong&gt;doneWithWrite&lt;/strong&gt; where we finish up by closing the file that flushes out any remaining data to Mongo DB and updates the file document.&lt;/p&gt;
+
+&lt;p&gt;As we are doing it in chunks of 5000 bytes we will notice that memory consumption is low. This is the trick to write large files to GridFS. In pieces. Also notice this line.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;gridStore.chunkSize = 1024 * 256;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This allows you to adjust how big the chunks are in bytes that Mongo DB will write. You can tune the Chunk Size to your needs. If you need to write large files to GridFS it might be worthwhile to trade of memory for CPU by setting a larger Chunk Size.&lt;/p&gt;
+
+&lt;p&gt;Now let&amp;rsquo;s see how the actual streaming read works.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;new GridStore(db, fileId, &amp;quot;r&amp;quot;).open(function(err, gridStore) {
+  var stream = gridStore.stream(true);
+
+  stream.on(&amp;quot;data&amp;quot;, function(chunk) {
+    console.log(&amp;quot;Chunk of file data&amp;quot;);
+  });
+
+  stream.on(&amp;quot;end&amp;quot;, function() {
+    console.log(&amp;quot;EOF of file&amp;quot;);
+  });
+
+  stream.on(&amp;quot;close&amp;quot;, function() {
+    console.log(&amp;quot;Finished reading the file&amp;quot;);
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Right let&amp;rsquo;s have a quick lock at the streaming functionality supplied with the driver &lt;strong&gt;(make sure you are using 0.9.6-12 or higher as there is a bug fix for custom chunksizes that you need)&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var stream = gridStore.stream(true);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This opens a stream to our file, you can pass in a boolean parameter to tell the driver to close the file automatically when it reaches the end. This will fire the &lt;strong&gt;close&lt;/strong&gt; event automatically. Otherwise you&amp;rsquo;ll have to handle cleanup when you receive the &lt;strong&gt;end&lt;/strong&gt; event. Let&amp;rsquo;s have a look at the events supported.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;  stream.on(&amp;quot;data&amp;quot;, function(chunk) {
+    console.log(&amp;quot;Chunk of file data&amp;quot;);
+  });
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;strong&gt;data&lt;/strong&gt; event is called for each chunk read. This means that it&amp;rsquo;s by the chunk size of the written file. So if you file is 1MB big and the file has chunkSize 256K then you&amp;rsquo;ll get 4 calls to the event handler for &lt;strong&gt;data&lt;/strong&gt;. The chunk returned is a &lt;strong&gt;Buffer&lt;/strong&gt; object.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;  stream.on(&amp;quot;end&amp;quot;, function() {
+    console.log(&amp;quot;EOF of file&amp;quot;);
+  });
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;strong&gt;end&lt;/strong&gt; event is called when the driver reaches the end of data for the file.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;  stream.on(&amp;quot;close&amp;quot;, function() {
+    console.log(&amp;quot;Finished reading the file&amp;quot;);
+  });
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;strong&gt;close&lt;/strong&gt; event is only called if you the &lt;strong&gt;autoclose&lt;/strong&gt; parameter on the &lt;strong&gt;gridStore.stream&lt;/strong&gt; method as shown above. If it&amp;rsquo;s false or not set handle cleanup of the streaming in the &lt;strong&gt;end&lt;/strong&gt; event handler.&lt;/p&gt;
+
+&lt;p&gt;Right that&amp;rsquo;s it for writing to GridFS in an efficient Manner. I&amp;rsquo;ll outline some other useful function on the Gridstore object.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_3&#34;&gt;Other useful methods on the Gridstore object&lt;/h2&gt;
+
+&lt;p&gt;There are some other methods that are useful&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;gridStore.writeFile(filename/filedescriptor, function(err fileInfo) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;writeFile&lt;/strong&gt; takes either a file name or a file descriptor and writes it to GridFS. It does this in chunks to ensure the Eventloop is not tied up.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;gridStore.read(length, function(err, data) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;read/readBuffer&lt;/strong&gt; lets you read a #length number of bytes from the current position in the file.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;gridStore.seek(position, seekLocation, function(err, gridStore) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;seek&lt;/strong&gt; lets you navigate the file to read from different positions inside the chunks. The seekLocation allows you to specify how to seek. It can be one of three values.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;GridStore.IO_SEEK_SET Seek mode where the given length is absolute&lt;/li&gt;
+&lt;li&gt;GridStore.IO_SEEK_CUR Seek mode where the given length is an offset to the current read/write head&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;GridStore.IO_SEEK_END Seek mode where the given length is an offset to the end of the file&lt;/p&gt;
+
+&lt;p&gt;GridStore.list(dbInstance, collectionName, {id:true}, function(err, files) {})&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;list&lt;/strong&gt; lists all the files in the collection in GridFS. If you have a lot of files the current version will not work very well as it&amp;rsquo;s getting all files into memory first. You can have it return either the filenames or the ids for the files using option.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;gridStore.unlink(function(err, result) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;unlink&lt;/strong&gt; deletes the file from Mongo DB, that&amp;rsquo;s to say all the file info and all the chunks.&lt;/p&gt;
+
+&lt;p&gt;This should be plenty to get you on your way building your first GridFS based application. As in the previous article the following links might be useful for you. Good luck and have fun.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_4&#34;&gt;Links and stuff&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/mongodb/node-mongodb-native/tree/master/examples&#34;&gt;The driver examples, good starting point for basic usage&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/mongodb/node-mongodb-native/tree/master/test&#34;&gt;All the integration tests, they have tons of different usage cases&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keyword" content="">
+    <link rel="shortcut icon" href="img/favicon.png">
+
+    <title>MongoDB Core 1.0.0</title>
+
+    <link href="css/bootstrap-theme.css" rel="stylesheet">
+    <link href="assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/style-responsive.css" rel="stylesheet" />
+    <link href="css/monokai_sublime.css" rel="stylesheet" />
+
+  </head>
+
+  <body>
+  
+  <section id="container" class="">
+
+      
+      <header class="header black-bg">
+            <div class="toggle-nav">
+                <i class="fa fa-bars"></i>
+                <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom"></div>
+            </div>
+
+            
+            <a href=".." class="logo"><img src="img/logo-mongodb-header.png" style="height:40px;"></a>
+            
+            <div class="top-nav notification-row">
+                
+                <div class="hidden-xs nav-github pull-right">
+                    <span rel="show-github" data-user="mongodb" data-repo="node-mongodb-native"></span>
+                    <span rel="show-github" data-user="mongodb" data-repo="node-mongodb-native" data-type="fork"></span>
+                    <a href='http://travis-ci.org/mongodb/node-mongodb-native'><img src='https://secure.travis-ci.org/mongodb/node-mongodb-native.png'/><a>
+                </div>
+            </div>
+
+            <div class="nav title-row" id="top_menu">
+                <h1 class="nav top-menu"> MongoDB Core 1.0.0 </h1>
+            </div>
+      </header>
+      
+
+
+<aside>
+    <div id="sidebar"  class="nav-collapse ">
+        
+        <ul class="sidebar-menu">
+          
+          
+              
+                <li>
+                <a class="" href="/node-mongodb-native/">
+                    <i class='fa fa-file-text'></i>
+                    
+                    <span>driver portal</span>
+                </a>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-gift'></i>
+                
+                <span>about driver</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/core/meta/license/"> License </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/core/meta/release-notes/"> Release Notes </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-road'></i>
+                
+                <span>getting started</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/core/overview/introduction/"> Introduction </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/core/overview/installing/"> Installing The Driver </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/core/overview/quickstart/"> QuickStart </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-file-text'></i>
+                
+                <span>api</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/core/api-docs/"> API Documentation </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-group'></i>
+                
+                <span>community</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/core/community/mailing-list/"> Mailing List </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/core/community/contributing/"> Contributing </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-book'></i>
+                
+                <span>tutorials</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/core/tutorials/connecting/"> Connecting To MongoDB </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/core/tutorials/crud_operations/"> CRUD Operations </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/core/tutorials/logging/"> Logging </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/core/tutorials/cursor/"> Cursor </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+            <li> <a href="https://jira.mongodb.org/browse/NODE" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
+            
+        </ul>
+        
+    </div>
+</aside>
+
+
+
+      
+      <section id="main-content">
+          <section class="wrapper">
+
+              <div class="row">
+                  <div class="col-md-1">
+                      
+                  </div>
+                <div class="col-md-10">
+                    <section class="panel">
+                    <div class="panel-body">
+                    <h2 id="what-is-mongodb-node.js-core-driver">What is MongoDB Node.js Core Driver ?</h2>
+<p>The MongodDB Node.js Core driver is a low level driver meant for people building libraries on top of MongoDB and who do not need the additional complexities of the native end user driver nor all the extra scaffolding and helpers.</p>
+<h2 id="what-does-the-driver-offer">What does the driver offer</h2>
+<p>I offers connecting to all the available topologies in MongoDB as well as an extensible framework for cursors and hopefully simple to read code. All the plumbing including authentication is all in this driver and as it's much smaller than the legacy 1.X driver it should be much easier to understand.</p>
+<h2 id="next-steps">Next Steps</h2>
+<ul>
+<li><a href="overview/installing">Install Driver</a></li>
+<li><a href="overview/quickstart">Quick start</a></li>
+<li><a href="community/mailing-list">Join the Mailing List</a></li>
+<li><a href="https://github.com/mongodb/node-mongodb-native">Star us on GitHub</a></li>
+</ul>
+<h2 id="statistics">Statistics</h2>
+<p><a href="https://nodei.co/npm/mongodb-core/"><embed src="https://nodei.co/npm/mongodb-core.png?downloads=true&amp;downloadRank=true"></a> <a href="https://nodei.co/npm/mongodb-core/"><embed src="https://nodei.co/npm-dl/mongodb-core.png?months=6&amp;height=3"></a></p>
+
+                    </div>
+                    </section>
+                </div>
+                <div class="col-md-1">
+                    
+                </div>
+              </div>
+              
+          </section>
+      </section>
+     
+  </section>
+  
+    
+    <script src="js/jquery-2.1.1.min.js"></script>
+    <script src="js/jquery.scrollTo.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    
+    <script src="js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="js/scripts.js"></script>
+    <script async defer id="github-bjs" src="js/buttons.js"></script>
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-29229787-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>

@@ -1,0 +1,462 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<link rel="shortcut icon" href="http://media.mongodb.org/favicon.ico" />
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>The Node.JS MongoDB Driver Manual &mdash; MongoDB Node.JS Driver 1.4.18 documentation</title>
+    
+    <link rel="stylesheet" href="_static/mongodb-docs.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.4.18',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="MongoDB Node.JS Driver 1.4.18 documentation" href="#" /> 
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+          <li><p><a href="#"><img class="logo" src="_static/logo-mongodb.png" alt="Logo"/></p></li>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="contents.html">MongoDB Node.JS Driver 1.4.18 documentation</a> (<a href="genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="the-node-js-mongodb-driver-manual">
+<h1>The Node.JS MongoDB Driver Manual<a class="headerlink" href="#the-node-js-mongodb-driver-manual" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="markdown-docs/collections.html">Collections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="markdown-docs/gridfs.html">GridStore</a></li>
+<li class="toctree-l1"><a class="reference internal" href="markdown-docs/indexes.html">Indexes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="markdown-docs/insert.html">Inserting and updating</a></li>
+<li class="toctree-l1"><a class="reference internal" href="markdown-docs/queries.html">Queries</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="driver-updates">
+<h2>Driver Updates<a class="headerlink" href="#driver-updates" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="driver-articles/index.html">Updates</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="driver-articles/anintroductionto1_4_and_2_6.html">Mongo Driver and Mongo DB 2.6 Features</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="driver-articles/anintroductionto1_4_and_2_6.html#aggregation-cursors">Aggregation cursors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="driver-articles/anintroductionto1_4_and_2_6.html#maxtimems">maxTimeMS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="driver-articles/anintroductionto1_4_and_2_6.html#ordered-unordered-bulk-operations">Ordered/Unordered bulk operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="driver-articles/anintroductionto1_4_and_2_6.html#parallelcollectionscan">parallelCollectionScan</a></li>
+<li class="toctree-l3"><a class="reference internal" href="driver-articles/anintroductionto1_4_and_2_6.html#integrated-text-search-in-the-query-language">Integrated text search in the query language</a></li>
+<li class="toctree-l3"><a class="reference internal" href="driver-articles/anintroductionto1_4_and_2_6.html#emitting-reconnect-and-joined-left-events">Emitting Reconnect and Joined/Left events</a></li>
+<li class="toctree-l3"><a class="reference internal" href="driver-articles/anintroductionto1_4_and_2_6.html#buffermaxentries">bufferMaxEntries</a></li>
+<li class="toctree-l3"><a class="reference internal" href="driver-articles/anintroductionto1_4_and_2_6.html#fsync-and-journal-write-concerns-note">Fsync and journal Write Concerns note</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="driver-articles/mongoclient.html">MongoClient or how to connect in a new and better way</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="driver-articles/mongoclient.html#the-url-connection-format">The URL connection format</a></li>
+<li class="toctree-l3"><a class="reference internal" href="driver-articles/mongoclient.html#mongoclient-connect">MongoClient.connect</a></li>
+<li class="toctree-l3"><a class="reference internal" href="driver-articles/mongoclient.html#mongoclient-connection-pooling">MongoClient connection pooling</a></li>
+<li class="toctree-l3"><a class="reference internal" href="driver-articles/mongoclient.html#mongoclient-connect-options">MongoClient.connect options</a></li>
+<li class="toctree-l3"><a class="reference internal" href="driver-articles/mongoclient.html#db-a-hash-of-options-at-the-db-level-overriding-or-adjusting-functionality-not-supported-by-the-url">db: A hash of options at the db level overriding or adjusting functionality not supported by the url</a></li>
+<li class="toctree-l3"><a class="reference internal" href="driver-articles/mongoclient.html#server-a-hash-of-options-at-the-server-level-not-supported-by-the-url">server: A hash of options at the server level not supported by the url.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="driver-articles/mongoclient.html#replset-a-hash-of-options-at-the-replset-level-not-supported-by-the-url">replSet: A hash of options at the replSet level not supported by the url.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="driver-articles/mongoclient.html#mongos-a-hash-of-options-at-the-mongos-level-not-supported-by-the-url">mongos: A hash of options at the mongos level not supported by the url.</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="driver-articles/anintroductionto1_1and2_2.html">Mongo Driver and Mongo DB 2.2 Features</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="driver-articles/anintroductionto1_1and2_2.html#read-preferences">Read preferences</a></li>
+<li class="toctree-l3"><a class="reference internal" href="driver-articles/anintroductionto1_1and2_2.html#mongos">Mongos</a></li>
+<li class="toctree-l3"><a class="reference internal" href="driver-articles/anintroductionto1_1and2_2.html#aggregation-framework-helper">Aggregation framework helper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="driver-articles/anintroductionto1_1and2_2.html#replicaset-improvements-and-changes">Replicaset improvements and changes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="driver-articles/anintroductionto1_1and2_2.html#high-availability-on-by-default">High availability &#8220;on&#8221; by default</a></li>
+<li class="toctree-l3"><a class="reference internal" href="driver-articles/anintroductionto1_1and2_2.html#better-stream-support-for-gridfs">Better stream support for GridFS</a></li>
+<li class="toctree-l3"><a class="reference internal" href="driver-articles/anintroductionto1_1and2_2.html#tobson-method">toBSON method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="driver-articles/anintroductionto1_1and2_2.html#much-faster-bson-c-parser">Much faster BSON C++ parser</a></li>
+<li class="toctree-l3"><a class="reference internal" href="driver-articles/anintroductionto1_1and2_2.html#other-minor-changes">Other minor changes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="tutorials">
+<h2>Tutorials<a class="headerlink" href="#tutorials" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-articles/index.html">Articles</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api-articles/nodekoarticle1.html">A Basic introduction to Mongo DB</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api-articles/nodekoarticle1.html#mongo-db-data-types">Mongo DB data types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-articles/nodekoarticle1.html#getting-that-connection-to-the-database">Getting that connection to the database</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-articles/nodekoarticle1.html#mongo-db-and-collections">Mongo DB and Collections</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-articles/nodekoarticle1.html#and-then-there-was-crud">And then there was CRUD</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-articles/nodekoarticle1.html#time-to-query">Time to Query</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-articles/nodekoarticle1.html#links-and-stuff">Links and stuff</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="api-articles/nodekoarticle2.html">A primer for GridFS using the Mongo DB driver</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="api-articles/nodekoarticle2.html#a-simple-example">A simple example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-articles/nodekoarticle2.html#advanced-gridfs-or-how-not-to-run-out-of-memory">Advanced GridFS or how not to run out of memory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-articles/nodekoarticle2.html#other-useful-methods-on-the-gridstore-object">Other useful methods on the Gridstore object</a></li>
+<li class="toctree-l3"><a class="reference internal" href="api-articles/nodekoarticle2.html#links-and-stuff">Links and stuff</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="api-documentation">
+<h2>API Documentation<a class="headerlink" href="#api-documentation" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-generated/index.html">Driver API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/admin.html">Admin()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/collection.html">Collection()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/mongoclient.html">MongoClient()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/db.html">Db()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/cursor.html">Cursor()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/cursorstream.html">CursorStream()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/gridstore.html">GridStore()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/readstream.html">ReadStream()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/grid.html">Grid()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/server.html">Server()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/mongos.html">Mongos()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/replset.html">ReplSet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/readpreference.html">ReadPreference()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/ordered.html">OrderedBulkOperation()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/unordered.html">UnorderedBulkOperation()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-generated/batchwriteresult.html">BatchWriteResult()</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/index.html">Binary JSON API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/objectid.html">ObjectID()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/binary.html">Binary()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/code.html">Code()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/db_ref.html">DBRef()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/double.html">Double()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/minkey.html">MinKey()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/maxkey.html">MaxKey()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/symbol.html">Symbol()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/timestamp.html">Timestamp()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/long.html">Long()</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api-bson-generated/bson.html">BSON()</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="external-tutorials">
+<h2>External Tutorials<a class="headerlink" href="#external-tutorials" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="http://howtonode.org/express-mongodb">http://howtonode.org/express-mongodb</a>, Blog rolling with mongoDB, express and Node.js</li>
+<li><a class="reference external" href="http://nodetuts.com/tutorials/18-mongodb-and-mongoose.html">http://nodetuts.com/tutorials/18-mongodb-and-mongoose.html</a>, Node Tuts - episode 18 - Node.js, MongoDB and Mongoose from Pedro Teixeira on Vimeo.</li>
+<li><a class="reference external" href="http://howtonode.org/node-js-and-mongodb-getting-started-with-mongojs">http://howtonode.org/node-js-and-mongodb-getting-started-with-mongojs</a>, Node.js and MongoDB - Getting started with MongoJS</li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="video-presentations-about-different-topics-around-the-mongodb-and-node-js">
+<h2>Video Presentations about different topics around the MongoDB and Node.js<a class="headerlink" href="#video-presentations-about-different-topics-around-the-mongodb-and-node-js" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="content/nodejsvideo.html">Node.JS Specific Presentations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="content/nodejsvideo.html#an-introduction-to-the-node-js-mongodb-driver">An Introduction to the node.js MongoDB Driver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="content/nodejsvideo.html#node-js-and-mongodb-a-panel-discussion">Node.js and MongoDB, a Panel Discussion</a></li>
+<li class="toctree-l2"><a class="reference internal" href="content/nodejsvideo.html#schemas-for-real-time-analytics-with-node-js">Schemas for Real Time Analytics with Node.js</a></li>
+<li class="toctree-l2"><a class="reference internal" href="content/nodejsvideo.html#happy-mongo-ing-in-node-js">Happy Mongo-ing in Node.js</a></li>
+<li class="toctree-l2"><a class="reference internal" href="content/nodejsvideo.html#nyc-mongodb-user-group-schemas-for-real-time-analytics-with-node-js">NYC MongoDB User Group - Schemas for Real Time Analytics with Node.js</a></li>
+<li class="toctree-l2"><a class="reference internal" href="content/nodejsvideo.html#nyc-mongodb-user-group-what-s-in-the-trello">NYC MongoDB User Group - What&#8217;s in the Trello</a></li>
+<li class="toctree-l2"><a class="reference internal" href="content/nodejsvideo.html#nyc-node-js-meetup-august-2011-mongoose-other-mongodb-connectors">NYC Node JS Meetup - August 2011 - Mongoose &amp; other MongoDB Connectors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="content/nodejsvideo.html#a-beautiful-marriage-mongodb-and-node-js">A beautiful marriage: MongoDB and node.js</a></li>
+<li class="toctree-l2"><a class="reference internal" href="content/nodejsvideo.html#rapid-realtime-app-development-with-node-js-mongodb">Rapid Realtime App Development with Node.JS &amp; MongoDB</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="content/awesomeappsvideo.html">Awesome Node.js + MongoDB Applications</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="content/awesomeappsvideo.html#node-js-blackboard-socket-io">Node.js blackboard - socket.io</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="content/tutorials.html">Tutorials using Node.JS and MongoDB</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="content/tutorials.html#node-js-and-mongodb-tutorial-using-coffeescript-and-mongoose-odm">Node.js and MongoDB Tutorial - Using CoffeeScript and Mongoose (ODM)</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="projects-and-libraries-using-the-driver">
+<h2>Projects and Libraries using the driver<a class="headerlink" href="#projects-and-libraries-using-the-driver" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
+</div>
+<div class="section" id="mongodb-in-general">
+<h2>MongoDB in General<a class="headerlink" href="#mongodb-in-general" title="Permalink to this headline">¶</a></h2>
+<p>There are two main places to learn about MongoDB itself. I&#8217;ve included links below.</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="http://www.mongodb.org">http://www.mongodb.org</a>, all the documentation for the database</li>
+<li><a class="reference external" href="http://www.10gen.com/presentations">http://www.10gen.com/presentations</a>, lots of presentations and slides about using the database.</li>
+</ul>
+</div></blockquote>
+<p>There are also some very good books out these days</p>
+<blockquote>
+<div><ul class="simple">
+<li><a class="reference external" href="http://www.amazon.com/MongoDB-Definitive-Guide-Kristina-Chodorow/dp/1449381561/ref=sr_1_1?ie=UTF8&amp;qid=1329392515&amp;sr=8-1">MongoDB: The Definitive Guide</a></li>
+<li><a class="reference external" href="http://www.amazon.com/MongoDB-Action-Kyle-Banker/dp/1935182870/ref=sr_1_2?ie=UTF8&amp;qid=1329392515&amp;sr=8-2">MongoDB in Action</a></li>
+<li><a class="reference external" href="http://www.amazon.com/Definitive-Guide-MongoDB-Database-Computing/dp/1430230517/ref=sr_1_3?ie=UTF8&amp;qid=1329392515&amp;sr=8-3">The Definitive Guide to MongoDB: The NoSQL Database for Cloud and Desktop Computing</a></li>
+<li><a class="reference external" href="http://www.amazon.com/50-Tips-Tricks-MongoDB-Developers/dp/1449304613/ref=sr_1_4?ie=UTF8&amp;qid=1329392515&amp;sr=8-4">50 Tips and Tricks for MongoDB Developers</a></li>
+<li><a class="reference external" href="http://www.amazon.com/Scaling-MongoDB-Kristina-Chodorow/dp/1449303218/ref=sr_1_6?ie=UTF8&amp;qid=1329392515&amp;sr=8-6">Scaling MongoDB</a></li>
+<li><a class="reference external" href="http://www.amazon.com/MongoDB-Python-Patterns-processes-document-oriented/dp/1449310370/ref=sr_1_7?ie=UTF8&amp;qid=1329392515&amp;sr=8-7">MongoDB and Python: Patterns and processes for the popular document-oriented database</a></li>
+<li><a class="reference external" href="http://www.amazon.com/MongoDB-PHP-Steve-Francia/dp/1449314368/ref=sr_1_8?ie=UTF8&amp;qid=1329392515&amp;sr=8-8">MongoDB and PHP</a></li>
+<li><a class="reference external" href="http://www.amazon.com/PHP-MongoDB-Development-Beginners-Guide/dp/1849513627/ref=sr_1_10?ie=UTF8&amp;qid=1329392515&amp;sr=8-10">PHP and MongoDB Web Development Beginner&#8217;s Guide</a></li>
+<li><a class="reference external" href="http://www.amazon.com/Node-Web-Development-David-Herron/dp/184951514X/ref=sr_1_11?ie=UTF8&amp;qid=1329392515&amp;sr=8-11">Node Web Development</a></li>
+<li><a class="reference external" href="http://www.amazon.com/Document-Design-MongoDB-Jeremy-McAnally/dp/1449303412/ref=sr_1_12?ie=UTF8&amp;qid=1329392515&amp;sr=8-12">Document Design for MongoDB</a></li>
+</ul>
+</div></blockquote>
+</div>
+<div class="section" id="changelog">
+<h2>Changelog<a class="headerlink" href="#changelog" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="changelog/changelog.html">Changelog</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="indices">
+<h2>Indices<a class="headerlink" href="#indices" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
+<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<h3>Contents</h3>
+<ul>
+<li><a class="reference internal" href="#">The Node.JS MongoDB Driver Manual</a><ul>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#driver-updates">Driver Updates</a></li>
+<li><a class="reference internal" href="#tutorials">Tutorials</a></li>
+<li><a class="reference internal" href="#api-documentation">API Documentation</a></li>
+<li><a class="reference internal" href="#external-tutorials">External Tutorials</a></li>
+<li><a class="reference internal" href="#video-presentations-about-different-topics-around-the-mongodb-and-node-js">Video Presentations about different topics around the MongoDB and Node.js</a></li>
+<li><a class="reference internal" href="#projects-and-libraries-using-the-driver">Projects and Libraries using the driver</a></li>
+<li><a class="reference internal" href="#mongodb-in-general">MongoDB in General</a></li>
+<li><a class="reference internal" href="#changelog">Changelog</a></li>
+<li><a class="reference internal" href="#indices">Indices</a></li>
+</ul>
+</li>
+</ul>
+
+
+
+<ul class="this-page-menu">
+</ul>
+<h3>Manual</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-generated/mongoclient.html">MongoClient()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-generated/db.html">Db()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-generated/collection.html">Collection()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-generated/admin.html">Admin()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-generated/cursor.html">Cursor()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-generated/cursorstream.html">CursorStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-generated/grid.html">Grid()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-generated/gridstore.html">GridStore()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-generated/readstream.html">ReadStream()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/bson.html">BSON()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/objectid.html">ObjectID()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/binary.html">Binary()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/code.html">Code()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/double.html">Double()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/long.html">Long()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/timestamp.html">Timestamp()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/maxkey.html">MaxKey()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-bson-generated/symbol.html">Symbol()</a></li>
+</ul>
+
+<ul class="this-page-menu">
+  <li><strong>Home:</strong> <a href="#">MongoDB Node.JS Driver Manual Home</a></li>
+  <li><strong>Contents:</strong> <a href="contents.html">MongoDB Node.JS Driver Manual Contents</a></li>
+  <li><strong>Index:</strong> <a href="genindex.html">MongoDB Node.JS Driver Manual Index</a></li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Search</h3>
+    <p class="searchtip">Search <strong>this</strong> manual.
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Search" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </p>
+    <p class="searchtip">Search the MongoDB wiki.
+    <form class="search" action="http://www.mongodb.org/dosearchsite.action" method="get">
+      <input type="text" name="queryString" />
+      <input type="submit" value="Wiki" />
+    </form>
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script><h3>MongoDB Wiki</h3>
+
+<ul>
+ <li><strong>Getting Started</strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Quickstart">Quickstart</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Introduction">Introduction</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Downloads">Downloads</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Features">Features</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/SQL+to+MongoDB+Mapping+Chart">SQL to MongoDB Mapping</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Developer+Zone">Developer Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Connections">Connections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Databases">Databases</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Collections">Collections</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Documents">Documents</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS">GridFS</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Indexes">Indexes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Querying">Querying</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Aggregation">Aggregation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Optimization">Optimization</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Inserting">Inserting</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Updating">Updating</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Removing">Removing</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MapReduce">MapReduce</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://mongodb.org/display/DOCS/Admin+Zone">Administrative Documentation</a></strong>
+   <ul>
+     <li><a href="http://mongodb.org/display/DOCS/Components">Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Journaling">Journaling</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Production+Notes">Production Notes</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Replication">Replication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Sharding">Sharding</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Monitoring+and+Diagnostics">Monitoring and Diagnostics</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Backups">Backups</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Durability+and+Repair">Durability and Repair</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Security+and+Authentication">Security and Authentication</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Starting+and+Stopping+Mongo">Starting/Stopping MongoDB</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/GridFS+Tools">GridFS Tools</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/DBA+Operations+from+the+Shell">DB Operations from the Shell</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Architecture+and+Components">Architecture and Components</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Windows">Windows</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Troubleshooting">Troubleshooting</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Community">Community and Ecosystem</a></strong>
+   <ul>
+     <li><a href="http://10gen.com">10gen</a></li>
+     <li><a href="http://www.mongodb.org/events">MongoDB Events</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Masters">MongoDB Masters</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Slides+and+Video">Slides and Video</a></li>
+     <li><a href="http://cookbook.mongodb.org/">Cookbook</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Hosting+Center">Hosting Center</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/MongoDB+Monitoring+Service">MongoDB Monitoring Service</a> (<a href="http://mms.10gen.com/help/">docs</a>)</li>
+     <li><a href="http://mongodb.org/display/DOCS/Admin+UIs">Administrative Interfaces</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/International+Docs">International Documentation</a></li>
+     <li><a href="http://mongodb.org/display/DOCS/Books">MongoDB Books</a></li>
+   </ul>
+ </li>
+ <li><strong><a href="http://www.mongodb.org/display/DOCS/Drivers">Drivers</a></strong>
+   <ul>
+     <li>JavaScript (<a href="http://mongodb.org/display/DOCS/Javascript+Language+Center">wiki</a>, <a href="http://api.mongodb.org/js/current">docs</a>)</li>
+     <li>Python (<a href="http://mongodb.org/display/DOCS/Python+Language+Center">wiki</a>, <a href="http://api.mongodb.org/python/current">docs</a>)</li>
+     <li>Ruby (<a href="http://mongodb.org/display/DOCS/Ruby+Language+Center">wiki</a>, <a href="http://api.mongodb.org/ruby/current">docs</a>)</li>
+     <li>PHP (<a href="http://mongodb.org/display/DOCS/PHP+Language+Center">wiki</a>, <a href="http://php.net/mongo/">docs</a>)</li>
+     <li>Perl (<a href="http://mongodb.org/display/DOCS/Perl+Language+Center">wiki</a>, <a href="http://api.mongodb.org/perl/current/">docs</a>)</li>
+     <li>Java (<a href="http://mongodb.org/display/DOCS/Java+Language+Center">wiki</a>, <a href="http://api.mongodb.org/java/current">docs</a>)</li>
+     <li>Scala (<a href="http://mongodb.org/display/DOCS/Scala+Language+Center">wiki</a>, <a href="http://api.mongodb.org/scala/casbah/current/">docs</a>)</li>
+     <li>C# (<a href="http://mongodb.org/display/DOCS/CSharp+Language+Center">wiki</a>, <a href="http://api.mongodb.org/csharp/current/">docs</a>)</li>
+     <li>C (<a href="http://mongodb.org/display/DOCS/C+Language+Center">wiki</a>, <a href="http://api.mongodb.org/c/current/">docs</a>)</li>
+     <li>C++ (<a href="http://mongodb.org/pages/viewpage.action?pageId=133409">wiki</a>, <a href="http://api.mongodb.org/cplusplus/current/">docs</a>)</li>
+     <li>Haskell (<a href="http://mongodb.org/display/DOCS/Haskell+Language+Center">wiki</a>, <a href="http://api.mongodb.org/haskell">docs</a>)</li>
+     <li>Erlang (<a href="http://mongodb.org/display/DOCS/Erlang+Language+Center">wiki</a>, <a href="http://api.mongodb.org/erlang">docs</a>)</li>
+   </ul>
+ </li>
+</ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+
+<div class="footer-nav">
+
+    <div class="related">
+      <h3>Navigation</h3>
+
+      <ul>
+        <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
+        <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
+        <li><a href="contents.html">MongoDB Node.JS Driver 1.4.18 documentation</a> (<a href="genindex.html">index</a>)  &raquo;</li> 
+      </ul>
+    </div></div>
+    <div class="footer">
+        &copy; Copyright 2013, MongoDB Node.JS Team 
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2.3.
+
+    <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
+    <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>
+
+    </div>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-29229787-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+
+    <script type="text/javascript">
+      document.write(unescape("%3Cscript src='" + document.location.protocol + "//munchkin.marketo.net/munchkin.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script>try { mktoMunchkin("017-HGS-593"); } catch(e) {}</script>
+  </body>
+</html>

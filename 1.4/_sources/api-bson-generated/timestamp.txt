@@ -1,0 +1,54 @@
+===========
+Timestamp()
+===========
+
+------------------
+Constructor
+------------------
+
+
+Defines a Timestamp class for representing a 64-bit two's-complement
+integer value, which faithfully simulates the behavior of a Java "Timestamp". This
+implementation is derived from TimestampLib in GWT.
+
+
+  .. js:class:: Timestamp()
+
+   :param number low: the low (signed) 32 bits of the Timestamp.
+   :param number high: the high (signed) 32 bits of the Timestamp.
+
+
+Constructs a 64-bit two's-complement integer, given its low and high 32-bit
+values as *signed* integers.  See the from* functions below for more
+convenient ways of constructing Timestamps.
+
+
+
+The internal representation of a Timestamp is the two given signed, 32-bit values.
+We use 32-bit pieces because these are the size of integers on which
+Javascript performs bit-operations.  For operations like addition and
+multiplication, we split each number into 16-bit pieces, which can easily be
+multiplied within Javascript's floating-point representation without overflow
+or change in sign.
+
+
+
+In the algorithms below, we frequently reduce the negative case to the
+positive case by negating the input(s) and then post-processing the result.
+Note that we must ALWAYS check specially whether those values are MIN_VALUE
+(-2^63) because -MIN_VALUE == MIN_VALUE (since 2^63 cannot be represented as
+a positive number, it overflows back into a negative).  Not handling this
+case would often result in infinite recursion.
+
+
+-----
+toInt
+-----
+
+
+Return the int value.
+
+.. js:function:: toInt()
+
+   :returns: number the value, assuming it is a 32-bit integer.
+

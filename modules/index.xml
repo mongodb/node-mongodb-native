@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+      <title>Modules on  </title>
+      <generator uri="https://hugo.spf13.com">Hugo</generator>
+    <link>/node-mongodb-native/modules/index.xml/</link>
+    
+    
+    
+    <updated>Mon, 01 Jul 2013 00:00:00 UTC</updated>
+    
+    <item>
+      <title>Mongoose</title>
+      <link>/node-mongodb-native/modules/mongoose/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/modules/mongoose/</guid>
+      <description>
+
+&lt;h1 id=&#34;toc_0&#34;&gt;Mongoose&lt;/h1&gt;
+
+&lt;p&gt;Mongoose is the premier MongoDB Object Document Modeling Framework. It allows you to create straight forward schema based models that can interact with MongoDB. Learn all about Mongoose at.&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;http://mongoosejs.com/&#34;&gt;http://mongoosejs.com/&lt;/a&gt;&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

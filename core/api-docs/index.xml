@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+      <title>Api-Docs on MongoDB Core 1.0.0 </title>
+      <generator uri="https://hugo.spf13.com">Hugo</generator>
+    <link>/node-mongodb-native/core/api-docs/index.xml/</link>
+    
+    
+    
+    <updated>Mon, 01 Jul 2013 00:00:00 UTC</updated>
+    
+    <item>
+      <title>API Documentation</title>
+      <link>/node-mongodb-native/core/api-docs/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/core/api-docs/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

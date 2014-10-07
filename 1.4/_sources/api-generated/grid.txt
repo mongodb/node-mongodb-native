@@ -1,0 +1,277 @@
+======
+Grid()
+======
+
+------------------
+Constructor
+------------------
+
+
+A class representation of a simple Grid interface.
+
+
+  .. js:class:: Grid()
+
+   :param db db: A database instance to interact with.
+   :param string [fsName]: optional different root collection for GridFS.
+   :returns: grid 
+
+
+
+---
+put
+---
+
+
+Puts binary data to the grid
+
+
+
+Options
+ - **_id** {Any}, unique id for this file
+ - **root** {String}, root collection to use. Defaults to **{GridStore.DEFAULT_ROOT_COLLECTION}**.
+ - **content_type** {String}, mime type of the file. Defaults to **{GridStore.DEFAULT_CONTENT_TYPE}**.
+ - **chunk_size** {Number}, size for the chunk. Defaults to **{Chunk.DEFAULT_CHUNK_SIZE}**.
+ - **metadata** {Object}, arbitrary data the user wants to store.
+
+.. js:function:: put(data[, options], callback)
+
+   :param buffer data: buffer with Binary Data.
+   :param object [options]: the options for the files.
+   :param function callback: this will be called after this method is executed. The first parameter will contain an Error object if an error occured or null otherwise. The second parameter will contain a reference to this object.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple example showing the usage of the put method.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Create a new grid instance
+       var grid = new Grid(db, 'fs');
+       // Some data to write
+       var originalData = new Buffer('Hello world');
+       // Write data to grid
+       grid.put(originalData, {}, function(err, result) {
+         // Fetch the content
+         grid.get(result._id, function(err, data) {
+           assert.deepEqual(originalData.toString('base64'), data.toString('base64'));
+     
+           db.close();
+         });
+       });
+     });
+
+  
+  
+  A simple example showing the usage of the put method.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Create a new grid instance
+       var grid = new Grid(db, 'fs');
+       // Some data to write
+       var originalData = new Buffer('Hello world');
+       // Write data to grid
+       var id = 123;
+       grid.put(originalData, {_id: id}, function(err, result) {
+         // Fetch the content
+         grid.get(id, function(err, data) {
+           assert.deepEqual(originalData.toString('base64'), data.toString('base64'));
+     
+           db.close();
+         });
+       });
+     });
+
+  
+  
+  A simple example showing the usage of the put method.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Create a new grid instance
+       var grid = new Grid(db, 'fs');
+       // Some data to write
+       var originalData = new Buffer('Hello world');
+       // Write data to grid
+       var id = 'test';
+       grid.put(originalData, {_id: id}, function(err, result) {
+         assert.equal(result._id, id);
+     
+         // Fetch the content
+         grid.get(id, function(err, data) {
+           assert.deepEqual(originalData.toString('base64'), data.toString('base64'));
+     
+           db.close();
+         });
+       });
+     });
+
+
+---
+get
+---
+
+
+Get binary data to the grid
+
+.. js:function:: get(id, callback)
+
+   :param any id: for file.
+   :param function callback: this will be called after this method is executed. The first parameter will contain an Error object if an error occured or null otherwise. The second parameter will contain a reference to this object.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple example showing the usage of the get method.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Create a new grid instance
+       var grid = new Grid(db, 'fs');
+       // Some data to write
+       var originalData = new Buffer('Hello world');
+       // Write data to grid
+       grid.put(originalData, {}, function(err, result) {
+         // Fetch the content
+         grid.get(result._id, function(err, data) {
+           assert.deepEqual(originalData.toString('base64'), data.toString('base64'));
+     
+           // Should fail due to illegal objectID
+           grid.get('not an id', function(err, result) {
+             assert.ok(err != null);
+     
+             db.close();
+           });
+         });
+       });
+     });
+
+
+------
+delete
+------
+
+
+Delete file from grid
+
+.. js:function:: delete(id, callback)
+
+   :param any id: for file.
+   :param function callback: this will be called after this method is executed. The first parameter will contain an Error object if an error occured or null otherwise. The second parameter will contain a reference to this object.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple example showing the usage of the delete method.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Create a new grid instance
+       var grid = new Grid(db, 'fs');
+       // Some data to write
+       var originalData = new Buffer('Hello world');
+       // Write data to grid
+       grid.put(originalData, {}, function(err, result) {
+     
+         // Delete file
+         grid.delete(result._id, function(err, result2) {
+           assert.equal(null, err);
+           assert.equal(true, result2);
+     
+           // Fetch the content, showing that the file is gone
+           grid.get(result._id, function(err, data) {
+             assert.ok(err != null);
+             assert.equal(null, data);
+     
+             db.close();
+           });
+         });
+       });
+     });
+

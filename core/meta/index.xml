@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+      <title>Meta on MongoDB Core 1.0.0 </title>
+      <generator uri="https://hugo.spf13.com">Hugo</generator>
+    <link>/node-mongodb-native/core/meta/index.xml/</link>
+    
+    
+    
+    <updated>Mon, 01 Jul 2013 00:00:00 UTC</updated>
+    
+    <item>
+      <title>License</title>
+      <link>/node-mongodb-native/core/meta/license/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/core/meta/license/</guid>
+      <description>
+
+&lt;h2 id=&#34;toc_0&#34;&gt;Licensed Under Apache License 2.0&lt;/h2&gt;
+
+&lt;p&gt;Licensed under the Apache License, Version 2.0 (the &amp;ldquo;License&amp;rdquo;); you may not use this file except in compliance with the License. You may obtain a copy of the License at&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;http://www.apache.org/licenses/LICENSE-2.0&#34;&gt;http://www.apache.org/licenses/LICENSE-2.0&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an &amp;ldquo;AS IS&amp;rdquo; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Release Notes</title>
+      <link>/node-mongodb-native/core/meta/release-notes/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/core/meta/release-notes/</guid>
+      <description>
+
+&lt;h2 id=&#34;toc_0&#34;&gt;1.0.0&lt;/h2&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

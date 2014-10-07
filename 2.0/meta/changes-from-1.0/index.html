@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keyword" content="">
+    <link rel="shortcut icon" href="/node-mongodb-native/2.0/img/favicon.png">
+
+    <title>Migrating to 2.X</title>
+
+    <link href="/node-mongodb-native/2.0/css/bootstrap-theme.css" rel="stylesheet">
+    <link href="/node-mongodb-native/2.0/assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/node-mongodb-native/2.0/css/style.css" rel="stylesheet">
+    <link href="/node-mongodb-native/2.0/css/style-responsive.css" rel="stylesheet" />
+    <link href="/node-mongodb-native/2.0/css/monokai_sublime.css" rel="stylesheet" />
+
+  </head>
+
+  <body>
+  
+  <section id="container" class="">
+
+      
+      <header class="header black-bg">
+            <div class="toggle-nav">
+                <i class="fa fa-bars"></i>
+                <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom"></div>
+            </div>
+
+            
+            <a href="/node-mongodb-native/2.0/.." class="logo"><img src="/node-mongodb-native/2.0/img/logo-mongodb-header.png" style="height:40px;"></a>
+
+            
+            <div class="top-nav notification-row">
+                
+                <div class="hidden-xs nav-github pull-right">
+                    <span rel="show-github" data-user="mongodb" data-repo="node-mongodb-native"></span>
+                    <span rel="show-github" data-user="mongodb" data-repo="node-mongodb-native" data-type="fork"></span>
+                    <a href='http://travis-ci.org/mongodb/node-mongodb-native'><img src='https://secure.travis-ci.org/mongodb/node-mongodb-native.png'/><a>
+                </div>
+            </div>
+
+            <div class="nav title-row" id="top_menu">
+                <h1 class="nav top-menu"> MongoDB 2.0.0 Driver </h1>
+            </div>
+      </header>
+      
+
+
+<aside>
+    <div id="sidebar"  class="nav-collapse ">
+        
+        <ul class="sidebar-menu">
+          
+          
+              
+                <li>
+                <a class="" href="/node-mongodb-native/">
+                    <i class='fa fa-file-text'></i>
+                    
+                    <span>driver portal</span>
+                </a>
+              
+              </li>
+          
+              
+                <li>
+                <a class="" href="/node-mongodb-native/1.4">
+                    <i class='fa fa-file-text'></i>
+                    
+                    <span>legacy docs 1.4.X</span>
+                </a>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu active">
+            <a href="javascript:;" class="">
+                <i class='fa fa-gift'></i>
+                
+                <span>about driver</span>
+                <span class="menu-arrow fa fa-angle-down"></span>
+            </a>
+                <ul class="sub open">
+                    
+                    <li><a href="/node-mongodb-native/2.0/meta/license/"> License </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/meta/release-notes/"> Release Notes </a> </li>
+                    
+                    <li class="active"><a href="/node-mongodb-native/2.0/meta/changes-from-1.0/"> Migrating to 2.X </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-road'></i>
+                
+                <span>getting started</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/2.0/overview/introduction/"> Introduction </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/overview/installing/"> Installing The Driver </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/overview/quickstart/"> QuickStart </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-file-text'></i>
+                
+                <span>api</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/2.0/api-docs/"> API Documentation </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-group'></i>
+                
+                <span>community</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/2.0/community/mailing-list/"> Mailing List </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/community/contributing/"> Contributing </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-book'></i>
+                
+                <span>tutorials</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/connecting/"> Connecting To MongoDB </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/urls/"> Connection URI </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/crud_operations/"> CRUD Operations </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/aggregation/"> Aggregation </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/streams/"> Streams </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/gridfs/"> GridFS </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/logging/"> Logging </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-book'></i>
+                
+                <span>articles</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/2.0/articles/node_knockout_article_1/"> Node Knockout, Basics </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/articles/node_knockout_article_2/"> Node Knockout, GridFS </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/articles/node_knockout_article_3/"> Node Knockout, GEO </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+            <li> <a href="https://jira.mongodb.org/browse/NODE" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
+            
+              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/meta/changes-from-1.0.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
+            
+        </ul>
+        
+    </div>
+</aside>
+
+
+
+      
+      <section id="main-content">
+          <section class="wrapper">
+
+              
+                  
+                      
+                      
+                          
+                          
+                          
+                      
+                      
+                  
+              
+
+              <div class="row">
+                  <div class="col-md-1">
+                      
+                      
+                      
+                  </div>
+                <div class="col-md-10">
+                    <section class="panel">
+                          
+                              
+                          
+                    <div class="panel-body">
+
+
+
+<h1 id="toc_0">Migrating Your Application To 2.0</h1>
+
+<p>There are some key changes in the driver going from 1.X to 2.X that one needs to be aware off before changing your application to using the new 2.X versions. There has been some cleanup of API&rsquo;s and some deprecations of 1.X features.</p>
+
+<h2 id="toc_1">Design differences in 2.X</h2>
+
+<p>One of the main changes is that the driver has been split into two pieces. There is a new <code>mongodb-core</code> that contains the low level MongoDB API&rsquo;s while <code>mongodb</code> contains the high level driver. <code>mongodb-core</code> is targeted to creators of libraries like <code>Mongoose</code> and other ODM&rsquo;s who do not need the abstractions available in the <code>mongodb</code> driver. The driver is also as of the time of writing compatible with the 0.11.x node.js branch including Kerberos support as well as MongoDB 2.8.</p>
+
+<h2 id="toc_2">Changes</h2>
+
+<p>We will outline where changes have occurred that could break your existing application.</p>
+
+<h3 id="toc_3">Node.JS versions and Streams</h3>
+
+<p>The 2.0 driver drops support for 0.8.x style streams and moves to 0.10.x or higher style pull based streams making for more reliable and faster streams. Backwards compatibility is by using the <code>readable-stream</code> npm package that might cause some slight behavior changes for the cursor streams.</p>
+
+<p>All dependencies have now been updated to use the <code>nan</code> package meaning they will compile and work on 0.11.x or higher.</p>
+
+<h3 id="toc_4">Grid Object</h3>
+
+<p>The grid object has been removed as it&rsquo;s not widely used and offers very limited GridStore capabilities.</p>
+
+<h3 id="toc_5">Db Object</h3>
+
+<p>The db instance object have had several changes made to it. We&rsquo;ve removed the following methods.</p>
+
+<ul>
+<li><code>db.dereference</code> due to db references being deprecated in the server.</li>
+<li><code>db.cursorInfo</code> removed as it never worked reliably.</li>
+<li><code>db.stats</code> removed as inconsistent.</li>
+<li><code>db.collectionNames</code> removed as it&rsquo;s just a specialized version of the new <code>listCollections</code> helper.</li>
+<li><code>db.collectionInfo</code> removed as it&rsquo;s not compatible with the new MongoDB 2.8 or higher alternative storage enginers.</li>
+</ul>
+
+<p>Added the following method</p>
+
+<ul>
+<li><code>db.listCollections</code> to replace all other collection inquiry method as it will do the correct thing for MongoDB 2.8 and higher as well as provide backwards compatibility for MongoDB 2.6 or lower.</li>
+</ul>
+
+<h3 id="toc_6">Collection Object</h3>
+
+<p>A collection instance has also had several changes made to it. Most importantly we now return the <code>mongodb-core</code> result objects directly with all the associated information returned from the server instead of the current selective information returned in the 1.4.x version.</p>
+
+<p>We&rsquo;ve added the following new methods</p>
+
+<ul>
+<li><code>collection.insertOne</code> Insert a single document.</li>
+<li><code>collection.insertMany</code> Insert an array of documents.</li>
+<li><code>collection.replaceOne</code> Replace an existing document fully.</li>
+<li><code>collection.updateOne</code> Update a single document.</li>
+<li><code>collection.updateMany</code> Update multiple documents in one go.</li>
+<li><code>collection.removeOne</code> Remove a single document.</li>
+<li><code>collection.removeMany</code> Remove multiple documents in one go.</li>
+<li><code>collection.findOneAndUpdate</code> Use findAndModify to update a document.</li>
+<li><code>collection.findOneAndRemove</code> Use findAndModify to remove a specific document.</li>
+<li><code>collection.findOneAndReplace</code> Use findAndModify to replace a specific document.</li>
+</ul>
+
+<p>The current <code>insert</code>, <code>update</code> and <code>remove</code> methods are marked for deprecation and will be removed in a future 3.0 driver. These 3 methods now also return the full <code>mongodb-core</code> results and have had their third return value removed to ensure less compatibility problems with orchestration libraries like <code>async</code>.</p>
+
+<p>The insert methods are now capping at the <code>maxWriteBatchSize</code> passed back from MongoDB on the results from the <code>ismaster</code> command. For MongoDB 2.4 or lower this means a max of 1000 documents in each insert batch. Legacy insert mode has been deprecated in favor of proper emulation of current 2.6 or higher write commands.</p>
+
+<p>Another important change is in how <code>collection.find</code> works. The idea is to chain commands instead of passing them into the <code>find</code> method. It still supports existing behavior from 1.4 so no code should break but the API documentation reflects the new preferred way to use the find to execute queries.</p>
+
+<h3 id="toc_7">GridStore</h3>
+
+<p>The GridStore object has had some major changes due to issues discovered by users related to parallel writing using the previous available <code>w+</code> append mode. Thus <code>w+</code> in 2.0 only allows for changes to the file metadata and does not allow for appending to a file avoiding the possible data corruption. The hope is to create a new GridStore spec in the future that allows for proper handling parallel writing to an existing file but this requires changes for all drivers as well as the server.</p>
+
+<h3 id="toc_8">MongoClient</h3>
+
+<p>MongoClient now only has the class method <code>connect</code>. Constructing of a new MongoClient using <code>Server</code>, <code>ReplSet</code> or <code>Mongos</code> has been removed due to the confusion it caused in duplicating the way one can build a topology connection using <code>Db</code> in 1.4. <code>MongoClient.connect</code> is the recommended way to connect to a MongoDB topology.</p>
+
+                      
+                      <div id="disqus_thread"></div>
+                      <script type="text/javascript">
+                           
+                          var disqus_shortname = 'nodejsmongodbdriver'; 
+
+                           
+                          (function() {
+                              var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                              dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                              (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                          })();
+                      </script>
+                      <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+                      <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+                      
+                    </div>
+                    </section>
+                </div>
+                <div class="col-md-1">
+                    
+                    
+                    
+                </div>
+              </div>
+              
+          </section>
+      </section>
+     
+  </section>
+  
+    
+    <script src="/node-mongodb-native/2.0/js/jquery-2.1.1.min.js"></script>
+    <script src="/node-mongodb-native/2.0/js/jquery.scrollTo.min.js"></script>
+    <script src="/node-mongodb-native/2.0/js/bootstrap.min.js"></script>
+    
+    <script src="/node-mongodb-native/2.0/js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="/node-mongodb-native/2.0/js/scripts.js"></script>
+    <script async defer id="github-bjs" src="/node-mongodb-native/2.0/js/buttons.js"></script>
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-29229787-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>
+

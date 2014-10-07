@@ -1,0 +1,1904 @@
+===========
+GridStore()
+===========
+
+------------------
+Constructor
+------------------
+
+
+A class representation of a file stored in GridFS.
+
+
+  .. js:class:: GridStore()
+
+   :param db db: A database instance to interact with.
+   :param any [id]: optional unique id for this file
+   :param string [filename]: optional filename for this file, no unique constrain on the field
+   :param string mode: set the mode for this file.
+   :param object options: optional properties to specify.
+   :returns: gridstore 
+
+
+Modes
+ - **"r"** - read only. This is the default mode.
+ - **"w"** - write in truncate mode. Existing data will be overwriten.
+ - **w+"** - write in edit mode (append is not guaranteed for concurrent operations)
+
+
+
+Options
+ - **root** {String}, root collection to use. Defaults to **{GridStore.DEFAULT_ROOT_COLLECTION}**.
+ - **content_type** {String}, mime type of the file. Defaults to **{GridStore.DEFAULT_CONTENT_TYPE}**.
+ - **chunk_size** {Number}, size for the chunk. Defaults to **{Chunk.DEFAULT_CHUNK_SIZE}**.
+ - **metadata** {Object}, arbitrary data the user wants to store.
+ - **readPreference** {String}, the prefered read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+ - **w**, {Number/String, > -1 || 'majority' || tag name} the write concern for the operation where < 1 is no acknowlegement of write and w >= 1, w = 'majority' or tag acknowledges the write
+ - **wtimeout**, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
+ - **fsync**, (Boolean, default:false) write waits for fsync before returning, from MongoDB 2.6 on, fsync cannot be combined with journal
+ - **j**, (Boolean, default:false) write waits for journal sync before returning
+
+
+------------------
+Constants
+------------------
+
+.. csv-table:: 
+   :header: "Constant Name", "Value", "Description"
+   :widths: 15, 10, 30
+
+   "GridStore.DEFAULT_ROOT_COLLECTION", "'fs'", "The collection to be used for holding the files and chunks collection."
+   "GridStore.DEFAULT_CONTENT_TYPE", "'binary/octet-stream'", "Default file mime type"
+   "GridStore.IO_SEEK_SET", "0", "Seek mode where the given length is absolute."
+   "GridStore.IO_SEEK_CUR", "1", "Seek mode where the given length is an offset to the current read/write head."
+   "GridStore.IO_SEEK_END", "2", "Seek mode where the given length is an offset to the end of the file."
+
+------------------
+Properties
+------------------
+
+
+Returns the current chunksize of the file.
+
+.. js:attribute:: chunkSize number [Getter|Setter]
+
+
+
+The md5 checksum for this file.
+
+.. js:attribute:: md5 number [Getter|Setter]
+
+
+----
+open
+----
+
+
+Opens the file from the database and initialize this object. Also creates a
+new one if file does not exist.
+
+.. js:function:: open(callback)
+
+   :param function callback: this will be called after executing this method. The first parameter will contain an **{Error}** object and the second parameter will be null if an error occured. Otherwise, the first parameter will be null and the second will contain the reference to this object.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple example showing how to save a file with a filename allowing for multiple files with the same name
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Create a file and open it
+       var gridStore = new GridStore(db, new ObjectID(), "test_gs_getc_file", "w");
+       gridStore.open(function(err, gridStore) {
+         // Write some content to the file
+         gridStore.write(new Buffer("hello, world!", "utf8"), function(err, gridStore) {
+           // Flush the file to GridFS
+           gridStore.close(function(err, fileData) {
+             assert.equal(null, err);
+     
+             // Create another file with same name and and save content to it
+             gridStore = new GridStore(db, new ObjectID(), "test_gs_getc_file", "w");
+             gridStore.open(function(err, gridStore) {
+               // Write some content to the file
+               gridStore.write(new Buffer("hello, world!", "utf8"), function(err, gridStore) {
+                 // Flush the file to GridFS
+                 gridStore.close(function(err, fileData) {
+                   assert.equal(null, err);
+     
+                   // Open the file in read mode using the filename
+                   var gridStore2 = new GridStore(db, "test_gs_getc_file", "r");
+                   gridStore2.open(function(err, gridStore) {
+     
+                     // Read first character and verify
+                     gridStore.getc(function(err, chr) {
+                       assert.equal('h', chr);
+     
+                       // Open the file using an object id
+                       gridStore2 = new GridStore(db, fileData._id, "r");
+                       gridStore2.open(function(err, gridStore) {
+     
+                         // Read first character and verify
+                         gridStore.getc(function(err, chr) {
+                           assert.equal('h', chr);
+     
+                           db.close();
+                         })
+                       });
+                     });
+                   });
+                 });
+               });
+             });
+           });
+         });
+       });
+     });
+
+  
+  
+  A simple example showing opening a file using a filename, writing to it and saving it.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Create a new instance of the gridstore
+       var gridStore = new GridStore(db, 'ourexamplefiletowrite.txt', 'w');
+     
+       // Open the file
+       gridStore.open(function(err, gridStore) {
+     
+         // Write some data to the file
+         gridStore.write('bar', function(err, gridStore) {
+           assert.equal(null, err);
+     
+           // Close (Flushes the data to MongoDB)
+           gridStore.close(function(err, result) {
+             assert.equal(null, err);
+     
+             // Verify that the file exists
+             GridStore.exist(db, 'ourexamplefiletowrite.txt', function(err, result) {
+               assert.equal(null, err);
+               assert.equal(true, result);
+     
+               db.close();
+             });
+           });
+         });
+       });
+     });
+
+  
+  
+  A simple example showing opening a file using an ObjectID, writing to it and saving it.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Our file ID
+       var fileId = new ObjectID();
+     
+       // Create a new instance of the gridstore
+       var gridStore = new GridStore(db, fileId, 'w');
+     
+       // Open the file
+       gridStore.open(function(err, gridStore) {
+     
+         // Write some data to the file
+         gridStore.write('bar', function(err, gridStore) {
+           assert.equal(null, err);
+     
+           // Close (Flushes the data to MongoDB)
+           gridStore.close(function(err, result) {
+             assert.equal(null, err);
+     
+             // Verify that the file exists
+             GridStore.exist(db, fileId, function(err, result) {
+               assert.equal(null, err);
+               assert.equal(true, result);
+     
+               db.close();
+             });
+           });
+         });
+       });
+     });
+
+
+---------
+writeFile
+---------
+
+
+Stores a file from the file system to the GridFS database.
+
+.. js:function:: writeFile(file, callback)
+
+   :param string file: the file to store.
+   :param function callback: this will be called after this method is executed. The first parameter will be null and the the second will contain the reference to this object.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple example showing how to write a file to Gridstore using file location path.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Our file ID
+       var fileId = new ObjectID();
+     
+       // Open a new file
+       var gridStore = new GridStore(db, fileId, 'w');
+     
+       // Read the filesize of file on disk (provide your own)
+       var fileSize = fs.statSync('./test/tests/functional/gridstore/test_gs_weird_bug.png').size;
+       // Read the buffered data for comparision reasons
+       var data = fs.readFileSync('./test/tests/functional/gridstore/test_gs_weird_bug.png');
+     
+       // Open the new file
+       gridStore.open(function(err, gridStore) {
+     
+         // Write the file to gridFS
+         gridStore.writeFile('./test/tests/functional/gridstore/test_gs_weird_bug.png', function(err, doc) {
+     
+           // Read back all the written content and verify the correctness
+           GridStore.read(db, fileId, function(err, fileData) {
+             assert.equal(data.toString('base64'), fileData.toString('base64'))
+             assert.equal(fileSize, fileData.length);
+     
+             db.close();
+           });
+         });
+       });
+     });
+
+  
+  
+  A simple example showing how to write a file to Gridstore using a file handle.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Our file ID
+       var fileId = new ObjectID();
+     
+       // Open a new file
+       var gridStore = new GridStore(db, fileId, 'w');
+     
+       // Read the filesize of file on disk (provide your own)
+       var fileSize = fs.statSync('./test/tests/functional/gridstore/test_gs_weird_bug.png').size;
+       // Read the buffered data for comparision reasons
+       var data = fs.readFileSync('./test/tests/functional/gridstore/test_gs_weird_bug.png');
+     
+       // Open a file handle for reading the file
+       var fd = fs.openSync('./test/tests/functional/gridstore/test_gs_weird_bug.png', 'r', 0666);
+     
+       // Open the new file
+       gridStore.open(function(err, gridStore) {
+     
+         // Write the file to gridFS using the file handle
+         gridStore.writeFile(fd, function(err, doc) {
+     
+           // Read back all the written content and verify the correctness
+           GridStore.read(db, fileId, function(err, fileData) {
+             assert.equal(data.toString('base64'), fileData.toString('base64'));
+             assert.equal(fileSize, fileData.length);
+     
+             db.close();
+           });
+         });
+       });
+     });
+
+
+-----
+close
+-----
+
+
+Saves this file to the database. This will overwrite the old entry if it
+already exists. This will work properly only if mode was initialized to
+"w" or "w+".
+
+.. js:function:: close(callback)
+
+   :param function callback: this will be called after executing this method. Passes an **{Error}** object to the first parameter and null to the second if an error occured. Otherwise, passes null to the first and a reference to this object to the second.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple example showing how to use the write command with strings and Buffers.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Our file ID
+       var fileId = new ObjectID();
+     
+       // Open a new file
+       var gridStore = new GridStore(db, fileId, 'w');
+     
+       // Open the new file
+       gridStore.open(function(err, gridStore) {
+     
+         // Write a text string
+         gridStore.write('Hello world', function(err, gridStore) {
+     
+           // Close the
+           gridStore.close(function(err, result) {
+             assert.equal(err, null);
+     
+             db.close();
+           });
+         });
+       });
+     });
+
+
+---------------
+chunkCollection
+---------------
+
+
+Retrieve this file's chunks collection.
+
+.. js:function:: chunkCollection(callback)
+
+   :param function callback: this will be called after executing this method. An exception object will be passed to the first parameter when an error occured or null otherwise. A new **{Collection}** object will be passed to the second parameter if no error occured.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple example showing how to access the chunks collection object.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Our file ID
+       var fileId = new ObjectID();
+     
+       // Open a new file
+       var gridStore = new GridStore(db, fileId, 'w');
+     
+       // Open the new file
+       gridStore.open(function(err, gridStore) {
+     
+         // Access the Chunk collection
+         gridStore.chunkCollection(function(err, collection) {
+           assert.equal(err, null);
+     
+           db.close();
+         });
+       });
+     });
+
+
+------
+unlink
+------
+
+
+Deletes all the chunks of this file in the database.
+
+.. js:function:: unlink(callback)
+
+   :param function callback: this will be called after this method executes. Passes null to the first and true to the second argument.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple example showing how to use the instance level unlink command to delete a gridstore item.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Our file ID
+       var fileId = new ObjectID();
+     
+       // Open a new file
+       var gridStore = new GridStore(db, fileId, 'w');
+     
+       // Open the new file
+       gridStore.open(function(err, gridStore) {
+     
+         // Write a text string
+         gridStore.write('Hello world', function(err, gridStore) {
+     
+           // Close the
+           gridStore.close(function(err, result) {
+             assert.equal(err, null);
+     
+             // Open the file again and unlin it
+             new GridStore(db, fileId, 'r').open(function(err, gridStore) {
+     
+               // Unlink the file
+               gridStore.unlink(function(err, result) {
+                 assert.equal(null, err);
+     
+                 // Verify that the file no longer exists
+                 GridStore.exist(db, fileId, function(err, result) {
+                   assert.equal(null, err);
+                   assert.equal(false, result);
+     
+                   db.close();
+                 });
+               });
+             });
+           });
+         });
+       });
+     });
+
+
+----------
+collection
+----------
+
+
+Retrieves the file collection associated with this object.
+
+.. js:function:: collection(callback)
+
+   :param function callback: this will be called after executing this method. An exception object will be passed to the first parameter when an error occured or null otherwise. A new **{Collection}** object will be passed to the second parameter if no error occured.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple example showing how to access the files collection object.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Our file ID
+       var fileId = new ObjectID();
+     
+       // Open a new file
+       var gridStore = new GridStore(db, fileId, 'w');
+     
+       // Open the new file
+       gridStore.open(function(err, gridStore) {
+     
+         // Access the Chunk collection
+         gridStore.collection(function(err, collection) {
+           assert.equal(err, null);
+     
+           db.close();
+         });
+       });
+     });
+
+
+---------
+readlines
+---------
+
+
+Reads the data of this file.
+
+.. js:function:: readlines([separator], callback)
+
+   :param string [separator]: the character to be recognized as the newline separator.
+   :param function callback: This will be called after this method is executed. The first parameter will be null and the second parameter will contain an array of strings representing the entire data, each element representing a line including the separator character.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple example showing reading back using readlines to split the text into lines by the seperator provided.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Our file ID
+       var fileId = new ObjectID();
+     
+       // Open a new file
+       var gridStore = new GridStore(db, fileId, 'w');
+     
+       // Open the new file
+       gridStore.open(function(err, gridStore) {
+     
+         // Write one line to gridStore
+         gridStore.puts("line one", function(err, gridStore) {
+     
+           // Write second line to gridStore
+           gridStore.puts("line two", function(err, gridStore) {
+     
+             // Write third line to gridStore
+             gridStore.puts("line three", function(err, gridStore) {
+     
+               // Flush file to disk
+               gridStore.close(function(err, result) {
+     
+                 // Open file for reading
+                 gridStore = new GridStore(db, fileId, 'r');
+                 gridStore.open(function(err, gridStore) {
+     
+                   // Read all the lines and verify correctness
+                   gridStore.readlines(function(err, lines) {
+                     assert.deepEqual(["line one\n", "line two\n", "line three\n"], lines);
+     
+                     db.close();
+                   });
+                 });
+               });
+             });
+           });
+         });
+       });
+     });
+
+
+------
+rewind
+------
+
+
+Deletes all the chunks of this file in the database if mode was set to "w" or
+"w+" and resets the read/write head to the initial position.
+
+.. js:function:: rewind(callback)
+
+   :param function callback: this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple example showing how to rewind and overwrite the file.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Our file ID
+       var fileId = new ObjectID();
+     
+       // Create a new file
+       var gridStore = new GridStore(db, fileId, "w");
+       // Open the file
+       gridStore.open(function(err, gridStore) {
+         // Write to the file
+         gridStore.write("hello, world!", function(err, gridStore) {
+           // Flush the file to disk
+           gridStore.close(function(err, result) {
+     
+             // Reopen the file
+             gridStore = new GridStore(db, fileId, "w");
+             gridStore.open(function(err, gridStore) {
+               // Write some more text to the file
+               gridStore.write('some text is inserted here', function(err, gridStore) {
+     
+                 // Let's rewind to truncate the file
+                 gridStore.rewind(function(err, gridStore) {
+     
+                   // Write something from the start
+                   gridStore.write('abc', function(err, gridStore) {
+     
+                     // Flush the data to mongodb
+                     gridStore.close(function(err, result) {
+     
+                       // Verify that the new data was written
+                       GridStore.read(db, fileId, function(err, data) {
+                         assert.equal("abc", data);
+     
+                         db.close();
+                       });
+                     });
+                   });
+                 });
+               });
+             });
+           });
+         });
+       });
+     });
+
+
+----
+read
+----
+
+
+Retrieves the contents of this file and advances the read/write head. Works with Buffers only.
+
+
+
+There are 3 signatures for this method:
+
+
+
+(callback)
+(length, callback)
+(length, buffer, callback)
+
+.. js:function:: read([length][, buffer], callback)
+
+   :param number [length]: the number of characters to read. Reads all the characters from the read/write head to the EOF if not specified.
+   :param string [buffer]: a string to hold temporary data. This is used for storing the string data read so far when recursively calling this method.
+   :param function callback: this will be called after this method is executed. null will be passed to the first parameter and a string containing the contents of the buffer concatenated with the contents read from this file will be passed to the second.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple example showing the usage of the read method.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Read in the content of a file
+       var data = fs.readFileSync('./test/tests/functional/gridstore/iya_logo_final_bw.jpg');
+       // Create a new file
+       var gs = new GridStore(db, "test", "w");
+       // Open the file
+       gs.open(function(err, gs) {
+         // Write the file to GridFS
+         gs.write(data, function(err, gs) {
+           // Flush to the GridFS
+           gs.close(function(err, gs) {
+     
+             // Define the file we wish to read
+             var gs2 = new GridStore(db, "test", "r");
+             // Open the file
+             gs2.open(function(err, gs) {
+               // Set the pointer of the read head to the start of the gridstored file
+               gs2.seek(0, function() {
+                 // Read the entire file
+                 gs2.read(function(err, data2) {
+                   // Compare the file content against the orgiinal
+                   assert.equal(data.toString('base64'), data2.toString('base64'));
+     
+                   db.close();
+                 });
+               });
+             });
+           });
+         });
+       });
+     });
+
+
+----
+tell
+----
+
+
+Retrieves the position of the read/write head of this file.
+
+.. js:function:: tell(callback)
+
+   :param function callback: This gets called after this method terminates. null is passed to the first parameter and the position is passed to the second.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple example showing the usage of the tell method.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Create a new file
+       var gridStore = new GridStore(db, "test_gs_tell", "w");
+       // Open the file
+       gridStore.open(function(err, gridStore) {
+         // Write a string to the file
+         gridStore.write("hello, world!", function(err, gridStore) {
+           // Flush the file to GridFS
+           gridStore.close(function(err, result) {
+     
+             // Open the file in read only mode
+             var gridStore2 = new GridStore(db, "test_gs_tell", "r");
+             gridStore2.open(function(err, gridStore) {
+     
+               // Read the first 5 characters
+               gridStore.read(5, function(err, data) {
+                 assert.equal("hello", data);
+     
+                 // Get the current position of the read head
+                 gridStore.tell(function(err, position) {
+                   assert.equal(5, position);
+     
+                   db.close();
+                 });
+               });
+             });
+           });
+         });
+       });
+     });
+
+
+----
+seek
+----
+
+
+Moves the read/write head to a new location.
+
+
+
+There are 3 signatures for this method
+
+
+
+Seek Location Modes
+ - **GridStore.IO_SEEK_SET**, **(default)** set the position from the start of the file.
+ - **GridStore.IO_SEEK_CUR**, set the position from the current position in the file.
+ - **GridStore.IO_SEEK_END**, set the position from the end of the file.
+
+.. js:function:: seek([position][, seekLocation], callback)
+
+   :param number [position]: the position to seek to
+   :param number [seekLocation]: seek mode. Use one of the Seek Location modes.
+   :param function callback: this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple example showing the usage of the seek method.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Create a file and open it
+       var gridStore = new GridStore(db, "test_gs_seek_with_buffer", "w");
+       gridStore.open(function(err, gridStore) {
+         // Write some content to the file
+         gridStore.write(new Buffer("hello, world!", "utf8"), function(err, gridStore) {
+           // Flush the file to GridFS
+           gridStore.close(function(result) {
+     
+             // Open the file in read mode
+             var gridStore2 = new GridStore(db, "test_gs_seek_with_buffer", "r");
+             gridStore2.open(function(err, gridStore) {
+               // Seek to start
+               gridStore.seek(0, function(err, gridStore) {
+                 // Read first character and verify
+                 gridStore.getc(function(err, chr) {
+                   assert.equal('h', chr);
+                 });
+               });
+             });
+     
+             // Open the file in read mode
+             var gridStore3 = new GridStore(db, "test_gs_seek_with_buffer", "r");
+             gridStore3.open(function(err, gridStore) {
+               // Seek to 7 characters from the beginning off the file and verify
+               gridStore.seek(7, function(err, gridStore) {
+                 gridStore.getc(function(err, chr) {
+                   assert.equal('w', chr);
+                 });
+               });
+             });
+     
+             // Open the file in read mode
+             var gridStore5 = new GridStore(db, "test_gs_seek_with_buffer", "r");
+             gridStore5.open(function(err, gridStore) {
+               // Seek to -1 characters from the end off the file and verify
+               gridStore.seek(-1, GridStore.IO_SEEK_END, function(err, gridStore) {
+                 gridStore.getc(function(err, chr) {
+                   assert.equal('!', chr);
+                 });
+               });
+             });
+     
+             // Open the file in read mode
+             var gridStore6 = new GridStore(db, "test_gs_seek_with_buffer", "r");
+             gridStore6.open(function(err, gridStore) {
+               // Seek to -6 characters from the end off the file and verify
+               gridStore.seek(-6, GridStore.IO_SEEK_END, function(err, gridStore) {
+                 gridStore.getc(function(err, chr) {
+                   assert.equal('w', chr);
+                 });
+               });
+             });
+     
+             // Open the file in read mode
+             var gridStore7 = new GridStore(db, "test_gs_seek_with_buffer", "r");
+             gridStore7.open(function(err, gridStore) {
+     
+               // Seek forward 7 characters from the current read position and verify
+               gridStore.seek(7, GridStore.IO_SEEK_CUR, function(err, gridStore) {
+                 gridStore.getc(function(err, chr) {
+                   assert.equal('w', chr);
+     
+                   // Seek forward -1 characters from the current read position and verify
+                   gridStore.seek(-1, GridStore.IO_SEEK_CUR, function(err, gridStore) {
+                     gridStore.getc(function(err, chr) {
+                       assert.equal('w', chr);
+     
+                       // Seek forward -4 characters from the current read position and verify
+                       gridStore.seek(-4, GridStore.IO_SEEK_CUR, function(err, gridStore) {
+                         gridStore.getc(function(err, chr) {
+                           assert.equal('o', chr);
+     
+                           // Seek forward 3 characters from the current read position and verify
+                           gridStore.seek(3, GridStore.IO_SEEK_CUR, function(err, gridStore) {
+                             gridStore.getc(function(err, chr) {
+                               assert.equal('o', chr);
+     
+                               db.close();
+                             });
+                           });
+                         });
+                       });
+                     });
+                   });
+                 });
+               });
+             });
+           });
+         });
+       });
+     });
+
+
+---
+eof
+---
+
+
+Verify if the file is at EOF.
+
+.. js:function:: eof()
+
+   :returns: boolean true if the read/write head is at the end of this file.
+
+
+**Examples**
+
+  
+  
+  A simple example showing the usage of the eof method.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Open the file in write mode
+       var gridStore = new GridStore(db, 'test_gs_empty_file_eof', "w");
+       gridStore.open(function(err, gridStore) {
+         // Flush the empty file to GridFS
+         gridStore.close(function(err, gridStore) {
+     
+           // Open the file in read mode
+           var gridStore2 = new GridStore(db, 'test_gs_empty_file_eof', "r");
+           gridStore2.open(function(err, gridStore) {
+             // Verify that we are at the end of the file
+             assert.equal(true, gridStore.eof());
+     
+             db.close();
+           })
+         });
+       });
+     });
+
+
+----
+getc
+----
+
+
+Retrieves a single character from this file.
+
+.. js:function:: getc(callback)
+
+   :param function callback: this gets called after this method is executed. Passes null to the first parameter and the character read to the second or null to the second if the read/write head is at the end of the file.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple example showing the usage of the seek method.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Create a file and open it
+       var gridStore = new GridStore(db, "test_gs_getc_file", "w");
+       gridStore.open(function(err, gridStore) {
+         // Write some content to the file
+         gridStore.write(new Buffer("hello, world!", "utf8"), function(err, gridStore) {
+           // Flush the file to GridFS
+           gridStore.close(function(result) {
+     
+             // Open the file in read mode
+             var gridStore2 = new GridStore(db, "test_gs_getc_file", "r");
+             gridStore2.open(function(err, gridStore) {
+     
+               // Read first character and verify
+               gridStore.getc(function(err, chr) {
+                 assert.equal('h', chr);
+     
+                 db.close();
+               });
+             });
+           });
+         });
+       });
+     });
+
+
+----
+puts
+----
+
+
+Writes a string to the file with a newline character appended at the end if
+the given string does not have one.
+
+.. js:function:: puts(string, callback)
+
+   :param string string: the string to write.
+   :param function callback: this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple example showing the usage of the puts method.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Open a file for writing
+       var gridStore = new GridStore(db, "test_gs_puts_and_readlines", "w");
+       gridStore.open(function(err, gridStore) {
+     
+         // Write a line to the file using the puts method
+         gridStore.puts("line one", function(err, gridStore) {
+     
+           // Flush the file to GridFS
+           gridStore.close(function(err, result) {
+     
+             // Read in the entire contents
+             GridStore.read(db, 'test_gs_puts_and_readlines', function(err, data) {
+               assert.equal("line one\n", data.toString());
+     
+               db.close();
+             });
+           });
+         });
+       });
+     });
+
+
+------
+stream
+------
+
+
+Returns read stream based on this GridStore file
+
+
+
+Events
+ - **data** {function(item) {}} the data event triggers when a document is ready.
+ - **end** {function() {}} the end event triggers when there is no more documents available.
+ - **close** {function() {}} the close event triggers when the stream is closed.
+ - **error** {function(err) {}} the error event triggers if an error happens.
+
+.. js:function:: stream(autoclose)
+
+   :param boolean autoclose: if true current GridStore will be closed when EOF and 'close' event will be fired
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple example showing the usage of the stream method.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db  
+     db.open(function(err, db) {
+       // Open a file for reading
+       var gridStoreR = new GridStore(db, "test_gs_read_stream", "r");
+       // Open a file for writing
+       var gridStoreW = new GridStore(db, "test_gs_read_stream", "w");
+       // Read in the data of a file
+       var data = fs.readFileSync("./test/tests/functional/gridstore/test_gs_weird_bug.png");
+     
+       var readLen = 0;
+       var gotEnd = 0;
+       
+       // Open the file we are writting to
+       gridStoreW.open(function(err, gs) {
+         // Write the file content
+         gs.write(data, function(err, gs) {
+           // Flush the file to GridFS
+           gs.close(function(err, result) {
+             
+             // Open the read file
+             gridStoreR.open(function(err, gs) {
+               
+               // Create a stream to the file
+               var stream = gs.stream(true);
+               
+               // Register events
+               stream.on("data", function(chunk) {
+                 // Record the length of the file
+                 readLen += chunk.length;
+               });
+     
+               stream.on("end", function() {              
+                 // Record the end was called
+                 ++gotEnd;
+               });
+     
+               stream.on("close", function() {
+                 // Verify the correctness of the read data
+                 assert.equal(data.length, readLen);
+                 assert.equal(1, gotEnd);
+                 
+                 db.close();
+               });
+             });
+           });
+         });
+       });
+     });
+
+  
+  
+  A simple example showing how to pipe a file stream through from gridfs to a file
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+       // Establish connection to db  
+       db.open(function(err, db) {
+         // Open a file for writing
+         var gridStoreWrite = new GridStore(db, "test_gs_read_stream_pipe", "w", {chunkSize:1024});
+         gridStoreWrite.writeFile("./test/tests/functional/gridstore/test_gs_weird_bug.png", function(err, result) {      
+           // Ensure we correctly returning a Gridstore object
+           assert.ok(typeof result.close == 'function');
+           // Open the gridStore for reading and pipe to a file
+           var gridStore = new GridStore(db, "test_gs_read_stream_pipe", "r");
+           gridStore.open(function(err, gridStore) {
+             // Create a file write stream
+             var fileStream = fs.createWriteStream("./test_gs_weird_bug_streamed.tmp");
+             // Grab the read stream
+             var stream = gridStore.stream(true);
+             // When the stream is finished close the database
+             fileStream.on("close", function(err) {          
+               // Read the original content
+               var originalData = fs.readFileSync("./test/tests/functional/gridstore/test_gs_weird_bug.png");
+               // Ensure we are doing writing before attempting to open the file
+               fs.readFile("./test_gs_weird_bug_streamed.tmp", function(err, streamedData) {                      
+                 // Compare the data
+                 for(var i = 0; i < originalData.length; i++) {
+                   assert.equal(originalData[i], streamedData[i])
+                 }
+                 
+                 // Close the database
+                 db.close();          
+               });
+             })
+     
+             // Pipe out the data
+             stream.pipe(fileStream);
+           })
+         })
+       });
+
+
+---------------
+GridStore.exist
+---------------
+
+
+Checks if a file exists in the database.
+
+
+
+Options
+ - **readPreference** {String}, the prefered read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+
+.. js:function:: GridStore.exist(db, name[, rootCollection], callback)
+
+   :param db db: the database to query.
+   :param string name: the name of the file to look for.
+   :param string [rootCollection]: the root collection that holds the files and chunks collection. Defaults to **{GridStore.DEFAULT_ROOT_COLLECTION}**.
+   :param function callback: this will be called after this method executes. Passes null to the first and passes true to the second if the file exists and false otherwise.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple example showing the usage of the Gridstore.exist method.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Open a file for writing
+       var gridStore = new GridStore(db, null, "w");
+       gridStore.open(function(err, gridStore) {
+         assert.equal(null, err);
+     
+         // Writing some content to the file
+         gridStore.write("hello world!", function(err, gridStore) {
+           assert.equal(null, err);
+     
+           // Flush the file to GridFS
+           gridStore.close(function(err, result) {
+             assert.equal(null, err);
+     
+             // Check if the file exists using the id returned from the close function
+             GridStore.exist(db, result._id, function(err, result) {
+               assert.equal(null, err);
+               assert.equal(true, result);
+             })
+     
+             // Show that the file does not exist for a random ObjectID
+             GridStore.exist(db, new ObjectID(), function(err, result) {
+               assert.equal(null, err);
+               assert.equal(false, result);
+             });
+     
+             // Show that the file does not exist for a different file root
+             GridStore.exist(db, result._id, 'another_root', function(err, result) {
+               assert.equal(null, err);
+               assert.equal(false, result);
+     
+               db.close();
+             });
+           });
+         });
+       });
+     });
+
+
+--------------
+GridStore.list
+--------------
+
+
+Gets the list of files stored in the GridFS.
+
+.. js:function:: GridStore.list(db[, rootCollection], callback)
+
+   :param db db: the database to query.
+   :param string [rootCollection]: the root collection that holds the files and chunks collection. Defaults to **{GridStore.DEFAULT_ROOT_COLLECTION}**.
+   :param function callback: this will be called after this method executes. Passes null to the first and passes an array of strings containing the names of the files.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple example showing the usage of the eof method.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Our file id
+       var fileId = new ObjectID();
+     
+       // Open a file for writing
+       var gridStore = new GridStore(db, fileId, "foobar2", "w");
+       gridStore.open(function(err, gridStore) {
+     
+         // Write some content to the file
+         gridStore.write("hello world!", function(err, gridStore) {
+           // Flush to GridFS
+           gridStore.close(function(err, result) {
+     
+             // List the existing files
+             GridStore.list(db, function(err, items) {
+               var found = false;
+               items.forEach(function(filename) {
+                 if(filename == 'foobar2') found = true;
+               });
+     
+               assert.ok(items.length >= 1);
+               assert.ok(found);
+             });
+     
+             // List the existing files but return only the file ids
+             GridStore.list(db, {id:true}, function(err, items) {
+               var found = false;
+               items.forEach(function(id) {
+                 assert.ok(typeof id == 'object');
+               });
+     
+               assert.ok(items.length >= 1);
+             });
+     
+             // List the existing files in a specific root collection
+             GridStore.list(db, 'fs', function(err, items) {
+               var found = false;
+               items.forEach(function(filename) {
+                 if(filename == 'foobar2') found = true;
+               });
+     
+               assert.ok(items.length >= 1);
+               assert.ok(found);
+             });
+     
+             // List the existing files in a different root collection where the file is not located
+             GridStore.list(db, 'my_fs', function(err, items) {
+               var found = false;
+               items.forEach(function(filename) {
+                 if(filename == 'foobar2') found = true;
+               });
+     
+               assert.ok(items.length >= 0);
+               assert.ok(!found);
+     
+               // Specify seperate id
+               var fileId2 = new ObjectID();
+               // Write another file to GridFS
+               var gridStore2 = new GridStore(db, fileId2, "foobar3", "w");
+               gridStore2.open(function(err, gridStore) {
+                 // Write the content
+                 gridStore2.write('my file', function(err, gridStore) {
+                   // Flush to GridFS
+                   gridStore.close(function(err, result) {
+     
+                     // List all the available files and verify that our files are there
+                     GridStore.list(db, function(err, items) {
+                       var found = false;
+                       var found2 = false;
+     
+                       items.forEach(function(filename) {
+                         if(filename == 'foobar2') found = true;
+                         if(filename == 'foobar3') found2 = true;
+                       });
+     
+                       assert.ok(items.length >= 2);
+                       assert.ok(found);
+                       assert.ok(found2);
+     
+                       db.close();
+                     });
+                   });
+                 });
+               });
+             });
+           });
+         });
+       });
+     });
+
+
+--------------
+GridStore.read
+--------------
+
+
+Reads the contents of a file.
+
+
+
+This method has the following signatures
+
+
+
+(db, name, callback)
+(db, name, length, callback)
+(db, name, length, offset, callback)
+(db, name, length, offset, options, callback)
+
+.. js:function:: GridStore.read(db, name[, length], [offset], [options], callback)
+
+   :param db db: the database to query.
+   :param string name: the name of the file.
+   :param number [length]: the size of data to read.
+   :param number [offset]: the offset from the head of the file of which to start reading from.
+   :param object [options]: the options for the file.
+   :param function callback: this will be called after this method executes. A string with an error message will be passed to the first parameter when the length and offset combination exceeds the length of the file while an Error object will be passed if other forms of error occured, otherwise, a string is passed. The second parameter will contain the data read if successful or null if an error occured.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple example showing the usage of the read method.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Create a new file
+       var gridStore = new GridStore(db, null, "w");
+       // Read in the content from a file, replace with your own
+       var data = fs.readFileSync("./test/tests/functional/gridstore/test_gs_weird_bug.png");
+     
+       // Open the file
+       gridStore.open(function(err, gridStore) {
+         // Write the binary file data to GridFS
+         gridStore.write(data, function(err, gridStore) {
+           // Flush the remaining data to GridFS
+           gridStore.close(function(err, result) {
+     
+             // Read in the whole file and check that it's the same content
+             GridStore.read(db, result._id, function(err, fileData) {
+               assert.equal(data.length, fileData.length);
+     
+               db.close();
+             });
+           });
+         });
+       });
+     });
+
+
+-------------------
+GridStore.readlines
+-------------------
+
+
+Reads the data of this file.
+
+.. js:function:: GridStore.readlines(db, name[, separator], [options], callback)
+
+   :param db db: the database to query.
+   :param string name: the name of the file.
+   :param string [separator]: the character to be recognized as the newline separator.
+   :param object [options]: file options.
+   :param function callback: this will be called after this method is executed. The first parameter will be null and the second parameter will contain an array of strings representing the entire data, each element representing a line including the separator character.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple example showing reading back using readlines to split the text into lines by the seperator provided.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Our file ID
+       var fileId = new ObjectID();
+     
+       // Open a new file
+       var gridStore = new GridStore(db, fileId, 'w');
+     
+       // Open the new file
+       gridStore.open(function(err, gridStore) {
+     
+         // Write one line to gridStore
+         gridStore.puts("line one", function(err, gridStore) {
+     
+           // Write second line to gridStore
+           gridStore.puts("line two", function(err, gridStore) {
+     
+             // Write third line to gridStore
+             gridStore.puts("line three", function(err, gridStore) {
+     
+               // Flush file to disk
+               gridStore.close(function(err, result) {
+     
+                 // Read back all the lines
+                 GridStore.readlines(db, fileId, function(err, lines) {
+                   assert.deepEqual(["line one\n", "line two\n", "line three\n"], lines);
+     
+                   db.close();
+                 });
+               });
+             });
+           });
+         });
+       });
+     });
+
+
+----------------
+GridStore.unlink
+----------------
+
+
+Deletes the chunks and metadata information of a file from GridFS.
+
+.. js:function:: GridStore.unlink(db, names[, options])
+
+   :param db db: the database to interact with.
+   :param string names: the name/names of the files to delete.
+   :param object [options]: the options for the files.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple example showing the usage of the GridStore.unlink method.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+     
+       // Open a new file for writing
+       var gridStore = new GridStore(db, "test_gs_unlink", "w");
+       gridStore.open(function(err, gridStore) {
+     
+         // Write some content
+         gridStore.write("hello, world!", function(err, gridStore) {
+     
+           // Flush file to GridFS
+           gridStore.close(function(err, result) {
+     
+             // Verify the existance of the fs.files document
+             db.collection('fs.files', function(err, collection) {
+               collection.count(function(err, count) {
+                 assert.equal(1, count);
+               })
+             });
+     
+             // Verify the existance of the fs.chunks chunk document
+             db.collection('fs.chunks', function(err, collection) {
+               collection.count(function(err, count) {
+                 assert.equal(1, count);
+     
+                 // Unlink the file (removing it)
+                 GridStore.unlink(db, 'test_gs_unlink', function(err, gridStore) {
+     
+                   // Verify that fs.files document is gone
+                   db.collection('fs.files', function(err, collection) {
+                     collection.count(function(err, count) {
+                       assert.equal(0, count);
+                     })
+                   });
+     
+                   // Verify that fs.chunks chunk documents are gone
+                   db.collection('fs.chunks', function(err, collection) {
+                     collection.count(function(err, count) {
+                       assert.equal(0, count);
+     
+                       db.close();
+                     })
+                   });
+                 });
+               })
+             });
+           });
+         });
+       });
+     });
+
+
+-----
+write
+-----
+
+
+Writes some data. This method will work properly only if initialized with mode "w" or "w+".
+
+.. js:function:: write(data[, close], callback)
+
+   :param string data: the data to write.
+   :param boolean [close]: closes this file after writing if set to true.
+   :param function callback: this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
+   :returns: null 
+
+
+**Examples**
+
+  
+  
+  A simple example showing how to use the write command with strings and Buffers.
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     var db = new Db('test', new Server('localhost', 27017));
+     // Establish connection to db
+     db.open(function(err, db) {
+       // Our file ID
+       var fileId = new ObjectID();
+     
+       // Open a new file
+       var gridStore = new GridStore(db, fileId, 'w');
+     
+       // Open the new file
+       gridStore.open(function(err, gridStore) {
+     
+         // Write a text string
+         gridStore.write('Hello world', function(err, gridStore) {
+     
+           // Write a buffer
+           gridStore.write(new Buffer('Buffer Hello world'), function(err, gridStore) {
+     
+             // Close the
+             gridStore.close(function(err, result) {
+     
+               // Read back all the written content and verify the correctness
+               GridStore.read(db, fileId, function(err, fileData) {
+                 assert.equal('Hello worldBuffer Hello world', fileData.toString());
+     
+                 db.close();
+               });
+             });
+           });
+         });
+       });
+     });
+

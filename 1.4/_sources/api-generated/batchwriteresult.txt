@@ -1,0 +1,142 @@
+==================
+BatchWriteResult()
+==================
+
+------------------
+Constructor
+------------------
+
+
+Create a new BatchWriteResult instance (INTERNAL TYPE, do not instantiate directly)
+
+
+  .. js:class:: BatchWriteResult()
+
+   :param object batchResult: internal data structure with results.
+   :returns: batchwriteresult a BatchWriteResult instance
+
+
+
+------------------
+Properties
+------------------
+
+.. csv-table:: 
+   :header: "Property"
+   :widths: 30
+
+   "**ok** {boolean} did bulk operation correctly execute"
+   "**nInserted** {number} number of inserted documents"
+   "**nUpdated** {number} number of documents updated logically"
+   "**nUpserted** {number} number of upserted documents"
+   "**nModified** {number} number of documents updated physically on disk"
+   "**nRemoved** {number} number of removed documents"
+
+--------------
+getUpsertedIds
+--------------
+
+
+Return an array of upserted ids
+
+.. js:function:: getUpsertedIds()
+
+   :returns: array 
+
+
+---------------
+getUpsertedIdAt
+---------------
+
+
+Return the upserted id at position x
+
+.. js:function:: getUpsertedIdAt(index)
+
+   :param number index: the number of the upserted id to return, returns undefined if no result for passed in index
+   :returns: array 
+
+
+--------------
+getRawResponse
+--------------
+
+
+Return raw internal result
+
+.. js:function:: getRawResponse()
+
+   :returns: object 
+
+
+--------------
+hasWriteErrors
+--------------
+
+
+Returns true if the bulk operation contains a write error
+
+.. js:function:: hasWriteErrors()
+
+   :returns: boolean 
+
+
+------------------
+getWriteErrorCount
+------------------
+
+
+Returns the number of write errors off the bulk operation
+
+.. js:function:: getWriteErrorCount()
+
+   :returns: number 
+
+
+---------------
+getWriteErrorAt
+---------------
+
+
+Returns a specific write error object
+
+.. js:function:: getWriteErrorAt()
+
+   :returns: writeerror 
+
+
+--------------
+getWriteErrors
+--------------
+
+
+Retrieve all write errors
+
+.. js:function:: getWriteErrors()
+
+   :returns: array 
+
+
+---------
+getLastOp
+---------
+
+
+Retrieve lastOp if available
+
+.. js:function:: getLastOp()
+
+   :returns: array 
+
+
+--------------------
+getWriteConcernError
+--------------------
+
+
+Retrieve the write concern error if any
+
+.. js:function:: getWriteConcernError()
+
+   :returns: writeconcernerror 
+

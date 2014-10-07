@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keyword" content="">
+    <link rel="shortcut icon" href="/node-mongodb-native/2.0/img/favicon.png">
+
+    <title>Aggregation</title>
+
+    <link href="/node-mongodb-native/2.0/css/bootstrap-theme.css" rel="stylesheet">
+    <link href="/node-mongodb-native/2.0/assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/node-mongodb-native/2.0/css/style.css" rel="stylesheet">
+    <link href="/node-mongodb-native/2.0/css/style-responsive.css" rel="stylesheet" />
+    <link href="/node-mongodb-native/2.0/css/monokai_sublime.css" rel="stylesheet" />
+
+  </head>
+
+  <body>
+  
+  <section id="container" class="">
+
+      
+      <header class="header black-bg">
+            <div class="toggle-nav">
+                <i class="fa fa-bars"></i>
+                <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom"></div>
+            </div>
+
+            
+            <a href="/node-mongodb-native/2.0/.." class="logo"><img src="/node-mongodb-native/2.0/img/logo-mongodb-header.png" style="height:40px;"></a>
+
+            
+            <div class="top-nav notification-row">
+                
+                <div class="hidden-xs nav-github pull-right">
+                    <span rel="show-github" data-user="mongodb" data-repo="node-mongodb-native"></span>
+                    <span rel="show-github" data-user="mongodb" data-repo="node-mongodb-native" data-type="fork"></span>
+                    <a href='http://travis-ci.org/mongodb/node-mongodb-native'><img src='https://secure.travis-ci.org/mongodb/node-mongodb-native.png'/><a>
+                </div>
+            </div>
+
+            <div class="nav title-row" id="top_menu">
+                <h1 class="nav top-menu"> MongoDB 2.0.0 Driver </h1>
+            </div>
+      </header>
+      
+
+
+<aside>
+    <div id="sidebar"  class="nav-collapse ">
+        
+        <ul class="sidebar-menu">
+          
+          
+              
+                <li>
+                <a class="" href="/node-mongodb-native/">
+                    <i class='fa fa-file-text'></i>
+                    
+                    <span>driver portal</span>
+                </a>
+              
+              </li>
+          
+              
+                <li>
+                <a class="" href="/node-mongodb-native/1.4">
+                    <i class='fa fa-file-text'></i>
+                    
+                    <span>legacy docs 1.4.X</span>
+                </a>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-gift'></i>
+                
+                <span>about driver</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/2.0/meta/license/"> License </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/meta/release-notes/"> Release Notes </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/meta/changes-from-1.0/"> Migrating to 2.X </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-road'></i>
+                
+                <span>getting started</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/2.0/overview/introduction/"> Introduction </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/overview/installing/"> Installing The Driver </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/overview/quickstart/"> QuickStart </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-file-text'></i>
+                
+                <span>api</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/2.0/api-docs/"> API Documentation </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-group'></i>
+                
+                <span>community</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/2.0/community/mailing-list/"> Mailing List </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/community/contributing/"> Contributing </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu active">
+            <a href="javascript:;" class="">
+                <i class='fa fa-book'></i>
+                
+                <span>tutorials</span>
+                <span class="menu-arrow fa fa-angle-down"></span>
+            </a>
+                <ul class="sub open">
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/connecting/"> Connecting To MongoDB </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/urls/"> Connection URI </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/crud_operations/"> CRUD Operations </a> </li>
+                    
+                    <li class="active"><a href="/node-mongodb-native/2.0/tutorials/aggregation/"> Aggregation </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/streams/"> Streams </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/gridfs/"> GridFS </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/logging/"> Logging </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-book'></i>
+                
+                <span>articles</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/2.0/articles/node_knockout_article_1/"> Node Knockout, Basics </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/articles/node_knockout_article_2/"> Node Knockout, GridFS </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/articles/node_knockout_article_3/"> Node Knockout, GEO </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+            <li> <a href="https://jira.mongodb.org/browse/NODE" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
+            
+              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/tutorials/aggregation.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
+            
+        </ul>
+        
+    </div>
+</aside>
+
+
+
+      
+      <section id="main-content">
+          <section class="wrapper">
+
+              
+                  
+                      
+                      
+                          
+                          
+                          
+                      
+                      
+                  
+              
+
+              <div class="row">
+                  <div class="col-md-1">
+                      
+                      
+                      <a class="navigation prev" href="/tutorials/crud_operations">
+                      <i class="fa fa-angle-left"></i>
+                      </a>
+                      
+                      
+                  </div>
+                <div class="col-md-10">
+                    <section class="panel">
+                          
+                              
+                          
+                    <div class="panel-body">
+
+
+
+<h1 id="toc_0">Using the Aggregation Framework</h1>
+
+<p>The aggregation framework lets you transform and apply grouping, summations and other operations on the documents before they are returned to the application. It&rsquo;s a very powerful unix pipe like framework. In this tutorial we will explore the <strong>aggregate</strong> method on the <em>Collection</em> class and see how it can be used to return a cursor we can iterate over. This cursor also implements the Node.js 0.10.x stream interface which we will not cover in this tutorial. For more information about streams and the Node.js driver please look in the <a href="/tutorials/streams">Streams Tutorial</a>.</p>
+
+<p>Let&rsquo;s start with a simple example that returns a cursor to iterate over the results from a simple <em>$match</em> and <em>$sum</em>.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
+  , assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://localhost:27017/myproject';
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&quot;Connected correctly to server&quot;);
+
+  var col = db.collection('aggregate');
+  // Insert a single document
+  col.insert([{a:1}, {a:1}, {a:1}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.result.n);
+
+    // Get first two documents that match the query
+    col.aggregate([
+          {$match: {}}
+        , {$group:
+            {_id: '$a', total: {$sum: '$a'} }
+          }
+      ]).toArray(function(err, docs) {
+      assert.equal(null, err);
+      assert.equal(3, docs[0].total);
+      db.close();
+    });
+  });
+});
+</code></pre>
+
+<p>When executing the <em>aggregate</em> method as a cursor it&rsquo;s important to understand that on MongoDB 2.6 or higher this will use the native cursor support for the aggregation framework on the server. If the server is 2.4 or earlier it will emulate the cursor behavior with a virtual cursor. If a callback is included in the <em>aggregate</em> command it will fall back to the legacy mode that returns the first 16MB of results.</p>
+
+<p>The cursor returned by the <em>aggregate</em> command has the same available method as the <em>find</em> cursor, namely the <em>toArray</em>, <em>next</em> and <em>each</em> methods.</p>
+
+<p>We already looked at <em>toArray</em> method above. Let&rsquo;s take a look at the <em>next</em> method.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
+  , assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://localhost:27017/myproject';
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&quot;Connected correctly to server&quot;);
+
+  var col = db.collection('aggregate');
+  // Insert a single document
+  col.insert([{a:1}, {a:1}, {a:1}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.result.n);
+
+    // Get first two documents that match the query
+    col.aggregate([
+          {$match: {}}
+        , {$group:
+            {_id: '$a', total: {$sum: '$a'} }
+          }
+      ]).next(function(err, doc) {
+      assert.equal(null, err);
+      assert.equal(3, doc.total);
+      db.close();
+    });
+  });
+});
+</code></pre>
+
+<p>The <em>next</em> method allows the application to read one document at a time using callbacks. Let&rsquo;s look at the <em>each</em> method next.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
+  , assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://localhost:27017/myproject';
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&quot;Connected correctly to server&quot;);
+
+  var col = db.collection('aggregate');
+  // Insert a single document
+  col.insert([{a:1}, {a:1}, {a:1}], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(3, r.result.n);
+
+    // Get first two documents that match the query
+    col.aggregate([
+          {$match: {}}
+        , {$group:
+            {_id: '$a', total: {$sum: '$a'} }
+          }
+      ]).each(function(err, doc) {
+        if(doc) {
+          db.close();
+          // Got a document, terminate the each
+          return false;
+        }
+    });
+  });
+});
+</code></pre>
+
+<p>The <em>each</em> method will call the supplied callback until there are no more documents available that satisfy the query. Once the available documents is exhausted it will return <em>null</em> for the second parameter in the callback. If you wish to terminate the each early you should return false in your <em>each</em> callback. This will stop the cursor from returning documents.</p>
+
+<p>This covers the <em>aggregation</em> support in the Node.js MongoDB driver.</p>
+
+                      
+                      <div id="disqus_thread"></div>
+                      <script type="text/javascript">
+                           
+                          var disqus_shortname = 'nodejsmongodbdriver'; 
+
+                           
+                          (function() {
+                              var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                              dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                              (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                          })();
+                      </script>
+                      <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+                      <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+                      
+                    </div>
+                    </section>
+                </div>
+                <div class="col-md-1">
+                    
+                    
+                    <a class="navigation next" href="/tutorials/streams">
+                        <i class="fa fa-angle-right"> </i>
+                    </a>
+                    
+                    
+                </div>
+              </div>
+              
+          </section>
+      </section>
+     
+  </section>
+  
+    
+    <script src="/node-mongodb-native/2.0/js/jquery-2.1.1.min.js"></script>
+    <script src="/node-mongodb-native/2.0/js/jquery.scrollTo.min.js"></script>
+    <script src="/node-mongodb-native/2.0/js/bootstrap.min.js"></script>
+    
+    <script src="/node-mongodb-native/2.0/js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="/node-mongodb-native/2.0/js/scripts.js"></script>
+    <script async defer id="github-bjs" src="/node-mongodb-native/2.0/js/buttons.js"></script>
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-29229787-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>
+

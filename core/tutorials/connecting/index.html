@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keyword" content="">
+    <link rel="shortcut icon" href="img/favicon.png">
+
+    <title>Connecting To MongoDB</title>
+
+    <link href="css/bootstrap-theme.css" rel="stylesheet">
+    <link href="assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/style-responsive.css" rel="stylesheet" />
+    <link href="css/monokai_sublime.css" rel="stylesheet" />
+
+  </head>
+
+  <body>
+  
+  <section id="container" class="">
+
+      
+      <header class="header black-bg">
+            <div class="toggle-nav">
+                <i class="fa fa-bars"></i>
+                <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom"></div>
+            </div>
+
+            
+            <a href=".." class="logo"><img src="img/logo-mongodb-header.png" style="height:40px;"></a>
+
+            
+            <div class="top-nav notification-row">
+                
+                <div class="hidden-xs nav-github pull-right">
+                    <span rel="show-github" data-user="mongodb" data-repo="node-mongodb-native"></span>
+                    <span rel="show-github" data-user="mongodb" data-repo="node-mongodb-native" data-type="fork"></span>
+                    <a href='http://travis-ci.org/mongodb/node-mongodb-native'><img src='https://secure.travis-ci.org/mongodb/node-mongodb-native.png'/><a>
+                </div>
+            </div>
+
+            <div class="nav title-row" id="top_menu">
+                <h1 class="nav top-menu"> MongoDB Core 1.0.0 </h1>
+            </div>
+      </header>
+      
+
+
+<aside>
+    <div id="sidebar"  class="nav-collapse ">
+        
+        <ul class="sidebar-menu">
+          
+          
+              
+                <li>
+                <a class="" href="/node-mongodb-native/">
+                    <i class='fa fa-file-text'></i>
+                    
+                    <span>driver portal</span>
+                </a>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-gift'></i>
+                
+                <span>about driver</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/core/meta/license/"> License </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/core/meta/release-notes/"> Release Notes </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-road'></i>
+                
+                <span>getting started</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/core/overview/introduction/"> Introduction </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/core/overview/installing/"> Installing The Driver </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/core/overview/quickstart/"> QuickStart </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-file-text'></i>
+                
+                <span>api</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/core/api-docs/"> API Documentation </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-group'></i>
+                
+                <span>community</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/core/community/mailing-list/"> Mailing List </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/core/community/contributing/"> Contributing </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu active">
+            <a href="javascript:;" class="">
+                <i class='fa fa-book'></i>
+                
+                <span>tutorials</span>
+                <span class="menu-arrow fa fa-angle-down"></span>
+            </a>
+                <ul class="sub open">
+                    
+                    <li class="active"><a href="/node-mongodb-native/core/tutorials/connecting/"> Connecting To MongoDB </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/core/tutorials/crud_operations/"> CRUD Operations </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/core/tutorials/logging/"> Logging </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/core/tutorials/cursor/"> Cursor </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+            <li> <a href="https://jira.mongodb.org/browse/NODE" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
+            
+              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/tutorials/connecting.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
+            
+        </ul>
+        
+    </div>
+</aside>
+
+
+
+      
+      <section id="main-content">
+          <section class="wrapper">
+
+              
+                  
+                      
+                      
+                          
+                          
+                          
+                      
+                      
+                  
+              
+
+              <div class="row">
+                  <div class="col-md-1">
+                      
+                      
+                      <a class="navigation prev" href="/tutorials/cursor">
+                      <i class="fa fa-angle-left"></i>
+                      </a>
+                      
+                      
+                  </div>
+                <div class="col-md-10">
+                    <section class="panel">
+                          
+                              
+                          
+                    <div class="panel-body">
+
+
+
+<h1 id="toc_0">Connecting To MongoDB</h1>
+
+<p>Connecting to MongoDB using the driver is done using the Topology classes <code>Server</code>, <code>ReplSet</code> and <code>Mongos</code>. There is no auto detection of the server topology as this is a low level driver.</p>
+
+<h2 id="toc_1">Single Server Connection</h2>
+
+<p>We have a single MongoDB server instance running on the port <em>27017</em> Let&rsquo;s connect using the driver and <em>MongoClient.connect</em></p>
+
+<pre><code class="language-js">var Server = require('mongodb-core').Server
+  , assert = require('assert');
+
+var server = new Server({host: 'localhost', port: 27017});
+// Wait for the connection event
+server.on('connect', function(server) {
+  server.destroy();
+});
+
+// Start connecting
+server.connect();
+</code></pre>
+
+<p>Let&rsquo;s break down the connection options available.</p>
+
+<ul>
+<li><code>reconnect</code> <strong>{boolean, default:true}</strong> Server will attempt to reconnect on loss of connection</li>
+<li><code>reconnectTries</code> <strong>{number, default:30}</strong> Server attempt to reconnect #times</li>
+<li><code>reconnectInterval</code> <strong>{number, default:1000}</strong> Server will wait # milliseconds between retries</li>
+<li><code>emitError</code> <strong>{boolean, default:false}</strong> Server will emit errors events</li>
+<li><code>cursorFactory</code> <strong>{Cursor, default:Cursor}</strong> The cursor factory class used for all query cursors</li>
+<li><code>host</code> <strong>{string}</strong> The server host</li>
+<li><code>port</code> <strong>{number}</strong> The server port</li>
+<li><code>size</code> <strong>{number, default:5}</strong> Server connection pool size</li>
+<li><code>keepAlive</code> <strong>{boolean, default:true}</strong> TCP Connection keep alive enabled</li>
+<li><code>keepAliveInitialDelay</code> <strong>{number, default:0}</strong> Initial delay before TCP keep alive enabled</li>
+<li><code>noDelay</code> <strong>{boolean, default:true}</strong> TCP Connection no delay</li>
+<li><code>connectionTimeout</code> <strong>{number, default:0}</strong> TCP Connection timeout setting</li>
+<li><code>socketTimeout</code> <strong>{number, default:0}</strong> TCP Socket timeout setting</li>
+<li><code>singleBufferSerializtion</code> <strong>{boolean, default:true}</strong> Serialize into single buffer, trade of peak memory for serialization speed</li>
+<li><code>ssl</code> <strong>{boolean, default:false}</strong> Use SSL for connection</li>
+<li><code>ca</code> <strong>{Buffer}</strong> SSL Certificate store binary buffer</li>
+<li><code>cert</code> <strong>{Buffer}</strong> SSL Certificate binary buffer</li>
+<li><code>key</code> <strong>{Buffer}</strong> SSL Key file binary buffer</li>
+<li><code>passphrase</code> <strong>{string}</strong> SSL Certificate pass phrase</li>
+<li><code>rejectUnauthorized</code> <strong>{boolean, default:false}</strong> Reject unauthorized server certificates</li>
+<li><code>promoteLongs</code> <strong>{boolean, default:true}</strong> Convert Long values from the db into Numbers if they fit into 53 bits</li>
+</ul>
+
+<h2 id="toc_2">Replicaset Connection</h2>
+
+<p>We wish to connect to a ReplicaSet consisting of one primary and 1 or more secondaries. To Do this we need to supply the driver with a seedlist of servers and the name of the ReplicaSet we wish to connect to. Let&rsquo;s take a look at a code example.</p>
+
+<pre><code class="language-js">var ReplSet = require('mongodb-core').ReplSet
+  , assert = require('assert');
+
+var server = new ReplSet(
+    [{host: 'localhost', port: 31000}, {host: 'localhost', port: 31001}]
+  , {setName: 'rs'});
+// Wait for the connection event
+server.on('connect', function(server) {
+  server.destroy();
+});
+
+// Start connecting
+server.connect();
+</code></pre>
+
+<p>Let&rsquo;s break down the connection options available.</p>
+
+<ul>
+<li><code>setName</code> <strong>{string}</strong> The Replicaset set name</li>
+<li><code>secondaryOnlyConnectionAllowed</code> <strong>{boolean, default:false}</strong> Allow connection to a secondary only replicaset</li>
+<li><code>haInterval</code> <strong>{number, default:5000}</strong> The High availability period for replicaset inquiry</li>
+<li><code>emitError</code> <strong>{boolean, default:false}</strong> Server will emit errors events</li>
+<li><code>cursorFactory</code> <strong>{Cursor, default:Cursor}</strong> The cursor factory class used for all query cursors</li>
+<li><code>size</code> <strong>{number, default:5}</strong> Server connection pool size</li>
+<li><code>keepAlive</code> <strong>{boolean, default:true}</strong> TCP Connection keep alive enabled</li>
+<li><code>keepAliveInitialDelay</code> <strong>{number, default:0}</strong> Initial delay before TCP keep alive enabled</li>
+<li><code>noDelay</code> <strong>{boolean, default:true}</strong> TCP Connection no delay</li>
+<li><code>connectionTimeout</code> <strong>{number, default:0}</strong> TCP Connection timeout setting</li>
+<li><code>socketTimeout</code> <strong>{number, default:0}</strong> TCP Socket timeout setting</li>
+<li><code>singleBufferSerializtion</code> <strong>{boolean, default:true}</strong> Serialize into single buffer, trade of peak memory for serialization speed</li>
+<li><code>ssl</code> <strong>{boolean, default:false}</strong> Use SSL for connection</li>
+<li><code>ca</code> <strong>{Buffer}</strong> SSL Certificate store binary buffer</li>
+<li><code>cert</code> <strong>{Buffer}</strong> SSL Certificate binary buffer</li>
+<li><code>key</code> <strong>{Buffer}</strong> SSL Key file binary buffer</li>
+<li><code>passphrase</code> <strong>{string}</strong> SSL Certificate pass phrase</li>
+<li><code>rejectUnauthorized</code> <strong>{boolean, default:false}</strong> Reject unauthorized server certificates</li>
+<li><code>promoteLongs</code> <strong>{boolean, default:true}</strong> Convert Long values from the db into Numbers if they fit into 53 bits</li>
+</ul>
+
+<h2 id="toc_3">Mongos Proxy Connection</h2>
+
+<p>We wish to connect to a set of <code>mongos</code> proxies. Just as in the case of connecting to a ReplicaSet we can provide a seed list of <code>mongos</code> proxies. This allows the driver to perform failover between proxies automatically in case of a proxy process having been shut down. Let&rsquo;s look at an example of code connecting to a set of proxies.</p>
+
+<pre><code class="language-js">var Mongos = require('mongodb-core').Mongos
+  , assert = require('assert');
+
+var server = new Mongos(
+    [{host: 'localhost', port: 50000}, {host: 'localhost', port: 50001}]
+  );
+// Wait for the connection event
+server.on('connect', function(server) {
+  server.destroy();
+});
+
+// Start connecting
+server.connect();
+</code></pre>
+
+<p>Let&rsquo;s break down the connection options available.</p>
+
+<ul>
+<li><code>reconnectTries</code> <strong>{number, default:30}</strong> Reconnect retries for HA if no servers available</li>
+<li><code>haInterval</code> <strong>{number, default:5000}</strong> The High availability period for replicaset inquiry</li>
+<li><code>emitError</code> <strong>{boolean, default:false}</strong> Server will emit errors events</li>
+<li><code>cursorFactory</code> <strong>{Cursor, default:Cursor}</strong> The cursor factory class used for all query cursors</li>
+<li><code>size</code> <strong>{number, default:5}</strong> Server connection pool size</li>
+<li><code>keepAlive</code> <strong>{boolean, default:true}</strong> TCP Connection keep alive enabled</li>
+<li><code>keepAliveInitialDelay</code> <strong>{number, default:0}</strong> Initial delay before TCP keep alive enabled</li>
+<li><code>noDelay</code> <strong>{boolean, default:true}</strong> TCP Connection no delay</li>
+<li><code>connectionTimeout</code> <strong>{number, default:0}</strong> TCP Connection timeout setting</li>
+<li><code>socketTimeout</code> <strong>{number, default:0}</strong> TCP Socket timeout setting</li>
+<li><code>singleBufferSerializtion</code> <strong>{boolean, default:true}</strong> Serialize into single buffer, trade of peak memory for serialization speed</li>
+<li><code>ssl</code> <strong>{boolean, default:false}</strong> Use SSL for connection</li>
+<li><code>ca</code> <strong>{Buffer}</strong> SSL Certificate store binary buffer</li>
+<li><code>cert</code> <strong>{Buffer}</strong> SSL Certificate binary buffer</li>
+<li><code>key</code> <strong>{Buffer}</strong> SSL Key file binary buffer</li>
+<li><code>passphrase</code> <strong>{string}</strong> SSL Certificate pass phrase</li>
+<li><code>rejectUnauthorized</code> <strong>{boolean, default:false}</strong> Reject unauthorized server certificates</li>
+<li><code>promoteLongs</code> <strong>{boolean, default:true}</strong> Convert Long values from the db into Numbers if they fit into 53 bits</li>
+</ul>
+
+<h2 id="toc_4">Authentication using the Core Driver</h2>
+
+<p>Authentication is fairly easy to perform and is done using the <code>auth</code> method on the connected topology instance. Let&rsquo;s look at a simple example of authenticating using the <code>MongoCR</code> authentication strategy.</p>
+
+<pre><code class="language-js">var Server = require('mongodb-core').Server
+  , assert = require('assert');
+
+var server = new Server({host: 'localhost', port: 27017});
+// Wait for the connection event
+server.on('connect', function(server) {
+  server.auth('mongocr', 'admin', 'test', 'test', function(err, session) {    
+    server.destroy();
+  });
+});
+
+// Start connecting
+server.connect();
+</code></pre>
+
+<p>The first argument is the authentication mechanism you wish to use, the second argument is the database you wish to authenticate against and the rest of the parameters are authentication mechanism specific with the last parameter being the callback function. The authentication is performed against all connections on the topology. The driver currently provides the following authentication mechanisms.</p>
+
+<ul>
+<li><code>mongocr</code> The current default MongoDB authentication mechanism.</li>
+<li><code>x509</code> Using a X509 Certificate for the authentication.</li>
+<li><code>plain</code> Use LDAP for authentication using $external.</li>
+<li><code>gssapi</code> Linux Kerberos authentication using MIT library.</li>
+<li><code>sspi</code> Windows Kerberos authentication using SSPI.</li>
+<li><code>scram-sha-1</code> 2.8 or higher default authentication mechanism.</li>
+</ul>
+
+<p>This covers connection and authentication using the Core driver.</p>
+
+                      
+                      <div id="disqus_thread"></div>
+                      <script type="text/javascript">
+                           
+                          var disqus_shortname = 'nodejsmongodbdriver'; 
+
+                           
+                          (function() {
+                              var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                              dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                              (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                          })();
+                      </script>
+                      <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+                      <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+                      
+                    </div>
+                    </section>
+                </div>
+                <div class="col-md-1">
+                    
+                    
+                    <a class="navigation next" href="/tutorials/crud_operations">
+                        <i class="fa fa-angle-right"> </i>
+                    </a>
+                    
+                    
+                </div>
+              </div>
+              
+          </section>
+      </section>
+     
+  </section>
+  
+    
+    <script src="js/jquery-2.1.1.min.js"></script>
+    <script src="js/jquery.scrollTo.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    
+    <script src="js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="js/scripts.js"></script>
+    <script async defer id="github-bjs" src="js/buttons.js"></script>
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-29229787-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>
+

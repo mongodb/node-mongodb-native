@@ -1,0 +1,840 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+      <title>Articles on MongoDB 2.0.0 Driver </title>
+      <generator uri="https://hugo.spf13.com">Hugo</generator>
+    <link>/node-mongodb-native/2.0/articles/index.xml/</link>
+    
+    
+    
+    <updated>Mon, 01 Jul 2013 00:00:00 UTC</updated>
+    
+    <item>
+      <title>Node Knockout, Basics</title>
+      <link>/node-mongodb-native/2.0/articles/node_knockout_article_1/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/articles/node_knockout_article_1/</guid>
+      <description>
+
+&lt;h1 id=&#34;toc_0&#34;&gt;A Basic introduction to Mongo DB&lt;/h1&gt;
+
+&lt;p&gt;Mongo DB has rapidly grown to become a popular database for web applications and is a perfect fit for Node.JS applications, letting you write Javascript for the client, backend and database layer. Its schemaless nature is a better match to our constantly evolving data structures in web applications, and the integrated support for location queries is a bonus that&amp;rsquo;s hard to ignore. Throw in Replica Sets for scaling, and we&amp;rsquo;re looking at really nice platform to grow your storage needs now and in the future.&lt;/p&gt;
+
+&lt;p&gt;Now to shamelessly plug my driver. It can be downloaded via npm, or fetched from the github repository. To install via npm, do the following:&lt;/p&gt;
+
+&lt;p&gt;&lt;code&gt;npm install mongodb&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;or go fetch it from github at &lt;a href=&#34;https://github.com/mongodb/node-mongodb-native&#34;&gt;https://github.com/mongodb/node-mongodb-native&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Once this business is taken care of, let&amp;rsquo;s move through the types available for the driver and then how to connect to your Mongo DB instance before facing the usage of some CRUD operations.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;Mongo DB data types&lt;/h2&gt;
+
+&lt;p&gt;So there is an important thing to keep in mind when working with Mongo DB, and that is the slight mapping difference between types Mongo DB supports and native Javascript data types. Let&amp;rsquo;s have a look at the types supported out of the box and then how types are promoted by the driver to fit as close to native Javascript types as possible.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Float&lt;/strong&gt; is a 8 byte and is directly convertible to the Javascript type Number&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Double class&lt;/strong&gt; a special class representing a float value, this is especially useful when using capped collections where you need to ensure your values are always floats.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Integers&lt;/strong&gt; is a bit trickier due to the fact that Javascript represents all Numbers as 64 bit floats meaning that the maximum integer value is at a 53 bit. Mongo has two types for integers, a 32 bit and a 64 bit. The driver will try to fit the value into 32 bits if it can and promote it to 64 bits if it has to. Similarly it will deserialize attempting to fit it into 53 bits if it can. If it cannot it will return an instance of &lt;strong&gt;Long&lt;/strong&gt; to avoid losing precision.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Long class&lt;/strong&gt; a special class that lets you store 64 bit integers and also lets you operate on the 64 bit integers.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Date&lt;/strong&gt; maps directly to a Javascript Date&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;RegExp&lt;/strong&gt; maps directly to a Javascript RegExp&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;String&lt;/strong&gt; maps directly to a Javascript String (encoded in utf8)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Binary class&lt;/strong&gt; a special class that lets you store data in Mongo DB&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Code class&lt;/strong&gt; a special class that lets you store javascript functions in Mongo DB, can also provide a scope to run the method in&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;ObjectID class&lt;/strong&gt; a special class that holds a MongoDB document identifier (the equivalent to a Primary key)&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;DbRef class&lt;/strong&gt; a special class that lets you include a reference in a document pointing to another object&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Symbol class&lt;/strong&gt; a special class that lets you specify a symbol, not really relevant for javascript but for languages that supports the concept of symbols.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;As we see the number type can be a little tricky due to the way integers are implemented in Javascript. The latest driver will do correct conversion up to 53 bits of complexity. If you need to handle big integers the recommendation is to use the Long class to operate on the numbers.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_2&#34;&gt;Getting that connection to the database&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s get around to setting up a connection with the Mongo DB database. Jumping straight into the code let&amp;rsquo;s do direct connection and then look at the code.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;// Retrieve
+var MongoClient = require(&#39;mongodb&#39;).MongoClient;
+
+// Connect to the db
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/exampleDb&amp;quot;, function(err, db) {
+  if(!err) {
+    console.log(&amp;quot;We are connected&amp;quot;);
+  }
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s have a quick look at how the connection code works. The &lt;strong&gt;Db.connect&lt;/strong&gt;
+method let&amp;rsquo;s use use a uri to connect to the Mongo database, where
+&lt;strong&gt;localhost:27017&lt;/strong&gt; is the server host and port and &lt;strong&gt;exampleDb&lt;/strong&gt; the db
+we wish to connect to. After the url notice the hash containing the
+&lt;strong&gt;auto_reconnect&lt;/strong&gt; key. Auto reconnect tells the driver to retry sending
+a command to the server if there is a failure during its execution.&lt;/p&gt;
+
+&lt;p&gt;Another useful option you can pass in is&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;poolSize&lt;/strong&gt;, this allows you to control how many tcp connections are
+opened in parallel. The default value for this is 5 but you can set it
+as high as you want. The driver will use a round-robin strategy to
+dispatch and read from the tcp connection.&lt;/p&gt;
+
+&lt;p&gt;We are up and running with a connection to the database. Let&amp;rsquo;s move on
+and look at what collections are and how they work.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_3&#34;&gt;Mongo DB and Collections&lt;/h2&gt;
+
+&lt;p&gt;Collections are the equivalent of tables in traditional databases and contain all your documents. A database can have many collections. So how do we go about defining and using collections. Well there are a couple of methods that we can use. Let&amp;rsquo;s jump straight into code and then look at the code.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;the requires and and other initializing stuff omitted for brevity&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;// Retrieve
+var MongoClient = require(&#39;mongodb&#39;).MongoClient;
+
+// Connect to the db
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/exampleDb&amp;quot;, function(err, db) {
+  if(err) { return console.dir(err); }
+
+  db.collection(&#39;test&#39;, function(err, collection) {});
+
+  db.collection(&#39;test&#39;, {w:1}, function(err, collection) {});
+
+  db.createCollection(&#39;test&#39;, function(err, collection) {});
+
+  db.createCollection(&#39;test&#39;, {w:1}, function(err, collection) {});
+
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Three different ways of creating a collection object but slightly different in behavior. Let&amp;rsquo;s go through them and see what they do&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db.collection(&#39;test&#39;, function(err, collection) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This function will not actually create a collection on the database until you actually insert the first document.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db.collection(&#39;test&#39;, {strict:true}, function(err, collection) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Notice the &lt;strong&gt;{strict:true}&lt;/strong&gt; option. This option will make the driver check if the collection exists and issue an error if it does not.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db.createCollection(&#39;test&#39;, function(err, collection) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This command will create the collection on the Mongo DB database before returning the collection object. If the collection already exists it will ignore the creation of the collection.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;db.createCollection(&#39;test&#39;, {strict:true}, function(err, collection) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;strong&gt;{strict:true}&lt;/strong&gt; option will make the method return an error if the collection already exists.&lt;/p&gt;
+
+&lt;p&gt;With an open db connection and a collection defined we are ready to do some CRUD operation on the data.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_4&#34;&gt;And then there was CRUD&lt;/h2&gt;
+
+&lt;p&gt;So let&amp;rsquo;s get dirty with the basic operations for Mongo DB. The Mongo DB wire protocol is built around 4 main operations &lt;strong&gt;insert/update/remove/query&lt;/strong&gt;. Most operations on the database are actually queries with special json objects defining the operation on the database. But I&amp;rsquo;m getting ahead of myself. Let&amp;rsquo;s go back and look at insert first and do it with some code.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;the requires and and other initializing stuff omitted for brevity&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;// Retrieve
+var MongoClient = require(&#39;mongodb&#39;).MongoClient;
+
+// Connect to the db
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/exampleDb&amp;quot;, function(err, db) {
+  if(err) { return console.dir(err); }
+
+  var collection = db.collection(&#39;test&#39;);
+  var doc1 = {&#39;hello&#39;:&#39;doc1&#39;};
+  var doc2 = {&#39;hello&#39;:&#39;doc2&#39;};
+  var lotsOfDocs = [{&#39;hello&#39;:&#39;doc3&#39;}, {&#39;hello&#39;:&#39;doc4&#39;}];
+
+  collection.insert(doc1);
+
+  collection.insert(doc2, {w:1}, function(err, result) {});
+
+  collection.insert(lotsOfDocs, {w:1}, function(err, result) {});
+
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A couple of variations on the theme of inserting a document as we can see. To understand why it&amp;rsquo;s important to understand how Mongo DB works during inserts of documents.&lt;/p&gt;
+
+&lt;p&gt;Mongo DB has asynchronous &lt;strong&gt;insert/update/remove&lt;/strong&gt; operations. This means that when you issue an &lt;strong&gt;insert&lt;/strong&gt; operation its a fire and forget operation where the database does not reply with the status of the insert operation. To retrieve the status of the operation you have to issue a query to retrieve the last error status of the connection. To make it simpler to the developer the driver implements the &lt;strong&gt;{w:1}&lt;/strong&gt; options so that this is done automatically when inserting the document. &lt;strong&gt;{w:1}&lt;/strong&gt; becomes especially important when you do &lt;strong&gt;update&lt;/strong&gt; or &lt;strong&gt;remove&lt;/strong&gt; as otherwise it&amp;rsquo;s not possible to determine the amount of documents modified or removed.&lt;/p&gt;
+
+&lt;p&gt;Now let&amp;rsquo;s go through the different types of inserts shown in the code above.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;collection.insert(doc1);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Taking advantage of the async behavior and not needing confirmation about the persisting of the data to Mongo DB we just fire off the insert (we are doing live analytics, loosing a couple of records does not matter).&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;collection.insert(doc2, {w:1}, function(err, result) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;That document needs to stick. Using the &lt;strong&gt;{w:1}&lt;/strong&gt; option ensure you get the error back if the document fails to insert correctly.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;collection.insert(lotsOfDocs, {w:1}, function(err, result) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;A batch insert of document with any errors being reported. This is much more efficient if you need to insert large batches of documents as you incur a lot less overhead.&lt;/p&gt;
+
+&lt;p&gt;Right that&amp;rsquo;s the basics of insert&amp;rsquo;s ironed out. We got some documents in there but want to update them as we need to change the content of a field. Let&amp;rsquo;s have a look at a simple example and then we will dive into how Mongo DB updates work and how to do them efficiently.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;the requires and and other initializing stuff omitted for brevity&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;// Retrieve
+var MongoClient = require(&#39;mongodb&#39;).MongoClient;
+
+// Connect to the db
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/exampleDb&amp;quot;, function(err, db) {
+  if(err) { return console.dir(err); }
+
+  var collection = db.collection(&#39;test&#39;);
+  var doc = {mykey:1, fieldtoupdate:1};
+
+  collection.insert(doc, {w:1}, function(err, result) {
+    collection.update({mykey:1}, {$set:{fieldtoupdate:2}}, {w:1}, function(err, result) {});
+  });
+
+  var doc2 = {mykey:2, docs:[{doc1:1}]};
+
+  collection.insert(doc2, {w:1}, function(err, result) {
+    collection.update({mykey:2}, {$push:{docs:{doc2:1}}}, {w:1}, function(err, result) {});
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Alright before we look at the code we want to understand how document updates work and how to do the efficiently. The most basic and less efficient way is to replace the whole document, this is not really the way to go if you want to change just a field in your document. Luckily Mongo DB provides a whole set of operations that let you modify just pieces of the document &lt;a href=&#34;http://www.mongodb.org/display/DOCS/Atomic+Operations&#34;&gt;Atomic operations documentation&lt;/a&gt;. Basically outlined below.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;$inc - increment a particular value by a certain amount&lt;/li&gt;
+&lt;li&gt;$set - set a particular value&lt;/li&gt;
+&lt;li&gt;$unset - delete a particular field (v1.3+)&lt;/li&gt;
+&lt;li&gt;$push - append a value to an array&lt;/li&gt;
+&lt;li&gt;$pushAll - append several values to an array&lt;/li&gt;
+&lt;li&gt;$addToSet - adds value to the array only if its not in the array already&lt;/li&gt;
+&lt;li&gt;$pop - removes the last element in an array&lt;/li&gt;
+&lt;li&gt;$pull - remove a value(s) from an existing array&lt;/li&gt;
+&lt;li&gt;$pullAll - remove several value(s) from an existing array&lt;/li&gt;
+&lt;li&gt;$rename - renames the field&lt;/li&gt;
+&lt;li&gt;$bit - bitwise operations&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Now that the operations are outline let&amp;rsquo;s dig into the specific cases show in the code example.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;collection.update({mykey:1}, {$set:{fieldtoupdate:2}}, {w:1}, function(err, result) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Right so this update will look for the document that has a field &lt;strong&gt;mykey&lt;/strong&gt; equal to &lt;strong&gt;1&lt;/strong&gt; and apply an update to the field &lt;strong&gt;fieldtoupdate&lt;/strong&gt; setting the value to &lt;strong&gt;2&lt;/strong&gt;. Since we are using the &lt;strong&gt;{w:1}&lt;/strong&gt; option the result parameter in the callback will return the value &lt;strong&gt;1&lt;/strong&gt; indicating that 1 document was modified by the update statement.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;collection.update({mykey:2}, {$push:{docs:{doc2:1}}}, {w:1}, function(err, result) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This updates adds another document to the field &lt;strong&gt;docs&lt;/strong&gt; in the document identified by &lt;strong&gt;{mykey:2}&lt;/strong&gt; using the atomic operation &lt;strong&gt;$push&lt;/strong&gt;. This allows you to modify keep such structures as queues in Mongo DB.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s have a look at the remove operation for the driver. As before let&amp;rsquo;s start with a piece of code.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;the requires and and other initializing stuff omitted for brevity&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;// Retrieve
+var MongoClient = require(&#39;mongodb&#39;).MongoClient;
+
+// Connect to the db
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/exampleDb&amp;quot;, function(err, db) {
+  if(err) { return console.dir(err); }
+
+  var collection = db.collection(&#39;test&#39;);
+  var docs = [{mykey:1}, {mykey:2}, {mykey:3}];
+
+  collection.insert(docs, {w:1}, function(err, result) {
+
+    collection.remove({mykey:1});
+
+    collection.remove({mykey:2}, {w:1}, function(err, result) {});
+
+    collection.remove();
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s examine the 3 remove variants and what they do.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;collection.remove({mykey:1});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This leverages the fact that Mongo DB is asynchronous and that it does not return a result for &lt;strong&gt;insert/update/remove&lt;/strong&gt; to allow for &lt;strong&gt;synchronous&lt;/strong&gt; style execution. This particular remove query will remove the document where &lt;strong&gt;mykey&lt;/strong&gt; equals &lt;strong&gt;1&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;collection.remove({mykey:2}, {w:1}, function(err, result) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This remove statement removes the document where &lt;strong&gt;mykey&lt;/strong&gt; equals &lt;strong&gt;2&lt;/strong&gt; but since we are using &lt;strong&gt;{w:1}&lt;/strong&gt; it will back to Mongo DB to get the status of the remove operation and return the number of documents removed in the result variable.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;collection.remove();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This last one will remove all documents in the collection.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_5&#34;&gt;Time to Query&lt;/h2&gt;
+
+&lt;p&gt;Queries is of course a fundamental part of interacting with a database and Mongo DB is no exception. Fortunately for us it has a rich query interface with cursors and close to SQL concepts for slicing and dicing your datasets. To build queries we have lots of operators to choose from &lt;a href=&#34;http://www.mongodb.org/display/DOCS/Advanced+Queries&#34;&gt;Mongo DB advanced queries&lt;/a&gt;. There are literarily tons of ways to search and ways to limit the query. Let&amp;rsquo;s look at some simple code for dealing with queries in different ways.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;the requires and and other initializing stuff omitted for brevity&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;// Retrieve
+var MongoClient = require(&#39;mongodb&#39;).MongoClient;
+
+// Connect to the db
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/exampleDb&amp;quot;, function(err, db) {
+  if(err) { return console.dir(err); }
+
+  var collection = db.collection(&#39;test&#39;);
+  var docs = [{mykey:1}, {mykey:2}, {mykey:3}];
+
+  collection.insert(docs, {w:1}, function(err, result) {
+
+    collection.find().toArray(function(err, items) {});
+
+    var stream = collection.find({mykey:{$ne:2}}).stream();
+    stream.on(&amp;quot;data&amp;quot;, function(item) {});
+    stream.on(&amp;quot;end&amp;quot;, function() {});
+
+    collection.findOne({mykey:1}, function(err, item) {});
+
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Before we start picking apart the code there is one thing that needs to be understood, the &lt;strong&gt;find&lt;/strong&gt; method does not execute the actual query. It builds an instance of &lt;strong&gt;Cursor&lt;/strong&gt; that you then use to retrieve the data. This lets you manage how you retrieve the data from Mongo DB and keeps state about your current Cursor state on Mongo DB. Now let&amp;rsquo;s pick apart the queries we have here and look at what they do.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;collection.find().toArray(function(err, items) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This query will fetch all the document in the collection and return them as an array of items. Be careful with the function &lt;strong&gt;toArray&lt;/strong&gt; as it might cause a lot of memory usage as it will instantiate all the document into memory before returning the final array of items. If you have a big resultset you could run into memory issues.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var stream = collection.find({mykey:{$ne:2}}).stream();
+stream.on(&amp;quot;data&amp;quot;, function(item) {});
+stream.on(&amp;quot;end&amp;quot;, function() {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This is the preferred way if you have to retrieve a lot of data for streaming, as data is deserialized a &lt;strong&gt;data&lt;/strong&gt; event is emitted. This keeps the resident memory usage low as the documents are streamed to you. Very useful if you are pushing documents out via websockets or some other streaming socket protocol. Once there is no more document the driver will emit the &lt;strong&gt;end&lt;/strong&gt; event to notify the application that it&amp;rsquo;s done.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;collection.findOne({mykey:1}, function(err, item) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This is special supported function to retrieve just one specific document bypassing the need for a cursor object.&lt;/p&gt;
+
+&lt;p&gt;That&amp;rsquo;s pretty much it for the quick intro on how to use the database. I have also included a list of links to where to go to find more information and also a sample crude location application I wrote using express JS and mongo DB.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_6&#34;&gt;Links and stuff&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/mongodb/node-mongodb-native/tree/master/examples&#34;&gt;The driver examples, good starting point for basic usage&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/mongodb/node-mongodb-native/tree/master/test&#34;&gt;All the integration tests, they have tons of different usage cases&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.mongodb.org/display/DOCS/Advanced+Queries&#34;&gt;The Mongo DB wiki pages such as the advanced query link&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/christkv/mongodb-presentation&#34;&gt;A silly simple location based application using Express JS and Mongo DB&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Node Knockout, GridFS</title>
+      <link>/node-mongodb-native/2.0/articles/node_knockout_article_2/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/articles/node_knockout_article_2/</guid>
+      <description>
+
+&lt;h1 id=&#34;toc_0&#34;&gt;A primer for GridFS using the Mongo DB driver&lt;/h1&gt;
+
+&lt;p&gt;In the first tutorial we targeted general usage of the database. But Mongo DB is much more than this. One of the additional very useful features is to act as a file storage system. This is accomplish in Mongo by having a file collection and a chunks collection where each document in the chunks collection makes up a &lt;strong&gt;Block&lt;/strong&gt; of the file. In this tutorial we will look at how to use the GridFS functionality and what functions are available.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;A simple example&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s dive straight into a simple example on how to write a file to the grid using the simplified Grid class.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  Grid = mongo.Grid;
+
+// Connect to the db
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/exampleDb&amp;quot;, function(err, db) {
+  if(err) return console.dir(err);
+
+  var grid = new Grid(db, &#39;fs&#39;);    
+  var buffer = new Buffer(&amp;quot;Hello world&amp;quot;);
+  grid.put(buffer, {metadata:{category:&#39;text&#39;}, content_type: &#39;text&#39;}, function(err, fileInfo) {
+    if(!err) {
+      console.log(&amp;quot;Finished writing file to Mongo&amp;quot;);
+    }
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;All right let&amp;rsquo;s dissect the example. The first thing you&amp;rsquo;ll notice is the statement&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var grid = new Grid(db, &#39;fs&#39;);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Since GridFS is actually a special structure stored as collections you&amp;rsquo;ll notice that we are using the db connection that we used in the previous tutorial to operate on collections and documents. The second parameter &lt;strong&gt;&amp;lsquo;fs&amp;rsquo;&lt;/strong&gt; allows you to change the collections you want to store the data in. In this example the collections would be &lt;strong&gt;fs_files&lt;/strong&gt; and &lt;strong&gt;fs_chunks&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;Having a live grid instance we now go ahead and create some test data stored in a Buffer instance, although you can pass in a string instead. We then write our data to disk.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var buffer = new Buffer(&amp;quot;Hello world&amp;quot;);
+grid.put(buffer, {metadata:{category:&#39;text&#39;}, content_type: &#39;text&#39;}, function(err, fileInfo) {
+  if(!err) {
+    console.log(&amp;quot;Finished writing file to Mongo&amp;quot;);
+  }
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s deconstruct the call we just made. The &lt;strong&gt;put&lt;/strong&gt; call will write the data you passed in as one or more chunks. The second parameter is a hash of options for the Grid class. In this case we wish to annotate the file we are writing to Mongo DB with some metadata and also specify a content type. Each file entry in GridFS has support for metadata documents which might be very useful if you are for example storing images in you Mongo DB and need to store all the data associated with the image.&lt;/p&gt;
+
+&lt;p&gt;One important thing is to take not that the put method return a document containing a &lt;strong&gt;_id&lt;/strong&gt;, this is an &lt;strong&gt;ObjectID&lt;/strong&gt; identifier that you&amp;rsquo;ll need to use if you wish to retrieve the file contents later.&lt;/p&gt;
+
+&lt;p&gt;Right so we have written out first file, let&amp;rsquo;s look at the other two simple functions supported by the Grid class.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;the requires and and other initializing stuff omitted for brevity&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  Grid = mongo.Grid;
+
+// Connect to the db
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/exampleDb&amp;quot;, function(err, db) {
+  if(err) return console.dir(err);
+
+  var grid = new Grid(db, &#39;fs&#39;);    
+  var buffer = new Buffer(&amp;quot;Hello world&amp;quot;);
+  grid.put.(buffer, {metadata:{category:&#39;text&#39;}, content_type: &#39;text&#39;}, function(err, fileInfo) {        
+    grid.get(fileInfo._id, function(err, data) {
+      console.log(&amp;quot;Retrieved data: &amp;quot; + data.toString());
+      grid.delete(fileInfo._id, function(err, result) {
+      });        
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s have a look at the two operations &lt;strong&gt;get&lt;/strong&gt; and &lt;strong&gt;delete&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;grid.get(fileInfo._id, function(err, data) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;strong&gt;get&lt;/strong&gt; method takes an ObjectID as the first argument and as we can se in the code we are using the one provided in &lt;strong&gt;fileInfo._id&lt;/strong&gt;. This will read all the chunks for the file and return it as a Buffer object.&lt;/p&gt;
+
+&lt;p&gt;The &lt;strong&gt;delete&lt;/strong&gt; method also takes an ObjectID as the first argument but will delete the file entry and the chunks associated with the file in Mongo.&lt;/p&gt;
+
+&lt;p&gt;This &lt;strong&gt;api&lt;/strong&gt; is the simplest one you can use to interact with GridFS but it&amp;rsquo;s not suitable for all kinds of files. One of it&amp;rsquo;s main drawbacks is you are trying to write large files to Mongo. This api will require you to read the entire file into memory when writing and reading from Mongo which most likely is not feasible if you have to store large files like Video or RAW Pictures. Luckily this is not the only way to work with GridFS. That&amp;rsquo;s not to say this api is not useful. If you are storing tons of small files the memory usage vs the simplicity might be a worthwhile tradeoff. Let&amp;rsquo;s dive into some of the more advanced ways of using GridFS.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_2&#34;&gt;Advanced GridFS or how not to run out of memory&lt;/h2&gt;
+
+&lt;p&gt;As we just said controlling memory consumption for you file writing and reading is key if you want to scale up the application. That means not reading in entire files before either writing or reading from Mongo DB. The good news is, it&amp;rsquo;s supported. Let&amp;rsquo;s throw some code out there straight away and look at how to do chunk sized streaming writes and reads.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;the requires and and other initializing stuff omitted for brevity&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var fileId = new ObjectID();
+var gridStore = new GridStore(db, fileId, &amp;quot;w&amp;quot;, {root:&#39;fs&#39;});
+gridStore.chunkSize = 1024 * 256;
+
+gridStore.open(function(err, gridStore) {
+ Step(
+   function writeData() {
+     var group = this.group();
+
+     for(var i = 0; i &amp;lt; 1000000; i += 5000) {
+       gridStore.write(new Buffer(5000), group());
+     }   
+   },
+
+   function doneWithWrite() {
+     gridStore.close(function(err, result) {
+       console.log(&amp;quot;File has been written to GridFS&amp;quot;);
+     });
+   }
+ )
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Before we jump into picking apart the code let&amp;rsquo;s look at&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var gridStore = new GridStore(db, fileId, &amp;quot;w&amp;quot;, {root:&#39;fs&#39;});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Notice the parameter &lt;strong&gt;&amp;ldquo;w&amp;rdquo;&lt;/strong&gt; this is important. It tells the driver that you are planning to write a new file. The parameters you can use here are.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&amp;ldquo;r&amp;rdquo;&lt;/strong&gt; - read only. This is the default mode&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&amp;ldquo;w&amp;rdquo;&lt;/strong&gt; - write in truncate mode. Existing data will be overwritten&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&amp;ldquo;w+&amp;rdquo;&lt;/strong&gt; - write in edit mode&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Right so there is a fair bit to digest here. We are simulating writing a file that&amp;rsquo;s about 1MB big to  Mongo DB using GridFS. To do this we are writing it in chunks of 5000 bytes. So to not live with a difficult callback setup we are using the Step library with its&amp;rsquo; group functionality to ensure that we are notified when all of the writes are done. After all the writes are done Step will invoke the next function (or step) called &lt;strong&gt;doneWithWrite&lt;/strong&gt; where we finish up by closing the file that flushes out any remaining data to Mongo DB and updates the file document.&lt;/p&gt;
+
+&lt;p&gt;As we are doing it in chunks of 5000 bytes we will notice that memory consumption is low. This is the trick to write large files to GridFS. In pieces. Also notice this line.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;gridStore.chunkSize = 1024 * 256;
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This allows you to adjust how big the chunks are in bytes that Mongo DB will write. You can tune the Chunk Size to your needs. If you need to write large files to GridFS it might be worthwhile to trade of memory for CPU by setting a larger Chunk Size.&lt;/p&gt;
+
+&lt;p&gt;Now let&amp;rsquo;s see how the actual streaming read works.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;new GridStore(db, fileId, &amp;quot;r&amp;quot;).open(function(err, gridStore) {
+  var stream = gridStore.stream(true);
+
+  stream.on(&amp;quot;data&amp;quot;, function(chunk) {
+    console.log(&amp;quot;Chunk of file data&amp;quot;);
+  });
+
+  stream.on(&amp;quot;end&amp;quot;, function() {
+    console.log(&amp;quot;EOF of file&amp;quot;);
+  });
+
+  stream.on(&amp;quot;close&amp;quot;, function() {
+    console.log(&amp;quot;Finished reading the file&amp;quot;);
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Right let&amp;rsquo;s have a quick lock at the streaming functionality supplied with the driver &lt;strong&gt;(make sure you are using 0.9.6-12 or higher as there is a bug fix for custom chunksizes that you need)&lt;/strong&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var stream = gridStore.stream(true);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This opens a stream to our file, you can pass in a boolean parameter to tell the driver to close the file automatically when it reaches the end. This will fire the &lt;strong&gt;close&lt;/strong&gt; event automatically. Otherwise you&amp;rsquo;ll have to handle cleanup when you receive the &lt;strong&gt;end&lt;/strong&gt; event. Let&amp;rsquo;s have a look at the events supported.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;  stream.on(&amp;quot;data&amp;quot;, function(chunk) {
+    console.log(&amp;quot;Chunk of file data&amp;quot;);
+  });
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;strong&gt;data&lt;/strong&gt; event is called for each chunk read. This means that it&amp;rsquo;s by the chunk size of the written file. So if you file is 1MB big and the file has chunkSize 256K then you&amp;rsquo;ll get 4 calls to the event handler for &lt;strong&gt;data&lt;/strong&gt;. The chunk returned is a &lt;strong&gt;Buffer&lt;/strong&gt; object.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;  stream.on(&amp;quot;end&amp;quot;, function() {
+    console.log(&amp;quot;EOF of file&amp;quot;);
+  });
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;strong&gt;end&lt;/strong&gt; event is called when the driver reaches the end of data for the file.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;  stream.on(&amp;quot;close&amp;quot;, function() {
+    console.log(&amp;quot;Finished reading the file&amp;quot;);
+  });
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;strong&gt;close&lt;/strong&gt; event is only called if you the &lt;strong&gt;autoclose&lt;/strong&gt; parameter on the &lt;strong&gt;gridStore.stream&lt;/strong&gt; method as shown above. If it&amp;rsquo;s false or not set handle cleanup of the streaming in the &lt;strong&gt;end&lt;/strong&gt; event handler.&lt;/p&gt;
+
+&lt;p&gt;Right that&amp;rsquo;s it for writing to GridFS in an efficient Manner. I&amp;rsquo;ll outline some other useful function on the Gridstore object.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_3&#34;&gt;Other useful methods on the Gridstore object&lt;/h2&gt;
+
+&lt;p&gt;There are some other methods that are useful&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;gridStore.writeFile(filename/filedescriptor, function(err fileInfo) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;writeFile&lt;/strong&gt; takes either a file name or a file descriptor and writes it to GridFS. It does this in chunks to ensure the Eventloop is not tied up.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;gridStore.read(length, function(err, data) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;read/readBuffer&lt;/strong&gt; lets you read a #length number of bytes from the current position in the file.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;gridStore.seek(position, seekLocation, function(err, gridStore) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;seek&lt;/strong&gt; lets you navigate the file to read from different positions inside the chunks. The seekLocation allows you to specify how to seek. It can be one of three values.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;GridStore.IO_SEEK_SET Seek mode where the given length is absolute&lt;/li&gt;
+&lt;li&gt;GridStore.IO_SEEK_CUR Seek mode where the given length is an offset to the current read/write head&lt;/li&gt;
+
+&lt;li&gt;&lt;p&gt;GridStore.IO_SEEK_END Seek mode where the given length is an offset to the end of the file&lt;/p&gt;
+
+&lt;p&gt;GridStore.list(dbInstance, collectionName, {id:true}, function(err, files) {})&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;strong&gt;list&lt;/strong&gt; lists all the files in the collection in GridFS. If you have a lot of files the current version will not work very well as it&amp;rsquo;s getting all files into memory first. You can have it return either the filenames or the ids for the files using option.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;gridStore.unlink(function(err, result) {});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;unlink&lt;/strong&gt; deletes the file from Mongo DB, that&amp;rsquo;s to say all the file info and all the chunks.&lt;/p&gt;
+
+&lt;p&gt;This should be plenty to get you on your way building your first GridFS based application. As in the previous article the following links might be useful for you. Good luck and have fun.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_4&#34;&gt;Links and stuff&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/mongodb/node-mongodb-native/tree/master/examples&#34;&gt;The driver examples, good starting point for basic usage&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/mongodb/node-mongodb-native/tree/master/test&#34;&gt;All the integration tests, they have tons of different usage cases&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Node Knockout, GEO</title>
+      <link>/node-mongodb-native/2.0/articles/node_knockout_article_3/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/articles/node_knockout_article_3/</guid>
+      <description>
+
+&lt;h1 id=&#34;toc_0&#34;&gt;The wonderful world of GEO spatial indexes in MongoDB&lt;/h1&gt;
+
+&lt;p&gt;MongoDB has native support for geospatial indexes and extensions to the query language to
+support a lot of different ways of querying your geo spatial documents. We will touch on a
+all of the available features of the MongoDB geospatial support point by point as outlined
+below.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Query $near a point with a maximum distance around that point&lt;/li&gt;
+&lt;li&gt;Set the minimum and maximum range for the 2d space letting you map any data to the space&lt;/li&gt;
+&lt;li&gt;GeoNear command lets you return the distance from each point found&lt;/li&gt;
+&lt;li&gt;$within query lets you set a shape for you query letting you use a circle, box or arbitrary polygon, letting you map complex geo queries such as congressional districts or post code zones.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;But first let&amp;rsquo;s cover the basics of getting you up and running starting with what a document needs to look like
+for the indexing to work.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;Geospatialize your documents&lt;/h2&gt;
+
+&lt;p&gt;Somehow we need to tell MongoDB what fields represent our geospatial coordinates. Luckily for us this is very simple. Lets take a simple sample document representing the best imaginative Burger place in the world.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var document = {
+  name: &amp;quot;Awesome burger bar&amp;quot;      
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Not we need know that it&amp;rsquo;s located on the fictitious planet (Burgoria) and more specifically at the coordinates
+[50, 50]. So how do we add this to the document so we can look it up using geospatial searches ? Well it&amp;rsquo;s very
+simple just add it as a field as shown below.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var document = {
+  name: &amp;quot;Awesome burger bar&amp;quot;,
+  loc: [50, 50]      
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Easy right? The only thing you have to ensure is that the first coordinate is the &lt;strong&gt;x&lt;/strong&gt; coordinate and the second one is the &lt;strong&gt;y&lt;/strong&gt; coordinate &lt;strong&gt;[x, y]&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s go ahead and connect to the database and insert the document&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient;
+
+var document = {
+  name: &amp;quot;Awesome burger bar&amp;quot;,
+  loc: [50, 50]      
+}
+
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/geodb&amp;quot;, function(err, db) {
+  if(err) return console.dir(err)
+
+  db.collection(&#39;places&#39;).insert(document, {w:1}, function(err, result) {
+    if(err) return console.dir(err)
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;So now we have a document in our collection. We now need to tell MongoDB to index our collection and create a 2D index on our loc attribute so we can avail us of the awesome geospatial features. This turns out to be easy as well. Let&amp;rsquo;s modify the code to ensure we have the index on startup.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient;
+
+var document = {
+  name: &amp;quot;Awesome burger bar&amp;quot;,
+  loc: [50, 50]      
+}
+
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/geodb&amp;quot;, function(err, db) {
+  if(err) return console.dir(err)
+  var collection = db.collection(&#39;places&#39;);
+
+  collection.ensureIndex({loc: &amp;quot;2d&amp;quot;}, {min: -500, max: 500, w:1}, function(err, result) {
+    if(err) return console.dir(err);
+
+    collection.insert(document, {w:1}, function(err, result) {
+      if(err) return console.dir(err)
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;ensureIndex&lt;/strong&gt; does the trick creating the index if it does not already exist. By specifying &lt;strong&gt;{loc: &amp;ldquo;2d&amp;rdquo;}&lt;/strong&gt; MongoDB will index the array contained in every document under the field name &lt;strong&gt;loc&lt;/strong&gt;. The &lt;strong&gt;min&lt;/strong&gt; and &lt;strong&gt;max&lt;/strong&gt; defines the boundaries of our (Burgoria) and means that points outside -500 and 500 will throw an error as it&amp;rsquo;s not on the planet.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_2&#34;&gt;Basic queries for your geospatial documents&lt;/h2&gt;
+
+&lt;p&gt;Since we now have a geospatial index on our collection let&amp;rsquo;s play around with the query methods and learn how we can work with the data. First however let&amp;rsquo;s add some more documents so we can see the effects of the different boundaries.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient;
+
+var documents = [
+    {name: &amp;quot;Awesome burger bar&amp;quot;, loc: [50, 50]}
+  , {name: &amp;quot;Not an Awesome burger bar&amp;quot;, loc: [10, 10]}
+  , {name: &amp;quot;More or less an Awesome burger bar&amp;quot;, loc: [45, 45]}
+]
+
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/geodb&amp;quot;, function(err, db) {
+  if(err) return console.dir(err)
+  var collection = db.collection(&#39;places&#39;);
+
+  collection.ensureIndex({loc: &amp;quot;2d&amp;quot;}, {min: -500, max: 500, w:1}, function(err, result) {
+    if(err) return console.dir(err);
+
+    collection.insert(documents, {w:1}, function(err, result) {
+      if(err) return console.dir(err)
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Right from now one for brevities sake we are going to assume we have the documents stored in the collection and the index created so we can work on queries without the boilerplate insert and index creation code. The first thing we are going to do is locate all the documents that&amp;rsquo;s a distance of 10 away from 50, 50.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  assert = require(&#39;assert&#39;);
+
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/geodb&amp;quot;, function(err, db) {
+  if(err) return console.dir(err)
+
+  db.collection(&#39;places&#39;).find({loc: {$near: [50,50], $maxDistance: 10}}).toArray(function(err, docs) {
+    if(err) return console.dir(err)
+
+    assert.equal(docs.length, 2);
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This returns the following results (ignore the _id it will be different as it&amp;rsquo;s a collection assigned key).&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{ &amp;quot;_id&amp;quot; : 509a47337d6ab61b2871ee8e, &amp;quot;name&amp;quot; : &amp;quot;Awesome burger bar&amp;quot;, &amp;quot;loc&amp;quot; : [ 50, 50 ] }
+{ &amp;quot;_id&amp;quot; : 509a47337d6ab61b2871ee90, &amp;quot;name&amp;quot; : &amp;quot;More or less an Awesome burger bar&amp;quot;, &amp;quot;loc&amp;quot; : [ 45
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s look at the query. &lt;strong&gt;$near&lt;/strong&gt; specifies the center point for the geospatial query and &lt;strong&gt;$maxDistance&lt;/strong&gt; the radius of the search circle. Given this the query will return the two documents at &lt;strong&gt;[50, 50]&lt;/strong&gt; and &lt;strong&gt;[10, 10]&lt;/strong&gt;. Now this is a nice feature but what if we need to know the distance from each of the found documents to the originating center for our query. Luckily we have a command that support that called &lt;strong&gt;geoNear&lt;/strong&gt;. Let&amp;rsquo;s execute it and look at the results.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  assert = require(&#39;assert&#39;);
+
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/geodb&amp;quot;, function(err, db) {
+  if(err) return console.dir(err)
+
+  db.collection(&#39;places&#39;).geoNear(50, 50, {$maxDistance:10}, function(err, result) {
+    if(err) return console.dir(err)
+
+    assert.equal(result.results, 2);
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s look at the results returned by the query.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+  &amp;quot;ns&amp;quot; : &amp;quot;test.places&amp;quot;,
+  &amp;quot;near&amp;quot; : &amp;quot;1100000011110000111100001111000011110000111100001111&amp;quot;,
+  &amp;quot;results&amp;quot; : [
+    {
+      &amp;quot;dis&amp;quot; : 0,
+      &amp;quot;obj&amp;quot; : {
+        &amp;quot;_id&amp;quot; : 509a47337d6ab61b2871ee8e,
+        &amp;quot;name&amp;quot; : &amp;quot;Awesome burger bar&amp;quot;,
+        &amp;quot;loc&amp;quot; : [
+          50,
+          50
+        ]
+      }
+    },
+    {
+      &amp;quot;dis&amp;quot; : 7.0710678118654755,
+      &amp;quot;obj&amp;quot; : {
+        &amp;quot;_id&amp;quot; : 509a47337d6ab61b2871ee90,
+        &amp;quot;name&amp;quot; : &amp;quot;More or less an Awesome burger bar&amp;quot;,
+        &amp;quot;loc&amp;quot; : [
+          45,
+          45
+        ]
+      }
+    }
+  ],
+  &amp;quot;stats&amp;quot; : {
+    &amp;quot;time&amp;quot; : 0,
+    &amp;quot;btreelocs&amp;quot; : 0,
+    &amp;quot;nscanned&amp;quot; : 2,
+    &amp;quot;objectsLoaded&amp;quot; : 2,
+    &amp;quot;avgDistance&amp;quot; : 3.5355339059327378,
+    &amp;quot;maxDistance&amp;quot; : 7.071128503792992
+  },
+  &amp;quot;ok&amp;quot; : 1
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Notice that &lt;strong&gt;geoNear&lt;/strong&gt; is a command not a find query so it returns a single document with the results in the results field of the returned document. As we can see from the results each returned result has a field called &lt;strong&gt;dis&lt;/strong&gt; that is the distance of the document from the center point of our search. Cool we&amp;rsquo;ve now covered the basics of geospatial search so let&amp;rsquo;s move onto more advanced queries.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_3&#34;&gt;Advanced queries for your geospatial documents&lt;/h2&gt;
+
+&lt;p&gt;So besides these simple queries we can also do &lt;strong&gt;bounds queries&lt;/strong&gt;. With bounds queries we mean we can look for points of interest inside a defined boundary. This can be useful if you have such things as a post code area, congressional district or any sort of bounding box that is not a pure circle (say look for all restaurants in the west village in new york). Let&amp;rsquo;s go through the basics.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_4&#34;&gt;The magical boundry box query&lt;/h3&gt;
+
+&lt;p&gt;Our country Whopper on Burgoria is a perfectly bound box (imagine that). Our application wants to restrict our searches to only burger bars in Burgonia. The boundaries for Burgonia are defined by (30, 30) -&amp;gt; (30, 60) and (30, 60) -&amp;gt; (60, 60). Great let&amp;rsquo;s peform a box bounded query.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  assert = require(&#39;assert&#39;);
+
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/geodb&amp;quot;, function(err, db) {
+  if(err) return console.dir(err)
+  var box = [[30, 30], [60, 60]];
+
+  db.collection(&#39;places&#39;).find({loc: {$within: {$box: box}}).toArray(function(err, docs) {
+    if(err) return console.dir(err)
+
+    assert.equal(docs.length, 2);
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The results returned are.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{ &amp;quot;_id&amp;quot; : 509a47337d6ab61b2871ee8e, &amp;quot;name&amp;quot; : &amp;quot;Awesome burger bar&amp;quot;, &amp;quot;loc&amp;quot; : [ 50, 50 ] }
+{ &amp;quot;_id&amp;quot; : 509a47337d6ab61b2871ee90, &amp;quot;name&amp;quot; : &amp;quot;More or less an Awesome burger bar&amp;quot;, &amp;quot;loc&amp;quot; : [ 45
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;toc_5&#34;&gt;A polygon to far&lt;/h3&gt;
+
+&lt;p&gt;Awesome we can now do a query by our perfectly boxed country. Inside Whopper the country is split into triangles where triangle one is made up of three points (40, 40), (40, 50), (45, 45). We want to look for points that are only inside this triangle. Let&amp;rsquo;s have a look at the query.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  assert = require(&#39;assert&#39;);
+
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/geodb&amp;quot;, function(err, db) {
+  if(err) return console.dir(err)
+  var triangle = [[40, 40], [40, 50], [45, 45]];
+
+  db.collection(&#39;places&#39;).find({loc: {$within: {$polygon: triangle}}).toArray(function(err, docs) {
+    if(err) return console.dir(err)
+
+    assert.equal(docs.length, 2);
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The results returned are.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{ &amp;quot;_id&amp;quot; : ObjectId(&amp;quot;509a47337d6ab61b2871ee90&amp;quot;), &amp;quot;name&amp;quot; : &amp;quot;More or less an Awesome burger bar&amp;quot;, &amp;quot;loc&amp;quot; : [ 45, 45 ] }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Cool things you can use this with is f.ex with the data at &lt;a href=&#34;https://nycopendata.socrata.com/browse?tags=geographic&#34;&gt;https://nycopendata.socrata.com/browse?tags=geographic&lt;/a&gt; you can create queries slicing new york into areas and look for data points inside those areas. So we&amp;rsquo;ve seen how we can query geo spatially in a lot of different ways. In closing we want to mention some simple ideas to get your mind churning.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_6&#34;&gt;Geospatial interesting tidbits&lt;/h2&gt;
+
+&lt;p&gt;So geospatial is what we mostly promote the features as but at some point you&amp;rsquo;ll realize that it&amp;rsquo;s a generic set of 2d indexes that can be used to index and &lt;strong&gt;x,y&lt;/strong&gt; data. You could consider indexing any data points that fit into a 2d space and using the geo query functionality to retrieve subsets of that data. Say if you map price vs apartment size and want to say giving an apartment find me everything that is &amp;ldquo;close&amp;rdquo; to the ideal price and size that I&amp;rsquo;m looking for. The limit here is your fantasy but as you can see it&amp;rsquo;s a pretty general and very powerful feature once you get over looking at the feature as a pure geographical function. With that I leave you to experiment and have fun with the features we have introduced.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_7&#34;&gt;Links and stuff&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/mongodb/node-mongodb-native/tree/master/examples&#34;&gt;The driver examples, good starting point for basic usage&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/mongodb/node-mongodb-native/tree/master/test&#34;&gt;All the integration tests, they have tons of different usage cases&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.mongodb.org/display/DOCS/Geospatial+Indexing&#34;&gt;MongoDB geospatial pages&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.mongodb.org/display/DOCS/Geospatial+Haystack+Indexing&#34;&gt;More specialized geo haystack indexing&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

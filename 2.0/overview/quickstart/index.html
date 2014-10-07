@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="keyword" content="">
+    <link rel="shortcut icon" href="/node-mongodb-native/2.0/img/favicon.png">
+
+    <title>QuickStart</title>
+
+    <link href="/node-mongodb-native/2.0/css/bootstrap-theme.css" rel="stylesheet">
+    <link href="/node-mongodb-native/2.0/assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/node-mongodb-native/2.0/css/style.css" rel="stylesheet">
+    <link href="/node-mongodb-native/2.0/css/style-responsive.css" rel="stylesheet" />
+    <link href="/node-mongodb-native/2.0/css/monokai_sublime.css" rel="stylesheet" />
+
+  </head>
+
+  <body>
+  
+  <section id="container" class="">
+
+      
+      <header class="header black-bg">
+            <div class="toggle-nav">
+                <i class="fa fa-bars"></i>
+                <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom"></div>
+            </div>
+
+            
+            <a href="/node-mongodb-native/2.0/.." class="logo"><img src="/node-mongodb-native/2.0/img/logo-mongodb-header.png" style="height:40px;"></a>
+
+            
+            <div class="top-nav notification-row">
+                
+                <div class="hidden-xs nav-github pull-right">
+                    <span rel="show-github" data-user="mongodb" data-repo="node-mongodb-native"></span>
+                    <span rel="show-github" data-user="mongodb" data-repo="node-mongodb-native" data-type="fork"></span>
+                    <a href='http://travis-ci.org/mongodb/node-mongodb-native'><img src='https://secure.travis-ci.org/mongodb/node-mongodb-native.png'/><a>
+                </div>
+            </div>
+
+            <div class="nav title-row" id="top_menu">
+                <h1 class="nav top-menu"> MongoDB 2.0.0 Driver </h1>
+            </div>
+      </header>
+      
+
+
+<aside>
+    <div id="sidebar"  class="nav-collapse ">
+        
+        <ul class="sidebar-menu">
+          
+          
+              
+                <li>
+                <a class="" href="/node-mongodb-native/">
+                    <i class='fa fa-file-text'></i>
+                    
+                    <span>driver portal</span>
+                </a>
+              
+              </li>
+          
+              
+                <li>
+                <a class="" href="/node-mongodb-native/1.4">
+                    <i class='fa fa-file-text'></i>
+                    
+                    <span>legacy docs 1.4.X</span>
+                </a>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-gift'></i>
+                
+                <span>about driver</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/2.0/meta/license/"> License </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/meta/release-notes/"> Release Notes </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/meta/changes-from-1.0/"> Migrating to 2.X </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu active">
+            <a href="javascript:;" class="">
+                <i class='fa fa-road'></i>
+                
+                <span>getting started</span>
+                <span class="menu-arrow fa fa-angle-down"></span>
+            </a>
+                <ul class="sub open">
+                    
+                    <li><a href="/node-mongodb-native/2.0/overview/introduction/"> Introduction </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/overview/installing/"> Installing The Driver </a> </li>
+                    
+                    <li class="active"><a href="/node-mongodb-native/2.0/overview/quickstart/"> QuickStart </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-file-text'></i>
+                
+                <span>api</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/2.0/api-docs/"> API Documentation </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-group'></i>
+                
+                <span>community</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/2.0/community/mailing-list/"> Mailing List </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/community/contributing/"> Contributing </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-book'></i>
+                
+                <span>tutorials</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/connecting/"> Connecting To MongoDB </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/urls/"> Connection URI </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/crud_operations/"> CRUD Operations </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/aggregation/"> Aggregation </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/streams/"> Streams </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/gridfs/"> GridFS </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/tutorials/logging/"> Logging </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+              
+
+            <li class="sub-menu">
+            <a href="javascript:;" class="">
+                <i class='fa fa-book'></i>
+                
+                <span>articles</span>
+                <span class="menu-arrow fa fa-angle-right"></span>
+            </a>
+                <ul class="sub">
+                    
+                    <li><a href="/node-mongodb-native/2.0/articles/node_knockout_article_1/"> Node Knockout, Basics </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/articles/node_knockout_article_2/"> Node Knockout, GridFS </a> </li>
+                    
+                    <li><a href="/node-mongodb-native/2.0/articles/node_knockout_article_3/"> Node Knockout, GEO </a> </li>
+                    
+                </ul>
+              
+              </li>
+          
+            <li> <a href="https://jira.mongodb.org/browse/NODE" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
+            
+              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/overview/quickstart.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
+            
+        </ul>
+        
+    </div>
+</aside>
+
+
+
+      
+      <section id="main-content">
+          <section class="wrapper">
+
+              
+                  
+                      
+                      
+                          
+                          
+                          
+                      
+                      
+                  
+              
+
+              <div class="row">
+                  <div class="col-md-1">
+                      
+                      
+                      <a class="navigation prev" href="/overview/installing">
+                      <i class="fa fa-angle-left"></i>
+                      </a>
+                      
+                      
+                  </div>
+                <div class="col-md-10">
+                    <section class="panel">
+                          
+                              
+                          
+                    <div class="panel-body">
+
+
+
+<h1 id="toc_0">QuickStart</h1>
+
+<p>The quickstart guide will show you how to set up a simple application using node.js and MongoDB. It scope is only how to set up the driver and perform the simple crud operations. For more inn depth coverage we encourage reading the tutorials.</p>
+
+<h2 id="toc_1">Create the package.json file</h2>
+
+<p>Let&rsquo;s create a directory where our application will live. In our case we will put this under our projects directory.</p>
+
+<pre><code>mkdir myproject
+cd myproject
+</code></pre>
+
+<p>Create a <strong>package.json</strong> using your favorite text editor and fill it in.</p>
+
+<pre><code class="language-json">{
+  &quot;name&quot;: &quot;myproject&quot;,
+  &quot;version&quot;: &quot;1.0.0&quot;,
+  &quot;description&quot;: &quot;My first project&quot;,
+  &quot;main&quot;: &quot;index.js&quot;,
+  &quot;repository&quot;: {
+    &quot;type&quot;: &quot;git&quot;,
+    &quot;url&quot;: &quot;git://github.com/christkv/myfirstproject.git&quot;
+  },
+  &quot;dependencies&quot;: {
+    &quot;mongodb&quot;: &quot;~2.0&quot;
+  },
+  &quot;author&quot;: &quot;Christian Kvalheim&quot;,
+  &quot;license&quot;: &quot;Apache 2.0&quot;,
+  &quot;bugs&quot;: {
+    &quot;url&quot;: &quot;https://github.com/christkv/myfirstproject/issues&quot;
+  },
+  &quot;homepage&quot;: &quot;https://github.com/christkv/myfirstproject&quot;
+}
+</code></pre>
+
+<p>Save the file and return to the shell or command prompt and use <strong>NPM</strong> to install all the dependencies.</p>
+
+<pre><code>npm install
+</code></pre>
+
+<p>You should see <strong>NPM</strong> download a lot of files. Once it&rsquo;s done you&rsquo;ll find all the downloaded packages under the <strong>node_modules</strong> directory.</p>
+
+<h2 id="toc_2">Booting up a MongoDB Server</h2>
+
+<p>Let&rsquo;s boot up a MongoDB server instance. Download the right MongoDB version from <a href="http://www.mongodb.org">MongoDB</a>, open a new shell or command line and ensure the <strong>mongod</strong> command is in the shell or command line path. Now let&rsquo;s create a database directory (in our case under <strong>/data</strong>).</p>
+
+<pre><code>mongod --dbpath=/data --port 27017
+</code></pre>
+
+<p>You should see the <strong>mongod</strong> process start up and print some status information.</p>
+
+<h2 id="toc_3">Connecting to MongoDB</h2>
+
+<p>Let&rsquo;s create a new <strong>app.js</strong> file that we will use to show the basic CRUD operations using the MongoDB driver.</p>
+
+<p>First let&rsquo;s add code to connect to the server and the database <strong>myproject</strong>.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
+  , assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://localhost:27017/myproject';
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&quot;Connected correctly to server&quot;);
+
+  db.close();
+});
+</code></pre>
+
+<p>Given that you booted up the <strong>mongod</strong> process earlier the application should connect successfully and print <strong>Connected correctly to server</strong> to the console.</p>
+
+<p>Let&rsquo;s Add some code to show the different CRUD operations available.</p>
+
+<h2 id="toc_4">Inserting a Document</h2>
+
+<p>Let&rsquo;s create a function that will insert some documents for us.</p>
+
+<pre><code class="language-js">var insertDocuments = function(db, callback) {
+  // Get the documents collection
+  var collection = db.collection('documents');
+  // Insert some documents
+  collection.insert([
+    {a : 1}, {a : 2}, {a : 3}
+  ], function(err, result) {
+    assert.equal(err, null);
+    assert.equal(3, result.result.n);
+    assert.equal(3, result.ops.length);
+    console.log(&quot;Inserted 3 document into the document collection&quot;);
+    callback(result);
+  });
+}
+</code></pre>
+
+<p>The insert command will return a results object that contains several fields that might be useful.</p>
+
+<ul>
+<li><strong>result</strong> Contains the result document from MongoDB</li>
+<li><strong>ops</strong> Contains the documents inserted with added <strong>_id</strong> fields</li>
+<li><strong>connection</strong> Contains the connection used to perform the insert</li>
+</ul>
+
+<p>Let&rsquo;s add call the <strong>insertDocuments</strong> command to the <strong>MongoClient.connect</strong> method callback.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
+  , assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://localhost:27017/myproject';
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&quot;Connected correctly to server&quot;);
+
+  insertDocuments(db, function() {
+    db.close();
+  });
+});
+</code></pre>
+
+<p>We can now run the update <strong>app.js</strong> file.</p>
+
+<pre><code>node app.js
+</code></pre>
+
+<p>You should see the following output after running the <strong>app.js</strong> file.</p>
+
+<pre><code>Connected correctly to server
+Inserted 3 document into the document collection
+</code></pre>
+
+<h2 id="toc_5">Updating a document</h2>
+
+<p>Let&rsquo;s look at how to do a simple document update by adding a new field <strong>b</strong> to the document that has the field <strong>a</strong> set to <strong>2</strong>.</p>
+
+<pre><code class="language-js">var updateDocument = function(db, callback) {
+  // Get the documents collection
+  var collection = db.collection('documents');
+  // Insert some documents
+  collection.update({ a : 2 }
+    , { $set: { b : 1 } }, function(err, result) {
+    assert.equal(err, null);
+    assert.equal(1, result.result.n);
+    console.log(&quot;Updated the document with the field a equal to 2&quot;);
+    callback(result);
+  });  
+}
+</code></pre>
+
+<p>The method will update the first document where the field <strong>a</strong> is equal to <strong>2</strong> by adding a new field <strong>b</strong> to the document set to <strong>1</strong>. Let&rsquo;s update the callback function from <strong>MongoClient.connect</strong> to include the update method.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
+  , assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://localhost:27017/myproject';
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&quot;Connected correctly to server&quot;);
+
+  insertDocuments(db, function() {
+    updateDocument(db, function() {
+      db.close();
+    });
+  });
+});
+</code></pre>
+
+<h2 id="toc_6">Remove a document</h2>
+
+<p>Next lets remove the document where the field <strong>a</strong> equals to <strong>3</strong>.</p>
+
+<pre><code class="language-js">var removeDocument = function(db, callback) {
+  // Get the documents collection
+  var collection = db.collection('documents');
+  // Insert some documents
+  collection.remove({ a : 3 }, function(err, result) {
+    assert.equal(err, null);
+    assert.equal(1, result.result.n);
+    console.log(&quot;Removed the document with the field a equal to 3&quot;);
+    callback(result);
+  });    
+}
+</code></pre>
+
+<p>This will remove the first document where the field <strong>a</strong> equals to <strong>3</strong>. Let&rsquo;s add the method to the <strong>MongoClient.connect</strong> callback function.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
+  , assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://localhost:27017/myproject';
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&quot;Connected correctly to server&quot;);
+
+  insertDocuments(db, function() {
+    updateDocument(db, function() {
+      removeDocument(db, function() {
+        db.close();
+      });
+    });
+  });
+});
+</code></pre>
+
+<p>Finally let&rsquo;s retrieve all the documents using a simple find.</p>
+
+<h2 id="toc_7">Find All Documents</h2>
+
+<p>We will finish up the Quickstart CRUD methods by performing a simple query that returns all the documents matching the query.</p>
+
+<pre><code class="language-js">var findDocuments = function(db, callback) {
+  // Get the documents collection
+  var collection = db.collection('documents');
+  // Insert some documents
+  collection.find({}).toArray(function(err, docs) {
+    assert.equal(err, null);
+    assert.equal(2, docs.length);
+    console.log(&quot;Found the following records&quot;);
+    console.dir(docs)
+    callback(docs);
+  });      
+}
+</code></pre>
+
+<p>This query will return all the documents in the <strong>documents</strong> collection. Since we removed a document the total documents returned is <strong>2</strong>. Finally let&rsquo;s add the findDocument method to the <strong>MongoClient.connect</strong> callback.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
+  , assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://localhost:27017/myproject';
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&quot;Connected correctly to server&quot;);
+
+  insertDocuments(db, function() {
+    updateDocument(db, function() {
+      removeDocument(db, function() {
+        findDocuments(db, function() {
+          db.close();
+        });
+      });
+    });
+  });
+});
+</code></pre>
+
+<p>This concludes the QuickStart of connecting and performing some Basic operations using the MongoDB Node.js driver. For more detailed information you can look at the tutorials covering more specific topics of interest.</p>
+
+                      
+                      <div id="disqus_thread"></div>
+                      <script type="text/javascript">
+                           
+                          var disqus_shortname = 'nodejsmongodbdriver'; 
+
+                           
+                          (function() {
+                              var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                              dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                              (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                          })();
+                      </script>
+                      <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+                      <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+                      
+                    </div>
+                    </section>
+                </div>
+                <div class="col-md-1">
+                    
+                    
+                    <a class="navigation next" href="/overview/introduction">
+                        <i class="fa fa-angle-right"> </i>
+                    </a>
+                    
+                    
+                </div>
+              </div>
+              
+          </section>
+      </section>
+     
+  </section>
+  
+    
+    <script src="/node-mongodb-native/2.0/js/jquery-2.1.1.min.js"></script>
+    <script src="/node-mongodb-native/2.0/js/jquery.scrollTo.min.js"></script>
+    <script src="/node-mongodb-native/2.0/js/bootstrap.min.js"></script>
+    
+    <script src="/node-mongodb-native/2.0/js/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script src="/node-mongodb-native/2.0/js/scripts.js"></script>
+    <script async defer id="github-bjs" src="/node-mongodb-native/2.0/js/buttons.js"></script>
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-29229787-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+  </body>
+</html>
+
