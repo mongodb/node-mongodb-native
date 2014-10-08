@@ -7,7 +7,7 @@ exports.shouldCorrectlySaveDocumentsAndReturnAsRaw = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var Buffer = require('buffer').Buffer
-      , BSON = require('bson').pure().BSON;
+      , BSON = require('mongodb-core').BSON.pure().BSON;
       // console.dir(BSON)
 
     var db = configuration.newDbInstance({w:1}, {poolSize:1});
@@ -52,7 +52,7 @@ exports.shouldCorrectlySaveDocumentsAndReturnAsRawWithRawSetAtCollectionLevel = 
   // The actual test we wish to run
   test: function(configuration, test) {
     var Buffer = require('buffer').Buffer
-      , BSON = require('bson').pure().BSON;
+      , BSON = require('mongodb-core').BSON.pure().BSON;
       // console.dir(BSON)
 
     var db = configuration.newDbInstance({w:1}, {poolSize:1});

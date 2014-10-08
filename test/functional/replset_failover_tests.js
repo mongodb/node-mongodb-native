@@ -4,6 +4,12 @@ var restartAndDone = function(configuration, test) {
   });
 }
 
+exports.beforeTests = function(configuration, callback) {
+  configuration.restart({purge:false, kill:true}, function() {
+    callback();
+  });
+}
+
 /**
  * @ignore
  */
@@ -92,7 +98,7 @@ exports['Should correctly recover from secondary shutdowns'] = {
 
       // Wait for left events
       db.serverConfig.on('left', function(t, s) {
-        console.log("-- left :: " + t + " :: " + s.name)
+        // console.log("-- left :: " + t + " :: " + s.name)
         left[s.name] = ({type: t, server: s});
 
         // Restart the servers
@@ -100,7 +106,7 @@ exports['Should correctly recover from secondary shutdowns'] = {
           db.serverConfig.removeAllListeners('left')
           // Wait for close event due to primary stepdown
           db.serverConfig.on('joined', function(t, d, s) {
-          console.log("-- joined :: " + t + " :: " + s.name)
+          // console.log("-- joined :: " + t + " :: " + s.name)
             if('secondary' == t && left[s.name]) {
               joined++;
             }

@@ -6,6 +6,12 @@ var restartAndDone = function(configuration, test) {
   });
 }
 
+exports.beforeTests = function(configuration, callback) {
+  configuration.restart({purge:false, kill:true}, function() {
+    callback();
+  });
+}
+
 /*******************************************************************
  *
  * Ordered

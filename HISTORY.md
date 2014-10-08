@@ -1,3 +1,12 @@
+2.0.2 2014-10-08
+----------------
+- Bumped mongodb-core to 1.0.2.
+- Fixed bson module dependency issue by relying on the mongodb-core one.
+
+2.0.1 2014-10-07
+----------------
+- Dependency fix
+
 2.0.0 2014-10-07
 ----------------
 - First release of 2.0 driver

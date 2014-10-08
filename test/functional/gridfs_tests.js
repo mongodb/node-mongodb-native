@@ -602,13 +602,6 @@ exports.shouldCorrectlyPerformWorkingFiledWithBigFile = {
             // Read in the whole file and check that it's the same content
             GridStore.read(client, result._id, function(err, fileData) {
               var data = fs.readFileSync('./test_gs_working_field_read.tmp');
-              // test.equal(data.toString('base64'), fileData.toString('base64'));
-              // console.log(data.length)
-              // console.log(fileData.length)
-              // for(var i = 0; i < data.length; i++) {
-              //   if(data[i] != fileData[i]) console.log("error at :: " + i)
-              // }
-
               test.deepEqual(data, fileData);
               client.close();
               test.done();
@@ -678,9 +671,6 @@ exports.shouldCorrectlyPerformWorkingFiledWriteWithDifferentChunkSizes = {
               // Read in the whole file and check that it's the same content
               GridStore.read(db, result._id, function(err, fileData) {
                 var data = fs.readFileSync('./test_gs_working_field_read.tmp');
-                // for(var i = 0; i < data.length; i++) {
-                //   if(data[i] != fileData[i]) console.log("=============== WRONG :: " + i)
-                // }
                 test.deepEqual(data, fileData);
                 callback(null, null);
               });
@@ -1089,7 +1079,6 @@ exports.shouldCorrectlySaveFileWithoutFilenameAndThenOpenAddFilenameAndSaveAgain
 
                   new GridStore(db, id, "r").open(function(err, gridStore) {
                     test.equal(null, err);
-                    console.log("2", gridStore.filename);
                     test.equal("test_gs_filename", gridStore.filename);
 
                     gridStore.read(function(err, data) {
@@ -1135,7 +1124,6 @@ exports.shouldCorrectlySaveFileAndThenOpenChangeFilenameAndSaveAgain = {
 
                   new GridStore(db, id, "r").open(function(err, gridStore) {
                     test.equal(null, err);
-                    console.log("2", gridStore.filename);
                     test.equal("test_gs_filename4", gridStore.filename);
 
                     gridStore.read(function(err, data) {
@@ -1180,7 +1168,6 @@ exports.shouldCorrectlySaveFileAndThenAppendChangeFilenameAndSaveAgain = {
 
                 new GridStore(db, id, "r").open(function(err, gridStore) {
                   test.equal(null, err);
-                  console.log("3", gridStore.filename);
                   test.equal("test_gs_filename2", gridStore.filename);
 
                   gridStore.read(function(err, data) {
@@ -2569,7 +2556,6 @@ exports.shouldNotThrowErrorOnClose = {
       gridStore.chunkSize = 1024 * 256;
       gridStore.open(function(err, gridStore) {
         var numberOfWrites = (1000000/5000);
-        // console.dir(numberOfWrites)
 
         var write = function(left, callback) {
           if(left == 0) return callback();

@@ -1,6 +1,6 @@
 {
   "name": "mongodb",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "MongoDB legacy driver emulation layer on top of mongodb-core",
   "main": "index.js",
   "scripts": {
@@ -20,7 +20,7 @@
     , "readable-stream": "1.0.31"
   },
   "devDependencies": {
-      "integra": "0.1.6"
+      "integra": "0.1.7"
     , "optimist": "0.6.1"
     , "bson": "~0.2"
     , "jsdoc": "3.3.0-alpha9"

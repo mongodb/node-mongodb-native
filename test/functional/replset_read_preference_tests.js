@@ -7,6 +7,16 @@ var restartAndDone = function(configuration, test) {
   });
 }
 
+exports.beforeTests = function(configuration, callback) {
+  configuration.restart({purge:false, kill:true}, function() {
+    callback();
+  });
+}
+
+// exports.afterTests = function(configuration, callback) {
+//   callback();
+// }
+
 exports['Should Correctly Pick lowest ping time'] = {
   metadata: { requires: { topology: 'replicaset' } },
   
@@ -223,7 +233,7 @@ exports.shouldCorrectlyReadFromGridstoreWithSecondaryReadPreference = {
         test.equal(null, err);
 
         var secondaries = {};
-        var gridStore = new GridStore(db, id, 'w', {w:3});
+        var gridStore = new GridStore(db, id, 'w', {w:4});
 
         result.hosts.forEach(function(s) {
           if(result.primary != s && result.arbiters.indexOf(s) == -1)
@@ -250,14 +260,20 @@ exports.shouldCorrectlyReadFromGridstoreWithSecondaryReadPreference = {
                 test.ok(secondaries[server.name] != null);
               });
 
+              // setTimeout(function() {
               // Read the file using readBuffer
               new GridStore(db, doc._id, 'r', {readPreference:ReadPreference.SECONDARY}).open(function(err, gridStore) {
+                test.equal(null, err);
+
                 gridStore.read(function(err, data2) {
                   test.equal(null, err);
                   test.equal(data.toString('base64'), data2.toString('base64'));
+                  db.close();
                   restartAndDone(configuration, test);
                 })
               });
+
+            // }, 10000)
             });
           })
         });
@@ -348,6 +364,7 @@ exports['Connection to replicaset with primary read preference'] = {
     var mongo = configuration.require
       , MongoClient = mongo.MongoClient
       , ReadPreference = mongo.ReadPreference
+      , Logger = mongo.Logger
       , ReplSet = mongo.ReplSet
       , Server = mongo.Server
       , Db = mongo.Db;
@@ -363,8 +380,9 @@ exports['Connection to replicaset with primary read preference'] = {
 
     // Create db instance
     var db = new Db('integration_test_', replSet, {w:0, readPreference:ReadPreference.PRIMARY});
+    // Logger.setLevel('info');
     // Trigger test once whole set is up
-    db.on("fullsetup", function() {
+    db.serverConfig.on("fullsetup", function() {
       db.command({ismaster:true}, function(err, result) {
         test.equal(null, err);
 
@@ -385,6 +403,7 @@ exports['Connection to replicaset with primary read preference'] = {
 
     // Connect to the db
     db.open(function(err, p_db) {
+      test.equal(null, err);
       db = p_db;
     });
   }
