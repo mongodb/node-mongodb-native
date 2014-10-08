@@ -2,6 +2,7 @@
 ----------------
 - Bumped mongodb-core to 1.0.2.
 - Fixed bson module dependency issue by relying on the mongodb-core one.
+- Use findOne instead of find followed by nextObject (Issue #1216, https://github.com/sergeyksv)
 
 2.0.1 2014-10-07
 ----------------
