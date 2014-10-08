@@ -377,7 +377,7 @@ var State = function(replSet, options) {
     }
 
     // Log information
-    if(logger.isInfo()) logger.info(f('[%s] updating replicaset state %s', id, JSON.stringify(replState)));    
+    if(logger.isInfo()) logger.info(f('[%s] updating replicaset state %s', id, JSON.stringify(this)));    
 
     // It's a master set it
     if(ismaster.ismaster && setName == ismaster.setName && !self.isPrimary(ismaster.me)) {
