@@ -85,19 +85,16 @@ exports['Should correctly recover from secondary shutdowns'] = {
       // Wait for left events
       _server.on('left', function(t, s) {
         left[s.name] = ({type: t, server: s});
-
         // Restart the servers
-        if(Object.keys(left).length == 3) {
+        if(Object.keys(left).length == 2) {
+          _server.removeAllListeners('left');
           // Wait for close event due to primary stepdown
           _server.on('joined', function(t, s) {
-            if('primary' == t && left[s.name]) {
-              joined++;
-              primary = true;
-            } else if('secondary' == t && left[s.name]) {
+            if('secondary' == t && left[s.name]) {
               joined++;
             }
 
-            if(joined >= Object.keys(left).length && primary) {
+            if(joined >= Object.keys(left).length) {
               // Execute the write
               _server.insert(f("%s.replset_insert0", configuration.db), [{a:1}], {
                 writeConcern: {w:1}, ordered:true
@@ -133,10 +130,10 @@ exports['Should correctly recover from secondary shutdowns'] = {
       // Wait for a second and shutdown secondaries
       setTimeout(function() {
         // Shutdown the first secondary
-        configuration.manager.shutdown('secondary', {signal:15}, function(err, result) {
+        configuration.manager.shutdown('secondary', {signal:-9}, function(err, result) {
           if(err) console.dir(err);
           // Shutdown the second secondary
-          configuration.manager.shutdown('secondary', {signal:15}, function(err, result) {
+          configuration.manager.shutdown('secondary', {signal:-9}, function(err, result) {
             if(err) console.dir(err);
           });
         });
