@@ -20,8 +20,6 @@ exports['Discover arbiters'] = {
       , ReplSet = configuration.require.ReplSet
       , manager = configuration.manager;
 
-    // State
-    var state = {'primary':[], 'secondary': [], 'arbiter': [], 'passive': []};
     // Get the primary server
     manager.getServerManagerByType('primary', function(err, serverManager) {
       test.equal(null, err);
@@ -35,13 +33,10 @@ exports['Discover arbiters'] = {
       });
 
       server.on('joined', function(_type, _server) {
-        state[_type].push(_server);
-      });
-
-      server.on('fullsetup', function(_server) {
-        test.equal(1, state.arbiter.length);
-        server.destroy();
-        test.done();
+        if(_type == 'arbiter') {
+          server.destroy();
+          test.done();          
+        }
       });
 
       // Start connection
@@ -63,8 +58,6 @@ exports['Discover passives'] = {
       , ReplSet = configuration.require.ReplSet
       , manager = configuration.manager;
 
-    // State
-    var state = {'primary':[], 'secondary': [], 'arbiter': [], 'passive': []};
     // Get the primary server
     manager.getServerManagerByType('primary', function(err, serverManager) {
       test.equal(null, err);
@@ -78,13 +71,10 @@ exports['Discover passives'] = {
       });
 
       server.on('joined', function(_type, _server) {
-        state[_type].push(_server);
-      });
-
-      server.on('fullsetup', function(_server) {
-        test.equal(1, state.passive.length);
-        server.destroy();
-        test.done();
+        if(_type == 'passive') {
+          server.destroy();
+          test.done();          
+        }
       });
 
       // Start connection
@@ -106,8 +96,6 @@ exports['Discover primary'] = {
       , ReplSet = configuration.require.ReplSet
       , manager = configuration.manager;
 
-    // State
-    var state = {'primary':[], 'secondary': [], 'arbiter': [], 'passive': []};
     // Get the primary server
     manager.getServerManagerByType('primary', function(err, serverManager) {
       test.equal(null, err);
@@ -121,13 +109,10 @@ exports['Discover primary'] = {
       });
 
       server.on('joined', function(_type, _server) {
-        state[_type].push(_server);
-      });
-
-      server.on('fullsetup', function(_server) {
-        test.equal(1, state.primary.length);
-        server.destroy();
-        test.done();
+        if(_type == 'primary') {
+          server.destroy();
+          test.done();          
+        }
       });
 
       // Start connection
@@ -149,8 +134,6 @@ exports['Discover secondaries'] = {
       , ReplSet = configuration.require.ReplSet
       , manager = configuration.manager;
 
-    // State
-    var state = {'primary':[], 'secondary': [], 'arbiter': [], 'passive': []};
     // Get the primary server
     manager.getServerManagerByType('primary', function(err, serverManager) {
       test.equal(null, err);
@@ -163,14 +146,13 @@ exports['Discover secondaries'] = {
         setName: configuration.setName 
       });
 
+      var count = 0;
       server.on('joined', function(_type, _server) {
-        state[_type].push(_server);
-      });
-
-      server.on('fullsetup', function(_server) {
-        test.equal(2, state.secondary.length);
-        server.destroy();
-        test.done();
+        if(_type == 'secondary') count = count + 1;
+        if(count == 2) {
+          server.destroy();
+          test.done();          
+        }
       });
 
       // Start connection
@@ -193,7 +175,7 @@ exports['Replica set discovery'] = {
       , manager = configuration.manager;
 
     // State
-    var state = {'primary':[], 'secondary': [], 'arbiter': [], 'passive': []};
+    var state = {'primary':1, 'secondary': 2, 'arbiter': 1, 'passive': 1};
     // Get the primary server
     manager.getServerManagerByType('primary', function(err, serverManager) {
       test.equal(null, err);
@@ -207,16 +189,15 @@ exports['Replica set discovery'] = {
       });
 
       server.on('joined', function(_type, _server) {
-        state[_type].push(_server);
-      });
+        state[_type] = state[_type] - 1;
 
-      server.on('fullsetup', function(_server) {
-        test.equal(1, state.primary.length);
-        test.equal(1, state.arbiter.length);
-        test.equal(1, state.passive.length);
-        test.equal(2, state.secondary.length);
-        server.destroy();
-        test.done();
+        if(state.primary == 0
+          && state.secondary == 0
+          && state.arbiter == 0
+          && state.passive == 0) {
+          server.destroy();
+          test.done();          
+        }
       });
 
       // Start connection
@@ -261,7 +242,7 @@ exports['Ghost discovered/Member brought up as standalone'] = {
       , manager = configuration.manager;
 
     // State
-    var state = {'primary':[], 'secondary': [], 'arbiter': [], 'passive': []};
+    var state = {'primary':1, 'secondary': 1, 'arbiter': 1, 'passive': 1};
     // Get the primary server
     manager.getServerManagerByType('primary', function(err, primaryServerManager) {
       test.equal(null, err);
@@ -299,23 +280,22 @@ exports['Ghost discovered/Member brought up as standalone'] = {
               // Attempt to connect
               var server = new ReplSet(config, options);
               server.on('joined', function(_type, _server) {
-                state[_type].push(_server);
-              });
+                state[_type] = state[_type] - 1;
 
-              server.on('fullsetup', function(_server) {
-                test.equal(1, state.primary.length);
-                test.equal(1, state.arbiter.length);
-                test.equal(1, state.passive.length);
-                test.equal(1, state.secondary.length);
-                server.destroy();
+                if(state.primary == 0
+                  && state.secondary == 0
+                  && state.arbiter == 0
+                  && state.passive == 0) {
+                  server.destroy();
 
-                // Stop the normal server
-                nonReplSetMember.stop(function() {
-                  // Restart the secondary server
-                  serverManager.start(function() {
-                    test.done();
+                  // Stop the normal server
+                  nonReplSetMember.stop(function() {
+                    // Restart the secondary server
+                    serverManager.start(function() {
+                      test.done();
+                    });
                   });
-                });
+                }
               });
 
               // Start connection
@@ -342,7 +322,7 @@ exports['Host list differs from seeds'] = {
       , manager = configuration.manager;
 
     // State
-    var state = {'primary':[], 'secondary': [], 'arbiter': [], 'passive': []};
+    var state = {'primary':1, 'secondary': 2, 'arbiter': 1, 'passive': 1};
     // Get the primary server
     manager.getServerManagerByType('primary', function(err, serverManager) {
       test.equal(null, err);
@@ -359,16 +339,15 @@ exports['Host list differs from seeds'] = {
       });
 
       server.on('joined', function(_type, _server) {
-        state[_type].push(_server);
-      });
+        state[_type] = state[_type] - 1;
 
-      server.on('fullsetup', function(_server) {
-        test.equal(1, state.primary.length);
-        test.equal(1, state.arbiter.length);
-        test.equal(1, state.passive.length);
-        test.equal(2, state.secondary.length);
-        server.destroy();
-        test.done();
+        if(state.primary == 0
+          && state.secondary == 0
+          && state.arbiter == 0
+          && state.passive == 0) {
+          server.destroy();
+          test.done();          
+        }
       });
 
       // Start connection
@@ -557,6 +536,11 @@ exports['Primary becomes standalone'] = {
         server.on('fullsetup', function(_server) {
           server.on('joined', function(_type, _server) {
             joined[_type].push(_server);
+
+            if(_type == 'primary') {
+              server.destroy();
+              restartAndDone(configuration, test);
+            }
           });
 
           server.on('left', function(_type, _server) {
@@ -584,9 +568,6 @@ exports['Primary becomes standalone'] = {
                       test.equal(null, err);
                       test.equal(1, left.primary.length);
                       test.equal(1, left.secondary.length);
-                      test.equal(1, joined.primary.length);
-                      server.destroy();
-                      restartAndDone(configuration, test);
                     });
                   });
                 });
