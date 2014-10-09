@@ -844,9 +844,7 @@ exports['ensure correct behavior when fullResult on insert and unique index viol
         test.equal(null, err);
 
         collection.insert([{a:1}, {a:1}], {fullResult:true}, function(err, result) {
-          console.dir(err)
-          console.dir(result)
-          // test.ok(err != null);
+          test.ok(err != null);
 
           db.close();
           test.done();

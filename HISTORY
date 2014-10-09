@@ -1,30 +1,32 @@
-1.4.19
+1.4.19 2014-10-09
 -----------------
-- Use findOne instead of find followed by nextObject (Issue #1216, https://github.com/sergeyksv)
+- Use findOne instead of find followed by nextObject (Issue #1216, https://github.com/sergeyksv).
+- NODE-294, slowness in aggregation cursor caused do to batchSize being set to 1 by mistake.
+- NODE-293, executing an insert with fullResult true throw TypeError: undefined is not a function.
 
-1.4.18 2015-10-03
+1.4.18 2014-10-03
 -----------------
 - Cleanup of code removing handleCallback instances
 - Throw error on missing callback on createIndex in strict mode (Issue #1214, https://github.com/marneborn)
 
-1.4.17 2015-09-27
+1.4.17 2014-09-27
 -----------------
 - NODE-286 collection/query.js references undefined MongoError
 - NODE-287 "MongoError is not defined" in options command
 
-1.4.16 2015-09-26
+1.4.16 2014-09-26
 -----------------
 - Fix minor issue due to MongoError usage in options and listCollections
 
-1.4.15 2015-09-25
+1.4.15 2014-09-25
 -----------------
 - Fix issues with collection.options
 
-1.4.14 2015-09-24
+1.4.14 2014-09-24
 -----------------
 - Args leak to global namespace fix.
 
-1.4.13 2015-09-24
+1.4.13 2014-09-24
 -----------------
 - NODE-283 Collection rename now always returns a new Collection object
 - Added listCollections helper to Db.prototype
