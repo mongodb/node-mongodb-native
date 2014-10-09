@@ -1,3 +1,7 @@
+1.4.19
+-----------------
+- Use findOne instead of find followed by nextObject (Issue #1216, https://github.com/sergeyksv)
+
 1.4.18 2015-10-03
 -----------------
 - Cleanup of code removing handleCallback instances
