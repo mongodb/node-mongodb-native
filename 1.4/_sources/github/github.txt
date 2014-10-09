@@ -119,9 +119,9 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/LearnBoost/mongoose.git
          * - **Forks**
-           - 811
+           - 810
          * - **Watchers**
-           - 5553
+           - 5560
 
 .. topic:: mongo-model
 
@@ -556,7 +556,7 @@ Queue libraries using MongoDB
          * - **Forks**
            - 6
          * - **Watchers**
-           - 95
+           - 94
 
 Logging libraries or applications
 ---------------------------------
@@ -753,7 +753,7 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 383
+           - 384
          * - **Watchers**
            - 3386
 
@@ -802,9 +802,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 169
+           - 168
          * - **Watchers**
-           - 588
+           - 589
 
 Libraries or applications for continous integration
 ---------------------------------------------------
