@@ -111,7 +111,7 @@ Object Document Modeling Libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 22:2:54 on 7/9/2014
+           - 1:31:29 on 11/9/2014
          * - **Homepage**
            - http://http://mongoosejs.com
          * - **Url**
@@ -119,9 +119,9 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/LearnBoost/mongoose.git
          * - **Forks**
-           - 810
+           - 814
          * - **Watchers**
-           - 5560
+           - 5575
 
 .. topic:: mongo-model
 
@@ -216,7 +216,7 @@ Content Management Systems
          * - **Forks**
            - 283
          * - **Watchers**
-           - 1503
+           - 1504
 
 Grid FS libraries or tools
 --------------------------
@@ -409,7 +409,7 @@ REST api's around MongoDB or resource based libraries
          * - **Forks**
            - 103
          * - **Watchers**
-           - 331
+           - 332
 
 .. topic:: lazyBum
 
@@ -593,9 +593,9 @@ Logging libraries or applications
          :header-rows: 0
 
          * - **Activity Level**
-           - .. image:: ../static/nonactive.png
+           - .. image:: ../static/active.png
          * - **Last push**
-           - 10:30:4 on 6/5/2013
+           - 8:49:39 on 10/9/2014
          * - **Homepage**
            - http://dev/null
          * - **Url**
@@ -753,9 +753,9 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 384
+           - 386
          * - **Watchers**
-           - 3386
+           - 3390
 
 Libraries for the connect middleware
 ------------------------------------
@@ -804,7 +804,7 @@ Libraries for the connect middleware
          * - **Forks**
            - 168
          * - **Watchers**
-           - 589
+           - 590
 
 Libraries or applications for continous integration
 ---------------------------------------------------
