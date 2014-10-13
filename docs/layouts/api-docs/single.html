@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="height:100%">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,9 +18,9 @@
 
   </head>
 
-  <body>
+  <body style="height:100%">
   <!-- container section start -->
-  <section id="container" class="">
+  <section id="container" class="" style="height:100%">
 
       <!--header start-->
       <header class="header black-bg">
@@ -50,8 +50,8 @@
 {{ partial "menu.html" . }}
 
       <!--main content start-->
-      <section id="main-content" style="margin-left:150px">
-          <section class="wrapper">
+      <section id="main-content" style="margin-left:150px;height:100%">
+          <section class="wrapper" style="height:100%">
 
               <div class="row">
                   <div class="col-md-1">
@@ -63,8 +63,8 @@
                       {{ end }}
                       {{ end }}
                   </div>
-                <div class="col-md-11">
-                    <section class="panel">
+                <div class="col-md-11" style="height:100%">
+                    <section class="panel" style="height:100%">
                     <div class="panel-body" style="height:100%">
                       <iframe src="{{.Site.BaseUrl}}/api/index.html" frameborder="0" style="overflow:hidden;height:100%;width:100%" height="100%" width="100%"></iframe>
                       {{ .Content }}
