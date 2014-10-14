@@ -401,7 +401,6 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
    * @param {boolean} [options.forceServerObjectId=false] Force server to assign _id values instead of driver.
    * @param {Collection~writeOpCallback} callback The command result callback   
    * @return {null}
-   * @deprecated
    */
   this.insertOne = function(doc, options, callback) {
     if(typeof options == 'function') callback = options, options = {};
@@ -426,7 +425,6 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
    * @param {boolean} [options.forceServerObjectId=false] Force server to assign _id values instead of driver.
    * @param {Collection~writeOpCallback} callback The command result callback   
    * @return {null}
-   * @deprecated
    */
   this.insertMany = function(docs, options, callback) {
     if(typeof options == 'function') callback = options, options = {};
@@ -539,7 +537,6 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
    * @param {boolean} [options.j=false] Specify a journal write concern.
    * @param {Collection~writeOpCallback} callback The command result callback   
    * @return {null}
-   * @deprecated
    */
   this.updateOne = function(criteria, update, options, callback) {
     if(typeof options == 'function') callback = options, options = {};
@@ -569,7 +566,6 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
    * @param {boolean} [options.j=false] Specify a journal write concern.
    * @param {Collection~writeOpCallback} callback The command result callback   
    * @return {null}
-   * @deprecated
    */
   this.replaceOne = function(criteria, update, options, callback) {
     if(typeof options == 'function') callback = options, options = {};
@@ -599,7 +595,6 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
    * @param {boolean} [options.j=false] Specify a journal write concern.
    * @param {Collection~writeOpCallback} callback The command result callback   
    * @return {null}
-   * @deprecated
    */
   this.updateMany = function(criteria, update, options, callback) {
     if(typeof options == 'function') callback = options, options = {};
@@ -677,7 +672,6 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
    * @param {boolean} [options.j=false] Specify a journal write concern.
    * @param {Collection~writeOpCallback} callback The command result callback   
    * @return {null}
-   * @deprecated
    */
   this.removeOne = function(criteria, options, callback) {
     if(typeof options == 'function') callback = options, options = {};
@@ -700,7 +694,6 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
    * @param {boolean} [options.j=false] Specify a journal write concern.
    * @param {Collection~writeOpCallback} callback The command result callback   
    * @return {null}
-   * @deprecated
    */
   this.removeMany = function(criteria, options, callback) {
     if(typeof options == 'function') callback = options, options = {};
@@ -1398,7 +1391,6 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
 
     // Set the AggregationCursor constructor
     options.cursorFactory = AggregationCursor;
-    
     // If explain has been specified add it
     return topology.cursor(namespace, command, options);
   }
@@ -1417,23 +1409,31 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
    * @return {(null|AggregationCursor)}
    */
   this.aggregate = function(pipeline, options, callback) {
-    var args = Array.prototype.slice.call(arguments, 0);
-    callback = args.pop();
+    if(Array.isArray(pipeline)) {
+      // Set up callback if one is provided
+      if(typeof options == 'function') {
+        callback = options;
+        options = {};
+      }
 
-    // If we have any of the supported options in the options object
-    var opts = args[args.length - 1];
-    opts = opts || {};
-    options = opts.readPreference 
-      || opts.explain || opts.cursor || opts.out
-      || opts.allowDiskUse ? args.pop() : {}
-    // If the callback is the option (as for cursor override it)
-    if(typeof callback == 'object' &amp;&amp; callback != null) options = callback;
-
-    // Convert operations to an array
-    if(!Array.isArray(args[0])) {
-      pipeline = [];
-      // Push all the operations to the pipeline
-      for(var i = 0; i &lt; args.length; i++) pipeline.push(args[i]);
+      // If we have no options or callback we are doing
+      // a cursor based aggregation
+      if(options == null &amp;&amp; callback == null) {
+        options = {};
+      }      
+    } else {
+      // Aggregation pipeline passed as arguments on the method
+      var args = Array.prototype.slice.call(arguments, 0);
+      // Get the callback
+      callback = args.pop();
+      // Get the possible options object
+      var opts = args[args.length - 1];
+      // If it contains any of the admissible options pop it of the args
+      options = opts &amp;&amp; (opts.readPreference 
+        || opts.explain || opts.cursor || opts.out
+        || opts.allowDiskUse) ? args.pop() : {};
+        // Left over arguments is the pipeline
+      pipeline = args;
     }
 
     // If out was specified
@@ -1462,6 +1462,7 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
 
       // Allow disk usage command
       if(typeof options.allowDiskUse == 'boolean') command.allowDiskUse = options.allowDiskUse;
+
       // Execute the cursor
       return topology.cursor(namespace, command, options);
     }
@@ -1973,7 +1974,7 @@ module.exports = Collection;</code></pre>
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Mon Oct 13 2014 12:16:28 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Tue Oct 14 2014 21:58:02 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>
