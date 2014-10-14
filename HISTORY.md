@@ -1,3 +1,7 @@
+2.0.3 2014-10-14
+----------------
+- NODE-297 Aggregate Broken for case of pipeline with no options.
+
 2.0.2 2014-10-08
 ----------------
 - Bumped mongodb-core to 1.0.2.
