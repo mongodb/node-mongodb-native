@@ -121,7 +121,7 @@ Object Document Modeling Libraries
          * - **Forks**
            - 813
          * - **Watchers**
-           - 5585
+           - 5591
 
 .. topic:: mongo-model
 
@@ -753,9 +753,9 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 386
+           - 385
          * - **Watchers**
-           - 3391
+           - 3393
 
 Libraries for the connect middleware
 ------------------------------------
@@ -830,7 +830,7 @@ Libraries or applications for continous integration
          * - **Forks**
            - 68
          * - **Watchers**
-           - 444
+           - 445
 
 Exampe applications
 -------------------
