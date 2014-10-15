@@ -17,7 +17,7 @@ Where
 
   * `db` is the database object
   * `filename` is the name of the file in GridFS that needs to be accessed/created
-  * `mode` indicated the operation, can be one of:
+  * `mode` indicates the operation, can be one of:
     * "r" (Read): Looks for the file information in fs.files collection, or creates a new id for this object. 
     * "w" (Write): Erases all chunks if the file already exist. 
     * "w+" (Append): Finds the last chunk, and keeps writing after it. 
