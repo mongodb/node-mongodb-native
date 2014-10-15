@@ -4,8 +4,8 @@ linktitle: Introduction
 menu:
   main:
     parent: getting started
-next: /overview/installing
-prev: /overview/quickstart
+next: /node-mongodb-native/2.0/overview/installing
+prev: /node-mongodb-native/2.0/overview/quickstart
 title: Driver introduction
 weight: 10
 ---
@@ -20,7 +20,7 @@ The Node.js driver handles the connections to a single MongoDB server, a replica
 
 ## Next Steps
 
- * [Install Driver](/overview/installing)
- * [Quick start](/overview/quickstart)
- * [Join the Mailing List](/community/mailing-list)
+ * [Install Driver](/node-mongodb-native/2.0/overview/installing)
+ * [Quick start](/node-mongodb-native/2.0/overview/quickstart)
+ * [Join the Mailing List](/node-mongodb-native/2.0/community/mailing-list)
  * [Star us on GitHub](https://github.com/mongodb/node-mongodb-native)
