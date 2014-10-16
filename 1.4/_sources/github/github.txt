@@ -121,7 +121,7 @@ Object Document Modeling Libraries
          * - **Forks**
            - 813
          * - **Watchers**
-           - 5591
+           - 5596
 
 .. topic:: mongo-model
 
@@ -214,9 +214,9 @@ Content Management Systems
          * - **Clone Url**
            - https://github.com/cliftonc/calipso.git
          * - **Forks**
-           - 283
+           - 282
          * - **Watchers**
-           - 1504
+           - 1505
 
 Grid FS libraries or tools
 --------------------------
