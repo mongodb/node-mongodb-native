@@ -8,10 +8,10 @@ The Node.js driver handles the connections to a single MongoDB server, a replica
 
 ## Next Steps
 
- * [Important Changes from 1.X to 2.X](meta/changes-from-1.0)
- * [Install Driver](overview/installing)
- * [Quick start](overview/quickstart)
- * [Join the Mailing List](community/mailing-list)
+ * [Important Changes from 1.X to 2.X](../../meta/changes-from-1.0)
+ * [Install Driver](../../overview/installing)
+ * [Quick start](../../overview/quickstart)
+ * [Join the Mailing List](../../community/mailing-list)
  * [Star us on GitHub](https://github.com/mongodb/node-mongodb-native)
 
 ## Statistics
