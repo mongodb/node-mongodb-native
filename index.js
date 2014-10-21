@@ -7,6 +7,7 @@ var connect = require('./lib/mongo_client').connect;
 // Actual driver classes exported
 connect.MongoClient = require('./lib/mongo_client');
 connect.Db = require('./lib/db');
+connect.Collection = require('./lib/collection');
 connect.Server = require('./lib/server');
 connect.ReplSet = require('./lib/replset');
 connect.Mongos = require('./lib/mongos');
