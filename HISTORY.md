@@ -1,3 +1,7 @@
+1.0.4 24-10-2014
+----------------
+- switched from using shift for the cursor due to bad slowdown on big batchSizes as shift causes entire array to be copied on each call.
+
 1.0.3 21-10-2014
 ----------------
 - fixed error issuing problem on cursor.next when iterating over a huge dataset with a very small batchSize.
