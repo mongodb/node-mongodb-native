@@ -239,7 +239,6 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
       return handleCallback(callback, null, cursorState.documents.shift());
     } else if(options.exhaust && Long.ZERO.equals(cursorState.cursorId)) {
       callbacks.unregister(query.requestId);
-      console.log("----------------------------------------- 0")
       cursorState.notified = true;
       return handleCallback(callback, null, null);
     } else if(options.exhaust) {
@@ -253,7 +252,6 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
     if(cursorState.cursorId == null) {
       execInitialQuery(query, function(err, r) {
         if(err) return handleCallback(callback, err, null);
-      console.log("----------------------------------------- 1")
         if(cursorState.documents.length == 0) {
           cursorState.notified = true;
           return handleCallback(callback, null, null);
@@ -293,14 +291,12 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
       }));
     } else if(cursorState.documents.length == 0 && Long.ZERO.equals(cursorState.cursorId)) {
       cursorState.dead = true;
-      console.log("----------------------------------------- 3")
       cursorState.notified = true;
       handleCallback(callback, null, null);
     } else {
       if(cursorState.limit > 0 && currentLimit >= cursorState.limit) {
         cursorState.dead = true;
         cursorState.notified = true;
-      console.log("----------------------------------------- 4")
         return handleCallback(callback, null, null);
       }
 
@@ -354,6 +350,7 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
       cursorState.init = false;
       cursorState.dead = false;
       cursorState.killed = false;
+      cursorState.notified = false;
       cursorState.documents = [];
       cursorState.cursorId = null;
     }  
