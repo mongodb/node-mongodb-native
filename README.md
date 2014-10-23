@@ -130,7 +130,7 @@ var insertDocuments = function(db, callback) {
     assert.equal(err, null);
     assert.equal(3, result.result.n);
     assert.equal(3, result.ops.length);
-    console.log("Inserted 3 document into the document collection");
+    console.log("Inserted 3 documents into the document collection");
     callback(result);
   });
 }
@@ -171,7 +171,7 @@ You should see the following output after running the **app.js** file.
 
 ```
 Connected correctly to server
-Inserted 3 document into the document collection
+Inserted 3 documents into the document collection
 ```
 
 Updating a document
