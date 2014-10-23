@@ -53,7 +53,7 @@ var Long = require('bson').Long
  * @param {{object}|Long} cmd The selector (can be a command or a cursorId)
  * @param {object} connection The connection used for this cursor
  * @param {object} callbacks The callbacks storage object for the server instance
- * @param {object} [options.batchSize=0] Batchsize for the operation
+ * @param {object} [options.batchSize=1000] Batchsize for the operation
  * @param {array} [options.documents=[]] Initial documents list for cursor
  * @return {Cursor} A cursor instance
  * @property {number} cursorBatchSize The current cursorBatchSize for the cursor
@@ -89,7 +89,7 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
     , notified: false
     , limit: options.limit || cmd.limit || 0
     , skip: options.skip || cmd.skip || 0
-    , batchSize: options.batchSize || cmd.batchSize || 0
+    , batchSize: options.batchSize || cmd.batchSize || 1000
   }
 
   // Callback controller
@@ -155,10 +155,17 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
    * @param {resultCallback} callback A callback function
    */
   this.next = function(callback) {
+    if(cursorState.notified) return;
     // Cursor is killed return null
-    if(cursorState.killed) return handleCallback(callback, null, null);
+    if(cursorState.killed) {
+      cursorState.notified = true;
+      console.log("--------------------------------- killed")
+      return handleCallback(callback, null, null);
+    }
     // Cursor is dead but not marked killed, return null
     if(cursorState.dead && !cursorState.killed) {
+      cursorState.notified = true;
+      console.log("--------------------------------- dead and !killed")
       cursorState.killed = true;
       return handleCallback(callback, null, null);
     }    
@@ -232,6 +239,8 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
       return handleCallback(callback, null, cursorState.documents.shift());
     } else if(options.exhaust && Long.ZERO.equals(cursorState.cursorId)) {
       callbacks.unregister(query.requestId);
+      console.log("----------------------------------------- 0")
+      cursorState.notified = true;
       return handleCallback(callback, null, null);
     } else if(options.exhaust) {
       return setTimeout(function() {
@@ -244,7 +253,11 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
     if(cursorState.cursorId == null) {
       execInitialQuery(query, function(err, r) {
         if(err) return handleCallback(callback, err, null);
-        if(cursorState.documents.length == 0) return handleCallback(callback, null, null);
+      console.log("----------------------------------------- 1")
+        if(cursorState.documents.length == 0) {
+          cursorState.notified = true;
+          return handleCallback(callback, null, null);
+        }
         self.next(callback);
       });
     } else if(cursorState.documents.length == 0 && !Long.ZERO.equals(cursorState.cursorId)) {
@@ -265,6 +278,8 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
         if(cursorState.limit > 0 && currentLimit >= cursorState.limit) {
           cursorState.dead = true;
           cursorState.documents = [];
+      console.log("----------------------------------------- 2")
+          cursorState.notified = true;
           return handleCallback(callback, null, null);
         }
 
@@ -278,10 +293,14 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
       }));
     } else if(cursorState.documents.length == 0 && Long.ZERO.equals(cursorState.cursorId)) {
       cursorState.dead = true;
+      console.log("----------------------------------------- 3")
+      cursorState.notified = true;
       handleCallback(callback, null, null);
     } else {
       if(cursorState.limit > 0 && currentLimit >= cursorState.limit) {
         cursorState.dead = true;
+        cursorState.notified = true;
+      console.log("----------------------------------------- 4")
         return handleCallback(callback, null, null);
       }
 
