@@ -24,11 +24,13 @@ exports.cursorShouldBeAbleToResetOnToArrayRunningQueryAgain = {
 
               // Should fail if called again (cursor should be closed)
               cursor.each(function(err, item) {
-                test.ok(err != null);
+                test.equal(null, err);
 
                 // Let's close the db
-                db.close();
-                test.done();
+                if(!item) {
+                  db.close();
+                  test.done();
+                }
               });
             });
           });
@@ -614,6 +616,7 @@ exports.shouldCorrectlySkipRecordsOnCursor = {
                 for(var i = 0; i < sliced.length; i++) {
                   if(sliced[i].x == items2[i].x) numberEqual = numberEqual + 1;
                 }
+
                 test.equal(8, numberEqual);
 
                 // Let's close the db

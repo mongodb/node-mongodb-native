@@ -1,3 +1,8 @@
+2.0.5 2014-10-24
+----------------
+- Made each rewind on each call allowing for re-using the cursor.
+- Fixed issue where incorrect iterations would happen on each for extensive batchSizes.
+
 2.0.4 2014-10-23
 ----------------
 - Allow for single replicaset seed list with no setName specified (Issue #1220, https://github.com/imaman)
