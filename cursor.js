@@ -83,6 +83,7 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
   var cursorState = {
       cursorId: null
     , documents: options.documents || []
+    , cursorIndex: 0
     , dead: false
     , killed: false
     , init: false
@@ -159,14 +160,16 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
     // Cursor is killed return null
     if(cursorState.killed) {
       cursorState.notified = true;
-      console.log("--------------------------------- killed")
+      cursorState.documents = [];
+      cursorState.cursorIndex = 0;
       return handleCallback(callback, null, null);
     }
     // Cursor is dead but not marked killed, return null
     if(cursorState.dead && !cursorState.killed) {
       cursorState.notified = true;
-      console.log("--------------------------------- dead and !killed")
       cursorState.killed = true;
+      cursorState.documents = [];
+      cursorState.cursorIndex = 0;
       return handleCallback(callback, null, null);
     }    
 
@@ -211,6 +214,7 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
 
       // Concatenate all the documents
       cursorState.documents = cursorState.documents.concat(result.documents);
+      // cursorState.documents = result.documents.reverse().concat(cursorState.documents);
 
       // If we have no documents left
       if(Long.ZERO.equals(result.cursorId)) {
@@ -235,11 +239,13 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
       callbacks.register(query.requestId, processExhaustMessages);
       // Write the initial command out
       return connection.write(query);
-    } else if(options.exhaust && cursorState.documents.length > 0) {
-      return handleCallback(callback, null, cursorState.documents.shift());
+    } else if(options.exhaust && cursorState.cursorIndex < cursorState.documents.length) {
+      return handleCallback(callback, null, cursorState.documents[cursorState.cursorIndex++]);
     } else if(options.exhaust && Long.ZERO.equals(cursorState.cursorId)) {
       callbacks.unregister(query.requestId);
       cursorState.notified = true;
+      cursorState.documents = [];
+      cursorState.cursorIndex = 0;
       return handleCallback(callback, null, null);
     } else if(options.exhaust) {
       return setTimeout(function() {
@@ -254,54 +260,69 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
         if(err) return handleCallback(callback, err, null);
         if(cursorState.documents.length == 0) {
           cursorState.notified = true;
-          return handleCallback(callback, null, null);
-        }
-        self.next(callback);
-      });
-    } else if(cursorState.documents.length == 0 && !Long.ZERO.equals(cursorState.cursorId)) {
-      execGetMore(function(err, doc) {
-        if(err) return handleCallback(callback, err);
-        if(cursorState.documents.length == 0 && Long.ZERO.equals(cursorState.cursorId)) cursorState.dead = true;
-        // Tailable cursor getMore result, notify owner about it
-        // No attempt is made here to retry, this is left to the user of the
-        // core module to handle to keep core simple
-        if(cursorState.documents.length == 0 && options.tailable) {
-          return handleCallback(callback, MongoError.create({
-              message: "No more documents in tailed cursor"
-            , tailable: options.tailable
-            , awaitData: options.awaitData
-          }));
-        }
-
-        if(cursorState.limit > 0 && currentLimit >= cursorState.limit) {
-          cursorState.dead = true;
           cursorState.documents = [];
-      console.log("----------------------------------------- 2")
-          cursorState.notified = true;
+          cursorState.cursorIndex = 0;
           return handleCallback(callback, null, null);
         }
 
         self.next(callback);
       });
-    } else if(cursorState.documents.length == 0 && options.tailable) { 
-      return handleCallback(callback, MongoError.create({
-          message: "No more documents in tailed cursor"
-        , tailable: options.tailable
-        , awaitData: options.awaitData
-      }));
-    } else if(cursorState.documents.length == 0 && Long.ZERO.equals(cursorState.cursorId)) {
-      cursorState.dead = true;
-      cursorState.notified = true;
-      handleCallback(callback, null, null);
+    } else if(cursorState.cursorIndex == cursorState.documents.length
+        && !Long.ZERO.equals(cursorState.cursorId)) {
+        // Ensure an empty cursor state
+        cursorState.documents = [];
+        cursorState.cursorIndex = 0;
+
+        // Execute the next get more
+        execGetMore(function(err, doc) {
+          if(err) return handleCallback(callback, err);
+          if(cursorState.documents.length == 0 && Long.ZERO.equals(cursorState.cursorId)) cursorState.dead = true;
+          // Tailable cursor getMore result, notify owner about it
+          // No attempt is made here to retry, this is left to the user of the
+          // core module to handle to keep core simple
+          if(cursorState.documents.length == 0 && options.tailable) {
+            return handleCallback(callback, MongoError.create({
+                message: "No more documents in tailed cursor"
+              , tailable: options.tailable
+              , awaitData: options.awaitData
+            }));
+          }
+
+          if(cursorState.limit > 0 && currentLimit >= cursorState.limit) {
+            cursorState.dead = true;
+            cursorState.documents = [];
+            cursorState.notified = true;
+            cursorState.cursorIndex = 0;
+            return handleCallback(callback, null, null);
+          }
+
+          self.next(callback);
+        });
+    } else if(cursorState.documents.length == cursorState.cursorIndex 
+      && options.tailable) { 
+        return handleCallback(callback, MongoError.create({
+            message: "No more documents in tailed cursor"
+          , tailable: options.tailable
+          , awaitData: options.awaitData
+        }));
+    } else if(cursorState.documents.length == cursorState.cursorIndex 
+        && Long.ZERO.equals(cursorState.cursorId)) {
+        cursorState.dead = true;
+        cursorState.notified = true;
+        cursorState.documents = [];
+        cursorState.cursorIndex = 0;
+        handleCallback(callback, null, null);
     } else {
       if(cursorState.limit > 0 && currentLimit >= cursorState.limit) {
         cursorState.dead = true;
         cursorState.notified = true;
+        cursorState.documents = [];
+        cursorState.cursorIndex = 0;
         return handleCallback(callback, null, null);
       }
 
       currentLimit += 1;
-      handleCallback(callback, null, cursorState.documents.shift());
+      handleCallback(callback, null, cursorState.documents[cursorState.cursorIndex++]);
     }
   }
 
@@ -315,12 +336,30 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
   }
 
   /**
+   * Checks if the cursor was killed by the application
+   * @method
+   * @return {boolean} A boolean signifying if the cursor was killed by the application
+   */
+  this.isKilled = function() {
+    return cursorState.killed == true;
+  }
+
+  /**
+   * Checks if the cursor notified it's caller about it's death
+   * @method
+   * @return {boolean} A boolean signifying if the cursor notified the callback
+   */
+  this.isNotified = function() {
+    return cursorState.notified == true;
+  }
+
+  /**
    * Returns current buffered documents length
    * @method
    * @return {number} The number of items in the buffered documents
    */
   this.bufferedCount = function() {
-    return cursorState.documents.length;
+    return cursorState.documents.length - cursorState.cursorIndex;
   }
 
   /**
@@ -329,9 +368,11 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
    * @return {Array} An array of buffered documents
    */
   this.readBufferedDocuments = function(number) {
-    var length = number < cursorState.documents.length ? number : cursorState.documents.length;
-    var elements = cursorState.documents.splice(0, length);
+    var unreadDocumentsLength = cursorState.documents.length - cursorState.cursorIndex;
+    var length = number < unreadDocumentsLength ? number : unreadDocumentsLength;
+    var elements = cursorState.documents.slice(cursorState.cursorIndex, cursorState.cursorIndex + length);
     currentLimit = currentLimit + length;
+    cursorState.cursorIndex = cursorState.cursorIndex + length;
     return elements;
   }
 
@@ -353,6 +394,7 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
       cursorState.notified = false;
       cursorState.documents = [];
       cursorState.cursorId = null;
+      cursorState.cursorIndex = 0;
     }  
   }
 
@@ -414,7 +456,7 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
             cursorState.cursorId = typeof id == 'number' ? Long.fromNumber(id) : id;
             // If we have a firstBatch set it
             if(Array.isArray(result.documents[0].cursor.firstBatch)) {
-              cursorState.documents = result.documents[0].cursor.firstBatch;
+              cursorState.documents = result.documents[0].cursor.firstBatch;//.reverse();
             }
 
             // Return after processing command cursor
@@ -422,7 +464,7 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
         }
 
         if(Array.isArray(result.documents[0].result)) {
-          cursorState.documents = result.documents[0].result;
+          cursorState.documents = result.documents[0].result;//.reverse();
           cursorState.cursorId = Long.ZERO;
           return callback(null, null);
         }
