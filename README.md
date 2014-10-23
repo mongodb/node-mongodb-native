@@ -265,7 +265,7 @@ We will finish up the Quickstart CRUD methods by performing a simple query that 
 var findDocuments = function(db, callback) {
   // Get the documents collection
   var collection = db.collection('documents');
-  // Insert some documents
+  // Find some documents
   collection.find({}).toArray(function(err, docs) {
     assert.equal(err, null);
     assert.equal(2, docs.length);
