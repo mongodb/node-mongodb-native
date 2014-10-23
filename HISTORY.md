@@ -2,6 +2,7 @@
 ----------------
 - Made each rewind on each call allowing for re-using the cursor.
 - Fixed issue where incorrect iterations would happen on each for extensive batchSizes.
+- NODE-301 specifying maxTimeMS on find causes all fields to be omitted from result.
 
 2.0.4 2014-10-23
 ----------------

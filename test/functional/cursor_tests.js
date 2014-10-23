@@ -2393,3 +2393,40 @@ exports['Terminate each after first document by returning false'] = {
     });
   }
 }
+
+/**
+ * @ignore
+ */
+exports['Should correctly handle maxTimeMS as part of findOne options'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    // Establish connection to db
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      var donkey = {
+        color: 'brown'
+      };
+
+      db.collection('donkies').insertOne(donkey, function(err, result) {
+        test.equal(null, err);
+
+        var query = { _id: result.insertedId };
+        var options = {maxTimeMS: 1000};
+
+        db.collection('donkies').findOne(query, options, function(err, doc) {
+          test.equal(null, err);
+          test.equal('brown', doc.color);
+
+          db.close();
+          test.done();
+        });
+      });
+    });
+  }
+}
