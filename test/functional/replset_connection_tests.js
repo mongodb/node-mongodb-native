@@ -911,3 +911,50 @@ exports['Should Correctly remove server going into recovery mode'] = {
     });
   }
 }
+
+/**
+ * @ignore
+ */
+exports['Should not give an error when using a single server seed and no setName'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var mongo = configuration.require
+      MongoClient = mongo.MongoClient;
+
+    var url = f("mongodb://localhost:%s/%s"
+      , configuration.port
+      , "integration_test_");
+
+    MongoClient.connect(url, function(err, db) {
+      test.equal(null, err);
+
+      restartAndDone(configuration, test);
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['Should give an error when using a two server seeds and no setName'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var mongo = configuration.require
+      MongoClient = mongo.MongoClient;
+
+    var url = f("mongodb://localhost:%s,localhost:%s/%s"
+      , configuration.port
+      , configuration.port + 1
+      , "integration_test_");
+
+    MongoClient.connect(url, function(err, db) {
+      test.ok(err != null);
+
+      restartAndDone(configuration, test);
+    });
+  }
+}
