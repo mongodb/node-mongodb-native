@@ -1,3 +1,7 @@
+2.0.4 2014-10-23
+----------------
+- Allow for single replicaset seed list with no setName specified (Issue #1220, https://github.com/imaman)
+
 2.0.3 2014-10-14
 ----------------
 - NODE-297 Aggregate Broken for case of pipeline with no options.
