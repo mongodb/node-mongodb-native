@@ -1040,35 +1040,6 @@ npm install
     </item>
     
     <item>
-      <title>Release Notes</title>
-      <link>/node-mongodb-native/core/meta/release-notes/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
-      
-      <guid>/node-mongodb-native/core/meta/release-notes/</guid>
-      <description>
-
-&lt;h2 id=&#34;toc_0&#34;&gt;1.0.1 07-10-2014&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;fullsetup is now defined as a primary and secondary being available allowing for all read preferences to be satisfied.&lt;/li&gt;
-&lt;li&gt;fixed issue with replset_state logging.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;toc_1&#34;&gt;1.0.1 07-10-2014&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Dependency issue solved&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;toc_2&#34;&gt;1.0.0 07-10-2014&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Initial release of mongodb-core&lt;/li&gt;
-&lt;/ul&gt;
-</description>
-    </item>
-    
-    <item>
       <title>License</title>
       <link>/node-mongodb-native/core/meta/license/</link>
       <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
@@ -1083,6 +1054,47 @@ npm install
 &lt;p&gt;&lt;a href=&#34;http://www.apache.org/licenses/LICENSE-2.0&#34;&gt;http://www.apache.org/licenses/LICENSE-2.0&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an &amp;ldquo;AS IS&amp;rdquo; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Release Notes</title>
+      <link>/node-mongodb-native/core/meta/release-notes/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/core/meta/release-notes/</guid>
+      <description>
+
+&lt;h2 id=&#34;toc_0&#34;&gt;1.0.4 24-10-2014&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;switched from using shift for the cursor due to bad slowdown on big batchSizes as shift causes entire array to be copied on each call.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;1.0.3 21-10-2014&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;fixed error issuing problem on cursor.next when iterating over a huge dataset with a very small batchSize.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;toc_2&#34;&gt;1.0.2 07-10-2014&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;fullsetup is now defined as a primary and secondary being available allowing for all read preferences to be satisfied.&lt;/li&gt;
+&lt;li&gt;fixed issue with replset_state logging.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;toc_3&#34;&gt;1.0.1 07-10-2014&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Dependency issue solved&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;toc_4&#34;&gt;1.0.0 07-10-2014&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Initial release of mongodb-core&lt;/li&gt;
+&lt;/ul&gt;
 </description>
     </item>
     
