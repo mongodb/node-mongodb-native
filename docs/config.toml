@@ -24,7 +24,7 @@ title = "MongoDB Core 1.0.0"
 [[menu.main]]
     name = "Mongo DB Docs"
     pre = "<i class='fa fa-file-text'></i>"
-    url = "http://learnmongodbthehardway.com"
+    url = "http://mongodb.org"
     weight = -113
 [[menu.main]]
     name = "about driver"
