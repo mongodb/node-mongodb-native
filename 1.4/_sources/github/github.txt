@@ -119,9 +119,9 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/LearnBoost/mongoose.git
          * - **Forks**
-           - 819
+           - 821
          * - **Watchers**
-           - 5636
+           - 5640
 
 .. topic:: mongo-model
 
@@ -502,7 +502,7 @@ Test helpers and libraries
          * - **Clone Url**
            - https://github.com/emerleite/node-database-cleaner.git
          * - **Forks**
-           - 15
+           - 16
          * - **Watchers**
            - 52
 
@@ -753,9 +753,9 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 386
+           - 387
          * - **Watchers**
-           - 3401
+           - 3403
 
 Libraries for the connect middleware
 ------------------------------------
@@ -804,7 +804,7 @@ Libraries for the connect middleware
          * - **Forks**
            - 174
          * - **Watchers**
-           - 594
+           - 595
 
 Libraries or applications for continous integration
 ---------------------------------------------------
@@ -830,7 +830,7 @@ Libraries or applications for continous integration
          * - **Forks**
            - 68
          * - **Watchers**
-           - 445
+           - 446
 
 Exampe applications
 -------------------

@@ -1703,8 +1703,10 @@ MongoClient.connect(url, function(err, db) {
 &lt;h2 id=&#34;toc_2&#34;&gt;Next Steps&lt;/h2&gt;
 
 &lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;http://learnmongodbthehardway.com/&#34;&gt;Learn MongoDB The Hard Way&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;../../overview/installing&#34;&gt;Install Driver&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;../../overview/quickstart&#34;&gt;Quick start&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://mongodb.org/&#34;&gt;MongoDB Documentation&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;../../community/mailing-list&#34;&gt;Join the Mailing List&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;https://github.com/mongodb/node-mongodb-native&#34;&gt;Star us on GitHub&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
