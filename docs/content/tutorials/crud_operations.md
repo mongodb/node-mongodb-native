@@ -165,8 +165,7 @@ MongoClient.connect(url, function(err, db) {
     assert.equal(3, r.insertedCount);
 
     // Remove a single document
-    col.removeOne({a:1}
-      , {$set: {b: 1}}, function(err, r) {
+    col.removeOne({a:1}, function(err, r) {
       assert.equal(null, err);
       assert.equal(1, r.deletedCount);
 
