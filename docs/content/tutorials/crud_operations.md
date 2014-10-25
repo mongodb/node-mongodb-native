@@ -114,7 +114,7 @@ MongoClient.connect(url, function(err, db) {
       assert.equal(1, r.modifiedCount);
 
       // Update multiple documents
-      col.updateMany({a:2}, {$set: {b: 1}}, function(err, r) {
+      col.updateMany([{a:1}, {a:2}], {$set: {b: 1}}, function(err, r) {
         assert.equal(null, err);
         assert.equal(2, r.matchedCount);
         assert.equal(2, r.modifiedCount);
@@ -159,20 +159,19 @@ MongoClient.connect(url, function(err, db) {
   console.log("Connected correctly to server");
 
   var col = db.collection('removes');
-  // Insert a single document
-  col.insertMany([{a:1}, {a:2}, {a:2}], function(err, r) {
+  // Insert multiple documents
+  col.insertMany([{a:1}, {a:2}, {a:3}], function(err, r) {
     assert.equal(null, err);
     assert.equal(3, r.insertedCount);
 
-    // Update a single document
+    // Remove a single document
     col.removeOne({a:1}
       , {$set: {b: 1}}, function(err, r) {
       assert.equal(null, err);
       assert.equal(1, r.deletedCount);
 
-      // Update multiple documents
-      col.removeMany({a:2}
-        , {$set: {b: 1}}, function(err, r) {
+      // Remove multiple documents
+      col.removeMany([{a:1}, {a:2}], function(err, r) {
         assert.equal(null, err);
         assert.equal(2, r.deletedCount);
         db.close();
@@ -206,8 +205,8 @@ MongoClient.connect(url, function(err, db) {
   console.log("Connected correctly to server");
 
   var col = db.collection('findAndModify');
-  // Insert a single document
-  col.insert([{a:1}, {a:2}, {a:2}], function(err, r) {
+  // Insert multiple documents
+  col.insertMany([{a:1}, {a:2}, {a:2}], function(err, r) {
     assert.equal(null, err);
     assert.equal(3, r.result.n);
 
@@ -255,8 +254,8 @@ MongoClient.connect(url, function(err, db) {
   console.log("Connected correctly to server");
 
   var col = db.collection('findAndModify');
-  // Insert a single document
-  col.insert([{a:1}, {a:2}, {a:2}], function(err, r) {
+  // Insert multiple documents
+  col.insertMany([{a:1}, {a:2}, {a:2}], function(err, r) {
     assert.equal(null, err);
     assert.equal(3, r.result.n);
 
@@ -422,7 +421,7 @@ MongoClient.connect(url, function(err, db) {
   console.log("Connected correctly to server");
 
   var col = db.collection('find');
-  // Insert a single document
+  // Insert multiple documents
   col.insertMany([{a:1}, {a:1}, {a:1}], function(err, r) {
     assert.equal(null, err);
     assert.equal(3, r.insertedCount);
@@ -455,7 +454,7 @@ MongoClient.connect(url, function(err, db) {
   console.log("Connected correctly to server");
 
   var col = db.collection('find');
-  // Insert a single document
+  // Insert multiple documents
   col.insertMany([{a:1}, {a:1}, {a:1}], function(err, r) {
     assert.equal(null, err);
     assert.equal(3, r.insertedCount);
@@ -484,7 +483,7 @@ MongoClient.connect(url, function(err, db) {
   console.log("Connected correctly to server");
 
   var col = db.collection('find');
-  // Insert a single document
+  // Insert multiple documents
   col.insertMany([{a:1}, {a:1}, {a:1}], function(err, r) {
     assert.equal(null, err);
     assert.equal(3, r.insertedCount);
