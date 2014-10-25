@@ -17,6 +17,16 @@ title = "MongoDB 2.0.0 Driver"
     url = "#REPLACE/"
     weight = -115
 [[menu.main]]
+    name = "Learn Mongo DB"
+    pre = "<i class='fa fa-file-text'></i>"
+    url = "http://learnmongodbthehardway.com"
+    weight = -114
+[[menu.main]]
+    name = "Mongo DB Docs"
+    pre = "<i class='fa fa-file-text'></i>"
+    url = "http://learnmongodbthehardway.com"
+    weight = -113
+[[menu.main]]
     name = "legacy docs 1.4.X"
     pre = "<i class='fa fa-file-text'></i>"
     url = "#REPLACE/1.4"

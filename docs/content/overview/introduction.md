@@ -20,7 +20,9 @@ The Node.js driver handles the connections to a single MongoDB server, a replica
 
 ## Next Steps
 
+ * [Learn MongoDB The Hard Way](http://learnmongodbthehardway.com/)
  * [Install Driver](../../overview/installing)
  * [Quick start](../../overview/quickstart)
+ * [MongoDB Documentation](http://mongodb.org/)
  * [Join the Mailing List](../../community/mailing-list)
  * [Star us on GitHub](https://github.com/mongodb/node-mongodb-native)
