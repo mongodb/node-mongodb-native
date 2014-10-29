@@ -165,7 +165,7 @@ var ServerManager = function(serverOptions) {
         _server.destroy();
 
         // Heap storage engine, no lock file available
-        if(storageEngine != 'heap1') {
+        if(storageEngine == null) {
           try {
             // Read the pidfile        
             pid = fs.readFileSync(path.join(dbpath, "mongod.lock"), 'ascii').trim();
