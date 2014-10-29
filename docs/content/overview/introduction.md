@@ -4,8 +4,8 @@ linktitle: Introduction
 menu:
   main:
     parent: getting started
-next: /overview/installing
-prev: /overview/quickstart
+next: ../../overview/installing
+prev: ../../overview/quickstart
 title: Driver introduction
 weight: 10
 ---

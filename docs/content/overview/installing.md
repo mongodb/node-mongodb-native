@@ -5,8 +5,8 @@ date: 2013-07-01
 menu:
   main:
     parent: getting started
-next: /overview/quickstart
-prev: /overview/introduction
+next: ../../overview/quickstart
+prev: ../../overview/introduction
 title: Installing The Driver
 weight: 15
 ---
