@@ -1,3 +1,7 @@
+1.0.5 29-10-2014
+----------------
+- Fixed issue with wrong namespace being created for command cursors.
+
 1.0.4 24-10-2014
 ----------------
 - switched from using shift for the cursor due to bad slowdown on big batchSizes as shift causes entire array to be copied on each call.
