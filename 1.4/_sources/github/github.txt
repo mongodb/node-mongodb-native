@@ -111,7 +111,7 @@ Object Document Modeling Libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 20:41:51 on 22/9/2014
+           - 21:53:20 on 28/9/2014
          * - **Homepage**
            - http://http://mongoosejs.com
          * - **Url**
@@ -119,9 +119,9 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/LearnBoost/mongoose.git
          * - **Forks**
-           - 821
+           - 831
          * - **Watchers**
-           - 5640
+           - 5664
 
 .. topic:: mongo-model
 
@@ -216,7 +216,7 @@ Content Management Systems
          * - **Forks**
            - 283
          * - **Watchers**
-           - 1511
+           - 1513
 
 Grid FS libraries or tools
 --------------------------
@@ -373,7 +373,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 12:14:4 on 8/7/2014
+           - 15:14:19 on 28/9/2014
          * - **Homepage**
            - http://http://simonenko.su/projects/easymongo
          * - **Url**
@@ -494,7 +494,7 @@ Test helpers and libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 16:48:30 on 3/9/2014
+           - 22:42:37 on 25/9/2014
          * - **Homepage**
            - http://
          * - **Url**
@@ -502,7 +502,7 @@ Test helpers and libraries
          * - **Clone Url**
            - https://github.com/emerleite/node-database-cleaner.git
          * - **Forks**
-           - 16
+           - 17
          * - **Watchers**
            - 52
 
@@ -518,7 +518,7 @@ Tools or applications to manage your MongoDB's
          :header-rows: 0
 
          * - **Activity Level**
-           - .. image:: ../static/active.png
+           - .. image:: ../static/nonactive.png
          * - **Last push**
            - 20:43:2 on 26/5/2014
          * - **Homepage**
@@ -556,7 +556,7 @@ Queue libraries using MongoDB
          * - **Forks**
            - 6
          * - **Watchers**
-           - 94
+           - 95
 
 Logging libraries or applications
 ---------------------------------
@@ -753,9 +753,9 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 387
+           - 389
          * - **Watchers**
-           - 3403
+           - 3406
 
 Libraries for the connect middleware
 ------------------------------------
@@ -802,9 +802,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 174
+           - 177
          * - **Watchers**
-           - 595
+           - 599
 
 Libraries or applications for continous integration
 ---------------------------------------------------

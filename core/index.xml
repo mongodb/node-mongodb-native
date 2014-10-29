@@ -1065,32 +1065,38 @@ npm install
       <guid>/node-mongodb-native/core/meta/release-notes/</guid>
       <description>
 
-&lt;h2 id=&#34;toc_0&#34;&gt;1.0.4 24-10-2014&lt;/h2&gt;
+&lt;h2 id=&#34;toc_0&#34;&gt;1.0.5 29-10-2014&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Fixed issue with wrong namespace being created for command cursors.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;1.0.4 24-10-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;switched from using shift for the cursor due to bad slowdown on big batchSizes as shift causes entire array to be copied on each call.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_1&#34;&gt;1.0.3 21-10-2014&lt;/h2&gt;
+&lt;h2 id=&#34;toc_2&#34;&gt;1.0.3 21-10-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;fixed error issuing problem on cursor.next when iterating over a huge dataset with a very small batchSize.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_2&#34;&gt;1.0.2 07-10-2014&lt;/h2&gt;
+&lt;h2 id=&#34;toc_3&#34;&gt;1.0.2 07-10-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;fullsetup is now defined as a primary and secondary being available allowing for all read preferences to be satisfied.&lt;/li&gt;
 &lt;li&gt;fixed issue with replset_state logging.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_3&#34;&gt;1.0.1 07-10-2014&lt;/h2&gt;
+&lt;h2 id=&#34;toc_4&#34;&gt;1.0.1 07-10-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Dependency issue solved&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_4&#34;&gt;1.0.0 07-10-2014&lt;/h2&gt;
+&lt;h2 id=&#34;toc_5&#34;&gt;1.0.0 07-10-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Initial release of mongodb-core&lt;/li&gt;

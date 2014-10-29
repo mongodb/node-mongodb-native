@@ -849,84 +849,6 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             
                 <span class="inherited"><a href="external-CoreCursor.html#clone">inherited</a></span>
             
-            clone<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="AggregationCursor.html">AggregationCursor</a>}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="aggregation_cursor.js.html#line244">line 244</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Clone the cursor</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer inherited">
-        <h4 class="name" id="clone">
-            
-                <span class="inherited"><a href="external-CoreCursor.html#clone">inherited</a></span>
-            
             clone<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="Cursor.html">Cursor</a>}</span>
         </h4>
     
@@ -1019,7 +941,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     <div class="description">
-        <p>Close the console, sending a KillCursor command and emitting close.</p>
+        <p>Close the cursor, sending a KillCursor command and emitting close.</p>
     </div>
     
 
@@ -2813,144 +2735,6 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="aggregation_cursor.js.html#line236">line 236</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Get the next available document from the cursor, returns null if no more documents are available.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>callback</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type"><a href="AggregationCursor.html#resultCallback">AggregationCursor~resultCallback</a></span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>The result callback.</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    <h5>Throws:</h5>
-    
-            
-
-    <div class="param-desc">
-    
-        
-<span class="param-type">MongoError</span>
-
-
-    
-    </div>
-
-
-        
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer inherited">
-        <h4 class="name" id="next">
-            
-                <span class="inherited"><a href="external-CoreCursor.html#next">inherited</a></span>
-            
-            next<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
             <a href="cursor.js.html">lib/cursor.js</a>, <a href="cursor.js.html#line277">line 277</a>
         </div>
         
@@ -3275,242 +3059,6 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer inherited">
-        <h4 class="name" id="pause">
-            
-                <span class="inherited"><a href="external-Readable.html#pause">inherited</a></span>
-            
-            pause<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="aggregation_cursor.js.html#line450">line 450</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>This method will cause a stream in flowing-mode to stop emitting data events. Any data that becomes available will remain in the internal buffer.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer inherited">
-        <h4 class="name" id="pipe">
-            
-                <span class="inherited"><a href="external-Readable.html#pipe">inherited</a></span>
-            
-            pipe<span class="signature">(destination, <span class="optional">options</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="aggregation_cursor.js.html#line456">line 456</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>This method pulls all the data out of a readable stream, and writes it to the supplied destination, automatically managing the flow so that the destination is not overwhelmed by a fast readable stream.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>destination</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">Writable</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                    
-                    
-                        
-                    
-                
-                <p>The destination for writing data</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Pipe options</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
     
     
     
@@ -3978,207 +3526,6 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             
 <dt>
     <div class="nameContainer inherited">
-        <h4 class="name" id="read">
-            
-                <span class="inherited"><a href="external-Readable.html#read">inherited</a></span>
-            
-            read<span class="signature">(size)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{String|Buffer|null}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="aggregation_cursor.js.html#line430">line 430</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>The read() method pulls some data out of the internal buffer and returns it. If there is no data available, then it will return null.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>size</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>Optional argument to specify how much data to read.</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer inherited">
-        <h4 class="name" id="resume">
-            
-                <span class="inherited"><a href="external-Readable.html#resume">inherited</a></span>
-            
-            resume<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="aggregation_cursor.js.html#line444">line 444</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>This method will cause the readable stream to resume emitting data events.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer inherited">
         <h4 class="name" id="resume">
             
                 <span class="inherited"><a href="external-Readable.html#resume">inherited</a></span>
@@ -4335,84 +3682,6 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             
 <dt>
     <div class="nameContainer inherited">
-        <h4 class="name" id="rewind">
-            
-                <span class="inherited"><a href="external-CoreCursor.html#rewind">inherited</a></span>
-            
-            rewind<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="AggregationCursor.html">AggregationCursor</a>}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="aggregation_cursor.js.html#line250">line 250</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Resets the cursor</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer inherited">
         <h4 class="name" id="setEncoding">
             
                 <span class="inherited"><a href="external-Readable.html#setEncoding">inherited</a></span>
@@ -4423,129 +3692,6 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
         
         <div class="tag-source">
             <a href="cursor.js.html">lib/cursor.js</a>, <a href="cursor.js.html#line654">line 654</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Call this function to cause the stream to return strings of the specified encoding instead of Buffer objects.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>encoding</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>The encoding to use.</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer inherited">
-        <h4 class="name" id="setEncoding">
-            
-                <span class="inherited"><a href="external-Readable.html#setEncoding">inherited</a></span>
-            
-            setEncoding<span class="signature">(encoding)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="aggregation_cursor.js.html#line437">line 437</a>
         </div>
         
     </div>
@@ -5629,136 +4775,6 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="aggregation_cursor.js.html#line464">line 464</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>This method will remove the hooks set up for a previous pipe() call.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>destination</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">Writable</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>The destination for writing data</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer inherited">
-        <h4 class="name" id="unpipe">
-            
-                <span class="inherited"><a href="external-Readable.html#unpipe">inherited</a></span>
-            
-            unpipe<span class="signature">(<span class="optional">destination</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
             <a href="cursor.js.html">lib/cursor.js</a>, <a href="cursor.js.html#line681">line 681</a>
         </div>
         
@@ -5889,132 +4905,6 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="aggregation_cursor.js.html#line471">line 471</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>This is useful in certain cases where a stream is being consumed by a parser, which needs to &quot;un-consume&quot; some data that it has optimistically pulled out of the source, so that the stream can be passed on to some other party.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>chunk</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">Buffer</span>
-|
-
-<span class="param-type">string</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>Chunk of data to unshift onto the read queue.</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer inherited">
-        <h4 class="name" id="unshift">
-            
-                <span class="inherited"><a href="external-Readable.html#unshift">inherited</a></span>
-            
-            unshift<span class="signature">(chunk)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
             <a href="cursor.js.html">lib/cursor.js</a>, <a href="cursor.js.html#line688">line 688</a>
         </div>
         
@@ -6077,129 +4967,6 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             <td class="description last">
                 
                 <p>Chunk of data to unshift onto the read queue.</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer inherited">
-        <h4 class="name" id="wrap">
-            
-                <span class="inherited"><a href="external-Readable.html#wrap">inherited</a></span>
-            
-            wrap<span class="signature">(stream)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="aggregation_cursor.js.html#line478">line 478</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Versions of Node prior to v0.10 had streams that did not implement the entire Streams API as it is today. (See &quot;Compatibility&quot; below for more information.)</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>stream</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">Stream</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>An &quot;old style&quot; readable stream.</p></td>
         </tr>
 	
 	
@@ -6530,122 +5297,6 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="aggregation_cursor.js.html#line292">line 292</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>The callback error format for the forEach iterator method</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>error</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">MongoError</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>An error instance representing the error during the execution.</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-            
-                
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="endCallback">
-            
-            endCallback<span class="signature">(error)</span>
-        </h4>
-    
-        
-        <div class="tag-source">
             <a href="cursor.js.html">lib/cursor.js</a>, <a href="cursor.js.html#line397">line 397</a>
         </div>
         
@@ -6763,122 +5414,6 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
         
         <div class="tag-source">
             <a href="cursor.js.html">lib/cursor.js</a>, <a href="cursor.js.html#line391">line 391</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>The callback format for the forEach iterator method</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>doc</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">Object</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>An emitted document for the iterator</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-            
-                
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="iteratorCallback">
-            
-            iteratorCallback<span class="signature">(doc)</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="aggregation_cursor.js.html#line286">line 286</a>
         </div>
         
     </div>
@@ -7624,7 +6159,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Sat Oct 25 2014 16:20:27 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Wed Oct 29 2014 17:05:54 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>
@@ -7705,6 +6240,10 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             
             <span class="subtitle">Typedefs</span>
             
+                <li data-name="AggregationCursor~endCallback"><a href="AggregationCursor.html#endCallback">endCallback</a></li>
+            
+                <li data-name="AggregationCursor~iteratorCallback"><a href="AggregationCursor.html#iteratorCallback">iteratorCallback</a></li>
+            
                 <li data-name="AggregationCursor~resultCallback"><a href="AggregationCursor.html#resultCallback">resultCallback</a></li>
             
                 <li data-name="AggregationCursor~toArrayResultCallback"><a href="AggregationCursor.html#toArrayResultCallback">toArrayResultCallback</a></li>
@@ -7718,15 +6257,11 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             
                 <li data-name="AggregationCursor#clone"><a href="AggregationCursor.html#clone">clone</a></li>
             
-                <li data-name="AggregationCursor#clone"><a href="AggregationCursor.html#clone">clone</a></li>
-            
                 <li data-name="AggregationCursor#close"><a href="AggregationCursor.html#close">close</a></li>
             
                 <li data-name="AggregationCursor#each"><a href="AggregationCursor.html#each">each</a></li>
             
                 <li data-name="AggregationCursor#explain"><a href="AggregationCursor.html#explain">explain</a></li>
-            
-                <li data-name="AggregationCursor#forEach"><a href="AggregationCursor.html#forEach">forEach</a></li>
             
                 <li data-name="AggregationCursor#geoNear"><a href="AggregationCursor.html#geoNear">geoNear</a></li>
             
@@ -7742,15 +6277,9 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             
                 <li data-name="AggregationCursor#next"><a href="AggregationCursor.html#next">next</a></li>
             
-                <li data-name="AggregationCursor#next"><a href="AggregationCursor.html#next">next</a></li>
-            
                 <li data-name="AggregationCursor#out"><a href="AggregationCursor.html#out">out</a></li>
             
                 <li data-name="AggregationCursor#pause"><a href="AggregationCursor.html#pause">pause</a></li>
-            
-                <li data-name="AggregationCursor#pause"><a href="AggregationCursor.html#pause">pause</a></li>
-            
-                <li data-name="AggregationCursor#pipe"><a href="AggregationCursor.html#pipe">pipe</a></li>
             
                 <li data-name="AggregationCursor#pipe"><a href="AggregationCursor.html#pipe">pipe</a></li>
             
@@ -7758,19 +6287,11 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             
                 <li data-name="AggregationCursor#read"><a href="AggregationCursor.html#read">read</a></li>
             
-                <li data-name="AggregationCursor#read"><a href="AggregationCursor.html#read">read</a></li>
-            
                 <li data-name="AggregationCursor#redact"><a href="AggregationCursor.html#redact">redact</a></li>
             
                 <li data-name="AggregationCursor#resume"><a href="AggregationCursor.html#resume">resume</a></li>
             
-                <li data-name="AggregationCursor#resume"><a href="AggregationCursor.html#resume">resume</a></li>
-            
                 <li data-name="AggregationCursor#rewind"><a href="AggregationCursor.html#rewind">rewind</a></li>
-            
-                <li data-name="AggregationCursor#rewind"><a href="AggregationCursor.html#rewind">rewind</a></li>
-            
-                <li data-name="AggregationCursor#setEncoding"><a href="AggregationCursor.html#setEncoding">setEncoding</a></li>
             
                 <li data-name="AggregationCursor#setEncoding"><a href="AggregationCursor.html#setEncoding">setEncoding</a></li>
             
@@ -7782,15 +6303,9 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             
                 <li data-name="AggregationCursor#unpipe"><a href="AggregationCursor.html#unpipe">unpipe</a></li>
             
-                <li data-name="AggregationCursor#unpipe"><a href="AggregationCursor.html#unpipe">unpipe</a></li>
-            
-                <li data-name="AggregationCursor#unshift"><a href="AggregationCursor.html#unshift">unshift</a></li>
-            
                 <li data-name="AggregationCursor#unshift"><a href="AggregationCursor.html#unshift">unshift</a></li>
             
                 <li data-name="AggregationCursor#unwind"><a href="AggregationCursor.html#unwind">unwind</a></li>
-            
-                <li data-name="AggregationCursor#wrap"><a href="AggregationCursor.html#wrap">wrap</a></li>
             
                 <li data-name="AggregationCursor#wrap"><a href="AggregationCursor.html#wrap">wrap</a></li>
             
@@ -8048,10 +6563,6 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             
                 <li data-name="Cursor~endCallback"><a href="Cursor.html#endCallback">endCallback</a></li>
             
-                <li data-name="Cursor~endCallback"><a href="Cursor.html#endCallback">endCallback</a></li>
-            
-                <li data-name="Cursor~iteratorCallback"><a href="Cursor.html#iteratorCallback">iteratorCallback</a></li>
-            
                 <li data-name="Cursor~iteratorCallback"><a href="Cursor.html#iteratorCallback">iteratorCallback</a></li>
             
                 <li data-name="Cursor~resultCallback"><a href="Cursor.html#resultCallback">resultCallback</a></li>
@@ -8068,8 +6579,6 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
                 <li data-name="Cursor#addQueryModifier"><a href="Cursor.html#addQueryModifier">addQueryModifier</a></li>
             
                 <li data-name="Cursor#batchSize"><a href="Cursor.html#batchSize">batchSize</a></li>
-            
-                <li data-name="Cursor#clone"><a href="Cursor.html#clone">clone</a></li>
             
                 <li data-name="Cursor#clone"><a href="Cursor.html#clone">clone</a></li>
             
@@ -8095,15 +6604,9 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             
                 <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
             
-                <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
-            
                 <li data-name="Cursor#nextObject"><a href="Cursor.html#nextObject">nextObject</a></li>
             
                 <li data-name="Cursor#pause"><a href="Cursor.html#pause">pause</a></li>
-            
-                <li data-name="Cursor#pause"><a href="Cursor.html#pause">pause</a></li>
-            
-                <li data-name="Cursor#pipe"><a href="Cursor.html#pipe">pipe</a></li>
             
                 <li data-name="Cursor#pipe"><a href="Cursor.html#pipe">pipe</a></li>
             
@@ -8111,17 +6614,9 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             
                 <li data-name="Cursor#read"><a href="Cursor.html#read">read</a></li>
             
-                <li data-name="Cursor#read"><a href="Cursor.html#read">read</a></li>
-            
-                <li data-name="Cursor#resume"><a href="Cursor.html#resume">resume</a></li>
-            
                 <li data-name="Cursor#resume"><a href="Cursor.html#resume">resume</a></li>
             
                 <li data-name="Cursor#rewind"><a href="Cursor.html#rewind">rewind</a></li>
-            
-                <li data-name="Cursor#rewind"><a href="Cursor.html#rewind">rewind</a></li>
-            
-                <li data-name="Cursor#setEncoding"><a href="Cursor.html#setEncoding">setEncoding</a></li>
             
                 <li data-name="Cursor#setEncoding"><a href="Cursor.html#setEncoding">setEncoding</a></li>
             
@@ -8137,13 +6632,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             
                 <li data-name="Cursor#unpipe"><a href="Cursor.html#unpipe">unpipe</a></li>
             
-                <li data-name="Cursor#unpipe"><a href="Cursor.html#unpipe">unpipe</a></li>
-            
                 <li data-name="Cursor#unshift"><a href="Cursor.html#unshift">unshift</a></li>
-            
-                <li data-name="Cursor#unshift"><a href="Cursor.html#unshift">unshift</a></li>
-            
-                <li data-name="Cursor#wrap"><a href="Cursor.html#wrap">wrap</a></li>
             
                 <li data-name="Cursor#wrap"><a href="Cursor.html#wrap">wrap</a></li>
             

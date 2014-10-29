@@ -528,7 +528,7 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
   /**
    * Update a single document on MongoDB
    * @method
-   * @param {object} criteria The Criteria used to select the document to update
+   * @param {object} filter The Filter used to select the document to update
    * @param {object} update The update operations to be applied to the document
    * @param {object} [options=null] Optional settings.
    * @param {boolean} [options.upsert=false] Update operation is an upsert.
@@ -538,13 +538,13 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
    * @param {Collection~writeOpCallback} callback The command result callback   
    * @return {null}
    */
-  this.updateOne = function(criteria, update, options, callback) {
+  this.updateOne = function(filter, update, options, callback) {
     if(typeof options == 'function') callback = options, options = {};
     options = shallowClone(options)
     // Set single document update
     options.multi = false;
     // Execute update
-    this.update(criteria, update, options, function(err, r) {
+    this.update(filter, update, options, function(err, r) {
       if(err) return callback(err);
       r.matchedCount = r.result.n;
       r.modifiedCount = r.result.nModified != null ? r.result.nModified : r.result.n;
@@ -557,7 +557,7 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
   /**
    * Replace a document on MongoDB
    * @method
-   * @param {object} criteria The Criteria used to select the document to update
+   * @param {object} filter The Filter used to select the document to update
    * @param {object} doc The Document that replaces the matching document
    * @param {object} [options=null] Optional settings.
    * @param {boolean} [options.upsert=false] Update operation is an upsert.
@@ -567,13 +567,13 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
    * @param {Collection~writeOpCallback} callback The command result callback   
    * @return {null}
    */
-  this.replaceOne = function(criteria, update, options, callback) {
+  this.replaceOne = function(filter, update, options, callback) {
     if(typeof options == 'function') callback = options, options = {};
     options = shallowClone(options)
     // Set single document update
     options.multi = false;
     // Execute update
-    this.update(criteria, update, options, function(err, r) {
+    this.update(filter, update, options, function(err, r) {
       if(err) return callback(err);
       r.matchedCount = r.result.n;
       r.modifiedCount = r.result.nModified != null ? r.result.nModified : r.result.n;
@@ -586,7 +586,7 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
   /**
    * Update multiple documents on MongoDB
    * @method
-   * @param {object} criteria The Criteria used to select the document to update
+   * @param {object} filter The Filter used to select the document to update
    * @param {object} update The update operations to be applied to the document
    * @param {object} [options=null] Optional settings.
    * @param {boolean} [options.upsert=false] Update operation is an upsert.
@@ -596,13 +596,13 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
    * @param {Collection~writeOpCallback} callback The command result callback   
    * @return {null}
    */
-  this.updateMany = function(criteria, update, options, callback) {
+  this.updateMany = function(filter, update, options, callback) {
     if(typeof options == 'function') callback = options, options = {};
     options = shallowClone(options)
     // Set single document update
     options.multi = true;
     // Execute update
-    this.update(criteria, update, options, function(err, r) {
+    this.update(filter, update, options, function(err, r) {
       if(err) return callback(err);
       r.matchedCount = r.result.n;
       r.modifiedCount = r.result.nModified != null ? r.result.nModified : r.result.n;
@@ -665,7 +665,7 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
   /**
    * Remove a document on MongoDB
    * @method
-   * @param {object} criteria The Criteria used to select the document to remove
+   * @param {object} filter The Filter used to select the document to remove
    * @param {object} [options=null] Optional settings.
    * @param {(number|string)} [options.w=null] The write concern.
    * @param {number} [options.wtimeout=null] The write concern timeout.
@@ -673,11 +673,11 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
    * @param {Collection~writeOpCallback} callback The command result callback   
    * @return {null}
    */
-  this.removeOne = function(criteria, options, callback) {
+  this.removeOne = function(filter, options, callback) {
     if(typeof options == 'function') callback = options, options = {};
     var options = shallowClone(options);    
     options.single = true;
-    this.remove(criteria, options, function(err, r) {
+    this.remove(filter, options, function(err, r) {
       if(err) return callback(err);
       r.deletedCount = r.result.n;
       callback(null, r);
@@ -687,7 +687,7 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
   /**
    * Remove multiple documents on MongoDB
    * @method
-   * @param {object} criteria The Criteria used to select the documents to remove
+   * @param {object} filter The Filter used to select the documents to remove
    * @param {object} [options=null] Optional settings.
    * @param {(number|string)} [options.w=null] The write concern.
    * @param {number} [options.wtimeout=null] The write concern timeout.
@@ -695,11 +695,11 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
    * @param {Collection~writeOpCallback} callback The command result callback   
    * @return {null}
    */
-  this.removeMany = function(criteria, options, callback) {
+  this.removeMany = function(filter, options, callback) {
     if(typeof options == 'function') callback = options, options = {};
     var options = shallowClone(options);    
     options.single = false;
-    this.remove(criteria, options, function(err, r) {
+    this.remove(filter, options, function(err, r) {
       if(err) return callback(err);
       r.deletedCount = r.result.n;
       callback(null, r);
@@ -1121,7 +1121,7 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
    * The distinct command returns returns a list of distinct values for the given key across a collection.
    * @method
    * @param {string} key Field of the document to find distinct values for.
-   * @param {object} query The query for filtering the set of documents to which we apply the distinct criteria.
+   * @param {object} query The query for filtering the set of documents to which we apply the distinct filter.
    * @param {object} [options=null] Optional settings.
    * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
    * @param {Collection~resultCallback} callback The command result callback
@@ -1195,7 +1195,7 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
    * Find a document and delete it in one atomic operation, requires a write lock for the duration of the operation.
    *
    * @method
-   * @param {object} criteria Document selection criteria.
+   * @param {object} filter Document selection filter.
    * @param {object} [options=null] Optional settings.
    * @param {object} [options.projection=null] Limits the fields to return for all matching documents.
    * @param {object} [options.sort=null] Determines which document the operation modifies if the query selects multiple documents.
@@ -1203,10 +1203,10 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
    * @param {Collection~resultCallback} callback The collection result callback
    * @return {null}
    */
-  this.findOneAndDelete = function(criteria, options, callback) {
+  this.findOneAndDelete = function(filter, options, callback) {
     if(typeof options == 'function') callback = options, options = {};
     this.findAndModify(
-        criteria
+        filter
       , options.sort
       , null
       , {
@@ -1221,7 +1221,7 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
    * Find a document and replace it in one atomic operation, requires a write lock for the duration of the operation.
    *
    * @method
-   * @param {object} criteria Document selection criteria.
+   * @param {object} filter Document selection filter.
    * @param {object} replacement Document replacing the matching document.
    * @param {object} [options=null] Optional settings.
    * @param {object} [options.projection=null] Limits the fields to return for all matching documents.
@@ -1232,10 +1232,10 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
    * @param {Collection~resultCallback} callback The collection result callback
    * @return {null}
    */
-  this.findOneAndReplace = function(criteria, replacement, options, callback) {
+  this.findOneAndReplace = function(filter, replacement, options, callback) {
     if(typeof options == 'function') callback = options, options = {};
     this.findAndModify(
-        criteria
+        filter
       , options.sort
       , replacement
       , {
@@ -1252,7 +1252,7 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
    * Find a document and update it in one atomic operation, requires a write lock for the duration of the operation.
    *
    * @method
-   * @param {object} criteria Document selection criteria.
+   * @param {object} filter Document selection filter.
    * @param {object} update Update operations to be performed on the document
    * @param {object} [options=null] Optional settings.
    * @param {object} [options.projection=null] Limits the fields to return for all matching documents.
@@ -1263,10 +1263,10 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
    * @param {Collection~resultCallback} callback The collection result callback
    * @return {null}
    */
-  this.findOneAndUpdate = function(criteria, update, options, callback) {
+  this.findOneAndUpdate = function(filter, update, options, callback) {
     if(typeof options == 'function') callback = options, options = {};
     this.findAndModify(
-        criteria
+        filter
       , options.sort
       , update
       , {
@@ -1973,7 +1973,7 @@ module.exports = Collection;</code></pre>
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Sat Oct 25 2014 16:20:24 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Wed Oct 29 2014 17:05:52 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>
@@ -2054,6 +2054,10 @@ module.exports = Collection;</code></pre>
             
             <span class="subtitle">Typedefs</span>
             
+                <li data-name="AggregationCursor~endCallback"><a href="AggregationCursor.html#endCallback">endCallback</a></li>
+            
+                <li data-name="AggregationCursor~iteratorCallback"><a href="AggregationCursor.html#iteratorCallback">iteratorCallback</a></li>
+            
                 <li data-name="AggregationCursor~resultCallback"><a href="AggregationCursor.html#resultCallback">resultCallback</a></li>
             
                 <li data-name="AggregationCursor~toArrayResultCallback"><a href="AggregationCursor.html#toArrayResultCallback">toArrayResultCallback</a></li>
@@ -2067,15 +2071,11 @@ module.exports = Collection;</code></pre>
             
                 <li data-name="AggregationCursor#clone"><a href="AggregationCursor.html#clone">clone</a></li>
             
-                <li data-name="AggregationCursor#clone"><a href="AggregationCursor.html#clone">clone</a></li>
-            
                 <li data-name="AggregationCursor#close"><a href="AggregationCursor.html#close">close</a></li>
             
                 <li data-name="AggregationCursor#each"><a href="AggregationCursor.html#each">each</a></li>
             
                 <li data-name="AggregationCursor#explain"><a href="AggregationCursor.html#explain">explain</a></li>
-            
-                <li data-name="AggregationCursor#forEach"><a href="AggregationCursor.html#forEach">forEach</a></li>
             
                 <li data-name="AggregationCursor#geoNear"><a href="AggregationCursor.html#geoNear">geoNear</a></li>
             
@@ -2091,15 +2091,9 @@ module.exports = Collection;</code></pre>
             
                 <li data-name="AggregationCursor#next"><a href="AggregationCursor.html#next">next</a></li>
             
-                <li data-name="AggregationCursor#next"><a href="AggregationCursor.html#next">next</a></li>
-            
                 <li data-name="AggregationCursor#out"><a href="AggregationCursor.html#out">out</a></li>
             
                 <li data-name="AggregationCursor#pause"><a href="AggregationCursor.html#pause">pause</a></li>
-            
-                <li data-name="AggregationCursor#pause"><a href="AggregationCursor.html#pause">pause</a></li>
-            
-                <li data-name="AggregationCursor#pipe"><a href="AggregationCursor.html#pipe">pipe</a></li>
             
                 <li data-name="AggregationCursor#pipe"><a href="AggregationCursor.html#pipe">pipe</a></li>
             
@@ -2107,19 +2101,11 @@ module.exports = Collection;</code></pre>
             
                 <li data-name="AggregationCursor#read"><a href="AggregationCursor.html#read">read</a></li>
             
-                <li data-name="AggregationCursor#read"><a href="AggregationCursor.html#read">read</a></li>
-            
                 <li data-name="AggregationCursor#redact"><a href="AggregationCursor.html#redact">redact</a></li>
             
                 <li data-name="AggregationCursor#resume"><a href="AggregationCursor.html#resume">resume</a></li>
             
-                <li data-name="AggregationCursor#resume"><a href="AggregationCursor.html#resume">resume</a></li>
-            
                 <li data-name="AggregationCursor#rewind"><a href="AggregationCursor.html#rewind">rewind</a></li>
-            
-                <li data-name="AggregationCursor#rewind"><a href="AggregationCursor.html#rewind">rewind</a></li>
-            
-                <li data-name="AggregationCursor#setEncoding"><a href="AggregationCursor.html#setEncoding">setEncoding</a></li>
             
                 <li data-name="AggregationCursor#setEncoding"><a href="AggregationCursor.html#setEncoding">setEncoding</a></li>
             
@@ -2131,15 +2117,9 @@ module.exports = Collection;</code></pre>
             
                 <li data-name="AggregationCursor#unpipe"><a href="AggregationCursor.html#unpipe">unpipe</a></li>
             
-                <li data-name="AggregationCursor#unpipe"><a href="AggregationCursor.html#unpipe">unpipe</a></li>
-            
-                <li data-name="AggregationCursor#unshift"><a href="AggregationCursor.html#unshift">unshift</a></li>
-            
                 <li data-name="AggregationCursor#unshift"><a href="AggregationCursor.html#unshift">unshift</a></li>
             
                 <li data-name="AggregationCursor#unwind"><a href="AggregationCursor.html#unwind">unwind</a></li>
-            
-                <li data-name="AggregationCursor#wrap"><a href="AggregationCursor.html#wrap">wrap</a></li>
             
                 <li data-name="AggregationCursor#wrap"><a href="AggregationCursor.html#wrap">wrap</a></li>
             
@@ -2397,10 +2377,6 @@ module.exports = Collection;</code></pre>
             
                 <li data-name="Cursor~endCallback"><a href="Cursor.html#endCallback">endCallback</a></li>
             
-                <li data-name="Cursor~endCallback"><a href="Cursor.html#endCallback">endCallback</a></li>
-            
-                <li data-name="Cursor~iteratorCallback"><a href="Cursor.html#iteratorCallback">iteratorCallback</a></li>
-            
                 <li data-name="Cursor~iteratorCallback"><a href="Cursor.html#iteratorCallback">iteratorCallback</a></li>
             
                 <li data-name="Cursor~resultCallback"><a href="Cursor.html#resultCallback">resultCallback</a></li>
@@ -2417,8 +2393,6 @@ module.exports = Collection;</code></pre>
                 <li data-name="Cursor#addQueryModifier"><a href="Cursor.html#addQueryModifier">addQueryModifier</a></li>
             
                 <li data-name="Cursor#batchSize"><a href="Cursor.html#batchSize">batchSize</a></li>
-            
-                <li data-name="Cursor#clone"><a href="Cursor.html#clone">clone</a></li>
             
                 <li data-name="Cursor#clone"><a href="Cursor.html#clone">clone</a></li>
             
@@ -2444,15 +2418,9 @@ module.exports = Collection;</code></pre>
             
                 <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
             
-                <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
-            
                 <li data-name="Cursor#nextObject"><a href="Cursor.html#nextObject">nextObject</a></li>
             
                 <li data-name="Cursor#pause"><a href="Cursor.html#pause">pause</a></li>
-            
-                <li data-name="Cursor#pause"><a href="Cursor.html#pause">pause</a></li>
-            
-                <li data-name="Cursor#pipe"><a href="Cursor.html#pipe">pipe</a></li>
             
                 <li data-name="Cursor#pipe"><a href="Cursor.html#pipe">pipe</a></li>
             
@@ -2460,17 +2428,9 @@ module.exports = Collection;</code></pre>
             
                 <li data-name="Cursor#read"><a href="Cursor.html#read">read</a></li>
             
-                <li data-name="Cursor#read"><a href="Cursor.html#read">read</a></li>
-            
-                <li data-name="Cursor#resume"><a href="Cursor.html#resume">resume</a></li>
-            
                 <li data-name="Cursor#resume"><a href="Cursor.html#resume">resume</a></li>
             
                 <li data-name="Cursor#rewind"><a href="Cursor.html#rewind">rewind</a></li>
-            
-                <li data-name="Cursor#rewind"><a href="Cursor.html#rewind">rewind</a></li>
-            
-                <li data-name="Cursor#setEncoding"><a href="Cursor.html#setEncoding">setEncoding</a></li>
             
                 <li data-name="Cursor#setEncoding"><a href="Cursor.html#setEncoding">setEncoding</a></li>
             
@@ -2486,13 +2446,7 @@ module.exports = Collection;</code></pre>
             
                 <li data-name="Cursor#unpipe"><a href="Cursor.html#unpipe">unpipe</a></li>
             
-                <li data-name="Cursor#unpipe"><a href="Cursor.html#unpipe">unpipe</a></li>
-            
                 <li data-name="Cursor#unshift"><a href="Cursor.html#unshift">unshift</a></li>
-            
-                <li data-name="Cursor#unshift"><a href="Cursor.html#unshift">unshift</a></li>
-            
-                <li data-name="Cursor#wrap"><a href="Cursor.html#wrap">wrap</a></li>
             
                 <li data-name="Cursor#wrap"><a href="Cursor.html#wrap">wrap</a></li>
             
