@@ -2,7 +2,7 @@
  * @ignore
  */
 exports.shouldCorrectlyHandleIllegalDbNames = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -129,7 +129,7 @@ exports.shouldCorrectlyPerformAutomaticConnectWithMaxBufferSize0 = {
  * @ignore
  */
 exports.shouldCorrectlyHandleFailedConnection = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -148,7 +148,7 @@ exports.shouldCorrectlyHandleFailedConnection = {
  * @ignore
  */
 exports.shouldCorrectlyResaveDBRef = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -251,7 +251,7 @@ exports.shouldCorrectlyForceReindexOnCollection = {
  * @ignore
  */
 exports.shouldCorrectlyGetErrorDroppingNonExistingDb = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -276,7 +276,7 @@ exports.shouldCorrectlyGetErrorDroppingNonExistingDb = {
  * @ignore
  */
 exports.shouldCorrectlyThrowWhenTryingToReOpenConnection = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -300,7 +300,7 @@ exports.shouldCorrectlyThrowWhenTryingToReOpenConnection = {
  * @ignore
  */
 exports.shouldCorrectlyReconnectWhenError = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {

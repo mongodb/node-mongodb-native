@@ -5,7 +5,7 @@
  * @ignore
  */
 exports.shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {

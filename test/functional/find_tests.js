@@ -3,7 +3,7 @@
  * @ignore
  */
 exports.shouldCorrectlyPerformSimpleFind = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -46,7 +46,7 @@ exports.shouldCorrectlyPerformSimpleFind = {
  * @ignore
  */
 exports.shouldCorrectlyPeformSimpleChainedFind = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -91,7 +91,7 @@ exports.shouldCorrectlyPeformSimpleChainedFind = {
  * @ignore
  */
 exports.shouldCorrectlyPeformAdvancedFinds = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -182,7 +182,7 @@ exports.shouldCorrectlyPeformAdvancedFinds = {
  * @ignore
  */
 exports.shouldCorrectlyPerformFindWithSort = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -290,7 +290,7 @@ exports.shouldCorrectlyPerformFindWithSort = {
  * @ignore
  */
 exports.shouldCorrectlyPerformFindWithLimit = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -350,7 +350,7 @@ exports.shouldCorrectlyPerformFindWithLimit = {
  * @ignore
  */
 exports.shouldCorrectlyFindWithNonQuotedValues = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -379,7 +379,7 @@ exports.shouldCorrectlyFindWithNonQuotedValues = {
  * @ignore
  */
 exports.shouldCorrectlyFindEmbeddedDocument = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -418,7 +418,7 @@ exports.shouldCorrectlyFindEmbeddedDocument = {
  * @ignore
  */
 exports.shouldCorrectlyFindNoRecords = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -442,7 +442,7 @@ exports.shouldCorrectlyFindNoRecords = {
  * @ignore
  */
 exports.shouldCorrectlyPerformFindByWhere = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -478,7 +478,7 @@ exports.shouldCorrectlyPerformFindByWhere = {
  * @ignore
  */
 exports.shouldCorrectlyPerformFindsWithHintTurnedOn = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -537,7 +537,7 @@ exports.shouldCorrectlyPerformFindsWithHintTurnedOn = {
  * @ignore
  */
 exports.shouldCorrectlyPerformFindByObjectID = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -571,7 +571,7 @@ exports.shouldCorrectlyPerformFindByObjectID = {
  * @ignore
  */
 exports.shouldCorrectlyReturnDocumentWithOriginalStructure = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -608,7 +608,7 @@ exports.shouldCorrectlyReturnDocumentWithOriginalStructure = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveSingleRecord = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -634,7 +634,7 @@ exports.shouldCorrectlyRetrieveSingleRecord = {
  * @ignore
  */
 exports.shouldCorrectlyHandleError = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -661,7 +661,7 @@ exports.shouldCorrectlyHandleError = {
  * @ignore
  */
 exports.shouldCorrectlyPerformFindWithOptions = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -707,7 +707,7 @@ exports.shouldCorrectlyPerformFindWithOptions = {
  * @ignore
  */
 exports.shouldCorrectlyFindAndModifyDocument = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -771,7 +771,7 @@ exports.shouldCorrectlyFindAndModifyDocument = {
  * @ignore
  */
 exports.shouldCorrectlyFindAndModifyDocumentAndReturnSelectedFieldsOnly = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -797,7 +797,7 @@ exports.shouldCorrectlyFindAndModifyDocumentAndReturnSelectedFieldsOnly = {
  * @ignore
  */
 exports['ShouldCorrectlyLocatePostAndIncValues'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -832,7 +832,7 @@ exports['ShouldCorrectlyLocatePostAndIncValues'] = {
  * @ignore
  */
 exports['Should Correctly Handle FindAndModify Duplicate Key Error'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -860,7 +860,7 @@ exports['Should Correctly Handle FindAndModify Duplicate Key Error'] = {
  * @ignore
  */
 exports['Should correctly return null when attempting to modify a non-existing document'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -883,7 +883,7 @@ exports['Should correctly return null when attempting to modify a non-existing d
  * @ignore
  */
 exports['Should correctly handle chained skip and limit on find with toArray'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -909,7 +909,7 @@ exports['Should correctly handle chained skip and limit on find with toArray'] =
  * @ignore
  */
 exports['Should correctly handle chained skip and negative limit on find with toArray'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -937,7 +937,7 @@ exports['Should correctly handle chained skip and negative limit on find with to
  * @ignore
  */
 exports['Should correctly pass timeout options to cursor'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -968,7 +968,7 @@ exports['Should correctly pass timeout options to cursor'] = {
  * @ignore
  */
 exports.shouldCorrectlyFindAndModifyDocumentWithDBStrict = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -995,7 +995,7 @@ exports.shouldCorrectlyFindAndModifyDocumentWithDBStrict = {
  * @ignore
  */
 exports.shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1025,7 +1025,7 @@ exports.shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep = {
  * @ignore
  */
 exports['Should correctly return new modified document'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1062,7 +1062,7 @@ exports['Should correctly return new modified document'] = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteFindAndModify = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1092,7 +1092,7 @@ exports.shouldCorrectlyExecuteFindAndModify = {
  * @ignore
  */
 exports['Should correctly return record with 64-bit id'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1131,7 +1131,7 @@ exports['Should correctly return record with 64-bit id'] = {
  * @ignore
  */
 exports['Should Correctly find a Document using findOne excluding _id field'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1167,7 +1167,7 @@ exports['Should Correctly find a Document using findOne excluding _id field'] = 
  * @ignore
  */
 exports['Should correctly execute find and findOne queries in the same way'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1199,7 +1199,7 @@ exports['Should correctly execute find and findOne queries in the same way'] = {
  * @ignore
  */
 exports['Should correctly execute find and findOne queries with selector set to null'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1231,7 +1231,7 @@ exports['Should correctly execute find and findOne queries with selector set to 
  * @ignore
  */
 exports.shouldCorrectlyHandlerErrorForFindAndModifyWhenNoRecordExists = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1253,7 +1253,7 @@ exports.shouldCorrectlyHandlerErrorForFindAndModifyWhenNoRecordExists = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteFindAndModifyShouldGenerateCorrectBSON = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1303,7 +1303,7 @@ exports.shouldCorrectlyExecuteFindAndModifyShouldGenerateCorrectBSON = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteMultipleFindsInParallel = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1341,7 +1341,7 @@ exports.shouldCorrectlyExecuteMultipleFindsInParallel = {
  * @ignore
  */
 exports.shouldCorrectlyReturnErrorFromMongodbOnFindAndModifyForcedError = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1373,7 +1373,7 @@ exports.shouldCorrectlyReturnErrorFromMongodbOnFindAndModifyForcedError = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteFindAndModifyUnderConcurrentLoad = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1417,7 +1417,7 @@ exports.shouldCorrectlyExecuteFindAndModifyUnderConcurrentLoad = {
  * @ignore
  */
 exports.shouldCorrectlyIterateOverCollection = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1460,7 +1460,7 @@ exports.shouldCorrectlyIterateOverCollection = {
  * @ignore
  */
 exports.shouldCorrectlyErrorOutFindAndModifyOnDuplicateRecord = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1496,7 +1496,7 @@ exports.shouldCorrectlyErrorOutFindAndModifyOnDuplicateRecord = {
  * @ignore
  */
 exports.shouldPerformSimpleFindInArray = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1535,7 +1535,7 @@ exports.shouldPerformSimpleFindInArray = {
 }
 
 exports.shouldReturnInstanceofErrorWithBadFieldSelection = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1562,7 +1562,7 @@ exports.shouldReturnInstanceofErrorWithBadFieldSelection = {
  * A simple query using find and fields
  */
 exports.shouldPeformASimpleLimitSkipFindWithFields = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1607,7 +1607,7 @@ exports.shouldPeformASimpleLimitSkipFindWithFields = {
  * A simple query using find and fields
  */
 exports.shouldPeformASimpleLimitSkipFindWithFields2 = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1644,7 +1644,7 @@ exports.shouldPeformASimpleLimitSkipFindWithFields2 = {
  * A simple query with a different batchSize
  */
 exports.shouldPerformQueryWithBatchSizeDifferentToStandard = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1714,7 +1714,7 @@ exports.shouldQueryCurrentOperation = {
  * A simple query with negative limit
  */
 exports.shouldCorrectlyPerformNegativeLimit = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1805,7 +1805,7 @@ exports.shouldCorrectlyExecuteExhaustQuery = {
 }
 
 exports['Readpreferences should work fine when using a single server instance'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1843,7 +1843,7 @@ exports['Readpreferences should work fine when using a single server instance'] 
 }
 
 exports['Each should not hang on iterating over no results'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1868,7 +1868,7 @@ exports['Each should not hang on iterating over no results'] = {
 }
 
 exports.shouldCorrectlyFindDocumentsByRegExp = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1902,7 +1902,7 @@ exports.shouldCorrectlyFindDocumentsByRegExp = {
 }
 
 exports.shouldCorrectlyDoFindMinMax = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2149,7 +2149,7 @@ exports['Should correctly execute parallelCollectionScan with single cursor stre
 exports['Should correctly sort using text search on 2.6 or higher in find'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { mongodb: ">2.5.5", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },  
+  metadata: { requires: { mongodb: ">2.5.5", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2185,7 +2185,7 @@ exports['Should correctly sort using text search on 2.6 or higher in find'] = {
 }
 
 exports.shouldNotMutateUserOptions = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {

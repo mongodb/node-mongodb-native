@@ -2,7 +2,7 @@
  * @ignore
  */
 exports.shouldStayInCorrectDomainForReadCommand = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -31,7 +31,7 @@ exports.shouldStayInCorrectDomainForReadCommand = {
  * @ignore
  */
 exports.shouldStayInCorrectDomainForWriteCommand = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -60,7 +60,7 @@ exports.shouldStayInCorrectDomainForWriteCommand = {
  * @ignore
  */
 exports.shouldStayInCorrectDomainForQueuedReadCommand = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -91,7 +91,7 @@ exports.shouldStayInCorrectDomainForQueuedReadCommand = {
  * @ignore
  */
 exports.shouldStayInCorrectDomainForQueuedWriteCommand = {
-  metadata: { requires: { node: ">=0.10.x", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },  
+  metadata: { requires: { node: ">=0.10.x", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
   
   // The actual test we wish to run
   test: function(configuration, test) {

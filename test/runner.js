@@ -390,6 +390,19 @@ if(argv.t == 'functional') {
           });
         },
     });
+  } else if(argv.e == 'wiredtiger') {
+    // Create single server instance running heap storage engine
+    config = createConfiguration({
+        manager: function() {
+          var ServerManager = require('mongodb-core').ServerManager;
+          // Return manager
+          return new ServerManager({
+              host: 'localhost'
+            , port: 27017
+            , storageEngine: 'wiredtiger'
+          });
+        },
+    });
   } else if(argv.e == 'auth') {
     // Create ssl server
     config = createConfiguration({
