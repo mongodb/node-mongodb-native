@@ -5,8 +5,8 @@ date: 2013-07-01
 menu:
   main:
     parent: articles
-next: /articles/node_knockout_article_3
-prev: /articles/node_knockout_article_2
+next: ../../articles/node_knockout_article_3
+prev: ../../articles/node_knockout_article_2
 title: Node Knockout, GEO
 weight: 50
 ---

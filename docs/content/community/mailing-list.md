@@ -3,8 +3,8 @@ date: 2013-07-01
 menu:
   main:
     parent: community
-next: /community/press
-prev: /extras/urls
+next: ../../community/contributing
+prev: ../../community/contributing
 title: Mailing List
 weight: 10
 ---

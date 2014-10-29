@@ -6,8 +6,8 @@ date: 2013-07-01
 menu:
   main:
     parent: community
-next: /tutorials/github_pages_blog
-prev: /community/press
+next: ../../community/mailing-list
+prev: ../../community/mailing-list
 title: Contributing
 weight: 30
 ---

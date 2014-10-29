@@ -5,8 +5,8 @@ date: 2013-07-01
 menu:
   main:
     parent: articles
-next: /articles/node_knockout_article_3
-prev: /articles/node_knockout_article_1
+next: ../../articles/node_knockout_article_3
+prev: ../../articles/node_knockout_article_1
 title: Node Knockout, GridFS
 weight: 40
 ---

@@ -5,8 +5,8 @@ date: 2013-07-01
 menu:
   main:
     parent: tutorials
-next: /tutorials/aggregation
-prev: /tutorials/urls
+next: ../../tutorials/aggregation
+prev: ../../tutorials/urls
 title: CRUD Operations
 weight: 3
 ---

@@ -5,8 +5,8 @@ date: 2013-07-01
 menu:
   main:
     parent: tutorials
-next: /tutorials/crud_operations
-prev: /tutorials/connecting
+next: ../../tutorials/crud_operations
+prev: ../../tutorials/connecting
 title: Connection URI
 weight: 2
 ---
