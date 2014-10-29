@@ -10,6 +10,36 @@ menu:
 title: Release Notes
 weight: 50
 ---
+2.0.5 
+----------------
+- Minor fixes to documentation.
+- 
+
+2.0.4 2014-10-23
+----------------
+- Allow for single replicaset seed list with no setName specified (Issue #1220, https://github.com/imaman)
+- Made each rewind on each call allowing for re-using the cursor.
+- Fixed issue where incorrect iterations would happen on each for extensive batchSizes.
+- NODE-301 specifying maxTimeMS on find causes all fields to be omitted from result.
+
+2.0.3 2014-10-14
+----------------
+- NODE-297 Aggregate Broken for case of pipeline with no options.
+
+2.0.2 2014-10-08
+----------------
+- Bumped mongodb-core to 1.0.2.
+- Fixed bson module dependency issue by relying on the mongodb-core one.
+- Use findOne instead of find followed by nextObject (Issue #1216, https://github.com/sergeyksv)
+
+2.0.1 2014-10-07
+----------------
+- Dependency fix
+
+2.0.0 2014-10-07
+----------------
+- First release of 2.0 driver
+
 2.0.0-alpha2 2014-10-02
 -----------------------
 - CRUD API (insertOne, insertMany, updateOne, updateMany, removeOne, removeMany, bulkWrite, findOneAndDelete, findOneAndUpdate, findOneAndReplace)

@@ -18,16 +18,16 @@
       "lib/bulk/unordered.js", 
       "lib/gridfs/grid_store.js",
       "node_modules/mongodb-core/lib/connection/logger.js",
-      "node_modules/bson/lib/bson/binary.js",
-      "node_modules/bson/lib/bson/code.js",
-      "node_modules/bson/lib/bson/db_ref.js",
-      "node_modules/bson/lib/bson/double.js",
-      "node_modules/bson/lib/bson/long.js",
-      "node_modules/bson/lib/bson/objectid.js",
-      "node_modules/bson/lib/bson/symbol.js",
-      "node_modules/bson/lib/bson/timestamp.js",
-      "node_modules/bson/lib/bson/max_key.js",
-      "node_modules/bson/lib/bson/min_key.js"
+      "node_modules/mongodb-core/node_modules/bson/lib/bson/binary.js",
+      "node_modules/mongodb-core/node_modules/bson/lib/bson/code.js",
+      "node_modules/mongodb-core/node_modules/bson/lib/bson/db_ref.js",
+      "node_modules/mongodb-core/node_modules/bson/lib/bson/double.js",
+      "node_modules/mongodb-core/node_modules/bson/lib/bson/long.js",
+      "node_modules/mongodb-core/node_modules/bson/lib/bson/objectid.js",
+      "node_modules/mongodb-core/node_modules/bson/lib/bson/symbol.js",
+      "node_modules/mongodb-core/node_modules/bson/lib/bson/timestamp.js",
+      "node_modules/mongodb-core/node_modules/bson/lib/bson/max_key.js",
+      "node_modules/mongodb-core/node_modules/bson/lib/bson/min_key.js"
     ]     
   },
   "templates": {

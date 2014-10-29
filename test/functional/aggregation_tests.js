@@ -557,3 +557,50 @@ exports['Should perform a simple group aggregation'] = {
     });
   }
 }
+
+/**
+ * Correctly perform simple group
+ * @ignore
+ */
+exports['Should correctly perform an aggregation using a collection name with dot in it'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { mongodb: ">2.5.5", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },  
+  
+  // The actual test we wish to run
+  test: function(configure, test) {
+    var db = configure.newDbInstance({w:1}, {poolSize:1});
+    db.open(function(err, db) {
+      db.collection('te.st', function(err, col){
+        test.equal(null, err);
+        var count = 0;
+        
+        col.insert([{a: 1}, {a: 1}, {a: 1}], function(err, r) {
+          test.equal(null, err);
+          test.equal(3, r.result.n);
+          
+          //Using callback - OK
+          col.aggregate([
+              {$project: {a: 1}}
+            ], function(err, docs) {
+              test.equal(null, err);
+              test.notEqual(0, docs.length);
+              
+              //Using cursor - KO
+              col.aggregate([
+                {$project: {a: 1}}
+              ], {cursor: {batchSize: 10000}}).forEach(function() {
+                count = count + 1;
+              }, function(err) {
+                test.equal(null, err);
+                test.notEqual(0, count);
+
+                db.close();
+                test.done();
+              });
+            });
+        });
+      });
+    });
+  }
+}

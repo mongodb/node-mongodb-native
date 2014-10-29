@@ -1,3 +1,8 @@
+2.0.5 2014-10-29
+----------------
+- Minor fixes to documentation and generation of documentation.
+- NODE-306 (No results in aggregation cursor when collection name contains a dot), Merged code for cursor and aggregation cursor.
+
 2.0.4 2014-10-23
 ----------------
 - Allow for single replicaset seed list with no setName specified (Issue #1220, https://github.com/imaman)
