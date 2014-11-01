@@ -34,6 +34,7 @@ var _buffer = null;
 //
 // Query message
 var Query = function(bson, ns, query, options) {
+  var self = this;
   // Basic options needed to be passed in
   if(ns == null) throw new Error("ns must be specified for query");
   if(query == null) throw new Error("query must be specified for query");
@@ -43,31 +44,36 @@ var Query = function(bson, ns, query, options) {
     throw new Error("namespace cannot contain a null character");
   }
 
+  // Save the passed params
+  this.bson = bson;
+  this.ns = ns;
+  this.query = query;
+
   // Ensure empty options
-  options = options || {};
+  this.options = options || {};
 
   // Additional options
-  var numberToSkip = options.numberToSkip || 0;
-  var numberToReturn = options.numberToReturn || 0;
-  var returnFieldSelector = options.returnFieldSelector || null;  
-  var requestId = _requestId++;
+  this.numberToSkip = options.numberToSkip || 0;
+  this.numberToReturn = options.numberToReturn || 0;
+  this.returnFieldSelector = options.returnFieldSelector || null;  
+  this.requestId = _requestId++;
 
   // Serialization option
-  var serializeFunctions = typeof options.serializeFunctions == 'boolean' ? options.serializeFunctions : false;
-  var maxBsonSize = options.maxBsonSize || 1024 * 1024 * 16;
-  var checkKeys = typeof options.checkKeys == 'boolean' ? options.checkKeys : true;
+  this.serializeFunctions = typeof options.serializeFunctions == 'boolean' ? options.serializeFunctions : false;
+  this.maxBsonSize = options.maxBsonSize || 1024 * 1024 * 16;
+  this.checkKeys = typeof options.checkKeys == 'boolean' ? options.checkKeys : true;
 
   // Properties
-  var tailable = {name: 'tailable', value: 0};
-  var slave = {name: 'slaveOk', value: 0};
-  var oplogReply = {name: 'oplogReply', value: 0};
-  var noCursorTimeout = {name: 'noCursorTimeout', value: 0};
-  var awaitData = {name: 'awaitData', value: 0};
-  var exhaust = {name: 'exhaust', value: 0};
-  var partial = {name: 'partial', value: 0};
+  this.tailable = {name: 'tailable', value: 0};
+  this.slave = {name: 'slaveOk', value: 0};
+  this.oplogReply = {name: 'oplogReply', value: 0};
+  this.noCursorTimeout = {name: 'noCursorTimeout', value: 0};
+  this.awaitData = {name: 'awaitData', value: 0};
+  this.exhaust = {name: 'exhaust', value: 0};
+  this.partial = {name: 'partial', value: 0};
 
   // Set the flags
-  var values = {
+  this.values = {
     flags: 0
   }
   
@@ -75,150 +81,151 @@ var Query = function(bson, ns, query, options) {
   // after creation has happened
   Object.defineProperty(this, 'batchSize', {
       enumerable:true,
-      set: function(value) { numberToReturn = value; }
-    , get: function() { return numberToReturn; }
+      set: function(value) { self.numberToReturn = value; }
+    , get: function() { return self.numberToReturn; }
   });  
 
   // Setup properties
-  setProperty(this, tailable, OPTS_TAILABLE_CURSOR, values);
-  setProperty(this, slave, OPTS_SLAVE, values);
-  setProperty(this, oplogReply, OPTS_OPLOG_REPLAY, values);
-  setProperty(this, noCursorTimeout, OPTS_NO_CURSOR_TIMEOUT, values);
-  setProperty(this, awaitData, OPTS_AWAIT_DATA, values);
-  setProperty(this, exhaust, OPTS_EXHAUST, values);
-  setProperty(this, partial, OPTS_PARTIAL, values);
+  setProperty(this, this.tailable, OPTS_TAILABLE_CURSOR, this.values);
+  setProperty(this, this.slave, OPTS_SLAVE, this.values);
+  setProperty(this, this.oplogReply, OPTS_OPLOG_REPLAY, this.values);
+  setProperty(this, this.noCursorTimeout, OPTS_NO_CURSOR_TIMEOUT, this.values);
+  setProperty(this, this.awaitData, OPTS_AWAIT_DATA, this.values);
+  setProperty(this, this.exhaust, OPTS_EXHAUST, this.values);
+  setProperty(this, this.partial, OPTS_PARTIAL, this.values);
 
-  // Get the request Id
-  Object.defineProperty(this, 'requestId', {
-      enumerable:true
-    , get: function() { return requestId; }
-  });
+  // // Get the request Id
+  // Object.defineProperty(this, 'requestId', {
+  //     enumerable:true
+  //   , get: function() { return self.requestId; }
+  // });
+}
 
-  //
-  // Assign a new request Id
-  this.incRequestId = function() {
-    requestId = _requestId++;
-  }
+//
+// Assign a new request Id
+Query.prototype.incRequestId = function() {
+  this.requestId = _requestId++;
+}
 
-  //
-  // Uses a single allocated buffer for the process, avoiding multiple memory allocations
-  this.toBinUnified = function() {
-    // No global buffer yet
-    if(_buffer == null) _buffer = new Buffer(maxBsonSize + (16 * 1024));
+//
+// Uses a single allocated buffer for the process, avoiding multiple memory allocations
+Query.prototype.toBinUnified = function() {
+  var self = this;
+  // No global buffer yet
+  if(_buffer == null) _buffer = new Buffer(self.maxBsonSize + (16 * 1024));
 
-    // Initial index
-    var index = 4;
+  // Initial index
+  var index = 4;
 
-    // Write header information
-    index = write32bit(index, _buffer, requestId);
-    index = write32bit(index, _buffer, 0);
-    index = write32bit(index, _buffer, OP_QUERY);
-    index = write32bit(index, _buffer, values.flags);
+  // Write header information
+  index = write32bit(index, _buffer, self.requestId);
+  index = write32bit(index, _buffer, 0);
+  index = write32bit(index, _buffer, OP_QUERY);
+  index = write32bit(index, _buffer, self.values.flags);
 
-    // Write collection name
-    index = index + _buffer.write(ns, index, 'utf8') + 1;
-    _buffer[index - 1] = 0;
+  // Write collection name
+  index = index + _buffer.write(self.ns, index, 'utf8') + 1;
+  _buffer[index - 1] = 0;
 
-    // Write rest of fields
-    index = write32bit(index, _buffer, numberToSkip);
-    index = write32bit(index, _buffer, numberToReturn);
+  // Write rest of fields
+  index = write32bit(index, _buffer, self.numberToSkip);
+  index = write32bit(index, _buffer, self.numberToReturn);
 
-    // Serialize query
-    var queryLength = bson.serializeWithBufferAndIndex(query
-      , checkKeys
-      , _buffer, index
-      , serializeFunctions) - index + 1;
+  // Serialize query
+  var queryLength = self.bson.serializeWithBufferAndIndex(self.query
+    , self.checkKeys
+    , _buffer, index
+    , self.serializeFunctions) - index + 1;
 
-    // Write document into buffer
-    index = write32bit(index, _buffer, queryLength);
-    index = index - 4 + queryLength;
+  // Write document into buffer
+  index = write32bit(index, _buffer, queryLength);
+  index = index - 4 + queryLength;
+  _buffer[index + 1] = 0x00;
+  
+  // If we have field selectors
+  if(self.returnFieldSelector && Object.keys(self.returnFieldSelector).length > 0) {
+    var fieldSelectorLength = self.bson.serializeWithBufferAndIndex(self.returnFieldSelector
+      , self.checkKeys
+      , _buffer
+      , index
+      , self.serializeFunctions) - index + 1;
+    index = write32bit(index, _buffer, fieldSelectorLength);
+    index = index - 4 + fieldSelectorLength;
     _buffer[index + 1] = 0x00;
-    
-    // If we have field selectors
-    if(returnFieldSelector && Object.keys(returnFieldSelector).length > 0) {
-      var fieldSelectorLength = bson.serializeWithBufferAndIndex(returnFieldSelector
-        , checkKeys
-        , _buffer
-        , index
-        , serializeFunctions) - index + 1;
-      index = write32bit(index, _buffer, fieldSelectorLength);
-      index = index - 4 + fieldSelectorLength;
-      _buffer[index + 1] = 0x00;
-    }
-
-    // Write total document length
-    write32bit(0, _buffer, index);
-    // Allocate a new buffer
-    var finalBuffer = new Buffer(index);
-    _buffer.copy(finalBuffer, 0, 0, index);
-    // Return buffer
-    return finalBuffer;
   }
 
-  // To Binary
-  this.toBin = function() {
-    // Basic length
-    var length = 4 
-      + Buffer.byteLength(ns) 
-      + 1 + 4 + 4 
-      + bson.calculateObjectSize(query, serializeFunctions, true) 
-      + (4 * 4);
+  // Write total document length
+  write32bit(0, _buffer, index);
+  // Allocate a new buffer
+  var finalBuffer = new Buffer(index);
+  _buffer.copy(finalBuffer, 0, 0, index);
+  // Return buffer
+  return finalBuffer;
+}
 
-    // Additional size for field selection
-    if(returnFieldSelector && Object.keys(returnFieldSelector).length > 0) {
-      length += bson.calculateObjectSize(returnFieldSelector, serializeFunctions, true);
-    }
+// To Binary
+Query.prototype.toBin = function() {
+  var self = this;
+  // Basic length
+  var length = 4 
+    + Buffer.byteLength(self.ns) 
+    + 1 + 4 + 4 
+    + self.bson.calculateObjectSize(self.query, self.serializeFunctions, true) 
+    + (4 * 4);
 
-    // Validate BSON size
-    if(length > maxBsonSize) {
-      throw new Error(f("command exceeds maximum bson size [%s > %s]", maxBsonSize, length));
-    }
+  // Additional size for field selection
+  if(self.returnFieldSelector && Object.keys(self.returnFieldSelector).length > 0) {
+    length += self.bson.calculateObjectSize(self.returnFieldSelector, self.serializeFunctions, true);
+  }
 
-    // Create command buffer
-    var buffer = new Buffer(length);
-    var index = 0;
-    
-    // Write header information
-    index = write32bit(index, buffer, length);
-    index = write32bit(index, buffer, requestId);
-    index = write32bit(index, buffer, 0);
-    index = write32bit(index, buffer, OP_QUERY);
-    index = write32bit(index, buffer, values.flags);
+  // Validate BSON size
+  if(length > self.maxBsonSize) {
+    throw new Error(f("command exceeds maximum bson size [%s > %s]", self.maxBsonSize, length));
+  }
 
-    // Write collection name
-    index = index + buffer.write(ns, index, 'utf8') + 1;
-    buffer[index - 1] = 0;
+  // Create command buffer
+  var buffer = new Buffer(length);
+  var index = 0;
+  
+  // Write header information
+  index = write32bit(index, buffer, length);
+  index = write32bit(index, buffer, self.requestId);
+  index = write32bit(index, buffer, 0);
+  index = write32bit(index, buffer, OP_QUERY);
+  index = write32bit(index, buffer, self.values.flags);
+  // Write collection name
+  index = index + buffer.write(self.ns, index, 'utf8') + 1;
+  buffer[index - 1] = 0;
 
-    // Write rest of fields
-    index = write32bit(index, buffer, numberToSkip);
-    index = write32bit(index, buffer, numberToReturn);
+  // Write rest of fields
+  index = write32bit(index, buffer, self.numberToSkip);
+  index = write32bit(index, buffer, self.numberToReturn);
 
-    // Serialize query
-    var queryLength = bson.serializeWithBufferAndIndex(query
-      , checkKeys
-      , buffer, index
-      , serializeFunctions) - index + 1;
+  // Serialize query
+  var queryLength = self.bson.serializeWithBufferAndIndex(self.query
+    , self.checkKeys
+    , buffer, index
+    , self.serializeFunctions) - index + 1;
 
-    // Write document into buffer
-    index = write32bit(index, buffer, queryLength);
-    index = index - 4 + queryLength;
+  // Write document into buffer
+  index = write32bit(index, buffer, queryLength);
+  index = index - 4 + queryLength;
+  buffer[index + 1] = 0x00;
+  
+  // If we have field selectors
+  if(self.returnFieldSelector && Object.keys(self.returnFieldSelector).length > 0) {
+    var fieldSelectorLength = self.bson.serializeWithBufferAndIndex(self.returnFieldSelector
+      , self.checkKeys
+      , buffer
+      , index
+      , self.serializeFunctions) - index + 1;
+    index = write32bit(index, buffer, fieldSelectorLength);
+    index = index - 4 + fieldSelectorLength;
     buffer[index + 1] = 0x00;
-    
-    // If we have field selectors
-    if(returnFieldSelector && Object.keys(returnFieldSelector).length > 0) {
-      var fieldSelectorLength = bson.serializeWithBufferAndIndex(returnFieldSelector
-        , checkKeys
-        , buffer
-        , index
-        , serializeFunctions) - index + 1;
-      index = write32bit(index, buffer, fieldSelectorLength);
-      index = index - 4 + fieldSelectorLength;
-      buffer[index + 1] = 0x00;
-    }
-
-    // Return buffer
-    return buffer;
   }
+
+  // Return buffer
+  return buffer;
 }
 
 Query.getRequestId = function() {
@@ -376,36 +383,41 @@ var KillCursor = function(bson, cursorIds) {
 var Response = function(bson, data, opts) {
   opts = opts || {promoteLongs: true};
   var parsed = false;
-  var values = {
+  this.values = {
     documents: []
   }
 
+  // Set local values
+  this.bson = bson;
+  this.data = data;
+  this.opts = opts;
+
   // Set error properties
-  getProperty(this, 'cursorNotFound', 'responseFlags', values, function(value) {
+  getProperty(this, 'cursorNotFound', 'responseFlags', this.values, function(value) {
     return (value & CURSOR_NOT_FOUND) != 0;
   });
 
-  getProperty(this, 'queryFailure', 'responseFlags', values, function(value) {
+  getProperty(this, 'queryFailure', 'responseFlags', this.values, function(value) {
     return (value & QUERY_FAILURE) != 0;
   });
 
-  getProperty(this, 'shardConfigStale', 'responseFlags', values, function(value) {
+  getProperty(this, 'shardConfigStale', 'responseFlags', this.values, function(value) {
     return (value & SHARD_CONFIG_STALE) != 0;
   });
 
-  getProperty(this, 'awaitCapable', 'responseFlags', values, function(value) {
+  getProperty(this, 'awaitCapable', 'responseFlags', this.values, function(value) {
     return (value & AWAIT_CAPABLE) != 0;
   });
 
   // Set standard properties
-  getProperty(this, 'length', 'length', values);
-  getProperty(this, 'requestId', 'requestId', values);
-  getProperty(this, 'responseTo', 'responseTo', values);
-  getProperty(this, 'responseFlags', 'responseFlags', values);
-  getProperty(this, 'cursorId', 'cursorId', values);
-  getProperty(this, 'startingFrom', 'startingFrom', values);
-  getProperty(this, 'numberReturned', 'numberReturned', values);
-  getProperty(this, 'documents', 'documents', values);
+  getProperty(this, 'length', 'length', this.values);
+  getProperty(this, 'requestId', 'requestId', this.values);
+  getProperty(this, 'responseTo', 'responseTo', this.values);
+  getProperty(this, 'responseFlags', 'responseFlags', this.values);
+  getProperty(this, 'cursorId', 'cursorId', this.values);
+  getProperty(this, 'startingFrom', 'startingFrom', this.values);
+  getProperty(this, 'numberReturned', 'numberReturned', this.values);
+  getProperty(this, 'documents', 'documents', this.values);
   getSingleProperty(this, 'raw', data);
 
   //
@@ -413,17 +425,17 @@ var Response = function(bson, data, opts) {
   //
   var index = 0;
   // Read the message length
-  values.length = data.readUInt32LE(index);
+  this.values.length = data.readUInt32LE(index);
   index = index + 4;
   // Fetch the request id for this reply
-  values.requestId = data.readUInt32LE(index);
+  this.values.requestId = data.readUInt32LE(index);
   index = index + 4;
   // Fetch the id of the request that triggered the response
-  values.responseTo = data.readUInt32LE(index);
+  this.values.responseTo = data.readUInt32LE(index);
   // Skip op-code field
   index = index + 4 + 4;
   // Unpack flags
-  values.responseFlags = data.readUInt32LE(index);
+  this.values.responseFlags = data.readUInt32LE(index);
   index = index + 4; 
   // Unpack the cursor
   var lowBits = data.readUInt32LE(index);
@@ -431,47 +443,49 @@ var Response = function(bson, data, opts) {
   var highBits = data.readUInt32LE(index);
   index = index + 4; 
   // Create long object
-  values.cursorId = new Long(lowBits, highBits);
+  this.values.cursorId = new Long(lowBits, highBits);
   // Unpack the starting from
-  values.startingFrom = data.readUInt32LE(index);
+  this.values.startingFrom = data.readUInt32LE(index);
   index = index + 4; 
   // Unpack the number of objects returned
-  values.numberReturned = data.readUInt32LE(index);
+  this.values.numberReturned = data.readUInt32LE(index);
   index = index + 4; 
+  // Set the current index location
+  this.index = index;
+}
 
-  this.isParsed = function() {
-    return parsed;
-  }
+Response.prototype.isParsed = function() {
+  return this.parsed;
+}
 
-  this.parse = function(options) {
-    // Don't parse again if not needed
-    if(parsed) return;
-    options = options || {};
-    // Allow the return of raw documents instead of parsing
-    var raw = options.raw || false;
+Response.prototype.parse = function(options) {
+  // Don't parse again if not needed
+  if(this.parsed) return;
+  options = options || {};
+  // Allow the return of raw documents instead of parsing
+  var raw = options.raw || false;
 
-    //
-    // Parse Body
-    //
-    for(var i = 0; i < values.numberReturned; i++) {
-      var bsonSize = data.readUInt32LE(index);
-      // Parse options
-      var _options = {promoteLongs: opts.promoteLongs};
+  //
+  // Parse Body
+  //
+  for(var i = 0; i < this.values.numberReturned; i++) {
+    var bsonSize = this.data.readUInt32LE(this.index);
+    // Parse options
+    var _options = {promoteLongs: this.opts.promoteLongs};
 
-      // If we have raw results specified slice the return document
-      if(raw) {
-        values.documents.push(data.slice(index, index + bsonSize));
-      } else {
-        values.documents.push(bson.deserialize(data.slice(index, index + bsonSize), _options));
-      }
-
-      // Adjust the index
-      index = index + bsonSize;
+    // If we have raw results specified slice the return document
+    if(raw) {
+      this.values.documents.push(this.data.slice(this.index, this.index + bsonSize));
+    } else {
+      this.values.documents.push(this.bson.deserialize(this.data.slice(this.index, this.index + bsonSize), _options));
     }
 
-    // Set parsed
-    parsed = true;
+    // Adjust the index
+    this.index = this.index + bsonSize;
   }
+
+  // Set parsed
+  this.parsed = true;
 }
 
 var write32bit = function(index, buffer, value) {
