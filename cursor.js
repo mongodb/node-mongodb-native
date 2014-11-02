@@ -108,31 +108,31 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
   // 
   // Did we pass in a cursor id
   if(typeof cmd == 'number') {
-    cursorState.cursorId = Long.fromNumber(cmd);
+    this.cursorState.cursorId = Long.fromNumber(cmd);
   } else if(cmd instanceof Long) {
-    cursorState.cursorId = cmd;
+    this.cursorState.cursorId = cmd;
   }
 
   // Allow the manipulation of the batch size of the cursor
   // after creation has happened
   Object.defineProperty(this, 'cursorBatchSize', {
       enumerable:true,
-      set: function(value) { cursorState.batchSize = value; }
-    , get: function() { return cursorState.batchSize; }
+      set: function(value) { this.cursorState.batchSize = value; }
+    , get: function() { return this.cursorState.batchSize; }
   });
 
   // Allow the manipulation of the cursor limit
   Object.defineProperty(this, 'cursorLimit', {
       enumerable:true,
-      set: function(value) { cursorState.limit = value; }
-    , get: function() { return cursorState.limit; }
+      set: function(value) { this.cursorState.limit = value; }
+    , get: function() { return this.cursorState.limit; }
   });
 
   // Allow the manipulation of the cursor skip
   Object.defineProperty(this, 'cursorSkip', {
       enumerable:true,
-      set: function(value) { cursorState.skip = value; }
-    , get: function() { return cursorState.skip; }
+      set: function(value) { this.cursorState.skip = value; }
+    , get: function() { return this.cursorState.skip; }
   });
 }
 
