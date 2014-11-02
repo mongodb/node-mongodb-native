@@ -840,95 +840,6 @@ var Server = function(options) {
     s.authProviders[name] = provider;
   }
 
-  /**
-   * Compare two server instances
-   * @method
-   * @param {Server} server Server to compare equality against
-   * @return {boolean}
-   */
-  this.equals = function(server) {    
-    if(typeof server == 'string') return server == this.name;
-    return server.name == this.name;
-  }
-
-  /**
-   * All raw connections
-   * @method
-   * @return {Connection[]}
-   */
-  this.connections = function() {
-    return s.pool.getAll();
-  }
-
-  /**
-   * Get server
-   * @method
-   * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
-   * @return {Server}
-   */
-  this.getServer = function(options) {
-    return self;
-  }
-
-  /**
-   * Get callbacks object
-   * @method
-   * @return {Callbacks}
-   */
-  this.getCallbacks = function() {
-    return s.callbacks;
-  }
-
-  /**
-   * Get connection
-   * @method
-   * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
-   * @return {Connection}
-   */
-  this.getConnection = function(options) {
-    return s.pool.get();
-  }
-
-  /**
-   * Name of BSON parser currently used
-   * @method
-   * @return {string}
-   */
-  this.parserType = function() {
-    if(s.options.bson.serialize.toString().indexOf('[native code]') != -1)
-      return 'c++';
-    return 'js';
-  }
-
-
-  // // Command
-  // {
-  //     find: ns
-  //   , query: <object>
-  //   , limit: <n>
-  //   , fields: <object>
-  //   , skip: <n>
-  //   , hint: <string>
-  //   , explain: <boolean>
-  //   , snapshot: <boolean>
-  //   , batchSize: <n>
-  //   , returnKey: <boolean>
-  //   , maxScan: <n>
-  //   , min: <n>
-  //   , max: <n>
-  //   , showDiskLoc: <boolean>
-  //   , comment: <string>
-  //   , maxTimeMS: <n>
-  //   , raw: <boolean>
-  //   , readPreference: <ReadPreference>
-  //   , tailable: <boolean>
-  //   , oplogReplay: <boolean>
-  //   , noCursorTimeout: <boolean>
-  //   , awaitdata: <boolean>
-  //   , exhaust: <boolean>
-  //   , partial: <boolean>
-  // }
-
   var slaveOk = function(r) {
     if(r) return r.slaveOk()
     return false;
@@ -946,6 +857,95 @@ var Server = function(options) {
 inherits(Server, EventEmitter);
 
 /**
+ * Compare two server instances
+ * @method
+ * @param {Server} server Server to compare equality against
+ * @return {boolean}
+ */
+Server.prototype.equals = function(server) {    
+  if(typeof server == 'string') return server == this.name;
+  return server.name == this.name;
+}
+
+/**
+ * All raw connections
+ * @method
+ * @return {Connection[]}
+ */
+Server.prototype.connections = function() {
+  return this.s.pool.getAll();
+}
+
+/**
+ * Get server
+ * @method
+ * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+ * @return {Server}
+ */
+Server.prototype.getServer = function(options) {
+  return this;
+}
+
+/**
+ * Get connection
+ * @method
+ * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+ * @return {Connection}
+ */
+Server.prototype.getConnection = function(options) {
+  return this.s.pool.get();
+}
+
+/**
+ * Get callbacks object
+ * @method
+ * @return {Callbacks}
+ */
+Server.prototype.getCallbacks = function() {
+  return this.s.callbacks;
+}
+
+/**
+ * Name of BSON parser currently used
+ * @method
+ * @return {string}
+ */
+Server.prototype.parserType = function() {
+  var s = this.s;
+  if(s.options.bson.serialize.toString().indexOf('[native code]') != -1)
+    return 'c++';
+  return 'js';
+}
+
+// // Command
+// {
+//     find: ns
+//   , query: <object>
+//   , limit: <n>
+//   , fields: <object>
+//   , skip: <n>
+//   , hint: <string>
+//   , explain: <boolean>
+//   , snapshot: <boolean>
+//   , batchSize: <n>
+//   , returnKey: <boolean>
+//   , maxScan: <n>
+//   , min: <n>
+//   , max: <n>
+//   , showDiskLoc: <boolean>
+//   , comment: <string>
+//   , maxTimeMS: <n>
+//   , raw: <boolean>
+//   , readPreference: <ReadPreference>
+//   , tailable: <boolean>
+//   , oplogReplay: <boolean>
+//   , noCursorTimeout: <boolean>
+//   , awaitdata: <boolean>
+//   , exhaust: <boolean>
+//   , partial: <boolean>
+// }
+
+/**
  * Perform one or more remove operations
  * @method
  * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
@@ -956,10 +956,10 @@ inherits(Server, EventEmitter);
  * @param {opResultCallback} callback A callback function
  */
 Server.prototype.cursor = function(ns, cmd, cursorOptions) {
-  var s = this;
+  var s = this.s;
   cursorOptions = cursorOptions || {};
   var FinalCursor = cursorOptions.cursorFactory || s.Cursor;
-  return new FinalCursor(s.bson, ns, cmd, cursorOptions, self, s.options);
+  return new FinalCursor(s.bson, ns, cmd, cursorOptions, this, s.options);
 }
 
 /**
