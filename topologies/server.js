@@ -929,22 +929,6 @@ var Server = function(options) {
   //   , partial: <boolean>
   // }
 
-  /**
-   * Perform one or more remove operations
-   * @method
-   * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
-   * @param {{object}|{Long}} cmd Can be either a command returning a cursor or a cursorId
-   * @param {object} [options.batchSize=0] Batchsize for the operation
-   * @param {array} [options.documents=[]] Initial documents list for cursor
-   * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
-   * @param {opResultCallback} callback A callback function
-   */
-  this.cursor = function(ns, cmd, cursorOptions) {
-    cursorOptions = cursorOptions || {};
-    var FinalCursor = cursorOptions.cursorFactory || s.Cursor;
-    return new FinalCursor(s.bson, ns, cmd, cursorOptions, self, s.options);
-  }
-
   var slaveOk = function(r) {
     if(r) return r.slaveOk()
     return false;
@@ -960,6 +944,23 @@ var Server = function(options) {
 }
 
 inherits(Server, EventEmitter);
+
+/**
+ * Perform one or more remove operations
+ * @method
+ * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+ * @param {{object}|{Long}} cmd Can be either a command returning a cursor or a cursorId
+ * @param {object} [options.batchSize=0] Batchsize for the operation
+ * @param {array} [options.documents=[]] Initial documents list for cursor
+ * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+ * @param {opResultCallback} callback A callback function
+ */
+Server.prototype.cursor = function(ns, cmd, cursorOptions) {
+  var s = this;
+  cursorOptions = cursorOptions || {};
+  var FinalCursor = cursorOptions.cursorFactory || s.Cursor;
+  return new FinalCursor(s.bson, ns, cmd, cursorOptions, self, s.options);
+}
 
 /**
  * A server connect event, used to verify that the connection is up and running
