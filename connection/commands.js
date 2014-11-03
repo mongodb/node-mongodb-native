@@ -398,7 +398,6 @@ var Response = function(bson, data, opts) {
   this.options = opts;
   // Have we already parsed the response
   this.parsed = false;
-  this.documents = [];
   // Internal data
   this.data = data;
   this.raw = data;
@@ -434,6 +433,9 @@ var Response = function(bson, data, opts) {
   // Unpack the number of objects returned
   this.numberReturned = data[this.index] | data[this.index + 1] << 8 | data[this.index + 2] << 16 | data[this.index + 3] << 24;
   this.index = this.index + 4; 
+  // The total number of documents
+  // this.documents = null;
+  this.documents = new Array(this.numberReturned);
 
   // Flag values
   this.cursorNotFound = (this.responseFlags & CURSOR_NOT_FOUND) != 0;
@@ -443,33 +445,42 @@ var Response = function(bson, data, opts) {
 }
 
 Response.prototype.parse = function(options) {
-  // Don't parse again if not needed
   if(this.parsed) return;
   options = options || {};
+  
   // Allow the return of raw documents instead of parsing
   var raw = options.raw || false;
+  var raw = false;
 
   //
   // Parse Body
   //
-  for(var i = 0; i < this.numberReturned; i++) {
-    var bsonSize = this.data.readUInt32LE(this.index);
-    // Parse options
-    var _options = {promoteLongs: this.opts.promoteLongs};
+  parse(this.bson, this.data, raw, this.opts.promoteLongs, this.index, this.numberReturned, this.documents);
+  // Set parsed
+  this.parsed = true;
+}
 
+var parse = function(bson, data, raw, promoteLongs, index, numberReturned, documents) {
+  // var documents = new Array(numberReturned);
+  var _options = {promoteLongs: promoteLongs};
+  
+  //
+  // Parse Body
+  //
+  for(var i = 0; i < numberReturned; i++) {
+    var bsonSize = data[index] | data[index + 1] << 8 | data[index + 2] << 16 | data[index + 3] << 24;
+    // Parse options
+    var documentBytes = data.slice(index, index + bsonSize);
     // If we have raw results specified slice the return document
-    if(raw) {
-      this.documents.push(this.data.slice(this.index, this.index + bsonSize));
+    if(!raw) {
+      documents[i] = bson.deserialize(documentBytes, _options);
     } else {
-      this.documents.push(this.bson.deserialize(this.data.slice(this.index, this.index + bsonSize), _options));
+      documents[i] = documentBytes;      
     }
 
     // Adjust the index
-    this.index = this.index + bsonSize;
+    index = index + bsonSize;
   }
-
-  // Set parsed
-  this.parsed = true;
 }
 
 Response.prototype.isParsed = function() {
