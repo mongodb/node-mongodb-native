@@ -6,6 +6,8 @@
 *.tmp
 *.log
 *.heapsnapshot
+*.txt
+*.png
 
 HISTORY
 Readme.md
