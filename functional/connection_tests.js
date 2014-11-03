@@ -77,6 +77,11 @@ exports['Should correctly execute ismaster on single server'] = {
       , host: configuration.host
       , port: configuration.port
       , bson: bson
+      , messageHandler: function(message) {
+        message.parse();
+        test.equal(true, message.documents[0].ismaster);
+        connection.destroy();        
+      }
     })
 
     // Add event listeners
@@ -88,12 +93,6 @@ exports['Should correctly execute ismaster on single server'] = {
 
       // Write it out to the connection
       _connection.write(query);
-    });
-
-    connection.on('message', function(message) {
-      message.parse();
-      test.equal(true, message.documents[0].ismaster);
-      connection.destroy();
     });
 
     connection.on('close', function(err) {
