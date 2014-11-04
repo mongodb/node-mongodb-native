@@ -254,7 +254,7 @@ State.prototype.toJSON = function() {
  * @return {object}
  */
 State.prototype.lastIsMaster = function() {
-  if(primary) return this.primary.lastIsMaster();
+  if(this.primary) return this.primary.lastIsMaster();
   if(this.secondaries.length > 0) return this.secondaries[0].lastIsMaster();
   return {};
 }
