@@ -177,6 +177,7 @@ Pool.prototype.connect = function(_options) {
  * @return {Connection}
  */
 Pool.prototype.get = function() {
+  // if(this.dead) return null;
   var connection = this.connections[this.index++];
   this.index = this.index % this.connections.length;
   return connection;
