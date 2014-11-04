@@ -392,48 +392,184 @@ KillCursor.prototype.toBinUnified = function() {
 /**************************************************************
  * RESPONSE
  **************************************************************/
+// var Response = function(bson, data, opts) {
+//   this.opts = opts || {promoteLongs: true};
+//   // Save the opts 
+//   this.options = opts;
+//   // Have we already parsed the response
+//   this.parsed = false;
+//   // Internal data
+//   this.data = data;
+//   this.raw = data;
+//   // Save bson parser
+//   this.bson = bson;
+//   //
+//   // Parse Header
+//   //
+//   this.index = 0;
+//   // Read the message length
+//   this.length = data[this.index] | data[this.index + 1] << 8 | data[this.index + 2] << 16 | data[this.index + 3] << 24;
+//   this.index = this.index + 4;
+//   // Fetch the request id for this reply
+//   this.requestId = data[this.index] | data[this.index + 1] << 8 | data[this.index + 2] << 16 | data[this.index + 3] << 24;
+//   this.index = this.index + 4;
+//   // Fetch the id of the request that triggered the response
+//   this.responseTo = data[this.index] | data[this.index + 1] << 8 | data[this.index + 2] << 16 | data[this.index + 3] << 24;
+//   // Skip op-code field
+//   this.index = this.index + 4 + 4;
+//   // Unpack flags
+//   this.responseFlags = data[this.index] | data[this.index + 1] << 8 | data[this.index + 2] << 16 | data[this.index + 3] << 24;
+//   this.index = this.index + 4; 
+//   // Unpack the cursor
+//   var lowBits = data[this.index] | data[this.index + 1] << 8 | data[this.index + 2] << 16 | data[this.index + 3] << 24;
+//   this.index = this.index + 4; 
+//   var highBits = data[this.index] | data[this.index + 1] << 8 | data[this.index + 2] << 16 | data[this.index + 3] << 24;
+//   this.index = this.index + 4; 
+//   // Create long object
+//   this.cursorId = new Long(lowBits, highBits);
+//   // Unpack the starting from
+//   this.startingFrom = data[this.index] | data[this.index + 1] << 8 | data[this.index + 2] << 16 | data[this.index + 3] << 24;
+//   this.index = this.index + 4; 
+//   // Unpack the number of objects returned
+//   this.numberReturned = data[this.index] | data[this.index + 1] << 8 | data[this.index + 2] << 16 | data[this.index + 3] << 24;
+//   this.index = this.index + 4; 
+//   // The total number of documents
+//   this.documents = new Array(this.numberReturned);
+
+//   // Flag values
+//   this.cursorNotFound = (this.responseFlags & CURSOR_NOT_FOUND) != 0;
+//   this.queryFailure = (this.responseFlags & QUERY_FAILURE) != 0;
+//   this.shardConfigStale = (this.responseFlags & SHARD_CONFIG_STALE) != 0;
+//   this.awaitCapable = (this.responseFlags & AWAIT_CAPABLE) != 0;
+// }
+
+// Response.prototype.parse = function(options) {
+//   if(this.parsed) return;
+//   options = options || {};
+  
+//   // Allow the return of raw documents instead of parsing
+//   var raw = options.raw || false;
+
+//   //
+//   // Parse Body
+//   //
+//   parse(this.bson, this.data, raw, this.opts.promoteLongs, this.index, this.numberReturned, this.documents);
+//   // Set parsed
+//   this.parsed = true;
+// }
+
+// var parse = function(bson, data, raw, promoteLongs, index, numberReturned, documents) {
+//   // var documents = new Array(numberReturned);
+//   var _options = {promoteLongs: promoteLongs};
+//   console.log("---------------------------------- start")
+//   //
+//   // Parse Body
+//   //
+//   for(var i = 0; i < numberReturned; i++) {
+//     var bsonSize = data[index] | data[index + 1] << 8 | data[index + 2] << 16 | data[index + 3] << 24;
+//     console.log("---------------------------------- 1 bsonSize :: " + bsonSize)
+//     // Parse options
+//     var documentBytes = data.slice(index, index + bsonSize);
+//     console.log("---------------------------------- 2 bsonSize :: " + bsonSize)
+//     console.dir(documentBytes)
+//     // If we have raw results specified slice the return document
+//     if(!raw) {
+//       documents[i] = bson.deserialize(documentBytes, _options);
+//     } else {
+//       documents[i] = documentBytes;      
+//     }
+//     console.log("---------------------------------- 3 bsonSize :: " + bsonSize)
+
+//     // Adjust the index
+//     index = index + bsonSize;
+//   }
+//   console.log("---------------------------------- end")
+// }
+
+// Response.prototype.isParsed = function() {
+//   return this.parsed;
+// }
+
 var Response = function(bson, data, opts) {
-  this.opts = opts || {promoteLongs: true};
-  // Save the opts 
-  this.options = opts;
-  // Have we already parsed the response
+  opts = opts || {promoteLongs: true};
   this.parsed = false;
-  // Internal data
-  this.data = data;
-  this.raw = data;
-  // Save bson parser
-  this.bson = bson;
+  // var values = {
+  //   documents: []
+  // }
+
+  // // Set error properties
+  // getProperty(this, 'cursorNotFound', 'responseFlags', values, function(value) {
+  //   return (value & CURSOR_NOT_FOUND) != 0;
+  // });
+
+  // getProperty(this, 'queryFailure', 'responseFlags', values, function(value) {
+  //   return (value & QUERY_FAILURE) != 0;
+  // });
+
+  // getProperty(this, 'shardConfigStale', 'responseFlags', values, function(value) {
+  //   return (value & SHARD_CONFIG_STALE) != 0;
+  // });
+
+  // getProperty(this, 'awaitCapable', 'responseFlags', values, function(value) {
+  //   return (value & AWAIT_CAPABLE) != 0;
+  // });
+
+  // // Set standard properties
+  // getProperty(this, 'length', 'length', values);
+  // getProperty(this, 'requestId', 'requestId', values);
+  // getProperty(this, 'responseTo', 'responseTo', values);
+  // getProperty(this, 'responseFlags', 'responseFlags', values);
+  // getProperty(this, 'cursorId', 'cursorId', values);
+  // getProperty(this, 'startingFrom', 'startingFrom', values);
+  // getProperty(this, 'numberReturned', 'numberReturned', values);
+  // getProperty(this, 'documents', 'documents', values);
+  // getSingleProperty(this, 'raw', data);
+
   //
   // Parse Header
   //
   this.index = 0;
+  this.raw = data;
+  this.data = data;
+  this.bson = bson;
+  this.opts = opts;
+
   // Read the message length
   this.length = data[this.index] | data[this.index + 1] << 8 | data[this.index + 2] << 16 | data[this.index + 3] << 24;
   this.index = this.index + 4;
+  
   // Fetch the request id for this reply
   this.requestId = data[this.index] | data[this.index + 1] << 8 | data[this.index + 2] << 16 | data[this.index + 3] << 24;
   this.index = this.index + 4;
+  
   // Fetch the id of the request that triggered the response
   this.responseTo = data[this.index] | data[this.index + 1] << 8 | data[this.index + 2] << 16 | data[this.index + 3] << 24;
+  this.index = this.index + 4;
+
   // Skip op-code field
-  this.index = this.index + 4 + 4;
+  this.index = this.index + 4;
+  
   // Unpack flags
   this.responseFlags = data[this.index] | data[this.index + 1] << 8 | data[this.index + 2] << 16 | data[this.index + 3] << 24;
-  this.index = this.index + 4; 
+  this.index = this.index + 4;
+  
   // Unpack the cursor
   var lowBits = data[this.index] | data[this.index + 1] << 8 | data[this.index + 2] << 16 | data[this.index + 3] << 24;
-  this.index = this.index + 4; 
+  this.index = this.index + 4;
   var highBits = data[this.index] | data[this.index + 1] << 8 | data[this.index + 2] << 16 | data[this.index + 3] << 24;
-  this.index = this.index + 4; 
+  this.index = this.index + 4;
   // Create long object
   this.cursorId = new Long(lowBits, highBits);
+  
   // Unpack the starting from
   this.startingFrom = data[this.index] | data[this.index + 1] << 8 | data[this.index + 2] << 16 | data[this.index + 3] << 24;
-  this.index = this.index + 4; 
+  this.index = this.index + 4;
+  
   // Unpack the number of objects returned
   this.numberReturned = data[this.index] | data[this.index + 1] << 8 | data[this.index + 2] << 16 | data[this.index + 3] << 24;
-  this.index = this.index + 4; 
-  // The total number of documents
+  this.index = this.index + 4;
+
+  // Preallocate document array
   this.documents = new Array(this.numberReturned);
 
   // Flag values
@@ -441,53 +577,41 @@ var Response = function(bson, data, opts) {
   this.queryFailure = (this.responseFlags & QUERY_FAILURE) != 0;
   this.shardConfigStale = (this.responseFlags & SHARD_CONFIG_STALE) != 0;
   this.awaitCapable = (this.responseFlags & AWAIT_CAPABLE) != 0;
+  this.promoteLongs = typeof opts.promoteLongs == 'boolean' ? opts.promoteLongs : true;
+}
+
+Response.prototype.isParsed = function() {
+  return this.parsed;
 }
 
 Response.prototype.parse = function(options) {
+  // Don't parse again if not needed
   if(this.parsed) return;
   options = options || {};
-  
   // Allow the return of raw documents instead of parsing
   var raw = options.raw || false;
 
   //
   // Parse Body
   //
-  parse(this.bson, this.data, raw, this.opts.promoteLongs, this.index, this.numberReturned, this.documents);
-  // Set parsed
-  this.parsed = true;
-}
-
-var parse = function(bson, data, raw, promoteLongs, index, numberReturned, documents) {
-  // var documents = new Array(numberReturned);
-  var _options = {promoteLongs: promoteLongs};
-  console.log("---------------------------------- start")
-  //
-  // Parse Body
-  //
-  for(var i = 0; i < numberReturned; i++) {
-    var bsonSize = data[index] | data[index + 1] << 8 | data[index + 2] << 16 | data[index + 3] << 24;
-    console.log("---------------------------------- 1 bsonSize :: " + bsonSize)
+  for(var i = 0; i < this.numberReturned; i++) {
+    var bsonSize = this.data[this.index] | this.data[this.index + 1] << 8 | this.data[this.index + 2] << 16 | this.data[this.index + 3] << 24;
     // Parse options
-    var documentBytes = data.slice(index, index + bsonSize);
-    console.log("---------------------------------- 2 bsonSize :: " + bsonSize)
-    console.dir(documentBytes)
+    var _options = {promoteLongs: this.opts.promoteLongs};
+
     // If we have raw results specified slice the return document
-    if(!raw) {
-      documents[i] = bson.deserialize(documentBytes, _options);
+    if(raw) {
+      this.documents[i] = this.data.slice(this.index, this.index + bsonSize);
     } else {
-      documents[i] = documentBytes;      
+      this.documents[i] = this.bson.deserialize(this.data.slice(this.index, this.index + bsonSize), _options);
     }
-    console.log("---------------------------------- 3 bsonSize :: " + bsonSize)
 
     // Adjust the index
-    index = index + bsonSize;
+    this.index = this.index + bsonSize;
   }
-  console.log("---------------------------------- end")
-}
 
-Response.prototype.isParsed = function() {
-  return this.parsed;
+  // Set parsed
+  this.parsed = true;
 }
 
 module.exports = {
