@@ -256,7 +256,7 @@ var dataHandler = function(self) {
                 // We got a parse Error fire it off then keep going
                 self.emit("parseError", errorObject, self);
               }
-            } else if(sizeOfMessage <= 4 || sizeOfMessage > maxBsonMessageSize) {
+            } else if(sizeOfMessage <= 4 || sizeOfMessage > self.maxBsonMessageSize) {
               var errorObject = {err:"socketHandler", trace:null, bin:data, parseState:{
                 sizeOfMessage:sizeOfMessage,
                 bytesRead:0,
