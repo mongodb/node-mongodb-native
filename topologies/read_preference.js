@@ -37,7 +37,7 @@ var needSlaveOk = ['primaryPreferred', 'secondary', 'secondaryPreferred', 'neare
  */
 var ReadPreference = function(preference, tags, options) {
   this.preference = preference;
-  this.tags = tags || {};
+  this.tags = tags;
   this.options = options;
 }
 
@@ -66,7 +66,7 @@ ReadPreference.prototype.equals = function(readPreference) {
  */
 ReadPreference.prototype.toJSON = function() {
   var readPreference = {mode: this.preference};
-  if(this.tags) readPreference.tags = this.tags;
+  if(Array.isArray(this.tags)) readPreference.tags = this.tags;
   return readPreference;
 }
 

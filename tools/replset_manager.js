@@ -3,6 +3,7 @@ var f = require('util').format
   , fs = require('fs')
   , mkdirp = require('mkdirp')
   , rimraf = require('rimraf')
+  , exec = require('child_process').exec
   , ServerManager = require('./server_manager')
   , ReadPreference = require('../../lib/topologies/read_preference')
   , Server = require('../../lib/topologies/server')
@@ -307,6 +308,7 @@ var ReplSetManager = function(replsetOptions) {
   //
   // Start the server
   this.start = function(options, callback) {
+    // console.log("########################################## START")
     if(typeof options == 'function') {
       callback = options;
       options = {};
@@ -320,49 +322,68 @@ var ReplSetManager = function(replsetOptions) {
     var signal = typeof options.signal == 'number' ? options.signal : -15;
     var self = this;
 
-    // Start all the servers
-    for(var i = 0; i < totalServers; i++) {
-      // Clone the options
-      var opts = cloneOptions(internalOptions);
-      // Emit errors
-      opts.emitError = true;
-      // Set the current Port 
-      opts.host = host;
-      opts.port = startPort + i;
-      opts.dbpath = opts.dbpath ? opts.dbpath + f("/data-%s", opts.port) : null;
-      opts.logpath = opts.logpath ? opts.logpath + f("/data-%s.log", opts.port) : null;
-      opts.fork = null;
-      // Add list
-      serverAddresses.push(f("%s:%s", host, opts.port));      
+    // Do we not have any server managers
+    if(serverManagers.length == 0) {
+      // Start all the servers
+      for(var i = 0; i < totalServers; i++) {
+        // Clone the options
+        var opts = cloneOptions(internalOptions);
+        // Emit errors
+        opts.emitError = true;
+        // Set the current Port 
+        opts.host = host;
+        opts.port = startPort + i;
+        opts.dbpath = opts.dbpath ? opts.dbpath + f("/data-%s", opts.port) : null;
+        opts.logpath = opts.logpath ? opts.logpath + f("/data-%s.log", opts.port) : null;
+        opts.fork = null;
+        // Add list
+        serverAddresses.push(f("%s:%s", host, opts.port));      
 
-      // Create a server manager
-      serverManagers.push(new ServerManager(opts));
+        // Create a server manager
+        serverManagers.push(new ServerManager(opts));
+      }
     }
 
-    // Start all the servers
-    for(var i = 0; i < serverManagers.length; i++) {
-      var startOpts = {purge: purge, kill: kill, signal: signal};
+    // Starts all the provided servers
+    var startServers = function() {
+      // Start all the servers
+      for(var i = 0; i < serverManagers.length; i++) {
+        var startOpts = {purge: purge, signal: signal};
 
-      // Start the server
-      serverManagers[i].start(startOpts, function(err) {
-        if(err) throw err;
-        serversLeft = serversLeft - 1;
+        // Start the server
+        serverManagers[i].start(startOpts, function(err) {
+          if(err) throw err;
+          serversLeft = serversLeft - 1;
 
-        // All servers are down
-        if(serversLeft == 0) {
-          // Configure the replicaset
-          configureAndEnsure(function() {
-            // Refresh view
-            getServerManagerByType('primary', function() {
-              callback(null, self);
+          // All servers are down
+          if(serversLeft == 0) {
+            // Configure the replicaset
+            configureAndEnsure(function() {
+              // Refresh view
+              getServerManagerByType('primary', function() {
+                callback(null, self);
+              });
             });
-          });
-        }
-      });
+          }
+        });
+      }      
     }
+
+    // Kill all mongod instances if kill specified
+    if(kill) {
+      return exec(f("killall %d mongod", signal), function(err, stdout, stderr) {
+        setTimeout(function() {
+          startServers();
+        }, 5000);
+      });
+    } 
+
+    // Start all the servers
+    startServers();
   }
 
   this.stop = function(options, callback) {    
+    // console.log("########################################## STOP")
     if(typeof options == 'function') {
       callback = options;
       options = {};
@@ -373,13 +394,10 @@ var ReplSetManager = function(replsetOptions) {
     var count = serverManagers.length;
     // Stop all servers
     serverManagers.forEach(function(s) {
-      s.stop(function() {
+      s.stop(options, function() {
         count = count - 1;
         if(count == 0) {
-          // Configure the replicaset
-          configureAndEnsure(function() {
-            callback();
-          });
+          callback();
         }
       });
     });
@@ -391,24 +409,44 @@ var ReplSetManager = function(replsetOptions) {
       options = {};
     }
 
-    // Servers needing to be restarted
-    var servers = serverManagers.filter(function(x) {
-      return !x.isConnected();
-    });
+    options = options || {};
+    // console.log("########################################## RESTART")
+    // Total server managers to check
+    var count = serverManagers.length;
 
-    if(servers.length == 0) return callback(null, null);
-    var count = servers.length;
-    // Restart the servers
-    for(var i = 0; i < servers.length; i++) {
-      servers[i].start(options, function(err, r) {
-        count = count - 1;
+    // Check an individual servers state
+    var checkServerManager = function(serverManager, _callback) {
+      serverManager.connect(function(err, server) {
+        // console.log("-------------------------- check server :: " + serverManager.port)
+        // console.dir(err)
+        // Attempt to restart server manager
+        if(err) {
+          serverManager.start(options, function(err) {
+            count = count - 1;
+
+            if(count == 0) {
+              // Started all the servers, reconfigure and ensure
+              configureAndEnsure({override:true}, function() {
+                _callback(null, null);
+              });
+            }          
+          });
+        } else {
+          count = count - 1;
+        }
 
         if(count == 0) {
+          // Started all the servers, reconfigure and ensure
           configureAndEnsure({override:true}, function() {
-            callback(null, null);
+            _callback(null, null);
           });
-        }
+        }          
       });
+    }
+
+    // Iterate over all the server managers restarting as needed
+    for(var i = 0; i < serverManagers.length; i++) {
+      checkServerManager(serverManagers[i], callback);
     }
   } 
 
@@ -422,7 +460,11 @@ var ReplSetManager = function(replsetOptions) {
   // Get the current ismaster
   var getIsMaster = function(callback) {
     if(serverManagers.length == 0) return callback(new Error("no servers"));
-    serverManagers[0].ismaster(callback);
+    // Run ismaster against primary only
+    getServerManagerByType('primary', function(err, manager) {
+      if(err) return callback(err);
+      manager.ismaster(callback);
+    });
   } 
 
   //
