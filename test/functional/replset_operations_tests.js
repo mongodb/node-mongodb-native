@@ -367,7 +367,6 @@ exports['Should Correctly group using replicaset'] = {
           collection.group(['key'], {}, {sum:0}, function reduce(record, memo){
             memo.sum += record.x;
           }, true, function(err, items){
-            // console.dir(items)
             test.equal(null, err);
             test.equal(3, items.length);
             db.close();

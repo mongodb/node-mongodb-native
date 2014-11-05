@@ -439,6 +439,11 @@ if(argv.t == 'functional') {
     });    
   }
 
+    // startupOptions.skipStartup = true;
+    // startupOptions.skipRestart = true;
+    // startupOptions.skipShutdown = true;
+    // startupOptions.skip = true;
+
   // If we have a test we are filtering by
   if(argv.f) {
     runner.plugin(new FileFilter(argv.f));

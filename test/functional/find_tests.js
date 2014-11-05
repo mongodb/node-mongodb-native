@@ -1750,7 +1750,7 @@ exports.shouldCorrectlyPerformNegativeLimit = {
  * Should perform an exhaust find query
  */
 exports.shouldCorrectlyExecuteExhaustQuery = {
-  metadata: { requires: { topology: ["single", "replset"] } },
+  metadata: { requires: { topology: ["single", "replicaset"] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {

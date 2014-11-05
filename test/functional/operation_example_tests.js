@@ -1334,7 +1334,7 @@ exports.shouldCorrectlyPerformSimpleGeoNearCommand = {
  * @ignore
  */
 exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommand = {
-  metadata: { requires: { topology: ["single", "replset"] } },
+  metadata: { requires: { topology: ["single", "replicaset"] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1903,7 +1903,7 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = {
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
           , {unique:true, background:true, w:1}, function(err, indexName) {
-
+          test.equal(null, err);
           // Fetch basic indexInformation for collection
           db.indexInformation('more_index_information_test_2', function(err, indexInformation) {
             test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
