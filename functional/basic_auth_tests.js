@@ -107,7 +107,7 @@ exports['Simple authentication test for replicaset'] = {
     server.addAuthProvider('mongocr', new MongoCR());
 
     // Add event listeners
-    server.on('connect', function(_server) {
+    server.on('fullsetup', function(_server) {
       var password = 'test';
       var username = 'test';
       // Use node md5 generator
@@ -122,7 +122,7 @@ exports['Simple authentication test for replicaset'] = {
         , pwd: userPassword
         , roles: ['dbOwner']
         , digestPassword: false
-        , writeConcern: {w:1}
+        , writeConcern: {w:'majority'}
       }, function(err, r) {
         test.equal(null, err);
         test.equal(1, r.result.ok);
@@ -134,18 +134,19 @@ exports['Simple authentication test for replicaset'] = {
           test.equal(null, err);
           test.ok(session != null);
 
-          // Wait for reconnect to happen
-          setTimeout(function() {
-            session.command(f("%s.$cmd", configuration.db), {
-                dropUser: username
-              , writeConcern: {w:1}
-            }, function(err, r) {
-              test.equal(null, err);
-              test.equal(1, r.result.ok);
-              _server.destroy();
-              test.done();
-            });
-          }, 1000);
+          _server.on('joined', function(t, s) {
+            if(t == 'primary') {
+              session.command(f("%s.$cmd", configuration.db), {
+                  dropUser: username
+                , writeConcern: {w:1}
+              }, function(err, r) {
+                test.equal(null, err);
+                test.equal(1, r.result.ok);
+                _server.destroy();
+                test.done();
+              });
+            }
+          })
 
           // Write garbage, force socket closure
           try {
