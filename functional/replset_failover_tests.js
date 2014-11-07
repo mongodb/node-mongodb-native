@@ -2,11 +2,8 @@ var f = require('util').format
   , Long = require('bson').Long;
 
 var restartAndDone = function(configuration, test) {
-  console.log("######################################## RESTART AND DONE")
-  configuration.manager.restart({signal: -15}, function() {
-    // configuration.manager.start(function() {
-      test.done();
-    // });
+  configuration.manager.restart({signal: -3}, function() {
+    test.done();
   });
 }
 
@@ -141,10 +138,10 @@ exports['Should correctly recover from secondary shutdowns'] = {
       // Wait for a second and shutdown secondaries
       setTimeout(function() {
         // Shutdown the first secondary
-        configuration.manager.shutdown('secondary', {signal:-15}, function(err, result) {
+        configuration.manager.shutdown('secondary', {signal:-3}, function(err, result) {
           if(err) console.dir(err);
           // Shutdown the second secondary
-          configuration.manager.shutdown('secondary', {signal:-15}, function(err, result) {
+          configuration.manager.shutdown('secondary', {signal:-3}, function(err, result) {
             if(err) console.dir(err);
           });
         });
@@ -178,6 +175,7 @@ exports['Should correctly fire single no-repeat ha state update due to not maste
     // Add event listeners
     server.on('fullsetup', function(_server) {
       _server.on('ha', function(e, options) {
+
         // Manual status request issues correctly
         if(options.norepeat) {
           process.nextTick(function() {
@@ -192,6 +190,7 @@ exports['Should correctly fire single no-repeat ha state update due to not maste
 
       // Wait for close event due to primary stepdown
       _server.on('joined', function(t, s) {
+        
         if(t == 'secondary') {
           // Execute write command
           _server.command(f("%s.$cmd", configuration.db)
@@ -209,6 +208,7 @@ exports['Should correctly fire single no-repeat ha state update due to not maste
 
       // Wait for a second and then step down primary
       setTimeout(function() {
+        
         configuration.manager.stepDown({force: true}, function(err, result) {
           test.ok(err != null);
         });
@@ -245,15 +245,17 @@ exports['Should correctly remove and re-add secondary and detect removal and re-
 
     // Add event listeners
     server.on('fullsetup', function(_server) {
+      
       _server.on('joined', function(t, s) {
-        if(t == 'secondary' && leftServer && s.name == leftServer.host) {
+        
+        if(t == 'secondary' && leftServer && s.name == leftServer.host) {          
           _server.destroy();
           // test.done();
           restartAndDone(configuration, test);
         }
       });
 
-      _server.on('left', function(t, s) {
+      _server.on('left', function(t, s) {        
         if(t == 'secondary' && leftServer && s.name == leftServer.host) state++;
       });
 
