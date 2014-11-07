@@ -198,7 +198,7 @@ var ServerManager = function(serverOptions) {
 
     setTimeout(function() {
       exec(cmd, function(error, stdout, stderr) {
-        // console.log(stdout)
+        console.log(stdout)
         if(error != null && callback) {
           var _internal = callback;
           callback = null;
@@ -225,17 +225,18 @@ var ServerManager = function(serverOptions) {
       } catch(err) {}
     }
 
+    // Check if we have a pid file and remove it we do
+    if(fs.existsSync(path.join(dbpath, "mongod.lock"))) {
+      fs.unlinkSync(path.join(dbpath, "mongod.lock"));
+    }
+    
     // Build startup command
     var cmd = buildStartupCommand(serverOptions);
-    // console.log("--------------------------- start server ")
-    // console.log(cmd)
     // If we have decided to kill all the processes
     if(typeof options.signal == 'number' && options.kill) {
-      options.signal = typeof options.signal == 'number' ? options.signal : -15;
-      // console.log("--------------------------- start server :: killall")
+      options.signal = typeof options.signal == 'number' ? options.signal : -3;
       exec(f("killall %d mongod", options.signal), function(err, stdout, stderr) {
         setTimeout(function() {
-          // console.log("--------------------------- start server :: boot server")
           bootServer(cmd, callback);
         }, 5000);
       });
@@ -270,16 +271,15 @@ var ServerManager = function(serverOptions) {
     // Heap storage engine, no lock file available
     if(storageEngine == null) {
       try {
-        // console.log("---------------------- 0")
         // Read the pidfile        
         pid = fs.readFileSync(path.join(dbpath, "mongod.lock"), 'ascii').trim();        
         // Get the signal
-        var signal = options.signal || -15;
+        var signal = options.signal || -3;
         // Stop server connection
         if(server) server.destroy();
         // Create kill command
         var cmd = f("kill %d %s", signal, pid);
-        // console.log("execute :: " + cmd)
+        console.log("execute :: " + cmd)
         // Kill the process with the desired signal
         exec(cmd, function(error) {
           // Monitor for pid until it's dead

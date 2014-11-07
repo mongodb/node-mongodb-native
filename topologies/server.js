@@ -743,9 +743,7 @@ Server.prototype.command = function(ns, cmd, options, callback) {
       || result.documents[0]['code']) return callback(MongoError.create(result.documents[0]));
       // Execute callback, catch and rethrow if needed
       try { callback(null, new CommandResult(result.documents[0], connection)); }
-      catch(err) { 
-        console.dir(err)
-        process.nextTick(function() { throw err}); }
+      catch(err) { process.nextTick(function() { throw err}); }
   });
 }
 

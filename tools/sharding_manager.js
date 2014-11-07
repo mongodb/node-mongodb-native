@@ -252,8 +252,8 @@ var ShardingManager = function(mongosOptions) {
 
     // kill all instances
     if(mongosOptions.kill) {
-      return exec(f("killall -15 mongod"), function(err, stdout, stderr) {
-        exec(f("killall -15 mongos"), function(err, stdout, stderr) {
+      return exec(f("killall -3 mongod"), function(err, stdout, stderr) {
+        exec(f("killall -3 mongos"), function(err, stdout, stderr) {
           // purge the directory
           if(mongosOptions.purge) {
             rimraf.sync(dbpath);
