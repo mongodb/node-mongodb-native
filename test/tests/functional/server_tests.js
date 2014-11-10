@@ -35,18 +35,21 @@ exports['Should correctly reconnect to server with automatic reconnect enabled']
           result.connection.write(a);
         } catch(err) {}
 
-        // Attempt a proper command
-        _server.command("system.$cmd", {ismaster: true}, {readPreference: new ReadPreference('primary')}, function(err, result) {
-          test.ok(err != null);
-        });
+        // Ensure the server died
+        setTimeout(function() {
+          // Attempt a proper command
+          _server.command("system.$cmd", {ismaster: true}, {readPreference: new ReadPreference('primary')}, function(err, result) {
+            test.ok(err != null);
+          });          
+        }, 100);
       });
     });
 
-    server.on('close', function() {
+    server.once('close', function() {
       emittedClose = true;
     });
 
-    server.on('reconnect', function() {
+    server.once('reconnect', function() {
       test.equal(true, emittedClose);
       test.equal(true, server.isConnected());
       server.destroy();
