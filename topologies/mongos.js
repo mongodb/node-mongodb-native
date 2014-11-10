@@ -55,113 +55,117 @@ var cloneOptions = function(options) {
 }
 
 var State = function(readPreferenceStrategies) {
-  var connectedServers = [];
-  var disconnectedServers = [];
+  // Internal state
+  this.s = {
+      connectedServers: []
+    , disconnectedServers: []
+    , readPreferenceStrategies: readPreferenceStrategies
+  }
+}
 
-  //
-  // A Mongos connected
-  this.connected = function(server) {
-    // Locate in disconnected servers and remove
-    disconnectedServers = disconnectedServers.filter(function(s) {
-      return !s.equals(server);
-    });
+//
+// A Mongos connected
+State.prototype.connected = function(server) {
+  // Locate in disconnected servers and remove
+  this.s.disconnectedServers = this.s.disconnectedServers.filter(function(s) {
+    return !s.equals(server);
+  });
 
-    var found = false;
-    // Check if the server exists
-    connectedServers.forEach(function(s) {
-      if(s.equals(server)) found = true;
-    });
+  var found = false;
+  // Check if the server exists
+  this.s.connectedServers.forEach(function(s) {
+    if(s.equals(server)) found = true;
+  });
 
-    // Add to disconnected list if it does not already exist
-    if(!found) connectedServers.push(server);
+  // Add to disconnected list if it does not already exist
+  if(!found) this.s.connectedServers.push(server);
+}
+
+//
+// A Mongos disconnected
+State.prototype.disconnected = function(server) {
+  // Locate in disconnected servers and remove
+  this.s.connectedServers = this.s.connectedServers.filter(function(s) {
+    return !s.equals(server);
+  });
+
+  var found = false;
+  // Check if the server exists
+  this.s.disconnectedServers.forEach(function(s) {
+    if(s.equals(server)) found = true;
+  });
+
+  // Add to disconnected list if it does not already exist
+  if(!found) this.s.disconnectedServers.push(server);
+}
+
+//
+// Return the list of disconnected servers
+State.prototype.disconnectedServers = function() {
+  return this.s.disconnectedServers.slice(0);
+}
+
+//
+// Get connectedServers
+State.prototype.connectedServers = function() {
+  return this.s.connectedServers.slice(0)
+}
+
+//
+// Get all servers
+State.prototype.getAll = function() {
+  return this.s.connectedServers.slice(0).concat(this.s.disconnectedServers);
+}
+
+//
+// Get all connections
+State.prototype.getAllConnections = function() {
+  var connections = [];
+  this.s.connectedServers.forEach(function(e) {
+    connections = connections.concat(e.connections());
+  });
+  return connections;
+}
+
+//
+// Destroy the state
+State.prototype.destroy = function() {
+  // Destroy any connected servers
+  while(this.s.connectedServers.length > 0) {
+    var server = this.s.connectedServers.shift();
+
+    // Remove any non used handlers
+    ['error', 'close', 'timeout', 'connect'].forEach(function(e) {
+      server.removeAllListeners(e);
+    })
+
+    // Server destroy
+    server.destroy();
+    // Add to list of disconnected servers
+    this.s.disconnectedServers.push(server);
+  }        
+}
+
+//
+// Are we connected
+State.prototype.isConnected = function() {
+  return this.s.connectedServers.length > 0;
+}
+
+//
+// Pick a server
+State.prototype.pickServer = function(readPreference) {
+  readPreference = readPreference || ReadPreference.primary;
+
+  // Do we have a custom readPreference strategy, use it
+  if(this.s.readPreferenceStrategies != null && this.s.readPreferenceStrategies[readPreference] != null) {
+    return this.s.readPreferenceStrategies[readPreference].pickServer(connectedServers, readPreference);
   }
 
-  //
-  // A Mongos disconnected
-  this.disconnected = function(server) {
-    // Locate in disconnected servers and remove
-    connectedServers = connectedServers.filter(function(s) {
-      return !s.equals(server);
-    });
-
-    var found = false;
-    // Check if the server exists
-    disconnectedServers.forEach(function(s) {
-      if(s.equals(server)) found = true;
-    });
-
-    // Add to disconnected list if it does not already exist
-    if(!found) disconnectedServers.push(server);
-  }
-
-  //
-  // Return the list of disconnected servers
-  this.disconnectedServers = function() {
-    return disconnectedServers.slice(0);
-  }
-
-  //
-  // Get connectedServers
-  this.connectedServers = function() {
-    return connectedServers.slice(0)
-  }
-
-  //
-  // Get all servers
-  this.getAll = function() {
-    return connectedServers.slice(0).concat(disconnectedServers);
-  }
-
-  //
-  // Get all connections
-  this.getAllConnections = function() {
-    var connections = [];
-    connectedServers.forEach(function(e) {
-      connections = connections.concat(e.connections());
-    });
-    return connections;
-  }
-
-  //
-  // Destroy the state
-  this.destroy = function() {
-    // Destroy any connected servers
-    while(connectedServers.length > 0) {
-      var server = connectedServers.shift();
-
-      // Remove any non used handlers
-      ['error', 'close', 'timeout', 'connect'].forEach(function(e) {
-        server.removeAllListeners(e);
-      })
-
-      // Server destroy
-      server.destroy();
-      // Add to list of disconnected servers
-      disconnectedServers.push(server);
-    }        
-  }
-
-  //
-  // Are we connected
-  this.isConnected = function() {
-    return connectedServers.length > 0;
-  }
-
-  //
-  // Pick a server
-  this.pickServer = function(readPreference) {
-    readPreference = readPreference || ReadPreference.primary;
-
-    // Do we have a custom readPreference strategy, use it
-    if(readPreferenceStrategies != null && readPreferenceStrategies[readPreference] != null) {
-      return readPreferenceStrategies[readPreference].pickServer(connectedServers, readPreference);
-    }
-
-    // No valid connections
-    if(connectedServers.length == 0) throw new MongoError("no mongos proxy available");
-    // Pick first one
-    return connectedServers[0];
-  }
+  // No valid connections
+  if(this.s.connectedServers.length == 0) throw new MongoError("no mongos proxy available");
+  // Pick first one
+  return this.s.connectedServers[0];
 }
 
 /**
