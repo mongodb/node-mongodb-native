@@ -2,7 +2,7 @@ exports['Should Correctly Do MongoClient with bufferMaxEntries:0'] = {
   metadata: {
     requires: {
       node: ">0.8.0",
-      topology: ['single', 'sharded', 'ssl', 'wiredtiger']
+      topology: ['single', 'ssl', 'wiredtiger']
     }
   },
 

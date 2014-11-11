@@ -75,7 +75,7 @@ var createConfiguration = function(options) {
 
       start: function(callback) {
         if(startupOptions.skipStartup) return callback();
-        manager.start({purge:true, signal:-9}, function(err) {
+        manager.start({purge:true, signal:-9, kill:true}, function(err) {
           if(err) throw err;
           callback();
         });
@@ -185,7 +185,7 @@ var createConfiguration = function(options) {
 
 // Set up the runner
 var runner = new Runner({
-    logLevel:'error'
+    logLevel:'debug'
   , runners: 1
   , failFast: true
 });

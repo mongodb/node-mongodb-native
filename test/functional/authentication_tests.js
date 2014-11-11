@@ -418,7 +418,7 @@ exports.shouldCorrectlyAuthenticateUsingPrimary = {
               MongoClient.connect(config, function(error, client) {
                 test.equal(null, error);
 
-                client.collectionNames(function(error, names) {
+                client.collections(function(error, names) {
                   test.equal(null, error);
                   
                   client.close();
@@ -483,7 +483,7 @@ exports.shouldCorrectlyAuthenticateWithTwoSeeds = {
               MongoClient.connect(config, function(error, client) {
                 test.equal(null, error);
 
-                client.collectionNames(function(error, names) {
+                client.collections(function(error, names) {
                   test.equal(null, err);
                   
                   client.close();
@@ -549,8 +549,6 @@ exports.shouldCorrectlyAuthenticateWithOnlySecondarySeed = {
               // Connect
               MongoClient.connect(config, function(error, client) {
                 client.on('fullsetup', function() {
-                  test.equal(null, error);
-
                   client.collection('test').insert({a:1}, function(err, r) {
                     test.equal(null, err);
                     
@@ -907,7 +905,7 @@ exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary =
       var db = new Db('foo', replSet, {w:1});
       db.open(function(err, db_p) {});
       db.on('fullsetup', function(err, db_p) {
-        test.equal(null, err);
+        test.ok(db_p != null);
 
         db_p.admin().addUser("me", "secret", {w:3}, function runWhatever(err, result) {
           // Just set auths for the manager to handle it correctly
@@ -1084,7 +1082,7 @@ exports.shouldCorrectlyAuthAgainstReplicaSetAdminDbUsingMongoClient = {
           MongoClient.connect(f("mongodb://me:secret@%s:%s/%s?rs_name=%s&readPreference=secondary&w=3"
             , 'localhost', replSetManager.startPort, dbName, replSetManager.replicasetName), function(err, db) {
               db.on('fullsetup', function(err, db) {
-                test.equal(null, err);
+                test.ok(db != null);
 
                 // Insert document
                 db.collection('authcollectiontest').insert({a:1}, {w:'majority'}, function(err, result) {
@@ -1156,7 +1154,7 @@ exports.shouldCorrectlyAuthAgainstNormalDbUsingMongoClient = {
                 , 'localhost', replSetManager.startPort, dbName, replSetManager.replicasetName), function(err, db) {
                   test.equal(null, err);
                   db.on('fullsetup', function(err, db) {
-                    test.equal(null, err);
+                    test.ok(db != null);
 
                     // Insert document
                     db.collection('authcollectiontest1').insert({a:1}, {w:3}, function(err, result) {
@@ -1293,7 +1291,7 @@ exports['should correctly connect and authenticate against admin database using 
                 MongoClient.connect(config, function(error, client) {
                   test.equal(null, error);
 
-                  client.collectionNames(function(error, names) {
+                  client.collections(function(error, names) {
                     test.equal(null, error);
                     
                     client.close();
@@ -1357,7 +1355,7 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
               MongoClient.connect(config, function(error, client) {
                 test.equal(null, error);
 
-                client.collectionNames(function(error, names) {
+                client.collections(function(error, names) {
                   test.equal(null, error);
 
                   // Kill the mongos proxy
@@ -1365,7 +1363,7 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
 
                     shardedManager.remove('mongos', {index: 1}, function(err, serverDetails2) {
 
-                      client.collectionNames(function(error, names) {
+                      client.collections(function(error, names) {
                         test.equal(null, error);
                       });
 
@@ -1373,7 +1371,7 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
                         
                         shardedManager.add(serverDetails2, function(err, result) {
                           
-                          client.collectionNames(function(error, names) {
+                          client.collections(function(error, names) {
                             test.equal(null, error);
 
                             client.close();

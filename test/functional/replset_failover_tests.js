@@ -10,6 +10,45 @@ exports.beforeTests = function(configuration, callback) {
   });
 }
 
+exports['Should correctly remove and re-add secondary and detect removal and re-addition of the server'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  test: function(configuration, test) {
+    // The state
+    var state = 0;
+    var leftServer = null;
+
+    // Get a new instance
+    var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      db.serverConfig.on('joined', function(t, d, s) {
+        if(t == 'secondary' && leftServer && s.name == leftServer.host) {
+          db.close();
+          restartAndDone(configuration, test);
+        }
+      });
+
+      db.serverConfig.on('left', function(t, s) {
+        if(t == 'secondary' && leftServer && s.name == leftServer.host) state++;
+      });
+
+      db.once('fullsetup', function() {
+        // Shutdown the first secondary
+        configuration.manager.remove('secondary', function(err, serverDetails) {
+          leftServer = serverDetails;
+
+          setTimeout(function() {
+            // Shutdown the second secondary
+            configuration.manager.add(serverDetails, function(err, result) {});
+          }, 10000)
+        });      
+      });
+    });
+  }
+}
+
 /**
  * @ignore
  */
@@ -133,45 +172,6 @@ exports['Should correctly recover from secondary shutdowns'] = {
             });
           });
         }
-      });
-    });
-  }
-}
-
-exports['Should correctly remove and re-add secondary and detect removal and re-addition of the server'] = {
-  metadata: { requires: { topology: 'replicaset' } },
-
-  test: function(configuration, test) {
-    // The state
-    var state = 0;
-    var leftServer = null;
-
-    // Get a new instance
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
-    db.open(function(err, db) {
-      test.equal(null, err);
-
-      db.serverConfig.on('joined', function(t, d, s) {
-        if(t == 'secondary' && leftServer && s.name == leftServer.host) {
-          db.close();
-          restartAndDone(configuration, test);
-        }
-      });
-
-      db.serverConfig.on('left', function(t, s) {
-        if(t == 'secondary' && leftServer && s.name == leftServer.host) state++;
-      });
-
-      db.once('fullsetup', function() {
-        // Shutdown the first secondary
-        configuration.manager.remove('secondary', function(err, serverDetails) {
-          leftServer = serverDetails;
-
-          setTimeout(function() {
-            // Shutdown the second secondary
-            configuration.manager.add(serverDetails, function(err, result) {});          
-          }, 10000)
-        });      
       });
     });
   }

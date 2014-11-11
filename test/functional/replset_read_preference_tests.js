@@ -325,7 +325,8 @@ exports['shouldStillQuerySecondaryWhenNoPrimaryAvailable'] = {
             // wait five seconds, then kill 2 of the 3 nodes that are up.
             setTimeout(function(){
               manager.shutdown('secondary', {signal: -15}, function() {
-                manager.shutdown('primary', {signal: -15}, function() {});
+                manager.shutdown('primary', {signal: -15}, function() {
+                });
               });
             }, 5000);
 
@@ -343,7 +344,7 @@ exports['shouldStillQuerySecondaryWhenNoPrimaryAvailable'] = {
 
               db.collection("replicaset_readpref_test").findOne({},
                 {readPreference: ReadPreference.SECONDARY_PREFERRED},
-                function(err, result){
+                function(err, result) {
                   callbacksWaiting--;
               });
             }, 1000);
