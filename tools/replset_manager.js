@@ -55,6 +55,8 @@ var ReplSetManager = function(replsetOptions) {
   var arbiterServers = [];
   var passiveServers = [];
   var primaryServer = [];;
+  // DbPath
+  var dbpath = replsetOptions.dbpath = replsetOptions.dbpath || path.resolve('data');
 
   // Get the keys
   var keys = Object.keys(replsetOptions);
@@ -320,6 +322,15 @@ var ReplSetManager = function(replsetOptions) {
     var kill = typeof options.kill == 'boolean' ? options.kill : true;
     var signal = typeof options.signal == 'number' ? options.signal : -15;
     var self = this;
+
+    // Remove db path and recreate it
+    if(purge) {
+      try {
+        rimraf.sync(dbpath);
+        mkdirp.sync(dbpath);
+      } catch(err) {
+      }
+    }
 
     // Do we not have any server managers
     if(serverManagers.length == 0) {

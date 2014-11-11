@@ -766,20 +766,6 @@ var pickServer = function(self, s, readPreference) {
   return s.replState.primary;
 }
 
-
-// state: {
-//   replState
-//   highAvailabilityProcessRunning
-//   logger
-//   id
-//   haId
-//   connectingServers
-//   disconnectHandler
-//   disconnectedServers
-//   haInterval
-//   readPreferenceStrategies
-// }
-
 var replicasetInquirer = function(self, state, norepeat) {
   return function() {
     if(state.replState.state == DESTROYED) return
@@ -943,16 +929,6 @@ var replicasetInquirer = function(self, state, norepeat) {
   }
 }
 
-// {
-//   logger
-//   initialConnectionServers
-//   id
-//   disconnectedServers
-//   secondaryOnlyConnectionAllowed
-//   seedlist
-//   emitError
-// }
-
 // Error handler for initial connect
 var errorHandlerTemp = function(self, state, event) {
   return function(err, server) {
@@ -997,17 +973,6 @@ var errorHandlerTemp = function(self, state, event) {
     }
   }
 }
-
-// {
-//   logger
-//   id
-//   replState
-//   initialConnectionServers
-//   connectingServers
-//   secondaryOnlyConnectionAllowed
-//   fullsetup
-//   credentials
-// }
 
 // Connect handler
 var connectHandler = function(self, state) {
@@ -1112,10 +1077,6 @@ var inInitialConnectingServers = function(self, state, address) {
   }
   return false;
 }
-
-// {
-//   options
-// }
 
 // Connect to a new server
 var connectToServer = function(self, state, host, port) {
