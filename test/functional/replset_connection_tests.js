@@ -114,6 +114,7 @@ exports['Should correctly connect with default replicaset and socket options set
 
     var db = new Db('integration_test_', replSet, {w:0});
     db.open(function(err, p_db) {
+      console.dir(err)
       test.equal(null, err);
       // Get a connection
       var connection = db.serverConfig.connections()[0];

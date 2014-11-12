@@ -85,6 +85,7 @@ exports['Should Correctly Pick lowest ping time'] = {
 
         // Attempt to perform a read
         db.collection('somecollection').findOne({}, {readPreference: new ReadPreference(ReadPreference.NEAREST)}, function(err, doc) {
+          console.dir(err)
           test.equal(null, err);          
 
           // Pick the server
