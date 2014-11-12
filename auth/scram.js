@@ -249,7 +249,7 @@ ScramSHA1.prototype.auth = function(server, pool, db, username, password, callba
         // Execute sasl continue
         server.command(f("%s.$cmd", db)
           , cmd, { connection: connection }, function(err, r) {
-            if(r.result.done == false) {
+            if(r && r.result.done == false) {
               var cmd = {
                   saslContinue: 1
                 , conversationId: r.result.conversationId

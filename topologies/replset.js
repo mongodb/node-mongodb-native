@@ -152,8 +152,14 @@ var ReplSet = function(seedlist, options) {
     , highAvailabilityProcessRunning: false
     // Full setup
     , fullsetup: false
+    // All servers accounted for (used for testing)
+    , all: false
     // Seedlist
     , seedlist: seedlist
+    // Authentication in progress
+    , authInProgress: false
+    // Servers added while auth in progress
+    , authInProgressServers: []
   }
 
   // Add bson parser to options
@@ -505,19 +511,23 @@ ReplSet.prototype.update = function(ns, ops, options, callback) {
  * @param {authResultCallback} callback A callback function
  */
 ReplSet.prototype.auth = function(mechanism, db) {
+  var allArgs = Array.prototype.slice.call(arguments, 0).slice(0);
   var self = this;
   var args = Array.prototype.slice.call(arguments, 2);
   var callback = args.pop();
+
   // If we don't have the mechanism fail
   if(this.s.authProviders[mechanism] == null && mechanism != 'default') 
     throw new MongoError(f("auth provider %s does not exist", mechanism));
 
   // Authenticate against all the servers
-  var servers = this.s.replState.getAll();
+  var servers = this.s.replState.getAll().slice(0);
   var count = servers.length;
   // Correct authentication
   var authenticated = true;
   var authErr = null;
+  // Set auth in progress
+  this.s.authInProgress = true;
 
   // Authenticate against all servers
   while(servers.length > 0) {
@@ -533,6 +543,14 @@ ReplSet.prototype.auth = function(mechanism, db) {
 
       // We are done
       if(count == 0) {
+        // We have more servers that are not authenticated, let's authenticate
+        if(self.s.authInProgressServers.length > 0) {
+          self.s.authInProgressServers = [];
+          return self.auth.apply(self, [mechanism, db].concat(args).concat([callback]));
+        }
+
+        // Auth is done
+        self.s.authInProgress = false;
         // Add successful credentials
         if(authErr == null) addCredentials(self.s, db, argsWithoutCallback);
         // Return the auth error
@@ -926,6 +944,16 @@ var replicasetInquirer = function(self, state, norepeat) {
       state.fullsetup = true;
       self.emit('fullsetup', self);
     }
+
+    // If all servers are accounted for and we have not sent the all event
+    if(state.replState.primary != null && self.lastIsMaster() 
+      && Array.isArray(self.lastIsMaster().hosts) && !state.all) {
+      var length = 1 + state.replState.secondaries.length;
+      if(length == self.lastIsMaster().hosts.length) {
+        state.all = true;
+        self.emit('all', self);   
+      }
+    }
   }
 }
 
@@ -1035,9 +1063,13 @@ var connectHandler = function(self, state) {
       }
     }
 
+    // Save up new members to be authenticated against
+    if(self.s.authInProgress) {
+      self.s.authInProgressServers.push(server);
+    }
+
     // No credentials just process server
     if(state.credentials.length == 0) return processNewServer();
-
     // Do we have credentials, let's apply them all
     var count = state.credentials.length;
     // Apply the credentials
