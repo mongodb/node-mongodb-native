@@ -5,7 +5,7 @@ exports['Simple authentication test for single server'] = {
   metadata: {
     requires: {
         topology: "single"
-      , mongodb: ">=2.6.0"
+      , mongodb: ">2.6.0 <=2.7.0"
     }
   },
 
@@ -50,7 +50,6 @@ exports['Simple authentication test for single server'] = {
         _server.auth('mongocr', configuration.db, 'test', 'test', function(err, session) {
           test.equal(null, err);
           test.ok(session != null);
-
           // Reconnect message
           _server.once('reconnect', function() {
             // Add a new user
@@ -84,7 +83,7 @@ exports['Simple authentication test for replicaset'] = {
   metadata: {
     requires: {
         topology: "replicaset"
-      , mongodb: ">=2.6.0"
+      , mongodb: ">2.6.0 <=2.7.0"
     }
   },
 
@@ -167,7 +166,7 @@ exports['Simple authentication test for mongos'] = {
   metadata: {
     requires: {
         topology: "mongos"
-      , mongodb: ">=2.6.0"
+      , mongodb: ">2.6.0 <=2.7.0"
     }
   },
 
