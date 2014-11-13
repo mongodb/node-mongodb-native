@@ -22,7 +22,8 @@
   "devDependencies": {
     "integra": "0.1.1",
     "optimist": "latest",
-    "jsdoc": "3.3.0-alpha8"
+    "jsdoc": "3.3.0-alpha8",
+    "semver": "4.1.0"
   },
   "optionalDependencies": {
     "kerberos": "0.0.6"
