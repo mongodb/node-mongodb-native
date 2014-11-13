@@ -189,6 +189,7 @@ Streaming a GridStore file to disk is fairly simple. The example below reads in 
 ```js
 var MongoClient = require('mongodb').MongoClient
   , GridStore = require('mongoddb').GridStore
+  , fs = require('fs')
   , assert = require('assert');
 
 // Connection URL
@@ -197,13 +198,14 @@ var url = 'mongodb://localhost:27017/myproject';
 MongoClient.connect(url, function(err, db) {
   assert.equal(null, err);
   // Set up gridStore
-  var gs = new GridStore(db, 'manual.pdf', 'w');
-  var filename = './test/functional/data/manual.pdf';
-  var outputFilename = './test/functional/data/manual_out.pdf';
+  var gs = new GridStore(db, 'simple_100_document_toArray.png', 'w');
+  var filename = './simple_100_document_toArray.png';
+  var outputFilename = './simple_100_document_toArray_out.png';
+
   // Write the a file to it (put your own here)
   gs.writeFile(filename, function(err, result) {   
     // Open a readable gridStore
-    gs = new GridStore(db, 'manual.pdf', 'r');    
+    gs = new GridStore(db, 'simple_100_document_toArray.png', 'r');
     
     // Create a file write stream
     var fileStream = fs.createWriteStream(outputFilename);
@@ -228,7 +230,8 @@ In the case of writing a file to GridFS using streams we do the reverse piping t
 ```js
 var MongoClient = require('mongodb').MongoClient
   , GridStore = require('mongoddb').GridStore
-  , ObjectID = require('mongoddb').ObjectID;
+  , ObjectID = require('mongoddb').ObjectID
+  , fs = require('fs')
   , assert = require('assert');
 
 // Connection URL
@@ -236,19 +239,23 @@ var url = 'mongodb://localhost:27017/myproject';
 // Use connect method to connect to the Server
 MongoClient.connect(url, function(err, db) {
   assert.equal(null, err);
+  
   // Set up gridStore
-  var stream = new GridStore(db, 'manual.pdf', 'w').stream();
+  var stream = new GridStore(db, 'simple_100_document_toArray.png', 'w').stream();
   // File we want to write to GridFS
-  var filename = './test/functional/data/manual.pdf';
+  var filename = './simple_100_document_toArray.png';  
   // Create a file reader stream to an object
   var fileStream = fs.createReadStream(filename);
+
   // Finish up once the file has been all read
   stream.on("end", function(err) {
+
     // Just read the content and compare to the raw binary
-    GridStore.read(client, "test_stream_write", function(err, gridData) {
+    GridStore.read(db, 'simple_100_document_toArray.png', function(err, gridData) {
+      assert.equal(null, err);
       var fileData = fs.readFileSync(filename);
       assert.equal(fileData.toString('hex'), gridData.toString('hex'));
-      client.close();
+      db.close();
     })
   });
 

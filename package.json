@@ -24,6 +24,7 @@
     , "optimist": "0.6.1"
     , "bson": "~0.2"
     , "jsdoc": "3.3.0-alpha9"
+    , "semver": "4.1.0"
   },
   "author": "Christian Kvalheim",
   "license": "Apache 2.0",
