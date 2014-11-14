@@ -1,3 +1,9 @@
+1.1.1 14-11-2014
+----------------
+- Refactored code to use prototype instead of privileged methods.
+- Fixed issue with auth where a runtime condition could leave replicaset members without proper authentication.
+- Several deopt optimizations for v8 to improve performance and reduce GC pauses.
+
 1.0.5 29-10-2014
 ----------------
 - Fixed issue with wrong namespace being created for command cursors.
