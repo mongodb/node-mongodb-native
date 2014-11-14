@@ -5,7 +5,7 @@ exports['Simple authentication test for single server'] = {
   metadata: {
     requires: {
         topology: "single"
-      , mongodb: ">=2.6.0"
+      , mongodb: ">2.6.0 <=2.7.0"
     }
   },
 
@@ -50,7 +50,6 @@ exports['Simple authentication test for single server'] = {
         _server.auth('mongocr', configuration.db, 'test', 'test', function(err, session) {
           test.equal(null, err);
           test.ok(session != null);
-
           // Reconnect message
           _server.once('reconnect', function() {
             // Add a new user
@@ -84,7 +83,7 @@ exports['Simple authentication test for replicaset'] = {
   metadata: {
     requires: {
         topology: "replicaset"
-      , mongodb: ">=2.6.0"
+      , mongodb: ">2.6.0 <=2.7.0"
     }
   },
 
@@ -107,7 +106,7 @@ exports['Simple authentication test for replicaset'] = {
     server.addAuthProvider('mongocr', new MongoCR());
 
     // Add event listeners
-    server.on('connect', function(_server) {
+    server.on('fullsetup', function(_server) {
       var password = 'test';
       var username = 'test';
       // Use node md5 generator
@@ -122,7 +121,7 @@ exports['Simple authentication test for replicaset'] = {
         , pwd: userPassword
         , roles: ['dbOwner']
         , digestPassword: false
-        , writeConcern: {w:1}
+        , writeConcern: {w:'majority'}
       }, function(err, r) {
         test.equal(null, err);
         test.equal(1, r.result.ok);
@@ -134,18 +133,19 @@ exports['Simple authentication test for replicaset'] = {
           test.equal(null, err);
           test.ok(session != null);
 
-          // Wait for reconnect to happen
-          setTimeout(function() {
-            session.command(f("%s.$cmd", configuration.db), {
-                dropUser: username
-              , writeConcern: {w:1}
-            }, function(err, r) {
-              test.equal(null, err);
-              test.equal(1, r.result.ok);
-              _server.destroy();
-              test.done();
-            });
-          }, 1000);
+          _server.on('joined', function(t, s) {
+            if(t == 'primary') {
+              session.command(f("%s.$cmd", configuration.db), {
+                  dropUser: username
+                , writeConcern: {w:1}
+              }, function(err, r) {
+                test.equal(null, err);
+                test.equal(1, r.result.ok);
+                _server.destroy();
+                test.done();
+              });
+            }
+          })
 
           // Write garbage, force socket closure
           try {
@@ -166,7 +166,7 @@ exports['Simple authentication test for mongos'] = {
   metadata: {
     requires: {
         topology: "mongos"
-      , mongodb: ">=2.6.0"
+      , mongodb: ">2.6.0 <=2.7.0"
     }
   },
 

@@ -6,10 +6,13 @@
 *.tmp
 *.log
 *.heapsnapshot
+*.txt
+*.png
 
 HISTORY
 Readme.md
 TODO
+data.txt
 
 out/
 gh-pages/

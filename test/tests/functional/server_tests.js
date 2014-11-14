@@ -35,18 +35,21 @@ exports['Should correctly reconnect to server with automatic reconnect enabled']
           result.connection.write(a);
         } catch(err) {}
 
-        // Attempt a proper command
-        _server.command("system.$cmd", {ismaster: true}, {readPreference: new ReadPreference('primary')}, function(err, result) {
-          test.ok(err != null);
-        });
+        // Ensure the server died
+        setTimeout(function() {
+          // Attempt a proper command
+          _server.command("system.$cmd", {ismaster: true}, {readPreference: new ReadPreference('primary')}, function(err, result) {
+            test.ok(err != null);
+          });          
+        }, 100);
       });
     });
 
-    server.on('close', function() {
+    server.once('close', function() {
       emittedClose = true;
     });
 
-    server.on('reconnect', function() {
+    server.once('reconnect', function() {
       test.equal(true, emittedClose);
       test.equal(true, server.isConnected());
       server.destroy();
@@ -86,14 +89,16 @@ exports['Should correctly reconnect to server with automatic reconnect disabled'
         test.equal(null, err)
         // Write garbage, force socket closure
         try {
-          var a = new Buffer(100);
+          var a = new Buffer(1000);
           for(var i = 0; i < 100; i++) a[i] = i;
           result.connection.write(a);
         } catch(err) {}
 
-        // Attempt a proper command
-        _server.command("system.$cmd", {ismaster: true}, {readPreference: new ReadPreference('primary')}, function(err, result) {
-          test.ok(err != null);
+        process.nextTick(function() {
+          // Attempt a proper command
+          _server.command("system.$cmd", {ismaster: true}, {readPreference: new ReadPreference('primary')}, function(err, result) {
+            test.ok(err != null);
+          });
         });
       });
     });

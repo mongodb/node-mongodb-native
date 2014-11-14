@@ -234,7 +234,7 @@ if(argv.t == 'functional') {
       , port: 31000
       , setName: 'rs'
       // , skipStart: true
-      , skipTermination: true
+      // , skipTermination: true
       , topology: function(self, _mongo) {
         return new _mongo.ReplSet([{
             host: 'localhost'
