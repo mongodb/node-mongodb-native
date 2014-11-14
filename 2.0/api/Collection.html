@@ -295,7 +295,7 @@ Collection instance.
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1353">line 1353</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1383">line 1383</a>
         </div>
         
     </div>
@@ -856,6 +856,424 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             
 <dt>
     <div class="nameContainer">
+        <h4 class="name" id="bulkWrite">
+            
+            bulkWrite<span class="signature">(operations, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line416">line 416</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Perform a bulkWrite operation without a fluent API</p>
+<p>Legal operation types are</p>
+<p> { insertOne: { document: { a: 1 } } }
+ { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+ { updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+ { deleteOne: { filter: {c:1} } }
+ { deleteMany: { filter: {c:1} } }
+ { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}]</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		<th>Default</th>
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>operations</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;object></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        
+                    
+                
+                <p>Bulk operations to perform.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Optional settings.</p>
+                
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		<th>Default</th>
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>w</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>The write concern.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>wtimeout</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>The write concern timeout.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>j</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify a journal write concern.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>serializeFunctions</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Serialize functions on any object.</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+            </td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Collection.html#bulkWriteOpCallback">Collection~bulkWriteOpCallback</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        
+                    
+                
+                <p>The command result callback</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+
+
+    
+    
+    
+        <h5>Example</h5>
+        
+
+    
+    <pre class="prettyprint"><code>// Example of a simple bulkWrite operation
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  // Get the collection
+  var col = db.collection('bulk_write');
+  col.bulkWrite([
+      { insertOne: { document: { a: 1 } } }
+    , { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+    , { updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+    , { deleteOne: { filter: {c:1} } }
+    , { deleteMany: { filter: {c:1} } }
+    , { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}]
+  , {ordered:true, w:1}, function(err, r) {
+    test.equal(null, err);
+    test.equal(1, r.nInserted);
+    test.equal(2, r.nUpserted);
+    test.equal(0, r.nRemoved);
+
+    // Crud fields
+    test.equal(1, r.insertedCount);
+    test.equal(1, Object.keys(r.insertedIds).length);
+    test.equal(1, r.matchedCount);
+    test.equal(0, r.modifiedCount);
+    test.equal(0, r.deletedCount);
+    test.equal(2, r.upsertedCount);
+    test.equal(2, Object.keys(r.upsertedIds).length);
+
+    // Ordered bulk operation
+    db.close();
+  });
+});</code></pre>
+    
+
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
         <h4 class="name" id="count">
             
             count<span class="signature">(query, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
@@ -863,7 +1281,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1032">line 1032</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1089">line 1089</a>
         </div>
         
     </div>
@@ -1267,7 +1685,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line873">line 873</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line930">line 930</a>
         </div>
         
     </div>
@@ -2030,6 +2448,676 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             
 <dt>
     <div class="nameContainer">
+        <h4 class="name" id="deleteMany">
+            
+            deleteMany<span class="signature">(filter, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line693">line 693</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Delete multiple documents on MongoDB</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		<th>Default</th>
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>filter</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        
+                    
+                
+                <p>The Filter used to select the documents to remove</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Optional settings.</p>
+                
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		<th>Default</th>
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>w</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>The write concern.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>wtimeout</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>The write concern timeout.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>j</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify a journal write concern.</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+            </td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Collection.html#writeOpCallback">Collection~writeOpCallback</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        
+                    
+                
+                <p>The command result callback</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="deleteOne">
+            
+            deleteOne<span class="signature">(filter, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line669">line 669</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Delete a document on MongoDB</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		<th>Default</th>
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>filter</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        
+                    
+                
+                <p>The Filter used to select the document to remove</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Optional settings.</p>
+                
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		<th>Default</th>
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>w</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>The write concern.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>wtimeout</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>The write concern timeout.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>j</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify a journal write concern.</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+            </td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Collection.html#writeOpCallback">Collection~writeOpCallback</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        
+                    
+                
+                <p>The command result callback</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
         <h4 class="name" id="distinct">
             
             distinct<span class="signature">(key, query, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
@@ -2037,7 +3125,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1073">line 1073</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1130">line 1130</a>
         </div>
         
     </div>
@@ -2389,7 +3477,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line820">line 820</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line875">line 875</a>
         </div>
         
     </div>
@@ -2550,7 +3638,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line916">line 916</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line973">line 973</a>
         </div>
         
     </div>
@@ -2695,7 +3783,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line894">line 894</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line951">line 951</a>
         </div>
         
     </div>
@@ -3067,7 +4155,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line965">line 965</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1022">line 1022</a>
         </div>
         
     </div>
@@ -3803,7 +4891,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line158">line 158</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line145">line 145</a>
         </div>
         
     </div>
@@ -4020,7 +5108,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1242">line 1242</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1299">line 1299</a>
         </div>
         
     </div>
@@ -4616,7 +5704,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1302">line 1302</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1359">line 1359</a>
         </div>
         
     </div>
@@ -5019,7 +6107,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line760">line 760</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line814">line 814</a>
         </div>
         
     </div>
@@ -5999,7 +7087,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1149">line 1149</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1206">line 1206</a>
         </div>
         
     </div>
@@ -6360,7 +7448,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1178">line 1178</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1235">line 1235</a>
         </div>
         
     </div>
@@ -6832,7 +7920,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1209">line 1209</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1266">line 1266</a>
         </div>
         
     </div>
@@ -7304,7 +8392,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1558">line 1558</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1597">line 1597</a>
         </div>
         
     </div>
@@ -7941,7 +9029,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1514">line 1514</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1545">line 1545</a>
         </div>
         
     </div>
@@ -8555,7 +9643,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1633">line 1633</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1672">line 1672</a>
         </div>
         
     </div>
@@ -9105,7 +10193,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1103">line 1103</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1160">line 1160</a>
         </div>
         
     </div>
@@ -9259,7 +10347,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line978">line 978</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1035">line 1035</a>
         </div>
         
     </div>
@@ -9441,7 +10529,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1004">line 1004</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1061">line 1061</a>
         </div>
         
     </div>
@@ -9676,7 +10764,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // Create an index on the a field
     collection.ensureIndex({a:1, b:1}
       , {unique:true, background:true, w:1}, function(err, indexName) {
-
+      test.equal(null, err);
       // Fetch basic indexInformation for collection
       db.indexInformation('more_index_information_test_2', function(err, indexInformation) {
         test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
@@ -9747,7 +10835,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1885">line 1885</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1925">line 1925</a>
         </div>
         
     </div>
@@ -10050,7 +11138,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1870">line 1870</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1910">line 1910</a>
         </div>
         
     </div>
@@ -10353,7 +11441,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line438">line 438</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line488">line 488</a>
         </div>
         
     </div>
@@ -10876,7 +11964,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line372">line 372</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line359">line 359</a>
         </div>
         
     </div>
@@ -11304,7 +12392,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line348">line 348</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line335">line 335</a>
         </div>
         
     </div>
@@ -11732,7 +12820,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line846">line 846</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line903">line 903</a>
         </div>
         
     </div>
@@ -11878,7 +12966,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1770">line 1770</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1809">line 1809</a>
         </div>
         
     </div>
@@ -12521,7 +13609,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line831">line 831</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line886">line 886</a>
         </div>
         
     </div>
@@ -12668,7 +13756,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1453">line 1453</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1483">line 1483</a>
         </div>
         
     </div>
@@ -13055,7 +14143,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line930">line 930</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line987">line 987</a>
         </div>
         
     </div>
@@ -13217,7 +14305,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line665">line 665</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line719">line 719</a>
         </div>
         
     </div>
@@ -13638,730 +14726,6 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="removeMany">
-            
-            removeMany<span class="signature">(filter, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line641">line 641</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Remove multiple documents on MongoDB</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		<th>Default</th>
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>filter</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                    
-                        
-                    
-                
-                <p>The Filter used to select the documents to remove</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                    null
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Optional settings.</p>
-                
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		<th>Default</th>
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>w</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-|
-
-<span class="param-type">string</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                    null
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>The write concern.</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>wtimeout</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                    null
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>The write concern timeout.</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>j</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                    false
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Specify a journal write concern.</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-            </td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>callback</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Collection.html#writeOpCallback">Collection~writeOpCallback</a></span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                    
-                        
-                    
-                
-                <p>The command result callback</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
-        <h5>Example</h5>
-        
-
-    
-    <pre class="prettyprint"><code>// Example of a simple removeMany operation
-
-var MongoClient = require('mongodb').MongoClient,
-  test = require('assert');
-MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-  // Get the collection
-  var col = db.collection('remove_many');
-  col.insertMany([{a:1}, {a:1}], function(err, r) {
-    test.equal(null, err);
-    test.equal(2, r.insertedCount);
-
-    // Update all documents
-    col.removeMany({a:1}, function(err, r) {
-      test.equal(null, err);
-      test.equal(2, r.deletedCount);
-
-      // Finish up test
-      db.close();
-    });
-  });
-});</code></pre>
-    
-
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="removeOne">
-            
-            removeOne<span class="signature">(filter, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line619">line 619</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Remove a document on MongoDB</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		<th>Default</th>
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>filter</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                    
-                        
-                    
-                
-                <p>The Filter used to select the document to remove</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                    null
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Optional settings.</p>
-                
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		<th>Default</th>
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>w</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-|
-
-<span class="param-type">string</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                    null
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>The write concern.</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>wtimeout</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                    null
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>The write concern timeout.</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>j</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                    false
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Specify a journal write concern.</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-            </td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>callback</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Collection.html#writeOpCallback">Collection~writeOpCallback</a></span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                    
-                        
-                    
-                
-                <p>The command result callback</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
-        <h5>Example</h5>
-        
-
-    
-    <pre class="prettyprint"><code>// Example of a simple removeOne operation
-
-var MongoClient = require('mongodb').MongoClient,
-  test = require('assert');
-MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-  // Get the collection
-  var col = db.collection('remove_one');
-  col.insertMany([{a:1}, {a:1}], function(err, r) {
-    test.equal(null, err);
-    test.equal(2, r.insertedCount);
-
-    col.removeOne({a:1}, function(err, r) {
-      test.equal(null, err);
-      test.equal(1, r.deletedCount);
-      // Finish up test
-      db.close();
-    });
-  });
-});</code></pre>
-    
-
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
         <h4 class="name" id="rename">
             
             rename<span class="signature">(newName, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
@@ -14369,7 +14733,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line790">line 790</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line844">line 844</a>
         </div>
         
     </div>
@@ -14716,7 +15080,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line513">line 513</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line563">line 563</a>
         </div>
         
     </div>
@@ -15119,7 +15483,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line703">line 703</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line757">line 757</a>
         </div>
         
     </div>
@@ -15523,7 +15887,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1116">line 1116</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1173">line 1173</a>
         </div>
         
     </div>
@@ -15778,7 +16142,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line574">line 574</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line624">line 624</a>
         </div>
         
     </div>
@@ -16331,7 +16695,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line542">line 542</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line592">line 592</a>
         </div>
         
     </div>
@@ -16763,7 +17127,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line484">line 484</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line534">line 534</a>
         </div>
         
     </div>
@@ -17189,6 +17553,398 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
                 
 <dt>
     <div class="nameContainer">
+        <h4 class="name" id="bulkWriteOpCallback">
+            
+            bulkWriteOpCallback<span class="signature">(error, result)</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line386">line 386</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>The callback format for inserts</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>error</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">MongoError</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>An error instance representing the error during the execution.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>result</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Collection.html#BulkWriteOpResult">Collection~BulkWriteOpResult</a></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>The result object if the command was executed successfully.</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+            
+                
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="BulkWriteOpResult">BulkWriteOpResult<span class="type-signature type object">Object</span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    
+    
+<dl class="details">
+    
+        
+        <h5 class="subsection-title">Properties:</h5>
+        
+        <dl>
+
+<table class="props">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>insertedCount</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"><p>Number of documents inserted.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>matchedCount</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"><p>Number of documents matched for update.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>modifiedCount</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"><p>Number of documents modified.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>deletedCount</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"><p>Number of documents deleted.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>upsertedCount</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"><p>Number of documents upserted.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>insertedIds</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"><p>Inserted document generated Id's, hash key is the index of the originating operation</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>upsertedIds</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"><p>Upserted document generated Id's, hash key is the index of the originating operation</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>result</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"><p>The command result object.</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table></dl>
+        
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+            
+                
+<dt>
+    <div class="nameContainer">
         <h4 class="name" id="collectionResultCallback">
             
             collectionResultCallback<span class="signature">(error, collection)</span>
@@ -17196,7 +17952,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line773">line 773</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line827">line 827</a>
         </div>
         
     </div>
@@ -17335,7 +18091,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1013">line 1013</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1070">line 1070</a>
         </div>
         
     </div>
@@ -17474,7 +18230,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1434">line 1434</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line1464">line 1464</a>
         </div>
         
     </div>
@@ -17613,7 +18369,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line724">line 724</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line778">line 778</a>
         </div>
         
     </div>
@@ -17752,7 +18508,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line417">line 417</a>
+            <a href="collection.js.html">lib/collection.js</a>, <a href="collection.js.html#line467">line 467</a>
         </div>
         
     </div>
@@ -18050,7 +18806,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Wed Oct 29 2014 17:28:46 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Fri Nov 14 2014 15:29:49 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>
@@ -18278,6 +19034,8 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             
             <span class="subtitle">Methods</span>
             
+                <li data-name="BulkWriteResult#getInsertedIds"><a href="BulkWriteResult.html#getInsertedIds">getInsertedIds</a></li>
+            
                 <li data-name="BulkWriteResult#getLastOp"><a href="BulkWriteResult.html#getLastOp">getLastOp</a></li>
             
                 <li data-name="BulkWriteResult#getRawResponse"><a href="BulkWriteResult.html#getRawResponse">getRawResponse</a></li>
@@ -18333,6 +19091,10 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             
             <span class="subtitle">Typedefs</span>
             
+                <li data-name="Collection~bulkWriteOpCallback"><a href="Collection.html#bulkWriteOpCallback">bulkWriteOpCallback</a></li>
+            
+                <li data-name="Collection~BulkWriteOpResult"><a href="Collection.html#BulkWriteOpResult">BulkWriteOpResult</a></li>
+            
                 <li data-name="Collection~collectionResultCallback"><a href="Collection.html#collectionResultCallback">collectionResultCallback</a></li>
             
                 <li data-name="Collection~countCallback"><a href="Collection.html#countCallback">countCallback</a></li>
@@ -18352,9 +19114,15 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             
                 <li data-name="Collection#aggregate"><a href="Collection.html#aggregate">aggregate</a></li>
             
+                <li data-name="Collection#bulkWrite"><a href="Collection.html#bulkWrite">bulkWrite</a></li>
+            
                 <li data-name="Collection#count"><a href="Collection.html#count">count</a></li>
             
                 <li data-name="Collection#createIndex"><a href="Collection.html#createIndex">createIndex</a></li>
+            
+                <li data-name="Collection#deleteMany"><a href="Collection.html#deleteMany">deleteMany</a></li>
+            
+                <li data-name="Collection#deleteOne"><a href="Collection.html#deleteOne">deleteOne</a></li>
             
                 <li data-name="Collection#distinct"><a href="Collection.html#distinct">distinct</a></li>
             
@@ -18413,10 +19181,6 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
                 <li data-name="Collection#reIndex"><a href="Collection.html#reIndex">reIndex</a></li>
             
                 <li data-name="Collection#remove"><a href="Collection.html#remove">remove</a></li>
-            
-                <li data-name="Collection#removeMany"><a href="Collection.html#removeMany">removeMany</a></li>
-            
-                <li data-name="Collection#removeOne"><a href="Collection.html#removeOne">removeOne</a></li>
             
                 <li data-name="Collection#rename"><a href="Collection.html#rename">rename</a></li>
             
@@ -19134,18 +19898,6 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             
                 <li data-name="OrderedBulkOperation#insert"><a href="OrderedBulkOperation.html#insert">insert</a></li>
             
-                <li data-name="OrderedBulkOperation#remove"><a href="OrderedBulkOperation.html#remove">remove</a></li>
-            
-                <li data-name="OrderedBulkOperation#removeOne"><a href="OrderedBulkOperation.html#removeOne">removeOne</a></li>
-            
-                <li data-name="OrderedBulkOperation#replaceOne"><a href="OrderedBulkOperation.html#replaceOne">replaceOne</a></li>
-            
-                <li data-name="OrderedBulkOperation#update"><a href="OrderedBulkOperation.html#update">update</a></li>
-            
-                <li data-name="OrderedBulkOperation#updateOne"><a href="OrderedBulkOperation.html#updateOne">updateOne</a></li>
-            
-                <li data-name="OrderedBulkOperation#upsert"><a href="OrderedBulkOperation.html#upsert">upsert</a></li>
-            
             </ul>
             <ul class="events itemMembers">
             
@@ -19409,18 +20161,6 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
                 <li data-name="UnorderedBulkOperation#find"><a href="UnorderedBulkOperation.html#find">find</a></li>
             
                 <li data-name="UnorderedBulkOperation#insert"><a href="UnorderedBulkOperation.html#insert">insert</a></li>
-            
-                <li data-name="UnorderedBulkOperation#remove"><a href="UnorderedBulkOperation.html#remove">remove</a></li>
-            
-                <li data-name="UnorderedBulkOperation#removeOne"><a href="UnorderedBulkOperation.html#removeOne">removeOne</a></li>
-            
-                <li data-name="UnorderedBulkOperation#replaceOne"><a href="UnorderedBulkOperation.html#replaceOne">replaceOne</a></li>
-            
-                <li data-name="UnorderedBulkOperation#update"><a href="UnorderedBulkOperation.html#update">update</a></li>
-            
-                <li data-name="UnorderedBulkOperation#updateOne"><a href="UnorderedBulkOperation.html#updateOne">updateOne</a></li>
-            
-                <li data-name="UnorderedBulkOperation#upsert"><a href="UnorderedBulkOperation.html#upsert">upsert</a></li>
             
             </ul>
             <ul class="events itemMembers">

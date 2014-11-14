@@ -153,7 +153,7 @@ var Mongos = function(servers, options) {
   var finalOptions = shallowClone(options);
 
   // Default values
-  finalOptions.size = options.poolSize || 5;  
+  finalOptions.size = typeof options.poolSize == 'number' ? options.poolSize : 5;  
   finalOptions.reconnect = typeof options.auto_reconnect == 'boolean' ? options.auto_reconnect : true;
   finalOptions.emitError = typeof options.emitError == 'boolean' ? options.emitError : true;
   finalOptions.cursorFactory = Cursor;
@@ -212,194 +212,217 @@ var Mongos = function(servers, options) {
   // Add auth prbufferMaxEntriesoviders
   mongos.addAuthProvider('mongocr', new MongoCR());
 
+  // Internal state
+  this.s = {
+    // Create the Mongos
+      mongos: mongos
+    // Server capabilities
+    , sCapabilities: sCapabilities
+    // Debug turned on
+    , debug: debug
+    // Store option defaults
+    , storeOptions: storeOptions
+    // Actual store of callbacks
+    , store: store
+    // Options
+    , options: options
+  }
+
+
   // Last ismaster
   Object.defineProperty(this, 'isMasterDoc', {
-    enumerable:true, get: function() { return mongos.lastIsMaster(); }
+    enumerable:true, get: function() { return self.s.mongos.lastIsMaster(); }
   });
 
   // Last ismaster
   Object.defineProperty(this, 'numberOfConnectedServers', {
-    enumerable:true, get: function() { return mongos.connectedServers().length; }
+    enumerable:true, get: function() { return self.s.mongos.connectedServers().length; }
   });
 
   // BSON property
   Object.defineProperty(this, 'bson', { 
     enumerable: true, get: function() { 
-      return mongos.bson; 
+      return self.s.mongos.bson; 
     }
   });
 
   Object.defineProperty(this, 'haInterval', {
-    enumerable:true, get: function() { return mongos.haInterval; }
-  });  
+    enumerable:true, get: function() { return self.s.mongos.haInterval; }
+  });
+}
 
-  this.parserType = function() {
-    return mongos.parserType();
-  }
+/**
+ * @ignore
+ */
+inherits(Mongos, EventEmitter);
 
-  // Connect
-  this.connect = function(db, _options, callback) {
-    if('function' === typeof _options) callback = _options, _options = {};
-    if(_options == null) _options = {};
-    if(!('function' === typeof callback)) callback = null;
-    options = _options;
+// Connect
+Mongos.prototype.connect = function(db, _options, callback) {
+  var self = this;
+  if('function' === typeof _options) callback = _options, _options = {};
+  if(_options == null) _options = {};
+  if(!('function' === typeof callback)) callback = null;
+  self.s.options = _options;
 
-    // Update bufferMaxEntries
-    storeOptions.bufferMaxEntries = db.bufferMaxEntries;
+  // Update bufferMaxEntries
+  self.s.storeOptions.bufferMaxEntries = db.bufferMaxEntries;
 
-    // Error handler
-    var connectErrorHandler = function(event) {
-      return function(err) {
-        // Remove all event handlers
-        var events = ['timeout', 'error', 'close'];
-        events.forEach(function(e) {
-          self.removeListener(e, connectErrorHandler);
-        });
-
-        mongos.removeListener('connect', connectErrorHandler);
-
-        // Try to callback
-        try {
-          callback(err);
-        } catch(err) { 
-          process.nextTick(function() { throw err; })
-        }
-      }
-    }
-
-    // Actual handler
-    var errorHandler = function(event) {
-      return function(err) {
-        if(event != 'error') {
-          self.emit(event, err);
-        }
-      }
-    }
-
-    // Error handler
-    var reconnectHandler = function(err) {
-      self.emit('reconnect');
-      store.execute();
-    }
-
-    // Connect handler
-    var connectHandler = function() {
-      // Clear out all the current handlers left over
-      ["timeout", "error", "close"].forEach(function(e) {
-        mongos.removeAllListeners(e);
+  // Error handler
+  var connectErrorHandler = function(event) {
+    return function(err) {
+      // Remove all event handlers
+      var events = ['timeout', 'error', 'close'];
+      events.forEach(function(e) {
+        self.removeListener(e, connectErrorHandler);
       });
 
-      // Set up listeners
-      mongos.once('timeout',  errorHandler('timeout'));
-      mongos.once('error',  errorHandler('error'));
-      mongos.once('close', errorHandler('close'));
+      self.s.mongos.removeListener('connect', connectErrorHandler);
 
-      // relay the event
-      var relay = function(event) {
-        return function(t, server) {
-          self.emit(event, t, server);
-        }
-      }
-
-      // Set up serverConfig listeners
-      mongos.on('joined', relay('joined'));
-      mongos.on('left', relay('left'));
-      mongos.on('fullsetup', relay('fullsetup'));
-
-      // Emit open event
-      self.emit('open', null, self);      
-
-      // Return correctly
+      // Try to callback
       try {
-        callback(null, self);
+        callback(err);
       } catch(err) { 
         process.nextTick(function() { throw err; })
-      }      
+      }
     }
+  }
+
+  // Actual handler
+  var errorHandler = function(event) {
+    return function(err) {
+      if(event != 'error') {
+        self.emit(event, err);
+      }
+    }
+  }
+
+  // Error handler
+  var reconnectHandler = function(err) {
+    self.emit('reconnect');
+    self.s.store.execute();
+  }
+
+  // Connect handler
+  var connectHandler = function() {
+    // Clear out all the current handlers left over
+    ["timeout", "error", "close"].forEach(function(e) {
+      self.s.mongos.removeAllListeners(e);
+    });
 
     // Set up listeners
-    mongos.once('timeout',  connectErrorHandler('timeout'));
-    mongos.once('error',  connectErrorHandler('error'));
-    mongos.once('close', connectErrorHandler('close'));
-    mongos.once('connect', connectHandler);
-    // Reconnect server
-    mongos.on('reconnect', reconnectHandler);
+    self.s.mongos.once('timeout', errorHandler('timeout'));
+    self.s.mongos.once('error', errorHandler('error'));
+    self.s.mongos.once('close', errorHandler('close'));
 
-    // Start connection
-    mongos.connect(_options);
-  }
-
-  // Server capabilities
-  this.capabilities = function() {
-    if(sCapabilities) return sCapabilities;
-    sCapabilities = new ServerCapabilities(mongos.lastIsMaster());
-    return sCapabilities;
-  }
-
-  // Command
-  this.command = function(ns, cmd, options, callback) {
-    mongos.command(ns, cmd, options, callback);
-  }
-
-  // Insert
-  this.insert = function(ns, ops, options, callback) {
-    mongos.insert(ns, ops, options, function(e, m) {
-      callback(e, m)
-    });
-  }
-
-  // Update
-  this.update = function(ns, ops, options, callback) {
-    mongos.update(ns, ops, options, callback);
-  }
-
-  // Remove
-  this.remove = function(ns, ops, options, callback) {
-    mongos.remove(ns, ops, options, callback);
-  }
-
-  // IsConnected
-  this.isConnected = function() {
-    return mongos.isConnected();
-  }
-
-  // Insert
-  this.cursor = function(ns, cmd, options) {
-    options.disconnectHandler = store;
-    return mongos.cursor(ns, cmd, options);
-  }
-
-  this.setBSONParserType = function(type) {
-    return mongos.setBSONParserType(type);
-  }  
-
-  this.lastIsMaster = function() {
-    return mongos.lastIsMaster();
-  }
-
-  this.close = function(forceClosed) {
-    mongos.destroy();
-    // We need to wash out all stored processes
-    if(forceClosed == true) {
-      storeOptions.force = forceClosed;
-      store.flush();
+    // relay the event
+    var relay = function(event) {
+      return function(t, server) {
+        self.emit(event, t, server);
+      }
     }
+
+    // Set up serverConfig listeners
+    self.s.mongos.on('joined', relay('joined'));
+    self.s.mongos.on('left', relay('left'));
+    self.s.mongos.on('fullsetup', relay('fullsetup'));
+
+    // Emit open event
+    self.emit('open', null, self);      
+
+    // Return correctly
+    try {
+      callback(null, self);
+    } catch(err) { 
+      process.nextTick(function() { throw err; })
+    }      
   }
 
-  this.auth = function() {
-    var args = Array.prototype.slice.call(arguments, 0);
-    mongos.auth.apply(mongos, args);
-  }
+  // Set up listeners
+  self.s.mongos.once('timeout', connectErrorHandler('timeout'));
+  self.s.mongos.once('error', connectErrorHandler('error'));
+  self.s.mongos.once('close', connectErrorHandler('close'));
+  self.s.mongos.once('connect', connectHandler);
+  // Reconnect server
+  self.s.mongos.on('reconnect', reconnectHandler);
 
-  /**
-   * All raw connections
-   * @method
-   * @return {array}
-   */
-  this.connections = function() {
-    return mongos.connections();
-  }      
+  // Start connection
+  self.s.mongos.connect(_options);
 }
+
+Mongos.prototype.parserType = function() {
+  return this.s.mongos.parserType();
+}
+
+// Server capabilities
+Mongos.prototype.capabilities = function() {
+  if(this.s.sCapabilities) return this.s.sCapabilities;
+  this.s.sCapabilities = new ServerCapabilities(this.s.mongos.lastIsMaster());
+  return this.s.sCapabilities;
+}
+
+// Command
+Mongos.prototype.command = function(ns, cmd, options, callback) {
+  this.s.mongos.command(ns, cmd, options, callback);
+}
+
+// Insert
+Mongos.prototype.insert = function(ns, ops, options, callback) {
+  this.s.mongos.insert(ns, ops, options, function(e, m) {
+    callback(e, m)
+  });
+}
+
+// Update
+Mongos.prototype.update = function(ns, ops, options, callback) {
+  this.s.mongos.update(ns, ops, options, callback);
+}
+
+// Remove
+Mongos.prototype.remove = function(ns, ops, options, callback) {
+  this.s.mongos.remove(ns, ops, options, callback);
+}
+
+// IsConnected
+Mongos.prototype.isConnected = function() {
+  return this.s.mongos.isConnected();
+}
+
+// Insert
+Mongos.prototype.cursor = function(ns, cmd, options) {
+  options.disconnectHandler = this.s.store;
+  return this.s.mongos.cursor(ns, cmd, options);
+}
+
+Mongos.prototype.setBSONParserType = function(type) {
+  return this.s.mongos.setBSONParserType(type);
+}  
+
+Mongos.prototype.lastIsMaster = function() {
+  return this.s.mongos.lastIsMaster();
+}
+
+Mongos.prototype.close = function(forceClosed) {
+  this.s.mongos.destroy();
+  // We need to wash out all stored processes
+  if(forceClosed == true) {
+    this.s.storeOptions.force = forceClosed;
+    this.s.store.flush();
+  }
+}
+
+Mongos.prototype.auth = function() {
+  var args = Array.prototype.slice.call(arguments, 0);
+  this.s.mongos.auth.apply(this.s.mongos, args);
+}
+
+/**
+ * All raw connections
+ * @method
+ * @return {array}
+ */
+Mongos.prototype.connections = function() {
+  return this.s.mongos.connections();
+}      
 
 /**
  * A mongos connect event, used to verify that the connection is up and running
@@ -479,11 +502,6 @@ var Mongos = function(servers, options) {
  * @type {object}
  */
 
-/**
- * @ignore
- */
-inherits(Mongos, EventEmitter);
-
 module.exports = Mongos;</code></pre>
         </article>
     </section>
@@ -513,7 +531,7 @@ module.exports = Mongos;</code></pre>
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Wed Oct 29 2014 17:28:45 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Fri Nov 14 2014 15:29:48 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>
@@ -741,6 +759,8 @@ module.exports = Mongos;</code></pre>
             
             <span class="subtitle">Methods</span>
             
+                <li data-name="BulkWriteResult#getInsertedIds"><a href="BulkWriteResult.html#getInsertedIds">getInsertedIds</a></li>
+            
                 <li data-name="BulkWriteResult#getLastOp"><a href="BulkWriteResult.html#getLastOp">getLastOp</a></li>
             
                 <li data-name="BulkWriteResult#getRawResponse"><a href="BulkWriteResult.html#getRawResponse">getRawResponse</a></li>
@@ -796,6 +816,10 @@ module.exports = Mongos;</code></pre>
             
             <span class="subtitle">Typedefs</span>
             
+                <li data-name="Collection~bulkWriteOpCallback"><a href="Collection.html#bulkWriteOpCallback">bulkWriteOpCallback</a></li>
+            
+                <li data-name="Collection~BulkWriteOpResult"><a href="Collection.html#BulkWriteOpResult">BulkWriteOpResult</a></li>
+            
                 <li data-name="Collection~collectionResultCallback"><a href="Collection.html#collectionResultCallback">collectionResultCallback</a></li>
             
                 <li data-name="Collection~countCallback"><a href="Collection.html#countCallback">countCallback</a></li>
@@ -815,9 +839,15 @@ module.exports = Mongos;</code></pre>
             
                 <li data-name="Collection#aggregate"><a href="Collection.html#aggregate">aggregate</a></li>
             
+                <li data-name="Collection#bulkWrite"><a href="Collection.html#bulkWrite">bulkWrite</a></li>
+            
                 <li data-name="Collection#count"><a href="Collection.html#count">count</a></li>
             
                 <li data-name="Collection#createIndex"><a href="Collection.html#createIndex">createIndex</a></li>
+            
+                <li data-name="Collection#deleteMany"><a href="Collection.html#deleteMany">deleteMany</a></li>
+            
+                <li data-name="Collection#deleteOne"><a href="Collection.html#deleteOne">deleteOne</a></li>
             
                 <li data-name="Collection#distinct"><a href="Collection.html#distinct">distinct</a></li>
             
@@ -876,10 +906,6 @@ module.exports = Mongos;</code></pre>
                 <li data-name="Collection#reIndex"><a href="Collection.html#reIndex">reIndex</a></li>
             
                 <li data-name="Collection#remove"><a href="Collection.html#remove">remove</a></li>
-            
-                <li data-name="Collection#removeMany"><a href="Collection.html#removeMany">removeMany</a></li>
-            
-                <li data-name="Collection#removeOne"><a href="Collection.html#removeOne">removeOne</a></li>
             
                 <li data-name="Collection#rename"><a href="Collection.html#rename">rename</a></li>
             
@@ -1597,18 +1623,6 @@ module.exports = Mongos;</code></pre>
             
                 <li data-name="OrderedBulkOperation#insert"><a href="OrderedBulkOperation.html#insert">insert</a></li>
             
-                <li data-name="OrderedBulkOperation#remove"><a href="OrderedBulkOperation.html#remove">remove</a></li>
-            
-                <li data-name="OrderedBulkOperation#removeOne"><a href="OrderedBulkOperation.html#removeOne">removeOne</a></li>
-            
-                <li data-name="OrderedBulkOperation#replaceOne"><a href="OrderedBulkOperation.html#replaceOne">replaceOne</a></li>
-            
-                <li data-name="OrderedBulkOperation#update"><a href="OrderedBulkOperation.html#update">update</a></li>
-            
-                <li data-name="OrderedBulkOperation#updateOne"><a href="OrderedBulkOperation.html#updateOne">updateOne</a></li>
-            
-                <li data-name="OrderedBulkOperation#upsert"><a href="OrderedBulkOperation.html#upsert">upsert</a></li>
-            
             </ul>
             <ul class="events itemMembers">
             
@@ -1872,18 +1886,6 @@ module.exports = Mongos;</code></pre>
                 <li data-name="UnorderedBulkOperation#find"><a href="UnorderedBulkOperation.html#find">find</a></li>
             
                 <li data-name="UnorderedBulkOperation#insert"><a href="UnorderedBulkOperation.html#insert">insert</a></li>
-            
-                <li data-name="UnorderedBulkOperation#remove"><a href="UnorderedBulkOperation.html#remove">remove</a></li>
-            
-                <li data-name="UnorderedBulkOperation#removeOne"><a href="UnorderedBulkOperation.html#removeOne">removeOne</a></li>
-            
-                <li data-name="UnorderedBulkOperation#replaceOne"><a href="UnorderedBulkOperation.html#replaceOne">replaceOne</a></li>
-            
-                <li data-name="UnorderedBulkOperation#update"><a href="UnorderedBulkOperation.html#update">update</a></li>
-            
-                <li data-name="UnorderedBulkOperation#updateOne"><a href="UnorderedBulkOperation.html#updateOne">updateOne</a></li>
-            
-                <li data-name="UnorderedBulkOperation#upsert"><a href="UnorderedBulkOperation.html#upsert">upsert</a></li>
             
             </ul>
             <ul class="events itemMembers">

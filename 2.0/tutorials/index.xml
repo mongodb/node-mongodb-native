@@ -750,20 +750,21 @@ MongoClient.connect(url, function(err, db) {
   // Get the collection
   var col = db.collection(&#39;bulk_write&#39;);
   col.bulkWrite([
-      { insertOne: { a: 1 } }
-    , { insertMany: [{ g: 1 }, { g: 2 }] }
-    , { updateOne: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
-    , { updateMany: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
-    , { removeOne: { q: {c:1} } }
-    , { removeMany: { q: {c:1} } }]
+      { insertOne: { document: { a: 1 } } }
+    , { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+    , { updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+    , { deleteOne: { filter: {c:1} } }
+    , { deleteMany: { filter: {c:1} } }
+    , { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}]
   , {ordered:true, w:1}, function(err, r) {
     assert.equal(null, err);
-    assert.equal(3, r.insertedCount);
+    assert.equal(1, r.insertedCount);
+    assert.equal(1, Object.keys(r.insertedIds).length);
     assert.equal(1, r.matchedCount);
     assert.equal(0, r.modifiedCount);
-    assert.equal(1, r.removedCount);
-    assert.equal(1, r.upsertedCount);
-    assert.equal(1, r.upsertedIds.length);
+    assert.equal(0, r.deletedCount);
+    assert.equal(2, r.upsertedCount);
+    assert.equal(2, Object.keys(r.upsertedIds).length);
 
     // Ordered bulk operation
     db.close();
@@ -1277,6 +1278,7 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
   , GridStore = require(&#39;mongoddb&#39;).GridStore
+  , fs = require(&#39;fs&#39;)
   , assert = require(&#39;assert&#39;);
 
 // Connection URL
@@ -1285,13 +1287,14 @@ var url = &#39;mongodb://localhost:27017/myproject&#39;;
 MongoClient.connect(url, function(err, db) {
   assert.equal(null, err);
   // Set up gridStore
-  var gs = new GridStore(db, &#39;manual.pdf&#39;, &#39;w&#39;);
-  var filename = &#39;./test/functional/data/manual.pdf&#39;;
-  var outputFilename = &#39;./test/functional/data/manual_out.pdf&#39;;
+  var gs = new GridStore(db, &#39;simple_100_document_toArray.png&#39;, &#39;w&#39;);
+  var filename = &#39;./simple_100_document_toArray.png&#39;;
+  var outputFilename = &#39;./simple_100_document_toArray_out.png&#39;;
+
   // Write the a file to it (put your own here)
   gs.writeFile(filename, function(err, result) {   
     // Open a readable gridStore
-    gs = new GridStore(db, &#39;manual.pdf&#39;, &#39;r&#39;);    
+    gs = new GridStore(db, &#39;simple_100_document_toArray.png&#39;, &#39;r&#39;);
     
     // Create a file write stream
     var fileStream = fs.createWriteStream(outputFilename);
@@ -1316,7 +1319,8 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
   , GridStore = require(&#39;mongoddb&#39;).GridStore
-  , ObjectID = require(&#39;mongoddb&#39;).ObjectID;
+  , ObjectID = require(&#39;mongoddb&#39;).ObjectID
+  , fs = require(&#39;fs&#39;)
   , assert = require(&#39;assert&#39;);
 
 // Connection URL
@@ -1324,19 +1328,23 @@ var url = &#39;mongodb://localhost:27017/myproject&#39;;
 // Use connect method to connect to the Server
 MongoClient.connect(url, function(err, db) {
   assert.equal(null, err);
+  
   // Set up gridStore
-  var stream = new GridStore(db, &#39;manual.pdf&#39;, &#39;w&#39;).stream();
+  var stream = new GridStore(db, &#39;simple_100_document_toArray.png&#39;, &#39;w&#39;).stream();
   // File we want to write to GridFS
-  var filename = &#39;./test/functional/data/manual.pdf&#39;;
+  var filename = &#39;./simple_100_document_toArray.png&#39;;  
   // Create a file reader stream to an object
   var fileStream = fs.createReadStream(filename);
+
   // Finish up once the file has been all read
   stream.on(&amp;quot;end&amp;quot;, function(err) {
+
     // Just read the content and compare to the raw binary
-    GridStore.read(client, &amp;quot;test_stream_write&amp;quot;, function(err, gridData) {
+    GridStore.read(db, &#39;simple_100_document_toArray.png&#39;, function(err, gridData) {
+      assert.equal(null, err);
       var fileData = fs.readFileSync(filename);
       assert.equal(fileData.toString(&#39;hex&#39;), gridData.toString(&#39;hex&#39;));
-      client.close();
+      db.close();
     })
   });
 

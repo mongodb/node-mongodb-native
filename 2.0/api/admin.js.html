@@ -55,7 +55,9 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/**
+            <pre class="prettyprint source linenums"><code>var toError = require('./utils').toError;
+
+/**
  * @fileOverview The **Admin** class is an internal class that allows convenient access to
  * the admin functionality and commands for MongoDB.
  * 
@@ -88,308 +90,314 @@ var Admin = function(db, topology) {
   if(!(this instanceof Admin)) return new Admin(db, topology);
   var self = this;
 
-  /**
-   * The callback format for results
-   * @callback Admin~resultCallback
-   * @param {MongoError} error An error instance representing the error during the execution.
-   * @param {object} result The result object if the command was executed successfully.
-   */
-
-  /**
-   * Execute a command
-   * @method
-   * @param {object} command The command hash
-   * @param {object} [options=null] Optional settings.
-   * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
-   * @param {number} [options.maxTimeMS=null] Number of milliseconds to wait before aborting the query.
-   * @param {Admin~resultCallback} callback The command result callback
-   * @return {null}
-   */
-  this.command = function(command, options, callback) {
-    var args = Array.prototype.slice.call(arguments, 1);
-    callback = args.pop();
-    options = args.length ? args.shift() : {};
-
-    // Execute a command
-    db.executeDbAdminCommand(command, options, function(err, doc) {
-      return callback != null ? callback(err, doc) : null;
-    });
-  } 
-
-  /**
-   * Retrieve the server information for the current
-   * instance of the db client
-   *
-   * @param {Admin~resultCallback} callback The command result callback
-   * @return {null}
-   */
-  this.buildInfo = function(callback) {
-    this.serverInfo(callback);
+  // Internal state
+  this.s = {
+      db: db
+    , topology: topology
   }
-
-  /**
-   * Retrieve the server information for the current
-   * instance of the db client
-   *
-   * @param {Admin~resultCallback} callback The command result callback
-   * @return {null}
-   */
-  this.serverInfo = function(callback) {
-    db.executeDbAdminCommand({buildinfo:1}, function(err, doc) {
-      if(err != null) return callback(err, null);
-      return callback(null, doc);
-    });
-  }
-
-  /**
-   * Retrieve this db's server status.
-   *
-   * @param {Admin~resultCallback} callback The command result callback
-   * @return {null}
-   */
-  this.serverStatus = function(callback) {
-    var self = this;
-
-    db.executeDbAdminCommand({serverStatus: 1}, function(err, doc) {
-      if(err == null &amp;&amp; doc.ok === 1) {
-        callback(null, doc);
-      } else {
-        if(err) return callback(err, false);
-        return callback(utils.toError(doc), false);
-      }
-    });
-  };
-
-  /**
-   * Retrieve the current profiling Level for MongoDB
-   *
-   * @param {Admin~resultCallback} callback The command result callback
-   * @return {null}
-   */
-  this.profilingLevel = function(callback) {
-    var self = this;
-
-    db.executeDbAdminCommand({profile:-1}, function(err, doc) {
-      doc = doc;
-
-      if(err == null &amp;&amp; doc.ok === 1) {
-        var was = doc.was;
-        if(was == 0) return callback(null, "off");
-        if(was == 1) return callback(null, "slow_only");
-        if(was == 2) return callback(null, "all");
-          return callback(new Error("Error: illegal profiling level value " + was), null);
-      } else {
-        err != null ? callback(err, null) : callback(new Error("Error with profile command"), null);
-      }
-    });
-  };
-
-  /**
-   * Ping the MongoDB server and retrieve results
-   *
-   * @param {Admin~resultCallback} callback The command result callback
-   * @return {null}
-   */
-  this.ping = function(options, callback) {
-    var args = Array.prototype.slice.call(arguments, 0);
-    db.executeDbAdminCommand({ping: 1}, args.pop());
-  }
-
-  /**
-   * Authenticate a user against the server.
-   * @method
-   * @param {string} username The username.
-   * @param {string} [password] The password.
-   * @param {Admin~resultCallback} callback The command result callback
-   * @return {null}
-   */
-  this.authenticate = function(username, password, callback) {
-    db.authenticate(username, password, {authdb: 'admin'}, function(err, doc) {
-      return callback(err, doc);
-    })
-  }
-
-  /**
-   * Logout user from server, fire off on all connections and remove all auth info
-   * @method
-   * @param {Admin~resultCallback} callback The command result callback
-   * @return {null}
-   */
-  this.logout = function(callback) {
-    db.logout({authdb: 'admin'},  function(err, doc) {
-      return callback(err, doc);
-    })
-  }
-
-  /**
-   * Add a user to the database.
-   * @method
-   * @param {string} username The username.
-   * @param {string} password The password.
-   * @param {object} [options=null] Optional settings.
-   * @param {(number|string)} [options.w=null] The write concern.
-   * @param {number} [options.wtimeout=null] The write concern timeout.
-   * @param {boolean} [options.j=false] Specify a journal write concern.
-   * @param {boolean} [options.fsync=false] Specify a file sync write concern.
-   * @param {object} [options.customData=null] Custom data associated with the user (only Mongodb 2.6 or higher)
-   * @param {object[]} [options.roles=null] Roles associated with the created user (only Mongodb 2.6 or higher)
-   * @param {Admin~resultCallback} callback The command result callback
-   * @return {null}
-   */
-  this.addUser = function(username, password, options, callback) {
-    var args = Array.prototype.slice.call(arguments, 2);
-    callback = args.pop();
-    options = args.length ? args.shift() : {};
-    // Set the db name to admin
-    options.dbName = 'admin';
-    // Add user
-    db.addUser(username, password, options, function(err, doc) {
-      return callback(err, doc);
-    })
-  }
-
-  /**
-   * Remove a user from a database
-   * @method
-   * @param {string} username The username.
-   * @param {object} [options=null] Optional settings.
-   * @param {(number|string)} [options.w=null] The write concern.
-   * @param {number} [options.wtimeout=null] The write concern timeout.
-   * @param {boolean} [options.j=false] Specify a journal write concern.
-   * @param {boolean} [options.fsync=false] Specify a file sync write concern.
-   * @param {Admin~resultCallback} callback The command result callback
-   * @return {null}
-   */
-  this.removeUser = function(username, options, callback) {
-    var self = this;
-    var args = Array.prototype.slice.call(arguments, 1);
-    callback = args.pop();
-    options = args.length ? args.shift() : {};
-    options.dbName = 'admin';
-
-    db.removeUser(username, options, function(err, doc) {
-      return callback(err, doc);
-    })
-  }
-
-  /**
-   * Set the current profiling level of MongoDB
-   *
-   * @param {string} level The new profiling level (off, slow_only, all).
-   * @param {Admin~resultCallback} callback The command result callback.
-   * @return {null}
-   */
-  this.setProfilingLevel = function(level, callback) {
-    var self = this;
-    var command = {};
-    var profile = 0;
-
-    if(level == "off") {
-      profile = 0;
-    } else if(level == "slow_only") {
-      profile = 1;
-    } else if(level == "all") {
-      profile = 2;
-    } else {
-      return callback(new Error("Error: illegal profiling level value " + level));
-    }
-
-    // Set up the profile number
-    command['profile'] = profile;
-
-    db.executeDbAdminCommand(command, function(err, doc) {
-      doc = doc;
-
-      if(err == null &amp;&amp; doc.ok === 1)
-        return callback(null, level);
-      return err != null ? callback(err, null) : callback(new Error("Error with profile command"), null);
-    });
-  };
-
-  /**
-   * Retrive the current profiling information for MongoDB
-   *
-   * @param {Admin~resultCallback} callback The command result callback.
-   * @return {null}
-   */
-  this.profilingInfo = function(callback) {
-    try {
-      topology.cursor("admin.system.profile", { find: 'system.profile', query: {}}, {}).toArray(callback);
-    } catch (err) {
-      return callback(err, null);
-    }
-  };
-
-  /**
-   * Validate an existing collection
-   *
-   * @param {string} collectionName The name of the collection to validate.
-   * @param {object} [options=null] Optional settings.
-   * @param {Admin~resultCallback} callback The command result callback.
-   * @return {null}
-   */
-  this.validateCollection = function(collectionName, options, callback) {
-    var args = Array.prototype.slice.call(arguments, 1);
-    callback = args.pop();
-    options = args.length ? args.shift() : {};
-
-    var self = this;
-    var command = {validate: collectionName};
-    var keys = Object.keys(options);
-
-    // Decorate command with extra options
-    for(var i = 0; i &lt; keys.length; i++) {
-      if(options.hasOwnProperty(keys[i])) {
-        command[keys[i]] = options[keys[i]];
-      }
-    }
-
-    db.command(command, function(err, doc) {
-      if(err != null) return callback(err, null);
-
-      if(doc.ok === 0)
-        return callback(new Error("Error with validate command"), null);
-      if(doc.result != null &amp;&amp; doc.result.constructor != String)
-        return callback(new Error("Error with validation data"), null);
-      if(doc.result != null &amp;&amp; doc.result.match(/exception|corrupt/) != null)
-        return callback(new Error("Error: invalid collection " + collectionName), null);
-      if(doc.valid != null &amp;&amp; !doc.valid)
-        return callback(new Error("Error: invalid collection " + collectionName), null);
-
-      return callback(null, doc);
-    });
-  };
-
-  /**
-   * List the available databases
-   *
-   * @param {Admin~resultCallback} callback The command result callback.
-   * @return {null}
-   */
-  this.listDatabases = function(callback) {
-    db.executeDbAdminCommand({listDatabases:1}, {}, function(err, doc) {
-      if(err != null) return callback(err, null);
-      return callback(null, doc);
-    });
-  }
-
-  /**
-   * Get ReplicaSet status
-   *
-   * @param {Admin~resultCallback} callback The command result callback.
-   * @return {null}
-   */
-  this.replSetGetStatus = function(callback) {
-    var self = this;
-
-    db.executeDbAdminCommand({replSetGetStatus:1}, function(err, doc) {
-      if(err == null &amp;&amp; doc.ok === 1)
-        return callback(null, doc);
-      if(err) return callback(err, false);
-      return callback(utils.toError(doc), false);
-    });
-  };   
 }
+
+/**
+ * The callback format for results
+ * @callback Admin~resultCallback
+ * @param {MongoError} error An error instance representing the error during the execution.
+ * @param {object} result The result object if the command was executed successfully.
+ */
+
+/**
+ * Execute a command
+ * @method
+ * @param {object} command The command hash
+ * @param {object} [options=null] Optional settings.
+ * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+ * @param {number} [options.maxTimeMS=null] Number of milliseconds to wait before aborting the query.
+ * @param {Admin~resultCallback} callback The command result callback
+ * @return {null}
+ */
+Admin.prototype.command = function(command, options, callback) {
+  var args = Array.prototype.slice.call(arguments, 1);
+  callback = args.pop();
+  options = args.length ? args.shift() : {};
+
+  // Execute a command
+  this.s.db.executeDbAdminCommand(command, options, function(err, doc) {
+    return callback != null ? callback(err, doc) : null;
+  });
+} 
+
+/**
+ * Retrieve the server information for the current
+ * instance of the db client
+ *
+ * @param {Admin~resultCallback} callback The command result callback
+ * @return {null}
+ */
+Admin.prototype.buildInfo = function(callback) {
+  this.serverInfo(callback);
+}
+
+/**
+ * Retrieve the server information for the current
+ * instance of the db client
+ *
+ * @param {Admin~resultCallback} callback The command result callback
+ * @return {null}
+ */
+Admin.prototype.serverInfo = function(callback) {
+  this.s.db.executeDbAdminCommand({buildinfo:1}, function(err, doc) {
+    if(err != null) return callback(err, null);
+    return callback(null, doc);
+  });
+}
+
+/**
+ * Retrieve this db's server status.
+ *
+ * @param {Admin~resultCallback} callback The command result callback
+ * @return {null}
+ */
+Admin.prototype.serverStatus = function(callback) {
+  var self = this;
+
+  this.s.db.executeDbAdminCommand({serverStatus: 1}, function(err, doc) {
+    if(err == null &amp;&amp; doc.ok === 1) {
+      callback(null, doc);
+    } else {
+      if(err) return callback(err, false);
+      return callback(toError(doc), false);
+    }
+  });
+};
+
+/**
+ * Retrieve the current profiling Level for MongoDB
+ *
+ * @param {Admin~resultCallback} callback The command result callback
+ * @return {null}
+ */
+Admin.prototype.profilingLevel = function(callback) {
+  var self = this;
+
+  this.s.db.executeDbAdminCommand({profile:-1}, function(err, doc) {
+    doc = doc;
+
+    if(err == null &amp;&amp; doc.ok === 1) {
+      var was = doc.was;
+      if(was == 0) return callback(null, "off");
+      if(was == 1) return callback(null, "slow_only");
+      if(was == 2) return callback(null, "all");
+        return callback(new Error("Error: illegal profiling level value " + was), null);
+    } else {
+      err != null ? callback(err, null) : callback(new Error("Error with profile command"), null);
+    }
+  });
+};
+
+/**
+ * Ping the MongoDB server and retrieve results
+ *
+ * @param {Admin~resultCallback} callback The command result callback
+ * @return {null}
+ */
+Admin.prototype.ping = function(options, callback) {
+  var args = Array.prototype.slice.call(arguments, 0);
+  this.s.db.executeDbAdminCommand({ping: 1}, args.pop());
+}
+
+/**
+ * Authenticate a user against the server.
+ * @method
+ * @param {string} username The username.
+ * @param {string} [password] The password.
+ * @param {Admin~resultCallback} callback The command result callback
+ * @return {null}
+ */
+Admin.prototype.authenticate = function(username, password, callback) {
+  this.s.db.authenticate(username, password, {authdb: 'admin'}, function(err, doc) {
+    return callback(err, doc);
+  })
+}
+
+/**
+ * Logout user from server, fire off on all connections and remove all auth info
+ * @method
+ * @param {Admin~resultCallback} callback The command result callback
+ * @return {null}
+ */
+Admin.prototype.logout = function(callback) {
+  this.s.db.logout({authdb: 'admin'},  function(err, doc) {
+    return callback(err, doc);
+  })
+}
+
+/**
+ * Add a user to the database.
+ * @method
+ * @param {string} username The username.
+ * @param {string} password The password.
+ * @param {object} [options=null] Optional settings.
+ * @param {(number|string)} [options.w=null] The write concern.
+ * @param {number} [options.wtimeout=null] The write concern timeout.
+ * @param {boolean} [options.j=false] Specify a journal write concern.
+ * @param {boolean} [options.fsync=false] Specify a file sync write concern.
+ * @param {object} [options.customData=null] Custom data associated with the user (only Mongodb 2.6 or higher)
+ * @param {object[]} [options.roles=null] Roles associated with the created user (only Mongodb 2.6 or higher)
+ * @param {Admin~resultCallback} callback The command result callback
+ * @return {null}
+ */
+Admin.prototype.addUser = function(username, password, options, callback) {
+  var args = Array.prototype.slice.call(arguments, 2);
+  callback = args.pop();
+  options = args.length ? args.shift() : {};
+  // Set the db name to admin
+  options.dbName = 'admin';
+  // Add user
+  this.s.db.addUser(username, password, options, function(err, doc) {
+    return callback(err, doc);
+  })
+}
+
+/**
+ * Remove a user from a database
+ * @method
+ * @param {string} username The username.
+ * @param {object} [options=null] Optional settings.
+ * @param {(number|string)} [options.w=null] The write concern.
+ * @param {number} [options.wtimeout=null] The write concern timeout.
+ * @param {boolean} [options.j=false] Specify a journal write concern.
+ * @param {boolean} [options.fsync=false] Specify a file sync write concern.
+ * @param {Admin~resultCallback} callback The command result callback
+ * @return {null}
+ */
+Admin.prototype.removeUser = function(username, options, callback) {
+  var self = this;
+  var args = Array.prototype.slice.call(arguments, 1);
+  callback = args.pop();
+  options = args.length ? args.shift() : {};
+  options.dbName = 'admin';
+
+  this.s.db.removeUser(username, options, function(err, doc) {
+    return callback(err, doc);
+  })
+}
+
+/**
+ * Set the current profiling level of MongoDB
+ *
+ * @param {string} level The new profiling level (off, slow_only, all).
+ * @param {Admin~resultCallback} callback The command result callback.
+ * @return {null}
+ */
+Admin.prototype.setProfilingLevel = function(level, callback) {
+  var self = this;
+  var command = {};
+  var profile = 0;
+
+  if(level == "off") {
+    profile = 0;
+  } else if(level == "slow_only") {
+    profile = 1;
+  } else if(level == "all") {
+    profile = 2;
+  } else {
+    return callback(new Error("Error: illegal profiling level value " + level));
+  }
+
+  // Set up the profile number
+  command['profile'] = profile;
+
+  this.s.db.executeDbAdminCommand(command, function(err, doc) {
+    doc = doc;
+
+    if(err == null &amp;&amp; doc.ok === 1)
+      return callback(null, level);
+    return err != null ? callback(err, null) : callback(new Error("Error with profile command"), null);
+  });
+};
+
+/**
+ * Retrive the current profiling information for MongoDB
+ *
+ * @param {Admin~resultCallback} callback The command result callback.
+ * @return {null}
+ */
+Admin.prototype.profilingInfo = function(callback) {
+  try {
+    this.s.topology.cursor("admin.system.profile", { find: 'system.profile', query: {}}, {}).toArray(callback);
+  } catch (err) {
+    return callback(err, null);
+  }
+};
+
+/**
+ * Validate an existing collection
+ *
+ * @param {string} collectionName The name of the collection to validate.
+ * @param {object} [options=null] Optional settings.
+ * @param {Admin~resultCallback} callback The command result callback.
+ * @return {null}
+ */
+Admin.prototype.validateCollection = function(collectionName, options, callback) {
+  var args = Array.prototype.slice.call(arguments, 1);
+  callback = args.pop();
+  options = args.length ? args.shift() : {};
+
+  var self = this;
+  var command = {validate: collectionName};
+  var keys = Object.keys(options);
+
+  // Decorate command with extra options
+  for(var i = 0; i &lt; keys.length; i++) {
+    if(options.hasOwnProperty(keys[i])) {
+      command[keys[i]] = options[keys[i]];
+    }
+  }
+
+  this.s.db.command(command, function(err, doc) {
+    if(err != null) return callback(err, null);
+
+    if(doc.ok === 0)
+      return callback(new Error("Error with validate command"), null);
+    if(doc.result != null &amp;&amp; doc.result.constructor != String)
+      return callback(new Error("Error with validation data"), null);
+    if(doc.result != null &amp;&amp; doc.result.match(/exception|corrupt/) != null)
+      return callback(new Error("Error: invalid collection " + collectionName), null);
+    if(doc.valid != null &amp;&amp; !doc.valid)
+      return callback(new Error("Error: invalid collection " + collectionName), null);
+
+    return callback(null, doc);
+  });
+};
+
+/**
+ * List the available databases
+ *
+ * @param {Admin~resultCallback} callback The command result callback.
+ * @return {null}
+ */
+Admin.prototype.listDatabases = function(callback) {
+  this.s.db.executeDbAdminCommand({listDatabases:1}, {}, function(err, doc) {
+    if(err != null) return callback(err, null);
+    return callback(null, doc);
+  });
+}
+
+/**
+ * Get ReplicaSet status
+ *
+ * @param {Admin~resultCallback} callback The command result callback.
+ * @return {null}
+ */
+Admin.prototype.replSetGetStatus = function(callback) {
+  var self = this;
+
+  this.s.db.executeDbAdminCommand({replSetGetStatus:1}, function(err, doc) {
+    if(err == null &amp;&amp; doc.ok === 1)
+      return callback(null, doc);
+    if(err) return callback(err, false);
+    return callback(toError(doc), false);
+  });
+}; 
 
 module.exports = Admin;</code></pre>
         </article>
@@ -420,7 +428,7 @@ module.exports = Admin;</code></pre>
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Wed Oct 29 2014 17:28:45 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Fri Nov 14 2014 15:29:47 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>
@@ -648,6 +656,8 @@ module.exports = Admin;</code></pre>
             
             <span class="subtitle">Methods</span>
             
+                <li data-name="BulkWriteResult#getInsertedIds"><a href="BulkWriteResult.html#getInsertedIds">getInsertedIds</a></li>
+            
                 <li data-name="BulkWriteResult#getLastOp"><a href="BulkWriteResult.html#getLastOp">getLastOp</a></li>
             
                 <li data-name="BulkWriteResult#getRawResponse"><a href="BulkWriteResult.html#getRawResponse">getRawResponse</a></li>
@@ -703,6 +713,10 @@ module.exports = Admin;</code></pre>
             
             <span class="subtitle">Typedefs</span>
             
+                <li data-name="Collection~bulkWriteOpCallback"><a href="Collection.html#bulkWriteOpCallback">bulkWriteOpCallback</a></li>
+            
+                <li data-name="Collection~BulkWriteOpResult"><a href="Collection.html#BulkWriteOpResult">BulkWriteOpResult</a></li>
+            
                 <li data-name="Collection~collectionResultCallback"><a href="Collection.html#collectionResultCallback">collectionResultCallback</a></li>
             
                 <li data-name="Collection~countCallback"><a href="Collection.html#countCallback">countCallback</a></li>
@@ -722,9 +736,15 @@ module.exports = Admin;</code></pre>
             
                 <li data-name="Collection#aggregate"><a href="Collection.html#aggregate">aggregate</a></li>
             
+                <li data-name="Collection#bulkWrite"><a href="Collection.html#bulkWrite">bulkWrite</a></li>
+            
                 <li data-name="Collection#count"><a href="Collection.html#count">count</a></li>
             
                 <li data-name="Collection#createIndex"><a href="Collection.html#createIndex">createIndex</a></li>
+            
+                <li data-name="Collection#deleteMany"><a href="Collection.html#deleteMany">deleteMany</a></li>
+            
+                <li data-name="Collection#deleteOne"><a href="Collection.html#deleteOne">deleteOne</a></li>
             
                 <li data-name="Collection#distinct"><a href="Collection.html#distinct">distinct</a></li>
             
@@ -783,10 +803,6 @@ module.exports = Admin;</code></pre>
                 <li data-name="Collection#reIndex"><a href="Collection.html#reIndex">reIndex</a></li>
             
                 <li data-name="Collection#remove"><a href="Collection.html#remove">remove</a></li>
-            
-                <li data-name="Collection#removeMany"><a href="Collection.html#removeMany">removeMany</a></li>
-            
-                <li data-name="Collection#removeOne"><a href="Collection.html#removeOne">removeOne</a></li>
             
                 <li data-name="Collection#rename"><a href="Collection.html#rename">rename</a></li>
             
@@ -1504,18 +1520,6 @@ module.exports = Admin;</code></pre>
             
                 <li data-name="OrderedBulkOperation#insert"><a href="OrderedBulkOperation.html#insert">insert</a></li>
             
-                <li data-name="OrderedBulkOperation#remove"><a href="OrderedBulkOperation.html#remove">remove</a></li>
-            
-                <li data-name="OrderedBulkOperation#removeOne"><a href="OrderedBulkOperation.html#removeOne">removeOne</a></li>
-            
-                <li data-name="OrderedBulkOperation#replaceOne"><a href="OrderedBulkOperation.html#replaceOne">replaceOne</a></li>
-            
-                <li data-name="OrderedBulkOperation#update"><a href="OrderedBulkOperation.html#update">update</a></li>
-            
-                <li data-name="OrderedBulkOperation#updateOne"><a href="OrderedBulkOperation.html#updateOne">updateOne</a></li>
-            
-                <li data-name="OrderedBulkOperation#upsert"><a href="OrderedBulkOperation.html#upsert">upsert</a></li>
-            
             </ul>
             <ul class="events itemMembers">
             
@@ -1779,18 +1783,6 @@ module.exports = Admin;</code></pre>
                 <li data-name="UnorderedBulkOperation#find"><a href="UnorderedBulkOperation.html#find">find</a></li>
             
                 <li data-name="UnorderedBulkOperation#insert"><a href="UnorderedBulkOperation.html#insert">insert</a></li>
-            
-                <li data-name="UnorderedBulkOperation#remove"><a href="UnorderedBulkOperation.html#remove">remove</a></li>
-            
-                <li data-name="UnorderedBulkOperation#removeOne"><a href="UnorderedBulkOperation.html#removeOne">removeOne</a></li>
-            
-                <li data-name="UnorderedBulkOperation#replaceOne"><a href="UnorderedBulkOperation.html#replaceOne">replaceOne</a></li>
-            
-                <li data-name="UnorderedBulkOperation#update"><a href="UnorderedBulkOperation.html#update">update</a></li>
-            
-                <li data-name="UnorderedBulkOperation#updateOne"><a href="UnorderedBulkOperation.html#updateOne">updateOne</a></li>
-            
-                <li data-name="UnorderedBulkOperation#upsert"><a href="UnorderedBulkOperation.html#upsert">upsert</a></li>
             
             </ul>
             <ul class="events itemMembers">

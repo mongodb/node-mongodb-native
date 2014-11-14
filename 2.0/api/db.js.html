@@ -172,24 +172,46 @@ var Db = function(databaseName, topology, options) {
   getSingleProperty(this, 'bufferMaxEntries', bufferMaxEntries);
   getSingleProperty(this, 'databaseName', databaseName);
 
+  // Db State
+  this.s = {
+    // Database name
+      databaseName: databaseName
+    // Topology
+    , topology: topology
+    // Pk Factory
+    , pkFactory: pkFactory
+    // Parent Db
+    , parentDb: parentDb
+    // bufferMaxEntries
+    , bufferMaxEntries: bufferMaxEntries
+    // Read preference
+    , readPreference: readPreference
+    // Logger
+    , logger: logger
+    // Authsource
+    , authSource: authSource
+    // Options
+    , options: options
+  }
+
   // Last ismaster
   Object.defineProperty(this, 'options', {
     enumerable:true,
-    get: function() { return options; }
+    get: function() { return self.s.options; }
   });  
 
   // Last ismaster
   Object.defineProperty(this, 'native_parser', {
     enumerable:true,
-    get: function() { return topology.parserType() == 'c++'; }
+    get: function() { return self.s.topology.parserType() == 'c++'; }
   });
 
   // Last ismaster
   Object.defineProperty(this, 'slaveOk', {
     enumerable:true,
     get: function() {
-      if(options.readPreference != null
-        &amp;&amp; (options.readPreference != 'primary' || options.readPreference.mode != 'primary')) {
+      if(self.s.options.readPreference != null
+        &amp;&amp; (self.s.options.readPreference != 'primary' || self.s.options.readPreference.mode != 'primary')) {
         return true;
       }
       return false;
@@ -200,10 +222,10 @@ var Db = function(databaseName, topology, options) {
     enumerable:true,
     get: function() { 
       var ops = {};
-      if(options.w != null) ops.w = options.w;
-      if(options.j != null) ops.j = options.j;
-      if(options.fsync != null) ops.fsync = options.fsync;
-      if(options.wtimeout != null) ops.wtimeout = options.wtimeout;
+      if(self.s.options.w != null) ops.w = self.s.options.w;
+      if(self.s.options.j != null) ops.j = self.s.options.j;
+      if(self.s.options.fsync != null) ops.fsync = self.s.options.fsync;
+      if(self.s.options.wtimeout != null) ops.wtimeout = self.s.options.wtimeout;
       return ops;
     }
   });  
@@ -222,7 +244,8 @@ var Db = function(databaseName, topology, options) {
    * @return {null}
    */
   this.open = function(callback) {
-    topology.connect(self, options, function(err, topology) {
+    var self = this;
+    self.s.topology.connect(self, options, function(err, topology) {
       if(callback == null) returnl
       var internalCallback = callback;
       callback == null;
@@ -254,13 +277,14 @@ var Db = function(databaseName, topology, options) {
    * @return {null}
    */
   this.command = function(command, options, callback) {
+    var self = this;
     if(typeof options == 'function') callback = options, options = {};
-    var dbName = options.dbName || options.authdb || databaseName;
+    var dbName = options.dbName || options.authdb || self.s.databaseName;
     // Clone the options
     options = shallowClone(options);
     // If we have a readPreference set
-    if(options.readPreference == null &amp;&amp; readPreference) {      
-      options.readPreference = readPreference;
+    if(options.readPreference == null &amp;&amp; self.s.readPreference) {      
+      options.readPreference = self.s.readPreference;
     }
 
     // Convert the readPreference
@@ -272,11 +296,11 @@ var Db = function(databaseName, topology, options) {
     }
 
     // Debug information
-    if(logger.isDebug()) logger.debug(f('executing command %s against %s with options [%s]'
+    if(self.s.logger.isDebug()) self.s.logger.debug(f('executing command %s against %s with options [%s]'
       , JSON.stringify(command), f('%s.$cmd', dbName), JSON.stringify(options)));
 
     // Execute command
-    topology.command(f('%s.$cmd', dbName), command, options, function(err, result) {
+    self.s.topology.command(f('%s.$cmd', dbName), command, options, function(err, result) {
       if(err) return handleCallback(callback, err);
       handleCallback(callback, null, result.result);
     });
@@ -298,10 +322,10 @@ var Db = function(databaseName, topology, options) {
    */
   this.close = function(force, callback) {
     if(typeof force == 'function') callback = force, force = false;
-    topology.close(force);
-    if(this.listeners('close').length > 0) self.emit('close');
+    this.s.topology.close(force);
+    if(this.listeners('close').length > 0) this.emit('close');
     this.removeAllListeners('close');
-    if(parentDb) parentDb.close();
+    if(this.s.parentDb) this.s.parentDb.close();
     if(typeof callback == 'function') handleCallback(callback, null);
   }
 
@@ -311,7 +335,7 @@ var Db = function(databaseName, topology, options) {
    * @return {Admin} return the new Admin db instance
    */
   this.admin = function() {
-    return new Admin(this, topology);
+    return new Admin(this, this.s.topology);
   };
 
   /**
@@ -340,12 +364,13 @@ var Db = function(databaseName, topology, options) {
    * @return {Collection} return the new Collection instance if not in strict mode
    */
   this.collection = function(name, options, callback) {
+    var self = this;
     if(typeof options == 'function') callback = options, options = {};
     options = options || {};
 
     if(options == null || !options.strict) {
       try {
-        var collection = new Collection(self, topology, databaseName, name, pkFactory, options);
+        var collection = new Collection(this, this.s.topology, this.s.databaseName, name, this.s.pkFactory, options);
         if(callback) callback(null, collection);
         return collection;
       } catch(err) {
@@ -356,16 +381,16 @@ var Db = function(databaseName, topology, options) {
 
     // Strict mode
     if(typeof callback != 'function') {
-      throw utils.toError(f("A callback is required in strict mode. While getting collection %s.", collectionName));
+      throw toError(f("A callback is required in strict mode. While getting collection %s.", name));
     }
 
     // Strict mode
-    self.listCollections(name, function(err, collections) {
+    this.listCollections(name, function(err, collections) {
       if(err != null) return handleCallback(callback, err, null);
       if(collections.length == 0) return handleCallback(callback, toError(f("Collection %s does not exist. Currently in strict mode.", name)), null);
 
       try {
-        return handleCallback(callback, null, new Collection(self, topology, databaseName, name, pkFactory, options));
+        return handleCallback(callback, null, new Collection(self, self.s.topology, self.s.databaseName, name, self.s.pkFactory, options));
       } catch(err) {
         return handleCallback(callback, err, null);
       }
@@ -394,13 +419,14 @@ var Db = function(databaseName, topology, options) {
    * @return {null}
    */
   this.createCollection = function(name, options, callback) {
+    var self = this;
     var args = Array.prototype.slice.call(arguments, 0);
     callback = args.pop();
     name = args.length ? args.shift() : null;
     options = args.length ? args.shift() || {} : {};
 
     // Get the write concern options
-    var finalOptions = writeConcern(shallowClone(options), self, options);
+    var finalOptions = writeConcern(shallowClone(options), this, options);
 
     // Check if we have the name
     this.listCollections(name, function(err, collections) {
@@ -408,7 +434,7 @@ var Db = function(databaseName, topology, options) {
       if(collections.length > 0 &amp;&amp; finalOptions.strict) {
         return handleCallback(callback, new MongoError(f("Collection %s already exists. Currently in strict mode.", name)), null);
       } else if (collections.length > 0) {
-        try { return handleCallback(callback, null, new Collection(self, topology, databaseName, name, pkFactory, options)); }
+        try { return handleCallback(callback, null, new Collection(self, self.s.topology, self.s.databaseName, name, self.s.pkFactory, options)); }
         catch(err) { return handleCallback(callback, err); }
       }
 
@@ -424,7 +450,7 @@ var Db = function(databaseName, topology, options) {
       // Execute command
       self.command(cmd, finalOptions, function(err, result) {
         if(err) return handleCallback(callback, err);
-        handleCallback(callback, null, new Collection(self, topology, databaseName, name, pkFactory, options));
+        handleCallback(callback, null, new Collection(self, self.s.topology, self.s.databaseName, name, self.s.pkFactory, options));
       });
     });
   }  
@@ -461,6 +487,7 @@ var Db = function(databaseName, topology, options) {
    * @return {null}
    */
   this.listCollections = function(name, options, callback) {
+    var self = this;
     var args = Array.prototype.slice.call(arguments, 0);
     callback = args.pop();
     name = args.length ? args.shift() : null;
@@ -476,7 +503,7 @@ var Db = function(databaseName, topology, options) {
       // Ensure we have a filter
       filter = filter || {};
       // Set the name variable for the filter
-      if(typeof name == 'string') filter.name = f("%s.%s", databaseName, name);
+      if(typeof name == 'string') filter.name = f("%s.%s", self.s.databaseName, name);
       // Get the system namespace collection as a cursor
       var cursor = self.collection(Db.SYSTEM_NAMESPACE_COLLECTION).find(filter);
       // Get all documents
@@ -538,6 +565,7 @@ var Db = function(databaseName, topology, options) {
    * @return {null}
    */
   this.eval = function(code, parameters, options, callback) {
+    var self = this;
     var args = Array.prototype.slice.call(arguments, 1);
     callback = args.pop();
     parameters = args.length ? args.shift() : parameters;
@@ -608,7 +636,7 @@ var Db = function(databaseName, topology, options) {
     var cmd = {'drop':name}
 
     // Execute command
-    self.command(cmd, options, function(err, result) {
+    this.command(cmd, options, function(err, result) {
       if(err) return handleCallback(callback, err);
       if(result.ok) return handleCallback(callback, null, true);
       handleCallback(callback, null, false);
@@ -652,12 +680,13 @@ var Db = function(databaseName, topology, options) {
    * @return {null}
    */
   this.collections = function(callback) {
+    var self = this;
     // Let's get the collection names
-    self.listCollections(function(err, documents) {
+    this.listCollections(function(err, documents) {
       if(err != null) return handleCallback(callback, err, null);
       // Return the collection objects
       handleCallback(callback, null, documents.map(function(d) {
-        return new Collection(self, topology, databaseName, d.name.replace(databaseName + ".", ''), pkFactory, options);
+        return new Collection(self, self.s.topology, self.s.databaseName, d.name.replace(self.s.databaseName + ".", ''), self.s.pkFactory, options);
       }));
     });
   };  
@@ -679,7 +708,7 @@ var Db = function(databaseName, topology, options) {
     }
 
     // Execute command
-    topology.command('admin.$cmd', selector, options, function(err, result) {
+    this.s.topology.command('admin.$cmd', selector, options, function(err, result) {
       if(err) return handleCallback(callback, err);
       handleCallback(callback, null, result.result);
     });
@@ -707,6 +736,7 @@ var Db = function(databaseName, topology, options) {
    * @return {null}
    */
   this.createIndex = function(name, fieldOrSpec, options, callback) {
+    var self = this;
     var args = Array.prototype.slice.call(arguments, 2);
     callback = args.pop();
     options = args.length ? args.shift() || {} : {};
@@ -732,7 +762,7 @@ var Db = function(databaseName, topology, options) {
       // Create command
       var doc = createCreateIndexCommand(self, name, fieldOrSpec, options);
       // Insert document
-      topology.insert(f("%s.%s", databaseName, Db.SYSTEM_INDEX_COLLECTION), doc, finalOptions, function(err, result) {
+      self.s.topology.insert(f("%s.%s", self.s.databaseName, Db.SYSTEM_INDEX_COLLECTION), doc, finalOptions, function(err, result) {
         if(callback == null) return;
         if(err) return handleCallback(callback, err);
         if(result == null) return handleCallback(callback, null, null);
@@ -764,6 +794,7 @@ var Db = function(databaseName, topology, options) {
    * @return {null}
    */
   this.ensureIndex = function(name, fieldOrSpec, options, callback) {
+    var self = this;
     if(typeof options == 'function') callback = options, options = {};
     options = options || {};
 
@@ -804,7 +835,7 @@ var Db = function(databaseName, topology, options) {
     options.parentDb = this;
 
     // Return the db object
-    var db = new Db(dbName, topology, options)
+    var db = new Db(dbName, this.s.topology, options)
     // Add listeners to the parent database
     this.once('error', createListener('error', db));
     this.once('timeout', createListener('timeout', db));
@@ -830,7 +861,7 @@ var Db = function(databaseName, topology, options) {
 
     // Error out if we digestPassword set
     if(options.digestPassword != null) {
-      throw utils.toError("The digestPassword option is not supported via add_user. Please use db.command('createUser', ...) instead for this option.");
+      throw toError("The digestPassword option is not supported via add_user. Please use db.command('createUser', ...) instead for this option.");
     }
 
     // Get additional values
@@ -1077,39 +1108,39 @@ var Db = function(databaseName, topology, options) {
 
     // If classic auth delegate to auth command
     if(authMechanism == 'MONGODB-CR') {
-      topology.auth('mongocr', authdb, username, password, function(err, result) {
+      this.s.topology.auth('mongocr', authdb, username, password, function(err, result) {
         if(err) return handleCallback(callback, err, false);
         _callback(null, true);
       });
     } else if(authMechanism == 'PLAIN') {
-      topology.auth('plain', authdb, username, password, function(err, result) {
+      this.s.topology.auth('plain', authdb, username, password, function(err, result) {
         if(err) return handleCallback(callback, err, false);
         _callback(null, true);
       });
     } else if(authMechanism == 'MONGODB-X509') {
-      topology.auth('x509', authdb, username, password, function(err, result) {
+      this.s.topology.auth('x509', authdb, username, password, function(err, result) {
         if(err) return handleCallback(callback, err, false);
         _callback(null, true);
       });
     } else if(authMechanism == 'SCRAM-SHA-1') {
-      topology.auth('scram-sha-1', authdb, username, password, function(err, result) {
+      this.s.topology.auth('scram-sha-1', authdb, username, password, function(err, result) {
         if(err) return handleCallback(callback, err, false);
         _callback(null, true);
       });
     } else if(authMechanism == 'GSSAPI') {
       if(process.platform == 'win32') {
-        topology.auth('sspi', authdb, username, password, options, function(err, result) {
+        this.s.topology.auth('sspi', authdb, username, password, options, function(err, result) {
           if(err) return handleCallback(callback, err, false);
           _callback(null, true);
         });
       } else {
-        topology.auth('gssapi', authdb, username, password, options, function(err, result) {
+        this.s.topology.auth('gssapi', authdb, username, password, options, function(err, result) {
           if(err) return handleCallback(callback, err, false);
           _callback(null, true);
         });
       }
     } else if(authMechanism == 'DEFAULT') {
-      topology.auth('default', authdb, username, password, function(err, result) {
+      this.s.topology.auth('default', authdb, username, password, function(err, result) {
         if(err) return handleCallback(callback, err, false);
         _callback(null, true);
       });      
@@ -1313,6 +1344,7 @@ var Db = function(databaseName, topology, options) {
   topology.once('parseError', createListener('parseError', self));
   topology.once('open', createListener('open', self));
   topology.once('fullsetup', createListener('fullsetup', self));
+  topology.once('all', createListener('all', self));
 }
 
 inherits(Db, EventEmitter);
@@ -1431,7 +1463,7 @@ module.exports = Db;</code></pre>
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Wed Oct 29 2014 17:28:45 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Fri Nov 14 2014 15:29:48 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>
@@ -1659,6 +1691,8 @@ module.exports = Db;</code></pre>
             
             <span class="subtitle">Methods</span>
             
+                <li data-name="BulkWriteResult#getInsertedIds"><a href="BulkWriteResult.html#getInsertedIds">getInsertedIds</a></li>
+            
                 <li data-name="BulkWriteResult#getLastOp"><a href="BulkWriteResult.html#getLastOp">getLastOp</a></li>
             
                 <li data-name="BulkWriteResult#getRawResponse"><a href="BulkWriteResult.html#getRawResponse">getRawResponse</a></li>
@@ -1714,6 +1748,10 @@ module.exports = Db;</code></pre>
             
             <span class="subtitle">Typedefs</span>
             
+                <li data-name="Collection~bulkWriteOpCallback"><a href="Collection.html#bulkWriteOpCallback">bulkWriteOpCallback</a></li>
+            
+                <li data-name="Collection~BulkWriteOpResult"><a href="Collection.html#BulkWriteOpResult">BulkWriteOpResult</a></li>
+            
                 <li data-name="Collection~collectionResultCallback"><a href="Collection.html#collectionResultCallback">collectionResultCallback</a></li>
             
                 <li data-name="Collection~countCallback"><a href="Collection.html#countCallback">countCallback</a></li>
@@ -1733,9 +1771,15 @@ module.exports = Db;</code></pre>
             
                 <li data-name="Collection#aggregate"><a href="Collection.html#aggregate">aggregate</a></li>
             
+                <li data-name="Collection#bulkWrite"><a href="Collection.html#bulkWrite">bulkWrite</a></li>
+            
                 <li data-name="Collection#count"><a href="Collection.html#count">count</a></li>
             
                 <li data-name="Collection#createIndex"><a href="Collection.html#createIndex">createIndex</a></li>
+            
+                <li data-name="Collection#deleteMany"><a href="Collection.html#deleteMany">deleteMany</a></li>
+            
+                <li data-name="Collection#deleteOne"><a href="Collection.html#deleteOne">deleteOne</a></li>
             
                 <li data-name="Collection#distinct"><a href="Collection.html#distinct">distinct</a></li>
             
@@ -1794,10 +1838,6 @@ module.exports = Db;</code></pre>
                 <li data-name="Collection#reIndex"><a href="Collection.html#reIndex">reIndex</a></li>
             
                 <li data-name="Collection#remove"><a href="Collection.html#remove">remove</a></li>
-            
-                <li data-name="Collection#removeMany"><a href="Collection.html#removeMany">removeMany</a></li>
-            
-                <li data-name="Collection#removeOne"><a href="Collection.html#removeOne">removeOne</a></li>
             
                 <li data-name="Collection#rename"><a href="Collection.html#rename">rename</a></li>
             
@@ -2515,18 +2555,6 @@ module.exports = Db;</code></pre>
             
                 <li data-name="OrderedBulkOperation#insert"><a href="OrderedBulkOperation.html#insert">insert</a></li>
             
-                <li data-name="OrderedBulkOperation#remove"><a href="OrderedBulkOperation.html#remove">remove</a></li>
-            
-                <li data-name="OrderedBulkOperation#removeOne"><a href="OrderedBulkOperation.html#removeOne">removeOne</a></li>
-            
-                <li data-name="OrderedBulkOperation#replaceOne"><a href="OrderedBulkOperation.html#replaceOne">replaceOne</a></li>
-            
-                <li data-name="OrderedBulkOperation#update"><a href="OrderedBulkOperation.html#update">update</a></li>
-            
-                <li data-name="OrderedBulkOperation#updateOne"><a href="OrderedBulkOperation.html#updateOne">updateOne</a></li>
-            
-                <li data-name="OrderedBulkOperation#upsert"><a href="OrderedBulkOperation.html#upsert">upsert</a></li>
-            
             </ul>
             <ul class="events itemMembers">
             
@@ -2790,18 +2818,6 @@ module.exports = Db;</code></pre>
                 <li data-name="UnorderedBulkOperation#find"><a href="UnorderedBulkOperation.html#find">find</a></li>
             
                 <li data-name="UnorderedBulkOperation#insert"><a href="UnorderedBulkOperation.html#insert">insert</a></li>
-            
-                <li data-name="UnorderedBulkOperation#remove"><a href="UnorderedBulkOperation.html#remove">remove</a></li>
-            
-                <li data-name="UnorderedBulkOperation#removeOne"><a href="UnorderedBulkOperation.html#removeOne">removeOne</a></li>
-            
-                <li data-name="UnorderedBulkOperation#replaceOne"><a href="UnorderedBulkOperation.html#replaceOne">replaceOne</a></li>
-            
-                <li data-name="UnorderedBulkOperation#update"><a href="UnorderedBulkOperation.html#update">update</a></li>
-            
-                <li data-name="UnorderedBulkOperation#updateOne"><a href="UnorderedBulkOperation.html#updateOne">updateOne</a></li>
-            
-                <li data-name="UnorderedBulkOperation#upsert"><a href="UnorderedBulkOperation.html#upsert">upsert</a></li>
             
             </ul>
             <ul class="events itemMembers">

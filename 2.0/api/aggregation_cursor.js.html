@@ -133,244 +133,27 @@ var AggregationCursor = function(bson, ns, cmd, options, topology, topologyOptio
   // Set up
   Readable.call(this, {objectMode: true});
 
-  /**
-   * Set the batch size for the cursor.
-   * @method
-   * @param {number} value The batchSize for the cursor.
-   * @throws {MongoError}
-   * @return {AggregationCursor}
-   */
-  this.batchSize = function(value) {
-    if(state == AggregationCursor.CLOSED || self.isDead()) throw new MongoError("Cursor is closed");
-    if(typeof value != 'number') throw new MongoError("batchSize requires an integer");
-    if(cmd.cursor) cmd.cursor.batchSize = value;
-    this.cursorBatchSize = value;
-    return self;
+  // Internal state
+  this.s = {
+    // MaxTimeMS
+      maxTimeMS: maxTimeMS
+    // State
+    , state: state
+    // Stream options
+    , streamOptions: streamOptions
+    // BSON
+    , bson: bson
+    // Namespae
+    , ns: ns
+    // Command
+    , cmd: cmd
+    // Options
+    , options: options
+    // Topology
+    , topology: topology
+    // Topology Options
+    , topologyOptions: topologyOptions
   }
-
-  /**
-   * Add a geoNear stage to the aggregation pipeline
-   * @method
-   * @param {object} document The geoNear stage document.
-   * @return {AggregationCursor}
-   */
-  this.geoNear = function(document) {
-    cmd.pipeline.push({$geoNear: document});
-    return self;
-  }
-
-  /**
-   * Add a group stage to the aggregation pipeline
-   * @method
-   * @param {object} document The group stage document.
-   * @return {AggregationCursor}
-   */
-  this.group = function(document) {
-    cmd.pipeline.push({$group: document});
-    return self;
-  }
-
-  /**
-   * Add a limit stage to the aggregation pipeline
-   * @method
-   * @param {number} value The state limit value.
-   * @return {AggregationCursor}
-   */
-  this.limit = function(value) {
-    cmd.pipeline.push({$limit: value});
-    return self; 
-  }
-
-  /**
-   * Add a match stage to the aggregation pipeline
-   * @method
-   * @param {object} document The match stage document.
-   * @return {AggregationCursor}
-   */
-  this.match = function(document) {
-    cmd.pipeline.push({$match: document});
-    return self; 
-  }
-
-  /**
-   * Add a maxTimeMS stage to the aggregation pipeline
-   * @method
-   * @param {number} value The state maxTimeMS value.
-   * @return {AggregationCursor}
-   */
-  this.maxTimeMS = function(value) {
-    if(topology.lastIsMaster().minWireVersion > 2) {
-      cmd.maxTimeMS = value;
-    }
-    return self; 
-  }
-
-  /**
-   * Add a out stage to the aggregation pipeline
-   * @method
-   * @param {number} destination The destination name.
-   * @return {AggregationCursor}
-   */
-  this.out = function(destination) {
-    cmd.pipeline.push({$out: destination});
-    return self; 
-  }
-
-  /**
-   * Add a project stage to the aggregation pipeline
-   * @method
-   * @param {object} document The project stage document.
-   * @return {AggregationCursor}
-   */
-  this.project = function(document) {
-    cmd.pipeline.push({$project: document});
-    return self; 
-  }
-
-  /**
-   * Add a redact stage to the aggregation pipeline
-   * @method
-   * @param {object} document The redact stage document.
-   * @return {AggregationCursor}
-   */
-  this.redact = function(document) {
-    cmd.pipeline.push({$redact: document});
-    return self; 
-  }
-
-  /**
-   * Add a skip stage to the aggregation pipeline
-   * @method
-   * @param {number} value The state skip value.
-   * @return {AggregationCursor}
-   */
-  this.skip = function(value) {
-    cmd.pipeline.push({$skip: value});
-    return self; 
-  }
-
-  /**
-   * Add a sort stage to the aggregation pipeline
-   * @method
-   * @param {object} document The sort stage document.
-   * @return {AggregationCursor}
-   */
-  this.sort = function(document) {
-    cmd.pipeline.push({$sort: document});
-    return self; 
-  }
-
-  /**
-   * Add a unwind stage to the aggregation pipeline
-   * @method
-   * @param {number} field The unwind field name.
-   * @return {AggregationCursor}
-   */
-  this.unwind = function(field) {
-    cmd.pipeline.push({$unwind: field});
-    return self; 
-  }
-
-  this.get = this.toArray;
-
-  /**
-   * Get the next available document from the cursor, returns null if no more documents are available.
-   * @function AggregationCursor.prototype.next
-   * @param {AggregationCursor~resultCallback} callback The result callback.
-   * @throws {MongoError}
-   * @return {null}
-   */
-
-  /**
-   * The callback format for results
-   * @callback AggregationCursor~toArrayResultCallback
-   * @param {MongoError} error An error instance representing the error during the execution.
-   * @param {object[]} documents All the documents the satisfy the cursor.
-   */
-
-  /**
-   * Returns an array of documents. The caller is responsible for making sure that there
-   * is enough memory to store the results. Note that the array only contain partial
-   * results when this cursor had been previouly accessed. In that case,
-   * cursor.rewind() can be used to reset the cursor.
-   * @method AggregationCursor.prototype.toArray
-   * @param {AggregationCursor~toArrayResultCallback} callback The result callback.
-   * @throws {MongoError}
-   * @return {null}
-   */
-
-  /**
-   * The callback format for results
-   * @callback AggregationCursor~resultCallback
-   * @param {MongoError} error An error instance representing the error during the execution.
-   * @param {(object|null)} result The result object if the command was executed successfully.
-   */
-
-  /**
-   * Iterates over all the documents for this cursor. As with **{cursor.toArray}**,
-   * not all of the elements will be iterated if this cursor had been previouly accessed.
-   * In that case, **{cursor.rewind}** can be used to reset the cursor. However, unlike
-   * **{cursor.toArray}**, the cursor will only hold a maximum of batch size elements
-   * at any given time if batch size is specified. Otherwise, the caller is responsible
-   * for making sure that the entire result can fit the memory.
-   * @method AggregationCursor.prototype.each
-   * @param {AggregationCursor~resultCallback} callback The result callback.
-   * @throws {MongoError}
-   * @return {null}
-   */
-
-  /**
-   * Close the cursor, sending a KillCursor command and emitting close.
-   * @method AggregationCursor.prototype.close
-   * @param {AggregationCursor~resultCallback} [callback] The result callback.
-   * @return {null}
-   */   
-
-  /**
-   * Is the cursor closed
-   * @method AggregationCursor.prototype.isClosed
-   * @return {boolean}
-   */   
-
-  /**
-   * Execute the explain for the cursor
-   * @method AggregationCursor.prototype.explain
-   * @param {AggregationCursor~resultCallback} [callback] The result callback.
-   * @return {null}
-   */
-
-  /**
-   * Clone the cursor
-   * @function AggregationCursor.prototype.clone
-   * @return {AggregationCursor}
-   */     
-
-  /**
-   * Resets the cursor
-   * @function AggregationCursor.prototype.rewind
-   * @return {AggregationCursor}
-   */  
-
-  /**
-   * The callback format for the forEach iterator method
-   * @callback AggregationCursor~iteratorCallback
-   * @param {Object} doc An emitted document for the iterator
-   */
-
-  /**
-   * The callback error format for the forEach iterator method
-   * @callback AggregationCursor~endCallback
-   * @param {MongoError} error An error instance representing the error during the execution.
-   */
-
-  /*
-   * Iterates over all the documents for this cursor using the iterator, callback pattern.
-   * @method AggregationCursor.prototype.forEach
-   * @param {AggregationCursor~iteratorCallback} iterator The iteration callback.
-   * @param {AggregationCursor~endCallback} callback The end callback.
-   * @throws {MongoError}
-   * @return {null}
-   */
 }
 
 /**
@@ -401,11 +184,255 @@ var AggregationCursor = function(bson, ns, cmd, options, topology, topologyOptio
  * @type {null}
  */
 
-// Extend the Cursor
-inherits(AggregationCursor, CoreCursor);
+// // Extend the Cursor
+// inherits(AggregationCursor, CoreCursor);
 
 // Inherit from Readable
 inherits(AggregationCursor, Readable);  
+
+// Extend the Cursor
+for(var name in CoreCursor.prototype) {
+  AggregationCursor.prototype[name] = CoreCursor.prototype[name];
+}
+
+/**
+ * Set the batch size for the cursor.
+ * @method
+ * @param {number} value The batchSize for the cursor.
+ * @throws {MongoError}
+ * @return {AggregationCursor}
+ */
+AggregationCursor.prototype.batchSize = function(value) {
+  if(this.s.state == AggregationCursor.CLOSED || this.isDead()) throw new MongoError("Cursor is closed");
+  if(typeof value != 'number') throw new MongoError("batchSize requires an integer");
+  if(this.s.cmd.cursor) this.s.cmd.cursor.batchSize = value;
+  this.cursorBatchSize = value;
+  return this;
+}
+
+/**
+ * Add a geoNear stage to the aggregation pipeline
+ * @method
+ * @param {object} document The geoNear stage document.
+ * @return {AggregationCursor}
+ */
+AggregationCursor.prototype.geoNear = function(document) {
+  this.s.cmd.pipeline.push({$geoNear: document});
+  return this;
+}
+
+/**
+ * Add a group stage to the aggregation pipeline
+ * @method
+ * @param {object} document The group stage document.
+ * @return {AggregationCursor}
+ */
+AggregationCursor.prototype.group = function(document) {
+  this.s.cmd.pipeline.push({$group: document});
+  return this;
+}
+
+/**
+ * Add a limit stage to the aggregation pipeline
+ * @method
+ * @param {number} value The state limit value.
+ * @return {AggregationCursor}
+ */
+AggregationCursor.prototype.limit = function(value) {
+  this.s.cmd.pipeline.push({$limit: value});
+  return this;
+}
+
+/**
+ * Add a match stage to the aggregation pipeline
+ * @method
+ * @param {object} document The match stage document.
+ * @return {AggregationCursor}
+ */
+AggregationCursor.prototype.match = function(document) {
+  this.s.cmd.pipeline.push({$match: document});
+  return this;
+}
+
+/**
+ * Add a maxTimeMS stage to the aggregation pipeline
+ * @method
+ * @param {number} value The state maxTimeMS value.
+ * @return {AggregationCursor}
+ */
+AggregationCursor.prototype.maxTimeMS = function(value) {
+  if(this.s.topology.lastIsMaster().minWireVersion > 2) {
+    this.s.cmd.maxTimeMS = value;
+  }
+  return this;
+}
+
+/**
+ * Add a out stage to the aggregation pipeline
+ * @method
+ * @param {number} destination The destination name.
+ * @return {AggregationCursor}
+ */
+AggregationCursor.prototype.out = function(destination) {
+  this.s.cmd.pipeline.push({$out: destination});
+  return this;
+}
+
+/**
+ * Add a project stage to the aggregation pipeline
+ * @method
+ * @param {object} document The project stage document.
+ * @return {AggregationCursor}
+ */
+AggregationCursor.prototype.project = function(document) {
+  this.s.cmd.pipeline.push({$project: document});
+  return this;
+}
+
+/**
+ * Add a redact stage to the aggregation pipeline
+ * @method
+ * @param {object} document The redact stage document.
+ * @return {AggregationCursor}
+ */
+AggregationCursor.prototype.redact = function(document) {
+  this.s.cmd.pipeline.push({$redact: document});
+  return this;
+}
+
+/**
+ * Add a skip stage to the aggregation pipeline
+ * @method
+ * @param {number} value The state skip value.
+ * @return {AggregationCursor}
+ */
+AggregationCursor.prototype.skip = function(value) {
+  this.s.cmd.pipeline.push({$skip: value});
+  return this;
+}
+
+/**
+ * Add a sort stage to the aggregation pipeline
+ * @method
+ * @param {object} document The sort stage document.
+ * @return {AggregationCursor}
+ */
+AggregationCursor.prototype.sort = function(document) {
+  this.s.cmd.pipeline.push({$sort: document});
+  return this;
+}
+
+/**
+ * Add a unwind stage to the aggregation pipeline
+ * @method
+ * @param {number} field The unwind field name.
+ * @return {AggregationCursor}
+ */
+AggregationCursor.prototype.unwind = function(field) {
+  this.s.cmd.pipeline.push({$unwind: field});
+  return this;
+}
+
+AggregationCursor.prototype.get = AggregationCursor.prototype.toArray;
+
+/**
+ * Get the next available document from the cursor, returns null if no more documents are available.
+ * @function AggregationCursor.prototype.next
+ * @param {AggregationCursor~resultCallback} callback The result callback.
+ * @throws {MongoError}
+ * @return {null}
+ */
+
+/**
+ * The callback format for results
+ * @callback AggregationCursor~toArrayResultCallback
+ * @param {MongoError} error An error instance representing the error during the execution.
+ * @param {object[]} documents All the documents the satisfy the cursor.
+ */
+
+/**
+ * Returns an array of documents. The caller is responsible for making sure that there
+ * is enough memory to store the results. Note that the array only contain partial
+ * results when this cursor had been previouly accessed. In that case,
+ * cursor.rewind() can be used to reset the cursor.
+ * @method AggregationCursor.prototype.toArray
+ * @param {AggregationCursor~toArrayResultCallback} callback The result callback.
+ * @throws {MongoError}
+ * @return {null}
+ */
+
+/**
+ * The callback format for results
+ * @callback AggregationCursor~resultCallback
+ * @param {MongoError} error An error instance representing the error during the execution.
+ * @param {(object|null)} result The result object if the command was executed successfully.
+ */
+
+/**
+ * Iterates over all the documents for this cursor. As with **{cursor.toArray}**,
+ * not all of the elements will be iterated if this cursor had been previouly accessed.
+ * In that case, **{cursor.rewind}** can be used to reset the cursor. However, unlike
+ * **{cursor.toArray}**, the cursor will only hold a maximum of batch size elements
+ * at any given time if batch size is specified. Otherwise, the caller is responsible
+ * for making sure that the entire result can fit the memory.
+ * @method AggregationCursor.prototype.each
+ * @param {AggregationCursor~resultCallback} callback The result callback.
+ * @throws {MongoError}
+ * @return {null}
+ */
+
+/**
+ * Close the cursor, sending a KillCursor command and emitting close.
+ * @method AggregationCursor.prototype.close
+ * @param {AggregationCursor~resultCallback} [callback] The result callback.
+ * @return {null}
+ */   
+
+/**
+ * Is the cursor closed
+ * @method AggregationCursor.prototype.isClosed
+ * @return {boolean}
+ */   
+
+/**
+ * Execute the explain for the cursor
+ * @method AggregationCursor.prototype.explain
+ * @param {AggregationCursor~resultCallback} [callback] The result callback.
+ * @return {null}
+ */
+
+/**
+ * Clone the cursor
+ * @function AggregationCursor.prototype.clone
+ * @return {AggregationCursor}
+ */     
+
+/**
+ * Resets the cursor
+ * @function AggregationCursor.prototype.rewind
+ * @return {AggregationCursor}
+ */  
+
+/**
+ * The callback format for the forEach iterator method
+ * @callback AggregationCursor~iteratorCallback
+ * @param {Object} doc An emitted document for the iterator
+ */
+
+/**
+ * The callback error format for the forEach iterator method
+ * @callback AggregationCursor~endCallback
+ * @param {MongoError} error An error instance representing the error during the execution.
+ */
+
+/*
+ * Iterates over all the documents for this cursor using the iterator, callback pattern.
+ * @method AggregationCursor.prototype.forEach
+ * @param {AggregationCursor~iteratorCallback} iterator The iteration callback.
+ * @param {AggregationCursor~endCallback} callback The end callback.
+ * @throws {MongoError}
+ * @return {null}
+ */
 
 AggregationCursor.INIT = 0;
 AggregationCursor.OPEN = 1;
@@ -440,7 +467,7 @@ module.exports = AggregationCursor;</code></pre>
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Wed Oct 29 2014 17:28:45 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Fri Nov 14 2014 15:29:47 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>
@@ -668,6 +695,8 @@ module.exports = AggregationCursor;</code></pre>
             
             <span class="subtitle">Methods</span>
             
+                <li data-name="BulkWriteResult#getInsertedIds"><a href="BulkWriteResult.html#getInsertedIds">getInsertedIds</a></li>
+            
                 <li data-name="BulkWriteResult#getLastOp"><a href="BulkWriteResult.html#getLastOp">getLastOp</a></li>
             
                 <li data-name="BulkWriteResult#getRawResponse"><a href="BulkWriteResult.html#getRawResponse">getRawResponse</a></li>
@@ -723,6 +752,10 @@ module.exports = AggregationCursor;</code></pre>
             
             <span class="subtitle">Typedefs</span>
             
+                <li data-name="Collection~bulkWriteOpCallback"><a href="Collection.html#bulkWriteOpCallback">bulkWriteOpCallback</a></li>
+            
+                <li data-name="Collection~BulkWriteOpResult"><a href="Collection.html#BulkWriteOpResult">BulkWriteOpResult</a></li>
+            
                 <li data-name="Collection~collectionResultCallback"><a href="Collection.html#collectionResultCallback">collectionResultCallback</a></li>
             
                 <li data-name="Collection~countCallback"><a href="Collection.html#countCallback">countCallback</a></li>
@@ -742,9 +775,15 @@ module.exports = AggregationCursor;</code></pre>
             
                 <li data-name="Collection#aggregate"><a href="Collection.html#aggregate">aggregate</a></li>
             
+                <li data-name="Collection#bulkWrite"><a href="Collection.html#bulkWrite">bulkWrite</a></li>
+            
                 <li data-name="Collection#count"><a href="Collection.html#count">count</a></li>
             
                 <li data-name="Collection#createIndex"><a href="Collection.html#createIndex">createIndex</a></li>
+            
+                <li data-name="Collection#deleteMany"><a href="Collection.html#deleteMany">deleteMany</a></li>
+            
+                <li data-name="Collection#deleteOne"><a href="Collection.html#deleteOne">deleteOne</a></li>
             
                 <li data-name="Collection#distinct"><a href="Collection.html#distinct">distinct</a></li>
             
@@ -803,10 +842,6 @@ module.exports = AggregationCursor;</code></pre>
                 <li data-name="Collection#reIndex"><a href="Collection.html#reIndex">reIndex</a></li>
             
                 <li data-name="Collection#remove"><a href="Collection.html#remove">remove</a></li>
-            
-                <li data-name="Collection#removeMany"><a href="Collection.html#removeMany">removeMany</a></li>
-            
-                <li data-name="Collection#removeOne"><a href="Collection.html#removeOne">removeOne</a></li>
             
                 <li data-name="Collection#rename"><a href="Collection.html#rename">rename</a></li>
             
@@ -1524,18 +1559,6 @@ module.exports = AggregationCursor;</code></pre>
             
                 <li data-name="OrderedBulkOperation#insert"><a href="OrderedBulkOperation.html#insert">insert</a></li>
             
-                <li data-name="OrderedBulkOperation#remove"><a href="OrderedBulkOperation.html#remove">remove</a></li>
-            
-                <li data-name="OrderedBulkOperation#removeOne"><a href="OrderedBulkOperation.html#removeOne">removeOne</a></li>
-            
-                <li data-name="OrderedBulkOperation#replaceOne"><a href="OrderedBulkOperation.html#replaceOne">replaceOne</a></li>
-            
-                <li data-name="OrderedBulkOperation#update"><a href="OrderedBulkOperation.html#update">update</a></li>
-            
-                <li data-name="OrderedBulkOperation#updateOne"><a href="OrderedBulkOperation.html#updateOne">updateOne</a></li>
-            
-                <li data-name="OrderedBulkOperation#upsert"><a href="OrderedBulkOperation.html#upsert">upsert</a></li>
-            
             </ul>
             <ul class="events itemMembers">
             
@@ -1799,18 +1822,6 @@ module.exports = AggregationCursor;</code></pre>
                 <li data-name="UnorderedBulkOperation#find"><a href="UnorderedBulkOperation.html#find">find</a></li>
             
                 <li data-name="UnorderedBulkOperation#insert"><a href="UnorderedBulkOperation.html#insert">insert</a></li>
-            
-                <li data-name="UnorderedBulkOperation#remove"><a href="UnorderedBulkOperation.html#remove">remove</a></li>
-            
-                <li data-name="UnorderedBulkOperation#removeOne"><a href="UnorderedBulkOperation.html#removeOne">removeOne</a></li>
-            
-                <li data-name="UnorderedBulkOperation#replaceOne"><a href="UnorderedBulkOperation.html#replaceOne">replaceOne</a></li>
-            
-                <li data-name="UnorderedBulkOperation#update"><a href="UnorderedBulkOperation.html#update">update</a></li>
-            
-                <li data-name="UnorderedBulkOperation#updateOne"><a href="UnorderedBulkOperation.html#updateOne">updateOne</a></li>
-            
-                <li data-name="UnorderedBulkOperation#upsert"><a href="UnorderedBulkOperation.html#upsert">upsert</a></li>
             
             </ul>
             <ul class="events itemMembers">

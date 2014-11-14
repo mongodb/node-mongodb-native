@@ -82,6 +82,7 @@ var Logger = function(className, options) {
 
   // Current reference
   var self = this;
+  this.className = className;
 
   // Current logger
   if(currentLogger == null &amp;&amp; options.logger) {
@@ -96,94 +97,94 @@ var Logger = function(className, options) {
   }
 
   // Add all class names
-  if(filteredClasses[className] == null) classFilters[className] =  true;
+  if(filteredClasses[this.className] == null) classFilters[this.className] =  true;
+}
 
-  /**
-   * Log a message at the debug level
-   * @method
-   * @param {string} message The message to log
-   * @param {object} object additional meta data to log
-   * @return {null}
-   */
-  this.debug = function(message, object) {
-    if(this.isDebug() 
-      &amp;&amp; classFilters[className] &amp;&amp; (filteredClasses[className] || Object.keys(filteredClasses).length == 0)) {
-      var dateTime = new Date().getTime();
-      var msg = f("[%s-%s:%s] %s %s", 'DEBUG', className, pid, dateTime, message);        
-      var state = {
-        type: 'debug', message: message, className: className, pid: pid, date: dateTime
-      };
-      if(object) state.meta = object;
-      currentLogger(msg, state);
-    }
+/**
+ * Log a message at the debug level
+ * @method
+ * @param {string} message The message to log
+ * @param {object} object additional meta data to log
+ * @return {null}
+ */
+Logger.prototype.debug = function(message, object) {
+  if(this.isDebug() 
+    &amp;&amp; classFilters[this.className] &amp;&amp; (filteredClasses[this.className] || Object.keys(filteredClasses).length == 0)) {
+    var dateTime = new Date().getTime();
+    var msg = f("[%s-%s:%s] %s %s", 'DEBUG', this.className, pid, dateTime, message);        
+    var state = {
+      type: 'debug', message: message, className: this.className, pid: pid, date: dateTime
+    };
+    if(object) state.meta = object;
+    currentLogger(msg, state);
   }
+}
 
-  /**
-   * Log a message at the info level
-   * @method
-   * @param {string} message The message to log
-   * @param {object} object additional meta data to log
-   * @return {null}
-   */
-  this.info = function(message, object) {
-    if(this.isInfo()
-      &amp;&amp; classFilters[className] &amp;&amp; (filteredClasses[className] || Object.keys(filteredClasses).length == 0)) {
-      var dateTime = new Date().getTime();
-      var msg = f("[%s-%s:%s] %s %s", 'INFO', className, pid, dateTime, message);
-      var state = {
-        type: 'info', message: message, className: className, pid: pid, date: dateTime
-      };
-      if(object) state.meta = object;
-      currentLogger(msg, state);
-    }
-  },
-
-  /**
-   * Log a message at the error level
-   * @method
-   * @param {string} message The message to log
-   * @param {object} object additional meta data to log
-   * @return {null}
-   */
-  this.error = function(message, object) {
-    if(this.isError() 
-      &amp;&amp; classFilters[className] &amp;&amp; (filteredClasses[className] || Object.keys(filteredClasses).length == 0)) {
-      var dateTime = new Date().getTime();
-      var msg = f("[%s-%s:%s] %s %s", 'ERROR', className, pid, dateTime, message);
-      var state = {
-        type: 'error', message: message, className: className, pid: pid, date: dateTime
-      };
-      if(object) state.meta = object;
-      currentLogger(msg, state);
-    }
-  },
-
-  /**
-   * Is the logger set at info level
-   * @method
-   * @return {boolean}
-   */
-  this.isInfo = function() {
-    return level == 'info' || level == 'debug';
-  },
-
-  /**
-   * Is the logger set at error level
-   * @method
-   * @return {boolean}
-   */
-  this.isError = function() {
-    return level == 'error' || level == 'info' || level == 'debug';
-  },
-
-  /**
-   * Is the logger set at debug level
-   * @method
-   * @return {boolean}
-   */
-  this.isDebug = function() {
-    return level == 'debug';
+/**
+ * Log a message at the info level
+ * @method
+ * @param {string} message The message to log
+ * @param {object} object additional meta data to log
+ * @return {null}
+ */
+Logger.prototype.info = function(message, object) {
+  if(this.isInfo()
+    &amp;&amp; classFilters[this.className] &amp;&amp; (filteredClasses[this.className] || Object.keys(filteredClasses).length == 0)) {
+    var dateTime = new Date().getTime();
+    var msg = f("[%s-%s:%s] %s %s", 'INFO', this.className, pid, dateTime, message);
+    var state = {
+      type: 'info', message: message, className: this.className, pid: pid, date: dateTime
+    };
+    if(object) state.meta = object;
+    currentLogger(msg, state);
   }
+},
+
+/**
+ * Log a message at the error level
+ * @method
+ * @param {string} message The message to log
+ * @param {object} object additional meta data to log
+ * @return {null}
+ */
+Logger.prototype.error = function(message, object) {
+  if(this.isError() 
+    &amp;&amp; classFilters[this.className] &amp;&amp; (filteredClasses[this.className] || Object.keys(filteredClasses).length == 0)) {
+    var dateTime = new Date().getTime();
+    var msg = f("[%s-%s:%s] %s %s", 'ERROR', this.className, pid, dateTime, message);
+    var state = {
+      type: 'error', message: message, className: this.className, pid: pid, date: dateTime
+    };
+    if(object) state.meta = object;
+    currentLogger(msg, state);
+  }
+},
+
+/**
+ * Is the logger set at info level
+ * @method
+ * @return {boolean}
+ */
+Logger.prototype.isInfo = function() {
+  return level == 'info' || level == 'debug';
+},
+
+/**
+ * Is the logger set at error level
+ * @method
+ * @return {boolean}
+ */
+Logger.prototype.isError = function() {
+  return level == 'error' || level == 'info' || level == 'debug';
+},
+
+/**
+ * Is the logger set at debug level
+ * @method
+ * @return {boolean}
+ */
+Logger.prototype.isDebug = function() {
+  return level == 'debug';
 }
 
 /**
@@ -273,7 +274,7 @@ module.exports = Logger;</code></pre>
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Wed Oct 29 2014 17:28:45 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Fri Nov 14 2014 15:29:48 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>
@@ -501,6 +502,8 @@ module.exports = Logger;</code></pre>
             
             <span class="subtitle">Methods</span>
             
+                <li data-name="BulkWriteResult#getInsertedIds"><a href="BulkWriteResult.html#getInsertedIds">getInsertedIds</a></li>
+            
                 <li data-name="BulkWriteResult#getLastOp"><a href="BulkWriteResult.html#getLastOp">getLastOp</a></li>
             
                 <li data-name="BulkWriteResult#getRawResponse"><a href="BulkWriteResult.html#getRawResponse">getRawResponse</a></li>
@@ -556,6 +559,10 @@ module.exports = Logger;</code></pre>
             
             <span class="subtitle">Typedefs</span>
             
+                <li data-name="Collection~bulkWriteOpCallback"><a href="Collection.html#bulkWriteOpCallback">bulkWriteOpCallback</a></li>
+            
+                <li data-name="Collection~BulkWriteOpResult"><a href="Collection.html#BulkWriteOpResult">BulkWriteOpResult</a></li>
+            
                 <li data-name="Collection~collectionResultCallback"><a href="Collection.html#collectionResultCallback">collectionResultCallback</a></li>
             
                 <li data-name="Collection~countCallback"><a href="Collection.html#countCallback">countCallback</a></li>
@@ -575,9 +582,15 @@ module.exports = Logger;</code></pre>
             
                 <li data-name="Collection#aggregate"><a href="Collection.html#aggregate">aggregate</a></li>
             
+                <li data-name="Collection#bulkWrite"><a href="Collection.html#bulkWrite">bulkWrite</a></li>
+            
                 <li data-name="Collection#count"><a href="Collection.html#count">count</a></li>
             
                 <li data-name="Collection#createIndex"><a href="Collection.html#createIndex">createIndex</a></li>
+            
+                <li data-name="Collection#deleteMany"><a href="Collection.html#deleteMany">deleteMany</a></li>
+            
+                <li data-name="Collection#deleteOne"><a href="Collection.html#deleteOne">deleteOne</a></li>
             
                 <li data-name="Collection#distinct"><a href="Collection.html#distinct">distinct</a></li>
             
@@ -636,10 +649,6 @@ module.exports = Logger;</code></pre>
                 <li data-name="Collection#reIndex"><a href="Collection.html#reIndex">reIndex</a></li>
             
                 <li data-name="Collection#remove"><a href="Collection.html#remove">remove</a></li>
-            
-                <li data-name="Collection#removeMany"><a href="Collection.html#removeMany">removeMany</a></li>
-            
-                <li data-name="Collection#removeOne"><a href="Collection.html#removeOne">removeOne</a></li>
             
                 <li data-name="Collection#rename"><a href="Collection.html#rename">rename</a></li>
             
@@ -1357,18 +1366,6 @@ module.exports = Logger;</code></pre>
             
                 <li data-name="OrderedBulkOperation#insert"><a href="OrderedBulkOperation.html#insert">insert</a></li>
             
-                <li data-name="OrderedBulkOperation#remove"><a href="OrderedBulkOperation.html#remove">remove</a></li>
-            
-                <li data-name="OrderedBulkOperation#removeOne"><a href="OrderedBulkOperation.html#removeOne">removeOne</a></li>
-            
-                <li data-name="OrderedBulkOperation#replaceOne"><a href="OrderedBulkOperation.html#replaceOne">replaceOne</a></li>
-            
-                <li data-name="OrderedBulkOperation#update"><a href="OrderedBulkOperation.html#update">update</a></li>
-            
-                <li data-name="OrderedBulkOperation#updateOne"><a href="OrderedBulkOperation.html#updateOne">updateOne</a></li>
-            
-                <li data-name="OrderedBulkOperation#upsert"><a href="OrderedBulkOperation.html#upsert">upsert</a></li>
-            
             </ul>
             <ul class="events itemMembers">
             
@@ -1632,18 +1629,6 @@ module.exports = Logger;</code></pre>
                 <li data-name="UnorderedBulkOperation#find"><a href="UnorderedBulkOperation.html#find">find</a></li>
             
                 <li data-name="UnorderedBulkOperation#insert"><a href="UnorderedBulkOperation.html#insert">insert</a></li>
-            
-                <li data-name="UnorderedBulkOperation#remove"><a href="UnorderedBulkOperation.html#remove">remove</a></li>
-            
-                <li data-name="UnorderedBulkOperation#removeOne"><a href="UnorderedBulkOperation.html#removeOne">removeOne</a></li>
-            
-                <li data-name="UnorderedBulkOperation#replaceOne"><a href="UnorderedBulkOperation.html#replaceOne">replaceOne</a></li>
-            
-                <li data-name="UnorderedBulkOperation#update"><a href="UnorderedBulkOperation.html#update">update</a></li>
-            
-                <li data-name="UnorderedBulkOperation#updateOne"><a href="UnorderedBulkOperation.html#updateOne">updateOne</a></li>
-            
-                <li data-name="UnorderedBulkOperation#upsert"><a href="UnorderedBulkOperation.html#upsert">upsert</a></li>
             
             </ul>
             <ul class="events itemMembers">
