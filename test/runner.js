@@ -16,7 +16,7 @@ var replica_set_config = require('./configurations/replicasets').replica_set_con
 
 // Run with wired tiger
 var singleConf = {};
-if(argv.t = 'wiredtiger') {
+if(argv.t == 'wiredtiger') {
   singleConf.storageEngine = 'wiredtiger';
   argv.t = 'functional';
 }
