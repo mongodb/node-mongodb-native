@@ -67,3 +67,39 @@ exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommand = function(configur
   });
   // DOC_END
 }
+
+/**
+ * Make sure user can't clobber geoNear options
+ *
+ * @_class collection
+ * @_function geoNear
+ * @ignore
+ */
+exports.shouldNotAllowUserToClobberGeoNearWithOptions = function(configuration, test) {
+  var db = configuration.newDbInstance({w:0}, {poolSize:1});
+
+  // Establish connection to db
+  db.open(function(err, db) {
+   
+    // Fetch the collection
+    var collection = db.collection("simple_geo_near_command");
+
+    // Add a location based index
+    collection.ensureIndex({loc:"2d"}, function(err, result) {
+
+      // Save a new location tagged document
+      collection.insert([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], {w:1}, function(err, result) {
+        // Try to intentionally clobber the underlying geoNear option
+        var options = {query:{a:1}, num:1, geoNear: 'bacon', near: 'butter' };
+
+        // Use geoNear command to find document
+        collection.geoNear(50, 50, options, function(err, docs) {
+          test.equal(1, docs.results.length);
+
+          db.close();
+          test.done();
+        });
+      });
+    });
+  });
+};
