@@ -114,7 +114,6 @@ exports['Should correctly connect with default replicaset and socket options set
 
     var db = new Db('integration_test_', replSet, {w:0});
     db.open(function(err, p_db) {
-      console.dir(err)
       test.equal(null, err);
       // Get a connection
       var connection = db.serverConfig.connections()[0];
@@ -237,13 +236,10 @@ var ensureConnection = function(configuration, numberOfTries, callback) {
     {rs_name:configuration.replicasetName, socketOptions: {connectTimeoutMS: 1000}}
   );
 
-  // console.log("===================== ensureConnection 0 :: " + numberOfTries)
-
   if(numberOfTries <= 0) return callback(new Error("could not connect correctly"), null);
   // Open the db
   var db = new Db('integration_test_', replSet, {w:0});
   db.open(function(err, p_db) {
-    // console.log("===================== ensureConnection 1")
     // Close the connection
     db.close();
 
@@ -959,3 +955,98 @@ exports['Should give an error when using a two server seeds and no setName'] = {
     });
   }
 }
+
+var waitForPrimary = function(count, config, options, callback) {
+  var ReplSet = require('mongodb-core').ReplSet;
+  if(count == 0) return callback(new Error("could not connect"));
+  // Attempt to connect
+  var server = new ReplSet(config, options);
+  server.on('error', function(err) {
+    server.destroy();
+    
+    setTimeout(function() {
+      waitForPrimary(count - 1, config, options, callback);
+    }, 1000);
+  });
+
+  server.on('fullsetup', function(_server) {
+    server.destroy();
+    callback();
+  });
+
+  // Start connection
+  server.connect();
+}
+
+exports['Replicaset connection where a server is standalone'] = {
+  metadata: {
+    requires: {
+      topology: "replicaset"
+    }
+  },
+
+  test: function(configuration, test) {
+    var Server = configuration.require.Server
+      , ReplSet = configuration.require.ReplSet
+      , ServerManager = require('mongodb-core').ServerManager
+      , MongoClient = configuration.require.MongoClient
+      , manager = configuration.manager;
+
+    // State
+    var joined = {'primary':[], 'secondary': [], 'arbiter': [], 'passive': []};
+    var left = {'primary':[], 'secondary': [], 'arbiter': [], 'passive': []};
+    // Get the primary server
+    manager.getServerManagerByType('primary', function(err, primaryServerManager) {
+      test.equal(null, err);
+
+      // Get the secondary server
+      manager.getServerManagerByType('secondary', function(err, serverManager) {
+        test.equal(null, err);
+
+        // Start a new server manager
+        var nonReplSetMember = new ServerManager({
+            host: primaryServerManager.host
+          , port: primaryServerManager.port
+          , dbpath: primaryServerManager.dbpath
+          , logpath: primaryServerManager.logpath
+        });
+
+        var config = [{
+            host: serverManager.host
+          , port: serverManager.port
+        }];
+
+        var options = { 
+          setName: configuration.replicasetName
+        };
+
+        // Stop the primary
+        primaryServerManager.stop(function(err, r) {
+
+          // Start a non replset member
+          nonReplSetMember.start(function() {
+
+            // Wait for primary
+            waitForPrimary(30, config, options, function(err, r) {
+              test.equal(null, err);
+
+              var url = f("mongodb://localhost:%s,localhost:%s,localhost:%s/integration_test_?replicaSet=%s"
+                    , configuration.port, configuration.port + 1, configuration.port + 2, configuration.replicasetName)
+              // Attempt to connect using MongoClient uri
+              MongoClient.connect(url, function(err, db) {
+                test.equal(null, err);
+                test.ok(db.serverConfig instanceof ReplSet);
+
+                // Stop the normal server
+                nonReplSetMember.stop(function() {
+                  restartAndDone(configuration, test);
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  }
+}
+

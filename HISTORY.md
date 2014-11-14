@@ -1,3 +1,10 @@
+2.0.6 2014-11-14
+----------------
+- Refactored code to be prototype based instead of privileged methods.
+- Bumped mongodb-core to 1.1.1 to take advantage of the prototype based refactorings.
+- Implemented missing aspects of the CRUD specification.
+- Fixed documentation issues.
+
 2.0.5 2014-10-29
 ----------------
 - Minor fixes to documentation and generation of documentation.

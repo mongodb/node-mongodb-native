@@ -355,6 +355,8 @@ exports['Should Correctly group using replicaset'] = {
     var manager = configuration.manager;
 
     MongoClient.connect(url, function(err, db) {
+      test.equal(null, err);
+
       var collection = db.collection('testgroup_replicaset', {
             readPreference: ReadPreference.SECONDARY
           , w:2, wtimeout: 10000

@@ -11,6 +11,7 @@ var Runner = require('integra').Runner
   , FileFilter = require('integra').FileFilter
   , TestNameFilter = require('integra').TestNameFilter
   , path = require('path')
+  , rimraf = require('rimraf')
   , fs = require('fs')
   , f = require('util').format;
 
@@ -455,6 +456,13 @@ if(argv.t == 'functional') {
 
   // Add travis filter
   runner.plugin(new TravisFilter());
+
+  // Remove db directories
+  try {
+    rimraf.sync('./data');
+    rimraf.sync('./db');
+  } catch(err) {
+  }
 
   // Run the configuration
   runner.run(config);
