@@ -2,6 +2,11 @@
 Changelog
 =========
 
+1.4.20 2014-11-14
+-----------------
+- Removed collectionsInfo method as it's incompatible with 2.8 or higher storage engines due to using namespace collections and a cursor.
+- Fix LearnBoost/mongoose#2313: don't let user accidentally clobber geoNear params (Issue #1223, https://github.com/vkarpov15)
+
 1.4.19 2014-10-09
 -----------------
 - Use findOne instead of find followed by nextObject (Issue #1216, https://github.com/sergeyksv).
