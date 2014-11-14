@@ -59,6 +59,9 @@ var ServerManager = exports.ServerManager = function(options) {
   this.ssl_server_pem_pass = options['ssl_server_pem_pass'] != null ? options['ssl_server_pem_pass'] : null;
   this.ssl_weak_certificate_validation = options['ssl_weak_certificate_validation'] != null ? options['ssl_weak_certificate_validation'] : null;
   this.ssl_fips = options['ssl_fips'] != null ? options['ssl_fips'] : null;
+
+  // Storage engine
+  this.storageEngine = options['storageEngine'];
   
   // Ca settings for ssl
   this.ssl_ca = options['ssl_ca'] != null ? options['ssl_ca'] : null;
@@ -100,7 +103,7 @@ ServerManager.prototype.start = function(killall, options, callback) {
   // Create start command
   var startCmd = generateStartCmd(this, {configserver:self.configServer, log_path: self.log_path
     , db_path: self.db_path, port: self.port, journal: self.journal, auth:self.auth, ssl:self.ssl
-    , master:self.master, scram: self.scram});
+    , master:self.master, scram: self.scram, storageEngine: this.storageEngine});
 
   exec(killall ? 'killall -15 mongod' : '', function(err, stdout, stderr) {
     if(purgedirectories) {
@@ -127,7 +130,9 @@ ServerManager.prototype.start = function(killall, options, callback) {
             if(err) throw err;
             // Mark server as running
             self.up = true;
-            self.pid = fs.readFileSync(path.join(self.db_path, "mongod.lock"), 'ascii').trim();
+            try {
+              self.pid = fs.readFileSync(path.join(self.db_path, "mongod.lock"), 'ascii').trim();              
+            } catch(err) {}
             // Callback
             callback();
           });
@@ -204,6 +209,7 @@ var generateStartCmd = function(self, options) {
   startCmd = startCmd + " --setParameter enableTestCommands=1";
   startCmd = options['master'] ? startCmd + " --master" : startCmd;
   startCmd = options['scram'] ? startCmd + " --setParameter authenticationMechanisms=SCRAM-SHA-1" : startCmd;
+  startCmd = options['storageEngine'] ? startCmd + " --storageEngine=" + options['storageEngine'] : startCmd;
 
   // If we have ssl defined set up with test certificate
   if(options['ssl']) {
@@ -230,7 +236,7 @@ var generateStartCmd = function(self, options) {
       startCmd = startCmd + " --sslFIPSMode"
     }
   }
-  // console.log(startCmd)
+  console.log(startCmd)
 
   // Return start command
   return startCmd;

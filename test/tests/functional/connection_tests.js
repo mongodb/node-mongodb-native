@@ -298,26 +298,26 @@ exports.shouldCorrectlyReturnFalseOnIsConnectBeforeConnectionHappened = function
   test.done();
 }
 
-/**
- * @ignore
- */
-exports['Should Force reconnect event by force closing connection'] = function(configuration, test) {
-  var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:true});
-  db.open(function(err, db) {
-    test.equal(null, err);
+// /**
+//  * @ignore
+//  */
+// exports['Should Force reconnect event by force closing connection'] = function(configuration, test) {
+//   var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:true});
+//   db.open(function(err, db) {
+//     test.equal(null, err);
 
-    var reconnectCalled = false;
-    // Add listener to the serverConfig
-    db.serverConfig.on('reconnect', function(err) {
-      reconnectCalled = true;
-    });
+//     var reconnectCalled = false;
+//     // Add listener to the serverConfig
+//     db.serverConfig.on('reconnect', function(err) {
+//       reconnectCalled = true;
+//     });
 
-    configuration.restart(function() {
-      db.collection('forceReconnectEvent').insert({a:1}, function(err, result) {
-        test.ok(reconnectCalled);
-        db.close();
-        test.done();
-      });
-    });
-  });  
-}
+//     configuration.restart(function() {
+//       db.collection('forceReconnectEvent').insert({a:1}, function(err, result) {
+//         test.ok(reconnectCalled);
+//         db.close();
+//         test.done();
+//       });
+//     });
+//   });  
+// }

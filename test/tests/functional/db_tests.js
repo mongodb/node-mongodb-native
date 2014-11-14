@@ -471,47 +471,6 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallback =
 }
 
 /**
- * An example of retrieving the information of all the collections.
- *
- * @_class db
- * @_function collectionsInfo
- * @ignore
- */
-exports.shouldCorrectlyRetrieveCollectionInformation = function(configuration, test) {
-  var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:false});
-
-  // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
-  // DOC_START
-  // Establish connection to db
-  db.open(function(err, db) {
-    test.equal(null, err);
-
-    // Create a collection
-    db.createCollection('test_collections_info', function(err, r) {
-      test.equal(null, err);
-
-      // Return the information of a single collection name
-      db.collectionsInfo("test_collections_info").toArray(function(err, items) {
-        test.equal(1, items.length);
-
-        // Return the information of a all collections, using the callback format
-        db.collectionsInfo(function(err, cursor) {
-
-          // Turn the cursor into an array of results
-          cursor.toArray(function(err, items) {
-            test.ok(items.length > 0);
-
-            db.close();
-            test.done();
-          });
-        })
-      });
-    });
-  });
-  // DOC_END
-}
-
-/**
  * An example of retrieving the collection names for a database.
  *
  * @_class db

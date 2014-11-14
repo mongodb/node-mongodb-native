@@ -14,12 +14,19 @@ var replica_set_config = require('./configurations/replicasets').replica_set_con
   , replica_set_config_auth = require('./configurations/replicasets').replica_set_config_auth
   , none = require('./configurations/none').none;
 
+// Run with wired tiger
+var singleConf = {};
+if(argv.t = 'wiredtiger') {
+  singleConf.storageEngine = 'wiredtiger';
+  argv.t = 'functional';
+}
+
 // 
 //  Configurations
 //
 var configurations = Configuration  
   // Single server configuration
-  .add('single_server', single_server_config())
+  .add('single_server', single_server_config(singleConf))
   .add('single_server_auth', single_server_config({auth:true}))
   // Simple Replicaset Configuration
   .add('replica_set', replica_set_config())
@@ -57,13 +64,12 @@ if(argv.t == 'functional') {
   });
 
   replicaset_runners.runner_auth.on('end', function() {
-    process.exit(0);
-    // sharded_runners.runner_auth.run('sharded_auth', run_options);
+    sharded_runners.runner_auth.run('sharded_auth', run_options);
   });
 
-  // sharded_runners.runner_auth.on('end', function() {
-  //   process.exit(0);
-  // });
+  sharded_runners.runner_auth.on('end', function() {
+    process.exit(0);
+  });
 
   // Start chain of auth tests
   standalone_runners.runner_auth.run('single_server_auth', run_options);
