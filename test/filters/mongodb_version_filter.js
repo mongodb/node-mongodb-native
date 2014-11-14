@@ -18,7 +18,7 @@ var MongoDBVersionFilter = function(options) {
       db.command({buildInfo:true}, function(err, result) {
         if(err) throw err;
         mongodb_version = result.versionArray.slice(0, 3).join('.');
-        version = result.result.version;
+        version = result.version;
         db.close();
         callback();
       });

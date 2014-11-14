@@ -8192,25 +8192,26 @@ exports['Should correctly execute bulkWrite operation'] = {
       // Get the collection
       var col = db.collection('bulk_write');
       col.bulkWrite([
-          { insertOne: { a: 1 } }
-        , { insertMany: [{ g: 1 }, { g: 2 }] }
-        , { updateOne: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
-        , { updateMany: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
-        , { removeOne: { q: {c:1} } }
-        , { removeMany: { q: {c:1} } }]
+          { insertOne: { document: { a: 1 } } }
+        , { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+        , { updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+        , { deleteOne: { filter: {c:1} } }
+        , { deleteMany: { filter: {c:1} } }
+        , { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}]
       , {ordered:true, w:1}, function(err, r) {
         test.equal(null, err);
-        test.equal(3, r.nInserted);
-        test.equal(1, r.nUpserted);
+        test.equal(1, r.nInserted);
+        test.equal(2, r.nUpserted);
         test.equal(0, r.nRemoved);
 
         // Crud fields
-        test.equal(3, r.insertedCount);
+        test.equal(1, r.insertedCount);
+        test.equal(1, Object.keys(r.insertedIds).length);
         test.equal(1, r.matchedCount);
         test.equal(0, r.modifiedCount);
         test.equal(0, r.deletedCount);
-        test.equal(1, r.upsertedCount);
-        test.equal(1, r.upsertedIds.length);
+        test.equal(2, r.upsertedCount);
+        test.equal(2, Object.keys(r.upsertedIds).length);
 
         // Ordered bulk operation
         db.close();

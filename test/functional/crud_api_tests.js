@@ -365,8 +365,8 @@ exports['should correctly execute insert methods using crud api'] = {
             , { insertMany: [{ g: 1 }, { g: 2 }] }
             , { updateOne: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
             , { updateMany: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
-            , { removeOne: { q: {c:1} } }
-            , { removeMany: { q: {c:1} } }]
+            , { deleteOne: { q: {c:1} } }
+            , { deleteMany: { q: {c:1} } }]
           , {ordered:false, w:1}, function(err, r) {
             test.equal(null, err);
             test.equal(3, r.nInserted);
@@ -375,11 +375,46 @@ exports['should correctly execute insert methods using crud api'] = {
 
             // Crud fields
             test.equal(3, r.insertedCount);
+            test.equal(3, Object.keys(r.insertedIds).length);
             test.equal(1, r.matchedCount);
-            test.equal(0, r.modifiedCount);
             test.equal(1, r.deletedCount);
             test.equal(1, r.upsertedCount);
-            test.equal(1, r.upsertedIds.length);
+            test.equal(1, Object.keys(r.upsertedIds).length);
+
+            // Ordered bulk operation
+            bulkWriteUnOrderedSpec();
+          });
+        });
+      }
+
+      //
+      // Bulk write method unordered
+      // -------------------------------------------------
+      var bulkWriteUnOrderedSpec = function() {
+        db.collection('t2_6').insertMany([{c:1}, {c:2}, {c:3}], {w:1}, function(err, r) {
+          test.equal(null, err);
+          test.equal(3, r.result.n);
+  
+          db.collection('t2_6').bulkWrite([
+              { insertOne: { document: { a: 1 } } }
+            , { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+            , { updateMany: { filter: {a:3}, update: {$set: {a:3}}, upsert:true } }
+            , { deleteOne: { filter: {c:1} } }
+            , { deleteMany: { filter: {c:2} } }
+            , { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true } }]
+          , {ordered:false, w:1}, function(err, r) {
+            test.equal(null, err);
+            test.equal(1, r.nInserted);
+            test.equal(2, r.nUpserted);
+            test.equal(2, r.nRemoved);
+
+            // Crud fields
+            test.equal(1, r.insertedCount);
+            test.equal(1, Object.keys(r.insertedIds).length);
+            test.equal(1, r.matchedCount);
+            test.equal(2, r.deletedCount);
+            test.equal(2, r.upsertedCount);
+            test.equal(2, Object.keys(r.upsertedIds).length);
 
             // Ordered bulk operation
             bulkWriteOrdered();
@@ -391,17 +426,17 @@ exports['should correctly execute insert methods using crud api'] = {
       // Bulk write method ordered
       // -------------------------------------------------
       var bulkWriteOrdered = function() {
-        db.collection('t2_6').insertMany([{c:1}], {w:1}, function(err, r) {
+        db.collection('t2_7').insertMany([{c:1}], {w:1}, function(err, r) {
           test.equal(null, err);
           test.equal(1, r.result.n);
   
-          db.collection('t2_6').bulkWrite([
+          db.collection('t2_7').bulkWrite([
               { insertOne: { a: 1 } }
             , { insertMany: [{ g: 1 }, { g: 2 }] }
             , { updateOne: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
             , { updateMany: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
-            , { removeOne: { q: {c:1} } }
-            , { removeMany: { q: {c:1} } }]
+            , { deleteOne: { q: {c:1} } }
+            , { deleteMany: { q: {c:1} } }]
           , {ordered:true, w:1}, function(err, r) {
             test.equal(null, err);
             test.equal(3, r.nInserted);
@@ -410,11 +445,45 @@ exports['should correctly execute insert methods using crud api'] = {
 
             // Crud fields
             test.equal(3, r.insertedCount);
+            test.equal(3, Object.keys(r.insertedIds).length);
             test.equal(1, r.matchedCount);
-            test.equal(0, r.modifiedCount);
             test.equal(1, r.deletedCount);
             test.equal(1, r.upsertedCount);
-            test.equal(1, r.upsertedIds.length);
+            test.equal(1, Object.keys(r.upsertedIds).length);
+
+            bulkWriteOrderedCrudSpec();
+          });
+        });
+      }
+
+      //
+      // Bulk write method ordered
+      // -------------------------------------------------
+      var bulkWriteOrderedCrudSpec = function() {
+        db.collection('t2_8').insertMany([{c:1}], {w:1}, function(err, r) {
+          test.equal(null, err);
+          test.equal(1, r.result.n);
+  
+          db.collection('t2_8').bulkWrite([
+              { insertOne: { document: { a: 1 }} }
+            , { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+            , { updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+            , { deleteOne: { filter: {c:1} } }
+            , { deleteMany: { filter: {c:1} } }
+            , { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true } }]
+          , {ordered:true, w:1}, function(err, r) {
+            // test.equal(null, err);
+            test.equal(1, r.nInserted);
+            test.equal(2, r.nUpserted);
+            test.equal(1, r.nRemoved);
+
+            // Crud fields
+            test.equal(1, r.insertedCount);
+            test.equal(1, Object.keys(r.insertedIds).length);
+            test.equal(1, r.matchedCount);
+            test.equal(1, r.deletedCount);
+            test.equal(2, r.upsertedCount);
+            test.equal(2, Object.keys(r.upsertedIds).length);
 
             db.close();
             test.done();
@@ -564,7 +633,7 @@ exports['should correctly execute remove methods using crud api'] = {
             test.equal(null, err);
             test.equal(1, r.result.n);
 
-            removeOne();
+            deleteOne();
           });
         });
       }
@@ -572,18 +641,18 @@ exports['should correctly execute remove methods using crud api'] = {
       //
       // Update one method
       // -------------------------------------------------
-      var removeOne = function() {
+      var deleteOne = function() {
         db.collection('t4_2').insertMany([{a:1}, {a:1}], {w:1}, function(err, r) {
           test.equal(null, err);
           test.equal(2, r.result.n);
 
-          db.collection('t4_2').removeOne({ a: 1 }
+          db.collection('t4_2').deleteOne({ a: 1 }
             , function(err, r) {
               test.equal(null, err);
               test.equal(1, r.result.n);
               test.equal(1, r.deletedCount);
               
-              removeMany();
+              deleteMany();
           });
         });
       }
@@ -591,12 +660,12 @@ exports['should correctly execute remove methods using crud api'] = {
       //
       // Update many method
       // -------------------------------------------------
-      var removeMany = function() {
+      var deleteMany = function() {
         db.collection('t4_3').insertMany([{a:1}, {a:1}], {w:1}, function(err, r) {
           test.equal(null, err);
           test.equal(2, r.result.n);
 
-          db.collection('t4_3').removeMany({ a: 1 }
+          db.collection('t4_3').deleteMany({ a: 1 }
             , function(err, r) {
               test.equal(null, err);
               test.equal(2, r.result.n);
