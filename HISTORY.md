@@ -4,6 +4,8 @@
 - Bumped mongodb-core to 1.1.1 to take advantage of the prototype based refactorings.
 - Implemented missing aspects of the CRUD specification.
 - Fixed documentation issues.
+- Fixed global leak REFERENCE_BY_ID in gridfs grid_store (Issue #1225, https://github.com/j)
+- Fix LearnBoost/mongoose#2313: don't let user accidentally clobber geoNear params (Issue #1223, https://github.com/vkarpov15)
 
 2.0.5 2014-10-29
 ----------------
