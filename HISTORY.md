@@ -1,3 +1,8 @@
+1.1.2 20-11-2014
+----------------
+- Correctly encoding UTF8 collection names on wire protocol messages.
+- Added emitClose parameter to topology destroy methods to allow users to specify that they wish the topology to emit the close event to any listeners.
+
 1.1.1 14-11-2014
 ----------------
 - Refactored code to use prototype instead of privileged methods.
