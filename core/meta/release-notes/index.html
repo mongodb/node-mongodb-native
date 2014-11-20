@@ -226,7 +226,14 @@
 
 
 
-<h2 id="toc_0">1.1.1 14-11-2014</h2>
+<h2 id="toc_0">1.1.2 20-11-2014</h2>
+
+<ul>
+<li>Correctly encoding UTF8 collection names on wire protocol messages.</li>
+<li>Added emitClose parameter to topology destroy methods to allow users to specify that they wish the topology to emit the close event to any listeners.</li>
+</ul>
+
+<h2 id="toc_1">1.1.1 14-11-2014</h2>
 
 <ul>
 <li>Refactored code to use prototype instead of privileged methods.</li>
@@ -234,38 +241,38 @@
 <li>Several deopt optimizations for v8 to improve performance and reduce GC pauses.</li>
 </ul>
 
-<h2 id="toc_1">1.0.5 29-10-2014</h2>
+<h2 id="toc_2">1.0.5 29-10-2014</h2>
 
 <ul>
 <li>Fixed issue with wrong namespace being created for command cursors.</li>
 </ul>
 
-<h2 id="toc_2">1.0.4 24-10-2014</h2>
+<h2 id="toc_3">1.0.4 24-10-2014</h2>
 
 <ul>
 <li>switched from using shift for the cursor due to bad slowdown on big batchSizes as shift causes entire array to be copied on each call.</li>
 </ul>
 
-<h2 id="toc_3">1.0.3 21-10-2014</h2>
+<h2 id="toc_4">1.0.3 21-10-2014</h2>
 
 <ul>
 <li>fixed error issuing problem on cursor.next when iterating over a huge dataset with a very small batchSize.</li>
 </ul>
 
-<h2 id="toc_4">1.0.2 07-10-2014</h2>
+<h2 id="toc_5">1.0.2 07-10-2014</h2>
 
 <ul>
 <li>fullsetup is now defined as a primary and secondary being available allowing for all read preferences to be satisfied.</li>
 <li>fixed issue with replset_state logging.</li>
 </ul>
 
-<h2 id="toc_5">1.0.1 07-10-2014</h2>
+<h2 id="toc_6">1.0.1 07-10-2014</h2>
 
 <ul>
 <li>Dependency issue solved</li>
 </ul>
 
-<h2 id="toc_6">1.0.0 07-10-2014</h2>
+<h2 id="toc_7">1.0.0 07-10-2014</h2>
 
 <ul>
 <li>Initial release of mongodb-core</li>

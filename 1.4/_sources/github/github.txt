@@ -111,7 +111,7 @@ Object Document Modeling Libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 16:32:37 on 14/10/2014
+           - 16:16:37 on 19/10/2014
          * - **Homepage**
            - http://http://mongoosejs.com
          * - **Url**
@@ -119,9 +119,9 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/LearnBoost/mongoose.git
          * - **Forks**
-           - 844
+           - 850
          * - **Watchers**
-           - 5746
+           - 5786
 
 .. topic:: mongo-model
 
@@ -214,9 +214,9 @@ Content Management Systems
          * - **Clone Url**
            - https://github.com/cliftonc/calipso.git
          * - **Forks**
-           - 285
+           - 284
          * - **Watchers**
-           - 1515
+           - 1516
 
 Grid FS libraries or tools
 --------------------------
@@ -397,7 +397,7 @@ REST api's around MongoDB or resource based libraries
          :header-rows: 0
 
          * - **Activity Level**
-           - .. image:: ../static/active.png
+           - .. image:: ../static/nonactive.png
          * - **Last push**
            - 17:24:49 on 18/6/2014
          * - **Homepage**
@@ -407,7 +407,7 @@ REST api's around MongoDB or resource based libraries
          * - **Clone Url**
            - https://github.com/tdegrunt/mongodb-rest.git
          * - **Forks**
-           - 103
+           - 104
          * - **Watchers**
            - 336
 
@@ -556,7 +556,7 @@ Queue libraries using MongoDB
          * - **Forks**
            - 6
          * - **Watchers**
-           - 95
+           - 96
 
 Logging libraries or applications
 ---------------------------------
@@ -678,7 +678,7 @@ General frameworks over MongoDB
          * - **Clone Url**
            - https://github.com/evanp/databank.git
          * - **Forks**
-           - 4
+           - 5
          * - **Watchers**
            - 42
 
@@ -753,9 +753,9 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 392
+           - 391
          * - **Watchers**
-           - 3421
+           - 3422
 
 Libraries for the connect middleware
 ------------------------------------
@@ -802,9 +802,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 176
+           - 175
          * - **Watchers**
-           - 616
+           - 621
 
 Libraries or applications for continous integration
 ---------------------------------------------------
