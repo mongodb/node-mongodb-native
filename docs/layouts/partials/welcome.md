@@ -1,10 +1,10 @@
 ## What is Node.js Native?
 
-Node.js Native is the MongoDB official Node.js driver allowing you to use MongoDB in you applications.
+Node.js Native is the MongoDB official Node.js driver allowing you to use MongoDB in your applications.
 
-## What does Node.js Native?
+## What does Node.js Native do?
 
-The Node.js driver handles the connections to a single MongoDB server, a replicaset or a set of Mongos proxies in a sharded system. It let's your application interact with the server and lets it perform operations against the database.
+The Node.js driver handles the connections to a single MongoDB server, a replicaset or a set of Mongos proxies in a sharded system. It lets your application interact with the server and lets it perform operations against the database.
 
 ## Next Steps
 
@@ -12,7 +12,7 @@ The Node.js driver handles the connections to a single MongoDB server, a replica
  * [Important Changes from 1.X to 2.X](../../meta/changes-from-1.0)
  * [Install Driver](../../overview/installing)
  * [Quick start](../../overview/quickstart)
- * [MongoDB Documentationo](http://mongodb.org/)
+ * [MongoDB Documentation](http://mongodb.org/)
  * [Join the Mailing List](../../community/mailing-list)
  * [Star us on GitHub](https://github.com/mongodb/node-mongodb-native)
 
