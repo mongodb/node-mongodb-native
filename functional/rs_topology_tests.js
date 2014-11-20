@@ -67,7 +67,7 @@ exports['Discover passives'] = {
           host: serverManager.host
         , port: serverManager.port
       }], { 
-        setName: configuration.setName 
+        setName: configuration.setName
       });
 
       server.on('joined', function(_type, _server) {
