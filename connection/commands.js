@@ -135,12 +135,7 @@ Query.prototype.toBinUnified = function() {
   index = index + 4;
 
   // Write collection name
-  // index = index + _buffer.write(ns, index, 'utf8') + 1;
-  for(var i = 0; i < this.ns.length; i++) {
-    _buffer[index + i] = this.ns.charCodeAt(i);
-  }
-  index = index + this.ns.length + 1;
-
+  index = index + _buffer.write(this.ns, index, 'utf8') + 1;
   _buffer[index - 1] = 0;
 
   // Write header information flags numberToSkip
@@ -265,11 +260,7 @@ GetMore.prototype.toBinUnified = function() {
   index = index + 4;
 
   // Write collection name
-  // index = index + _buffer.write(ns, index, 'utf8') + 1;
-  for(var i = 0; i < this.ns.length; i++) {
-    _buffer[index + i] = this.ns.charCodeAt(i);
-  }
-  index = index + this.ns.length + 1;
+  index = index + _buffer.write(this.ns, index, 'utf8') + 1;
   _buffer[index - 1] = 0;
 
   // Write batch size

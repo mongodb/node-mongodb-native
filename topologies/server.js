@@ -593,9 +593,11 @@ Server.prototype.connect = function(_options) {
  * Destroy the server connection
  * @method
  */
-Server.prototype.destroy = function() {
+Server.prototype.destroy = function(emitClose) {
   var self = this;
   if(self.s.logger.isDebug()) self.s.logger.debug(f('destroy called on server %s', self.name));
+  // Emit close
+  if(emitClose && self.listeners('close').length > 0) self.emit('close', self);
   // Set state as destroyed
   self.s.state = DESTROYED;
   // Close the pool

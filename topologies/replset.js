@@ -648,10 +648,15 @@ ReplSet.prototype.isConnected = function(options) {
  * Destroy the server connection
  * @method
  */
-ReplSet.prototype.destroy = function() {
+ReplSet.prototype.destroy = function(emitClose) {
   var self = this;
   if(this.s.logger.isInfo()) this.s.logger.info(f('[%s] destroyed', this.s.id));
   this.s.replState.state = DESTROYED;
+
+  // Emit close
+  if(emitClose && self.listeners('close').length > 0) self.emit('close', self);
+
+  // Destroy state
   this.s.replState.destroy();
 
   // Clear out any listeners
