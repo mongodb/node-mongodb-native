@@ -1,3 +1,7 @@
+1.4.22 2014-11-20
+-----------------
+- NODE-184, Correct message size validation
+
 1.4.20 2014-11-14
 -----------------
 - Removed collectionsInfo method as it's incompatible with 2.8 or higher storage engines due to using namespace collections and a cursor.
