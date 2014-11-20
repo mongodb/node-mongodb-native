@@ -1,3 +1,9 @@
+2.0.7 2014-11-20
+----------------
+- Bumped mongodb-core to 1.1.2 fixing a UTF8 encoding issue for collection names.
+- NODE-318 collection.update error while setting a function with serializeFunctions option.
+- Documentation fixes.
+
 2.0.6 2014-11-14
 ----------------
 - Refactored code to be prototype based instead of privileged methods.
