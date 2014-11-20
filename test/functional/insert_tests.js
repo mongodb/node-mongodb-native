@@ -1789,3 +1789,32 @@ exports.shouldCorrectlyApplyBitOperator = {
     });
   }
 }
+
+exports.shouldCorrectlyPerformInsertAndUpdateWithFunctionSerialization = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:false})
+    db.open(function(err, db) {
+      var col = db.collection('shouldCorrectlyPerformInsertAndUpdateWithFunctionSerialization', {serializeFunctions:true});
+      
+      col.insert({a:1, f: function(x) {return x;}},function(err,doc){
+        test.equal(null,err);
+        
+        col.update({a:1},{$set:{f: function(y){return y;}}},function(err,doc){
+          test.equal(null,err);
+
+          col.findOne({a:1}, function(err, doc) {
+            test.equal(null, err);
+            test.equal("function (y){return y;}", doc.f.code);
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
+  }
+}

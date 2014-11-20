@@ -20,7 +20,7 @@
     , "readable-stream": "1.0.31"
   },
   "devDependencies": {
-      "integra": "0.1.7"
+      "integra": "0.1.8"
     , "optimist": "0.6.1"
     , "bson": "~0.2"
     , "jsdoc": "3.3.0-alpha9"
