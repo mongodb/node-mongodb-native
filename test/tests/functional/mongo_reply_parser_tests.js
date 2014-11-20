@@ -23,7 +23,9 @@ exports['Should correctly parse perfectly aligned message from socket'] = functi
   buffer[index] = value & 0xff;            
 
   // Dummy object for receiving message
-  var self = {maxBsonSize: (4 * 1024 * 1024 * 4 * 3), emit:function(message, data) {
+  var self = {maxBsonSize: (4 * 1024 * 1024 * 4 * 3)
+    , maxMessageSizeBytes: (4 * 1024 * 1024 * 4 * 3)
+    , emit:function(message, data) {
     assertBuffersEqual(test, buffer, data);
     test.done();
   }};
@@ -61,7 +63,9 @@ exports['Should correctly parse perfectly aligned double message from socket'] =
   // var result index
   var resultIndex = 0;
   // Dummy object for receiving message
-  var self = {maxBsonSize: (4 * 1024 * 1024 * 4 * 3), emit:function(message, data) {
+  var self = {maxBsonSize: (4 * 1024 * 1024 * 4 * 3)
+    , maxMessageSizeBytes: (4 * 1024 * 1024 * 4 * 3)
+    , emit:function(message, data) {
     assertBuffersEqual(test, buffer.slice(resultIndex, resultIndex + 10), data);
     resultIndex = resultIndex + 10;
     
@@ -91,7 +95,9 @@ exports['Should correctly parse message + in two packets from socket'] = functio
   buffer[index] = value & 0xff;            
 
   // Dummy object for receiving message
-  var self = {maxBsonSize: (4 * 1024 * 1024 * 4 * 3), emit:function(message, data) {
+  var self = {maxBsonSize: (4 * 1024 * 1024 * 4 * 3)
+    , maxMessageSizeBytes: (4 * 1024 * 1024 * 4 * 3)
+    , emit:function(message, data) {
     assertBuffersEqual(test, buffer, data);
     test.done();
   }};
@@ -129,7 +135,9 @@ exports['Should correctly parse message + in two packets from socket and partial
   buffer[index + 5] = 0xff;            
 
   // Dummy object for receiving message
-  var self = {maxBsonSize: (4 * 1024 * 1024 * 4 * 3), emit:function(message, data) {
+  var self = {maxBsonSize: (4 * 1024 * 1024 * 4 * 3)
+    , maxMessageSizeBytes: (4 * 1024 * 1024 * 4 * 3)
+    , emit:function(message, data) {
     assertBuffersEqual(test, buffer.slice(0, 10), data);
   }};
   
@@ -172,7 +180,9 @@ exports['Should correctly parse message + in two packets from socket and smaller
   buffer[index] = value & 0xff;            
 
   // Dummy object for receiving message
-  var self = {maxBsonSize: (4 * 1024 * 1024 * 4 * 3), emit:function(message, data) {
+  var self = {maxBsonSize: (4 * 1024 * 1024 * 4 * 3)
+    , maxMessageSizeBytes: (4 * 1024 * 1024 * 4 * 3)
+    , emit:function(message, data) {
     assertBuffersEqual(test, buffer.slice(0, 10), data);
   }};
   
@@ -220,7 +230,9 @@ exports['Should correctly parse message + in two packets from socket and smaller
   buffer[index + 9] = 0xfe;
   
   // Dummy object for receiving message
-  var self = {maxBsonSize: (4 * 1024 * 1024 * 4 * 3), emit:function(message, data) {
+  var self = {maxBsonSize: (4 * 1024 * 1024 * 4 * 3)
+    , maxMessageSizeBytes: (4 * 1024 * 1024 * 4 * 3)
+    , emit:function(message, data) {
     assertBuffersEqual(test, buffer.slice(0, 10), data);
   }};
   
@@ -271,7 +283,9 @@ exports['Should correctly parse message + in two packets from socket and smaller
   buffer[index + 9] = 0xfe;
 
   // Dummy object for receiving message
-  var self = {maxBsonSize: (4 * 1024 * 1024 * 4 * 3), emit:function(message, data) {
+  var self = {maxBsonSize: (4 * 1024 * 1024 * 4 * 3)
+    , maxMessageSizeBytes: (4 * 1024 * 1024 * 4 * 3)
+    , emit:function(message, data) {
     assertBuffersEqual(test, buffer.slice(0, 10), data);
   }};
   
@@ -325,7 +339,9 @@ exports['Should correctly parse message + in two packets from socket and smaller
   buffer[index] = value & 0xff;            
 
   // Dummy object for receiving message
-  var self = {maxBsonSize: (4 * 1024 * 1024 * 4 * 3), emit:function(message, data) {
+  var self = {maxBsonSize: (4 * 1024 * 1024 * 4 * 3)
+    , maxMessageSizeBytes: (4 * 1024 * 1024 * 4 * 3)
+    , emit:function(message, data) {
     assertBuffersEqual(test, buffer.slice(0, 10), data);
   }};
   
@@ -361,7 +377,9 @@ exports['Corrupt the message baby'] = function(configuration, test) {
   buffer[index] = value & 0xff;                
 
   // Dummy object for receiving message
-  var self = {maxBsonSize: (4 * 1024 * 1024 * 4 * 3), emit:function(message, data) {
+  var self = {maxBsonSize: (4 * 1024 * 1024 * 4 * 3)
+    , maxMessageSizeBytes: (4 * 1024 * 1024 * 4 * 3)
+    , emit:function(message, data) {
     test.equal('parseError', message)
     // test.equal('socketHandler', data.err)
   }};
@@ -392,8 +410,10 @@ exports['Corrupt the message baby but catch the log error'] = function(configura
   buffer[index] = value & 0xff;                
 
   // Dummy object for receiving message
-  var self = {maxBsonSize: (4 * 1024 * 1024 * 4 * 3), emit:function(message, data) {
-    test.equal('parseError', message)
+  var self = {maxBsonSize: (4 * 1024 * 1024 * 4 * 3)
+    , maxMessageSizeBytes: (4 * 1024 * 1024 * 4 * 3)
+    , emit:function(message, data) {
+      test.equal('parseError', message)
   }};
   
   // Count the number of errors
