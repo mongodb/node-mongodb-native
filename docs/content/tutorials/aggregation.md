@@ -30,7 +30,7 @@ MongoClient.connect(url, function(err, db) {
   // Insert a single document
   col.insert([{a:1}, {a:1}, {a:1}], function(err, r) {
     assert.equal(null, err);
-    assert.equal(3, r.result.n);
+    assert.equal(3, r.length);
 
     // Get first two documents that match the query
     col.aggregate([
@@ -68,7 +68,7 @@ MongoClient.connect(url, function(err, db) {
   // Insert a single document
   col.insert([{a:1}, {a:1}, {a:1}], function(err, r) {
     assert.equal(null, err);
-    assert.equal(3, r.result.n);
+    assert.equal(3, r.length);
 
     // Get first two documents that match the query
     col.aggregate([
@@ -102,7 +102,7 @@ MongoClient.connect(url, function(err, db) {
   // Insert a single document
   col.insert([{a:1}, {a:1}, {a:1}], function(err, r) {
     assert.equal(null, err);
-    assert.equal(3, r.result.n);
+    assert.equal(3, r.length);
 
     // Get first two documents that match the query
     col.aggregate([
