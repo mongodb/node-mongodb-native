@@ -111,7 +111,7 @@ Object Document Modeling Libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 16:13:15 on 24/10/2014
+           - 15:17:30 on 26/10/2014
          * - **Homepage**
            - http://http://mongoosejs.com
          * - **Url**
@@ -119,9 +119,9 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/LearnBoost/mongoose.git
          * - **Forks**
-           - 853
+           - 855
          * - **Watchers**
-           - 5816
+           - 5817
 
 .. topic:: mongo-model
 
