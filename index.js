@@ -25,6 +25,7 @@ connect.Long = core.BSON.Long;
 connect.MinKey = core.BSON.MinKey;
 connect.MaxKey = core.BSON.MaxKey;
 connect.ObjectID = core.BSON.ObjectID;
+connect.ObjectId = core.BSON.ObjectID;
 connect.Symbol = core.BSON.Symbol;
 connect.Timestamp = core.BSON.Timestamp;
 

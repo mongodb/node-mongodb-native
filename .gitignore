@@ -16,6 +16,8 @@ data/
 out/
 docs/public
 public/
+.idea/
+t.js
 
 # Directory for dbs
 db

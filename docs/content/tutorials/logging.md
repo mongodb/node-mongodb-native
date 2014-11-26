@@ -5,8 +5,8 @@ date: 2013-07-01
 menu:
   main:
     parent: tutorials
-next: ../../tutorials/connecting
 prev: ../../tutorials/gridfs
+next: ../../tutorials/objectid
 title: Logging
 weight: 7
 ---
