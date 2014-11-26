@@ -37,7 +37,7 @@ Collection.prototype.findOne = function() {
   });
 
   // Call the original prototype method findOne on this instance
-  findOne.apply(this, args);
+  return findOne.apply(this, args);
 }
 
 MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
