@@ -280,6 +280,210 @@ MongoClient.connect(url, {
     </item>
     
     <item>
+      <title>Connection Failures</title>
+      <link>/node-mongodb-native/2.0/tutorials/connection_failures/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/tutorials/connection_failures/</guid>
+      <description>
+
+&lt;h1 id=&#34;toc_0&#34;&gt;Connection Failures and Retries&lt;/h1&gt;
+
+&lt;p&gt;This comes up a lot because there are some confusion about how the driver works when it comes to Socket timeouts and retries. This Tutorial attempts to clarify the drivers behavior and explains why for some legacy reasons as well as for some design reasons the driver works the way it does.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s start off looking at the Simple case of a single server connection and how it behaves when tweaking the options that control the driver behavior on server disconnects.&lt;/p&gt;
+
+&lt;p&gt;First let&amp;rsquo;s start with a simple script performing inserts and find and running against a server on &lt;code&gt;localhost:27017&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , f = require(&#39;util&#39;).format;
+
+MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, function(err, db) {
+  var col = db.collection(&#39;t&#39;);
+
+  setInterval(function() {
+    col.insert({a:1}, function(err, r) {
+      console.log(&amp;quot;insert&amp;quot;)
+      console.log(err)
+
+      col.findOne({}, function(err, doc) {
+        console.log(&amp;quot;findOne&amp;quot;)
+        console.log(err)
+      });
+    })
+  }, 1000)
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Start the script and notice how it prints out &lt;code&gt;insert&lt;/code&gt; and &lt;code&gt;findOne&lt;/code&gt; every second. Now shut down the &lt;code&gt;mongod&lt;/code&gt; process and notice how you stop seeing the console printouts. What is happening is that the server is buffering operations until the &lt;code&gt;mongod&lt;/code&gt; returns because the two parameters controlling this behavior are set to the default value. These parameters are.&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;code&gt;Parameter&lt;/code&gt;&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;&lt;code&gt;Value&lt;/code&gt;&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;&lt;code&gt;Description&lt;/code&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;autoReconnect&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;true&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Driver will attempt to auto reconnect&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;bufferMaxEntries&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;-1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Max Number of operations buffered while waiting for server reconnect. Driver will error out all operations if the number of buffered operations goes over the limit set&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;By default the driver attempt to reconnect and buffers all operations until it can. This is due to backward compatibility.&lt;/p&gt;
+
+&lt;p&gt;Now let&amp;rsquo;s try to disable the &lt;code&gt;bufferMaxEntries&lt;/code&gt; by setting it to &lt;code&gt;0&lt;/code&gt; and see what happens.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , f = require(&#39;util&#39;).format;
+
+MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, {
+    db: { bufferMaxEntries: 0 }
+  }, function(err, db) {
+  var col = db.collection(&#39;t&#39;);
+
+  setInterval(function() {
+    col.insert({a:1}, function(err, r) {
+      console.log(&amp;quot;insert&amp;quot;)
+      console.log(err)
+
+      col.findOne({}, function(err, doc) {
+        console.log(&amp;quot;findOne&amp;quot;)
+        console.log(err)
+      });
+    })
+  }, 1000)
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Start the script running and then shut down the &lt;code&gt;mongod&lt;/code&gt; process. Notice how all operations are now erroring out instead of just being buffered ? Now restart the &lt;code&gt;mongod&lt;/code&gt; service and you will see the the operations once again correctly being executed.&lt;/p&gt;
+
+&lt;p&gt;So what happens if we disable &lt;code&gt;autoReconnect&lt;/code&gt; by setting it to &lt;code&gt;false&lt;/code&gt;. Let&amp;rsquo;s take a look.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , f = require(&#39;util&#39;).format;
+
+MongoClient.connect(&#39;mongodb://localhost:27017/test?autoReconnect=false&#39;, function(err, db) {
+  var col = db.collection(&#39;t&#39;);
+
+  setInterval(function() {
+    col.insert({a:1}, function(err, r) {
+      console.log(&amp;quot;insert&amp;quot;)
+      console.log(err)
+
+      col.findOne({}, function(err, doc) {
+        console.log(&amp;quot;findOne&amp;quot;)
+        console.log(err)
+      });
+    })
+  }, 1000)
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;When you shut down the &lt;code&gt;mongod&lt;/code&gt; process now it stops processing operations and keeps buffering them due to &lt;code&gt;bufferMaxEntries&lt;/code&gt; being &lt;code&gt;-1&lt;/code&gt; by default meaning buffer all operations. When you bring the &lt;code&gt;mongod&lt;/code&gt; process back up will notice how it does not change the fact that we are buffering. This is a legacy behavior and less than idea. So you will want to set &lt;code&gt;bufferMaxEntries&lt;/code&gt; to 0 or a low number if you wish to turn off &lt;code&gt;autoReconnect&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;The Matrix of behavior&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s put all the possible values of &lt;code&gt;autoReconnect&lt;/code&gt; and &lt;code&gt;bufferMaxEntries&lt;/code&gt; in a table so we can more easily understand the behavior.&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;&lt;code&gt;autoReconnect&lt;/code&gt;&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;&lt;code&gt;bufferMaxEntries&lt;/code&gt;&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;&lt;code&gt;Description&lt;/code&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;true&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;0&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Auto reconnect but do not buffer operations, error out until server reconnect&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;true&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;-1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Auto reconnect, buffer all operations until memory run out&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;true&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&amp;gt; 0&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Auto reconnect, buffer all operations until the bufferMaxEntries is reached and then error out all buffered operations&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;false&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;0&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Auto reconnect but do not buffer operations, error out all operations&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;false&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;-1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Auto reconnect is off, buffer all operations until memory run out&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;false&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&amp;gt; 0&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Auto reconnect is off, buffer all operations until the bufferMaxEntries is reached and then error out all buffered operations&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;So why is this like this. Well the main reason is a combination the asynchronous behavior of &lt;code&gt;node.js&lt;/code&gt; as well as &lt;code&gt;Replicasets&lt;/code&gt;. When you are using a single serve the behavior might be a bit mystifying but it makes sense in the context of the &lt;code&gt;Replicaset&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Say you have a &lt;code&gt;Replicaset&lt;/code&gt; where a new primary is elected. If the drivers does not buffer the operations it will have to error out all operations until there is a new primary available in the set. This complicates people&amp;rsquo;s code as every operation could potentially fail and thus the driver a long time ago took the decision to make this transparent to the user by buffering operations until the new &lt;code&gt;primary&lt;/code&gt; is available and then replaying them. &lt;code&gt;bufferMaxEntries&lt;/code&gt; was added later to allow developers to control this behavior themselves if they wished to be instantly notified about write errors f.ex instead of letting the driver handle it.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_2&#34;&gt;The Confusion&lt;/h2&gt;
+
+&lt;p&gt;A lot of the confusion comes from mistaking &lt;code&gt;socketTimeoutMS&lt;/code&gt; with how the async driver works. &lt;code&gt;socketTimeoutMS&lt;/code&gt; only applies to sockets if they have not been in use and they reach the &lt;code&gt;socketTimeoutMS&lt;/code&gt;. &lt;code&gt;connectionTimeoutMS&lt;/code&gt; applies to the initial server connection process timeout and is independent of the &lt;code&gt;socketTimeoutMS&lt;/code&gt; which is only applied to the socket after a successful server connection.&lt;/p&gt;
+
+&lt;p&gt;However people set &lt;code&gt;socketTimeoutMS&lt;/code&gt; expecting it to influence timeouts for operations. But as we have seen above the &lt;code&gt;autoReconnect&lt;/code&gt; and &lt;code&gt;bufferMaxEntries&lt;/code&gt; are the two settings that control the behavior expected by setting &lt;code&gt;socketTimeoutMS&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;However it&amp;rsquo;s good to notice that you should ensure you have a reasonable &lt;code&gt;socketTimeoutMS&lt;/code&gt;. A lot of people set it way way to low and find themselves with timeouts happening all the time as operations are infrequent enough to cause constant connection closing and reconnect events.&lt;/p&gt;
+
+&lt;p&gt;The rule of thumb I always impart is.&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Set &lt;em&gt;socketTimeoutMS&lt;/em&gt; to at least &lt;code&gt;2-3x&lt;/code&gt; the longest running operation in your application or the interval between operations, too ensure you don&amp;rsquo;t timeout long running operations or servers where there are big gaps of time between operations.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&#34;toc_3&#34;&gt;What You are Probably Looking For&lt;/h2&gt;
+
+&lt;p&gt;Most people who start changing &lt;code&gt;socketTimeoutMS&lt;/code&gt; are actually looking for the &lt;code&gt;maxTimeMS&lt;/code&gt; property to limit the time a query runs against the server before it gets aborted. Let&amp;rsquo;s look at how to apply this property on a query.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , f = require(&#39;util&#39;).format;
+
+MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, function(err, db) {
+  var cursor = db.collection(&#39;t&#39;).find({}).maxTimeMS(1000);
+  cursor.toArray(function(err, docs) {
+    console.dir(docs)
+    db.close();
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This executes a query and sets the &lt;code&gt;maxTimeMS&lt;/code&gt; property to &lt;code&gt;1000&lt;/code&gt; milliseconds. If the query runs for longer than that time it will be aborted by the server.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
       <title>Connection URI</title>
       <link>/node-mongodb-native/2.0/tutorials/urls/</link>
       <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
@@ -1661,6 +1865,209 @@ MongoClient.connect(url, function(err, db) {
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;That wraps up the Logging support in the driver.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>ObjectId</title>
+      <link>/node-mongodb-native/2.0/tutorials/objectid/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/tutorials/objectid/</guid>
+      <description>
+
+&lt;h1 id=&#34;toc_0&#34;&gt;ObjectId&lt;/h1&gt;
+
+&lt;p&gt;The ObjectId class is the default primary key for a MongoDB document and is usually found in the &lt;code&gt;_id&lt;/code&gt; field in an inserted document. Let&amp;rsquo;s look at an example.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-json&#34;&gt;{
+    &amp;quot;_id&amp;quot;: ObjectId(&amp;quot;54759eb3c090d83494e2d804&amp;quot;)
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;An ObjectId is a 12 byte binary BSON type that contain any 12 bytes you want. To be helpful in generating ObjectIds MongoDB drivers and the server will generate them using a default Algorithm. A ObjectId&amp;rsquo;s 12 bytes will be then contain the following.&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Size&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;4 bytes&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;a 4-byte value representing the seconds since the Unix epoch&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;3 bytes&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;a 3-byte machine identifier&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;2 bytes&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;2-byte process id&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;3 bytes&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;3-byte counter, starting with a random value&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;In the driver you can tap into this by simply creating a new ObjectId. Let&amp;rsquo;s look at an example that will create an ObjectId that contains a 12 byte description that matches this specification.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var ObjectId = require(&#39;mongodb&#39;).ObjectID
+var id = new ObjectId();
+console.log(id)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will print a hexadecimal representation of the 12 byte ObjectId the driver generated.&lt;/p&gt;
+
+&lt;p&gt;It&amp;rsquo;s equally valid to just pass it a 12 byte string (buffer is not currently supported but will be sometime soon). Let&amp;rsquo;s create our own definition of a 12 byte ObjectId.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var ObjectId = require(&#39;mongodb&#39;).ObjectID
+var id = new ObjectId(&amp;quot;aaaaaaaaaaaa&amp;quot;);
+console.log(id)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will print the hexadecimal value &lt;code&gt;616161616161616161616161&lt;/code&gt; which corresponds to the string &lt;code&gt;aaaaaaaaaaaa&lt;/code&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_1&#34;&gt;Properties of a Generated ObjectId&lt;/h2&gt;
+
+&lt;p&gt;One of the main reasons ObjectId&amp;rsquo;s are generated in the fashion mentioned above by the drivers is that is contains a useful behavior due to the way sorting works. Given that it contains a 4 byte timestamp (resolution of seconds) and an incrementing counter as well as some more unique identifiers such as the machine id once can use the &lt;code&gt;_id&lt;/code&gt; field to sort documents in the order of creation just by simply sorting on the &lt;code&gt;_id&lt;/code&gt; field. This can be useful to save the space needed by an additional timestamp if you wish to track the time of creation of a document.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_2&#34;&gt;Driver ObjectId Constructor methods&lt;/h2&gt;
+
+&lt;p&gt;The driver allows you to create ObjectId&amp;rsquo;s in a couple of ways as well as allowing you to introspects aspects of the ObjectId.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s look at the actual constructor options. The constructor lets you pass in a 12 byte string or a 24 byte hexadecimal representation as well as no arguments.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var ObjectId = require(&#39;mongodb&#39;).ObjectID
+var id = new ObjectId();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Creates a new generated ObjectId using the algorithm outlined above.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var ObjectId = require(&#39;mongodb&#39;).ObjectID
+var id = new ObjectId(&amp;quot;aaaaaaaaaaaa&amp;quot;);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Creates a new specific ObjectId using the 12 byte string.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var ObjectId = require(&#39;mongodb&#39;).ObjectID
+var id = new ObjectId(&amp;quot;616161616161616161616161&amp;quot;);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Creates a new specific ObjectId using the 24 byte hexadecimal 12 byte string representation. This is useful for when you are passing back Id&amp;rsquo;s from a web application.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_3&#34;&gt;Driver ObjectId Static methods&lt;/h2&gt;
+
+&lt;p&gt;The ObjectId static methods are meant to be helpful in making it more explicit what your intention is when creating a new ObjectId.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var ObjectId = require(&#39;mongodb&#39;).ObjectID
+var id = ObjectId.createPk();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Creates a new ObjectId instance with a generated key using the algorithm outlined above.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var ObjectId = require(&#39;mongodb&#39;).ObjectID
+var id = ObjectId.createFromTime(5000);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Creates an ObjectId from a seconds timestamp with the rest of the bytes in the ObjectId zeroed out.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var ObjectId = require(&#39;mongodb&#39;).ObjectID
+var id = ObjectId.createFromHexString(&amp;quot;616161616161616161616161&amp;quot;);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Creates and ObjectId from the 24 byte hexadecimal representation of a 12 byte string.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_4&#34;&gt;Driver ObjectId Instance methods&lt;/h2&gt;
+
+&lt;p&gt;The more interesting methods on an ObjectId instance are the following.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_5&#34;&gt;getTimestamp()&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var ObjectId = require(&#39;mongodb&#39;).ObjectID
+var id = new ObjectId();
+console.log(id.getTimestamp())
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This method returns a Date object representing the timestamp part of the 12 byte ObjectId as defined by the algorithm above. If the ObjectId is generated by the algorithm you will get the creation time Date object back. However if it&amp;rsquo;s just a random 12 byte sequence obviously the date coming back might be nonsensical.&lt;/p&gt;
+
+&lt;h3 id=&#34;toc_6&#34;&gt;toHexString()&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var ObjectId = require(&#39;mongodb&#39;).ObjectID
+var id = new ObjectId(&amp;quot;aaaaaaaaaaaa&amp;quot;);
+console.log(id.toHexString())
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will print out the hexadecimal representation of the ObjectId.&lt;/p&gt;
+
+&lt;h2 id=&#34;toc_7&#34;&gt;On Buffers&lt;/h2&gt;
+
+&lt;p&gt;Until the ObjectId natively accepts a buffer the best way to transform a Buffer into a valid ObjectId is to do the following.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var ObjectId = require(&#39;mongodb&#39;).ObjectID
+var id = new ObjectId(new Buffer(&amp;quot;aaaaaaaaaaaa&amp;quot;).toString());
+console.log(id.toHexString())
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;By converting the buffer into it&amp;rsquo;s string representation we can correctly create a new ObjectId.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Tracing</title>
+      <link>/node-mongodb-native/2.0/tutorials/tracing/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/tutorials/tracing/</guid>
+      <description>
+
+&lt;h1 id=&#34;toc_0&#34;&gt;Tracing or Prototype Overriding&lt;/h1&gt;
+
+&lt;p&gt;Tracing comes up a couple of times a year so it might be a useful thing for more people than just New Relic or other application metrics companies out there. Maybe you want to instrument the driver to keep some measurements client side on the time it takes for an operation to finish or maybe you want to log all operations somewhere for auditing purposes or maybe you have some awesome new idea about how to do something radically different. Well the good thing is that JavaScript is on your side when it comes to reaching your goals. The rescue comes in the form of the &lt;code&gt;prototype&lt;/code&gt; of the driver classes. Since code speaks a thousand words let&amp;rsquo;s just throw out code where override the &lt;code&gt;findOne&lt;/code&gt; method to print the time it took for the operation to the console.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var Collection = require(&#39;mongodb&#39;).Collection
+  , MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , f = require(&#39;util&#39;).format;
+
+// Keep the original findOne method
+var findOne = Collection.prototype.findOne;
+// Create our own overriding findOne method that wraps the original
+Collection.prototype.findOne = function() {
+  var startTime = new Date().getTime();
+  // Get all the passed in arguments as an array
+  var args = Array.prototype.slice.call(arguments, 0);
+  // Get the callback at the end of the function
+  var callback = args.pop();
+  // Push our own callback handler that calls the original 
+  // callback after finishing up it&#39;s goals
+  args.push(function(err, r) {
+    var endTime = new Date().getTime();
+    console.log(f(&amp;quot;findOne took %s milliseconds&amp;quot;, (endTime - startTime)))
+    callback(err, r)
+  });
+
+  // Call the original prototype method findOne on this instance
+  findOne.apply(this, args);
+}
+
+MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, function(err, db) {
+  db.collection(&#39;t&#39;).findOne({}, function(err, r) {
+    db.close();
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;In this code we change the behavior of the findOne method by wrapping it in our own method that records the start and end times of the findOne operation and prints the number of milliseconds it took to the console. The cool thing is that this is global. Once we changed &lt;code&gt;Collection.prototype&lt;/code&gt; we automatically get our new wrapped method for all methods that create a new &lt;code&gt;Collection&lt;/code&gt; instance allowing us to instruments all calls using &lt;code&gt;Collection.findOne&lt;/code&gt; across our application.&lt;/p&gt;
+
+&lt;p&gt;There is not much more to it so go ahead and think of some crazy ways to use this and if you do something very clever let me know :).&lt;/p&gt;
 </description>
     </item>
     

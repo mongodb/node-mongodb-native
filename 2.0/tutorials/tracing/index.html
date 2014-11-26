@@ -8,7 +8,7 @@
     <meta name="keyword" content="">
     <link rel="shortcut icon" href="/node-mongodb-native/2.0/img/favicon.png">
 
-    <title>Migrating to 2.X</title>
+    <title>Tracing</title>
 
     <link href="/node-mongodb-native/2.0/css/bootstrap-theme.css" rel="stylesheet">
     <link href="/node-mongodb-native/2.0/assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
@@ -97,20 +97,20 @@
           
               
 
-            <li class="sub-menu active">
+            <li class="sub-menu">
             <a href="javascript:;" class="">
                 <i class='fa fa-gift'></i>
                 
                 <span>about driver</span>
-                <span class="menu-arrow fa fa-angle-down"></span>
+                <span class="menu-arrow fa fa-angle-right"></span>
             </a>
-                <ul class="sub open">
+                <ul class="sub">
                     
                     <li><a href="/node-mongodb-native/2.0/meta/license/"> License </a> </li>
                     
                     <li><a href="/node-mongodb-native/2.0/meta/release-notes/"> Release Notes </a> </li>
                     
-                    <li class="active"><a href="/node-mongodb-native/2.0/meta/changes-from-1.0/"> Migrating to 2.X </a> </li>
+                    <li><a href="/node-mongodb-native/2.0/meta/changes-from-1.0/"> Migrating to 2.X </a> </li>
                     
                 </ul>
               
@@ -175,14 +175,14 @@
           
               
 
-            <li class="sub-menu">
+            <li class="sub-menu active">
             <a href="javascript:;" class="">
                 <i class='fa fa-book'></i>
                 
                 <span>tutorials</span>
-                <span class="menu-arrow fa fa-angle-right"></span>
+                <span class="menu-arrow fa fa-angle-down"></span>
             </a>
-                <ul class="sub">
+                <ul class="sub open">
                     
                     <li><a href="/node-mongodb-native/2.0/tutorials/connecting/"> Connecting To MongoDB </a> </li>
                     
@@ -202,7 +202,7 @@
                     
                     <li><a href="/node-mongodb-native/2.0/tutorials/objectid/"> ObjectId </a> </li>
                     
-                    <li><a href="/node-mongodb-native/2.0/tutorials/tracing/"> Tracing </a> </li>
+                    <li class="active"><a href="/node-mongodb-native/2.0/tutorials/tracing/"> Tracing </a> </li>
                     
                 </ul>
               
@@ -231,7 +231,7 @@
           
             <li> <a href="https://jira.mongodb.org/browse/NODE" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
             
-              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/meta/changes-from-1.0.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
+              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/tutorials/tracing.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
             
         </ul>
         
@@ -260,6 +260,10 @@
                   <div class="col-md-1">
                       
                       
+                      <a class="navigation prev" href="../../tutorials/objectid">
+                      <i class="fa fa-angle-left"></i>
+                      </a>
+                      
                       
                   </div>
                 <div class="col-md-10">
@@ -271,78 +275,45 @@
 
 
 
-<h1 id="toc_0">Migrating Your Application To 2.0</h1>
+<h1 id="toc_0">Tracing or Prototype Overriding</h1>
 
-<p>There are some key changes in the driver going from 1.X to 2.X that one needs to be aware off before changing your application to using the new 2.X versions. There has been some cleanup of API&rsquo;s and some deprecations of 1.X features.</p>
+<p>Tracing comes up a couple of times a year so it might be a useful thing for more people than just New Relic or other application metrics companies out there. Maybe you want to instrument the driver to keep some measurements client side on the time it takes for an operation to finish or maybe you want to log all operations somewhere for auditing purposes or maybe you have some awesome new idea about how to do something radically different. Well the good thing is that JavaScript is on your side when it comes to reaching your goals. The rescue comes in the form of the <code>prototype</code> of the driver classes. Since code speaks a thousand words let&rsquo;s just throw out code where override the <code>findOne</code> method to print the time it took for the operation to the console.</p>
 
-<h2 id="toc_1">Design differences in 2.X</h2>
+<pre><code class="language-javascript">var Collection = require('mongodb').Collection
+  , MongoClient = require('mongodb').MongoClient
+  , f = require('util').format;
 
-<p>One of the main changes is that the driver has been split into two pieces. There is a new <code>mongodb-core</code> that contains the low level MongoDB API&rsquo;s while <code>mongodb</code> contains the high level driver. <code>mongodb-core</code> is targeted to creators of libraries like <code>Mongoose</code> and other ODM&rsquo;s who do not need the abstractions available in the <code>mongodb</code> driver. The driver is also as of the time of writing compatible with the 0.11.x node.js branch including Kerberos support as well as MongoDB 2.8.</p>
+// Keep the original findOne method
+var findOne = Collection.prototype.findOne;
+// Create our own overriding findOne method that wraps the original
+Collection.prototype.findOne = function() {
+  var startTime = new Date().getTime();
+  // Get all the passed in arguments as an array
+  var args = Array.prototype.slice.call(arguments, 0);
+  // Get the callback at the end of the function
+  var callback = args.pop();
+  // Push our own callback handler that calls the original 
+  // callback after finishing up it's goals
+  args.push(function(err, r) {
+    var endTime = new Date().getTime();
+    console.log(f(&quot;findOne took %s milliseconds&quot;, (endTime - startTime)))
+    callback(err, r)
+  });
 
-<h2 id="toc_2">Changes</h2>
+  // Call the original prototype method findOne on this instance
+  findOne.apply(this, args);
+}
 
-<p>We will outline where changes have occurred that could break your existing application.</p>
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  db.collection('t').findOne({}, function(err, r) {
+    db.close();
+  });
+});
+</code></pre>
 
-<h3 id="toc_3">Node.JS versions and Streams</h3>
+<p>In this code we change the behavior of the findOne method by wrapping it in our own method that records the start and end times of the findOne operation and prints the number of milliseconds it took to the console. The cool thing is that this is global. Once we changed <code>Collection.prototype</code> we automatically get our new wrapped method for all methods that create a new <code>Collection</code> instance allowing us to instruments all calls using <code>Collection.findOne</code> across our application.</p>
 
-<p>The 2.0 driver drops support for 0.8.x style streams and moves to 0.10.x or higher style pull based streams making for more reliable and faster streams. Backwards compatibility is by using the <code>readable-stream</code> npm package that might cause some slight behavior changes for the cursor streams.</p>
-
-<p>All dependencies have now been updated to use the <code>nan</code> package meaning they will compile and work on 0.11.x or higher.</p>
-
-<h3 id="toc_4">Grid Object</h3>
-
-<p>The grid object has been removed as it&rsquo;s not widely used and offers very limited GridStore capabilities.</p>
-
-<h3 id="toc_5">Db Object</h3>
-
-<p>The db instance object have had several changes made to it. We&rsquo;ve removed the following methods.</p>
-
-<ul>
-<li><code>db.dereference</code> due to db references being deprecated in the server.</li>
-<li><code>db.cursorInfo</code> removed as it never worked reliably.</li>
-<li><code>db.stats</code> removed as inconsistent.</li>
-<li><code>db.collectionNames</code> removed as it&rsquo;s just a specialized version of the new <code>listCollections</code> helper.</li>
-<li><code>db.collectionInfo</code> removed as it&rsquo;s not compatible with the new MongoDB 2.8 or higher alternative storage enginers.</li>
-</ul>
-
-<p>Added the following method</p>
-
-<ul>
-<li><code>db.listCollections</code> to replace all other collection inquiry method as it will do the correct thing for MongoDB 2.8 and higher as well as provide backwards compatibility for MongoDB 2.6 or lower.</li>
-</ul>
-
-<h3 id="toc_6">Collection Object</h3>
-
-<p>A collection instance has also had several changes made to it. Most importantly we now return the <code>mongodb-core</code> result objects directly with all the associated information returned from the server instead of the current selective information returned in the 1.4.x version.</p>
-
-<p>We&rsquo;ve added the following new methods</p>
-
-<ul>
-<li><code>collection.insertOne</code> Insert a single document.</li>
-<li><code>collection.insertMany</code> Insert an array of documents.</li>
-<li><code>collection.replaceOne</code> Replace an existing document fully.</li>
-<li><code>collection.updateOne</code> Update a single document.</li>
-<li><code>collection.updateMany</code> Update multiple documents in one go.</li>
-<li><code>collection.removeOne</code> Remove a single document.</li>
-<li><code>collection.removeMany</code> Remove multiple documents in one go.</li>
-<li><code>collection.findOneAndUpdate</code> Use findAndModify to update a document.</li>
-<li><code>collection.findOneAndRemove</code> Use findAndModify to remove a specific document.</li>
-<li><code>collection.findOneAndReplace</code> Use findAndModify to replace a specific document.</li>
-</ul>
-
-<p>The current <code>insert</code>, <code>update</code> and <code>remove</code> methods are marked for deprecation and will be removed in a future 3.0 driver. These 3 methods now also return the full <code>mongodb-core</code> results and have had their third return value removed to ensure less compatibility problems with orchestration libraries like <code>async</code>.</p>
-
-<p>The insert methods are now capping at the <code>maxWriteBatchSize</code> passed back from MongoDB on the results from the <code>ismaster</code> command. For MongoDB 2.4 or lower this means a max of 1000 documents in each insert batch. Legacy insert mode has been deprecated in favor of proper emulation of current 2.6 or higher write commands.</p>
-
-<p>Another important change is in how <code>collection.find</code> works. The idea is to chain commands instead of passing them into the <code>find</code> method. It still supports existing behavior from 1.4 so no code should break but the API documentation reflects the new preferred way to use the find to execute queries.</p>
-
-<h3 id="toc_7">GridStore</h3>
-
-<p>The GridStore object has had some major changes due to issues discovered by users related to parallel writing using the previous available <code>w+</code> append mode. Thus <code>w+</code> in 2.0 only allows for changes to the file metadata and does not allow for appending to a file avoiding the possible data corruption. The hope is to create a new GridStore spec in the future that allows for proper handling parallel writing to an existing file but this requires changes for all drivers as well as the server.</p>
-
-<h3 id="toc_8">MongoClient</h3>
-
-<p>MongoClient now only has the class method <code>connect</code>. Constructing of a new MongoClient using <code>Server</code>, <code>ReplSet</code> or <code>Mongos</code> has been removed due to the confusion it caused in duplicating the way one can build a topology connection using <code>Db</code> in 1.4. <code>MongoClient.connect</code> is the recommended way to connect to a MongoDB topology.</p>
+<p>There is not much more to it so go ahead and think of some crazy ways to use this and if you do something very clever let me know :).</p>
 
                       
                       <div id="disqus_thread"></div>
@@ -365,6 +336,10 @@
                 </div>
                 <div class="col-md-1">
                     
+                    
+                    <a class="navigation next" href="../../tutorials/connecting">
+                        <i class="fa fa-angle-right"> </i>
+                    </a>
                     
                     
                 </div>

@@ -8,6 +8,11 @@
   </url>
   
   <url>
+    <loc>/node-mongodb-native/2.0/tutorials/connection_failures/</loc>
+    <lastmod>2013-07-01T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/node-mongodb-native/2.0/tutorials/connecting/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
@@ -39,6 +44,16 @@
   
   <url>
     <loc>/node-mongodb-native/2.0/tutorials/logging/</loc>
+    <lastmod>2013-07-01T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.0/tutorials/objectid/</loc>
+    <lastmod>2013-07-01T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.0/tutorials/tracing/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
   

@@ -8,7 +8,7 @@
     <meta name="keyword" content="">
     <link rel="shortcut icon" href="/node-mongodb-native/2.0/img/favicon.png">
 
-    <title>Migrating to 2.X</title>
+    <title>Connection Failures</title>
 
     <link href="/node-mongodb-native/2.0/css/bootstrap-theme.css" rel="stylesheet">
     <link href="/node-mongodb-native/2.0/assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
@@ -97,20 +97,20 @@
           
               
 
-            <li class="sub-menu active">
+            <li class="sub-menu">
             <a href="javascript:;" class="">
                 <i class='fa fa-gift'></i>
                 
                 <span>about driver</span>
-                <span class="menu-arrow fa fa-angle-down"></span>
+                <span class="menu-arrow fa fa-angle-right"></span>
             </a>
-                <ul class="sub open">
+                <ul class="sub">
                     
                     <li><a href="/node-mongodb-native/2.0/meta/license/"> License </a> </li>
                     
                     <li><a href="/node-mongodb-native/2.0/meta/release-notes/"> Release Notes </a> </li>
                     
-                    <li class="active"><a href="/node-mongodb-native/2.0/meta/changes-from-1.0/"> Migrating to 2.X </a> </li>
+                    <li><a href="/node-mongodb-native/2.0/meta/changes-from-1.0/"> Migrating to 2.X </a> </li>
                     
                 </ul>
               
@@ -175,18 +175,18 @@
           
               
 
-            <li class="sub-menu">
+            <li class="sub-menu active">
             <a href="javascript:;" class="">
                 <i class='fa fa-book'></i>
                 
                 <span>tutorials</span>
-                <span class="menu-arrow fa fa-angle-right"></span>
+                <span class="menu-arrow fa fa-angle-down"></span>
             </a>
-                <ul class="sub">
+                <ul class="sub open">
                     
                     <li><a href="/node-mongodb-native/2.0/tutorials/connecting/"> Connecting To MongoDB </a> </li>
                     
-                    <li><a href="/node-mongodb-native/2.0/tutorials/connection_failures/"> Connection Failures </a> </li>
+                    <li class="active"><a href="/node-mongodb-native/2.0/tutorials/connection_failures/"> Connection Failures </a> </li>
                     
                     <li><a href="/node-mongodb-native/2.0/tutorials/urls/"> Connection URI </a> </li>
                     
@@ -231,7 +231,7 @@
           
             <li> <a href="https://jira.mongodb.org/browse/NODE" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
             
-              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/meta/changes-from-1.0.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
+              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/tutorials/connection_failures.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
             
         </ul>
         
@@ -260,6 +260,10 @@
                   <div class="col-md-1">
                       
                       
+                      <a class="navigation prev" href="../../tutorials/connecting">
+                      <i class="fa fa-angle-left"></i>
+                      </a>
+                      
                       
                   </div>
                 <div class="col-md-10">
@@ -271,78 +275,199 @@
 
 
 
-<h1 id="toc_0">Migrating Your Application To 2.0</h1>
+<h1 id="toc_0">Connection Failures and Retries</h1>
 
-<p>There are some key changes in the driver going from 1.X to 2.X that one needs to be aware off before changing your application to using the new 2.X versions. There has been some cleanup of API&rsquo;s and some deprecations of 1.X features.</p>
+<p>This comes up a lot because there are some confusion about how the driver works when it comes to Socket timeouts and retries. This Tutorial attempts to clarify the drivers behavior and explains why for some legacy reasons as well as for some design reasons the driver works the way it does.</p>
 
-<h2 id="toc_1">Design differences in 2.X</h2>
+<p>Let&rsquo;s start off looking at the Simple case of a single server connection and how it behaves when tweaking the options that control the driver behavior on server disconnects.</p>
 
-<p>One of the main changes is that the driver has been split into two pieces. There is a new <code>mongodb-core</code> that contains the low level MongoDB API&rsquo;s while <code>mongodb</code> contains the high level driver. <code>mongodb-core</code> is targeted to creators of libraries like <code>Mongoose</code> and other ODM&rsquo;s who do not need the abstractions available in the <code>mongodb</code> driver. The driver is also as of the time of writing compatible with the 0.11.x node.js branch including Kerberos support as well as MongoDB 2.8.</p>
+<p>First let&rsquo;s start with a simple script performing inserts and find and running against a server on <code>localhost:27017</code>.</p>
 
-<h2 id="toc_2">Changes</h2>
+<pre><code class="language-javascript">var MongoClient = require('mongodb').MongoClient
+  , f = require('util').format;
 
-<p>We will outline where changes have occurred that could break your existing application.</p>
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  var col = db.collection('t');
 
-<h3 id="toc_3">Node.JS versions and Streams</h3>
+  setInterval(function() {
+    col.insert({a:1}, function(err, r) {
+      console.log(&quot;insert&quot;)
+      console.log(err)
 
-<p>The 2.0 driver drops support for 0.8.x style streams and moves to 0.10.x or higher style pull based streams making for more reliable and faster streams. Backwards compatibility is by using the <code>readable-stream</code> npm package that might cause some slight behavior changes for the cursor streams.</p>
+      col.findOne({}, function(err, doc) {
+        console.log(&quot;findOne&quot;)
+        console.log(err)
+      });
+    })
+  }, 1000)
+});
+</code></pre>
 
-<p>All dependencies have now been updated to use the <code>nan</code> package meaning they will compile and work on 0.11.x or higher.</p>
+<p>Start the script and notice how it prints out <code>insert</code> and <code>findOne</code> every second. Now shut down the <code>mongod</code> process and notice how you stop seeing the console printouts. What is happening is that the server is buffering operations until the <code>mongod</code> returns because the two parameters controlling this behavior are set to the default value. These parameters are.</p>
 
-<h3 id="toc_4">Grid Object</h3>
+<table>
+<thead>
+<tr>
+<th><code>Parameter</code></th>
+<th align="left"><code>Value</code></th>
+<th align="left"><code>Description</code></th>
+</tr>
+</thead>
 
-<p>The grid object has been removed as it&rsquo;s not widely used and offers very limited GridStore capabilities.</p>
+<tbody>
+<tr>
+<td>autoReconnect</td>
+<td align="left">true</td>
+<td align="left">Driver will attempt to auto reconnect</td>
+</tr>
 
-<h3 id="toc_5">Db Object</h3>
+<tr>
+<td>bufferMaxEntries</td>
+<td align="left">-1</td>
+<td align="left">Max Number of operations buffered while waiting for server reconnect. Driver will error out all operations if the number of buffered operations goes over the limit set</td>
+</tr>
+</tbody>
+</table>
 
-<p>The db instance object have had several changes made to it. We&rsquo;ve removed the following methods.</p>
+<p>By default the driver attempt to reconnect and buffers all operations until it can. This is due to backward compatibility.</p>
 
-<ul>
-<li><code>db.dereference</code> due to db references being deprecated in the server.</li>
-<li><code>db.cursorInfo</code> removed as it never worked reliably.</li>
-<li><code>db.stats</code> removed as inconsistent.</li>
-<li><code>db.collectionNames</code> removed as it&rsquo;s just a specialized version of the new <code>listCollections</code> helper.</li>
-<li><code>db.collectionInfo</code> removed as it&rsquo;s not compatible with the new MongoDB 2.8 or higher alternative storage enginers.</li>
-</ul>
+<p>Now let&rsquo;s try to disable the <code>bufferMaxEntries</code> by setting it to <code>0</code> and see what happens.</p>
 
-<p>Added the following method</p>
+<pre><code class="language-javascript">var MongoClient = require('mongodb').MongoClient
+  , f = require('util').format;
 
-<ul>
-<li><code>db.listCollections</code> to replace all other collection inquiry method as it will do the correct thing for MongoDB 2.8 and higher as well as provide backwards compatibility for MongoDB 2.6 or lower.</li>
-</ul>
+MongoClient.connect('mongodb://localhost:27017/test', {
+    db: { bufferMaxEntries: 0 }
+  }, function(err, db) {
+  var col = db.collection('t');
 
-<h3 id="toc_6">Collection Object</h3>
+  setInterval(function() {
+    col.insert({a:1}, function(err, r) {
+      console.log(&quot;insert&quot;)
+      console.log(err)
 
-<p>A collection instance has also had several changes made to it. Most importantly we now return the <code>mongodb-core</code> result objects directly with all the associated information returned from the server instead of the current selective information returned in the 1.4.x version.</p>
+      col.findOne({}, function(err, doc) {
+        console.log(&quot;findOne&quot;)
+        console.log(err)
+      });
+    })
+  }, 1000)
+});
+</code></pre>
 
-<p>We&rsquo;ve added the following new methods</p>
+<p>Start the script running and then shut down the <code>mongod</code> process. Notice how all operations are now erroring out instead of just being buffered ? Now restart the <code>mongod</code> service and you will see the the operations once again correctly being executed.</p>
 
-<ul>
-<li><code>collection.insertOne</code> Insert a single document.</li>
-<li><code>collection.insertMany</code> Insert an array of documents.</li>
-<li><code>collection.replaceOne</code> Replace an existing document fully.</li>
-<li><code>collection.updateOne</code> Update a single document.</li>
-<li><code>collection.updateMany</code> Update multiple documents in one go.</li>
-<li><code>collection.removeOne</code> Remove a single document.</li>
-<li><code>collection.removeMany</code> Remove multiple documents in one go.</li>
-<li><code>collection.findOneAndUpdate</code> Use findAndModify to update a document.</li>
-<li><code>collection.findOneAndRemove</code> Use findAndModify to remove a specific document.</li>
-<li><code>collection.findOneAndReplace</code> Use findAndModify to replace a specific document.</li>
-</ul>
+<p>So what happens if we disable <code>autoReconnect</code> by setting it to <code>false</code>. Let&rsquo;s take a look.</p>
 
-<p>The current <code>insert</code>, <code>update</code> and <code>remove</code> methods are marked for deprecation and will be removed in a future 3.0 driver. These 3 methods now also return the full <code>mongodb-core</code> results and have had their third return value removed to ensure less compatibility problems with orchestration libraries like <code>async</code>.</p>
+<pre><code class="language-javascript">var MongoClient = require('mongodb').MongoClient
+  , f = require('util').format;
 
-<p>The insert methods are now capping at the <code>maxWriteBatchSize</code> passed back from MongoDB on the results from the <code>ismaster</code> command. For MongoDB 2.4 or lower this means a max of 1000 documents in each insert batch. Legacy insert mode has been deprecated in favor of proper emulation of current 2.6 or higher write commands.</p>
+MongoClient.connect('mongodb://localhost:27017/test?autoReconnect=false', function(err, db) {
+  var col = db.collection('t');
 
-<p>Another important change is in how <code>collection.find</code> works. The idea is to chain commands instead of passing them into the <code>find</code> method. It still supports existing behavior from 1.4 so no code should break but the API documentation reflects the new preferred way to use the find to execute queries.</p>
+  setInterval(function() {
+    col.insert({a:1}, function(err, r) {
+      console.log(&quot;insert&quot;)
+      console.log(err)
 
-<h3 id="toc_7">GridStore</h3>
+      col.findOne({}, function(err, doc) {
+        console.log(&quot;findOne&quot;)
+        console.log(err)
+      });
+    })
+  }, 1000)
+});
+</code></pre>
 
-<p>The GridStore object has had some major changes due to issues discovered by users related to parallel writing using the previous available <code>w+</code> append mode. Thus <code>w+</code> in 2.0 only allows for changes to the file metadata and does not allow for appending to a file avoiding the possible data corruption. The hope is to create a new GridStore spec in the future that allows for proper handling parallel writing to an existing file but this requires changes for all drivers as well as the server.</p>
+<p>When you shut down the <code>mongod</code> process now it stops processing operations and keeps buffering them due to <code>bufferMaxEntries</code> being <code>-1</code> by default meaning buffer all operations. When you bring the <code>mongod</code> process back up will notice how it does not change the fact that we are buffering. This is a legacy behavior and less than idea. So you will want to set <code>bufferMaxEntries</code> to 0 or a low number if you wish to turn off <code>autoReconnect</code>.</p>
 
-<h3 id="toc_8">MongoClient</h3>
+<h2 id="toc_1">The Matrix of behavior</h2>
 
-<p>MongoClient now only has the class method <code>connect</code>. Constructing of a new MongoClient using <code>Server</code>, <code>ReplSet</code> or <code>Mongos</code> has been removed due to the confusion it caused in duplicating the way one can build a topology connection using <code>Db</code> in 1.4. <code>MongoClient.connect</code> is the recommended way to connect to a MongoDB topology.</p>
+<p>Let&rsquo;s put all the possible values of <code>autoReconnect</code> and <code>bufferMaxEntries</code> in a table so we can more easily understand the behavior.</p>
+
+<table>
+<thead>
+<tr>
+<th align="left"><code>autoReconnect</code></th>
+<th align="left"><code>bufferMaxEntries</code></th>
+<th align="left"><code>Description</code></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">true</td>
+<td align="left">0</td>
+<td align="left">Auto reconnect but do not buffer operations, error out until server reconnect</td>
+</tr>
+
+<tr>
+<td align="left">true</td>
+<td align="left">-1</td>
+<td align="left">Auto reconnect, buffer all operations until memory run out</td>
+</tr>
+
+<tr>
+<td align="left">true</td>
+<td align="left">&gt; 0</td>
+<td align="left">Auto reconnect, buffer all operations until the bufferMaxEntries is reached and then error out all buffered operations</td>
+</tr>
+
+<tr>
+<td align="left">false</td>
+<td align="left">0</td>
+<td align="left">Auto reconnect but do not buffer operations, error out all operations</td>
+</tr>
+
+<tr>
+<td align="left">false</td>
+<td align="left">-1</td>
+<td align="left">Auto reconnect is off, buffer all operations until memory run out</td>
+</tr>
+
+<tr>
+<td align="left">false</td>
+<td align="left">&gt; 0</td>
+<td align="left">Auto reconnect is off, buffer all operations until the bufferMaxEntries is reached and then error out all buffered operations</td>
+</tr>
+</tbody>
+</table>
+
+<p>So why is this like this. Well the main reason is a combination the asynchronous behavior of <code>node.js</code> as well as <code>Replicasets</code>. When you are using a single serve the behavior might be a bit mystifying but it makes sense in the context of the <code>Replicaset</code>.</p>
+
+<p>Say you have a <code>Replicaset</code> where a new primary is elected. If the drivers does not buffer the operations it will have to error out all operations until there is a new primary available in the set. This complicates people&rsquo;s code as every operation could potentially fail and thus the driver a long time ago took the decision to make this transparent to the user by buffering operations until the new <code>primary</code> is available and then replaying them. <code>bufferMaxEntries</code> was added later to allow developers to control this behavior themselves if they wished to be instantly notified about write errors f.ex instead of letting the driver handle it.</p>
+
+<h2 id="toc_2">The Confusion</h2>
+
+<p>A lot of the confusion comes from mistaking <code>socketTimeoutMS</code> with how the async driver works. <code>socketTimeoutMS</code> only applies to sockets if they have not been in use and they reach the <code>socketTimeoutMS</code>. <code>connectionTimeoutMS</code> applies to the initial server connection process timeout and is independent of the <code>socketTimeoutMS</code> which is only applied to the socket after a successful server connection.</p>
+
+<p>However people set <code>socketTimeoutMS</code> expecting it to influence timeouts for operations. But as we have seen above the <code>autoReconnect</code> and <code>bufferMaxEntries</code> are the two settings that control the behavior expected by setting <code>socketTimeoutMS</code>.</p>
+
+<p>However it&rsquo;s good to notice that you should ensure you have a reasonable <code>socketTimeoutMS</code>. A lot of people set it way way to low and find themselves with timeouts happening all the time as operations are infrequent enough to cause constant connection closing and reconnect events.</p>
+
+<p>The rule of thumb I always impart is.</p>
+
+<blockquote>
+<p>Set <em>socketTimeoutMS</em> to at least <code>2-3x</code> the longest running operation in your application or the interval between operations, too ensure you don&rsquo;t timeout long running operations or servers where there are big gaps of time between operations.</p>
+</blockquote>
+
+<h2 id="toc_3">What You are Probably Looking For</h2>
+
+<p>Most people who start changing <code>socketTimeoutMS</code> are actually looking for the <code>maxTimeMS</code> property to limit the time a query runs against the server before it gets aborted. Let&rsquo;s look at how to apply this property on a query.</p>
+
+<pre><code class="language-javascript">var MongoClient = require('mongodb').MongoClient
+  , f = require('util').format;
+
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  var cursor = db.collection('t').find({}).maxTimeMS(1000);
+  cursor.toArray(function(err, docs) {
+    console.dir(docs)
+    db.close();
+  });
+});
+</code></pre>
+
+<p>This executes a query and sets the <code>maxTimeMS</code> property to <code>1000</code> milliseconds. If the query runs for longer than that time it will be aborted by the server.</p>
 
                       
                       <div id="disqus_thread"></div>
@@ -365,6 +490,10 @@
                 </div>
                 <div class="col-md-1">
                     
+                    
+                    <a class="navigation next" href="../../tutorials/urls">
+                        <i class="fa fa-angle-right"> </i>
+                    </a>
                     
                     
                 </div>
