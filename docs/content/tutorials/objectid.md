@@ -6,7 +6,7 @@ menu:
   main:
     parent: tutorials
 prev: ../../tutorials/logging
-next: ../../tutorials/connecting
+next: ../../tutorials/tracing
 title: ObjectId
 weight: 8
 ---

@@ -5,8 +5,8 @@ date: 2013-07-01
 menu:
   main:
     parent: tutorials
+prev: ../../tutorials/tracing
 next: ../../tutorials/urls
-prev: ../../tutorials/gridfs
 title: Connecting To MongoDB
 weight: 1
 ---
