@@ -6,7 +6,7 @@ menu:
   main:
     parent: tutorials
 prev: ../../tutorials/tracing
-next: ../../tutorials/urls
+next: ../../tutorials/connection_failures
 title: Connecting To MongoDB
 weight: 1
 ---

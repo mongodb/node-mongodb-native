@@ -15,8 +15,8 @@ weight: 9
 Tracing comes up a couple of times a year so it might be a useful thing for more people than just New Relic or other application metrics companies out there. Maybe you want to instrument the driver to keep some measurements client side on the time it takes for an operation to finish or maybe you want to log all operations somewhere for auditing purposes or maybe you have some awesome new idea about how to do something radically different. Well the good thing is that JavaScript is on your side when it comes to reaching your goals. The rescue comes in the form of the `prototype` of the driver classes. Since code speaks a thousand words let's just throw out code where override the `findOne` method to print the time it took for the operation to the console.
 
 ```javascript
-var Collection = require('./').Collection
-  , MongoClient = require('./').MongoClient
+var Collection = require('mongodb').Collection
+  , MongoClient = require('mongodb').MongoClient
   , f = require('util').format;
 
 // Keep the original findOne method
