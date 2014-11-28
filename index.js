@@ -15,6 +15,7 @@ connect.ReadPreference = require('./lib/read_preference');
 connect.GridStore = require('./lib/gridfs/grid_store');
 connect.Chunk = require('./lib/gridfs/chunk');
 connect.Logger = core.Logger;
+connect.Cursor = require('./lib/cursor');
 
 // BSON types exported
 connect.Binary = core.BSON.Binary;

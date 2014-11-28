@@ -1,3 +1,8 @@
+2.0.8 2014-11-28
+----------------
+- NODE-322 Finished up prototype refactoring of Db class.
+- NODE-322 Exposed Cursor in index.js for New Relic.
+
 2.0.7 2014-11-20
 ----------------
 - Bumped mongodb-core to 1.1.2 fixing a UTF8 encoding issue for collection names.
