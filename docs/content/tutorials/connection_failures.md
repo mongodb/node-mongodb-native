@@ -108,7 +108,7 @@ Let's put all the possible values of `autoReconnect` and `bufferMaxEntries` in a
 | true | 0| Auto reconnect but do not buffer operations, error out until server reconnect |
 | true | -1| Auto reconnect, buffer all operations until memory run out |
 | true | > 0| Auto reconnect, buffer all operations until the bufferMaxEntries is reached and then error out all buffered operations |
-| false | 0| Auto reconnect but do not buffer operations, error out all operations |
+| false | 0| Auto reconnect is off, do not buffer operations, error out all operations |
 | false |-1| Auto reconnect is off, buffer all operations until memory run out |
 | false |> 0| Auto reconnect is off, buffer all operations until the bufferMaxEntries is reached and then error out all buffered operations |
 
