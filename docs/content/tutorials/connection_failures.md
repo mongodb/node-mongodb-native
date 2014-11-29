@@ -100,7 +100,7 @@ MongoClient.connect('mongodb://localhost:27017/test?autoReconnect=false', functi
 
 When you shut down the `mongod` process, the driver stops processing operations and keeps buffering them due to `bufferMaxEntries` being `-1` by default meaning buffer all operations. When you bring the `mongod` process back up you will notice how it does not change the fact that we are buffering. This is a legacy behavior and less than ideal. So you will want to set `bufferMaxEntries` to 0 or a low number if you wish to turn off `autoReconnect`.
 
-## The Matrix of behavior
+## The Matrix of Behavior
 Let's put all the possible values of `autoReconnect` and `bufferMaxEntries` in a table so we can more easily understand the behavior.
 
 | `autoReconnect` | `bufferMaxEntries`   | `Description` |
@@ -112,17 +112,17 @@ Let's put all the possible values of `autoReconnect` and `bufferMaxEntries` in a
 | false |-1| Auto reconnect is off, buffer all operations until memory run out |
 | false |> 0| Auto reconnect is off, buffer all operations until the bufferMaxEntries is reached and then error out all buffered operations |
 
-So why is this like this? Well the main reason is a combination of the asynchronous behavior of `node.js` as well as `Replicasets`. When you are using a single server the behavior might be a bit mystifying, but it makes sense in the context of the `Replicaset`.
+So why is this the case? Well, the main reason is a combination of the asynchronous behavior of `node.js` as well as `Replicasets`. When you are using a single server the behavior might be a bit mystifying, but it makes sense in the context of the `Replicaset`.
 
 Say you have a `Replicaset` where a new primary is elected. If the driver does not buffer the operations, it will have to error out all operations until there is a new primary available in the set. This complicates people's code as every operation could potentially fail and thus the driver a long time ago took the decision to make this transparent to the user by buffering operations until the new `primary` is available and then replaying them. `bufferMaxEntries` was added later to allow developers to control this behavior themselves if they wished to be instantly notified about write errors f.ex instead of letting the driver handle it.
 
 ## The Confusion
 
-A lot of the confusion comes from mistaking `socketTimeoutMS` with how the async driver works. `socketTimeoutMS` only applies to sockets if they have not been in use and they reach the `socketTimeoutMS`. `connectionTimeoutMS` applies to the initial server connection process timeout and is independent of the `socketTimeoutMS` which is only applied to the socket after a successful server connection.
+A lot of the confusion comes from mistaking `socketTimeoutMS` with how the async driver works. `socketTimeoutMS` only applies to sockets if they have successfully connected to the server, but have not been in use and they reach the `socketTimeoutMS`. In contrast, `connectionTimeoutMS` applies only to the _initial_ server connection process timeout.  The 'connectionTimeoutMS' is independent of the `socketTimeoutMS`.
 
-However people set `socketTimeoutMS` expecting it to influence timeouts for operations. But as we have seen above the `autoReconnect` and `bufferMaxEntries` are the two settings that control the behavior expected by setting `socketTimeoutMS`.
+However, some people set `socketTimeoutMS` expecting it to influence timeouts for operations. But as we have seen above the `autoReconnect` and `bufferMaxEntries` are the two settings that control that behavior.
 
-However it's good to notice that you should ensure you have a reasonable `socketTimeoutMS`. A lot of people set it way way too low and find themselves with timeouts happening all the time as operations are infrequent enough to cause constant connection closing and reconnect events.
+It's worth noting that you should ensure you have a reasonable `socketTimeoutMS`. A lot of people set it way way too low and find themselves with timeouts happening all the time as operations are infrequent enough to cause constant connection closing and reconnect events.
 
 The rule of thumb I always impart is:
 
