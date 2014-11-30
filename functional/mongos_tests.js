@@ -44,7 +44,7 @@ exports['Should correctly execute command using mongos'] = {
 
   test: function(configuration, test) {
     var Mongos = configuration.require.Mongos
-      ReadPreference = configuration.require.ReadPreference;
+      , ReadPreference = configuration.require.ReadPreference;
 
     // Attempt to connect
     var server = new Mongos([{
