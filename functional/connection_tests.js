@@ -1,3 +1,5 @@
+"use strict";
+
 exports['Should correctly connect to single server'] = {
   metadata: {
     requires: {

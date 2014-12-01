@@ -1,3 +1,5 @@
+"use strict";
+
 var inherits = require('util').inherits
   , f = require('util').format
   , Logger = require('../../../lib/connection/logger')
@@ -16,7 +18,7 @@ exports['Should correctly extend the cursor with custom implementation'] = {
 
     //
     // Create an extended cursor that adds a toArray function
-    var ExtendedCursor = function(bson, ns, cmd, options, connection, callbacks, options) {
+    var ExtendedCursor = function(bson, ns, cmd, options, connection, callbacks, topologyOptions) {
       Cursor.apply(this, Array.prototype.slice.call(arguments, 0));
       var self = this;
 
