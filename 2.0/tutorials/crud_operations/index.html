@@ -415,7 +415,7 @@ MongoClient.connect(url, function(err, db) {
 
 <h3 id="toc_4">Removing Documents</h3>
 
-<p>The <em>removeOne</em> and <em>removeMany</em> methods exist on the <em>Collection</em> class and is used to remove documents from MongoDB. Let&rsquo;s look at a couple of usage examples.</p>
+<p>The <em>deleteOne</em> and <em>deleteMany</em> methods exist on the <em>Collection</em> class and is used to remove documents from MongoDB. Let&rsquo;s look at a couple of usage examples.</p>
 
 <pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
   , assert = require('assert');
@@ -434,13 +434,13 @@ MongoClient.connect(url, function(err, db) {
     assert.equal(3, r.insertedCount);
 
     // Update a single document
-    col.removeOne({a:1}
+    col.deleteOne({a:1}
       , {$set: {b: 1}}, function(err, r) {
       assert.equal(null, err);
       assert.equal(1, r.deletedCount);
 
       // Update multiple documents
-      col.removeMany({a:2}
+      col.deleteMany({a:2}
         , {$set: {b: 1}}, function(err, r) {
         assert.equal(null, err);
         assert.equal(2, r.deletedCount);
@@ -451,7 +451,7 @@ MongoClient.connect(url, function(err, db) {
 });
 </code></pre>
 
-<p>The <em>remove</em> method also accepts an second argument that can be an options object. This object can have the following fields.</p>
+<p>The <em>removeOne</em> and <em>deleteMany</em> methods also accepts an second argument that can be an options object. This object can have the following fields.</p>
 
 <ul>
 <li><code>w</code>, {Number/String, &gt; -1 || &lsquo;majority&rsquo;} the write concern for the operation where &lt; 1 is no acknowledgment of write and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write.</li>
@@ -460,9 +460,9 @@ MongoClient.connect(url, function(err, db) {
 <li><code>single</code>, (Boolean, default:false) Removes the first document found.</li>
 </ul>
 
-<p>Just as for <em>update</em> and <em>insert</em> the <em>remove</em> method allows you to specify a per operation write concern using the <em>w</em>, <em>wtimeout</em> and <em>fsync</em> parameters</p>
+<p>Just as for <em>updateOne/updateMany</em> and <em>insertOne/insertMany</em> the <em>deleteOne/deleteMany</em> method allows you to specify a per operation write concern using the <em>w</em>, <em>wtimeout</em> and <em>fsync</em> parameters</p>
 
-<h3 id="toc_5">FindAndModify and FindAndRemove</h3>
+<h3 id="toc_5">FindAndModify and findAndDelete</h3>
 
 <p>The two methods <em>findOneAndUpdate</em>, <em>findOneAndDelete</em> and <em>findOneAndReplace</em> are special commands that allows the user to update or upsert a document and have the modified or existing document returned. It comes at a cost as the operation takes a write lock for the duration of the operation as it needs to ensure the modification is <em>atomic</em>. Let&rsquo;s look at <em>findOneAndUpdate</em> first using an example.</p>
 
@@ -514,7 +514,7 @@ MongoClient.connect(url, function(err, db) {
 <li><code>returnOriginal</code>, (Boolean, default:true) Set to false if you want to return the modified object rather than the original. Ignored for remove.</li>
 </ul>
 
-<p>The <em>findAndRemove</em> function is a function especially defined to help remove a document. Let&rsquo;s look at an example of usage.</p>
+<p>The <em>findAndDelete</em> function is a function especially defined to help remove a document. Let&rsquo;s look at an example of usage.</p>
 
 <pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
   , assert = require('assert');
@@ -593,7 +593,7 @@ MongoClient.connect(url, function(err, db) {
 });
 </code></pre>
 
-<p>As we can see the <em>bulkWrite</em> function takes an array of operation that can be objects of either <em>insertOne</em>, <em>insertMany</em>, <em>updateOne</em>, <em>updateMany</em>, <em>removeOne</em> or <em>removeMany</em>. It also takes a second parameter that takes the following options.</p>
+<p>As we can see the <em>bulkWrite</em> function takes an array of operation that can be objects of either <em>insertOne</em>, <em>insertMany</em>, <em>updateOne</em>, <em>updateMany</em>, <em>deleteOne</em> or <em>deleteMany</em>. It also takes a second parameter that takes the following options.</p>
 
 <ul>
 <li><code>ordered</code>, (Boolean, default:true) Execute in order or out of order.</li>
@@ -632,7 +632,7 @@ MongoClient.connect(url, function(err, db) {
   }
 
   // Finally perform a remove operation
-  bulk.find({b:1}).removeOne();
+  bulk.find({b:1}).deleteOne();
 
   // Execute the bulk with a journal write concern
   bulk.execute(function(err, result) {

@@ -19,11 +19,11 @@
 
 &lt;h1 id=&#34;toc_0&#34;&gt;Connection Failures and Retries&lt;/h1&gt;
 
-&lt;p&gt;This comes up a lot because there are some confusion about how the driver works when it comes to Socket timeouts and retries. This Tutorial attempts to clarify the drivers behavior and explains why for some legacy reasons as well as for some design reasons the driver works the way it does.&lt;/p&gt;
+&lt;p&gt;This comes up a lot because there is some confusion about how the driver works when it comes to Socket timeouts and retries. This Tutorial attempts to clarify the driver&amp;rsquo;s behavior and explains why, for some legacy reasons as well as for some design reasons, the driver works the way it does.&lt;/p&gt;
 
-&lt;p&gt;Let&amp;rsquo;s start off looking at the Simple case of a single server connection and how it behaves when tweaking the options that control the driver behavior on server disconnects.&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s start off by looking at the Simple case of a single server connection and how it behaves when tweaking the options that control the driver behavior on server disconnects.&lt;/p&gt;
 
-&lt;p&gt;First let&amp;rsquo;s start with a simple script performing inserts and find and running against a server on &lt;code&gt;localhost:27017&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;First let&amp;rsquo;s start with a simple script performing inserts and find, and running against a server on &lt;code&gt;localhost:27017&lt;/code&gt;.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
   , f = require(&#39;util&#39;).format;
@@ -45,7 +45,7 @@ MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, function(err, db) 
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Start the script and notice how it prints out &lt;code&gt;insert&lt;/code&gt; and &lt;code&gt;findOne&lt;/code&gt; every second. Now shut down the &lt;code&gt;mongod&lt;/code&gt; process and notice how you stop seeing the console printouts. What is happening is that the server is buffering operations until the &lt;code&gt;mongod&lt;/code&gt; returns because the two parameters controlling this behavior are set to the default value. These parameters are.&lt;/p&gt;
+&lt;p&gt;Start the script and notice how it prints out &lt;code&gt;insert&lt;/code&gt; and &lt;code&gt;findOne&lt;/code&gt; every second. Now shut down the &lt;code&gt;mongod&lt;/code&gt; process and notice how you stop seeing the console printouts. What is happening is that the server is buffering operations until the &lt;code&gt;mongod&lt;/code&gt; returns because the two parameters controlling this behavior are set to the default value. These parameters are:&lt;/p&gt;
 
 &lt;table&gt;
 &lt;thead&gt;
@@ -71,7 +71,7 @@ MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, function(err, db) 
 &lt;/tbody&gt;
 &lt;/table&gt;
 
-&lt;p&gt;By default the driver attempt to reconnect and buffers all operations until it can. This is due to backward compatibility.&lt;/p&gt;
+&lt;p&gt;By default the driver attempts to reconnect and buffers all operations until it can. This is due to backward compatibility.&lt;/p&gt;
 
 &lt;p&gt;Now let&amp;rsquo;s try to disable the &lt;code&gt;bufferMaxEntries&lt;/code&gt; by setting it to &lt;code&gt;0&lt;/code&gt; and see what happens.&lt;/p&gt;
 
@@ -97,9 +97,9 @@ MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, {
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Start the script running and then shut down the &lt;code&gt;mongod&lt;/code&gt; process. Notice how all operations are now erroring out instead of just being buffered ? Now restart the &lt;code&gt;mongod&lt;/code&gt; service and you will see the the operations once again correctly being executed.&lt;/p&gt;
+&lt;p&gt;Start the script running and then shut down the &lt;code&gt;mongod&lt;/code&gt; process. Notice how all operations are now erroring out instead of just being buffered? Now restart the &lt;code&gt;mongod&lt;/code&gt; service and you will see the the operations once again correctly being executed.&lt;/p&gt;
 
-&lt;p&gt;So what happens if we disable &lt;code&gt;autoReconnect&lt;/code&gt; by setting it to &lt;code&gt;false&lt;/code&gt;. Let&amp;rsquo;s take a look.&lt;/p&gt;
+&lt;p&gt;So what happens if we disable &lt;code&gt;autoReconnect&lt;/code&gt; by setting it to &lt;code&gt;false&lt;/code&gt;? Let&amp;rsquo;s take a look.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
   , f = require(&#39;util&#39;).format;
@@ -121,9 +121,9 @@ MongoClient.connect(&#39;mongodb://localhost:27017/test?autoReconnect=false&#39;
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;When you shut down the &lt;code&gt;mongod&lt;/code&gt; process now it stops processing operations and keeps buffering them due to &lt;code&gt;bufferMaxEntries&lt;/code&gt; being &lt;code&gt;-1&lt;/code&gt; by default meaning buffer all operations. When you bring the &lt;code&gt;mongod&lt;/code&gt; process back up will notice how it does not change the fact that we are buffering. This is a legacy behavior and less than idea. So you will want to set &lt;code&gt;bufferMaxEntries&lt;/code&gt; to 0 or a low number if you wish to turn off &lt;code&gt;autoReconnect&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;When you shut down the &lt;code&gt;mongod&lt;/code&gt; process, the driver stops processing operations and keeps buffering them due to &lt;code&gt;bufferMaxEntries&lt;/code&gt; being &lt;code&gt;-1&lt;/code&gt; by default meaning buffer all operations. When you bring the &lt;code&gt;mongod&lt;/code&gt; process back up you will notice how it does not change the fact that we are buffering. This is a legacy behavior and less than ideal. So you will want to set &lt;code&gt;bufferMaxEntries&lt;/code&gt; to 0 or a low number if you wish to turn off &lt;code&gt;autoReconnect&lt;/code&gt;.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_1&#34;&gt;The Matrix of behavior&lt;/h2&gt;
+&lt;h2 id=&#34;toc_1&#34;&gt;The Matrix of Behavior&lt;/h2&gt;
 
 &lt;p&gt;Let&amp;rsquo;s put all the possible values of &lt;code&gt;autoReconnect&lt;/code&gt; and &lt;code&gt;bufferMaxEntries&lt;/code&gt; in a table so we can more easily understand the behavior.&lt;/p&gt;
 
@@ -158,7 +158,7 @@ MongoClient.connect(&#39;mongodb://localhost:27017/test?autoReconnect=false&#39;
 &lt;tr&gt;
 &lt;td align=&#34;left&#34;&gt;false&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;0&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Auto reconnect but do not buffer operations, error out all operations&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Auto reconnect is off, do not buffer operations, error out all operations&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
@@ -175,19 +175,19 @@ MongoClient.connect(&#39;mongodb://localhost:27017/test?autoReconnect=false&#39;
 &lt;/tbody&gt;
 &lt;/table&gt;
 
-&lt;p&gt;So why is this like this. Well the main reason is a combination the asynchronous behavior of &lt;code&gt;node.js&lt;/code&gt; as well as &lt;code&gt;Replicasets&lt;/code&gt;. When you are using a single serve the behavior might be a bit mystifying but it makes sense in the context of the &lt;code&gt;Replicaset&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;So why is this the case? Well, the main reason is a combination of the asynchronous behavior of &lt;code&gt;node.js&lt;/code&gt; as well as &lt;code&gt;Replicasets&lt;/code&gt;. When you are using a single server the behavior might be a bit mystifying, but it makes sense in the context of the &lt;code&gt;Replicaset&lt;/code&gt;.&lt;/p&gt;
 
-&lt;p&gt;Say you have a &lt;code&gt;Replicaset&lt;/code&gt; where a new primary is elected. If the drivers does not buffer the operations it will have to error out all operations until there is a new primary available in the set. This complicates people&amp;rsquo;s code as every operation could potentially fail and thus the driver a long time ago took the decision to make this transparent to the user by buffering operations until the new &lt;code&gt;primary&lt;/code&gt; is available and then replaying them. &lt;code&gt;bufferMaxEntries&lt;/code&gt; was added later to allow developers to control this behavior themselves if they wished to be instantly notified about write errors f.ex instead of letting the driver handle it.&lt;/p&gt;
+&lt;p&gt;Say you have a &lt;code&gt;Replicaset&lt;/code&gt; where a new primary is elected. If the driver does not buffer the operations, it will have to error out all operations until there is a new primary available in the set. This complicates people&amp;rsquo;s code as every operation could potentially fail and thus the driver a long time ago took the decision to make this transparent to the user by buffering operations until the new &lt;code&gt;primary&lt;/code&gt; is available and then replaying them. &lt;code&gt;bufferMaxEntries&lt;/code&gt; was added later to allow developers to control this behavior themselves if they wished to be instantly notified about write errors f.ex instead of letting the driver handle it.&lt;/p&gt;
 
 &lt;h2 id=&#34;toc_2&#34;&gt;The Confusion&lt;/h2&gt;
 
-&lt;p&gt;A lot of the confusion comes from mistaking &lt;code&gt;socketTimeoutMS&lt;/code&gt; with how the async driver works. &lt;code&gt;socketTimeoutMS&lt;/code&gt; only applies to sockets if they have not been in use and they reach the &lt;code&gt;socketTimeoutMS&lt;/code&gt;. &lt;code&gt;connectionTimeoutMS&lt;/code&gt; applies to the initial server connection process timeout and is independent of the &lt;code&gt;socketTimeoutMS&lt;/code&gt; which is only applied to the socket after a successful server connection.&lt;/p&gt;
+&lt;p&gt;A lot of the confusion comes from mistaking &lt;code&gt;socketTimeoutMS&lt;/code&gt; with how the async driver works. &lt;code&gt;socketTimeoutMS&lt;/code&gt; only applies to sockets if they have successfully connected to the server, but have not been in use and they reach the &lt;code&gt;socketTimeoutMS&lt;/code&gt;. In contrast, &lt;code&gt;connectionTimeoutMS&lt;/code&gt; applies only to the &lt;em&gt;initial&lt;/em&gt; server connection process timeout.  The &amp;lsquo;connectionTimeoutMS&amp;rsquo; is independent of the &lt;code&gt;socketTimeoutMS&lt;/code&gt;.&lt;/p&gt;
 
-&lt;p&gt;However people set &lt;code&gt;socketTimeoutMS&lt;/code&gt; expecting it to influence timeouts for operations. But as we have seen above the &lt;code&gt;autoReconnect&lt;/code&gt; and &lt;code&gt;bufferMaxEntries&lt;/code&gt; are the two settings that control the behavior expected by setting &lt;code&gt;socketTimeoutMS&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;However, some people set &lt;code&gt;socketTimeoutMS&lt;/code&gt; expecting it to influence timeouts for operations. But as we have seen above the &lt;code&gt;autoReconnect&lt;/code&gt; and &lt;code&gt;bufferMaxEntries&lt;/code&gt; are the two settings that control that behavior.&lt;/p&gt;
 
-&lt;p&gt;However it&amp;rsquo;s good to notice that you should ensure you have a reasonable &lt;code&gt;socketTimeoutMS&lt;/code&gt;. A lot of people set it way way to low and find themselves with timeouts happening all the time as operations are infrequent enough to cause constant connection closing and reconnect events.&lt;/p&gt;
+&lt;p&gt;It&amp;rsquo;s worth noting that you should ensure you have a reasonable &lt;code&gt;socketTimeoutMS&lt;/code&gt;. A lot of people set it way way too low and find themselves with timeouts happening all the time as operations are infrequent enough to cause constant connection closing and reconnect events.&lt;/p&gt;
 
-&lt;p&gt;The rule of thumb I always impart is.&lt;/p&gt;
+&lt;p&gt;The rule of thumb I always impart is:&lt;/p&gt;
 
 &lt;blockquote&gt;
 &lt;p&gt;Set &lt;em&gt;socketTimeoutMS&lt;/em&gt; to at least &lt;code&gt;2-3x&lt;/code&gt; the longest running operation in your application or the interval between operations, too ensure you don&amp;rsquo;t timeout long running operations or servers where there are big gaps of time between operations.&lt;/p&gt;
@@ -798,7 +798,7 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;h3 id=&#34;toc_4&#34;&gt;Removing Documents&lt;/h3&gt;
 
-&lt;p&gt;The &lt;em&gt;removeOne&lt;/em&gt; and &lt;em&gt;removeMany&lt;/em&gt; methods exist on the &lt;em&gt;Collection&lt;/em&gt; class and is used to remove documents from MongoDB. Let&amp;rsquo;s look at a couple of usage examples.&lt;/p&gt;
+&lt;p&gt;The &lt;em&gt;deleteOne&lt;/em&gt; and &lt;em&gt;deleteMany&lt;/em&gt; methods exist on the &lt;em&gt;Collection&lt;/em&gt; class and is used to remove documents from MongoDB. Let&amp;rsquo;s look at a couple of usage examples.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
   , assert = require(&#39;assert&#39;);
@@ -817,13 +817,13 @@ MongoClient.connect(url, function(err, db) {
     assert.equal(3, r.insertedCount);
 
     // Update a single document
-    col.removeOne({a:1}
+    col.deleteOne({a:1}
       , {$set: {b: 1}}, function(err, r) {
       assert.equal(null, err);
       assert.equal(1, r.deletedCount);
 
       // Update multiple documents
-      col.removeMany({a:2}
+      col.deleteMany({a:2}
         , {$set: {b: 1}}, function(err, r) {
         assert.equal(null, err);
         assert.equal(2, r.deletedCount);
@@ -834,7 +834,7 @@ MongoClient.connect(url, function(err, db) {
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The &lt;em&gt;remove&lt;/em&gt; method also accepts an second argument that can be an options object. This object can have the following fields.&lt;/p&gt;
+&lt;p&gt;The &lt;em&gt;removeOne&lt;/em&gt; and &lt;em&gt;deleteMany&lt;/em&gt; methods also accepts an second argument that can be an options object. This object can have the following fields.&lt;/p&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 is no acknowledgment of write and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write.&lt;/li&gt;
@@ -843,9 +843,9 @@ MongoClient.connect(url, function(err, db) {
 &lt;li&gt;&lt;code&gt;single&lt;/code&gt;, (Boolean, default:false) Removes the first document found.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;Just as for &lt;em&gt;update&lt;/em&gt; and &lt;em&gt;insert&lt;/em&gt; the &lt;em&gt;remove&lt;/em&gt; method allows you to specify a per operation write concern using the &lt;em&gt;w&lt;/em&gt;, &lt;em&gt;wtimeout&lt;/em&gt; and &lt;em&gt;fsync&lt;/em&gt; parameters&lt;/p&gt;
+&lt;p&gt;Just as for &lt;em&gt;updateOne/updateMany&lt;/em&gt; and &lt;em&gt;insertOne/insertMany&lt;/em&gt; the &lt;em&gt;deleteOne/deleteMany&lt;/em&gt; method allows you to specify a per operation write concern using the &lt;em&gt;w&lt;/em&gt;, &lt;em&gt;wtimeout&lt;/em&gt; and &lt;em&gt;fsync&lt;/em&gt; parameters&lt;/p&gt;
 
-&lt;h3 id=&#34;toc_5&#34;&gt;FindAndModify and FindAndRemove&lt;/h3&gt;
+&lt;h3 id=&#34;toc_5&#34;&gt;FindAndModify and findAndDelete&lt;/h3&gt;
 
 &lt;p&gt;The two methods &lt;em&gt;findOneAndUpdate&lt;/em&gt;, &lt;em&gt;findOneAndDelete&lt;/em&gt; and &lt;em&gt;findOneAndReplace&lt;/em&gt; are special commands that allows the user to update or upsert a document and have the modified or existing document returned. It comes at a cost as the operation takes a write lock for the duration of the operation as it needs to ensure the modification is &lt;em&gt;atomic&lt;/em&gt;. Let&amp;rsquo;s look at &lt;em&gt;findOneAndUpdate&lt;/em&gt; first using an example.&lt;/p&gt;
 
@@ -897,7 +897,7 @@ MongoClient.connect(url, function(err, db) {
 &lt;li&gt;&lt;code&gt;returnOriginal&lt;/code&gt;, (Boolean, default:true) Set to false if you want to return the modified object rather than the original. Ignored for remove.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;The &lt;em&gt;findAndRemove&lt;/em&gt; function is a function especially defined to help remove a document. Let&amp;rsquo;s look at an example of usage.&lt;/p&gt;
+&lt;p&gt;The &lt;em&gt;findAndDelete&lt;/em&gt; function is a function especially defined to help remove a document. Let&amp;rsquo;s look at an example of usage.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
   , assert = require(&#39;assert&#39;);
@@ -976,7 +976,7 @@ MongoClient.connect(url, function(err, db) {
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;As we can see the &lt;em&gt;bulkWrite&lt;/em&gt; function takes an array of operation that can be objects of either &lt;em&gt;insertOne&lt;/em&gt;, &lt;em&gt;insertMany&lt;/em&gt;, &lt;em&gt;updateOne&lt;/em&gt;, &lt;em&gt;updateMany&lt;/em&gt;, &lt;em&gt;removeOne&lt;/em&gt; or &lt;em&gt;removeMany&lt;/em&gt;. It also takes a second parameter that takes the following options.&lt;/p&gt;
+&lt;p&gt;As we can see the &lt;em&gt;bulkWrite&lt;/em&gt; function takes an array of operation that can be objects of either &lt;em&gt;insertOne&lt;/em&gt;, &lt;em&gt;insertMany&lt;/em&gt;, &lt;em&gt;updateOne&lt;/em&gt;, &lt;em&gt;updateMany&lt;/em&gt;, &lt;em&gt;deleteOne&lt;/em&gt; or &lt;em&gt;deleteMany&lt;/em&gt;. It also takes a second parameter that takes the following options.&lt;/p&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;ordered&lt;/code&gt;, (Boolean, default:true) Execute in order or out of order.&lt;/li&gt;
@@ -1015,7 +1015,7 @@ MongoClient.connect(url, function(err, db) {
   }
 
   // Finally perform a remove operation
-  bulk.find({b:1}).removeOne();
+  bulk.find({b:1}).deleteOne();
 
   // Execute the bulk with a journal write concern
   bulk.execute(function(err, result) {
