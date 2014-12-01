@@ -145,7 +145,7 @@ The *update* method also accepts an second argument that can be an options objec
 Just as for *insert* the *update* method allows you to specify a per operation write concern using the *w*, *wtimeout* and *fsync* parameters
 
 ### Removing Documents
-The *removeOne* and *removeMany* methods exist on the *Collection* class and is used to remove documents from MongoDB. Let's look at a couple of usage examples.
+The *deleteOne* and *deleteMany* methods exist on the *Collection* class and is used to remove documents from MongoDB. Let's look at a couple of usage examples.
 
 ```js
 var MongoClient = require('mongodb').MongoClient
@@ -165,13 +165,13 @@ MongoClient.connect(url, function(err, db) {
     assert.equal(3, r.insertedCount);
 
     // Update a single document
-    col.removeOne({a:1}
+    col.deleteOne({a:1}
       , {$set: {b: 1}}, function(err, r) {
       assert.equal(null, err);
       assert.equal(1, r.deletedCount);
 
       // Update multiple documents
-      col.removeMany({a:2}
+      col.deleteMany({a:2}
         , {$set: {b: 1}}, function(err, r) {
         assert.equal(null, err);
         assert.equal(2, r.deletedCount);
@@ -182,16 +182,16 @@ MongoClient.connect(url, function(err, db) {
 });
 ```
 
-The *remove* method also accepts an second argument that can be an options object. This object can have the following fields.
+The *removeOne* and *deleteMany* methods also accepts an second argument that can be an options object. This object can have the following fields.
 
 *  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
 *  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
 *  `j`, (Boolean, default:false) write waits for journal sync.
 *  `single`, (Boolean, default:false) Removes the first document found.
 
-Just as for *update* and *insert* the *remove* method allows you to specify a per operation write concern using the *w*, *wtimeout* and *fsync* parameters
+Just as for *updateOne/updateMany* and *insertOne/insertMany* the *deleteOne/deleteMany* method allows you to specify a per operation write concern using the *w*, *wtimeout* and *fsync* parameters
 
-### FindAndModify and FindAndRemove
+### FindAndModify and findAndDelete
 The two methods *findOneAndUpdate*, *findOneAndDelete* and *findOneAndReplace* are special commands that allows the user to update or upsert a document and have the modified or existing document returned. It comes at a cost as the operation takes a write lock for the duration of the operation as it needs to ensure the modification is *atomic*. Let's look at *findOneAndUpdate* first using an example.
 
 ```js
@@ -241,7 +241,7 @@ The *findOneAndUpdate* method also accepts an second argument that can be an opt
 *  `projection`, (Object, default:null) Projection for returned result
 *  `returnOriginal`, (Boolean, default:true) Set to false if you want to return the modified object rather than the original. Ignored for remove.
 
-The *findAndRemove* function is a function especially defined to help remove a document. Let's look at an example of usage.
+The *findAndDelete* function is a function especially defined to help remove a document. Let's look at an example of usage.
 
 ```js
 var MongoClient = require('mongodb').MongoClient
@@ -319,7 +319,7 @@ MongoClient.connect(url, function(err, db) {
 });
 ```
 
-As we can see the *bulkWrite* function takes an array of operation that can be objects of either *insertOne*, *insertMany*, *updateOne*, *updateMany*, *removeOne* or *removeMany*. It also takes a second parameter that takes the following options.
+As we can see the *bulkWrite* function takes an array of operation that can be objects of either *insertOne*, *insertMany*, *updateOne*, *updateMany*, *deleteOne* or *deleteMany*. It also takes a second parameter that takes the following options.
 
 *  `ordered`, (Boolean, default:true) Execute in order or out of order.
 *  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
@@ -356,7 +356,7 @@ MongoClient.connect(url, function(err, db) {
   }
 
   // Finally perform a remove operation
-  bulk.find({b:1}).removeOne();
+  bulk.find({b:1}).deleteOne();
 
   // Execute the bulk with a journal write concern
   bulk.execute(function(err, result) {
