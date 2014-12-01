@@ -164,7 +164,22 @@ var ReplSetManager = function(replsetOptions) {
       var hostString = hosts.shift().host;
       var host = hostString.split(':')[0];
       var port = parseInt(hostString.split(':')[1], 10);
-      var server = new Server({host: host, port: port, size: 1});
+
+      // Set the basic options
+      var opts = {host: host, port: port, size: 1};
+
+      // Set the key
+      if(keys.indexOf('sslOnNormalPorts') != -1) opts.ssl = true;
+      if(keys.indexOf('ssl') != -1) opts.ssl = replsetOptions.ssl;
+      if(keys.indexOf('ca') != -1) opts.ca = replsetOptions.ca;
+      if(keys.indexOf('cert') != -1) opts.cert = replsetOptions.cert;
+      if(keys.indexOf('rejectUnauthorized') != -1) opts.rejectUnauthorized = replsetOptions.rejectUnauthorized;
+      if(keys.indexOf('key') != -1) opts.key = replsetOptions.key;
+      if(keys.indexOf('passphrase') != -1) opts.passphrase = replsetOptions.passphrase;
+
+      // Create a server instance
+      // var server = new Server({host: host, port: port, size: 1});
+      var server = new Server(opts);
 
       // Process result
       var processResult = function(_s) {
