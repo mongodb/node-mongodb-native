@@ -1,3 +1,5 @@
+"use strict";
+
 var validVersion = require('./shared').validVersion
   , semver = require('semver');
 

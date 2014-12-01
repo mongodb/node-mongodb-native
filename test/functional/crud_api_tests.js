@@ -1,3 +1,5 @@
+"use strict";
+
 var fs = require('fs');
 
 // instanceof cannot be use reliably to detect the new models in js due to scoping and new contexts killing class info

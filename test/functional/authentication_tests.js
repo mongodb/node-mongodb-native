@@ -1,3 +1,5 @@
+"use strict";
+
 var f = require('util').format;
 
 exports['Should correctly authenticate against admin db'] = {
@@ -232,7 +234,7 @@ exports['Unordered bulk operation should fail correctly when not authenticated']
       , Server = configuration.require.Server;
 
     // restart server
-    configuration.restart(function() {
+    configuration.restart({purge:true, kill:true}, function() {
       var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true}), {w:1});
       db1.open(function(err, db) {
         test.equal(null, err);

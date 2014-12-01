@@ -1,3 +1,5 @@
+"use strict";
+
 /**
 * @ignore
 */
@@ -117,12 +119,12 @@ exports.shouldPerformMapReduceWithParametersBeingFunctions = {
           collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}}, function(err, collection) {
             collection.findOne({'_id':1}, function(err, result) {
               test.equal(1, result.value);
-            });
 
-            collection.findOne({'_id':2}, function(err, result) {
-              test.equal(1, result.value);
-              db.close();
-              test.done();
+              collection.findOne({'_id':2}, function(err, result) {
+                test.equal(1, result.value);
+                db.close();
+                test.done();
+              });
             });
           });
         });

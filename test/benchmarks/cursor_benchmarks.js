@@ -1,3 +1,5 @@
+"use strict";
+
 var mongodb = require('../../.')
   , Db = mongodb.Db
   , Server = mongodb.Server

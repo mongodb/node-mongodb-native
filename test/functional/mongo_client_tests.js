@@ -1,3 +1,5 @@
+"use strict";
+
 exports['Should Correctly Do MongoClient with bufferMaxEntries:0'] = {
   metadata: {
     requires: {

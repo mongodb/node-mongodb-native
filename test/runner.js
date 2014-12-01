@@ -1,3 +1,5 @@
+"use strict";
+
 var Runner = require('integra').Runner
   , Cover = require('integra').Cover
   , RCover = require('integra').RCover
@@ -15,6 +17,7 @@ var Runner = require('integra').Runner
   , fs = require('fs')
   , f = require('util').format;
 
+var detector = require('gleak')();
 var smokePlugin = require('./smoke_plugin.js');
 // console.log(argv._);
 var argv = require('optimist')
@@ -47,6 +50,7 @@ var createConfiguration = function(options) {
     var mongo = require('../');
     var Db = mongo.Db;
     var Server = mongo.Server;
+    var Logger = mongo.Logger;
     var ServerManager = require('mongodb-core').ServerManager;
     var database = "integration_tests";
     var url = options.url || "mongodb://%slocalhost:27017/" + database;
@@ -56,6 +60,9 @@ var createConfiguration = function(options) {
     var writeConcern = options.writeConcern || {w:1};
     var writeConcernMax = options.writeConcernMax || {w:1};
     
+    Logger.setCurrentLogger(function() {});
+    Logger.setLevel('debug');
+
     // Shallow clone the options
     var fOptions = shallowClone(options);
     options.journal = false;
@@ -85,6 +92,13 @@ var createConfiguration = function(options) {
       stop: function(callback) {
         if(startupOptions.skipShutdown) return callback();
         manager.stop({signal: -15}, function() {
+
+          // Print any global leaks
+          detector.detect().forEach(function (name) {
+            console.warn('found global leak: %s', name);
+          });
+
+          // Finish stop
           callback();
         });        
       },

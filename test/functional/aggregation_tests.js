@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * Correctly call the aggregation framework using a pipeline in an Array.
  *

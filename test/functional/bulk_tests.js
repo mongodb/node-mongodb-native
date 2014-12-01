@@ -1,3 +1,5 @@
+"use strict";
+
 exports['Should correctly handle ordered single batch api write command error'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   

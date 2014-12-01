@@ -1,3 +1,5 @@
+"use strict";
+
 var f = require('util').format;
 
 var restartAndDone = function(configuration, test) {
@@ -732,7 +734,7 @@ exports['Should correctly connect to a replicaset with additional options'] = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
-      MongoClient = mongo.MongoClient;
+      , MongoClient = mongo.MongoClient;
 
     var url = f("mongodb://localhost:%s,localhost:%s,localhost:%s/integration_test_?replicaSet=%s"
       , configuration.port, configuration.port + 1, configuration.port + 2, configuration.replicasetName)
@@ -771,7 +773,7 @@ exports['Should correctly connect to a replicaset with readPreference set'] = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
-      MongoClient = mongo.MongoClient;
+      , MongoClient = mongo.MongoClient;
 
     // Create url
     var url = f("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
@@ -801,7 +803,7 @@ exports['Should give an error for non-existing servers'] = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
-      MongoClient = mongo.MongoClient;
+      , MongoClient = mongo.MongoClient;
 
     var url = f("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
       , "nolocalhost:30000"
@@ -918,7 +920,7 @@ exports['Should not give an error when using a single server seed and no setName
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
-      MongoClient = mongo.MongoClient;
+      , MongoClient = mongo.MongoClient;
 
     var url = f("mongodb://localhost:%s/%s"
       , configuration.port
@@ -941,7 +943,7 @@ exports['Should give an error when using a two server seeds and no setName'] = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
-      MongoClient = mongo.MongoClient;
+      , MongoClient = mongo.MongoClient;
 
     var url = f("mongodb://localhost:%s,localhost:%s/%s"
       , configuration.port

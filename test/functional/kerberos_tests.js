@@ -1,3 +1,5 @@
+"use strict";
+
 var format = require('util').format;
 
 // You need to set up the kinit tab first

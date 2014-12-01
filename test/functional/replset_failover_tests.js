@@ -1,3 +1,5 @@
+"use strict";
+
 var restartAndDone = function(configuration, test) {
   configuration.manager.restart(function() {
     test.done();

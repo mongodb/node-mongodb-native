@@ -1,3 +1,5 @@
+"use strict";
+
 var fs = require('fs');
 
 /**
@@ -2094,7 +2096,7 @@ exports.shouldNotFailDueToStackOverflowEach = {
         }
         // Get all batches we must insert
         left = allDocs.length;
-        totalI = 0;
+        var totalI = 0;
 
         // Execute inserts
         for(var i = 0; i < left; i++) {
@@ -2149,8 +2151,8 @@ exports.shouldNotFailDueToStackOverflowToArray = {
         }
         // Get all batches we must insert
         left = allDocs.length;
-        totalI = 0;
-        timeout = 0;
+        var totalI = 0;
+        var timeout = 0;
 
         // Execute inserts
         for(var i = 0; i < left; i++) {

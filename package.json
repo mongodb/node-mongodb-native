@@ -26,6 +26,7 @@
     , "jsdoc": "3.3.0-alpha9"
     , "semver": "4.1.0"
     , "rimraf": "2.2.6"
+    , "gleak": "0.5.0"
   },
   "author": "Christian Kvalheim",
   "license": "Apache 2.0",

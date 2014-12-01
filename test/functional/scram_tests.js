@@ -1,3 +1,5 @@
+"use strict";
+
 /**
  * rm -rf data; mkdir data; mongod --dbpath=./data --setParameter authenticationMechanisms=SCRAM-SHA-1 --auth
  * @ignore

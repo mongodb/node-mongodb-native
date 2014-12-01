@@ -1,3 +1,5 @@
+"use strict";
+
 exports.shouldFailInsertDueToUniqueIndex = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   

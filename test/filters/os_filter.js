@@ -1,3 +1,5 @@
+"use strict";
+
 var OSFilter = function() {
   // Get environmental variables that are known
   var platform = process.platform;

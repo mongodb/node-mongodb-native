@@ -1,3 +1,5 @@
+"use strict";
+
 var fs = require('fs');
 
 /**
@@ -17,14 +19,15 @@ exports.shouldCorrectlyCommunicateUsingSSLSocket = {
     var insertDocs = [];
 
     // Start server
-    serverManager = new ServerManager({
+    var serverManager = new ServerManager({
         journal: null
       , sslOnNormalPorts: null
       , sslPEMKeyFile: __dirname + "/ssl/server.pem"
     });
 
     // Start the server
-    serverManager.start({purge:true, signal:-9}, function(err) {
+    serverManager.start({purge:true, kill:true, signal:-9}, function(err) {
+      console.dir(err)
       test.equal(null, err);
       
       // Connect
@@ -62,7 +65,7 @@ exports.shouldCorrectlyValidateServerCertificate = {
     var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
 
     // Start server
-    serverManager = new ServerManager({
+    var serverManager = new ServerManager({
         journal:null
       , sslOnNormalPorts: null
       , sslPEMKeyFile: __dirname + "/ssl/server.pem"
@@ -71,7 +74,7 @@ exports.shouldCorrectlyValidateServerCertificate = {
       , ca:ca
     });
 
-    serverManager.start({purge:true, signal:-9}, function() {
+    serverManager.start({purge:true, kill:true, signal:-9}, function() {
 
       // Connect and validate the server certificate
       MongoClient.connect("mongodb://server:27017/test?ssl=true&maxPoolSize=1", {
@@ -115,7 +118,7 @@ exports.shouldCorrectlyValidatePresentedServerCertificateAndPresentValidCertific
     var key = fs.readFileSync(__dirname + "/ssl/client.pem");
     
     // Start server
-    serverManager = new ServerManager({
+    var serverManager = new ServerManager({
         journal:null
       , sslOnNormalPorts: null
       , sslCAFile: __dirname + "/ssl/ca.pem"
@@ -129,7 +132,7 @@ exports.shouldCorrectlyValidatePresentedServerCertificateAndPresentValidCertific
       , cert:cert
     });
 
-    serverManager.start({purge:true, signal:-9}, function() {
+    serverManager.start({purge:true, kill:true, signal:-9}, function() {
       // Connect and validate the server certificate
       MongoClient.connect("mongodb://server:27017/test?ssl=true&maxPoolSize=1", {
         server: {
@@ -175,7 +178,7 @@ exports.shouldValidatePresentedServerCertificateButPresentInvalidCertificate = {
     var key = fs.readFileSync(__dirname + "/ssl/client.pem");
 
     // Start server
-    serverManager = new ServerManager({
+    var serverManager = new ServerManager({
         journal:null
       , ssl:true
       , fork: null
@@ -191,7 +194,7 @@ exports.shouldValidatePresentedServerCertificateButPresentInvalidCertificate = {
       , cert:cert
     });
 
-    serverManager.start({purge:true, signal:-9}, function() {
+    serverManager.start({purge:true, kill:true, signal:-9}, function() {
 
       // Read the ca
       var cert = fs.readFileSync(__dirname + "/ssl/mycert.pem");
@@ -235,14 +238,14 @@ exports['Should correctly shut down if attempting to connect to ssl server with 
     var insertDocs = [];
 
     // Start server
-    serverManager = new ServerManager({
+    var serverManager = new ServerManager({
         journal: null
       , sslOnNormalPorts: null
       , sslPEMKeyFile: __dirname + "/ssl/server.pem"
     });
 
     // Start server
-    serverManager.start({purge:true, signal:-9}, function() {
+    serverManager.start({purge:true, kill:true, signal:-9}, function() {
       MongoClient.connect("mongodb://localhost:27017/test?ssl=false", function(err, db) {
         test.ok(err != null);
 

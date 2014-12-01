@@ -1,3 +1,5 @@
+"use strict";
+
 // console.log(argv._);
 var argv = require('optimist')
     .usage('Usage: $0 -n [name]')

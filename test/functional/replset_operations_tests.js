@@ -1,3 +1,5 @@
+"use strict";
+
 var format = require('util').format;
 
 var restartAndDone = function(configuration, test) {

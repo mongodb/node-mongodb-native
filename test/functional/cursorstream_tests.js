@@ -1,3 +1,5 @@
+"use strict";
+
 exports.shouldStreamDocumentsWithPauseAndResumeForFetching = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   

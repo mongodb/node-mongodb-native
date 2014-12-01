@@ -1,3 +1,5 @@
+"use strict";
+
 var TravisFilter = function(name) {
   name = name || "ON_TRAVIS";
   // Get environmental variables that are known

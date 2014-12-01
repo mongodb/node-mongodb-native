@@ -1,3 +1,5 @@
+"use strict";
+
 // Check if we have a valid node.js method
 var validVersion = function(compare_version, version_required) {
   var comparator = version_required.substr(0, 1)

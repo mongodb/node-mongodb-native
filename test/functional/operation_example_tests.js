@@ -1,3 +1,5 @@
+"use strict";
+
 var f = require('util').format;
 
 /**************************************************************************
@@ -6596,7 +6598,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandle = {
       var data = fs.readFileSync('./test/functional/data/test_gs_weird_bug.png');
 
       // Open a file handle for reading the file
-      var fd = fs.openSync('./test/functional/data/test_gs_weird_bug.png', 'r', 0666);
+      var fd = fs.openSync('./test/functional/data/test_gs_weird_bug.png', 'r', parseInt('0666',8));
 
       // Open the new file
       gridStore.open(function(err, gridStore) {
