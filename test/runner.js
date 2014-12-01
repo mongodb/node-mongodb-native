@@ -1,3 +1,5 @@
+"use strict";
+
 var Runner = require('integra').Runner
   , Cover = require('integra').Cover
   , RCover = require('integra').RCover
@@ -13,6 +15,7 @@ var Runner = require('integra').Runner
   , ReplSetManager = require('../lib/tools/replset_manager')
   , ShardingManager = require('../lib/tools/sharding_manager');
 
+var detector = require('gleak')();
 var smokePlugin = require('../lib/tools/smoke_plugin.js');
 var argv = require('optimist')
     .usage('Usage: $0 -t [target] -e [environment] -n [name] -f [filename] -r [smoke report file]')
@@ -36,13 +39,16 @@ var Configuration = function(options) {
   var skipTermination = typeof options.skipTermination == 'boolean' ? options.skipTermination : false;
   var setName = options.setName || 'rs';
 
-  // Create a topology function
-  var topology = options.topology || function(self, _mongo) {
+  // Default function
+  var defaultFunction = function(self, _mongo) {
     return new _mongo.Server({
         host: self.host
       , port: self.port
     });
-  }
+  };
+
+  // Create a topology function
+  var topology = options.topology || defaultFunction;
 
   return function(context) {
     mongo = require('..');
@@ -53,7 +59,7 @@ var Configuration = function(options) {
         if(skipStart) return callback();
         // Start the db
         manager.start({purge:true, signal: -9}, function(err) {
-          var server = topology(this, mongo);
+          var server = topology(self, mongo);
           // Set up connect
           server.once('connect', function() {
             // Drop the database
@@ -71,6 +77,13 @@ var Configuration = function(options) {
       stop: function(callback) {
         if(skipTermination) return callback();
         manager.stop({signal: -15}, function() {
+
+          // Print any global leaks
+          detector.detect().forEach(function (name) {
+            console.warn('found global leak: %s', name);
+          });
+
+          // Finish up the tests
           callback();
         });        
       },

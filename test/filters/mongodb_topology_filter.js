@@ -1,3 +1,5 @@
+"use strict";
+
 var MongoDBTopologyFilter = function() {
   var serverConfig = null;
 

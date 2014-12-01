@@ -1,3 +1,5 @@
+"use strict";
+
 exports['Should correctly connect pool to single server'] = {
   metadata: {
     requires: {

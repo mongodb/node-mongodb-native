@@ -1,3 +1,5 @@
+"use strict";
+
 exports['Should correctly use a ping strategy to pick a node'] = {
   metadata: {
     requires: {
