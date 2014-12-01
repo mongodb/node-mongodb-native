@@ -71,18 +71,23 @@ MongoCR.prototype.auth = function(server, pool, db, username, password, callback
       server.command(f("%s.$cmd", db)
         , { getnonce: 1 }
         , { connection: connection }, function(err, r) {
+          var nonce = null;
+          var key = null;
+          
           // Adjust the number of connections left
           // Get nonce
-          var nonce = r.result.nonce;
-          // Use node md5 generator
-          var md5 = crypto.createHash('md5');
-          // Generate keys used for authentication
-          md5.update(username + ":mongo:" + password);
-          var hash_password = md5.digest('hex');
-          // Final key
-          md5 = crypto.createHash('md5');
-          md5.update(nonce + username + hash_password);
-          var key = md5.digest('hex');
+          if(err == null) {
+            nonce = r.result.nonce;
+            // Use node md5 generator
+            var md5 = crypto.createHash('md5');
+            // Generate keys used for authentication
+            md5.update(username + ":mongo:" + password);
+            var hash_password = md5.digest('hex');
+            // Final key
+            md5 = crypto.createHash('md5');
+            md5.update(nonce + username + hash_password);
+            key = md5.digest('hex');
+          }
 
           // Execute command
           server.command(f("%s.$cmd", db)
