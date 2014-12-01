@@ -1,3 +1,5 @@
+"use strict";
+
 var f = require('util').format
   , Long = require('bson').Long
   , setProperty = require('./utils').setProperty
@@ -35,6 +37,7 @@ var _buffer = null;
  * QUERY
  **************************************************************/
 var Query = function(bson, ns, query, options) {
+  var self = this;
   // Basic options needed to be passed in
   if(ns == null) throw new Error("ns must be specified for query");
   if(query == null) throw new Error("query must be specified for query");
@@ -67,8 +70,8 @@ var Query = function(bson, ns, query, options) {
   // after creation has happened
   Object.defineProperty(this, 'batchSize', {
       enumerable:true,
-      set: function(value) { numberToReturn = value; }
-    , get: function() { return numberToReturn; }
+      set: function(value) { self.numberToReturn = value; }
+    , get: function() { return self.numberToReturn; }
   });
 
   // Flags

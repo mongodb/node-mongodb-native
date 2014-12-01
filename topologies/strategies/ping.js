@@ -1,3 +1,5 @@
+"use strict";
+
 var Logger = require('../../connection/logger')
   , EventEmitter = require('events').EventEmitter
   , inherits = require('util').inherits

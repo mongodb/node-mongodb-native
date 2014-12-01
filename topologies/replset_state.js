@@ -1,3 +1,5 @@
+"use strict";
+
 var Logger = require('../connection/logger')
   , f = require('util').format
   , MongoError = require('../error');

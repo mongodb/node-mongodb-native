@@ -1,7 +1,10 @@
+"use strict";
+
 var inherits = require('util').inherits
   , f = require('util').format
   , b = require('bson')
   , bindToCurrentDomain = require('../connection/utils').bindToCurrentDomain
+  , debugOptions = require('../connection/utils').debugOptions
   , EventEmitter = require('events').EventEmitter
   , Server = require('./server')
   , ReadPreference = require('./read_preference')
@@ -1010,7 +1013,7 @@ var errorHandlerTemp = function(self, state, event) {
 // Connect handler
 var connectHandler = function(self, state) {
   return function(server) {
-    if(state.logger.isInfo()) logger.info(f('[%s] connected to %s', state.id, server.name));
+    if(state.logger.isInfo()) state.logger.info(f('[%s] connected to %s', state.id, server.name));
     if(state.replState.state == DESTROYED) return;
 
     // Filter out any connection servers

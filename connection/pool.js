@@ -1,3 +1,5 @@
+"use strict";
+
 var inherits = require('util').inherits
   , EventEmitter = require('events').EventEmitter
   , Connection = require('./connection')

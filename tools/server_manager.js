@@ -1,3 +1,5 @@
+"use strict";
+
 var f = require('util').format
   , path = require('path')
   , exec = require('child_process').exec
@@ -47,14 +49,6 @@ var ServerManager = function(serverOptions) {
 
   // Clone the options
   serverOptions = cloneOptions(serverOptions);
-
-  Object.defineProperty(this, 'host', {
-    enumerable:true, get: function() { return host; }
-  });
-
-  Object.defineProperty(this, 'port', {
-    enumerable:true, get: function() { return port; }
-  });
 
   Object.defineProperty(this, 'dbpath', {
     enumerable:true, get: function() { return dbpath; }

@@ -1,3 +1,5 @@
+"use strict";
+
 // Set property function
 var setProperty = function(obj, prop, flag, values) {
   Object.defineProperty(obj, prop.name, {
@@ -49,6 +51,15 @@ var copy = function(fObj, tObj) {
   return tObj;
 }
 
+var debugOptions = function(debugFields, options) {
+  var finaloptions = {};
+  debugFields.forEach(function(n) {
+    finaloptions[n] = options[n];
+  });
+
+  return finaloptions;
+}
+
 /**
  * @ignore
  */
@@ -63,3 +74,4 @@ exports.getProperty = getProperty;
 exports.getSingleProperty = getSingleProperty;
 exports.copy = copy;
 exports.bindToCurrentDomain = bindToCurrentDomain;
+exports.debugOptions = debugOptions;

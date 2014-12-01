@@ -1,3 +1,5 @@
+"use strict";
+
 var f = require('util').format
   , MongoError = require('../error');
 

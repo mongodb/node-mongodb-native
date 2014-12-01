@@ -1,3 +1,5 @@
+"use strict";
+
 var f = require('util').format
   , crypto = require('crypto')
   , MongoError = require('../error');
@@ -67,7 +69,7 @@ SSPI.prototype.auth = function(server, pool, db, username, password, options, ca
     // Execute MongoCR
     var execute = function(connection) {
       // Start Auth process for a connection
-      SSIPAuthenticate(db, username, password, db, gssapiServiceName, server, connection, function(err, r) {
+      SSIPAuthenticate(username, password, gssapiServiceName, server, connection, function(err, r) {
         // Adjust count
         count = count - 1;
 
@@ -101,7 +103,7 @@ SSPI.prototype.auth = function(server, pool, db, username, password, options, ca
   }
 }
 
-var SSIPAuthenticate = function(db, username, password, db, gssapiServiceName, server, connection, callback) {
+var SSIPAuthenticate = function(username, password, gssapiServiceName, server, connection, callback) {
   // Build Authentication command to send to MongoDB
   var command = {
       saslStart: 1

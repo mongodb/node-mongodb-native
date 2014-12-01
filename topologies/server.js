@@ -1,3 +1,5 @@
+ "use strict";
+
 var inherits = require('util').inherits
   , f = require('util').format
   , bindToCurrentDomain = require('../connection/utils').bindToCurrentDomain
@@ -11,6 +13,7 @@ var inherits = require('util').inherits
   , CommandResult = require('./command_result')
   , getSingleProperty = require('../connection/utils').getSingleProperty
   , getProperty = require('../connection/utils').getProperty
+  , debugOptions = require('../connection/utils').debugOptions
   , BSON = require('bson').native().BSON
   , PreTwoSixWireProtocolSupport = require('../wireprotocol/2_4_support')
   , TwoSixWireProtocolSupport = require('../wireprotocol/2_6_support')
@@ -74,7 +77,7 @@ var Callbacks = function() {
 Callbacks.prototype.flush = function(err) {
   for(var id in this.callbacks) {
     if(!isNaN(parseInt(id, 10))) {
-      callback = this.callbacks[id];
+      var callback = this.callbacks[id];
       delete this.callbacks[id];
       callback(err, null);
     }
@@ -407,6 +410,10 @@ var notifyStrategies = function(self, state, op, params, callback) {
   }    
 }
 
+var debugFields = ['reconnect', 'reconnectTries', 'reconnectInterval', 'emitError', 'cursorFactory', 'host'
+  , 'port', 'size', 'keepAlive', 'keepAliveInitialDelay', 'noDelay', 'connectionTimeout'
+  , 'socketTimeout', 'singleBufferSerializtion', 'ssl', 'ca', 'cert', 'key', 'rejectUnauthorized', 'promoteLongs'];
+
 /**
  * Creates a new Server instance
  * @class
@@ -638,7 +645,7 @@ Server.prototype.command = function(ns, cmd, options, callback) {
 
   // Debug log
   if(self.s.logger.isDebug()) self.s.logger.debug(f('executing command [%s] against %s', JSON.stringify({
-    ns: ns, cmd: cmd, options: options
+    ns: ns, cmd: cmd, options: debugOptions(debugFields, options)
   }), self.name));
 
   // Topology is not connected, save the call in the provided store to be

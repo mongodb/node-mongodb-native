@@ -1,14 +1,20 @@
+"use strict";
+
 var inherits = require('util').inherits
   , EventEmitter = require('events').EventEmitter
   , net = require('net')
   , tls = require('tls')
   , f = require('util').format
   , getSingleProperty = require('./utils').getSingleProperty
+  , debugOptions = require('./utils').debugOptions
   , Response = require('./commands').Response
   , MongoError = require('../error')
   , Logger = require('./logger');  
 
 var _id = 0;
+var debugFields = ['host', 'port', 'size', 'keepAlive', 'keepAliveInitialDelay', 'noDelay'
+  , 'connectionTimeout', 'socketTimeout', 'singleBufferSerializtion', 'ssl', 'ca', 'cert'
+  , 'rejectUnauthorized', 'promoteLongs'];
 
 /**
  * Creates a new Connection instance
@@ -57,7 +63,7 @@ var Connection = function(options) {
   // Max BSON message size
   this.maxBsonMessageSize = options.maxBsonMessageSize || (1024 * 1024 * 16 * 4);
   // Debug information
-  if(this.logger.isDebug()) this.logger.debug(f('creating connection %s with options [%s]', id, JSON.stringify(options)));
+  if(this.logger.isDebug()) this.logger.debug(f('creating connection %s with options [%s]', this.id, JSON.stringify(debugOptions(debugFields, options))));
 
   // Default options
   this.port = options.port || 27017;

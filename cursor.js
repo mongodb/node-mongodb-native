@@ -1,3 +1,5 @@
+"use strict";
+
 var Long = require('bson').Long
   , Logger = require('./connection/logger')
   , MongoError = require('./error')

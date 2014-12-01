@@ -1,3 +1,5 @@
+"use strict";
+
 var f = require('util').format
   , path = require('path')
   , fs = require('fs')
@@ -626,6 +628,8 @@ var ReplSetManager = function(replsetOptions) {
 
             // Remove from the list of the result
             var members = [];
+            var removedServer = null;
+            
             // Find all all servers not matching the one we want removed
             for(var i = 0; i < d.members.length; i++) {
               if(d.members[i].host != m.lastIsMaster().me) {
