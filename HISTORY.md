@@ -1,3 +1,12 @@
+2.0.9 2014-12-01
+----------------
+- Bumped mongodb-core to 1.1.3 fixing global leaked variables and introducing strict across all classes.
+- All classes are now strict (Issue #1233)
+- NODE-324 Refactored insert/update/remove and all other crud opts to rely on internal methods to avoid any recursion.
+- Fixed recursion issues in debug logging due to JSON.stringify()
+- Documentation fixes (Issue #1232, https://github.com/wsmoak)
+- Fix writeConcern in Db.prototype.ensureIndex (Issue #1231, https://github.com/Qard)
+
 2.0.8 2014-11-28
 ----------------
 - NODE-322 Finished up prototype refactoring of Db class.
