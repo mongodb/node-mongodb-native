@@ -1,3 +1,10 @@
+1.1.3 01-12-2014
+----------------
+- Fixed error handling issue with nonce generation in mongocr.
+- Fixed issues with restarting servers when using ssl.
+- Using strict for all classes.
+- Cleaned up any escaping global variables.
+
 1.1.2 20-11-2014
 ----------------
 - Correctly encoding UTF8 collection names on wire protocol messages.
