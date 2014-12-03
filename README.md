@@ -182,7 +182,7 @@ Let's look at how to do a simple document update by adding a new field **b** to 
 var updateDocument = function(db, callback) {
   // Get the documents collection
   var collection = db.collection('documents');
-  // Insert some documents
+  // Update document where a is 2, set b equal to 1
   collection.update({ a : 2 }
     , { $set: { b : 1 } }, function(err, result) {
     assert.equal(err, null);
