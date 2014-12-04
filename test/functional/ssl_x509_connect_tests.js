@@ -50,7 +50,7 @@ exports['Should correctly authenticate using x509'] = {
     var serverManager = new ServerManager(rsOptions);
   
     // Start the server manager
-    serverManager.start({purge:true, signal:-9}, function() {
+    serverManager.start({purge:true, signal:-9, kill:true}, function() {
       // Connect and validate the server certificate
       MongoClient.connect("mongodb://server:27017/test?ssl=true&maxPoolSize=1", {
         server: {
@@ -151,7 +151,7 @@ exports['Should correctly handle bad x509 certificate'] = {
 
     // Create server manager
     var serverManager = new ServerManager(rsOptions);
-    serverManager.start({purge:true, signal:-9}, function() {
+    serverManager.start({purge:true, signal:-9, kill:true}, function() {
       // Connect and validate the server certificate
       MongoClient.connect("mongodb://server:27017/test?ssl=true&maxPoolSize=1", {
         server: {
@@ -250,7 +250,7 @@ exports['Should give reasonable error on x509 authentication failure'] = {
 
     // Create server manager
     var serverManager = new ServerManager(rsOptions);
-    serverManager.start({purge:true, signal:-9}, function() {
+    serverManager.start({purge:true, signal:-9, kill:true}, function() {
       // Connect and validate the server certificate
       MongoClient.connect("mongodb://server:27017/test?ssl=true&maxPoolSize=1", {
         server: {
@@ -335,7 +335,7 @@ exports['Should give helpful error when attempting to use x509 without SSL'] = {
 
     // Create server manager
     var serverManager = new ServerManager(rsOptions);
-    serverManager.start({purge:true, signal:-9}, function() {
+    serverManager.start({purge:true, signal:-9, kill:true}, function() {
       // Connect and validate the server certificate
       MongoClient.connect("mongodb://server:27017/test?ssl=false&maxPoolSize=1", {
         server: {
@@ -437,7 +437,7 @@ exports['Should correctly reauthenticate against x509'] = {
     var serverManager = new ServerManager(rsOptions);
   
     // Start the server manager
-    serverManager.start({purge:true, signal:-9}, function() {
+    serverManager.start({purge:true, signal:-9, kill:true}, function() {
       // Connect and validate the server certificate
       MongoClient.connect("mongodb://server:27017/test?ssl=true&maxPoolSize=1", {
         server: {
@@ -493,7 +493,7 @@ exports['Should correctly reauthenticate against x509'] = {
                       test.equal(1, doc.a);
 
                       // Attempt disconnect again
-                      db.serverConfig.connections()[0].destroy();
+                      db.serverConfig.allRawConnections()[0].connection.destroy();
 
                       // Await reconnect and re-authentication    
                       db.collection('x509collection').findOne(function(err, doc) {
@@ -510,7 +510,7 @@ exports['Should correctly reauthenticate against x509'] = {
                   })
                   
                   // Force close
-                  db.serverConfig.connections()[0].destroy();
+                  db.serverConfig.allRawConnections()[0].connection.destroy();
                 });
               });
             });
