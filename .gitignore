@@ -12,6 +12,7 @@
 data
 node_modules/
 lib-cov/
+db/
 output
 build
 upload.py
