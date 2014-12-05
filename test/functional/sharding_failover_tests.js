@@ -6,7 +6,7 @@ var f = require('util').format;
  * @ignore
  */
 exports['Should correctly connect and then handle a mongos failure'] = {
-  metadata: { requires: { topology: 'mongos' } },
+  metadata: { requires: { topology: 'sharded' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -27,7 +27,7 @@ exports['Should correctly connect and then handle a mongos failure'] = {
 
       db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
         test.equal(null, err);
-        test.equal(1, result);
+        test.equal(1, result.result.n);
         // process.exit(0)
         var numberOfTicks = 10;
 
@@ -60,7 +60,7 @@ exports['Should correctly connect and then handle a mongos failure'] = {
  * @ignore
  */
 exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = {
-  metadata: { requires: { topology: 'mongos' } },
+  metadata: { requires: { topology: 'sharded' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -166,7 +166,7 @@ exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = {
  * @ignore
  */
 exports['Should correctly connect and emit a reconnect event after mongos failover'] = {
-  metadata: { requires: { topology: 'mongos' } },
+  metadata: { requires: { topology: 'sharded' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {

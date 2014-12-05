@@ -6,7 +6,7 @@ var f = require('util').format;
  * @ignore
  */
 exports['Should connect to mongos proxies using connectiong string and options'] = {
-  metadata: { requires: { topology: 'mongos' } },
+  metadata: { requires: { topology: 'sharded' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -26,7 +26,7 @@ exports['Should connect to mongos proxies using connectiong string and options']
 
       db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
         test.equal(null, err);
-        test.equal(1, result);
+        test.equal(1, result.result.n);
 
         // Perform fetch of document
         db.collection("replicaset_mongo_client_collection").findOne(function(err, d) {
@@ -44,7 +44,7 @@ exports['Should connect to mongos proxies using connectiong string and options']
  * @ignore
  */
 exports['Should correctly connect with a missing mongos'] = {
-  metadata: { requires: { topology: 'mongos' } },
+  metadata: { requires: { topology: 'sharded' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -69,7 +69,7 @@ exports['Should correctly connect with a missing mongos'] = {
  * @ignore
  */
 exports['Should correctly emit open and fullsetup to all db instances'] = {
-  metadata: { requires: { topology: 'mongos' } },
+  metadata: { requires: { topology: 'sharded' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {

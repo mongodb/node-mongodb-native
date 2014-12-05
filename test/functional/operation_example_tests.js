@@ -1503,7 +1503,7 @@ exports.shouldCorrectlyExecuteGroupFunction = {
  * A simple map reduce example
  *
  * @example-class Collection
- * @example-method geoHaystackSearch
+ * @example-method mapReduce
  * @ignore
  */
 exports.shouldPerformSimpleMapReduceFunctions = {
@@ -1558,7 +1558,7 @@ exports.shouldPerformSimpleMapReduceFunctions = {
  * A simple map reduce example using the inline output type on MongoDB > 1.7.6 returning the statistics
  *
  * @example-class Collection
- * @example-method geoHaystackSearch
+ * @example-method mapReduce
  * @ignore
  */
 exports.shouldPerformMapReduceFunctionInline = {
@@ -1610,7 +1610,7 @@ exports.shouldPerformMapReduceFunctionInline = {
  * Mapreduce different test with a provided scope containing a javascript function.
  *
  * @example-class Collection
- * @example-method geoHaystackSearch
+ * @example-method mapReduce
  * @ignore
  */
 exports.shouldPerformMapReduceWithContext = {
@@ -1695,7 +1695,7 @@ exports.shouldPerformMapReduceWithContext = {
  * Mapreduce different test with a provided scope containing javascript objects with functions.
  *
  * @example-class Collection
- * @example-method geoHaystackSearch
+ * @example-method mapReduce
  * @ignore
  */
 exports.shouldPerformMapReduceInContextObjects = {

@@ -4,7 +4,7 @@
  * @ignore
  */
 exports['Should correctly perform a Mongos secondary read using the read preferences'] = {
-  metadata: { requires: { topology: 'mongos' } },
+  metadata: { requires: { topology: 'sharded' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -62,7 +62,7 @@ exports['Should correctly perform a Mongos secondary read using the read prefere
  * @ignore
  */
 exports['Should correctly fail a Mongos read using a unsupported read preference'] = {
-  metadata: { requires: { topology: 'mongos' } },
+  metadata: { requires: { topology: 'sharded' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -119,7 +119,7 @@ exports['Should correctly fail a Mongos read using a unsupported read preference
  * @ignore
  */
 exports['Should fail a Mongos secondary read using the read preference and tags that dont exist'] = {
-  metadata: { requires: { topology: 'mongos' } },
+  metadata: { requires: { topology: 'sharded' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -175,7 +175,7 @@ exports['Should fail a Mongos secondary read using the read preference and tags 
  * @ignore
  */
 exports['Should correctly read from a tagged secondary using Mongos'] = {
-  metadata: { requires: { topology: 'mongos' } },
+  metadata: { requires: { topology: 'sharded' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -232,7 +232,7 @@ exports['Should correctly read from a tagged secondary using Mongos'] = {
  * @ignore
  */
 exports['Should correctly connect to MongoS using single server instance'] = {
-  metadata: { requires: { topology: 'mongos' } },
+  metadata: { requires: { topology: 'sharded' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -270,7 +270,7 @@ exports['Should correctly connect to MongoS using single server instance'] = {
  * @ignore
  */
 exports['Should correctly connect to the mongos using Server connection'] = {
-  metadata: { requires: { topology: 'mongos' } },
+  metadata: { requires: { topology: 'sharded' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -297,7 +297,7 @@ exports['Should correctly connect to the mongos using Server connection'] = {
  * @ignore
  */
 exports.shouldCorrectlyEmitOpenEvent = {
-  metadata: { requires: { topology: 'mongos' } },
+  metadata: { requires: { topology: 'sharded' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
