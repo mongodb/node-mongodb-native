@@ -5,11 +5,9 @@
 *.log
 *.heapsnapshot
 *.dat
-*.png
 .project
 .settings
 .tm_properties
-data
 node_modules/
 lib-cov/
 db/
