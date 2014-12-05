@@ -75,8 +75,6 @@ exports['Should correctly apply collection level read Preference to group'] = {
 /**
  * Make sure user can't clobber geoNear options
  *
- * @_class collection
- * @_function geoNear
  * @ignore
  */
 exports['shouldNotAllowUserToClobberGeoNearWithOptions'] = {

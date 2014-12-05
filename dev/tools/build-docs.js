@@ -33,46 +33,46 @@ var apiClasses = [
 // All test files
 var testClasses = [];
 // Read in all the test files and create a testClasses collection
-var files = fs.readdirSync("./test/tests/functional");
+var files = fs.readdirSync("./test/functional");
 files.forEach(function(file) {
-  if(file.indexOf('.js') != -1) testClasses.push({path: "./test/tests/functional/" + file});
+  if(file.indexOf('.js') != -1) testClasses.push({path: "./test/functional/" + file});
 })
 
-// Read all gridstore files
-files = fs.readdirSync("./test/tests/functional/gridstore");
-files.forEach(function(file) {
-  if(file.indexOf('.js') != -1) testClasses.push({path: "./test/tests/functional/gridstore/" + file});
-})
+// // Read all gridstore files
+// files = fs.readdirSync("./test/tests/functional/gridstore");
+// files.forEach(function(file) {
+//   if(file.indexOf('.js') != -1) testClasses.push({path: "./test/tests/functional/gridstore/" + file});
+// })
 
-// Read all gridstore files
-files = fs.readdirSync("./test/tests/functional/fluent_api");
-files.forEach(function(file) {
-  if(file.indexOf('.js') != -1) testClasses.push({path: "./test/tests/functional/fluent_api/" + file});
-})
+// // Read all gridstore files
+// files = fs.readdirSync("./test/tests/functional/fluent_api");
+// files.forEach(function(file) {
+//   if(file.indexOf('.js') != -1) testClasses.push({path: "./test/tests/functional/fluent_api/" + file});
+// })
 
-// Read all replicaset files
-files = fs.readdirSync("./test/tests/repl_set");
-files.forEach(function(file) {
-  if(file.indexOf('.js') != -1) testClasses.push({path: "./test/tests/repl_set/" + file});
-})
+// // Read all replicaset files
+// files = fs.readdirSync("./test/tests/repl_set");
+// files.forEach(function(file) {
+//   if(file.indexOf('.js') != -1) testClasses.push({path: "./test/tests/repl_set/" + file});
+// })
 
-// Sharded tests
-files = fs.readdirSync("./test/tests/sharded");
-files.forEach(function(file) {
-  if(file.indexOf('.js') != -1) testClasses.push({path: "./test/tests/sharded/" + file});
-})
+// // Sharded tests
+// files = fs.readdirSync("./test/tests/sharded");
+// files.forEach(function(file) {
+//   if(file.indexOf('.js') != -1) testClasses.push({path: "./test/tests/sharded/" + file});
+// })
 
-// Authentication tests
-files = fs.readdirSync("./test/tests/authentication");
-files.forEach(function(file) {
-  if(file.indexOf('.js') != -1) testClasses.push({path: "./test/tests/authentication/" + file});
-})
+// // Authentication tests
+// files = fs.readdirSync("./test/tests/authentication");
+// files.forEach(function(file) {
+//   if(file.indexOf('.js') != -1) testClasses.push({path: "./test/tests/authentication/" + file});
+// })
 
-// SSL tests
-files = fs.readdirSync("./test/tests/ssl");
-files.forEach(function(file) {
-  if(file.indexOf('.js') != -1) testClasses.push({path: "./test/tests/ssl/" + file});
-})
+// // SSL tests
+// files = fs.readdirSync("./test/tests/ssl");
+// files.forEach(function(file) {
+//   if(file.indexOf('.js') != -1) testClasses.push({path: "./test/tests/ssl/" + file});
+// })
 
 // Read all the templates
 var templates = [

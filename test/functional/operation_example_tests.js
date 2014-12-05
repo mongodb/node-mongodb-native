@@ -11,7 +11,7 @@ var f = require('util').format;
 /**
  * Correctly call the aggregation framework using a pipeline in an Array.
  *
- * @_class Collection
+ * @_class collection
  * @_function aggregate
  * @ignore
  */
@@ -70,7 +70,7 @@ exports.aggregationExample1 = {
 /**
  * Correctly call the aggregation using a cursor
  *
- * @_class Collection
+ * @_class collection
  * @_function aggregate
  * @ignore
  */
@@ -127,7 +127,7 @@ exports.aggregationExample2 = {
 /**
  * Correctly call the aggregation using a cursor and toArray
  *
- * @_class AggregationCursor
+ * @_class aggregationcursor
  * @_function toArray
  * @ignore
  */
@@ -185,7 +185,7 @@ exports['Aggregation Cursor toArray Test'] = {
 /**
  * Correctly call the aggregation using a cursor and next
  *
- * @_class AggregationCursor
+ * @_class aggregationcursor
  * @_function next
  * @ignore
  */
@@ -242,7 +242,7 @@ exports['Aggregation Cursor toArray Test'] = {
 /**
  * Correctly call the aggregation using a cursor and each
  *
- * @_class AggregationCursor
+ * @_class aggregationcursor
  * @_function each
  * @ignore
  */
@@ -302,7 +302,7 @@ exports['Aggregation Cursor each Test'] = {
 /**
  * Correctly call the aggregation using a read stream
  *
- * @_class Collection
+ * @_class collection
  * @_function aggregate
  * @ignore
  */
@@ -364,7 +364,7 @@ exports.aggregationExample3 = {
 /**
  * Example of running simple count commands against a collection.
  *
- * @_class Collection
+ * @_class collection
  * @_function count
  * @ignore
  */
@@ -407,7 +407,7 @@ exports.shouldCorrectlyDoSimpleCountExamples = {
 /**
  * A more complex createIndex using a compound unique index in the background and dropping duplicated documents
  *
- * @_class Collection
+ * @_class collection
  * @_function createIndex
  * @ignore
  */
@@ -456,7 +456,7 @@ exports.shouldCreateComplexIndexOnTwoFields = {
 /**
  * A simple createIndex using a simple single field index
  *
- * @_class Collection
+ * @_class collection
  * @_function createIndex
  * @ignore
  */
@@ -499,7 +499,7 @@ exports.shouldCreateASimpleIndexOnASingleField = {
 /**
  * A more complex createIndex using a compound unique index in the background
  *
- * @_class Collection
+ * @_class collection
  * @_function createIndex
  * @ignore
  */
@@ -551,7 +551,7 @@ exports.createIndexExample3 = {
 /**
  * Example of running the distinct command against a collection
  *
- * @_class Collection
+ * @_class collection
  * @_function distinct
  * @ignore
  */
@@ -594,7 +594,7 @@ exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilter = {
 /**
  * Example of running the distinct command against a collection with a filter query
  *
- * @_class Collection
+ * @_class collection
  * @_function distinct
  * @ignore
  */
@@ -632,7 +632,7 @@ exports.shouldCorrectlyHandleDistinctIndexes = {
 /**
  * Example of a simple document save and then resave with safe set to true
  *
- * @_class Collection
+ * @_class collection
  * @_function drop
  * @ignore
  */
@@ -683,7 +683,7 @@ exports.shouldCorrectlyDropCollectionWithDropFunction = {
 /**
  * Example of a simple document save and then resave with safe set to true
  *
- * @_class Collection
+ * @_class collection
  * @_function dropAllIndexes
  * @ignore
  */
@@ -717,7 +717,7 @@ exports.dropAllIndexesExample1 = {
 /**
  * An examples showing the creation and dropping of an index
  *
- * @_class Collection
+ * @_class collection
  * @_function dropIndex
  * @ignore
  */
@@ -764,7 +764,7 @@ exports.shouldCorrectlyCreateAndDropIndex = {
 /**
  * A more complex ensureIndex using a compound unique index in the background and dropping duplicated documents.
  *
- * @_class Collection
+ * @_class collection
  * @_function ensureIndex
  * @ignore
  */
@@ -812,7 +812,7 @@ exports.shouldCreateComplexEnsureIndex = {
 /**
  * A more complex ensureIndex using a compound unique index in the background.
  *
- * @_class Collection
+ * @_class collection
  * @_function ensureIndex
  * @ignore
  */
@@ -861,7 +861,7 @@ exports.ensureIndexExampleWithCompountIndex = {
 /**
  * A simple query using the find method on the collection.
  *
- * @_class Collection
+ * @_class collection
  * @_function find
  * @ignore
  */
@@ -900,7 +900,7 @@ exports.shouldPeformASimpleQuery = {
 /**
  * A simple query showing the explain for a query
  *
- * @_class Collection
+ * @_class collection
  * @_function find
  * @ignore
  */
@@ -938,7 +938,7 @@ exports.shouldPeformASimpleExplainQuery = {
 /**
  * A simple query showing skip and limit
  *
- * @_class Collection
+ * @_class collection
  * @_function find
  * @ignore
  */
@@ -982,7 +982,7 @@ exports.shouldPeformASimpleLimitSkipQuery = {
  * The second findAndModify command removes the document.
  * The second findAndModify command upserts a document and returns the new document.
  * 
- * @_class Collection
+ * @_class collection
  * @_function findAndModify
  * @ignore
  */
@@ -1042,7 +1042,7 @@ exports.shouldPerformSimpleFindAndModifyOperations = {
 /**
  * An example of using findAndRemove
  *
- * @_class Collection
+ * @_class collection
  * @_function findAndRemove
  * @ignore
  */
@@ -1088,7 +1088,7 @@ exports.shouldPerformSimpleFindAndRemove = {
 /**
  * A simple query using findOne
  *
- * @_class Collection
+ * @_class collection
  * @_function findOne
  * @ignore
  */
@@ -1127,7 +1127,7 @@ exports.shouldPeformASimpleLimitSkipFindOneQuery = {
 /**
  * Example of a simple geoNear query across some documents
  *
- * @_class Collection
+ * @_class collection
  * @_function geoNear
  * @ignore
  */
@@ -1168,7 +1168,7 @@ exports.shouldCorrectlyPerformSimpleGeoNearCommand = {
 /**
  * Example of a simple geoHaystackSearch query across some documents
  *
- * @_class Collection
+ * @_class collection
  * @_function geoHaystackSearch
  * @ignore
  */
@@ -1208,7 +1208,7 @@ exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommand = {
 /**
  * A whole lot of different wayt to execute the group command
  *
- * @_class Collection
+ * @_class collection
  * @_function group
  * @ignore
  */
@@ -1330,8 +1330,8 @@ exports.shouldCorrectlyExecuteGroupFunction = {
 /**
  * A simple map reduce example
  *
- * @_class Collection
- * @_function geoHaystackSearch
+ * @_class collection
+ * @_function mapreduce
  * @ignore
  */
 exports.shouldPerformSimpleMapReduceFunctions = {
@@ -1381,7 +1381,7 @@ exports.shouldPerformSimpleMapReduceFunctions = {
 /**
  * A simple map reduce example using the inline output type on MongoDB > 1.7.6 returning the statistics
  *
- * @_class Collection
+ * @_class collection
  * @_function geoHaystackSearch
  * @ignore
  */
@@ -1429,7 +1429,7 @@ exports.shouldPerformMapReduceFunctionInline = {
 /**
  * Mapreduce different test with a provided scope containing a javascript function.
  *
- * @_class Collection
+ * @_class collection
  * @_function geoHaystackSearch
  * @ignore
  */
@@ -1509,7 +1509,7 @@ exports.shouldPerformMapReduceWithContext = {
 /**
  * Mapreduce different test with a provided scope containing javascript objects with functions.
  *
- * @_class Collection
+ * @_class collection
  * @_function geoHaystackSearch
  * @ignore
  */
@@ -1588,7 +1588,7 @@ exports.shouldPerformMapReduceInContextObjects = {
 /**
  * Example of retrieving a collections indexes
  *
- * @_class Collection
+ * @_class collection
  * @_function indexes
  * @ignore
  */
@@ -1631,7 +1631,7 @@ exports.shouldCorrectlyRetriveACollectionsIndexes = {
 /**
  * An example showing the use of the indexExists function for a single index name and a list of index names.
  *
- * @_class Collection
+ * @_class collection
  * @_function indexExists
  * @ignore
  */
@@ -1676,7 +1676,7 @@ exports.shouldCorrectlyExecuteIndexExists = {
 /**
  * An example showing the information returned by indexInformation
  *
- * @_class Collection
+ * @_class collection
  * @_function indexInformation
  * @ignore
  */
@@ -1728,7 +1728,7 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = {
 /**
  * An examples showing the information returned by indexInformation
  *
- * @_class Collection
+ * @_class collection
  * @_function indexInformation
  * @ignore
  */
@@ -1779,7 +1779,7 @@ exports.shouldCorrectlyShowAllTheResultsFromIndexInformation = {
 /**
  * A batch document insert example, using safe mode to ensure document persistance on MongoDB
  *
- * @_class Collection
+ * @_class collection
  * @_function insert
  * @ignore
  */
@@ -1817,7 +1817,7 @@ exports.shouldCorrectlyPerformABatchDocumentInsertSafe = {
 /**
  * Example of inserting a document containing functions
  *
- * @_class Collection
+ * @_class collection
  * @_function insert
  * @ignore
  */
@@ -1858,7 +1858,7 @@ exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafe = {
 /**
  * Example of using keepGoing to allow batch insert to complete even when there are illegal documents in the batch
  *
- * @_class Collection
+ * @_class collection
  * @_function insert
  * @ignore
  */
@@ -1940,7 +1940,7 @@ exports.shouldCorrectlyExecuteIsCapped = {
 /**
  * An example returning the options for a collection.
  *
- * @_class Collection
+ * @_class collection
  * @_function options
  * @ignore
  */
@@ -1977,7 +1977,7 @@ exports.shouldCorrectlyRetriveCollectionOptions = {
 /**
  * A parallelCollectionScan example
  *
- * @_class Collection
+ * @_class collection
  * @_function parallelCollectionScan
  * @ignore
  */
@@ -2040,7 +2040,7 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors']
 /**
  * An example showing how to force a reindex of a collection.
  *
- * @_class Collection
+ * @_class collection
  * @_function reIndex
  * @ignore
  */
@@ -2090,7 +2090,7 @@ exports.shouldCorrectlyIndexAndForceReindexOnCollection = {
 /**
  * An example removing all documents in a collection not using safe mode
  *
- * @_class Collection
+ * @_class collection
  * @_function remove
  * @ignore
  */
@@ -2130,7 +2130,7 @@ exports.shouldRemoveAllDocumentsNoSafe = {
 /**
  * An example removing a subset of documents using safe mode to ensure removal of documents
  *
- * @_class Collection
+ * @_class collection
  * @_function remove
  * @ignore
  */
@@ -2168,7 +2168,7 @@ exports.shouldRemoveSubsetOfDocumentsSafeMode = {
 /**
  * An example of illegal and legal renaming of a collection
  *
- * @_class Collection
+ * @_class collection
  * @_function rename
  * @ignore
  */
@@ -2356,7 +2356,7 @@ exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveIt = {
 /**
  * Example of a simple document update with safe set to false on an existing document
  *
- * @_class Collection
+ * @_class collection
  * @_function update
  * @ignore
  */
@@ -2401,7 +2401,7 @@ exports.shouldCorrectlyUpdateASimpleDocument = {
 /**
  * Example of a simple document update using upsert (the document will be inserted if it does not exist)
  *
- * @_class Collection
+ * @_class collection
  * @_function update
  * @ignore
  */
@@ -2440,7 +2440,7 @@ exports.shouldCorrectlyUpsertASimpleDocument = {
 /**
  * Example of an update across multiple documents using the multi option.
  *
- * @_class Collection
+ * @_class collection
  * @_function update
  * @ignore
  */
@@ -2489,7 +2489,7 @@ exports.shouldCorrectlyUpdateMultipleDocuments = {
 /**
  * Example of retrieving a collections stats
  *
- * @_class Collection
+ * @_class collection
  * @_function stats
  * @ignore
  */
@@ -2526,7 +2526,7 @@ exports.shouldCorrectlyReturnACollectionsStats = {
 /**
  * An examples showing the creation and dropping of an index
  *
- * @_class Collection
+ * @_class collection
  * @_function dropIndexes
  * @ignore
  */
@@ -2587,7 +2587,7 @@ exports.shouldCorrectlyCreateAndDropAllIndex = {
 /**
  * Example showing how to access the Admin database for admin level operations.
  *
- * @_class Db
+ * @_class db
  * @_function admin
  * @ignore
  */
@@ -2615,7 +2615,7 @@ exports.accessAdminLevelOperations = {
 /**
  * An example that shows how to force close a db connection so it cannot be reused.
  *
- * @_class Db
+ * @_class db
  * @_function close
  * @ignore
  */
@@ -2655,7 +2655,7 @@ exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDb = {
 /**
  * A whole bunch of examples on how to use eval on the server.
  *
- * @_class Db
+ * @_class db
  * @_function eval
  * @ignore
  */
@@ -2752,7 +2752,7 @@ exports.shouldCorrectlyExecuteEvalFunctions = {
 /**
  * Defining and calling a system level javascript function (NOT recommended, http://www.mongodb.org/display/DOCS/Server-side+Code+Execution)
  *
- * @_class Db
+ * @_class db
  * @_function eval
  * @ignore
  */
@@ -2793,7 +2793,7 @@ exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunction = {
 /**
  * An example of a simple single server db connection
  *
- * @_class Db
+ * @_class db
  * @_function open
  * @ignore
  */
@@ -2821,7 +2821,7 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnection = {
 /**
  * An example of a simple single server db connection and close function
  *
- * @_class Db
+ * @_class db
  * @_function close
  * @ignore
  */
@@ -2851,7 +2851,7 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallback =
 /**
  * An example of retrieving the collections list for a database.
  *
- * @_class Db
+ * @_class db
  * @_function listCollections
  * @ignore
  */
@@ -2889,7 +2889,7 @@ exports.shouldCorrectlyRetrievelistCollections = {
 /**
  * An example of retrieving the collection names for a database using a filter
  *
- * @_class Db
+ * @_class db
  * @_function listCollections
  * @ignore
  */
@@ -2934,7 +2934,7 @@ exports.shouldCorrectlyRetrievelistCollections = {
 /**
  * An example of retrieving a collection from a db using the collection function.
  *
- * @_class Db
+ * @_class db
  * @_function collection
  * @ignore
  */
@@ -2982,7 +2982,7 @@ exports.shouldCorrectlyAccessACollection = {
 /**
  * An example of retrieving all collections for a db as Collection objects
  *
- * @_class Db
+ * @_class db
  * @_function collections
  * @ignore
  */
@@ -3016,7 +3016,7 @@ exports.shouldCorrectlyRetrieveAllCollections = {
 /**
  * An example of using the logout command for the database.
  *
- * @_class Db
+ * @_class db
  * @_function logout
  * @ignore
  */
@@ -3062,7 +3062,7 @@ exports.shouldCorrectlyLogoutFromTheDatabase = {
 /**
  * An example of using the authenticate command.
  *
- * @_class Db
+ * @_class db
  * @_function authenticate
  * @ignore
  */
@@ -3103,7 +3103,7 @@ exports.shouldCorrectlyAuthenticateAgainstTheDatabase = {
 /**
  * An example of adding a user to the database.
  *
- * @_class Db
+ * @_class db
  * @_function addUser
  * @ignore
  */
@@ -3139,7 +3139,7 @@ exports.shouldCorrectlyAddUserToDb = {
 /**
  * An example of dereferencing values.
  *
- * @_class Db
+ * @_class db
  * @_function removeUser
  * @ignore
  */
@@ -3189,7 +3189,7 @@ exports.shouldCorrectlyAddAndRemoveUser = {
 /**
  * A simple example showing the creation of a collection.
  *
- * @_class Db
+ * @_class db
  * @_function createCollection
  * @ignore
  */
@@ -3225,7 +3225,7 @@ exports.shouldCorrectlyCreateACollection = {
 /**
  * A simple example executing a command against the server.
  *
- * @_class Db
+ * @_class db
  * @_function dropCollection
  * @ignore
  */
@@ -3276,7 +3276,7 @@ exports.shouldCorrectlyExecuteACommandAgainstTheServer = {
 /**
  * A simple example creating, dropping a collection and then verifying that the collection is gone.
  *
- * @_class Db
+ * @_class db
  * @_function command
  * @ignore
  */
@@ -3307,7 +3307,7 @@ exports.shouldCorrectlyCreateDropAndVerifyThatCollectionIsGone = {
 /**
  * A simple example creating, dropping a collection and then verifying that the collection is gone.
  *
- * @_class Db
+ * @_class db
  * @_function renameCollection
  * @ignore
  */
@@ -3368,7 +3368,7 @@ exports.shouldCorrectlyRenameACollection = {
 /**
  * A more complex createIndex using a compound unique index in the background and dropping duplicated documents
  *
- * @_class Db
+ * @_class db
  * @_function createIndex
  * @ignore
  */
@@ -3418,7 +3418,7 @@ exports.shouldCreateOnDbComplexIndexOnTwoFields = {
 /**
  * A more complex ensureIndex using a compound unique index in the background and dropping duplicated documents.
  *
- * @_class Db
+ * @_class db
  * @_function ensureIndex
  * @ignore
  */
@@ -3468,7 +3468,7 @@ exports.shouldCreateComplexEnsureIndexDb = {
 /**
  * An examples showing the dropping of a database
  *
- * @_class Db
+ * @_class db
  * @_function dropDatabase
  * @ignore
  */
@@ -3525,7 +3525,7 @@ exports.shouldCorrectlyDropTheDatabase = {
 /**
  * An example showing how to retrieve the db statistics
  *
- * @_class Db
+ * @_class db
  * @_function stats
  * @ignore
  */
@@ -3556,7 +3556,7 @@ exports.shouldCorrectlyRetrieveDbStats = {
 /**
  * Simple example connecting to two different databases sharing the socket connections below.
  *
- * @_class Db
+ * @_class db
  * @_function db
  * @ignore
  */
@@ -3605,7 +3605,7 @@ exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstances = {
 /**
  * Simple replicaset connection setup, requires a running replicaset on the correct ports
  *
- * @_class Db
+ * @_class db
  * @_function open
  * @ignore
  */
@@ -3648,7 +3648,7 @@ exports['Should correctly connect with default replicasetNoOption'] = {
 /**
  * Authenticate against MongoDB Admin user
  *
- * @_class Admin
+ * @_class admin
  * @_function authenticate
  * @ignore
  */
@@ -3695,7 +3695,7 @@ exports.shouldCorrectlyAuthenticate = {
 /**
  * Retrieve the buildInfo for the current MongoDB instance
  *
- * @_class Admin
+ * @_class admin
  * @_function buildInfo
  * @ignore
  */
@@ -3741,7 +3741,7 @@ exports.shouldCorrectlyRetrieveBuildInfo = {
 /**
  * Retrieve the buildInfo using the command function
  *
- * @_class Admin
+ * @_class admin
  * @_function command
  * @ignore
  */
@@ -3787,7 +3787,7 @@ exports.shouldCorrectlyRetrieveBuildInfoUsingCommand = {
 /**
  * Retrieve the current profiling level set for the MongoDB instance
  *
- * @_class Admin
+ * @_class admin
  * @_function profilingLevel
  * @ignore
  */
@@ -3840,7 +3840,7 @@ exports.shouldCorrectlySetDefaultProfilingLevel = {
  * An example of how to use the setProfilingInfo
  * Use this command to set the Profiling level on the MongoDB server
  * 
- * @_class Admin
+ * @_class admin
  * @_function setProfilingLevel
  * @ignore
  */ 
@@ -3922,7 +3922,7 @@ exports.shouldCorrectlyChangeProfilingLevel = {
  * An example of how to use the profilingInfo
  * Use this command to pull back the profiling information currently set for Mongodb
  * 
- * @_class Admin
+ * @_class admin
  * @_function profilingInfo
  * @ignore
  */ 
@@ -3991,7 +3991,7 @@ exports.shouldCorrectlySetAndExtractProfilingInfo = {
  * An example of how to use the validateCollection command
  * Use this command to check that a collection is valid (not corrupt) and to get various statistics.
  * 
- * @_class Admin
+ * @_class admin
  * @_function validateCollection
  * @ignore
  */
@@ -4050,7 +4050,7 @@ exports.shouldCorrectlyCallValidateCollection = {
 /**
  * An example of how to add a user to the admin database
  * 
- * @_class Admin
+ * @_class admin
  * @_function ping
  * @ignore
  */
@@ -4096,7 +4096,7 @@ exports.shouldCorrectlyPingTheMongoDbInstance = {
 /**
  * An example of how add a user, authenticate and logout
  * 
- * @_class Admin
+ * @_class admin
  * @_function logout
  * @ignore
  */
@@ -4142,7 +4142,7 @@ exports.shouldCorrectlyUseLogoutFunction = {
 /**
  * An example of how to add a user to the admin database
  * 
- * @_class Admin
+ * @_class admin
  * @_function addUser
  * @ignore
  */
@@ -4182,7 +4182,7 @@ exports.shouldCorrectlyAddAUserToAdminDb = {
 /**
  * An example of how to remove a user from the admin database
  * 
- * @_class Admin
+ * @_class admin
  * @_function removeUser
  * @ignore
  */
@@ -4231,7 +4231,7 @@ exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDb = {
 /**
  * An example of listing all available databases.
  * 
- * @_class Admin
+ * @_class admin
  * @_function listDatabases
  * @ignore
  */
@@ -4265,7 +4265,7 @@ exports.shouldCorrectlyListAllAvailableDatabases = {
 /**
  * Retrieve the current server Info
  *
- * @_class Admin
+ * @_class admin
  * @_function serverStatus
  * @ignore
  */
@@ -4319,7 +4319,7 @@ exports.shouldCorrectlyRetrieveServerInfo = {
 /**
  * Retrieve the current replicaset status if the server is running as part of a replicaset
  *
- * @_class Admin
+ * @_class admin
  * @_function replSetGetStatus
  * @ignore
  */
@@ -4384,7 +4384,7 @@ var fs = require('fs');
 /**
  * An example showing the information returned by indexInformation
  *
- * @_class Cursor
+ * @_class cursor
  * @_function toArray
  * @ignore
  */
@@ -4424,7 +4424,7 @@ exports.shouldCorrectlyExecuteToArray = {
 /**
  * An example showing how to rewind the cursor
  *
- * @_class Cursor
+ * @_class cursor
  * @_function rewind
  * @ignore
  */
@@ -4480,7 +4480,7 @@ exports['Should correctly rewind and restart cursor'] = {
 /**
  * A simple example showing the count function of the cursor.
  *
- * @_class Cursor
+ * @_class cursor
  * @_function count
  * @ignore
  */
@@ -4521,7 +4521,7 @@ exports.shouldCorrectlyUseCursorCountFunction = {
 /**
  * A simple example showing the use of sort on the cursor.
  *
- * @_class Cursor
+ * @_class cursor
  * @_function sort
  * @ignore
  */
@@ -4568,7 +4568,7 @@ exports.shouldCorrectlyPeformSimpleSorts = {
 /**
  * A simple example showing the use of limit on the cursor
  *
- * @_class Cursor
+ * @_class cursor
  * @_function limit
  * @ignore
  */
@@ -4609,7 +4609,7 @@ exports.shouldCorrectlyPeformLimitOnCursor = {
 /**
  * A simple example showing the use of skip on the cursor
  *
- * @_class Cursor
+ * @_class cursor
  * @_function skip
  * @ignore
  */
@@ -4651,7 +4651,7 @@ exports.shouldCorrectlyPeformSkipOnCursor = {
  * A simple example showing the use of batchSize on the cursor, batchSize only regulates how many
  * documents are returned for each batch using the getMoreCommand against the MongoDB server
  *
- * @_class Cursor
+ * @_class cursor
  * @_function batchSize
  * @ignore
  */
@@ -4692,7 +4692,7 @@ exports.shouldCorrectlyPeformBatchSizeOnCursor = {
 /**
  * A simple example showing the use of nextObject.
  *
- * @_class Cursor
+ * @_class cursor
  * @_function nextObject
  * @ignore
  */
@@ -4733,7 +4733,7 @@ exports.shouldCorrectlyPeformNextObjectOnCursor = {
 /**
  * A simple example showing the use of the cursor explain function.
  *
- * @_class Cursor
+ * @_class cursor
  * @_function explain
  * @ignore
  */
@@ -4773,7 +4773,7 @@ exports.shouldCorrectlyPeformSimpleExplainCursor = {
 /**
  * A simple example showing the use of the cursor stream function.
  *
- * @_class Cursor
+ * @_class cursor
  * @_function stream
  * @ignore
  */
@@ -4822,7 +4822,7 @@ exports.shouldStreamDocumentsUsingTheStreamFunction = {
 /**
  * A simple example showing the use of the cursor close function.
  *
- * @_class Cursor
+ * @_class cursor
  * @_function isClosed
  * @ignore
  */
@@ -4875,7 +4875,7 @@ exports.shouldStreamDocumentsUsingTheIsCloseFunction = {
 /**
  * A simple example showing the use of the cursor close function.
  *
- * @_class Cursor
+ * @_class cursor
  * @_function close
  * @ignore
  */
@@ -4927,7 +4927,7 @@ exports.shouldStreamDocumentsUsingTheCloseFunction = {
 /**
  * A simple example showing the use of the cursorstream pause function.
  *
- * @_class Cursor
+ * @_class cursor
  * @_function stream
  * @ignore
  */
@@ -4985,7 +4985,7 @@ exports.shouldStreamDocumentsUsingTheCursorStreamPauseFunction = {
 /**
  * A simple example showing the use of the cursorstream resume function.
  *
- * @_class Cursor
+ * @_class cursor
  * @_function destroy
  * @ignore
  */
@@ -5040,7 +5040,7 @@ exports.shouldStreamDocumentsUsingTheCursorStreamDestroyFunction = {
 /**
  * Example of a simple url connection string to a replicaset, with acknowledgement of writes.
  *
- * @_class MongoClient
+ * @_class mongoclient
  * @_function MongoClient.connect
  * @ignore
  */
@@ -5081,7 +5081,7 @@ exports['Should correctly connect to a replicaset'] = {
 /**
  * Example of a simple url connection string to a shard, with acknowledgement of writes.
  *
- * @_class MongoClient
+ * @_class mongoclient
  * @_function MongoClient.connect
  * @ignore
  */
@@ -5117,7 +5117,7 @@ exports['Should connect to mongos proxies using connectiong string'] = {
 /**
  * Example of a simple url connection string for a single server connection
  *
- * @_class MongoClient
+ * @_class mongoclient
  * @_function MongoClient.connect
  * @ignore
  */
@@ -5158,7 +5158,7 @@ exports['Should correctly connect using MongoClient to a single server using con
  * Generate 12 byte binary string representation using a second based timestamp or
  * default value
  *
- * @_class ObjectID
+ * @_class objectid
  * @_function getTimestamp
  * @ignore
  */
@@ -5188,7 +5188,7 @@ exports.shouldCorrectlyGenerate12ByteStringFromTimestamp = {
 /**
  * Generate a 24 character hex string representation of the ObjectID
  *
- * @_class ObjectID
+ * @_class objectid
  * @_function toHexString
  * @ignore
  */
@@ -5212,7 +5212,7 @@ exports.shouldCorrectlyRetrieve24CharacterHexStringFromToHexString = {
 /**
  * Get and set the generation time for an ObjectID
  *
- * @_class ObjectID
+ * @_class objectid
  * @_function generationTime
  * @ignore
  */
@@ -5245,7 +5245,7 @@ exports.shouldCorrectlyGetAndSetObjectIDUsingGenerationTimeProperty = {
 /**
  * Convert a ObjectID into a hex string representation and then back to an ObjectID
  *
- * @_class ObjectID
+ * @_class objectid
  * @_function createFromHexString
  * @ignore
  */
@@ -5275,7 +5275,7 @@ exports.shouldCorrectlyTransformObjectIDToHexAndObjectId = {
 /**
  * Compare two different ObjectID's using the equals method
  *
- * @_class ObjectID
+ * @_class objectid
  * @_function equals
  * @ignore
  */
@@ -5305,7 +5305,7 @@ exports.shouldCorrectlyDifferentiateBetweenObjectIdInstances = {
 /**
  * Show the usage of the Objectid createFromTime function
  *
- * @_class ObjectID
+ * @_class objectid
  * @_function ObjectID.createFromTime
  * @ignore
  */
@@ -5333,7 +5333,7 @@ exports.shouldCorrectlyUseCreateFromTime = {
 /**
  * A simple example showing the usage of the Gridstore.exist method.
  *
- * @_class GridStore
+ * @_class gridstore
  * @_function GridStore.exist
  * @ignore
  */
@@ -5394,7 +5394,7 @@ exports.shouldCorrectlyExecuteGridStoreExistsByObjectId = {
 /**
  * A simple example showing the usage of the eof method.
  *
- * @_class GridStore
+ * @_class gridstore
  * @_function GridStore.list
  * @ignore
  */
@@ -5506,7 +5506,7 @@ exports.shouldCorrectlyExecuteGridStoreList = {
 /**
  * A simple example showing the usage of the puts method.
  *
- * @_class GridStore
+ * @_class gridstore
  * @_function puts
  * @ignore
  */
@@ -5549,7 +5549,7 @@ exports.shouldCorrectlyReadlinesAndPutLines = {
 /**
  * A simple example showing the usage of the GridStore.unlink method.
  *
- * @_class GridStore
+ * @_class gridstore
  * @_function GridStore.unlink
  * @ignore
  */
@@ -5624,7 +5624,7 @@ exports.shouldCorrectlyUnlink = {
 /**
  * A simple example showing the usage of the read method.
  *
- * @_class GridStore
+ * @_class gridstore
  * @_function read
  * @ignore
  */
@@ -5677,7 +5677,7 @@ exports.shouldCorrectlyWriteAndReadJpgImage = {
 /**
  * A simple example showing opening a file using a filename, writing to it and saving it.
  *
- * @_class GridStore
+ * @_class gridstore
  * @_function open
  * @ignore
  */
@@ -5725,7 +5725,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingFilename = {
 /**
  * A simple example showing opening a file using an ObjectID, writing to it and saving it.
  *
- * @_class GridStore
+ * @_class gridstore
  * @_function open
  * @ignore
  */
@@ -5776,7 +5776,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingObjectID = {
 /**
  * A simple example showing how to write a file to Gridstore using file location path.
  *
- * @_class GridStore
+ * @_class gridstore
  * @_function writeFile
  * @ignore
  */
@@ -5826,7 +5826,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFile = {
 /**
  * A simple example showing how to write a file to Gridstore using a file handle.
  *
- * @_class GridStore
+ * @_class gridstore
  * @_function writeFile
  * @ignore
  */
@@ -5879,7 +5879,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandle = {
 /**
  * A simple example showing how to use the write command with strings and Buffers.
  *
- * @_class GridStore
+ * @_class gridstore
  * @_function write
  * @ignore
  */
@@ -5931,7 +5931,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffers 
 /**
  * A simple example showing how to use the write command with strings and Buffers.
  *
- * @_class GridStore
+ * @_class gridstore
  * @_function close
  * @ignore
  */
@@ -5975,7 +5975,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingClose = {
 /**
  * A simple example showing how to access the chunks collection object.
  *
- * @_class GridStore
+ * @_class gridstore
  * @_function chunkCollection
  * @ignore
  */
@@ -6015,7 +6015,7 @@ exports.shouldCorrectlyAccessChunkCollection = {
 /**
  * A simple example showing how to use the instance level unlink command to delete a gridstore item.
  *
- * @_class GridStore
+ * @_class gridstore
  * @_function unlink
  * @ignore
  */
@@ -6074,7 +6074,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkIt = {
 /**
  * A simple example showing how to access the files collection object.
  *
- * @_class GridStore
+ * @_class gridstore
  * @_function collection
  * @ignore
  */
@@ -6114,7 +6114,7 @@ exports.shouldCorrectlyAccessFilesCollection = {
 /**
  * A simple example showing reading back using readlines to split the text into lines by the seperator provided.
  *
- * @_class GridStore
+ * @_class gridstore
  * @_function GridStore.readlines
  * @ignore
  */
@@ -6170,7 +6170,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlines = {
 /**
  * A simple example showing reading back using readlines to split the text into lines by the seperator provided.
  *
- * @_class GridStore
+ * @_class gridstore
  * @_function readlines
  * @ignore
  */
@@ -6231,7 +6231,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlines = {
 /**
  * A simple example showing the usage of the read method.
  *
- * @_class GridStore
+ * @_class gridstore
  * @_function GridStore.read
  * @ignore
  */
@@ -6276,7 +6276,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreRead = {
 /**
  * A simple example showing the usage of the stream method.
  *
- * @_class GridStore
+ * @_class gridstore
  * @_function stream
  * @ignore
  */
@@ -6337,7 +6337,7 @@ exports.shouldCorrectlyReadFileUsingStream = {
 /**
  * A simple example showing how to pipe a file stream through from gridfs to a file
  *
- * @_class GridStore
+ * @_class gridstore
  * @_function stream
  * @ignore
  */
@@ -6392,7 +6392,7 @@ exports.shouldCorrectlyPipeAGridFsToAfile = {
 /**
  * A simple example showing the usage of the seek method.
  *
- * @_class GridStore
+ * @_class gridstore
  * @_function seek
  * @ignore
  */
@@ -6505,7 +6505,7 @@ exports.shouldCorrectlySeekWithBuffer = {
 /**
  * A simple example showing how to rewind and overwrite the file.
  *
- * @_class GridStore
+ * @_class gridstore
  * @_function rewind
  * @ignore
  */
@@ -6570,7 +6570,7 @@ exports.shouldCorrectlyRewingAndTruncateOnWrite = {
 /**
  * A simple example showing the usage of the eof method.
  *
- * @_class GridStore
+ * @_class gridstore
  * @_function eof
  * @ignore
  */
@@ -6610,7 +6610,7 @@ exports.shouldCorrectlyDetectEOF = {
 /**
  * A simple example showing the usage of the tell method.
  *
- * @_class GridStore
+ * @_class gridstore
  * @_function tell
  * @ignore
  */
@@ -6661,7 +6661,7 @@ exports.shouldCorrectlyExecuteGridstoreTell = {
 /**
  * A simple example showing the usage of the seek method.
  *
- * @_class GridStore
+ * @_class gridstore
  * @_function getc
  * @ignore
  */
@@ -6706,7 +6706,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = {
 /**
  * A simple example showing how to save a file with a filename allowing for multiple files with the same name
  *
- * @_class GridStore
+ * @_class gridstore
  * @_function open
  * @ignore
  */
@@ -6776,7 +6776,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = {
 /**
  * A simple example showing the use of the readstream pause function.
  *
- * @_class GridStoreStream
+ * @_class gridstorestream
  * @_function pause
  * @ignore
  */
@@ -6835,7 +6835,7 @@ exports.shouldStreamDocumentsUsingTheReadStreamPauseFunction = {
 /**
  * A simple example showing the use of the readstream resume function.
  *
- * @_class GridStoreStream
+ * @_class gridstorestream
  * @_function resume
  * @ignore
  */
@@ -6909,7 +6909,7 @@ exports.shouldStreamDocumentsUsingTheReadStreamResumeFunction = {
 /**
  * A simple example showing the use of the readstream destroy function.
  *
- * @_class GridStoreStream
+ * @_class gridstorestream
  * @_function destroy
  * @ignore
  */
@@ -6970,8 +6970,8 @@ exports.shouldStreamDocumentsUsingTheReadStreamDestroyFunction = {
 /**
  * Example of a simple ordered insert/update/upsert/remove ordered collection
  *
- * @_class OrderedBulkOperation
- * @_function update
+ * @_class collection
+ * @_function initializeOrderedBulkOp
  * @ignore
  */
 exports['Should correctly execute ordered batch with no errors using write commands'] = {
@@ -7025,8 +7025,8 @@ exports['Should correctly execute ordered batch with no errors using write comma
  * Example of a simple ordered insert/update/upsert/remove ordered collection
  *
  *
- * @_class UnorderedBulkOperation
- * @_function update
+ * @_class collection
+ * @_function initializeUnorderedBulkOp
  * @ignore
  */
 exports['Should correctly execute unordered batch with no errors'] = {

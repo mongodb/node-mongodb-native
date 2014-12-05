@@ -3,8 +3,6 @@
 /**
  * Correctly call the aggregation framework using a pipeline in an Array.
  *
- * @_class collection
- * @_function aggregate
  * @ignore
  */
 exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = {
@@ -62,8 +60,6 @@ exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = {
 /**
  * Correctly call the aggregation framework using a pipeline expressed as an argument list.
  *
- * @_class collection
- * @_function aggregate
  * @ignore
  */
 exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsNotAnArray = {
@@ -121,8 +117,6 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsNotAnArray
 /**
  * Correctly call the aggregation framework using a pipeline expressed as an argument list.
  *
- * @_class collection
- * @_function aggregate
  * @ignore
  */
 exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsUsingSingleObject = {
@@ -180,8 +174,6 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsUsingSingl
 /**
  * Correctly call the aggregation framework to return a cursor
  *
- * @_class collection
- * @_function aggregate
  * @ignore
  */
 exports['Should correctly return and iterate over all the cursor results'] = {
@@ -250,8 +242,6 @@ exports['Should correctly return and iterate over all the cursor results'] = {
 /**
  * Correctly call the aggregation framework to return a cursor and call explain
  *
- * @_class collection
- * @_function aggregate
  * @ignore
  */
 exports['Should correctly return a cursor and call explain'] = {
@@ -318,8 +308,6 @@ exports['Should correctly return a cursor and call explain'] = {
 /**
  * Correctly call the aggregation framework to return a cursor with batchSize 1 and get the first result using next
  *
- * @_class collection
- * @_function aggregate
  * @ignore
  */
 exports['Should correctly return a cursor with batchSize 1 and call next'] = {
@@ -386,8 +374,6 @@ exports['Should correctly return a cursor with batchSize 1 and call next'] = {
 /**
  * Correctly call the aggregation framework and write the results to a new collection
  *
- * @_class collection
- * @_function aggregate
  * @ignore
  */
 exports['Should correctly write the results out to a new collection'] = {
@@ -444,8 +430,6 @@ exports['Should correctly write the results out to a new collection'] = {
 /**
  * Correctly use allowDiskUse when performing an aggregation
  *
- * @_class collection
- * @_function aggregate
  * @ignore
  */
 exports['Should correctly use allowDiskUse when performing an aggregation'] = {
