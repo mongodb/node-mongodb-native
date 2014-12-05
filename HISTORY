@@ -4,6 +4,7 @@
 - Added support for authdb as option for Db.prototype.logout to logout against another db than the current one when authSource has been used.
 - Backported 2.0.X test suite to minimize maintenance between 1.4.x branch and 2.0.x.
 - Fixed bug on 2.4.x servers when using aggregation cursor and close happens on server connection
+- Updated kerberos library to 0.0.6
 
 1.4.22 2014-11-20
 -----------------
