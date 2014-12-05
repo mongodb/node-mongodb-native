@@ -1,3 +1,9 @@
+1.4.23 2014-12-05
+-----------------
+- Fixed minor replicaset reauthentication issues for High availability process.
+- Added support for authdb as option for Db.prototype.logout to logout against another db than the current one when authSource has been used.
+- Backported 2.0.X test suite to minimize maintenance between 1.4.x branch and 2.0.x.
+
 1.4.22 2014-11-20
 -----------------
 - NODE-184, Correct message size validation
