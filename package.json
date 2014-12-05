@@ -77,7 +77,6 @@
 	  , "async": "0.1.22"
     , "integra": "0.0.3"
     , "optimist": "latest"
-
     , "integra": "0.1.8"
     , "gleak": "0.5.0"
     , "rimraf": "2.2.6"
