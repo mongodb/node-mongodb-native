@@ -56,7 +56,7 @@ exports['Should Correctly Authenticate using kerberos with MongoClient and then 
     var urlEncodedPrincipal = encodeURIComponent(principal);
 
     // Let's write the actual connection code
-    MongoClient.connect(format("mongodb://%s@%s/kerberos?authMechanism=GSSAPI&gssapiServiceName=mongodb&maxPoolSize=5", urlEncodedPrincipal, server), function(err, db) {
+    MongoClient.connect(format("mongodb://%s@%s/kerberos?authMechanism=GSSAPI&gssapiServiceName=mongodb&maxPoolSize=1", urlEncodedPrincipal, server), function(err, db) {
       test.equal(null, err);
       test.ok(db != null);
 
@@ -71,7 +71,7 @@ exports['Should Correctly Authenticate using kerberos with MongoClient and then 
             test.equal(true, doc.kerberos);
 
             // Attempt disconnect again
-            db.serverConfig.connections()[0].destroy();
+            db.serverConfig.allRawConnections()[0].connection.destroy()
 
             // Await reconnect and re-authentication    
             db.db('kerberos').collection('test').findOne(function(err, doc) {
@@ -84,7 +84,7 @@ exports['Should Correctly Authenticate using kerberos with MongoClient and then 
         })
         
         // Force close
-        db.serverConfig.connections()[0].destroy();
+        db.serverConfig.allRawConnections()[0].connection.destroy()
       });
     });
   }
@@ -217,7 +217,7 @@ exports['Should Correctly Authenticate using kerberos on Win32 with MongoClient 
             test.equal(true, doc.kerberos);
 
             // Attempt disconnect again
-            db.serverConfig.connections()[0].destroy();
+            db.serverConfig.allRawConnections()[0].connection.destroy();
 
             // Await reconnect and re-authentication    
             db.db('kerberos').collection('test').findOne(function(err, doc) {
@@ -230,7 +230,7 @@ exports['Should Correctly Authenticate using kerberos on Win32 with MongoClient 
         })
         
         // Force close
-        db.serverConfig.connections()[0].destroy();
+        db.serverConfig.allRawConnections()[0].connection.destroy();
       });
     });
   }

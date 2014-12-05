@@ -525,7 +525,7 @@ exports.shouldCorrectlyAuthenticateWithOnlySecondarySeed = {
       );
 
       var p_db = new Db('node-native-test', replSet, {w:1});
-      p_db.on('all', function() {
+      p_db.on('fullsetup', function() {
         test.equal(null, err);
 
         // Add a user
@@ -544,47 +544,45 @@ exports.shouldCorrectlyAuthenticateWithOnlySecondarySeed = {
               replSetManager.setCredentials("mongocr", "admin", "me", "secret");
 
               // connection string
-              var config = f("mongodb://me:secret@localhost:%s/node-native-test?authSource=admin&readPreference=secondary&replicaSet=%s&maxPoolSize=1"
+              var config = f("mongodb://me:secret@localhost:%s/node-native-test?authSource=admin&readPreference=secondaryPreferred&replicaSet=%s&maxPoolSize=1"
                 , replSetManager.startPort, replSetManager.replicasetName);
               
               // Connect
               MongoClient.connect(config, function(error, client) {
-                client.on('all', function() {
-                  client.collection('test').insert({a:1}, function(err, r) {
-                    test.equal(null, err);
-                    
-                    // Logout
-                    client.logout(function() {
+                client.collection('test').insert({a:1}, function(err, r) {
+                  test.equal(null, err);
+                  
+                  // Logout
+                  client.logout({authdb: 'admin'}, function() {
 
-                      // Should fail
-                      client.collection('test').findOne(function(err, r) {
-                        test.ok(err != null);
+                    // Should fail
+                    client.collection('test').findOne(function(err, r) {
+                      test.ok(err != null);
 
-                        // Authenticate
-                        client.admin().authenticate("me", "secret", function(err, r) {
-                          test.equal(null, err);
-                          test.ok(r);
+                      // Authenticate
+                      client.admin().authenticate("me", "secret", function(err, r) {
+                        test.equal(null, err);
+                        test.ok(r);
 
-                          // Shutdown the first secondary
+                        // Shutdown the first secondary
+                        replSetManager.shutdown('secondary', {signal:-9}, function(err, result) {
+
+                          // Shutdown the second secondary
                           replSetManager.shutdown('secondary', {signal:-9}, function(err, result) {
 
-                            // Shutdown the second secondary
-                            replSetManager.shutdown('secondary', {signal:-9}, function(err, result) {
-
+                            // Let's restart a secondary
+                            replSetManager.restartServer('secondary', function(err, result) {
+                              
                               // Let's restart a secondary
                               replSetManager.restartServer('secondary', function(err, result) {
-                                
-                                // Let's restart a secondary
-                                replSetManager.restartServer('secondary', function(err, result) {
-                                  // Should fail
-                                  client.collection('test').findOne(function(err) {
-                                    test.equal(null, err);
+                                // Should fail
+                                client.collection('test').findOne(function(err) {
+                                  test.equal(null, err);
 
-                                    client.close();
+                                  client.close();
 
-                                    replSetManager.stop(function() {
-                                      test.done();
-                                    });
+                                  replSetManager.stop(function() {
+                                    test.done();
                                   });
                                 });
                               });
@@ -906,7 +904,7 @@ exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary =
 
       var db = new Db('foo', replSet, {w:1});
       db.open(function(err, db_p) {});
-      db.on('all', function(err, db_p) {
+      db.on('fullsetup', function(err, db_p) {
         test.ok(db_p != null);
 
         db_p.admin().addUser("me", "secret", {w:4, wtimeout:25000}, function runWhatever(err, result) {
@@ -1078,24 +1076,22 @@ exports.shouldCorrectlyAuthAgainstReplicaSetAdminDbUsingMongoClient = {
 
           MongoClient.connect(f("mongodb://me:secret@%s:%s/%s?rs_name=%s&readPreference=secondary&w=3"
             , 'localhost', replSetManager.startPort, dbName, replSetManager.replicasetName), function(err, db) {
-              db.on('all', function(err, db) {
-                test.ok(db != null);
+              test.ok(db != null);
 
-                // Insert document
-                db.collection('authcollectiontest').insert({a:1}, {w:4, wtimeout: 25000}, function(err, result) {
+              // Insert document
+              db.collection('authcollectiontest').insert({a:1}, {w:4, wtimeout: 25000}, function(err, result) {
+                test.equal(null, err);
+
+                // Find the document
+                db.collection('authcollectiontest').find().toArray(function(err, docs) {
                   test.equal(null, err);
+                  test.equal(1, docs.length);
+                  test.equal(1, docs[0].a);
 
-                  // Find the document
-                  db.collection('authcollectiontest').find().toArray(function(err, docs) {
-                    test.equal(null, err);
-                    test.equal(1, docs.length);
-                    test.equal(1, docs[0].a);
+                  db.close();
 
-                    db.close();
-
-                    replSetManager.stop(function() {
-                      test.done();
-                    });
+                  replSetManager.stop(function() {
+                    test.done();
                   });
                 });
               });
@@ -1131,45 +1127,41 @@ exports.shouldCorrectlyAuthAgainstNormalDbUsingMongoClient = {
       var dbName = 'foo';
 
       new Db(dbName, replSet, {w:'majority'}).open(function(err, db_p) {
-        db_p.on('all', function(err, db) {
-          // Add a user
-          db_p.admin().addUser("admin", "admin", {w:4, wtimeout: 25000}, function(err, result) {
+        // Add a user
+        db_p.admin().addUser("admin", "admin", {w:4, wtimeout: 25000}, function(err, result) {
 
-            // Log in to admin
-            db_p.admin().authenticate("admin", "admin", function(err, result) {
-              test.equal(null, err);
+          // Log in to admin
+          db_p.admin().authenticate("admin", "admin", function(err, result) {
+            test.equal(null, err);
 
-              db_p.addUser("me", "secret", {w:4, wtimeout: 25000}, function runWhatever(err, result) {
-                // Just set auths for the manager to handle it correctly
-                replSetManager.setCredentials("mongocr", "admin", "me", "secret");
-                
-                db_p.close();
+            db_p.addUser("me", "secret", {w:4, wtimeout: 25000}, function runWhatever(err, result) {
+              // Just set auths for the manager to handle it correctly
+              replSetManager.setCredentials("mongocr", "admin", "me", "secret");
+              
+              db_p.close();
 
-                MongoClient.connect(f("mongodb://me:secret@%s:%s/%s?rs_name=%s&readPreference=secondary&w=3"
-                  , 'localhost', replSetManager.startPort, dbName, replSetManager.replicasetName), function(err, db) {
+              MongoClient.connect(f("mongodb://me:secret@%s:%s/%s?rs_name=%s&readPreference=secondary&w=3"
+                , 'localhost', replSetManager.startPort, dbName, replSetManager.replicasetName), function(err, db) {
+                  test.equal(null, err);
+                  test.ok(db != null);
+
+                  // Insert document
+                  db.collection('authcollectiontest1').insert({a:1}, {w:4, wtimeout:25000}, function(err, result) {
                     test.equal(null, err);
-                    db.on('all', function(err, db) {
-                      test.ok(db != null);
 
-                      // Insert document
-                      db.collection('authcollectiontest1').insert({a:1}, {w:4, wtimeout:25000}, function(err, result) {
-                        test.equal(null, err);
+                    // Find the document
+                    db.collection('authcollectiontest1').find().toArray(function(err, docs) {
+                      test.equal(null, err);
+                      test.equal(1, docs.length);
+                      test.equal(1, docs[0].a);
 
-                        // Find the document
-                        db.collection('authcollectiontest1').find().toArray(function(err, docs) {
-                          test.equal(null, err);
-                          test.equal(1, docs.length);
-                          test.equal(1, docs[0].a);
+                      db.close();
 
-                          db.close();
-
-                          replSetManager.stop(function() {
-                            test.done();
-                          });
-                        });
+                      replSetManager.stop(function() {
+                        test.done();
                       });
                     });
-                });
+                  });
               });
             });
           });

@@ -129,7 +129,7 @@ You can either clone the repository or download a tarball of the latest release.
 
 Once you have the source you can test the driver by running
 
-    $ make test
+    $ node test/runner.js -t functional
 
 in the main directory. You will need to have a mongo instance running on localhost for the integration tests to pass.
 

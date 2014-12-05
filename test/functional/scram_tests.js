@@ -53,7 +53,7 @@ exports['Should correctly authenticate against scram'] = {
             });
 
             // Attempt disconnect again
-            db.serverConfig.connections()[0].destroy();
+            db.serverConfig.allRawConnections()[0].connection.destroy()
           });
         });
       });
