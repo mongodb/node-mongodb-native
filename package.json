@@ -34,5 +34,6 @@
   "bugs": {
     "url": "https://github.com/christkv/mongodb-core/issues"
   },
+  "scripts": { "test" : "node test/runner.js -t functional" },
   "homepage": "https://github.com/christkv/mongodb-core"
 }
