@@ -1,3 +1,7 @@
+2.0.10
+----------------
+- NODE-328 fixed db.open return when no callback available issue and added test
+
 2.0.9 2014-12-01
 ----------------
 - Bumped mongodb-core to 1.1.3 fixing global leaked variables and introducing strict across all classes.
