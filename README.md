@@ -1,3 +1,9 @@
+[![NPM](https://nodei.co/npm/mongodb.png?downloads=true&downloadRank=true)](https://nodei.co/npm/mongodb/) [![NPM](https://nodei.co/npm-dl/mongodb.png?months=6&height=3)](https://nodei.co/npm/mongodb/)
+
+[![Build Status](https://secure.travis-ci.org/mongodb/node-mongodb-native.png)](http://travis-ci.org/mongodb/node-mongodb-native)
+
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+
 # Description
 
 The MongoDB driver is the high level part of the 2.0 or higher MongoDB driver and is meant for end users.
@@ -302,7 +308,3 @@ MongoClient.connect(url, function(err, db) {
 ```
 
 This concludes the QuickStart of connecting and performing some Basic operations using the MongoDB Node.js driver. For more detailed information you can look at the tutorials covering more specific topics of interest.
-
-[![NPM](https://nodei.co/npm/mongodb.png?downloads=true&downloadRank=true)](https://nodei.co/npm/mongodb/) [![NPM](https://nodei.co/npm-dl/mongodb.png?months=6&height=3)](https://nodei.co/npm/mongodb/)
-
-[![Build Status](https://secure.travis-ci.org/mongodb/node-mongodb-native.png)](http://travis-ci.org/mongodb/node-mongodb-native)
