@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Binary JSON API &mdash; MongoDB Node.JS Driver 1.4.22 documentation</title>
+    <title>Binary JSON API &mdash; MongoDB Node.JS Driver 1.4.23 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.4.22',
+        VERSION:     '1.4.23',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.4.22 documentation" href="../index.html" /> 
+    <link rel="top" title="MongoDB Node.JS Driver 1.4.23 documentation" href="../index.html" /> 
   </head>
   <body>
 
@@ -35,7 +35,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.22 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.23 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -50,14 +50,22 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="objectid.html">ObjectID()</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="objectid.html#constructor">Constructor</a></li>
-<li class="toctree-l2"><a class="reference internal" href="objectid.html#properties">Properties</a></li>
-<li class="toctree-l2"><a class="reference internal" href="objectid.html#tostring">toString</a></li>
-<li class="toctree-l2"><a class="reference internal" href="objectid.html#tojson">toJSON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="objectid.html#tohexstring">toHexString</a></li>
+<li class="toctree-l2"><a class="reference internal" href="objectid.html#equals">equals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="objectid.html#gettimestamp">getTimestamp</a></li>
+<li class="toctree-l2"><a class="reference internal" href="objectid.html#objectid-createfromtime">ObjectID.createFromTime</a></li>
+<li class="toctree-l2"><a class="reference internal" href="objectid.html#objectid-createfromhexstring">ObjectID.createFromHexString</a></li>
+<li class="toctree-l2"><a class="reference internal" href="objectid.html#objectid-isvalid">ObjectID.isValid</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="binary.html">Binary()</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="binary.html#constructor">Constructor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="binary.html#constants">Constants</a></li>
+<li class="toctree-l2"><a class="reference internal" href="binary.html#put">put</a></li>
+<li class="toctree-l2"><a class="reference internal" href="binary.html#write">write</a></li>
+<li class="toctree-l2"><a class="reference internal" href="binary.html#read">read</a></li>
+<li class="toctree-l2"><a class="reference internal" href="binary.html#value">value</a></li>
+<li class="toctree-l2"><a class="reference internal" href="binary.html#length">length</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="code.html">Code()</a><ul>
@@ -70,6 +78,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="double.html">Double()</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="double.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="double.html#valueof">valueOf</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="minkey.html">MinKey()</a><ul>
@@ -82,15 +91,85 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="symbol.html">Symbol()</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="symbol.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symbol.html#valueof">valueOf</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="timestamp.html">Timestamp()</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="timestamp.html#constructor">Constructor</a></li>
 <li class="toctree-l2"><a class="reference internal" href="timestamp.html#toint">toInt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#tonumber">toNumber</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#tojson">toJSON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#tostring">toString</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#gethighbits">getHighBits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#getlowbits">getLowBits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#getlowbitsunsigned">getLowBitsUnsigned</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#getnumbitsabs">getNumBitsAbs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#iszero">isZero</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#isnegative">isNegative</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#isodd">isOdd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#equals">equals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#notequals">notEquals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#lessthan">lessThan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#lessthanorequal">lessThanOrEqual</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#greaterthan">greaterThan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#greaterthanorequal">greaterThanOrEqual</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#compare">compare</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#negate">negate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#add">add</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#subtract">subtract</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#multiply">multiply</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#div">div</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#modulo">modulo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#not">not</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#and">and</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#or">or</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#xor">xor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#shiftleft">shiftLeft</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#shiftright">shiftRight</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#shiftrightunsigned">shiftRightUnsigned</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#timestamp-fromint">Timestamp.fromInt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#timestamp-fromnumber">Timestamp.fromNumber</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#timestamp-frombits">Timestamp.fromBits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="timestamp.html#timestamp-fromstring">Timestamp.fromString</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="long.html">Long()</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="long.html#constructor">Constructor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#toint">toInt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#tonumber">toNumber</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#tojson">toJSON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#tostring">toString</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#gethighbits">getHighBits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#getlowbits">getLowBits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#getlowbitsunsigned">getLowBitsUnsigned</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#getnumbitsabs">getNumBitsAbs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#iszero">isZero</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#isnegative">isNegative</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#isodd">isOdd</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#equals">equals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#notequals">notEquals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#lessthan">lessThan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#lessthanorequal">lessThanOrEqual</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#greaterthan">greaterThan</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#greaterthanorequal">greaterThanOrEqual</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#compare">compare</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#negate">negate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#add">add</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#subtract">subtract</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#multiply">multiply</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#div">div</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#modulo">modulo</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#not">not</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#and">and</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#or">or</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#xor">xor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#shiftleft">shiftLeft</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#shiftright">shiftRight</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#shiftrightunsigned">shiftRightUnsigned</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#long-fromint">Long.fromInt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#long-fromnumber">Long.fromNumber</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#long-frombits">Long.fromBits</a></li>
+<li class="toctree-l2"><a class="reference internal" href="long.html#long-fromstring">Long.fromString</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="bson.html">BSON()</a><ul>
@@ -276,7 +355,7 @@
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.22 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.23 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">

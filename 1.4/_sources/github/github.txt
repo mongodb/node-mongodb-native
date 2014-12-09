@@ -72,7 +72,7 @@ Web frameworks using MongoDB
          * - **Forks**
            - 4
          * - **Watchers**
-           - 7
+           - 8
 
 .. topic:: arrjs
 
@@ -111,7 +111,7 @@ Object Document Modeling Libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 22:33:14 on 1/11/2014
+           - 23:46:34 on 8/11/2014
          * - **Homepage**
            - http://http://mongoosejs.com
          * - **Url**
@@ -119,9 +119,9 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/LearnBoost/mongoose.git
          * - **Forks**
-           - 862
+           - 864
          * - **Watchers**
-           - 5848
+           - 5889
 
 .. topic:: mongo-model
 
@@ -216,7 +216,7 @@ Content Management Systems
          * - **Forks**
            - 284
          * - **Watchers**
-           - 1518
+           - 1521
 
 Grid FS libraries or tools
 --------------------------
@@ -268,7 +268,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 4
          * - **Watchers**
-           - 43
+           - 44
 
 .. topic:: mongoq
 
@@ -502,7 +502,7 @@ Test helpers and libraries
          * - **Clone Url**
            - https://github.com/emerleite/node-database-cleaner.git
          * - **Forks**
-           - 18
+           - 17
          * - **Watchers**
            - 57
 
@@ -755,7 +755,7 @@ Libraries or Applications for analytics
          * - **Forks**
            - 390
          * - **Watchers**
-           - 3430
+           - 3435
 
 Libraries for the connect middleware
 ------------------------------------
@@ -802,9 +802,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 176
+           - 178
          * - **Watchers**
-           - 627
+           - 633
 
 Libraries or applications for continous integration
 ---------------------------------------------------

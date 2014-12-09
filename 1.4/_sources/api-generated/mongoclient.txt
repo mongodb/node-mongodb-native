@@ -74,51 +74,6 @@ Initialize the database connection.
    :returns: null 
 
 
-**Examples**
-
-  
-  
-  A basic example using the MongoClient to connect using a Server instance, similar to existing Db version
-
-  .. code-block:: javascript
-
-     var Db = require('mongodb').Db,
-         MongoClient = require('mongodb').MongoClient,
-         Server = require('mongodb').Server,
-         ReplSetServers = require('mongodb').ReplSetServers,
-         ObjectID = require('mongodb').ObjectID,
-         Binary = require('mongodb').Binary,
-         GridStore = require('mongodb').GridStore,
-         Grid = require('mongodb').Grid,
-         Code = require('mongodb').Code,
-         BSON = require('mongodb').pure().BSON,
-         assert = require('assert');
-
-       // Set up the connection to the local db
-       var mongoclient = new MongoClient(new Server("localhost", 27017), {native_parser: true});
-     
-       // Open the connection to the server
-       mongoclient.open(function(err, mongoclient) {
-     
-         // Get the first db and do an update document on it
-         var db = mongoclient.db("integration_tests");
-         db.collection('mongoclient_test').update({a:1}, {b:1}, {upsert:true}, function(err, result) {
-           assert.equal(null, err);
-           assert.equal(1, result);
-     
-           // Get another db and do an update document on it
-           var db2 = mongoclient.db("integration_tests2");
-           db2.collection('mongoclient_test').update({a:1}, {b:1}, {upsert:true}, function(err, result) {
-             assert.equal(null, err);
-             assert.equal(1, result);
-     
-             // Close the connection
-             mongoclient.close();
-           });
-         });
-       });  
-
-
 -----
 close
 -----
@@ -177,36 +132,6 @@ Options
 
   
   
-  Example of a simple url connection string for a single server connection
-
-  .. code-block:: javascript
-
-     var Db = require('mongodb').Db,
-         MongoClient = require('mongodb').MongoClient,
-         Server = require('mongodb').Server,
-         ReplSetServers = require('mongodb').ReplSetServers,
-         ObjectID = require('mongodb').ObjectID,
-         Binary = require('mongodb').Binary,
-         GridStore = require('mongodb').GridStore,
-         Grid = require('mongodb').Grid,
-         Code = require('mongodb').Code,
-         BSON = require('mongodb').pure().BSON,
-         assert = require('assert');
-
-       // Connect using the connection string  
-       MongoClient.connect("mongodb://localhost:27017/integration_tests", {native_parser:true}, function(err, db) {
-         assert.equal(null, err);
-     
-         db.collection('mongoclient_test').update({a:1}, {b:1}, {upsert:true}, function(err, result) {
-           assert.equal(null, err);
-           assert.equal(1, result);
-     
-           db.close();
-         });
-       });
-
-  
-  
   Example of a simple url connection string to a replicaset, with acknowledgement of writes.
 
   .. code-block:: javascript
@@ -223,17 +148,17 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     MongoClient.connect("mongodb://localhost:30000,localhost:30001,localhost:30002/integration_test_?w=1", function(err, db) {
-       assert.equal(null, err);
-       assert.ok(db != null);
-     
-       db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
+     MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
          assert.equal(null, err);
-         assert.equal(1, result);
+         assert.ok(db != null);
      
-         db.close();
+         db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
+           assert.equal(null, err);
+           assert.equal(1, result);
+     
+           db.close();
+         });
        });
-     });
 
   
   
@@ -253,16 +178,44 @@ Options
          BSON = require('mongodb').pure().BSON,
          assert = require('assert');
 
-     MongoClient.connect('mongodb://localhost:50000,localhost:50001/sharded_test_db?w=1', function(err, db) {
-       assert.equal(null, err);
-       assert.ok(db != null);
-     
-       db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
+     MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
          assert.equal(null, err);
-         assert.equal(1, result);
+         assert.ok(db != null);
      
-         process.exit(0)
-         db.close();
-       });    
-     });
+         db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
+           assert.equal(null, err);
+           assert.equal(1, result);
+     
+           db.close();
+         });    
+       });
+
+  
+  
+  Example of a simple url connection string for a single server connection
+
+  .. code-block:: javascript
+
+     var Db = require('mongodb').Db,
+         MongoClient = require('mongodb').MongoClient,
+         Server = require('mongodb').Server,
+         ReplSetServers = require('mongodb').ReplSetServers,
+         ObjectID = require('mongodb').ObjectID,
+         Binary = require('mongodb').Binary,
+         GridStore = require('mongodb').GridStore,
+         Grid = require('mongodb').Grid,
+         Code = require('mongodb').Code,
+         BSON = require('mongodb').pure().BSON,
+         assert = require('assert');
+
+     MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+         assert.equal(null, err);
+     
+         db.collection('mongoclient_test').update({a:1}, {b:1}, {upsert:true}, function(err, result) {
+           assert.equal(null, err);
+           assert.equal(1, result);
+     
+           db.close();
+         });
+       });
 
