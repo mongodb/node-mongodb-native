@@ -1822,3 +1822,27 @@ exports.shouldCorrectlyPerformInsertAndUpdateWithFunctionSerialization = {
     });
   }
 }
+
+exports.shouldCorrectlyReportBackDuplicateIndexException = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] }, mongodb: ">2.6.3" },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:false})
+    db.open(function(err, db) {
+      var col = db.collection('shouldCorrectlyReportBackDuplicateIndexException_1');
+      col.ensureIndex({a:1}, {unique: true}, function(err) {
+        test.equal(null, err);
+
+        col.insert([{a:1}, {a:1}],function(err,doc) {
+          test.ok(err != null);
+          test.ok(err.message.indexOf('E11000') != -1);
+          db.close();
+          test.done();
+        });        
+      })
+    });
+  }
+}
