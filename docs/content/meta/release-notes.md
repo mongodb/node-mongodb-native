@@ -10,10 +10,43 @@ menu:
 title: Release Notes
 weight: 50
 ---
-2.0.5 
+2.0.10
 ----------------
-- Minor fixes to documentation.
-- 
+- NODE-328 fixed db.open return when no callback available issue and added test
+
+2.0.9 2014-12-01
+----------------
+- Bumped mongodb-core to 1.1.3 fixing global leaked variables and introducing strict across all classes.
+- All classes are now strict (Issue #1233)
+- NODE-324 Refactored insert/update/remove and all other crud opts to rely on internal methods to avoid any recursion.
+- Fixed recursion issues in debug logging due to JSON.stringify()
+- Documentation fixes (Issue #1232, https://github.com/wsmoak)
+- Fix writeConcern in Db.prototype.ensureIndex (Issue #1231, https://github.com/Qard)
+
+2.0.8 2014-11-28
+----------------
+- NODE-322 Finished up prototype refactoring of Db class.
+- NODE-322 Exposed Cursor in index.js for New Relic.
+
+2.0.7 2014-11-20
+----------------
+- Bumped mongodb-core to 1.1.2 fixing a UTF8 encoding issue for collection names.
+- NODE-318 collection.update error while setting a function with serializeFunctions option.
+- Documentation fixes.
+
+2.0.6 2014-11-14
+----------------
+- Refactored code to be prototype based instead of privileged methods.
+- Bumped mongodb-core to 1.1.1 to take advantage of the prototype based refactorings.
+- Implemented missing aspects of the CRUD specification.
+- Fixed documentation issues.
+- Fixed global leak REFERENCE_BY_ID in gridfs grid_store (Issue #1225, https://github.com/j)
+- Fix LearnBoost/mongoose#2313: don't let user accidentally clobber geoNear params (Issue #1223, https://github.com/vkarpov15)
+
+2.0.5 2014-10-29
+----------------
+- Minor fixes to documentation and generation of documentation.
+- NODE-306 (No results in aggregation cursor when collection name contains a dot), Merged code for cursor and aggregation cursor.
 
 2.0.4 2014-10-23
 ----------------
