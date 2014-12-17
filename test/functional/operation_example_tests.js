@@ -658,7 +658,7 @@ exports.shouldCorrectlyDropCollectionWithDropFunction = {
       collection.drop(function(err, reply) {
 
         // Ensure we don't have the collection in the set of names
-        db.listCollections(function(err, replies) {
+        db.listCollections().toArray(function(err, replies) {
 
           var found = false;
           // For each collection in the list of collection names in this db look for the
@@ -2873,16 +2873,20 @@ exports.shouldCorrectlyRetrievelistCollections = {
 
       // Create a collection
       var collection = db.collection('test_collections_info');
-      // Return the information of a single collection name
-      db.listCollections("test_collections_info", function(err, items) {
-        test.equal(1, items.length);
+      collection.insert({a:1}, function(err, r) {
+        test.equal(null, err);
 
-        // Return the information of a all collections, using the callback format
-        db.listCollections(function(err, items) {
-          test.ok(items.length > 0);
+        // Return the information of a single collection name
+        db.listCollections({name:"test_collections_info"}).toArray(function(err, items) {
+          test.equal(1, items.length);
 
-          db.close();
-          test.done();
+          // Return the information of a all collections, using the callback format
+          db.listCollections().toArray(function(err, items) {
+            test.ok(items.length > 0);
+
+            db.close();
+            test.done();
+          });
         });
       });
     });
@@ -2897,7 +2901,7 @@ exports.shouldCorrectlyRetrievelistCollections = {
  * @_function listCollections
  * @ignore
  */
-exports.shouldCorrectlyRetrievelistCollections = {
+exports.shouldCorrectlyRetrievelistCollectionsByRegExp = {
   metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -2916,13 +2920,12 @@ exports.shouldCorrectlyRetrievelistCollections = {
 
         // Return the information of a single collection name
         db.listCollections({
-          filter: {
             name: /test_collections_info2/
-          }}, function(err, items) {
-          test.equal(1, items.length);
+          }).toArray(function(err, items) {
+          test.ok(items.length >= 1);
 
           // Return the information of a all collections, using the callback format
-          db.listCollections(function(err, items) {
+          db.listCollections().toArray(function(err, items) {
             test.ok(items.length > 0);
 
             db.close();
@@ -3262,7 +3265,7 @@ exports.shouldCorrectlyExecuteACommandAgainstTheServer = {
               test.equal(null, err);
 
               // Verify that the collection is gone
-              db.listCollections("a_simple_create_drop_collection", function(err, names) {
+              db.listCollections({name:"a_simple_create_drop_collection"}).toArray(function(err, names) {
                 test.equal(0, names.length);
 
                 db.close();
@@ -3348,11 +3351,11 @@ exports.shouldCorrectlyRenameACollection = {
                 test.equal(1, count);
 
                 // Verify that the collection is gone
-                db.listCollections("simple_rename_collection", function(err, names) {
+                db.listCollections({name:"simple_rename_collection"}).toArray(function(err, names) {
                   test.equal(0, names.length);
 
                   // Verify that the new collection exists
-                  db.listCollections("simple_rename_collection_2", function(err, names) {
+                  db.listCollections({name:"simple_rename_collection_2"}).toArray(function(err, names) {
                     test.equal(1, names.length);
 
                     db.close();
