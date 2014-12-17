@@ -14,43 +14,38 @@ exports.shouldCorrectExecuteBasicCollectionMethods = {
         // Verify that all the result are correct coming back (should contain the value ok)
         test.equal('test_collection_methods', collection.collectionName);
         // Let's check that the collection was created correctly
-        db.listCollections(function(err, documents) {
+        db.listCollections().toArray(function(err, documents) {
           var found = false;
           documents.forEach(function(document) {
             if(document.name == "integration_tests_.test_collection_methods") found = true;
           });
           test.ok(true, found);
 
-          // Let's check that the collection was created correctly
-          db.listCollections({namesOnly:true}, function(err, names) {
-            test.ok(typeof names[0] == 'string');
-
-            // Rename the collection and check that it's gone
-            db.renameCollection("test_collection_methods", "test_collection_methods2", function(err, reply) {
-              test.equal(null, err);
-              // Drop the collection and check that it's gone
-              db.dropCollection("test_collection_methods2", function(err, result) {
-                test.equal(true, result);
-              });
+          // Rename the collection and check that it's gone
+          db.renameCollection("test_collection_methods", "test_collection_methods2", function(err, reply) {
+            test.equal(null, err);
+            // Drop the collection and check that it's gone
+            db.dropCollection("test_collection_methods2", function(err, result) {
+              test.equal(true, result);
             });
+          });
 
-            db.createCollection('test_collection_methods3', function(err, collection) {
+          db.createCollection('test_collection_methods3', function(err, collection) {
+            // Verify that all the result are correct coming back (should contain the value ok)
+            test.equal('test_collection_methods3', collection.collectionName);
+          
+            db.createCollection('test_collection_methods4', function(err, collection) {
               // Verify that all the result are correct coming back (should contain the value ok)
-              test.equal('test_collection_methods3', collection.collectionName);
-            
-              db.createCollection('test_collection_methods4', function(err, collection) {
-                // Verify that all the result are correct coming back (should contain the value ok)
-                test.equal('test_collection_methods4', collection.collectionName);
-            
-                // Rename the collection and with the dropTarget boolean, and check to make sure only onen exists.
-                db.renameCollection("test_collection_methods4", "test_collection_methods3", {dropTarget:true}, function(err, reply) {
-                  test.equal(null, err);
+              test.equal('test_collection_methods4', collection.collectionName);
+          
+              // Rename the collection and with the dropTarget boolean, and check to make sure only onen exists.
+              db.renameCollection("test_collection_methods4", "test_collection_methods3", {dropTarget:true}, function(err, reply) {
+                test.equal(null, err);
 
-                  db.dropCollection("test_collection_methods3", function(err, result) {
-                    test.equal(true, result);
-                    db.close();
-                    test.done();
-                  });
+                db.dropCollection("test_collection_methods3", function(err, result) {
+                  test.equal(true, result);
+                  db.close();
+                  test.done();
                 });
               });
             });
@@ -119,7 +114,7 @@ exports.shouldCorrectlyRetrivelistCollections = {
       db.createCollection('test_collection_names', function(err, r) {
         test.equal(null, err);
 
-        db.listCollections(function(err, documents) {
+        db.listCollections().toArray(function(err, documents) {
           var found = false;
           var found2 = false;
     
@@ -134,7 +129,7 @@ exports.shouldCorrectlyRetrivelistCollections = {
           collection.insert({a:1}, configuration.writeConcernMax(), function(err, r) {
             test.equal(null, err);
 
-            db.listCollections(function(err, documents) {
+            db.listCollections().toArray(function(err, documents) {
               documents.forEach(function(document) {
                 if(document.name == configuration.database + '.test_collection_names2' 
                   || document.name == 'test_collection_names2') found = true;
