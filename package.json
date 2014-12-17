@@ -81,10 +81,10 @@
     , "gleak": "0.5.0"
     , "rimraf": "2.2.6"
     , "semver": "4.1.0"
-    , "mongodb-core": "1.1.3"
+    , "mongodb-core": "1.1.4"
   }
 , "optionalDependencies": {
-      "kerberos": "0.0.6"
+      "kerberos": "0.0.7"
     , "readable-stream": "latest"
   }
 , "config":         { "native" : false }
