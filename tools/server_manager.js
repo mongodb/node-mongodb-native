@@ -19,6 +19,26 @@ var cloneOptions = function(options) {
   return opts;
 }
 
+       // SIGHUP      1       Term    Hangup detected on controlling terminal
+       //       or death of controlling process
+       // SIGINT      2       Term    Interrupt from keyboard
+       // SIGQUIT       3       Core    Quit from keyboard
+       // SIGILL      4       Core    Illegal Instruction
+       // SIGABRT       6       Core    Abort signal from abort(3)
+       // SIGFPE      8       Core    Floating point exception
+       // SIGKILL       9       Term    Kill signal
+       // SIGSEGV      11       Core    Invalid memory reference
+       // SIGPIPE      13       Term    Broken pipe: write to pipe with no readers
+       // SIGALRM      14       Term    Timer signal from alarm(2)
+       // SIGTERM      15       Term    Termination signal
+// Signal map
+var signals = {
+    1: "SIGHUP", 2: "SIGINT", 3: "SIGQUIT", 4: "SIGABRT"
+  , 6: "SIGABRT", 8: "SIGFPE", 9: "SIGKILL", 11: "SIGSEGV"
+  , 13: "SIGPIPE", 14: "SIGALRM", 15: "SIGTERM"
+  , 17: "SIGSTOP", 19: "SIGSTOP", 23: "SIGSTOP"
+}
+
 //
 // Remove any non-server specific settings
 var filterInternalOptionsOut = function(options, internalOptions) {
@@ -65,6 +85,9 @@ var ServerManager = function(serverOptions) {
 
   // Add rest options
   serverOptions.rest = null;
+
+  // Contains the child process
+  var process = null;
 
   // Any needed credentials
   var credentials;
@@ -191,7 +214,7 @@ var ServerManager = function(serverOptions) {
     }    
 
     setTimeout(function() {
-      exec(cmd, function(error, stdout, stderr) {
+      process = exec(cmd, function(error, stdout, stderr) {
         console.log(stdout)
         if(error != null && callback) {
           var _internal = callback;
@@ -256,47 +279,26 @@ var ServerManager = function(serverOptions) {
     });
   }
 
-  this.stop = function(options, callback) {    
-    if(typeof options == 'function') {
-      callback = options;
-      options = {};
-    }
+  var locateLockFile = function(dbpath) {
+    var possibleLockFiles = ['mongod.lock', 'WiredTiger.lock'];
 
-    // Heap storage engine, no lock file available
-    if(storageEngine == null) {
+    for(var i = 0; i < possibleLockFiles.length; i++) {
       try {
-        // Read the pidfile        
-        pid = fs.readFileSync(path.join(dbpath, "mongod.lock"), 'ascii').trim();
-        if(pid == '') throw new Error("no pid kill all processes");
-        // Get the signal
-        var signal = options.signal || -3;
-        // Stop server connection
-        if(server) server.destroy();
-        // Create kill command
-        var cmd = f("kill %d %s", signal, pid);
-        console.log("execute :: " + cmd)
-        // Kill the process with the desired signal
-        exec(cmd, function(error, stdout, stderr) {
-          // Monitor for pid until it's dead
-          waitToDie(pid, function() {
-            try {
-              // Destroy pid file
-              fs.unlinkSync(path.join(dbpath, "mongod.lock"))
-            } catch(err) {}
+        return {
+            file: possibleLockFiles[i]
+          , pid: fs.readFileSync(path.join(dbpath, possibleLockFiles[i]), 'ascii').trim()
+        }
+      } catch(err) {}
+    }
+  }
 
-            // Return
-            if(error) return callback(error, null);
-            callback(null, null);
-          });
-        });
-      } catch(err) {
-        exec(f("killall %d mongod", signal), function(error) {
-          if(error) return callback(error, null);
-          setTimeout(function() {
-            callback(null, null);
-          }, 1000);
-        });
-      }          
+  this.stop = function(options, callback) {    
+    if(typeof options == 'function') callback = options, options = {};
+    // Get the signal
+    var signal = options.signal || -3;    
+    if(process) {
+      process.on('exit', callback);
+      process.kill(signals[Math.abs(signal)]);
     }
   }
 

@@ -53,10 +53,13 @@ var Long = require('bson').Long
  * @param {object} bson An instance of the BSON parser
  * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
  * @param {{object}|Long} cmd The selector (can be a command or a cursorId)
- * @param {object} connection The connection used for this cursor
- * @param {object} callbacks The callbacks storage object for the server instance
+ * @param {object} [options=null] Optional settings.
  * @param {object} [options.batchSize=1000] Batchsize for the operation
  * @param {array} [options.documents=[]] Initial documents list for cursor
+ * @param {object} [options.transforms=null] Transform methods for the cursor results
+ * @param {function} [options.transforms.query] Transform the value returned from the initial query
+ * @param {object} topology The server topology instance.
+ * @param {object} topologyOptions The server topology options.
  * @return {Cursor} A cursor instance
  * @property {number} cursorBatchSize The current cursorBatchSize for the cursor
  * @property {number} cursorLimit The current cursorLimit for the cursor
@@ -97,6 +100,8 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
     , skip: options.skip || cmd.skip || 0
     , batchSize: options.batchSize || cmd.batchSize || 1000
     , currentLimit: 0
+    // Result field name if not a cursor (contains the array of results)
+    , transforms: options.transforms
   }
 
   // Callback controller
@@ -180,7 +185,7 @@ var execInitialQuery = function(query, cmd, options, cursorState, connection, lo
       }
 
       if(Array.isArray(result.documents[0].result)) {
-        cursorState.documents = result.documents[0].result;//.reverse();
+        cursorState.documents = result.documents[0].result;
         cursorState.cursorId = Long.ZERO;
         return callback(null, null);
       }
@@ -189,6 +194,13 @@ var execInitialQuery = function(query, cmd, options, cursorState, connection, lo
     // Otherwise fall back to regular find path
     cursorState.cursorId = result.cursorId;
     cursorState.documents = result.documents;
+
+    // Transform the results with passed in transformation method if provided
+    if(cursorState.transforms && typeof cursorState.transforms.query == 'function') {
+      cursorState.documents = cursorState.transforms.query(result);
+    }
+
+    // Return callback
     callback(null, null);
   }
 
