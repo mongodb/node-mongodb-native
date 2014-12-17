@@ -673,3 +673,25 @@ exports['should correctly use listIndexes to retrieve index list'] = {
   }
 }
 
+exports['should correctly ensureIndex for nested style index name c.d'] = {
+  metadata: { requires: { mongodb: ">=2.4.0", topology: ['single', 'ssl', 'heap', 'wiredtiger'] } },  
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    db.open(function(err, db) {
+      db.collection('ensureIndexWithNestedStyleIndex').ensureIndex({'c.d':1}, function(err, r) {
+        test.equal(null, err);
+
+        // Get the list of indexes
+        db.collection('ensureIndexWithNestedStyleIndex').listIndexes().toArray(function(err, indexes) {
+          test.equal(null, err);
+          test.equal(2, indexes.length);
+
+          db.close();
+          test.done();
+        });
+      });
+    });
+  }
+}

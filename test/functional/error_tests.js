@@ -39,6 +39,7 @@ exports.shouldFailInsertDueToUniqueIndexStrict = {
             collection.ensureIndex([['a', 1 ]], {unique:true, w:1}, function(err, indexName) {
               collection.insert({a:2}, {w:1}, function(err, r) {
                 test.ok(err == null);
+                
                 collection.insert({a:2}, {w:1}, function(err, r) {
                   test.ok(err != null);
                   db.close();
