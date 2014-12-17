@@ -27,14 +27,12 @@
     , "semver": "4.1.0"
     , "rimraf": "2.2.6"
     , "gleak": "0.5.0"
-    , "m": "1.0.0"
-    , "mongodb-version-manager": "0.4.1"
   },
   "author": "Christian Kvalheim",
   "license": "Apache 2.0",
   "bugs": {
     "url": "https://github.com/christkv/mongodb-legacy/issues"
   },
-  "scripts": { "test" : "m kill && m ${MONGODB_VERSION} && node test/runner.js -t functional" },
+  "scripts": { "test" : "node test/runner.js -t functional" },
   "homepage": "https://github.com/christkv/mongodb-legacy"
 }
