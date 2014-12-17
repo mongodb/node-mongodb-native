@@ -1,3 +1,7 @@
+1.1.5 17-12-2014
+----------------
+- Fall back to errmsg when creating MongoError for command errors
+
 1.1.4 17-12-2014
 ----------------
 - Added transform method support for cursor (initially just for initial query results) to support listCollections/listIndexes in 2.8.
