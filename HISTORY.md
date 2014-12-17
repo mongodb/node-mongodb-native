@@ -1,6 +1,10 @@
 2.0.10
 ----------------
-- NODE-328 fixed db.open return when no callback available issue and added test
+- NODE-328 fixed db.open return when no callback available issue and added test.
+- NODE-327 Refactored listCollections to return cursor to support 2.8.
+- NODE-327 Added listIndexes method and refactored internal methods to use the new command helper.
+- Enable setting of connectTimeoutMS (Issue #1235, https://github.com/vkarpov15)
+- Bumped mongo-client to 1.1.4
 
 2.0.9 2014-12-01
 ----------------

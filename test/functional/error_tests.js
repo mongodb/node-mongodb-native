@@ -9,6 +9,8 @@ exports.shouldFailInsertDueToUniqueIndex = {
     db.open(function(err, db) {
       var collection = db.collection('test_failing_insert_due_to_unique_index');
       collection.ensureIndex([['a', 1 ]], {unique:true, w:1}, function(err, indexName) {
+        test.equal(null, err);
+
         collection.insert({a:2}, {w: 1}, function(err, r) {
           test.ok(err == null);
           
