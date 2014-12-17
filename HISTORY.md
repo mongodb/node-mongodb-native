@@ -1,3 +1,9 @@
+1.1.4
+----------------
+- Added transform method support for cursor (initially just for initial query results) to support listCollections/listIndexes in 2.8.
+- Fixed variable leak in scram.
+- Fixed server manager to deal better with killing processes.
+
 1.1.3 01-12-2014
 ----------------
 - Fixed error handling issue with nonce generation in mongocr.
