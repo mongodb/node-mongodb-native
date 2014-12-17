@@ -5,7 +5,7 @@
 - NODE-327 Added listIndexes method and refactored internal methods to use the new command helper.
 - NODE-335 Cannot create index for nested objects fixed by relaxing key checking for createIndex helper.
 - Enable setting of connectTimeoutMS (Issue #1235, https://github.com/vkarpov15)
-- Bumped mongo-client to 1.1.4
+- Bumped mongo-client to 1.1.5
 
 2.0.9 2014-12-01
 ----------------
