@@ -163,6 +163,7 @@ var testFiles =[
   , '/test/tests/functional/rs_topology_state_tests.js'
   , '/test/tests/functional/operation_example_tests.js'
   , '/test/tests/functional/cursor_tests.js'
+  , '/test/tests/functional/error_tests.js'
 ]
 
 // Add all the tests to run
