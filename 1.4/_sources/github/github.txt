@@ -111,7 +111,7 @@ Object Document Modeling Libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 23:46:34 on 8/11/2014
+           - 21:13:34 on 18/11/2014
          * - **Homepage**
            - http://http://mongoosejs.com
          * - **Url**
@@ -119,9 +119,9 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/LearnBoost/mongoose.git
          * - **Forks**
-           - 864
+           - 871
          * - **Watchers**
-           - 5889
+           - 5946
 
 .. topic:: mongo-model
 
@@ -204,9 +204,9 @@ Content Management Systems
          :header-rows: 0
 
          * - **Activity Level**
-           - .. image:: ../static/nonactive.png
+           - .. image:: ../static/active.png
          * - **Last push**
-           - 13:3:55 on 4/5/2014
+           - 16:23:17 on 16/11/2014
          * - **Homepage**
            - http://calip.so
          * - **Url**
@@ -214,9 +214,9 @@ Content Management Systems
          * - **Clone Url**
            - https://github.com/cliftonc/calipso.git
          * - **Forks**
-           - 284
+           - 285
          * - **Watchers**
-           - 1521
+           - 1523
 
 Grid FS libraries or tools
 --------------------------
@@ -381,9 +381,9 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Clone Url**
            - https://github.com/meritt/easymongo.git
          * - **Forks**
-           - 13
+           - 14
          * - **Watchers**
-           - 99
+           - 100
 
 REST api's around MongoDB or resource based libraries
 -----------------------------------------------------
@@ -407,7 +407,7 @@ REST api's around MongoDB or resource based libraries
          * - **Clone Url**
            - https://github.com/tdegrunt/mongodb-rest.git
          * - **Forks**
-           - 103
+           - 105
          * - **Watchers**
            - 335
 
@@ -554,7 +554,7 @@ Queue libraries using MongoDB
          * - **Clone Url**
            - https://github.com/bcoe/karait.git
          * - **Forks**
-           - 6
+           - 5
          * - **Watchers**
            - 96
 
@@ -755,7 +755,7 @@ Libraries or Applications for analytics
          * - **Forks**
            - 390
          * - **Watchers**
-           - 3435
+           - 3446
 
 Libraries for the connect middleware
 ------------------------------------
@@ -792,9 +792,9 @@ Libraries for the connect middleware
          :header-rows: 0
 
          * - **Activity Level**
-           - .. image:: ../static/nonactive.png
+           - .. image:: ../static/active.png
          * - **Last push**
-           - 13:27:59 on 23/4/2014
+           - 11:8:43 on 18/11/2014
          * - **Homepage**
            - http://http://kcbanner.github.com/connect-mongo/
          * - **Url**
@@ -802,9 +802,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 178
+           - 182
          * - **Watchers**
-           - 633
+           - 640
 
 Libraries or applications for continous integration
 ---------------------------------------------------
@@ -828,9 +828,9 @@ Libraries or applications for continous integration
          * - **Clone Url**
            - https://github.com/ryankee/concrete.git
          * - **Forks**
-           - 69
+           - 68
          * - **Watchers**
-           - 449
+           - 450
 
 Exampe applications
 -------------------

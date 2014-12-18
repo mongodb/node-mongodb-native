@@ -890,7 +890,7 @@ Drop the collection
          collection.drop(function(err, reply) {
      
            // Ensure we don't have the collection in the set of names
-           db.listCollections(function(err, replies) {
+           db.listCollections().toArray(function(err, replies) {
      
              var found = false;
              // For each collection in the list of collection names in this db look for the
@@ -1646,6 +1646,24 @@ Options
            });
          });
        });
+
+
+-----------
+listIndexes
+-----------
+
+
+Get the list of all indexes information for the collection.
+
+
+
+Options
+ - **batchSize**, {Number, 0} The batchSize for the returned command cursor or if pre 2.8 the systems batch collection
+
+.. js:function:: listIndexes([options])
+
+   :param object [options]: additional options during update.
+   :returns: cursor 
 
 
 ----------------

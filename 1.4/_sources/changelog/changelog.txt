@@ -2,6 +2,17 @@
 Changelog
 =========
 
+1.4.25 2014-12-18
+-----------------
+- listCollections filters out index namespaces on &lt; 2.8 correctly
+- Use returned ns for getmores when doing command cursors.
+
+1.4.24 2014-12-18
+-----------------
+- Refactored listCollections to return cursor to support 2.8 features correctly.
+- Added new listIndexes helper that returns a cursor to support 2.8 features.
+- Bumped kerberos to 0.0.7 to correctly compile across win/linus/osx
+
 1.4.23 2014-12-05
 -----------------
 - Fixed minor replicaset reauthentication issues for High availability process.

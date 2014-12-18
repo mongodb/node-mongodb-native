@@ -14,7 +14,7 @@ A class representation of the BSON Binary type.
 
    :param buffer buffer: a buffer object containing the binary data.
    :param number [subType]: the option binary type.
-   :returns: grid 
+   :returns: binary 
 
 
 Sub types
@@ -41,64 +41,3 @@ Constants
    "Binary.SUBTYPE_UUID", "4", "UUID BSON type"
    "Binary.SUBTYPE_MD5", "5", "MD5 BSON type"
    "Binary.SUBTYPE_USER_DEFINED", "128", "User BSON type"
-
----
-put
----
-
-
-Updates this binary with byte_value.
-
-.. js:function:: put(byte_value)
-
-   :param character byte_value: a single byte we wish to write.
-
------
-write
------
-
-
-Writes a buffer or string to the binary.
-
-.. js:function:: write(string, offset)
-
-   :param buffer string: a string or buffer to be written to the Binary BSON object.
-   :param number offset: specify the binary of where to write the content.
-
-----
-read
-----
-
-
-Reads **length** bytes starting at **position**.
-
-.. js:function:: read(position, length)
-
-   :param number position: read from the given position in the Binary.
-   :param number length: the number of bytes to read.
-   :returns: buffer 
-
-
------
-value
------
-
-
-Returns the value of this binary as a string.
-
-.. js:function:: value()
-
-   :returns: string 
-
-
-------
-length
-------
-
-
-Length.
-
-.. js:function:: length()
-
-   :returns: number the length of the binary.
-

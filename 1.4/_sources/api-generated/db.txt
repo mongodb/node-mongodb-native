@@ -318,15 +318,14 @@ Get the list of all collection names for the specified db
 
 
 Options
- - **namesOnly** {String, default:false}, Return only the full collection namespace.
- - **filter** {String|Object, default:null}, Filter collections by this filter (string or object)
+ - **batchSize** {Number, default:null}, The batchSize for the returned command cursor or if pre 2.8 the systems batch collection
 
-.. js:function:: listCollections([collectionName][, options], callback)
+.. js:function:: listCollections(filter[, options], [options.batchSize=null])
 
-   :param string [collectionName]: the collection name we wish to filter by.
+   :param object filter: Query to filter collections by
    :param object [options]: additional options during update.
-   :param function callback: this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the collection names or null if an error occurred.
-   :returns: null 
+   :param number [options.batchSize=null]: The batchSize for the returned command cursor or if pre 2.8 the systems batch collection
+   :returns: cursor 
 
 
 **Examples**
@@ -353,17 +352,22 @@ Options
        db.open(function(err, db) {
          assert.equal(null, err);
      
+         var db1 = db.db('listCollectionsTestDb');
          // Create a collection
-         var collection = db.collection('test_collections_info');
-         // Return the information of a single collection name
-         db.listCollections("test_collections_info", function(err, items) {
-           assert.equal(1, items.length);
+         var collection = db1.collection('test_collections_info');
+         collection.insert({a:1}, function(err, r) {
+           assert.equal(null, err);
      
-           // Return the information of a all collections, using the callback format
-           db.listCollections(function(err, items) {
-             assert.ok(items.length > 0);
+           // Return the information of a single collection name
+           db1.listCollections({name:"test_collections_info"}).toArray(function(err, items) {
+             assert.equal(1, items.length);
      
-             db.close();
+             // Return the information of a all collections, using the callback format
+             db1.listCollections().toArray(function(err, items) {
+               assert.equal(2, items.length);
+     
+               db.close();
+             });
            });
          });
        });
@@ -397,13 +401,12 @@ Options
      
            // Return the information of a single collection name
            db.listCollections({
-             filter: {
                name: /test_collections_info2/
-             }}, function(err, items) {
-             assert.equal(1, items.length);
+             }).toArray(function(err, items) {
+             assert.ok(items.length >= 1);
      
              // Return the information of a all collections, using the callback format
-             db.listCollections(function(err, items) {
+             db.listCollections().toArray(function(err, items) {
                assert.ok(items.length > 0);
      
                db.close();
@@ -1184,7 +1187,7 @@ Drop a collection from the database, removing it permanently. New accesses will 
                  assert.equal(null, err);
      
                  // Verify that the collection is gone
-                 db.listCollections("a_simple_create_drop_collection", function(err, names) {
+                 db.listCollections({name:"a_simple_create_drop_collection"}).toArray(function(err, names) {
                    assert.equal(0, names.length);
      
                    db.close();
@@ -1262,11 +1265,11 @@ Options
                    assert.equal(1, count);
      
                    // Verify that the collection is gone
-                   db.listCollections("simple_rename_collection", function(err, names) {
+                   db.listCollections({name:"simple_rename_collection"}).toArray(function(err, names) {
                      assert.equal(0, names.length);
      
                      // Verify that the new collection exists
-                     db.listCollections("simple_rename_collection_2", function(err, names) {
+                     db.listCollections({name:"simple_rename_collection_2"}).toArray(function(err, names) {
                        assert.equal(1, names.length);
      
                        db.close();

@@ -57,6 +57,7 @@
         <article>
             <pre class="prettyprint source linenums"><code>/**
  * Module dependencies.
+ * @ignore
  */
 var BinaryParser = require('./binary_parser').BinaryParser;
 
@@ -66,6 +67,7 @@ var BinaryParser = require('./binary_parser').BinaryParser;
  * Create a random 3-byte value (i.e. unique for this
  * process). Other drivers use a md5 of the machine id here, but
  * that would mean an asyc call to gethostname, so we don't bother.
+ * @ignore
  */
 var MACHINE_ID = parseInt(Math.random() * 0xFFFFFF, 10);
 
@@ -75,9 +77,10 @@ var checkForHexRegExp = new RegExp("^[0-9a-fA-F]{24}$");
 /**
 * Create a new ObjectID instance
 *
-* @class Represents the BSON ObjectID type
-* @param {String|Number} id Can be a 24 byte hex string, 12 byte binary string or a Number.
-* @return {Object} instance of ObjectID.
+* @class Represents a BSON ObjectId type.
+* @param {(string|number)} id Can be a 24 byte hex string, 12 byte binary string or a Number.
+* @property {number} generationTime The generation time of this ObjectId instance
+* @return {ObjectID} instance of ObjectID.
 */
 var ObjectID = function ObjectID(id) {
   if(!(this instanceof ObjectID)) return new ObjectID(id);
@@ -115,8 +118,8 @@ for (var i = 0; i &lt; 256; i++) {
 /**
 * Return the ObjectID id as a 24 byte hex string representation
 *
-* @return {String} return the 24 byte hex string representation.
-* @api public
+* @method
+* @return {string} return the 24 byte hex string representation.
 */
 ObjectID.prototype.toHexString = function() {
   if(ObjectID.cacheHexString &amp;&amp; this.__id) return this.__id;
@@ -134,8 +137,9 @@ ObjectID.prototype.toHexString = function() {
 /**
 * Update the ObjectID index used in generating new ObjectID's on the driver
 *
-* @return {Number} returns next index value.
-* @api private
+* @method
+* @return {number} returns next index value.
+* @ignore
 */
 ObjectID.prototype.get_inc = function() {
   return ObjectID.index = (ObjectID.index + 1) % 0xFFFFFF;
@@ -144,8 +148,9 @@ ObjectID.prototype.get_inc = function() {
 /**
 * Update the ObjectID index used in generating new ObjectID's on the driver
 *
-* @return {Number} returns next index value.
-* @api private
+* @method
+* @return {number} returns next index value.
+* @ignore
 */
 ObjectID.prototype.getInc = function() {
   return this.get_inc();
@@ -154,9 +159,9 @@ ObjectID.prototype.getInc = function() {
 /**
 * Generate a 12 byte id string used in ObjectID's
 *
-* @param {Number} [time] optional parameter allowing to pass in a second based timestamp.
-* @return {String} return the 12 byte id binary string.
-* @api private
+* @method
+* @param {number} [time] optional parameter allowing to pass in a second based timestamp.
+* @return {string} return the 12 byte id binary string.
 */
 ObjectID.prototype.generate = function(time) {
   if ('number' != typeof time) {
@@ -166,7 +171,7 @@ ObjectID.prototype.generate = function(time) {
   var time4Bytes = BinaryParser.encodeInt(time, 32, true, true);
   /* for time-based ObjectID the bytes following the time will be zeroed */
   var machine3Bytes = BinaryParser.encodeInt(MACHINE_ID, 24, false);
-  var pid2Bytes = BinaryParser.fromShort(typeof process === 'undefined' ? Math.floor(Math.random() * 100000) : process.pid);
+  var pid2Bytes = BinaryParser.fromShort(typeof process === 'undefined' ? Math.floor(Math.random() * 100000) : process.pid % 0xFFFF);
   var index3Bytes = BinaryParser.encodeInt(this.get_inc(), 24, false, true);
 
   return time4Bytes + machine3Bytes + pid2Bytes + index3Bytes;
@@ -176,7 +181,7 @@ ObjectID.prototype.generate = function(time) {
 * Converts the id into a 24 byte hex string for printing
 *
 * @return {String} return the 24 byte hex string representation.
-* @api private
+* @ignore
 */
 ObjectID.prototype.toString = function() {
   return this.toHexString();
@@ -186,7 +191,7 @@ ObjectID.prototype.toString = function() {
 * Converts to a string representation of this Id.
 *
 * @return {String} return the 24 byte hex string representation.
-* @api private
+* @ignore
 */
 ObjectID.prototype.inspect = ObjectID.prototype.toString;
 
@@ -194,7 +199,7 @@ ObjectID.prototype.inspect = ObjectID.prototype.toString;
 * Converts to its JSON representation.
 *
 * @return {String} return the 24 byte hex string representation.
-* @api private
+* @ignore
 */
 ObjectID.prototype.toJSON = function() {
   return this.toHexString();
@@ -203,9 +208,9 @@ ObjectID.prototype.toJSON = function() {
 /**
 * Compares the equality of this ObjectID with `otherID`.
 *
-* @param {Object} otherID ObjectID instance to compare against.
-* @return {Bool} the result of comparing two ObjectID's
-* @api public
+* @method
+* @param {object} otherID ObjectID instance to compare against.
+* @return {boolean} the result of comparing two ObjectID's
 */
 ObjectID.prototype.equals = function equals (otherID) {
   if(otherID == null) return false;
@@ -219,8 +224,8 @@ ObjectID.prototype.equals = function equals (otherID) {
 /**
 * Returns the generation date (accurate up to the second) that this ID was generated.
 *
-* @return {Date} the generation date
-* @api public
+* @method
+* @return {date} the generation date
 */
 ObjectID.prototype.getTimestamp = function() {
   var timestamp = new Date();
@@ -230,10 +235,12 @@ ObjectID.prototype.getTimestamp = function() {
 
 /**
 * @ignore
-* @api private
 */
 ObjectID.index = parseInt(Math.random() * 0xFFFFFF, 10);
 
+/**
+* @ignore
+*/
 ObjectID.createPk = function createPk () {
   return new ObjectID();
 };
@@ -241,9 +248,9 @@ ObjectID.createPk = function createPk () {
 /**
 * Creates an ObjectID from a second based number, with the rest of the ObjectID zeroed out. Used for comparisons or sorting the ObjectID.
 *
-* @param {Number} time an integer number representing a number of seconds.
+* @method
+* @param {number} time an integer number representing a number of seconds.
 * @return {ObjectID} return the created ObjectID
-* @api public
 */
 ObjectID.createFromTime = function createFromTime (time) {
   var id = BinaryParser.encodeInt(time, 32, true, true) +
@@ -254,9 +261,9 @@ ObjectID.createFromTime = function createFromTime (time) {
 /**
 * Creates an ObjectID from a hex string representation of an ObjectID.
 *
-* @param {String} hexString create a ObjectID from a passed in 24 byte hexstring.
+* @method
+* @param {string} hexString create a ObjectID from a passed in 24 byte hexstring.
 * @return {ObjectID} return the created ObjectID
-* @api public
 */
 ObjectID.createFromHexString = function createFromHexString (hexString) {
   // Throw an error if it's not a valid setup
@@ -285,8 +292,8 @@ ObjectID.createFromHexString = function createFromHexString (hexString) {
 /**
 * Checks if a value is a valid bson ObjectId
 *
-* @return {Boolean} return true if the value is a valid bson ObjectId, return false otherwise.
-* @api public
+* @method
+* @return {boolean} return true if the value is a valid bson ObjectId, return false otherwise.
 */
 ObjectID.isValid = function isValid(id) {
   if(id == null) return false;
@@ -319,9 +326,9 @@ Object.defineProperty(ObjectID.prototype, "generationTime", {
 /**
  * Expose.
  */
-exports.ObjectID = ObjectID;
-exports.ObjectId = ObjectID;
-</code></pre>
+module.exports = ObjectID;
+module.exports.ObjectID = ObjectID;
+module.exports.ObjectId = ObjectID;</code></pre>
         </article>
     </section>
 
@@ -350,7 +357,7 @@ exports.ObjectId = ObjectID;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Tue Dec 09 2014 12:34:44 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Thu Dec 18 2014 23:13:58 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>
@@ -518,26 +525,26 @@ exports.ObjectId = ObjectID;
     
         <li class="item" data-name="Binary">
             <span class="title">
-                <a href="global.html#Binary">Binary</a>
+                <a href="Binary.html">Binary</a>
                 
             </span>
             <ul class="members itemMembers">
             
             <span class="subtitle">Members</span>
             
-                <li data-name="Binary.SUBTYPE_BYTE_ARRAY"><a href="global.html#Binary#SUBTYPE_BYTE_ARRAY">SUBTYPE_BYTE_ARRAY</a></li>
+                <li data-name="Binary.SUBTYPE_BYTE_ARRAY"><a href="Binary.html#SUBTYPE_BYTE_ARRAY">SUBTYPE_BYTE_ARRAY</a></li>
             
-                <li data-name="Binary.SUBTYPE_DEFAULT"><a href="global.html#Binary#SUBTYPE_DEFAULT">SUBTYPE_DEFAULT</a></li>
+                <li data-name="Binary.SUBTYPE_DEFAULT"><a href="Binary.html#SUBTYPE_DEFAULT">SUBTYPE_DEFAULT</a></li>
             
-                <li data-name="Binary.SUBTYPE_FUNCTION"><a href="global.html#Binary#SUBTYPE_FUNCTION">SUBTYPE_FUNCTION</a></li>
+                <li data-name="Binary.SUBTYPE_FUNCTION"><a href="Binary.html#SUBTYPE_FUNCTION">SUBTYPE_FUNCTION</a></li>
             
-                <li data-name="Binary.SUBTYPE_MD5"><a href="global.html#Binary#SUBTYPE_MD5">SUBTYPE_MD5</a></li>
+                <li data-name="Binary.SUBTYPE_MD5"><a href="Binary.html#SUBTYPE_MD5">SUBTYPE_MD5</a></li>
             
-                <li data-name="Binary.SUBTYPE_USER_DEFINED"><a href="global.html#Binary#SUBTYPE_USER_DEFINED">SUBTYPE_USER_DEFINED</a></li>
+                <li data-name="Binary.SUBTYPE_USER_DEFINED"><a href="Binary.html#SUBTYPE_USER_DEFINED">SUBTYPE_USER_DEFINED</a></li>
             
-                <li data-name="Binary.SUBTYPE_UUID"><a href="global.html#Binary#SUBTYPE_UUID">SUBTYPE_UUID</a></li>
+                <li data-name="Binary.SUBTYPE_UUID"><a href="Binary.html#SUBTYPE_UUID">SUBTYPE_UUID</a></li>
             
-                <li data-name="Binary.SUBTYPE_UUID_OLD"><a href="global.html#Binary#SUBTYPE_UUID_OLD">SUBTYPE_UUID_OLD</a></li>
+                <li data-name="Binary.SUBTYPE_UUID_OLD"><a href="Binary.html#SUBTYPE_UUID_OLD">SUBTYPE_UUID_OLD</a></li>
             
             </ul>
             <ul class="typedefs itemMembers">
@@ -547,15 +554,15 @@ exports.ObjectId = ObjectID;
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="Binary#length"><a href="global.html#Binary#length">length</a></li>
+                <li data-name="Binary#length"><a href="Binary.html#length">length</a></li>
             
-                <li data-name="Binary#put"><a href="global.html#Binary#put">put</a></li>
+                <li data-name="Binary#put"><a href="Binary.html#put">put</a></li>
             
-                <li data-name="Binary#read"><a href="global.html#Binary#read">read</a></li>
+                <li data-name="Binary#read"><a href="Binary.html#read">read</a></li>
             
-                <li data-name="Binary#value"><a href="global.html#Binary#value">value</a></li>
+                <li data-name="Binary#value"><a href="Binary.html#value">value</a></li>
             
-                <li data-name="Binary#write"><a href="global.html#Binary#write">write</a></li>
+                <li data-name="Binary#write"><a href="Binary.html#write">write</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -715,6 +722,8 @@ exports.ObjectId = ObjectID;
                 <li data-name="Collection#insertOne"><a href="Collection.html#insertOne">insertOne</a></li>
             
                 <li data-name="Collection#isCapped"><a href="Collection.html#isCapped">isCapped</a></li>
+            
+                <li data-name="Collection#listIndexes"><a href="Collection.html#listIndexes">listIndexes</a></li>
             
                 <li data-name="Collection#mapReduce"><a href="Collection.html#mapReduce">mapReduce</a></li>
             
@@ -1169,44 +1178,22 @@ exports.ObjectId = ObjectID;
     
         <li class="item" data-name="Long">
             <span class="title">
-                <a href="global.html#Long">Long</a>
+                <a href="Long.html">Long</a>
                 
             </span>
             <ul class="members itemMembers">
             
             <span class="subtitle">Members</span>
             
-                <li data-name="Long.INT_CACHE_"><a href="global.html#Long#INT_CACHE_">INT_CACHE_</a></li>
+                <li data-name="Long.MAX_VALUE"><a href="Long.html#MAX_VALUE">MAX_VALUE</a></li>
             
-                <li data-name="Long.MAX_VALUE"><a href="global.html#Long#MAX_VALUE">MAX_VALUE</a></li>
+                <li data-name="Long.MIN_VALUE"><a href="Long.html#MIN_VALUE">MIN_VALUE</a></li>
             
-                <li data-name="Long.MIN_VALUE"><a href="global.html#Long#MIN_VALUE">MIN_VALUE</a></li>
+                <li data-name="Long.NEG_ONE"><a href="Long.html#NEG_ONE">NEG_ONE</a></li>
             
-                <li data-name="Long.NEG_ONE"><a href="global.html#Long#NEG_ONE">NEG_ONE</a></li>
+                <li data-name="Long.ONE"><a href="Long.html#ONE">ONE</a></li>
             
-                <li data-name="Long.ONE"><a href="global.html#Long#ONE">ONE</a></li>
-            
-                <li data-name="Long.TWO_PWR_16_DBL_"><a href="global.html#Long#TWO_PWR_16_DBL_">TWO_PWR_16_DBL_</a></li>
-            
-                <li data-name="Long.TWO_PWR_24_"><a href="global.html#Long#TWO_PWR_24_">TWO_PWR_24_</a></li>
-            
-                <li data-name="Long.TWO_PWR_24_DBL_"><a href="global.html#Long#TWO_PWR_24_DBL_">TWO_PWR_24_DBL_</a></li>
-            
-                <li data-name="Long.TWO_PWR_31_DBL_"><a href="global.html#Long#TWO_PWR_31_DBL_">TWO_PWR_31_DBL_</a></li>
-            
-                <li data-name="Long.TWO_PWR_32_DBL_"><a href="global.html#Long#TWO_PWR_32_DBL_">TWO_PWR_32_DBL_</a></li>
-            
-                <li data-name="Long.TWO_PWR_48_DBL_"><a href="global.html#Long#TWO_PWR_48_DBL_">TWO_PWR_48_DBL_</a></li>
-            
-                <li data-name="Long.TWO_PWR_63_DBL_"><a href="global.html#Long#TWO_PWR_63_DBL_">TWO_PWR_63_DBL_</a></li>
-            
-                <li data-name="Long.TWO_PWR_64_DBL_"><a href="global.html#Long#TWO_PWR_64_DBL_">TWO_PWR_64_DBL_</a></li>
-            
-                <li data-name="Long.ZERO"><a href="global.html#Long#ZERO">ZERO</a></li>
-            
-                <li data-name="Long#high_"><a href="global.html#Long#high_">high_</a></li>
-            
-                <li data-name="Long#low_"><a href="global.html#Long#low_">low_</a></li>
+                <li data-name="Long.ZERO"><a href="Long.html#ZERO">ZERO</a></li>
             
             </ul>
             <ul class="typedefs itemMembers">
@@ -1216,75 +1203,75 @@ exports.ObjectId = ObjectID;
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="Long.fromBits"><a href="global.html#Long#fromBits">fromBits</a></li>
+                <li data-name="Long.fromBits"><a href="Long.html#fromBits">fromBits</a></li>
             
-                <li data-name="Long.fromInt"><a href="global.html#Long#fromInt">fromInt</a></li>
+                <li data-name="Long.fromInt"><a href="Long.html#fromInt">fromInt</a></li>
             
-                <li data-name="Long.fromNumber"><a href="global.html#Long#fromNumber">fromNumber</a></li>
+                <li data-name="Long.fromNumber"><a href="Long.html#fromNumber">fromNumber</a></li>
             
-                <li data-name="Long.fromString"><a href="global.html#Long#fromString">fromString</a></li>
+                <li data-name="Long.fromString"><a href="Long.html#fromString">fromString</a></li>
             
-                <li data-name="Long#add"><a href="global.html#Long#add">add</a></li>
+                <li data-name="Long#add"><a href="Long.html#add">add</a></li>
             
-                <li data-name="Long#and"><a href="global.html#Long#and">and</a></li>
+                <li data-name="Long#and"><a href="Long.html#and">and</a></li>
             
-                <li data-name="Long#compare"><a href="global.html#Long#compare">compare</a></li>
+                <li data-name="Long#compare"><a href="Long.html#compare">compare</a></li>
             
-                <li data-name="Long#div"><a href="global.html#Long#div">div</a></li>
+                <li data-name="Long#div"><a href="Long.html#div">div</a></li>
             
-                <li data-name="Long#equals"><a href="global.html#Long#equals">equals</a></li>
+                <li data-name="Long#equals"><a href="Long.html#equals">equals</a></li>
             
-                <li data-name="Long#getHighBits"><a href="global.html#Long#getHighBits">getHighBits</a></li>
+                <li data-name="Long#getHighBits"><a href="Long.html#getHighBits">getHighBits</a></li>
             
-                <li data-name="Long#getLowBits"><a href="global.html#Long#getLowBits">getLowBits</a></li>
+                <li data-name="Long#getLowBits"><a href="Long.html#getLowBits">getLowBits</a></li>
             
-                <li data-name="Long#getLowBitsUnsigned"><a href="global.html#Long#getLowBitsUnsigned">getLowBitsUnsigned</a></li>
+                <li data-name="Long#getLowBitsUnsigned"><a href="Long.html#getLowBitsUnsigned">getLowBitsUnsigned</a></li>
             
-                <li data-name="Long#getNumBitsAbs"><a href="global.html#Long#getNumBitsAbs">getNumBitsAbs</a></li>
+                <li data-name="Long#getNumBitsAbs"><a href="Long.html#getNumBitsAbs">getNumBitsAbs</a></li>
             
-                <li data-name="Long#greaterThan"><a href="global.html#Long#greaterThan">greaterThan</a></li>
+                <li data-name="Long#greaterThan"><a href="Long.html#greaterThan">greaterThan</a></li>
             
-                <li data-name="Long#greaterThanOrEqual"><a href="global.html#Long#greaterThanOrEqual">greaterThanOrEqual</a></li>
+                <li data-name="Long#greaterThanOrEqual"><a href="Long.html#greaterThanOrEqual">greaterThanOrEqual</a></li>
             
-                <li data-name="Long#isNegative"><a href="global.html#Long#isNegative">isNegative</a></li>
+                <li data-name="Long#isNegative"><a href="Long.html#isNegative">isNegative</a></li>
             
-                <li data-name="Long#isOdd"><a href="global.html#Long#isOdd">isOdd</a></li>
+                <li data-name="Long#isOdd"><a href="Long.html#isOdd">isOdd</a></li>
             
-                <li data-name="Long#isZero"><a href="global.html#Long#isZero">isZero</a></li>
+                <li data-name="Long#isZero"><a href="Long.html#isZero">isZero</a></li>
             
-                <li data-name="Long#lessThan"><a href="global.html#Long#lessThan">lessThan</a></li>
+                <li data-name="Long#lessThan"><a href="Long.html#lessThan">lessThan</a></li>
             
-                <li data-name="Long#lessThanOrEqual"><a href="global.html#Long#lessThanOrEqual">lessThanOrEqual</a></li>
+                <li data-name="Long#lessThanOrEqual"><a href="Long.html#lessThanOrEqual">lessThanOrEqual</a></li>
             
-                <li data-name="Long#modulo"><a href="global.html#Long#modulo">modulo</a></li>
+                <li data-name="Long#modulo"><a href="Long.html#modulo">modulo</a></li>
             
-                <li data-name="Long#multiply"><a href="global.html#Long#multiply">multiply</a></li>
+                <li data-name="Long#multiply"><a href="Long.html#multiply">multiply</a></li>
             
-                <li data-name="Long#negate"><a href="global.html#Long#negate">negate</a></li>
+                <li data-name="Long#negate"><a href="Long.html#negate">negate</a></li>
             
-                <li data-name="Long#not"><a href="global.html#Long#not">not</a></li>
+                <li data-name="Long#not"><a href="Long.html#not">not</a></li>
             
-                <li data-name="Long#notEquals"><a href="global.html#Long#notEquals">notEquals</a></li>
+                <li data-name="Long#notEquals"><a href="Long.html#notEquals">notEquals</a></li>
             
-                <li data-name="Long#or"><a href="global.html#Long#or">or</a></li>
+                <li data-name="Long#or"><a href="Long.html#or">or</a></li>
             
-                <li data-name="Long#shiftLeft"><a href="global.html#Long#shiftLeft">shiftLeft</a></li>
+                <li data-name="Long#shiftLeft"><a href="Long.html#shiftLeft">shiftLeft</a></li>
             
-                <li data-name="Long#shiftRight"><a href="global.html#Long#shiftRight">shiftRight</a></li>
+                <li data-name="Long#shiftRight"><a href="Long.html#shiftRight">shiftRight</a></li>
             
-                <li data-name="Long#shiftRightUnsigned"><a href="global.html#Long#shiftRightUnsigned">shiftRightUnsigned</a></li>
+                <li data-name="Long#shiftRightUnsigned"><a href="Long.html#shiftRightUnsigned">shiftRightUnsigned</a></li>
             
-                <li data-name="Long#subtract"><a href="global.html#Long#subtract">subtract</a></li>
+                <li data-name="Long#subtract"><a href="Long.html#subtract">subtract</a></li>
             
-                <li data-name="Long#toInt"><a href="global.html#Long#toInt">toInt</a></li>
+                <li data-name="Long#toInt"><a href="Long.html#toInt">toInt</a></li>
             
-                <li data-name="Long#toJSON"><a href="global.html#Long#toJSON">toJSON</a></li>
+                <li data-name="Long#toJSON"><a href="Long.html#toJSON">toJSON</a></li>
             
-                <li data-name="Long#toNumber"><a href="global.html#Long#toNumber">toNumber</a></li>
+                <li data-name="Long#toNumber"><a href="Long.html#toNumber">toNumber</a></li>
             
-                <li data-name="Long#toString"><a href="global.html#Long#toString">toString</a></li>
+                <li data-name="Long#toString"><a href="Long.html#toString">toString</a></li>
             
-                <li data-name="Long#xor"><a href="global.html#Long#xor">xor</a></li>
+                <li data-name="Long#xor"><a href="Long.html#xor">xor</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1406,14 +1393,10 @@ exports.ObjectId = ObjectID;
     
         <li class="item" data-name="ObjectID">
             <span class="title">
-                <a href="global.html#ObjectID">ObjectID</a>
+                <a href="ObjectID.html">ObjectID</a>
                 
             </span>
             <ul class="members itemMembers">
-            
-            <span class="subtitle">Members</span>
-            
-                <li data-name="ObjectID#inspect"><a href="global.html#ObjectID#inspect">inspect</a></li>
             
             </ul>
             <ul class="typedefs itemMembers">
@@ -1423,27 +1406,19 @@ exports.ObjectId = ObjectID;
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="ObjectID.createFromHexString"><a href="global.html#ObjectID#createFromHexString">createFromHexString</a></li>
+                <li data-name="ObjectID.createFromHexString"><a href="ObjectID.html#createFromHexString">createFromHexString</a></li>
             
-                <li data-name="ObjectID.createFromTime"><a href="global.html#ObjectID#createFromTime">createFromTime</a></li>
+                <li data-name="ObjectID.createFromTime"><a href="ObjectID.html#createFromTime">createFromTime</a></li>
             
-                <li data-name="ObjectID.isValid"><a href="global.html#ObjectID#isValid">isValid</a></li>
+                <li data-name="ObjectID.isValid"><a href="ObjectID.html#isValid">isValid</a></li>
             
-                <li data-name="ObjectID#equals"><a href="global.html#ObjectID#equals">equals</a></li>
+                <li data-name="ObjectID#equals"><a href="ObjectID.html#equals">equals</a></li>
             
-                <li data-name="ObjectID#generate"><a href="global.html#ObjectID#generate">generate</a></li>
+                <li data-name="ObjectID#generate"><a href="ObjectID.html#generate">generate</a></li>
             
-                <li data-name="ObjectID#get_inc"><a href="global.html#ObjectID#get_inc">get_inc</a></li>
+                <li data-name="ObjectID#getTimestamp"><a href="ObjectID.html#getTimestamp">getTimestamp</a></li>
             
-                <li data-name="ObjectID#getInc"><a href="global.html#ObjectID#getInc">getInc</a></li>
-            
-                <li data-name="ObjectID#getTimestamp"><a href="global.html#ObjectID#getTimestamp">getTimestamp</a></li>
-            
-                <li data-name="ObjectID#toHexString"><a href="global.html#ObjectID#toHexString">toHexString</a></li>
-            
-                <li data-name="ObjectID#toJSON"><a href="global.html#ObjectID#toJSON">toJSON</a></li>
-            
-                <li data-name="ObjectID#toString"><a href="global.html#ObjectID#toString">toString</a></li>
+                <li data-name="ObjectID#toHexString"><a href="ObjectID.html#toHexString">toHexString</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -1614,44 +1589,22 @@ exports.ObjectId = ObjectID;
     
         <li class="item" data-name="Timestamp">
             <span class="title">
-                <a href="global.html#Timestamp">Timestamp</a>
+                <a href="Timestamp.html">Timestamp</a>
                 
             </span>
             <ul class="members itemMembers">
             
             <span class="subtitle">Members</span>
             
-                <li data-name="Timestamp.INT_CACHE_"><a href="global.html#Timestamp#INT_CACHE_">INT_CACHE_</a></li>
+                <li data-name="Timestamp.MAX_VALUE"><a href="Timestamp.html#MAX_VALUE">MAX_VALUE</a></li>
             
-                <li data-name="Timestamp.MAX_VALUE"><a href="global.html#Timestamp#MAX_VALUE">MAX_VALUE</a></li>
+                <li data-name="Timestamp.MIN_VALUE"><a href="Timestamp.html#MIN_VALUE">MIN_VALUE</a></li>
             
-                <li data-name="Timestamp.MIN_VALUE"><a href="global.html#Timestamp#MIN_VALUE">MIN_VALUE</a></li>
+                <li data-name="Timestamp.NEG_ONE"><a href="Timestamp.html#NEG_ONE">NEG_ONE</a></li>
             
-                <li data-name="Timestamp.NEG_ONE"><a href="global.html#Timestamp#NEG_ONE">NEG_ONE</a></li>
+                <li data-name="Timestamp.ONE"><a href="Timestamp.html#ONE">ONE</a></li>
             
-                <li data-name="Timestamp.ONE"><a href="global.html#Timestamp#ONE">ONE</a></li>
-            
-                <li data-name="Timestamp.TWO_PWR_16_DBL_"><a href="global.html#Timestamp#TWO_PWR_16_DBL_">TWO_PWR_16_DBL_</a></li>
-            
-                <li data-name="Timestamp.TWO_PWR_24_"><a href="global.html#Timestamp#TWO_PWR_24_">TWO_PWR_24_</a></li>
-            
-                <li data-name="Timestamp.TWO_PWR_24_DBL_"><a href="global.html#Timestamp#TWO_PWR_24_DBL_">TWO_PWR_24_DBL_</a></li>
-            
-                <li data-name="Timestamp.TWO_PWR_31_DBL_"><a href="global.html#Timestamp#TWO_PWR_31_DBL_">TWO_PWR_31_DBL_</a></li>
-            
-                <li data-name="Timestamp.TWO_PWR_32_DBL_"><a href="global.html#Timestamp#TWO_PWR_32_DBL_">TWO_PWR_32_DBL_</a></li>
-            
-                <li data-name="Timestamp.TWO_PWR_48_DBL_"><a href="global.html#Timestamp#TWO_PWR_48_DBL_">TWO_PWR_48_DBL_</a></li>
-            
-                <li data-name="Timestamp.TWO_PWR_63_DBL_"><a href="global.html#Timestamp#TWO_PWR_63_DBL_">TWO_PWR_63_DBL_</a></li>
-            
-                <li data-name="Timestamp.TWO_PWR_64_DBL_"><a href="global.html#Timestamp#TWO_PWR_64_DBL_">TWO_PWR_64_DBL_</a></li>
-            
-                <li data-name="Timestamp.ZERO"><a href="global.html#Timestamp#ZERO">ZERO</a></li>
-            
-                <li data-name="Timestamp#high_"><a href="global.html#Timestamp#high_">high_</a></li>
-            
-                <li data-name="Timestamp#low_"><a href="global.html#Timestamp#low_">low_</a></li>
+                <li data-name="Timestamp.ZERO"><a href="Timestamp.html#ZERO">ZERO</a></li>
             
             </ul>
             <ul class="typedefs itemMembers">
@@ -1661,75 +1614,75 @@ exports.ObjectId = ObjectID;
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="Timestamp.fromBits"><a href="global.html#Timestamp#fromBits">fromBits</a></li>
+                <li data-name="Timestamp.fromBits"><a href="Timestamp.html#fromBits">fromBits</a></li>
             
-                <li data-name="Timestamp.fromInt"><a href="global.html#Timestamp#fromInt">fromInt</a></li>
+                <li data-name="Timestamp.fromInt"><a href="Timestamp.html#fromInt">fromInt</a></li>
             
-                <li data-name="Timestamp.fromNumber"><a href="global.html#Timestamp#fromNumber">fromNumber</a></li>
+                <li data-name="Timestamp.fromNumber"><a href="Timestamp.html#fromNumber">fromNumber</a></li>
             
-                <li data-name="Timestamp.fromString"><a href="global.html#Timestamp#fromString">fromString</a></li>
+                <li data-name="Timestamp.fromString"><a href="Timestamp.html#fromString">fromString</a></li>
             
-                <li data-name="Timestamp#add"><a href="global.html#Timestamp#add">add</a></li>
+                <li data-name="Timestamp#add"><a href="Timestamp.html#add">add</a></li>
             
-                <li data-name="Timestamp#and"><a href="global.html#Timestamp#and">and</a></li>
+                <li data-name="Timestamp#and"><a href="Timestamp.html#and">and</a></li>
             
-                <li data-name="Timestamp#compare"><a href="global.html#Timestamp#compare">compare</a></li>
+                <li data-name="Timestamp#compare"><a href="Timestamp.html#compare">compare</a></li>
             
-                <li data-name="Timestamp#div"><a href="global.html#Timestamp#div">div</a></li>
+                <li data-name="Timestamp#div"><a href="Timestamp.html#div">div</a></li>
             
-                <li data-name="Timestamp#equals"><a href="global.html#Timestamp#equals">equals</a></li>
+                <li data-name="Timestamp#equals"><a href="Timestamp.html#equals">equals</a></li>
             
-                <li data-name="Timestamp#getHighBits"><a href="global.html#Timestamp#getHighBits">getHighBits</a></li>
+                <li data-name="Timestamp#getHighBits"><a href="Timestamp.html#getHighBits">getHighBits</a></li>
             
-                <li data-name="Timestamp#getLowBits"><a href="global.html#Timestamp#getLowBits">getLowBits</a></li>
+                <li data-name="Timestamp#getLowBits"><a href="Timestamp.html#getLowBits">getLowBits</a></li>
             
-                <li data-name="Timestamp#getLowBitsUnsigned"><a href="global.html#Timestamp#getLowBitsUnsigned">getLowBitsUnsigned</a></li>
+                <li data-name="Timestamp#getLowBitsUnsigned"><a href="Timestamp.html#getLowBitsUnsigned">getLowBitsUnsigned</a></li>
             
-                <li data-name="Timestamp#getNumBitsAbs"><a href="global.html#Timestamp#getNumBitsAbs">getNumBitsAbs</a></li>
+                <li data-name="Timestamp#getNumBitsAbs"><a href="Timestamp.html#getNumBitsAbs">getNumBitsAbs</a></li>
             
-                <li data-name="Timestamp#greaterThan"><a href="global.html#Timestamp#greaterThan">greaterThan</a></li>
+                <li data-name="Timestamp#greaterThan"><a href="Timestamp.html#greaterThan">greaterThan</a></li>
             
-                <li data-name="Timestamp#greaterThanOrEqual"><a href="global.html#Timestamp#greaterThanOrEqual">greaterThanOrEqual</a></li>
+                <li data-name="Timestamp#greaterThanOrEqual"><a href="Timestamp.html#greaterThanOrEqual">greaterThanOrEqual</a></li>
             
-                <li data-name="Timestamp#isNegative"><a href="global.html#Timestamp#isNegative">isNegative</a></li>
+                <li data-name="Timestamp#isNegative"><a href="Timestamp.html#isNegative">isNegative</a></li>
             
-                <li data-name="Timestamp#isOdd"><a href="global.html#Timestamp#isOdd">isOdd</a></li>
+                <li data-name="Timestamp#isOdd"><a href="Timestamp.html#isOdd">isOdd</a></li>
             
-                <li data-name="Timestamp#isZero"><a href="global.html#Timestamp#isZero">isZero</a></li>
+                <li data-name="Timestamp#isZero"><a href="Timestamp.html#isZero">isZero</a></li>
             
-                <li data-name="Timestamp#lessThan"><a href="global.html#Timestamp#lessThan">lessThan</a></li>
+                <li data-name="Timestamp#lessThan"><a href="Timestamp.html#lessThan">lessThan</a></li>
             
-                <li data-name="Timestamp#lessThanOrEqual"><a href="global.html#Timestamp#lessThanOrEqual">lessThanOrEqual</a></li>
+                <li data-name="Timestamp#lessThanOrEqual"><a href="Timestamp.html#lessThanOrEqual">lessThanOrEqual</a></li>
             
-                <li data-name="Timestamp#modulo"><a href="global.html#Timestamp#modulo">modulo</a></li>
+                <li data-name="Timestamp#modulo"><a href="Timestamp.html#modulo">modulo</a></li>
             
-                <li data-name="Timestamp#multiply"><a href="global.html#Timestamp#multiply">multiply</a></li>
+                <li data-name="Timestamp#multiply"><a href="Timestamp.html#multiply">multiply</a></li>
             
-                <li data-name="Timestamp#negate"><a href="global.html#Timestamp#negate">negate</a></li>
+                <li data-name="Timestamp#negate"><a href="Timestamp.html#negate">negate</a></li>
             
-                <li data-name="Timestamp#not"><a href="global.html#Timestamp#not">not</a></li>
+                <li data-name="Timestamp#not"><a href="Timestamp.html#not">not</a></li>
             
-                <li data-name="Timestamp#notEquals"><a href="global.html#Timestamp#notEquals">notEquals</a></li>
+                <li data-name="Timestamp#notEquals"><a href="Timestamp.html#notEquals">notEquals</a></li>
             
-                <li data-name="Timestamp#or"><a href="global.html#Timestamp#or">or</a></li>
+                <li data-name="Timestamp#or"><a href="Timestamp.html#or">or</a></li>
             
-                <li data-name="Timestamp#shiftLeft"><a href="global.html#Timestamp#shiftLeft">shiftLeft</a></li>
+                <li data-name="Timestamp#shiftLeft"><a href="Timestamp.html#shiftLeft">shiftLeft</a></li>
             
-                <li data-name="Timestamp#shiftRight"><a href="global.html#Timestamp#shiftRight">shiftRight</a></li>
+                <li data-name="Timestamp#shiftRight"><a href="Timestamp.html#shiftRight">shiftRight</a></li>
             
-                <li data-name="Timestamp#shiftRightUnsigned"><a href="global.html#Timestamp#shiftRightUnsigned">shiftRightUnsigned</a></li>
+                <li data-name="Timestamp#shiftRightUnsigned"><a href="Timestamp.html#shiftRightUnsigned">shiftRightUnsigned</a></li>
             
-                <li data-name="Timestamp#subtract"><a href="global.html#Timestamp#subtract">subtract</a></li>
+                <li data-name="Timestamp#subtract"><a href="Timestamp.html#subtract">subtract</a></li>
             
-                <li data-name="Timestamp#toInt"><a href="global.html#Timestamp#toInt">toInt</a></li>
+                <li data-name="Timestamp#toInt"><a href="Timestamp.html#toInt">toInt</a></li>
             
-                <li data-name="Timestamp#toJSON"><a href="global.html#Timestamp#toJSON">toJSON</a></li>
+                <li data-name="Timestamp#toJSON"><a href="Timestamp.html#toJSON">toJSON</a></li>
             
-                <li data-name="Timestamp#toNumber"><a href="global.html#Timestamp#toNumber">toNumber</a></li>
+                <li data-name="Timestamp#toNumber"><a href="Timestamp.html#toNumber">toNumber</a></li>
             
-                <li data-name="Timestamp#toString"><a href="global.html#Timestamp#toString">toString</a></li>
+                <li data-name="Timestamp#toString"><a href="Timestamp.html#toString">toString</a></li>
             
-                <li data-name="Timestamp#xor"><a href="global.html#Timestamp#xor">xor</a></li>
+                <li data-name="Timestamp#xor"><a href="Timestamp.html#xor">xor</a></li>
             
             </ul>
             <ul class="events itemMembers">

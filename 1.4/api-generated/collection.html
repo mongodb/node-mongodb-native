@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Collection() &mdash; MongoDB Node.JS Driver 1.4.23 documentation</title>
+    <title>Collection() &mdash; MongoDB Node.JS Driver 1.4.25 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.4.23',
+        VERSION:     '1.4.25',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.4.23 documentation" href="../index.html" />
+    <link rel="top" title="MongoDB Node.JS Driver 1.4.25 documentation" href="../index.html" />
     <link rel="next" title="Admin()" href="admin.html" />
     <link rel="prev" title="Db()" href="db.html" /> 
   </head>
@@ -37,7 +37,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.23 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.25 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -982,7 +982,7 @@ operators and update instead for more efficient operations.</p>
     <span class="nx">collection</span><span class="p">.</span><span class="nx">drop</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">reply</span><span class="p">)</span> <span class="p">{</span>
 
       <span class="c1">// Ensure we don&#39;t have the collection in the set of names</span>
-      <span class="nx">db</span><span class="p">.</span><span class="nx">listCollections</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">replies</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">db</span><span class="p">.</span><span class="nx">listCollections</span><span class="p">().</span><span class="nx">toArray</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">replies</span><span class="p">)</span> <span class="p">{</span>
 
         <span class="kd">var</span> <span class="nx">found</span> <span class="o">=</span> <span class="kc">false</span><span class="p">;</span>
         <span class="c1">// For each collection in the list of collection names in this db look for the</span>
@@ -1775,6 +1775,36 @@ The second findAndModify command upserts a document and returns the new document
 </pre></div>
 </div>
 </div></blockquote>
+</div>
+<div class="section" id="listindexes">
+<h2>listIndexes<a class="headerlink" href="#listindexes" title="Permalink to this headline">¶</a></h2>
+<p>Get the list of all indexes information for the collection.</p>
+<dl class="docutils">
+<dt>Options</dt>
+<dd><ul class="first last simple">
+<li><strong>batchSize</strong>, {Number, 0} The batchSize for the returned command cursor or if pre 2.8 the systems batch collection</li>
+</ul>
+</dd>
+</dl>
+<dl class="function">
+<dt id="listIndexes">
+<tt class="descname">listIndexes</tt><big>(</big><span class="optional">[</span><em>options</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#listIndexes" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
+<li><strong>[options]</strong> (<em>object</em>) &#8211; additional options during update.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">cursor</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 <div class="section" id="indexinformation">
 <h2>indexInformation<a class="headerlink" href="#indexinformation" title="Permalink to this headline">¶</a></h2>
@@ -3442,6 +3472,7 @@ no ordering guarantees for returned results.</p>
 <li><a class="reference internal" href="#findone">findOne</a></li>
 <li><a class="reference internal" href="#createindex">createIndex</a></li>
 <li><a class="reference internal" href="#ensureindex">ensureIndex</a></li>
+<li><a class="reference internal" href="#listindexes">listIndexes</a></li>
 <li><a class="reference internal" href="#indexinformation">indexInformation</a></li>
 <li><a class="reference internal" href="#dropindex">dropIndex</a></li>
 <li><a class="reference internal" href="#dropallindexes">dropAllIndexes</a></li>
@@ -3616,7 +3647,7 @@ no ordering guarantees for returned results.</p>
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.23 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.25 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">

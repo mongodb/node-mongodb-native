@@ -636,7 +636,7 @@ var server = new Server({
 });
 
 // Wait for the connection event
-server.on(&#39;connect&#39;, function(server) {
+server.on(&#39;connect&#39;, function(_server) {
   // Execute find
   var cursor = _server.cursor(&#39;db.test&#39;, {
       find: f(&amp;quot;%s.inserts_extend_cursors&amp;quot;, configuration.db)

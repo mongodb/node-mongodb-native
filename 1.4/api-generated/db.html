@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Db() &mdash; MongoDB Node.JS Driver 1.4.23 documentation</title>
+    <title>Db() &mdash; MongoDB Node.JS Driver 1.4.25 documentation</title>
     
     <link rel="stylesheet" href="../_static/mongodb-docs.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -15,7 +15,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../',
-        VERSION:     '1.4.23',
+        VERSION:     '1.4.25',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="../_static/jquery.js"></script>
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
-    <link rel="top" title="MongoDB Node.JS Driver 1.4.23 documentation" href="../index.html" />
+    <link rel="top" title="MongoDB Node.JS Driver 1.4.25 documentation" href="../index.html" />
     <link rel="next" title="Collection()" href="collection.html" />
     <link rel="prev" title="MongoClient()" href="mongoclient.html" /> 
   </head>
@@ -37,7 +37,7 @@
           <li><p><a href="../index.html"><img class="logo" src="../_static/logo-mongodb.png" alt="Logo"/></p></li>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.23 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.25 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div>  
 
@@ -400,26 +400,25 @@
 <dl class="docutils">
 <dt>Options</dt>
 <dd><ul class="first last simple">
-<li><strong>namesOnly</strong> {String, default:false}, Return only the full collection namespace.</li>
-<li><strong>filter</strong> {String|Object, default:null}, Filter collections by this filter (string or object)</li>
+<li><strong>batchSize</strong> {Number, default:null}, The batchSize for the returned command cursor or if pre 2.8 the systems batch collection</li>
 </ul>
 </dd>
 </dl>
 <dl class="function">
 <dt id="listCollections">
-<tt class="descname">listCollections</tt><big>(</big><em>[collectionName][, options], callback</em><big>)</big><a class="headerlink" href="#listCollections" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">listCollections</tt><big>(</big><em>filter</em><span class="optional">[</span>, <em>options</em><span class="optional">]</span><span class="optional">[</span>, <em>options.batchSize=null</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#listCollections" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Arguments:</th><td class="field-body"><ul class="first simple">
-<li><strong>[collectionName]</strong> (<em>string</em>) &#8211; the collection name we wish to filter by.</li>
+<li><strong>filter</strong> (<em>object</em>) &#8211; Query to filter collections by</li>
 <li><strong>[options]</strong> (<em>object</em>) &#8211; additional options during update.</li>
-<li><strong>callback</strong> (<em>function</em>) &#8211; this will be called after executing this method. The first parameter will contain the Error object if an error occurred, or null otherwise. While the second parameter will contain the collection names or null if an error occurred.</li>
+<li><strong>[options.batchSize=null]</strong> (<em>number</em>) &#8211; The batchSize for the returned command cursor or if pre 2.8 the systems batch collection</li>
 </ul>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">null</p>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">cursor</p>
 </td>
 </tr>
 </tbody>
@@ -445,17 +444,22 @@
   <span class="nx">db</span><span class="p">.</span><span class="nx">open</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">db</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
 
+    <span class="kd">var</span> <span class="nx">db1</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">db</span><span class="p">(</span><span class="s1">&#39;listCollectionsTestDb&#39;</span><span class="p">);</span>
     <span class="c1">// Create a collection</span>
-    <span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;test_collections_info&#39;</span><span class="p">);</span>
-    <span class="c1">// Return the information of a single collection name</span>
-    <span class="nx">db</span><span class="p">.</span><span class="nx">listCollections</span><span class="p">(</span><span class="s2">&quot;test_collections_info&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">items</span><span class="p">)</span> <span class="p">{</span>
-      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">items</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">collection</span> <span class="o">=</span> <span class="nx">db1</span><span class="p">.</span><span class="nx">collection</span><span class="p">(</span><span class="s1">&#39;test_collections_info&#39;</span><span class="p">);</span>
+    <span class="nx">collection</span><span class="p">.</span><span class="nx">insert</span><span class="p">({</span><span class="nx">a</span><span class="o">:</span><span class="mi">1</span><span class="p">},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">r</span><span class="p">)</span> <span class="p">{</span>
+      <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
 
-      <span class="c1">// Return the information of a all collections, using the callback format</span>
-      <span class="nx">db</span><span class="p">.</span><span class="nx">listCollections</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">items</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">items</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">);</span>
+      <span class="c1">// Return the information of a single collection name</span>
+      <span class="nx">db1</span><span class="p">.</span><span class="nx">listCollections</span><span class="p">({</span><span class="nx">name</span><span class="o">:</span><span class="s2">&quot;test_collections_info&quot;</span><span class="p">}).</span><span class="nx">toArray</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">items</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">items</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
 
-        <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+        <span class="c1">// Return the information of a all collections, using the callback format</span>
+        <span class="nx">db1</span><span class="p">.</span><span class="nx">listCollections</span><span class="p">().</span><span class="nx">toArray</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">items</span><span class="p">)</span> <span class="p">{</span>
+          <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nx">items</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+
+          <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+        <span class="p">});</span>
       <span class="p">});</span>
     <span class="p">});</span>
   <span class="p">});</span>
@@ -485,13 +489,12 @@
 
       <span class="c1">// Return the information of a single collection name</span>
       <span class="nx">db</span><span class="p">.</span><span class="nx">listCollections</span><span class="p">({</span>
-        <span class="nx">filter</span><span class="o">:</span> <span class="p">{</span>
           <span class="nx">name</span><span class="o">:</span> <span class="sr">/test_collections_info2/</span>
-        <span class="p">}},</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">items</span><span class="p">)</span> <span class="p">{</span>
-        <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">items</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+        <span class="p">}).</span><span class="nx">toArray</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">items</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">items</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">);</span>
 
         <span class="c1">// Return the information of a all collections, using the callback format</span>
-        <span class="nx">db</span><span class="p">.</span><span class="nx">listCollections</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">items</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">db</span><span class="p">.</span><span class="nx">listCollections</span><span class="p">().</span><span class="nx">toArray</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">items</span><span class="p">)</span> <span class="p">{</span>
           <span class="nx">assert</span><span class="p">.</span><span class="nx">ok</span><span class="p">(</span><span class="nx">items</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">);</span>
 
           <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
@@ -1368,7 +1371,7 @@ Options</p>
             <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">err</span><span class="p">);</span>
 
             <span class="c1">// Verify that the collection is gone</span>
-            <span class="nx">db</span><span class="p">.</span><span class="nx">listCollections</span><span class="p">(</span><span class="s2">&quot;a_simple_create_drop_collection&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">names</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">db</span><span class="p">.</span><span class="nx">listCollections</span><span class="p">({</span><span class="nx">name</span><span class="o">:</span><span class="s2">&quot;a_simple_create_drop_collection&quot;</span><span class="p">}).</span><span class="nx">toArray</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">names</span><span class="p">)</span> <span class="p">{</span>
               <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nx">names</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
 
               <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
@@ -1454,11 +1457,11 @@ Options</p>
               <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">count</span><span class="p">);</span>
 
               <span class="c1">// Verify that the collection is gone</span>
-              <span class="nx">db</span><span class="p">.</span><span class="nx">listCollections</span><span class="p">(</span><span class="s2">&quot;simple_rename_collection&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">names</span><span class="p">)</span> <span class="p">{</span>
+              <span class="nx">db</span><span class="p">.</span><span class="nx">listCollections</span><span class="p">({</span><span class="nx">name</span><span class="o">:</span><span class="s2">&quot;simple_rename_collection&quot;</span><span class="p">}).</span><span class="nx">toArray</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">names</span><span class="p">)</span> <span class="p">{</span>
                 <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nx">names</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
 
                 <span class="c1">// Verify that the new collection exists</span>
-                <span class="nx">db</span><span class="p">.</span><span class="nx">listCollections</span><span class="p">(</span><span class="s2">&quot;simple_rename_collection_2&quot;</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">names</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">db</span><span class="p">.</span><span class="nx">listCollections</span><span class="p">({</span><span class="nx">name</span><span class="o">:</span><span class="s2">&quot;simple_rename_collection_2&quot;</span><span class="p">}).</span><span class="nx">toArray</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">names</span><span class="p">)</span> <span class="p">{</span>
                   <span class="nx">assert</span><span class="p">.</span><span class="nx">equal</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nx">names</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
 
                   <span class="nx">db</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
@@ -2142,7 +2145,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
       <ul>
         <li class="right">| <a href="https://github.com/mongodb/node-mongodb-native/" title="Fork the driver on GitHub to contribute.">GitHub</a></li>
         <li class="right"><a href="http://jira.mongodb.org/browse/NODE" title="Open a case in Jira to report a problem with the documentation.">Jira</a></li>
-        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.23 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
+        <li><a href="../contents.html">MongoDB Node.JS Driver 1.4.25 documentation</a> (<a href="../genindex.html">index</a>)  &raquo;</li> 
       </ul>
     </div></div>
     <div class="footer">
