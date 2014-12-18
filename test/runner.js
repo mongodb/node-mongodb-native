@@ -486,7 +486,6 @@ if(argv.t == 'functional') {
 
     m.current(function(err, version){
       if(err) return console.error(err) && process.exit(1);
-
       console.log('Running tests against MongoDB version `%s`', version);
       // Run the configuration
       runner.run(config);
