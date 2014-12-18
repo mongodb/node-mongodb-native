@@ -1,5 +1,5 @@
-2.0.10
-----------------
+2.0.10 2014-12-18
+-----------------
 - NODE-328 fixed db.open return when no callback available issue and added test.
 - NODE-327 Refactored listCollections to return cursor to support 2.8.
 - NODE-327 Added listIndexes method and refactored internal methods to use the new command helper.
