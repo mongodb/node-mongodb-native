@@ -1,3 +1,7 @@
+1.1.7 18-12-2014
+----------------
+- Use ns variable for getMore commands for command cursors to work properly with cursor version of listCollections and listIndexes.
+
 1.1.6 18-12-2014
 ----------------
 - Server manager fixed to support 2.2.X servers for travis test matrix.
