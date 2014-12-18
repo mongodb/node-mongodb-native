@@ -1210,7 +1210,7 @@ exports.shouldAttempToForceBsonSize = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
-    requires: {topology: 'single'}
+    requires: {topology: 'single', mongodb: '>=2.4.x'}
   },
   
   // The actual test we wish to run
