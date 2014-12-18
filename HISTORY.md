@@ -1,3 +1,7 @@
+1.1.6 18-12-2014
+----------------
+- Server manager fixed to support 2.2.X servers for travis test matrix.
+
 1.1.5 17-12-2014
 ----------------
 - Fall back to errmsg when creating MongoError for command errors
