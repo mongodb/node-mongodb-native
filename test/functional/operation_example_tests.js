@@ -3211,19 +3211,21 @@ exports.shouldCorrectlyRetrievelistCollections = {
     // BEGIN
       test.equal(null, err);
 
+      // Get an empty db
+      var db1 = db.db('listCollectionTestDb');
       // Create a collection
-      var collection = db.collection('shouldCorrectlyRetrievelistCollections');
+      var collection = db1.collection('shouldCorrectlyRetrievelistCollections');
       // Ensure the collection was created
       collection.insert({a:1}, function(err, r) {
         test.equal(null, err);
 
         // Return the information of a single collection name
-        db.listCollections({name: "shouldCorrectlyRetrievelistCollections"}).toArray(function(err, items) {
+        db1.listCollections({name: "shouldCorrectlyRetrievelistCollections"}).toArray(function(err, items) {
           test.equal(1, items.length);
 
           // Return the information of a all collections, using the callback format
-          db.listCollections().toArray(function(err, items) {
-            test.ok(items.length > 0);
+          db1.listCollections().toArray(function(err, items) {
+            test.equal(2, items.length);
 
             db.close();
             test.done();
