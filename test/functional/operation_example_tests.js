@@ -6870,7 +6870,7 @@ exports.shouldStreamDocumentsUsingTheReadStreamResumeFunction = {
             // Let's create a read file
             file = new GridStore(db, fileId, "r");
 
-            // Open the file
+            // Open the file 
             file.open(function(err, file) {            
               // Peform a find to get a cursor
               var stream = file.stream(true);
