@@ -3,3 +3,8 @@ node_js:
   - 0.10
   - 0.11
 sudo: false
+env:
+  - MONGODB_VERSION=2.2.x
+  - MONGODB_VERSION=2.4.x
+  - MONGODB_VERSION=2.6.x
+  - MONGODB_VERSION=2.8.x

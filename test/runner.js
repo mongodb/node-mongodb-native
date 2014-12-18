@@ -15,6 +15,7 @@ var Runner = require('integra').Runner
   , path = require('path')
   , rimraf = require('rimraf')
   , fs = require('fs')
+  , m = require('mongodb-version-manager')
   , f = require('util').format;
 
 var detector = require('gleak')();
@@ -478,8 +479,19 @@ if(argv.t == 'functional') {
   } catch(err) {
   }
 
-  // Run the configuration
-  runner.run(config);
+  // Kill any running MongoDB processes and
+  // `install $MONGODB_VERSION` || `use existing installation` || `install stable`
+  m(function(err){
+    if(err) return console.error(err) && process.exit(1);
+
+    m.current(function(err, version){
+      if(err) return console.error(err) && process.exit(1);
+
+      console.log('Running tests against MongoDB version `%s`', version);
+      // Run the configuration
+      runner.run(config);
+    });
+  });
 }
 
 
