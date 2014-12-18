@@ -82,7 +82,7 @@
     , "rimraf": "2.2.6"
     , "semver": "4.1.0"
     , "mongodb-core": "1.1.6"
-    , "mongodb-version-manager": "0.5.0"
+    , "mongodb-version-manager": "git+https://github.com/christkv/mongodb-version-manager.git"
   }
 , "optionalDependencies": {
       "kerberos": "0.0.7"
