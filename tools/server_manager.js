@@ -123,14 +123,16 @@ var ServerManager = function(serverOptions) {
     , 'storageEngine'];
 
   // Return the startup command
-  var buildStartupCommand = function(options) {
+  var buildStartupCommand = function(options, opts) {
+    opts = opts || {};
     var command = [];
     // Binary command
     command.push(f('%s', bin));
     command.push('--smallfiles');
     command.push('--noprealloc')
     // Push test commands
-    command.push('--setParameter enableTestCommands=1');
+    if(!opts.noSetParameter)
+      command.push('--setParameter enableTestCommands=1');
 
     // Add all other passed in options    
     for(var name in options) {
@@ -152,7 +154,7 @@ var ServerManager = function(serverOptions) {
     return command.join(' ');
   }
 
-  var bootServer = function(cmd, callback) {
+  var bootServer = function(serverOptions, callback) {
     var pingServer = function() {
       if(server) server.destroy();
       var opt = {host: host
@@ -214,13 +216,20 @@ var ServerManager = function(serverOptions) {
     }    
 
     setTimeout(function() {
-      process = exec(cmd, function(error, stdout, stderr) {
-        console.log(stdout)
-        if(error != null && callback) {
-          var _internal = callback;
-          callback = null;
-          return _internal(error);
-        }
+      exec('mongod --version', function(error, stdout, stderr) {
+        // Build startup command
+        var cmd = stdout.indexOf('v2.2') != -1
+          ? buildStartupCommand(serverOptions, {noSetParameter:true})
+          : buildStartupCommand(serverOptions);
+        // Attempt to start      
+        process = exec(cmd, function(error, stdout, stderr) {
+          console.log(stdout)
+          if(error != null && callback) {
+            var _internal = callback;
+            callback = null;
+            return _internal(error);
+          }
+        });
       });
 
       // Attempt to ping the server
@@ -247,18 +256,16 @@ var ServerManager = function(serverOptions) {
       fs.unlinkSync(path.join(dbpath, "mongod.lock"));
     }
     
-    // Build startup command
-    var cmd = buildStartupCommand(serverOptions);
     // If we have decided to kill all the processes
     if(typeof options.signal == 'number' && options.kill) {
       options.signal = typeof options.signal == 'number' ? options.signal : -3;
       exec(f("killall %d mongod", options.signal), function(err, stdout, stderr) {
         setTimeout(function() {
-          bootServer(cmd, callback);
+          bootServer(serverOptions, callback);
         }, 5000);
       });
     } else {
-      bootServer(cmd, callback);
+      bootServer(serverOptions, callback);
     }
   }
 
