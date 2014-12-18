@@ -1,3 +1,8 @@
+2.0.11 2014-12-19
+-----------------
+- listCollections filters out index namespaces on < 2.8 correctly
+- Bumped mongo-client to 1.1.7
+
 2.0.10 2014-12-18
 -----------------
 - NODE-328 fixed db.open return when no callback available issue and added test.
