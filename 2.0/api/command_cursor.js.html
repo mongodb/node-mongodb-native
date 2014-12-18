@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Class: Binary</title>
+    <title>Source: lib/command_cursor.js</title>
     
     
     
@@ -48,1100 +48,282 @@
         <tr>
             <td valign='top'>        
                 <div class="main">
-                    <h1 class="page-title" data-filename="Binary.html">Class: Binary</h1>
+                    <h1 class="page-title" data-filename="command_cursor.js.html">Source: lib/command_cursor.js</h1>
                     
 
 
-
-<section>
-    
-<header>
-    <h2>
-    Binary
-    </h2>
-    
-        <div class="class-description"><p>Represents a BSON Binary type.</p></div>
-    
-</header>  
-
-<article>
-    <div class="container-overview">
-    
-    
-    
-        
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="Binary">
-            
-            new Binary<span class="signature">(buffer, <span class="optional">subType</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="Binary.html">Binary</a>}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="binary.js.html">node_modules/bson/lib/bson/binary.js</a>, <a href="binary.js.html#line25">line 25</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>A class representation of the BSON Binary type.</p>
-<p>Sub types</p>
-<ul>
-<li><strong>BSON.BSON_BINARY_SUBTYPE_DEFAULT</strong>, default BSON type.</li>
-<li><strong>BSON.BSON_BINARY_SUBTYPE_FUNCTION</strong>, BSON function type.</li>
-<li><strong>BSON.BSON_BINARY_SUBTYPE_BYTE_ARRAY</strong>, BSON byte array type.</li>
-<li><strong>BSON.BSON_BINARY_SUBTYPE_UUID</strong>, BSON uuid type.</li>
-<li><strong>BSON.BSON_BINARY_SUBTYPE_MD5</strong>, BSON md5 type.</li>
-<li><strong>BSON.BSON_BINARY_SUBTYPE_USER_DEFINED</strong>, BSON user defined type.</li>
-</ul>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>buffer</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">Buffer</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                    
-                    
-                        
-                    
-                
-                <p>a buffer object containing the binary data.</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>subType</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">Number</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>the option binary type.</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-    
-    </div>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-        <h3 class="subsection-title">Members</h3>
-        
-        <dl>
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="SUBTYPE_BYTE_ARRAY"><span class="type-signature static">static</span>Binary.SUBTYPE_BYTE_ARRAY</h4>
-    </div>
-    
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>Byte Array BSON type</p>
-    </div>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="SUBTYPE_DEFAULT"><span class="type-signature static">static</span>Binary.SUBTYPE_DEFAULT</h4>
-    </div>
-    
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>Default BSON type</p>
-    </div>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="SUBTYPE_FUNCTION"><span class="type-signature static">static</span>Binary.SUBTYPE_FUNCTION</h4>
-    </div>
-    
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>Function BSON type</p>
-    </div>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="SUBTYPE_MD5"><span class="type-signature static">static</span>Binary.SUBTYPE_MD5</h4>
-    </div>
-    
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>MD5 BSON type</p>
-    </div>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="SUBTYPE_USER_DEFINED"><span class="type-signature static">static</span>Binary.SUBTYPE_USER_DEFINED</h4>
-    </div>
-    
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>User BSON type</p>
-    </div>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="SUBTYPE_UUID"><span class="type-signature static">static</span>Binary.SUBTYPE_UUID</h4>
-    </div>
-    
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>UUID BSON type</p>
-    </div>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="SUBTYPE_UUID_OLD"><span class="type-signature static">static</span>Binary.SUBTYPE_UUID_OLD</h4>
-    </div>
-    
-    
-</dt>
-<dd>
-    
-    <div class="description">
-        <p>OLD UUID BSON type</p>
-    </div>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-</dd>
-
-        </dl>
-    
-    
-    
-        <h3 class="subsection-title">Methods</h3>
-        
-        <dl>
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="length">
-            
-            length<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{number}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="binary.js.html">node_modules/bson/lib/bson/binary.js</a>, <a href="binary.js.html#line244">line 244</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Length.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-<h5>Returns:</h5>
-length of the binary.
-<br />
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="put">
-            
-            put<span class="signature">(byte_value)</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="binary.js.html">node_modules/bson/lib/bson/binary.js</a>, <a href="binary.js.html#line72">line 72</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Updates this binary with byte_value.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>byte_value</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>a single byte we wish to write.</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="read">
-            
-            read<span class="signature">(position, length)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Buffer}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="binary.js.html">node_modules/bson/lib/bson/binary.js</a>, <a href="binary.js.html#line182">line 182</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Reads <strong>length</strong> bytes starting at <strong>position</strong>.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>position</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>read from the given position in the Binary.</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>length</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>the number of bytes to read.</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="value">
-            
-            value<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{string}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="binary.js.html">node_modules/bson/lib/bson/binary.js</a>, <a href="binary.js.html#line207">line 207</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Returns the value of this binary as a string.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="write">
-            
-            write<span class="signature">(string, offset)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="binary.js.html">node_modules/bson/lib/bson/binary.js</a>, <a href="binary.js.html#line127">line 127</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Writes a buffer or string to the binary.</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>string</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">Buffer</span>
-|
-
-<span class="param-type">string</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>a string or buffer to be written to the Binary BSON object.</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>offset</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>specify the binary of where to write the content.</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        </dl>
-    
-    
-    
-    
     
-</article>
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>"use strict";
+
+var inherits = require('util').inherits
+  , f = require('util').format
+  , toError = require('./utils').toError
+  , getSingleProperty = require('./utils').getSingleProperty
+  , formattedOrderClause = require('./utils').formattedOrderClause
+  , handleCallback = require('./utils').handleCallback
+  , Logger = require('mongodb-core').Logger
+  , EventEmitter = require('events').EventEmitter
+  , ReadPreference = require('./read_preference')
+  , MongoError = require('mongodb-core').MongoError
+  , Readable = require('stream').Readable || require('readable-stream').Readable
+  // , CoreCursor = require('mongodb-core').Cursor
+  , CoreCursor = require('./cursor')
+  , Query = require('mongodb-core').Query
+  , CoreReadPreference = require('mongodb-core').ReadPreference;
+
+/**
+ * @fileOverview The **CommandCursor** class is an internal class that embodies a 
+ * generalized cursor based on a MongoDB command allowing for iteration over the 
+ * results returned. It supports one by one document iteration, conversion to an 
+ * array or can be iterated as a Node 0.10.X or higher stream
+ * 
+ * **CommandCursor Cannot directly be instantiated**
+ * @example
+ * var MongoClient = require('mongodb').MongoClient,
+ *   test = require('assert');
+ * // Connection url
+ * var url = 'mongodb://localhost:27017/test';
+ * // Connect using MongoClient
+ * MongoClient.connect(url, function(err, db) {
+ *   // Create a collection we want to drop later
+ *   var col = db.collection('listCollectionsExample1');
+ *   // Insert a bunch of documents
+ *   col.insert([{a:1, b:1}
+ *     , {a:2, b:2}, {a:3, b:3}
+ *     , {a:4, b:4}], {w:1}, function(err, result) {
+ *     test.equal(null, err);
+ * 
+ *     // List the database collections available
+ *     db.listCollections().toArray(function(err, items) {
+ *       test.equal(null, err);
+ *       db.close();
+ *     });
+ *   });
+ * });
+ */
+
+/**
+ * Namespace provided by the browser.
+ * @external Readable
+ */
+
+/**
+ * Creates a new Command Cursor instance (INTERNAL TYPE, do not instantiate directly)
+ * @class
+ * @extends external:Readable
+ * @property {number} cursorBatchSize The current cursorBatchSize for the cursor
+ * @fires CommandCursor#data
+ * @fires CommandCursor#end
+ * @fires CommandCursor#close
+ * @fires CommandCursor#readable
+ * @return {CommandCursor} an CommandCursor instance.
+ */
+var CommandCursor = function(bson, ns, cmd, options, topology, topologyOptions) {
+  CoreCursor.apply(this, Array.prototype.slice.call(arguments, 0));
+  var self = this;
+  var state = CommandCursor.INIT;
+  var streamOptions = {};
+
+  // MaxTimeMS
+  var maxTimeMS = null;
+
+  // Set up
+  Readable.call(this, {objectMode: true});
+
+  // Internal state
+  this.s = {
+    // MaxTimeMS
+      maxTimeMS: maxTimeMS
+    // State
+    , state: state
+    // Stream options
+    , streamOptions: streamOptions
+    // BSON
+    , bson: bson
+    // Namespae
+    , ns: ns
+    // Command
+    , cmd: cmd
+    // Options
+    , options: options
+    // Topology
+    , topology: topology
+    // Topology Options
+    , topologyOptions: topologyOptions
+  }
+}
+
+/**
+ * CommandCursor stream data event, fired for each document in the cursor.
+ *
+ * @event CommandCursor#data
+ * @type {object}
+ */
+
+/**
+ * CommandCursor stream end event
+ *
+ * @event CommandCursor#end
+ * @type {null}
+ */
+
+/**
+ * CommandCursor stream close event
+ *
+ * @event CommandCursor#close
+ * @type {null}
+ */
+
+/**
+ * CommandCursor stream readable event
+ *
+ * @event CommandCursor#readable
+ * @type {null}
+ */
+
+// Inherit from Readable
+inherits(CommandCursor, Readable);  
+
+// Set the methods to inherit from prototype
+var methodsToInherit = ['next', 'each', 'forEach', 'toArray'
+  , 'rewind', 'bufferedCount', 'readBufferedDocuments', 'close', 'isClosed'];
+
+// Only inherit the types we need
+for(var i = 0; i &lt; methodsToInherit.length; i++) {
+  CommandCursor.prototype[methodsToInherit[i]] = CoreCursor.prototype[methodsToInherit[i]];
+}
+
+/**
+ * Set the batch size for the cursor.
+ * @method
+ * @param {number} value The batchSize for the cursor.
+ * @throws {MongoError}
+ * @return {CommandCursor}
+ */
+CommandCursor.prototype.batchSize = function(value) {
+  if(this.s.state == CommandCursor.CLOSED || this.isDead()) throw new MongoError("Cursor is closed");
+  if(typeof value != 'number') throw new MongoError("batchSize requires an integer");
+  if(this.s.cmd.cursor) this.s.cmd.cursor.batchSize = value;
+  this.cursorBatchSize = value;
+  return this;
+}
+
+/**
+ * Add a maxTimeMS stage to the aggregation pipeline
+ * @method
+ * @param {number} value The state maxTimeMS value.
+ * @return {CommandCursor}
+ */
+CommandCursor.prototype.maxTimeMS = function(value) {
+  if(this.s.topology.lastIsMaster().minWireVersion > 2) {
+    this.s.cmd.maxTimeMS = value;
+  }
+  return this;
+}
+
+CommandCursor.prototype.get = CommandCursor.prototype.toArray;
+
+/**
+ * Get the next available document from the cursor, returns null if no more documents are available.
+ * @function CommandCursor.prototype.next
+ * @param {CommandCursor~resultCallback} callback The result callback.
+ * @throws {MongoError}
+ * @return {null}
+ */
+
+/**
+ * The callback format for results
+ * @callback CommandCursor~toArrayResultCallback
+ * @param {MongoError} error An error instance representing the error during the execution.
+ * @param {object[]} documents All the documents the satisfy the cursor.
+ */
+
+/**
+ * Returns an array of documents. The caller is responsible for making sure that there
+ * is enough memory to store the results. Note that the array only contain partial
+ * results when this cursor had been previouly accessed.
+ * @method CommandCursor.prototype.toArray
+ * @param {CommandCursor~toArrayResultCallback} callback The result callback.
+ * @throws {MongoError}
+ * @return {null}
+ */
+
+/**
+ * The callback format for results
+ * @callback CommandCursor~resultCallback
+ * @param {MongoError} error An error instance representing the error during the execution.
+ * @param {(object|null)} result The result object if the command was executed successfully.
+ */
+
+/**
+ * Iterates over all the documents for this cursor. As with **{cursor.toArray}**,
+ * not all of the elements will be iterated if this cursor had been previouly accessed.
+ * In that case, **{cursor.rewind}** can be used to reset the cursor. However, unlike
+ * **{cursor.toArray}**, the cursor will only hold a maximum of batch size elements
+ * at any given time if batch size is specified. Otherwise, the caller is responsible
+ * for making sure that the entire result can fit the memory.
+ * @method CommandCursor.prototype.each
+ * @param {CommandCursor~resultCallback} callback The result callback.
+ * @throws {MongoError}
+ * @return {null}
+ */
+
+/**
+ * Close the cursor, sending a KillCursor command and emitting close.
+ * @method CommandCursor.prototype.close
+ * @param {CommandCursor~resultCallback} [callback] The result callback.
+ * @return {null}
+ */   
+
+/**
+ * Is the cursor closed
+ * @method CommandCursor.prototype.isClosed
+ * @return {boolean}
+ */   
+
+/**
+ * Clone the cursor
+ * @function CommandCursor.prototype.clone
+ * @return {CommandCursor}
+ */     
+
+/**
+ * Resets the cursor
+ * @function CommandCursor.prototype.rewind
+ * @return {CommandCursor}
+ */  
+
+/**
+ * The callback format for the forEach iterator method
+ * @callback CommandCursor~iteratorCallback
+ * @param {Object} doc An emitted document for the iterator
+ */
+
+/**
+ * The callback error format for the forEach iterator method
+ * @callback CommandCursor~endCallback
+ * @param {MongoError} error An error instance representing the error during the execution.
+ */
+
+/*
+ * Iterates over all the documents for this cursor using the iterator, callback pattern.
+ * @method CommandCursor.prototype.forEach
+ * @param {CommandCursor~iteratorCallback} iterator The iteration callback.
+ * @param {CommandCursor~endCallback} callback The end callback.
+ * @throws {MongoError}
+ * @return {null}
+ */
+
+CommandCursor.INIT = 0;
+CommandCursor.OPEN = 1;
+CommandCursor.CLOSED = 2;
+
+module.exports = CommandCursor;</code></pre>
+        </article>
+    </section>
 
-</section>  
 
 
 
@@ -1167,7 +349,7 @@ length of the binary.
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Thu Dec 18 2014 23:44:58 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Thu Dec 18 2014 23:44:57 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>
