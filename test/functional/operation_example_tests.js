@@ -2871,18 +2871,19 @@ exports.shouldCorrectlyRetrievelistCollections = {
     db.open(function(err, db) {
       test.equal(null, err);
 
+      var db1 = db.db('listCollectionsTestDb');
       // Create a collection
-      var collection = db.collection('test_collections_info');
+      var collection = db1.collection('test_collections_info');
       collection.insert({a:1}, function(err, r) {
         test.equal(null, err);
 
         // Return the information of a single collection name
-        db.listCollections({name:"test_collections_info"}).toArray(function(err, items) {
+        db1.listCollections({name:"test_collections_info"}).toArray(function(err, items) {
           test.equal(1, items.length);
 
           // Return the information of a all collections, using the callback format
-          db.listCollections().toArray(function(err, items) {
-            test.ok(items.length > 0);
+          db1.listCollections().toArray(function(err, items) {
+            test.equal(2, items.length);
 
             db.close();
             test.done();

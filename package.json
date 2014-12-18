@@ -1,7 +1,7 @@
 { "name" :            "mongodb"
 , "description" :     "A node.js driver for MongoDB"
 , "keywords" :        ["mongodb", "mongo", "driver", "db"]
-, "version" :         "1.4.24"
+, "version" :         "1.4.25"
 , "author" :          "Christian Amor Kvalheim <christkv@gmail.com>"
 , "contributors" :  [ "Aaron Heckmann",
                       "Christoph Pojer",
@@ -81,7 +81,7 @@
     , "gleak": "0.5.0"
     , "rimraf": "2.2.6"
     , "semver": "4.1.0"
-    , "mongodb-core": "1.1.6"
+    , "mongodb-core": "1.1.7"
     , "mongodb-version-manager": "0.5.0"
   }
 , "optionalDependencies": {

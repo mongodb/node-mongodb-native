@@ -1,3 +1,8 @@
+1.4.25 2014-12-18
+-----------------
+- listCollections filters out index namespaces on < 2.8 correctly
+- Use returned ns for getmores when doing command cursors.
+
 1.4.24 2014-12-18
 -----------------
 - Refactored listCollections to return cursor to support 2.8 features correctly.
