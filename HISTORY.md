@@ -1,3 +1,7 @@
+2.0.12 2014-12-22
+-----------------
+- Minor fixes to listCollections to ensure correct querying of a collection when using a string.
+
 2.0.11 2014-12-19
 -----------------
 - listCollections filters out index namespaces on < 2.8 correctly
