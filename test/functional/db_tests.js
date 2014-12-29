@@ -436,26 +436,19 @@ exports['should correctly list collection names with . in the middle'] = {
           test.equal(null, err);
           
           // Get listCollections filtering out the name
-          var cursor = db1.listCollections({name: /test.collection/}, {batchSize:1});
+          var cursor = db1.listCollections({name: /test.collection/});
           cursor.toArray(function(err, names) {
             test.equal(null, err);
             test.equal(2, names.length);
 
             // Get listCollections filtering out the name
-            var cursor = db1.listCollections({name: /test.collection/});
+            var cursor = db1.listCollections({name: 'test.collection1'}, {});
             cursor.toArray(function(err, names) {
               test.equal(null, err);
-              test.equal(2, names.length);
+              test.equal(1, names.length);
 
-              // Get listCollections filtering out the name
-              var cursor = db1.listCollections({name: 'test.collection1'}, {});
-              cursor.toArray(function(err, names) {
-                test.equal(null, err);
-                test.equal(1, names.length);
-
-                db.close();
-                test.done();
-              });
+              db.close();
+              test.done();
             });
           });
         });
