@@ -435,11 +435,11 @@ exports['should correctly list collection names with . in the middle'] = {
         db1.collection('test.collection2').insertOne({a:1}, function() {
           test.equal(null, err);
           
-          // // Get listCollections filtering out the name
-          // var cursor = db1.listCollections({name: /test.collection/}, {batchSize:1});
-          // cursor.toArray(function(err, names) {
-          //   test.equal(null, err);
-          //   test.equal(1, names.length);
+          // Get listCollections filtering out the name
+          var cursor = db1.listCollections({name: /test.collection/}, {batchSize:1});
+          cursor.toArray(function(err, names) {
+            test.equal(null, err);
+            test.equal(2, names.length);
 
             // Get listCollections filtering out the name
             var cursor = db1.listCollections({name: /test.collection/});
@@ -459,7 +459,52 @@ exports['should correctly list collection names with . in the middle'] = {
             });
           });
         });
-      // });
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['should correctly list collection names with batchSize 1 for 2.8 or higher'] = {
+  metadata: { requires: { 
+      topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] 
+    , mongodb: ">= 2.8.0"
+  } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Db = configuration.require.Db
+      , Server = configuration.require.Server;
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    // Establish connection to db
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      // Get a db we that does not have any collections
+      var db1 = db.db('shouldCorrectlyListCollectionsWithDotsOnThemFor28');
+
+      // Create a collection
+      db1.collection('test.collection1').insertOne({a:1}, function(err) {
+        test.equal(null, err);
+
+        // Create a collection
+        db1.collection('test.collection2').insertOne({a:1}, function() {
+          test.equal(null, err);
+          
+          // Get listCollections filtering out the name
+          var cursor = db1.listCollections({name: /test.collection/}, {batchSize:1});
+          cursor.toArray(function(err, names) {
+            test.equal(null, err);
+            test.equal(2, names.length);
+
+            db.close();
+            test.done();
+          });
+        });
+      });
     });
   }
 }
