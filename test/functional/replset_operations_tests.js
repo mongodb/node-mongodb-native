@@ -32,7 +32,7 @@ exports['Should fail due to w:5 and wtimeout:1 with ordered batch api'] = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
-      MongoClient = mongo.MongoClient;
+      , MongoClient = mongo.MongoClient;
 
     // Create url
     var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
@@ -83,6 +83,8 @@ exports['Should fail due to w:5 and wtimeout:1 with ordered batch api'] = {
     }
 
     MongoClient.connect(url, function(err, db) {
+      test.equal(null, err);
+
       executeTests(db, function() {
         // Finish up test
         db.close();
@@ -104,7 +106,7 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
-      MongoClient = mongo.MongoClient;
+      , MongoClient = mongo.MongoClient;
 
     // Create url
     var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
@@ -164,6 +166,8 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
     }
 
     MongoClient.connect(url, function(err, db) {
+      test.equal(null, err);
+
       executeTests(db, function() {
         // Finish up test
         db.close();
@@ -191,7 +195,7 @@ exports['Should fail due to w:5 and wtimeout:1 with unordered batch api'] = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
-      MongoClient = mongo.MongoClient;
+      , MongoClient = mongo.MongoClient;
 
     // Create url
     var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
@@ -243,6 +247,8 @@ exports['Should fail due to w:5 and wtimeout:1 with unordered batch api'] = {
     }
 
     MongoClient.connect(url, function(err, db) {
+      test.equal(null, err);
+
       executeTests(db, function() {
         // Finish up test
         db.close();
@@ -264,7 +270,7 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
-      MongoClient = mongo.MongoClient;
+      , MongoClient = mongo.MongoClient;
 
     // Create url
     var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
@@ -328,6 +334,8 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
     }
 
     MongoClient.connect(url, function(err, db) {
+      test.equal(null, err);
+
       executeTests(db, function() {
         // Finish up test
         db.close();
@@ -342,9 +350,9 @@ exports['Should Correctly group using replicaset'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var mongo = configuration.require,
-      MongoClient = mongo.MongoClient,
-      ReadPreference = mongo.ReadPreference;
+    var mongo = configuration.require
+      , MongoClient = mongo.MongoClient
+      , ReadPreference = mongo.ReadPreference;
 
     // Create url
     var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
@@ -387,9 +395,9 @@ exports['Should fail to do map reduce to out collection'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var mongo = configuration.require,
-      MongoClient = mongo.MongoClient,
-      ReadPreference = mongo.ReadPreference;
+    var mongo = configuration.require
+      , MongoClient = mongo.MongoClient
+      , ReadPreference = mongo.ReadPreference;
 
     // Create url
     var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
@@ -402,6 +410,8 @@ exports['Should fail to do map reduce to out collection'] = {
     var manager = configuration.manager;
 
     MongoClient.connect(url, function(err, db) {
+      test.equal(null, err);
+
       var collection = db.collection('test_map_reduce_functions_notInline_map_reduce', {
             readPreference: ReadPreference.SECONDARY
           , w:2, wtimeout: 10000

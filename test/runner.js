@@ -201,8 +201,8 @@ var createConfiguration = function(options) {
 
 // Set up the runner
 var runner = new Runner({
-    logLevel:'debug'
-  , runners: 1
+    // logLevel:'debug'
+  runners: 1
   , failFast: true
 });
 
