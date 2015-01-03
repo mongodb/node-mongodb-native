@@ -534,11 +534,12 @@ exports['Should fail aggregation due to illegal cursor option and streams'] = {
             ], {
               cursor: 1
             }); 
-          test.ok(false);         
         } catch(err) {
           db.close();
-          test.done();          
+          return test.done();          
         }
+
+        test.ok(false);         
       });
     });
   }
