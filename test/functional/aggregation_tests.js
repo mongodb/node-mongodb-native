@@ -485,3 +485,61 @@ exports['Should correctly use allowDiskUse when performing an aggregation'] = {
     // DOC_END
   }
 }
+
+/**
+ * Correctly call the aggregation framework to return a cursor with batchSize 1 and get the first result using next
+ *
+ * @ignore
+ */
+exports['Should fail aggregation due to illegal cursor option and streams'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: {
+    requires: {
+        mongodb: ">2.5.3"
+      , topology: 'single'
+      , node: ">0.10.0"
+    }
+  },
+  
+  // The actual test we wish to run
+  test: function(configure, test) {
+    var db = configure.newDbInstance({w:1}, {poolSize:1});
+    db.open(function(err, db) {
+      // Some docs for insertion
+      var docs = [{
+          title : "this is my title", author : "bob", posted : new Date() ,
+          pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+          comments : [
+            { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+          ]}];
+
+      // Create a collection
+      var collection = db.collection('shouldCorrectlyDoAggWithCursorGetStream');
+      // Insert the docs
+      collection.insert(docs, {w: 1}, function(err, result) {
+
+        try {
+          // Execute aggregate, notice the pipeline is expressed as an Array
+          var cursor = collection.aggregate([
+              { $project : {
+                author : 1,
+                tags : 1
+              }},
+              { $unwind : "$tags" },
+              { $group : {
+                _id : {tags : "$tags"},
+                authors : { $addToSet : "$author" }
+              }}
+            ], {
+              cursor: 1
+            }); 
+          test.ok(false);         
+        } catch(err) {
+          db.close();
+          test.done();          
+        }
+      });
+    });
+  }
+}
