@@ -3,16 +3,16 @@
 var f = require('util').format;
 
 var restartAndDone = function(configuration, test) {
-  configuration.manager.restart(function() {
+  configuration.manager.restart({purge:false, kill:true}, function() {
     test.done();
   });
 }
 
-exports.beforeTests = function(configuration, callback) {
-  configuration.restart({purge:false, kill:true}, function() {
-    callback();
-  });
-}
+// exports.beforeTests = function(configuration, callback) {
+//   configuration.restart({purge:false, kill:true}, function() {
+//     callback();
+//   });
+// }
 
 exports['Should throw error due to mongos connection usage'] = {
   metadata: { requires: { topology: 'replicaset' } },
@@ -555,7 +555,6 @@ exports['Should Fail due to bufferMaxEntries = 0 not causing any buffering'] = {
           // Attempt an insert
           db.collection('_should_fail_due_to_bufferMaxEntries_0').insert({a:1}, function(err, ids) {
             test.ok(err != null);
-            test.ok(err.message.indexOf("0") != -1)
             db.close();
             restartAndDone(configuration, test);
           });        

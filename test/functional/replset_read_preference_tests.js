@@ -4,16 +4,16 @@ var format = require('util').format
   , fs = require('fs');
 
 var restartAndDone = function(configuration, test) {
-  configuration.manager.restart(function() {
+  configuration.manager.restart({purge:false, kill:true}, function() {
     test.done();
   });
 }
 
-exports.beforeTests = function(configuration, callback) {
-  configuration.restart({purge:false, kill:true}, function() {
-    callback();
-  });
-}
+// exports.beforeTests = function(configuration, callback) {
+//   configuration.restart({purge:false, kill:true}, function() {
+//     callback();
+//   });
+// }
 
 var format = require('util').format;
 
@@ -862,11 +862,14 @@ exports['Connection to a arbiter host with primary preference should give error'
       var db = new Db('integration_test_', server, {w:0});
       db.open(function(err, p_db) {
         // Grab a collection
-        p_db.createCollection('read_preference_single_test_0', function(err, collection) {
-          test.ok(err instanceof Error);
-          test.equal('string', typeof err.message);
-          p_db.close();
-          test.done();
+        p_db.collection('t').insert({a:1}, function(err, r) {
+
+          p_db.collection('t').findOne({}, function(err, doc) {
+            test.ok(err instanceof Error);
+            test.equal('string', typeof err.message);
+            p_db.close();
+            test.done();
+          });
         });
       });
     });

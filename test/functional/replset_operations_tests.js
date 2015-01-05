@@ -3,16 +3,16 @@
 var format = require('util').format;
 
 var restartAndDone = function(configuration, test) {
-  configuration.manager.restart(function() {
+  configuration.manager.restart({purge:false, kill:true}, function() {
     test.done();
   });
 }
 
-exports.beforeTests = function(configuration, callback) {
-  configuration.restart({purge:false, kill:true}, function() {
-    callback();
-  });
-}
+// exports.beforeTests = function(configuration, callback) {
+//   configuration.restart({purge:false, kill:true}, function() {
+//     callback();
+//   });
+// }
 
 /*******************************************************************
  *

@@ -1,16 +1,16 @@
 "use strict";
 
 var restartAndDone = function(configuration, test) {
-  configuration.manager.restart(function() {
+  configuration.manager.restart({purge:false, kill:true}, function() {
     test.done();
   });
 }
 
-exports.beforeTests = function(configuration, callback) {
-  configuration.restart({purge:false, kill:true}, function() {
-    callback();
-  });
-}
+// exports.beforeTests = function(configuration, callback) {
+//   configuration.restart({purge:false, kill:true}, function() {
+//     callback();
+//   });
+// }
 
 /**
  * @ignore
@@ -183,7 +183,6 @@ exports['Should correctly recover from secondary shutdowns'] = {
         db.serverConfig.removeAllListeners('left')
         // Wait for close event due to primary stepdown
         db.serverConfig.on('joined', function(t, d, s) {
-        // console.log("-- joined :: " + t + " :: " + s.name)
           if('secondary' == t && left[s.name]) {
             joined++;
           }
@@ -318,7 +317,7 @@ exports['Should work correctly with inserts after bringing master back'] = {
 
               inserts(function(err) {                
                 // Restart the old master and wait for the sync to happen
-                manager.restart(function(err, result) {
+                manager.restart({purge:true, kill:true}, function(err, result) {
                   // Contains the results
                   var results = [];
 

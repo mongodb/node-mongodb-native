@@ -1,3 +1,7 @@
+1.4.27 2014-01-05
+-----------------
+- Changed how the ServerCapabilities is populated in the driver to ensure it's always correctly added on High availability checking on ReplSet and Mongos.
+
 1.4.26 2014-12-22
 -----------------
 - Minor fixes to listCollections to ensure correct querying of a collection when using a string.

@@ -2645,7 +2645,7 @@ exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDb = {
         db.close(true, function(err, result) {
           // Attemp to insert should fail now with correct message 'db closed by application'
           collection.insert({a:2}, configuration.writeConcernMax(), function(err, result) {
-            test.equal('db closed by application', err.message);
+            test.ok(err != null);
             db.close();
             test.done();
           });
@@ -2860,7 +2860,7 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallback =
  * @ignore
  */
 exports.shouldCorrectlyRetrievelistCollections = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
