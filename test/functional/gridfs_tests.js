@@ -1480,39 +1480,6 @@ exports['Should fail when attempting to append to a file'] = {
 /**
  * @ignore
  */
-exports.shouldCorrectlyStreamWriteToGridStoreObject = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , ObjectID = configuration.require.ObjectID;
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    client.open(function(err, client) {      
-      // Set up gridStore
-      var gridStore = new GridStore(client, "test_stream_write", "w");
-      var stream = gridStore.stream();
-      // Create a file reader stream to an object
-      var fileStream = fs.createReadStream("./test/functional/data/test_gs_working_field_read.pdf");
-      stream.on("end", function(err) {
-        // Just read the content and compare to the raw binary
-        GridStore.read(client, "test_stream_write", function(err, gridData) {
-          var fileData = fs.readFileSync("./test/functional/data/test_gs_working_field_read.pdf");
-          test.equal(fileData.toString('hex'), gridData.toString('hex'));
-          client.close();
-          test.done();
-        })
-      });
-
-      // Pipe it through to the gridStore
-      fileStream.pipe(stream);
-    })
-  }
-}
-
-/**
- * @ignore
- */
 exports.shouldCorrectlyStreamReadFromGridStoreObject = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
