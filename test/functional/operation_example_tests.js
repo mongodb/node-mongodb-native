@@ -3196,7 +3196,7 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallback =
  * @ignore
  */
 exports.shouldCorrectlyRetrievelistCollections = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -3234,6 +3234,44 @@ exports.shouldCorrectlyRetrievelistCollections = {
       });
     });
     // END
+  }
+}
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyRetrievelistCollectionsWiredTiger = {
+  metadata: { requires: { topology: ['wiredtiger'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      // Get an empty db
+      var db1 = db.db('listCollectionTestDb2');
+      // Create a collection
+      var collection = db1.collection('shouldCorrectlyRetrievelistCollections');
+      // Ensure the collection was created
+      collection.insert({a:1}, function(err, r) {
+        test.equal(null, err);
+
+        // Return the information of a single collection name
+        db1.listCollections({name: "shouldCorrectlyRetrievelistCollections"}).toArray(function(err, items) {
+          test.equal(1, items.length);
+
+          // Return the information of a all collections, using the callback format
+          db1.listCollections().toArray(function(err, items) {
+            test.equal(1, items.length);
+
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
   }
 }
 

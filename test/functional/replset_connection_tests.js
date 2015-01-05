@@ -687,8 +687,13 @@ exports['Should correctly connect to arbiter with single connection'] = {
       p_db.command({ismaster: true}, function(err, result) {
         test.equal(null, err);
 
-        p_db.close();
-        restartAndDone(configuration, test);
+        // Should fail
+        p_db.collection('t').insert({a:1}, function(err, r) {
+          test.ok(err != null);
+
+          p_db.close();
+          restartAndDone(configuration, test);
+        });
       });
     })
   }
