@@ -695,3 +695,31 @@ exports['should correctly ensureIndex for nested style index name c.d'] = {
     });
   }
 }
+
+exports['should correctly pass back error on duplicate index with fullResult'] = {
+  metadata: { requires: { mongodb: ">=2.4.0", topology: ['single', 'ssl', 'heap', 'wiredtiger'] } },  
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    db.open(function(err, db) {
+      test.equal(null, err);
+      
+      var col = db.collection('testduplicateWithFullResult');
+      col.ensureIndex({a:1}, {unique:true}, function(err, r) {
+        test.equal(null, err);
+
+        col.insert({a:1}, { fullResult: true }, function(err, doc) {
+          test.equal(null, err);
+        
+          col.insert({a:1}, { fullResult: true }, function(err, doc) {
+            test.ok(err != null);
+        
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
+  }
+}
