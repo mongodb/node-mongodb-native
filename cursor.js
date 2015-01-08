@@ -217,7 +217,7 @@ var execInitialQuery = function(self, query, cmd, options, cursorState, connecti
   callbacks.register(query.requestId, queryCallback);
 
   // Write the initial command out
-  connection.write(query);
+  connection.write(query.toBin());
 }
 
 //
@@ -385,7 +385,6 @@ Cursor.prototype.next = function(callback) {
 
     // Set as init
     self.cursorState.init = true;
-
     // Get the right wire protocol command
     this.query = self.server.wireProtocolHandler.command(self.bson, self.ns, self.cmd, self.cursorState, self.topology, self.options);
   }
@@ -423,7 +422,7 @@ Cursor.prototype.next = function(callback) {
     // Handle all the exhaust responses
     self.callbacks.register(self.query.requestId, processExhaustMessages);
     // Write the initial command out
-    return self.connection.write(self.query);
+    return self.connection.write(self.query.toBin());
   } else if(self.options.exhaust && self.cursorState.cursorIndex < self.cursorState.documents.length) {
     return handleCallback(callback, null, self.cursorState.documents[self.cursorState.cursorIndex++]);
   } else if(self.options.exhaust && Long.ZERO.equals(self.cursorState.cursorId)) {
@@ -453,6 +452,12 @@ Cursor.prototype.next = function(callback) {
 
       self.next(callback);
     });
+  } else if(self.cursorState.limit > 0 && self.cursorState.currentLimit >= self.cursorState.limit) {
+      self.cursorState.dead = true;
+      self.cursorState.notified = true;
+      self.cursorState.documents = [];
+      self.cursorState.cursorIndex = 0;
+      return handleCallback(callback, null, null);
   } else if(self.cursorState.cursorIndex == self.cursorState.documents.length
       && !Long.ZERO.equals(self.cursorState.cursorId)) {
       // Ensure an empty cursor state

@@ -379,11 +379,9 @@ Connection.prototype.destroy = function() {
  * @method
  * @param {Command} command Command to write out need to implement toBin and toBinUnified
  */
-Connection.prototype.write = function(command) {
-  // Get the raw buffer
-  var buffer = Buffer.isBuffer(command) 
-    ? command 
-    : (command[this.serializationFunction] ? command[this.serializationFunction]() : command.toBin());
+Connection.prototype.write = function(buffer) {
+  // console.dir("===========================================================")
+  // console.dir(buffer)
   // Debug log
   if(this.logger.isDebug()) this.logger.debug(f('writing buffer [%s] to %s:%s', buffer.toString('hex'), this.host, this.port));
   // Write out the command

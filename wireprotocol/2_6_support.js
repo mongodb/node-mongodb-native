@@ -68,7 +68,7 @@ LegacySupport.prototype.killCursor = function(bson, cursorId, connection, callba
   // Create a kill cursor command
   var killCursor = new KillCursor(bson, [cursorId]);
   // Execute the kill cursor command
-  if(connection && connection.isConnected()) connection.write(killCursor);
+  if(connection && connection.isConnected()) connection.write(killCursor.toBin());
   // Set cursor to 0
   cursorId = Long.ZERO;
   // Return to caller
@@ -103,7 +103,7 @@ LegacySupport.prototype.getMore = function(bson, ns, cursorState, batchSize, raw
   // Register a callback
   callbacks.register(getMore.requestId, queryCallback);
   // Write out the getMore command
-  connection.write(getMore);
+  connection.write(getMore.toBin());
 }
 
 LegacySupport.prototype.command = function(bson, ns, cmd, cursorState, topology, options) {
