@@ -117,51 +117,7 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
   } else if(cmd instanceof Long) {
     this.cursorState.cursorId = cmd;
   }
-
-  // // Allow the manipulation of the batch size of the cursor
-  // // after creation has happened
-  // Object.defineProperty(this, 'cursorBatchSize', {
-  //     enumerable:true,
-  //     set: function(value) { this.cursorState.batchSize = value; }
-  //   , get: function() { return this.cursorState.batchSize; }
-  // });
-
-  // // Allow the manipulation of the cursor limit
-  // Object.defineProperty(this, 'cursorLimit', {
-  //     enumerable:true,
-  //     set: function(value) { this.cursorState.limit = value; }
-  //   , get: function() { return this.cursorState.limit; }
-  // });
-
-  // // Allow the manipulation of the cursor skip
-  // Object.defineProperty(this, 'cursorSkip', {
-  //     enumerable:true,
-  //     set: function(value) { this.cursorState.skip = value; }
-  //   , get: function() { return this.cursorState.skip; }
-  // });
 }
-
-// // Allow the manipulation of the batch size of the cursor
-// // after creation has happened
-// Object.defineProperty(Cursor.prototype, 'cursorBatchSize', {
-//     enumerable:true,
-//     set: function(value) { this.cursorState.batchSize = value; }
-//   , get: function() { return this.cursorState.batchSize; }
-// });
-
-// // Allow the manipulation of the cursor limit
-// Object.defineProperty(Cursor.prototype, 'cursorLimit', {
-//     enumerable:true,
-//     set: function(value) { this.cursorState.limit = value; }
-//   , get: function() { return this.cursorState.limit; }
-// });
-
-// // Allow the manipulation of the cursor skip
-// Object.defineProperty(Cursor.prototype, 'cursorSkip', {
-//     enumerable:true,
-//     set: function(value) { this.cursorState.skip = value; }
-//   , get: function() { return this.cursorState.skip; }
-// });
 
 Cursor.prototype.setCursorBatchSize = function(value) {  
   this.cursorState.batchSize = value;
