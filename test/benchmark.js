@@ -14,7 +14,9 @@ var read_all_tests = require('./util').read_all_tests
 var tests = read_all_tests(__dirname + "/benchmarks");
 // Number of times to run the test
 var run_number_of_times = 10000;
+// var run_number_of_times = 1;
 // Number of iterations to run for JIT warmup
+// var warm_up_iterations = 0;
 var warm_up_iterations = 1000;
 // Run serially or all of them at the same time
 var concurrent = false;
