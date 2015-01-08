@@ -1,3 +1,8 @@
+2.0.13 2015-01-09
+-----------------
+- Bumped mongodb-core to 1.1.8.
+- Optimized query path for performance, moving Object.defineProperty outside of constructors.
+
 2.0.12 2014-12-22
 -----------------
 - Minor fixes to listCollections to ensure correct querying of a collection when using a string.
