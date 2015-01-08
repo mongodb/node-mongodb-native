@@ -62,19 +62,6 @@ var Query = function(bson, ns, query, options) {
   this.serializeFunctions = typeof options.serializeFunctions == 'boolean' ? options.serializeFunctions : false;
   this.maxBsonSize = options.maxBsonSize || 1024 * 1024 * 16;
   this.checkKeys = typeof options.checkKeys == 'boolean' ? options.checkKeys : true;
-
-  // console.log("================================================== CREATE")
-  // console.dir(this.batchSize)
-  // console.dir(this.numberToReturn)
-
-  // Allow the manipulation of the batch size of the cursor
-  // after creation has happened
-  // Object.defineProperty(this, 'batchSize', {
-  //     enumerable:true,
-  //     set: function(value) { self.numberToReturn = value; }
-  //   , get: function() { return self.numberToReturn; }
-  // });
-
   this.batchSize = self.numberToReturn;
 
   // Flags
@@ -122,9 +109,6 @@ Query.prototype.toBin = function() {
   if(this.exhaust) flags |= OPTS_EXHAUST;
   if(this.partial) flags |= OPTS_PARTIAL;
 
-  // console.log("================================================== EXECUTE")
-  // console.dir(self.batchSize)
-  // console.dir(self.numberToReturn)
   // If batchSize is different to self.numberToReturn
   if(self.batchSize != self.numberToReturn) self.numberToReturn = self.batchSize;
 
