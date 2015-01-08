@@ -1,3 +1,9 @@
+1.1.8 09-12-2015
+----------------
+- Stripped out Object.defineProperty for performance reasons
+- Applied more performance optimizations.
+- properties cursorBatchSize, cursorSkip, cursorLimit are not methods setCursorBatchSize/cursorBatchSize, setCursorSkip/cursorSkip, setCursorLimit/cursorLimit
+
 1.1.7 18-12-2014
 ----------------
 - Use ns variable for getMore commands for command cursors to work properly with cursor version of listCollections and listIndexes.
