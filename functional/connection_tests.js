@@ -94,7 +94,7 @@ exports['Should correctly execute ismaster on single server'] = {
       });
 
       // Write it out to the connection
-      _connection.write(query);
+      _connection.write(query.toBin());
     });
 
     connection.on('close', function(err) {
