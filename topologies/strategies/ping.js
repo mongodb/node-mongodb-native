@@ -8,8 +8,8 @@ var Logger = require('../../connection/logger')
 /**
  * Creates a new Ping read preference strategy instance
  * @class
- * @param {object} [options.pingInterval=5000] Ping interval to check the response time to the different servers
- * @param {object} [options.acceptableLatency=250] Acceptable latency for selecting a server for reading (in milliseconds)
+ * @param {number} [options.pingInterval=5000] Ping interval to check the response time to the different servers
+ * @param {number} [options.acceptableLatency=250] Acceptable latency for selecting a server for reading (in milliseconds)
  * @return {Ping} A cursor instance
  */
 var Ping = function(options) {
