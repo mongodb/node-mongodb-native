@@ -189,8 +189,9 @@ Let's look at the individual options for each of the top level fields.
 *  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write
 *  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)
 *  `fsync`, (Boolean, default:false) write waits for fsync before returning
-*  `journal`, (Boolean, default:false) write waits for journal sync before returning
+*  `j`, (Boolean, default:false) write waits for journal sync before returning
 *  `readPreference` {String}, the preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+*  `readPreferenceTags` {Object, default:null}, the tags object {'loc':'ny'} used with the readPreference.
 *  `native_parser` {Boolean, default:false}, use c++ bson parser.
 *  `forceServerObjectId` {Boolean, default:false}, force server to create _id fields instead of client.
 *  `pkFactory` {Object}, object overriding the basic ObjectID primary key generation.
@@ -209,7 +210,7 @@ Let's look at the individual options for each of the top level fields.
 * `sslCert`, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).
 * `sslKey`, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).
 * `sslPass`, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).
-* `socketOptions.autoReconnect`, {Boolean, default: true} Reconnect on error.
+* `autoReconnect`, {Boolean, default: true} Reconnect on error.
 * `socketOptions.noDelay`, {Boolean, default: true} TCP Socket NoDelay option.
 * `socketOptions.keepAlive`, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start. 
 * `socketOptions.connectTimeoutMS`, {Number, default: 0} TCP Connection timeout setting.
@@ -229,7 +230,6 @@ Let's look at the individual options for each of the top level fields.
 * `sslCert`, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).
 * `sslKey`, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).
 * `sslPass`, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).
-* `socketOptions.autoReconnect`, {Boolean, default: true} Reconnect on error.
 * `socketOptions.noDelay`, {Boolean, default: true} TCP Socket NoDelay option.
 * `socketOptions.keepAlive`, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start. 
 * `socketOptions.connectTimeoutMS`, {Number, default: 0} TCP Connection timeout setting.
@@ -239,7 +239,6 @@ Let's look at the individual options for each of the top level fields.
 
 *  `ha` {Boolean, default:true}, turn on high availability.
 *  `haInterval` {Number, default:5000}, time between each replicaset status check.
-*  `replicaSet` {String}, the name of the replicaset to connect to.
 *  `secondaryAcceptableLatencyMS` {Number, default:15}, sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)
 * `poolSize`, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.
 * `ssl`, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.
@@ -248,7 +247,6 @@ Let's look at the individual options for each of the top level fields.
 * `sslCert`, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).
 * `sslKey`, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).
 * `sslPass`, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).
-* `socketOptions.autoReconnect`, {Boolean, default: true} Reconnect on error.
 * `socketOptions.noDelay`, {Boolean, default: true} TCP Socket NoDelay option.
 * `socketOptions.keepAlive`, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start. 
 * `socketOptions.connectTimeoutMS`, {Number, default: 0} TCP Connection timeout setting.

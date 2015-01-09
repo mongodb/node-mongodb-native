@@ -36,3 +36,177 @@ exports['Should Correctly Do MongoClient with bufferMaxEntries:0'] = {
   }
 }
 
+exports['Should correctly pass through extra db options'] = {
+  metadata: {
+    requires: {
+      node: ">0.8.0",
+      topology: ['single']
+    }
+  },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    MongoClient.connect(configuration.url(), {
+      db: {
+          w: 1
+        , wtimeout: 1000
+        , fsync: true
+        , j:true
+        , readPreference:'nearest'
+        , readPreferenceTags: {'loc': 'ny'}
+        , native_parser: false
+        , forceServerObjectId: true
+        , pkFactory: function() { return 1 }
+        , serializeFunctions: true
+        , raw: true
+        , retryMiliSeconds: 1000
+        , numberOfRetries: 10
+        , bufferMaxEntries: 0
+      },
+    }, function(err, db) {
+      test.equal(1, db.writeConcern.w);
+      test.equal(1000, db.writeConcern.wtimeout);
+      test.equal(true, db.writeConcern.fsync);
+      test.equal(true, db.writeConcern.j);
+
+      test.equal('nearest', db.s.readPreference.mode);
+      test.deepEqual({'loc': 'ny'}, db.s.readPreference.tags);
+
+      test.equal(false, db.s.nativeParser);
+      test.equal(true, db.s.options.forceServerObjectId);
+      test.equal(1, db.s.pkFactory());
+      test.equal(true, db.s.options.serializeFunctions);
+      test.equal(true, db.s.options.raw);
+      test.equal(1000, db.s.options.retryMiliSeconds);
+      test.equal(10, db.s.options.numberOfRetries);
+      test.equal(0, db.s.options.bufferMaxEntries);
+
+      db.close();
+      test.done();
+    });
+  }
+}
+
+exports['Should correctly pass through extra server options'] = {
+  metadata: {
+    requires: {
+      node: ">0.8.0",
+      topology: ['single']
+    }
+  },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    MongoClient.connect(configuration.url(), {
+      server: {
+          poolSize: 10
+        , autoReconnect:false
+        , socketOptions: {
+            noDelay: false
+          , keepAlive: 100
+          , connectTimeoutMS: 444444
+          , socketTimeoutMS: 555555
+        }
+      },
+    }, function(err, db) {
+      test.equal(10, db.s.topology.s.poolSize);
+      test.equal(false, db.s.topology.autoReconnect);
+      test.equal(444444, db.s.topology.s.clonedOptions.connectionTimeout);
+      test.equal(555555, db.s.topology.s.clonedOptions.socketTimeout);
+      test.equal(true, db.s.topology.s.clonedOptions.keepAlive);
+      test.equal(100, db.s.topology.s.clonedOptions.keepAliveInitialDelay);
+
+      db.close();
+      test.done();
+    });
+  }
+}
+
+exports['Should correctly pass through extra replicaset options'] = {
+  metadata: {
+    requires: {
+      node: ">0.8.0",
+      topology: ['replicaset']
+    }
+  },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var url = configuration.url().replace('rs_name=rs', 'rs_name=rs1')
+    MongoClient.connect(url, {
+      replSet: {
+          ha:false
+        , haInterval: 10000
+        , replicaSet: 'rs'
+        , secondaryAcceptableLatencyMS: 100
+        , connectWithNoPrimary: true
+        , poolSize: 1
+        , socketOptions: {
+            noDelay: false
+          , keepAlive: 100
+          , connectTimeoutMS: 444444
+          , socketTimeoutMS: 555555
+        }
+      }
+    }, function(err, db) {
+      test.equal(false, db.s.topology.s.clonedOptions.ha);
+      test.equal(10000, db.s.topology.s.clonedOptions.haInterval);
+      test.equal('rs', db.s.topology.s.clonedOptions.replicaSet);
+      test.equal(100, db.s.topology.s.clonedOptions.acceptableLatency);
+      test.equal(true, db.s.topology.s.clonedOptions.secondaryOnlyConnectionAllowed);
+      test.equal(1, db.s.topology.s.clonedOptions.poolSize);
+
+      test.equal(444444, db.s.topology.s.clonedOptions.connectionTimeout);
+      test.equal(555555, db.s.topology.s.clonedOptions.socketTimeout);
+      test.equal(true, db.s.topology.s.clonedOptions.keepAlive);
+      test.equal(100, db.s.topology.s.clonedOptions.keepAliveInitialDelay);
+
+      db.close();
+      test.done();
+    });
+  }
+}
+
+exports['Should correctly pass through extra sharded options'] = {
+  metadata: {
+    requires: {
+      node: ">0.8.0",
+      topology: ['sharded']
+    }
+  },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    MongoClient.connect(configuration.url(), {
+      mongos: {
+          ha:false
+        , haInterval: 10000
+        , secondaryAcceptableLatencyMS: 100
+        , poolSize: 1
+        , socketOptions: {
+            noDelay: false
+          , keepAlive: 100
+          , connectTimeoutMS: 444444
+          , socketTimeoutMS: 555555
+        }
+      }
+    }, function(err, db) {
+      test.equal(false, db.s.topology.s.clonedOptions.ha);
+      test.equal(10000, db.s.topology.s.clonedOptions.haInterval);
+      test.equal(100, db.s.topology.s.clonedOptions.acceptableLatency);
+      test.equal(1, db.s.topology.s.clonedOptions.poolSize);
+
+      test.equal(444444, db.s.topology.s.clonedOptions.connectionTimeout);
+      test.equal(555555, db.s.topology.s.clonedOptions.socketTimeout);
+      test.equal(true, db.s.topology.s.clonedOptions.keepAlive);
+      test.equal(100, db.s.topology.s.clonedOptions.keepAliveInitialDelay);
+
+      db.close();
+      test.done();
+    });
+  }
+}

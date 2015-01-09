@@ -1,3 +1,7 @@
+2.0.14
+-----------------
+- Fixed some MongoClient.connect options pass through issues and added test coverage.
+
 2.0.13 2015-01-09
 -----------------
 - Bumped mongodb-core to 1.1.8.
