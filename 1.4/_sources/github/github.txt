@@ -111,7 +111,7 @@ Object Document Modeling Libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 22:5:25 on 12/0/2015
+           - 22:45:13 on 13/0/2015
          * - **Homepage**
            - http://http://mongoosejs.com
          * - **Url**
@@ -220,6 +220,29 @@ Content Management Systems
 
 Grid FS libraries or tools
 --------------------------
+
+.. topic:: nettle
+
+    On-the-fly processing framework for Node.js and MongoDB
+
+      .. list-table::
+         :widths: 25 85
+         :header-rows: 0
+
+         * - **Activity Level**
+           - .. image:: ../static/nonactive.png
+         * - **Last push**
+           - 20:36:16 on 11/6/2012
+         * - **Homepage**
+           - http://
+         * - **Url**
+           - https://github.com/scttnlsn/nettle
+         * - **Clone Url**
+           - https://github.com/scttnlsn/nettle.git
+         * - **Forks**
+           - 0
+         * - **Watchers**
+           - 9
 
 Wrapper libraries to ease the use of development or provide simple ODM like behaviours
 --------------------------------------------------------------------------------------

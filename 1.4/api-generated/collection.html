@@ -1220,7 +1220,7 @@ The second findAndModify command upserts a document and returns the new document
 <li><strong>hint</strong> {Object}, tell the query to use specific indexes in the query. Object of indexes to use, {&#8216;_id&#8217;:1}</li>
 <li><strong>explain</strong> {Boolean, default:false}, explain the query instead of returning the data.</li>
 <li><strong>snapshot</strong> {Boolean, default:false}, snapshot query.</li>
-<li><strong>timeout</strong> {Boolean, default:false}, specify if the cursor can timeout.</li>
+<li><strong>timeout</strong> {Boolean, default:true}, specify if the cursor can timeout.</li>
 <li><strong>tailable</strong> {Boolean, default:false}, specify if the cursor is tailable.</li>
 <li><strong>tailableRetryInterval</strong> {Number, default:100}, specify the miliseconds between getMores on tailable cursor.</li>
 <li><strong>numberOfRetries</strong> {Number, default:5}, specify the number of times to retry the tailable cursor.</li>

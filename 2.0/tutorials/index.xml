@@ -73,7 +73,7 @@ MongoClient.connect(url, function(err, db) {
 &lt;li&gt;&lt;code&gt;mongodb://&lt;/code&gt; is the protocol definition&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;localhost:27017,localhost:27018&lt;/code&gt; is the servers we are connecting to to discover the topology of the ReplicaSet.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;/myproject&lt;/code&gt; is the database we wish to connect to&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;replicaSet=foo&lt;/code&gt; is the name of the ReplicaSet we are connecting to. This ensures we are connecting to the correct Replicaset.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;replicaSet=foo&lt;/code&gt; is the name of the ReplicaSet we are connecting to. This ensures we are connecting to the correct Replicaset. &lt;strong&gt;This is a required parameter when using the 2.0 driver&lt;/strong&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h2 id=&#34;toc_3&#34;&gt;Mongos Proxy Connection&lt;/h2&gt;
@@ -169,7 +169,7 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;db&lt;/code&gt;, Options that affect the Db instance returned by the MongoClient.connect method.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;replSet&lt;/code&gt;, Options that modify the Replicaset topology connection behavior.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;replSet&lt;/code&gt;, Options that modify the Replicaset topology connection behavior. &lt;strong&gt;This is a required parameter when using the 2.0 driver&lt;/strong&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;mongos&lt;/code&gt;, Options that modify the Mongos topology connection behavior.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;server&lt;/code&gt;, Options that modify the Server topology connection behavior.&lt;/li&gt;
 &lt;/ul&gt;
@@ -240,7 +240,7 @@ MongoClient.connect(url, {
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;ha&lt;/code&gt; {Boolean, default:true}, turn on high availability.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;haInterval&lt;/code&gt; {Number, default:5000}, time between each replicaset status check.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;replicaSet&lt;/code&gt; {String}, the name of the replicaset to connect to.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;replicaSet&lt;/code&gt; {String}, the name of the replicaset to connect to. &lt;strong&gt;This is a required parameter when using the 2.0 driver&lt;/strong&gt;&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;secondaryAcceptableLatencyMS&lt;/code&gt; {Number, default:15}, sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;connectWithNoPrimary&lt;/code&gt; {Boolean, default:false}, Sets if the driver should connect even if no primary is available.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;poolSize&lt;/code&gt;, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
@@ -515,6 +515,7 @@ MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, function(err, db) 
 &lt;ul&gt;
 &lt;li&gt;The driver verifies that the name of the replica set it connects to matches this name. Implies that the hosts given are a seed list, and the driver will attempt to find all members of the set.&lt;/li&gt;
 &lt;li&gt;No default value.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;This is a required parameter when using the 2.0 driver&lt;/strong&gt;&lt;/li&gt;
 &lt;/ul&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
@@ -1479,7 +1480,7 @@ MongoClient.connect(url, function(err, db) {
 &lt;p&gt;Streaming a GridStore file to disk is fairly simple. The example below reads in a pdf file and saves it in GridFS. It then creates a GridStore instance pointing to the newly saved pdf file and passes the stream to a file write stream using pipe.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
-  , GridStore = require(&#39;mongoddb&#39;).GridStore
+  , GridStore = require(&#39;mongodb&#39;).GridStore
   , fs = require(&#39;fs&#39;)
   , assert = require(&#39;assert&#39;);
 
@@ -1520,7 +1521,7 @@ MongoClient.connect(url, function(err, db) {
 &lt;p&gt;In the case of writing a file to GridFS using streams we do the reverse piping the file read stream into a our gridstore instance.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
-  , GridStore = require(&#39;mongoddb&#39;).GridStore
+  , GridStore = require(&#39;mongodb&#39;).GridStore
   , ObjectID = require(&#39;mongoddb&#39;).ObjectID
   , fs = require(&#39;fs&#39;)
   , assert = require(&#39;assert&#39;);

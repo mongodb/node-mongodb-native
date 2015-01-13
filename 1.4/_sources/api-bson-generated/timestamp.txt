@@ -7,15 +7,20 @@ Constructor
 ------------------
 
 
-Defines a Timestamp class for representing a 64-bit two's-complement
-integer value, which faithfully simulates the behavior of a Java "Timestamp". This
-implementation is derived from TimestampLib in GWT.
+This type is for INTERNAL use in MongoDB only and should not be used in applications.
+The appropriate corresponding type is the JavaScript Date type.
 
 
   .. js:class:: Timestamp()
 
    :param number low: the low (signed) 32 bits of the Timestamp.
    :param number high: the high (signed) 32 bits of the Timestamp.
+
+
+Defines a Timestamp class for representing a 64-bit two's-complement
+integer value, which faithfully simulates the behavior of a Java "Timestamp". This
+implementation is derived from TimestampLib in GWT.
+
 
 
 Constructs a 64-bit two's-complement integer, given its low and high 32-bit

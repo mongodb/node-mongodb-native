@@ -82,7 +82,7 @@ MongoClient.connect(&quot;mongodb://localhost:27017/test&quot;, function(err, db
     var cursor = db.collection(&#39;data&#39;).aggregate([
             {$match: {}}
         ], {
-        allowDiskUsage: true
+        allowDiskUse: true
       , cursor: {batchSize: 1000}
         });
 

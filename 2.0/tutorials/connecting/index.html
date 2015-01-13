@@ -331,7 +331,7 @@ MongoClient.connect(url, function(err, db) {
 <li><code>mongodb://</code> is the protocol definition</li>
 <li><code>localhost:27017,localhost:27018</code> is the servers we are connecting to to discover the topology of the ReplicaSet.</li>
 <li><code>/myproject</code> is the database we wish to connect to</li>
-<li><code>replicaSet=foo</code> is the name of the ReplicaSet we are connecting to. This ensures we are connecting to the correct Replicaset.</li>
+<li><code>replicaSet=foo</code> is the name of the ReplicaSet we are connecting to. This ensures we are connecting to the correct Replicaset. <strong>This is a required parameter when using the 2.0 driver</strong></li>
 </ul>
 
 <h2 id="toc_3">Mongos Proxy Connection</h2>
@@ -427,7 +427,7 @@ MongoClient.connect(url, function(err, db) {
 
 <ul>
 <li><code>db</code>, Options that affect the Db instance returned by the MongoClient.connect method.</li>
-<li><code>replSet</code>, Options that modify the Replicaset topology connection behavior.</li>
+<li><code>replSet</code>, Options that modify the Replicaset topology connection behavior. <strong>This is a required parameter when using the 2.0 driver</strong></li>
 <li><code>mongos</code>, Options that modify the Mongos topology connection behavior.</li>
 <li><code>server</code>, Options that modify the Server topology connection behavior.</li>
 </ul>
@@ -498,7 +498,7 @@ MongoClient.connect(url, {
 <ul>
 <li><code>ha</code> {Boolean, default:true}, turn on high availability.</li>
 <li><code>haInterval</code> {Number, default:5000}, time between each replicaset status check.</li>
-<li><code>replicaSet</code> {String}, the name of the replicaset to connect to.</li>
+<li><code>replicaSet</code> {String}, the name of the replicaset to connect to. <strong>This is a required parameter when using the 2.0 driver</strong></li>
 <li><code>secondaryAcceptableLatencyMS</code> {Number, default:15}, sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)</li>
 <li><code>connectWithNoPrimary</code> {Boolean, default:false}, Sets if the driver should connect even if no primary is available.</li>
 <li><code>poolSize</code>, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.</li>

@@ -456,7 +456,7 @@ MongoClient.connect(url, function(err, db) {
 <p>Streaming a GridStore file to disk is fairly simple. The example below reads in a pdf file and saves it in GridFS. It then creates a GridStore instance pointing to the newly saved pdf file and passes the stream to a file write stream using pipe.</p>
 
 <pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
-  , GridStore = require('mongoddb').GridStore
+  , GridStore = require('mongodb').GridStore
   , fs = require('fs')
   , assert = require('assert');
 
@@ -497,7 +497,7 @@ MongoClient.connect(url, function(err, db) {
 <p>In the case of writing a file to GridFS using streams we do the reverse piping the file read stream into a our gridstore instance.</p>
 
 <pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
-  , GridStore = require('mongoddb').GridStore
+  , GridStore = require('mongodb').GridStore
   , ObjectID = require('mongoddb').ObjectID
   , fs = require('fs')
   , assert = require('assert');

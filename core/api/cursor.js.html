@@ -395,33 +395,105 @@ Cursor.prototype.rewind = function() {
 }
 
 /**
- * Retrieve the next document from the cursor
- * @method
- * @param {resultCallback} callback A callback function
+ * Validate if the connection is dead and return error
  */
-Cursor.prototype.next = function(callback) {
-  var self = this;
-  if(self.cursorState.notified) return;
-  // Cursor is killed return null
-  if(self.cursorState.killed) {
+var isConnectionDead = function(self, callback) {
+  if(self.connection 
+    &amp;&amp; !self.connection.isConnected()) {
     self.cursorState.notified = true;
+    self.cursorState.killed = true;
     self.cursorState.documents = [];
     self.cursorState.cursorIndex = 0;
-    return handleCallback(callback, null, null);
+    callback(MongoError.create(f('connection to host %s:%s was destroyed', self.connection.host, self.connection.port)))
+    return true;
   }
+
+  return false;
+}
+
+/**
+ * Validate if the cursor is dead but was not explicitly killed by user
+ */
+var isCursorDeadButNotkilled = function(self, callback) {
   // Cursor is dead but not marked killed, return null
   if(self.cursorState.dead &amp;&amp; !self.cursorState.killed) {
     self.cursorState.notified = true;
     self.cursorState.killed = true;
     self.cursorState.documents = [];
     self.cursorState.cursorIndex = 0;
-    return handleCallback(callback, null, null);
+    handleCallback(callback, null, null);
+    return true;
   }    
 
-  // We have a dead and killed cursor, attempting to call next should error
+  return false;
+}
+
+/**
+ * Validate if the cursor is dead and was killed by user
+ */
+var isCursorDeadAndKilled = function(self, callback) {
   if(self.cursorState.dead &amp;&amp; self.cursorState.killed) {
-    return handleCallback(callback, MongoError.create("cursor is dead"));    
+    handleCallback(callback, MongoError.create("cursor is dead"));
+    return true;
+  }  
+
+  return false;
+}
+
+/**
+ * Validate if the cursor was killed by the user
+ */
+var isCursorKilled = function(self, callback) {
+  if(self.cursorState.killed) {
+    self.cursorState.notified = true;
+    self.cursorState.documents = [];
+    self.cursorState.cursorIndex = 0;
+    handleCallback(callback, null, null);
+    return true;
   }
+
+  return false;
+}
+
+/**
+ * Mark cursor as being dead and notified
+ */
+var setCursorDeadAndNotified = function(self, callback) {
+  self.cursorState.dead = true;
+  self.cursorState.notified = true;
+  self.cursorState.documents = [];
+  self.cursorState.cursorIndex = 0;
+  handleCallback(callback, null, null);  
+}
+
+/**
+ * Mark cursor as being notified
+ */
+var setCursorNotified = function(self, callback) {
+  self.cursorState.notified = true;
+  self.cursorState.documents = [];
+  self.cursorState.cursorIndex = 0;
+  handleCallback(callback, null, null);
+}
+
+/**
+ * Retrieve the next document from the cursor
+ * @method
+ * @param {resultCallback} callback A callback function
+ */
+Cursor.prototype.next = function(callback) {
+  var self = this;
+  // We have notified about it
+  if(self.cursorState.notified) return;
+
+  // Cursor is killed return null
+  if(isCursorKilled(self, callback)) return;  
+
+  // Cursor is dead but not marked killed, return null
+  if(isCursorDeadButNotkilled(self, callback)) return;
+
+  // We have a dead and killed cursor, attempting to call next should error
+  if(isCursorDeadAndKilled(self, callback)) return;
   
   // We have just started the cursor
   if(!self.cursorState.init) {
@@ -486,10 +558,7 @@ Cursor.prototype.next = function(callback) {
     return handleCallback(callback, null, self.cursorState.documents[self.cursorState.cursorIndex++]);
   } else if(self.options.exhaust &amp;&amp; Long.ZERO.equals(self.cursorState.cursorId)) {
     self.callbacks.unregister(self.query.requestId);
-    self.cursorState.notified = true;
-    self.cursorState.documents = [];
-    self.cursorState.cursorIndex = 0;
-    return handleCallback(callback, null, null);
+    return setCursorNotified(self, callback);
   } else if(self.options.exhaust) {
     return setTimeout(function() {
       if(Long.ZERO.equals(self.cursorState.cursorId)) return;
@@ -499,34 +568,36 @@ Cursor.prototype.next = function(callback) {
 
   // If we don't have a cursorId execute the first query
   if(self.cursorState.cursorId == null) {
+    // Check if connection is dead and return if not possible to
+    // execute the query against the db
+    if(isConnectionDead(self, callback)) return;
+    
     // query, cmd, options, cursorState, callback
     execInitialQuery(self, self.query, self.cmd, self.options, self.cursorState, self.connection, self.logger, self.callbacks, function(err, r) {
       if(err) return handleCallback(callback, err, null);
       if(self.cursorState.documents.length == 0) {
-        self.cursorState.notified = true;
-        self.cursorState.documents = [];
-        self.cursorState.cursorIndex = 0;
-        return handleCallback(callback, null, null);
+        return setCursorNotified(self, callback);
       }
 
       self.next(callback);
     });
   } else if(self.cursorState.limit > 0 &amp;&amp; self.cursorState.currentLimit >= self.cursorState.limit) {
-      self.cursorState.dead = true;
-      self.cursorState.notified = true;
-      self.cursorState.documents = [];
-      self.cursorState.cursorIndex = 0;
-      return handleCallback(callback, null, null);
+      return setCursorDeadAndNotified(self, callback);
   } else if(self.cursorState.cursorIndex == self.cursorState.documents.length
       &amp;&amp; !Long.ZERO.equals(self.cursorState.cursorId)) {
       // Ensure an empty cursor state
       self.cursorState.documents = [];
       self.cursorState.cursorIndex = 0;
 
+      // Check if connection is dead and return if not possible to
+      // execute a getmore on this connection
+      if(isConnectionDead(self, callback)) return;
+
       // Execute the next get more
       execGetMore(self, function(err, doc) {
         if(err) return handleCallback(callback, err);
         if(self.cursorState.documents.length == 0 &amp;&amp; Long.ZERO.equals(self.cursorState.cursorId)) self.cursorState.dead = true;
+        
         // Tailable cursor getMore result, notify owner about it
         // No attempt is made here to retry, this is left to the user of the
         // core module to handle to keep core simple
@@ -539,11 +610,7 @@ Cursor.prototype.next = function(callback) {
         }
 
         if(self.cursorState.limit > 0 &amp;&amp; self.cursorState.currentLimit >= self.cursorState.limit) {
-          self.cursorState.dead = true;
-          self.cursorState.documents = [];
-          self.cursorState.notified = true;
-          self.cursorState.cursorIndex = 0;
-          return handleCallback(callback, null, null);
+          return setCursorDeadAndNotified(self, callback);
         }
 
         self.next(callback);
@@ -557,18 +624,10 @@ Cursor.prototype.next = function(callback) {
       }));
   } else if(self.cursorState.documents.length == self.cursorState.cursorIndex 
       &amp;&amp; Long.ZERO.equals(self.cursorState.cursorId)) {
-      self.cursorState.dead = true;
-      self.cursorState.notified = true;
-      self.cursorState.documents = [];
-      self.cursorState.cursorIndex = 0;
-      handleCallback(callback, null, null);
+      setCursorDeadAndNotified(self, callback);
   } else {
     if(self.cursorState.limit > 0 &amp;&amp; self.cursorState.currentLimit >= self.cursorState.limit) {
-      self.cursorState.dead = true;
-      self.cursorState.notified = true;
-      self.cursorState.documents = [];
-      self.cursorState.cursorIndex = 0;
-      return handleCallback(callback, null, null);
+      return setCursorDeadAndNotified(self, callback);
     }
 
     self.cursorState.currentLimit += 1;
@@ -605,7 +664,7 @@ module.exports = Cursor;</code></pre>
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Tue Jan 13 2015 22:12:01 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha9</a> on Wed Jan 14 2015 00:07:54 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

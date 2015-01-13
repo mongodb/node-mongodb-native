@@ -42,7 +42,7 @@ look at a simple use of the aggregation cursor.
             var cursor = db.collection('data').aggregate([
                     {$match: {}}
                 ], {
-                allowDiskUsage: true
+                allowDiskUse: true
               , cursor: {batchSize: 1000}       
                 });
 
