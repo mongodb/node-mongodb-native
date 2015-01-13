@@ -2432,3 +2432,43 @@ exports['Should correctly handle maxTimeMS as part of findOne options'] = {
     });
   }
 }
+
+/**
+ * @ignore
+ */
+exports['Should correctly handle batchSize of 2'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    // Establish connection to db
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      db.collection('should_correctly_handle_batchSize_2').insert([{ x: 1 }, { x: 2 }, { x: 3 }], function(error) {
+        test.equal(null, err);
+   
+        db.collection('should_correctly_handle_batchSize_2').find({}, {batchSize: 2}, function(error, cursor) {
+          test.equal(null, err);
+   
+          cursor.nextObject(function(err, obj) {
+            test.equal(null, err);
+            db.close();
+
+            cursor.nextObject(function(err, obj) {
+              test.equal(null, err);
+    
+              cursor.nextObject(function(err, obj) {
+                test.ok(err != null);   
+                test.done();             
+              });
+            });
+          });
+        });
+      });
+    });
+  }
+}
