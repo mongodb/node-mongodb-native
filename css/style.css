@@ -91,7 +91,7 @@ h1, h2, h3 {
 }
 
 pre code {
-    font-size: 18px !important;
+    font-size: 14px !important;
     font-family: 'Courier New', monospace;
 }
 
@@ -101,7 +101,7 @@ body {
     font-family: 'Lato', sans-serif;
     padding: 0px !important;
     margin: 0px !important;
-    font-size:16px !important;    
+    font-size:14px !important;    
     font-weight: 300;
 }
 
@@ -303,6 +303,13 @@ ul.sidebar-menu li.active a i {
     font-size: 19px;
 }
 
+#main-content img {
+    width: 400px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto 
+}
+
 .header {
     min-height: 60px;
     padding: 0 10px;
@@ -315,9 +322,8 @@ ul.sidebar-menu li.active a i {
     text-align:center;
 }
 
-
 .black-bg {
-    background: #402817;
+    background: black;
     border-bottom: 1px solid #f1f2f7;
 }
 
@@ -452,4 +458,10 @@ h1.top-menu {
 
 .section-start {
     padding-left: 0px    
+}
+
+#main-content > section > div > div.col-md-10 > section > div > p:nth-child(3) > a > img {
+    width: 150px;
+    box-shadow: 10px 10px 5px #888888;
+    border: 1px solid black;
 }

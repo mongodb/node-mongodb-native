@@ -463,8 +463,9 @@ MongoClient.connect(url, {
 <li><code>w</code>, {Number/String, &gt; -1 || &lsquo;majority&rsquo;} the write concern for the operation where &lt; 1 is no acknowledgment of write and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write</li>
 <li><code>wtimeout</code>, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)</li>
 <li><code>fsync</code>, (Boolean, default:false) write waits for fsync before returning</li>
-<li><code>journal</code>, (Boolean, default:false) write waits for journal sync before returning</li>
+<li><code>j</code>, (Boolean, default:false) write waits for journal sync before returning</li>
 <li><code>readPreference</code> {String}, the preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</li>
+<li><code>readPreferenceTags</code> {Object, default:null}, the tags object {&lsquo;loc&rsquo;:&lsquo;ny&rsquo;} used with the readPreference.</li>
 <li><code>native_parser</code> {Boolean, default:false}, use c++ bson parser.</li>
 <li><code>forceServerObjectId</code> {Boolean, default:false}, force server to create _id fields instead of client.</li>
 <li><code>pkFactory</code> {Object}, object overriding the basic ObjectID primary key generation.</li>
@@ -485,7 +486,7 @@ MongoClient.connect(url, {
 <li><code>sslCert</code>, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).</li>
 <li><code>sslKey</code>, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).</li>
 <li><code>sslPass</code>, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).</li>
-<li><code>socketOptions.autoReconnect</code>, {Boolean, default: true} Reconnect on error.</li>
+<li><code>autoReconnect</code>, {Boolean, default: true} Reconnect on error.</li>
 <li><code>socketOptions.noDelay</code>, {Boolean, default: true} TCP Socket NoDelay option.</li>
 <li><code>socketOptions.keepAlive</code>, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start.</li>
 <li><code>socketOptions.connectTimeoutMS</code>, {Number, default: 0} TCP Connection timeout setting.</li>
@@ -507,7 +508,6 @@ MongoClient.connect(url, {
 <li><code>sslCert</code>, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).</li>
 <li><code>sslKey</code>, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).</li>
 <li><code>sslPass</code>, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).</li>
-<li><code>socketOptions.autoReconnect</code>, {Boolean, default: true} Reconnect on error.</li>
 <li><code>socketOptions.noDelay</code>, {Boolean, default: true} TCP Socket NoDelay option.</li>
 <li><code>socketOptions.keepAlive</code>, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start.</li>
 <li><code>socketOptions.connectTimeoutMS</code>, {Number, default: 0} TCP Connection timeout setting.</li>
@@ -519,7 +519,6 @@ MongoClient.connect(url, {
 <ul>
 <li><code>ha</code> {Boolean, default:true}, turn on high availability.</li>
 <li><code>haInterval</code> {Number, default:5000}, time between each replicaset status check.</li>
-<li><code>replicaSet</code> {String}, the name of the replicaset to connect to.</li>
 <li><code>secondaryAcceptableLatencyMS</code> {Number, default:15}, sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)</li>
 <li><code>poolSize</code>, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.</li>
 <li><code>ssl</code>, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.</li>
@@ -528,7 +527,6 @@ MongoClient.connect(url, {
 <li><code>sslCert</code>, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).</li>
 <li><code>sslKey</code>, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).</li>
 <li><code>sslPass</code>, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).</li>
-<li><code>socketOptions.autoReconnect</code>, {Boolean, default: true} Reconnect on error.</li>
 <li><code>socketOptions.noDelay</code>, {Boolean, default: true} TCP Socket NoDelay option.</li>
 <li><code>socketOptions.keepAlive</code>, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start.</li>
 <li><code>socketOptions.connectTimeoutMS</code>, {Number, default: 0} TCP Connection timeout setting.</li>
