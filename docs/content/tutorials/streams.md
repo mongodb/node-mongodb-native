@@ -188,7 +188,7 @@ Streaming a GridStore file to disk is fairly simple. The example below reads in 
 
 ```js
 var MongoClient = require('mongodb').MongoClient
-  , GridStore = require('mongoddb').GridStore
+  , GridStore = require('mongodb').GridStore
   , fs = require('fs')
   , assert = require('assert');
 
@@ -229,7 +229,7 @@ In the case of writing a file to GridFS using streams we do the reverse piping t
 
 ```js
 var MongoClient = require('mongodb').MongoClient
-  , GridStore = require('mongoddb').GridStore
+  , GridStore = require('mongodb').GridStore
   , ObjectID = require('mongoddb').ObjectID
   , fs = require('fs')
   , assert = require('assert');
