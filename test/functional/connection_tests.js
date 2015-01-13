@@ -249,6 +249,8 @@ exports.testConnectBadUrl = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
+    var connect = configuration.require;
+
     test.throws(function() {
       connect('mangodb://localhost:27017/test?safe=false', function(err, db) {
         test.ok(false, 'Bad URL!');
@@ -355,3 +357,4 @@ exports['Should correctly reconnect and finish query operation'] = {
     });
   }
 }
+
