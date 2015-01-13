@@ -344,6 +344,7 @@ Cursor.prototype.rewind = function() {
  */
 Cursor.prototype.next = function(callback) {
   var self = this;
+  // We have notified about it
   if(self.cursorState.notified) return;
   // Cursor is killed return null
   if(self.cursorState.killed) {
@@ -352,6 +353,7 @@ Cursor.prototype.next = function(callback) {
     self.cursorState.cursorIndex = 0;
     return handleCallback(callback, null, null);
   }
+  
   // Cursor is dead but not marked killed, return null
   if(self.cursorState.dead && !self.cursorState.killed) {
     self.cursorState.notified = true;
@@ -442,6 +444,17 @@ Cursor.prototype.next = function(callback) {
 
   // If we don't have a cursorId execute the first query
   if(self.cursorState.cursorId == null) {
+    // Check if connection is dead and return if not possible to
+    // execute the query against the db
+    if(self.connection 
+      && !self.connection.isConnected()) {
+      self.cursorState.notified = true;
+      self.cursorState.killed = true;
+      self.cursorState.documents = [];
+      self.cursorState.cursorIndex = 0;
+      return callback(MongoError.create(f('connection to host %s:%s was destroyed', self.connection.host, self.connection.port)))
+    }
+
     // query, cmd, options, cursorState, callback
     execInitialQuery(self, self.query, self.cmd, self.options, self.cursorState, self.connection, self.logger, self.callbacks, function(err, r) {
       if(err) return handleCallback(callback, err, null);
@@ -465,6 +478,17 @@ Cursor.prototype.next = function(callback) {
       // Ensure an empty cursor state
       self.cursorState.documents = [];
       self.cursorState.cursorIndex = 0;
+
+      // Check if connection is dead and return if not possible to
+      // execute a getmore on this connection
+      if(self.connection 
+        && !self.connection.isConnected()) {
+        self.cursorState.notified = true;
+        self.cursorState.killed = true;
+        self.cursorState.documents = [];
+        self.cursorState.cursorIndex = 0;
+        return callback(MongoError.create(f('connection to host %s:%s was destroyed', self.connection.host, self.connection.port)))
+      }
 
       // Execute the next get more
       execGetMore(self, function(err, doc) {
