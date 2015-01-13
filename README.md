@@ -45,46 +45,12 @@ QuickStart
 ==========
 The quick start guide will show you how to set up a simple application using node.js and MongoDB. It scope is only how to set up the driver and perform the simple crud operations. For more inn depth coverage we encourage reading the tutorials.
 
-Create the package.json file
+Installation
 ----------------------------
-Let's create a directory where our application will live. In our case we will put this under our projects directory.
 
 ```
-mkdir myproject
-cd myproject
+npm install mongodb --save
 ```
-
-Create a **package.json** using your favorite text editor and fill it in.
-
-```json
-{
-  "name": "myproject",
-  "version": "1.0.0",
-  "description": "My first project",
-  "main": "index.js",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/christkv/myfirstproject.git"
-  },
-  "dependencies": {
-    "mongodb": "~2.0"
-  },
-  "author": "Christian Kvalheim",
-  "license": "Apache 2.0",
-  "bugs": {
-    "url": "https://github.com/christkv/myfirstproject/issues"
-  },
-  "homepage": "https://github.com/christkv/myfirstproject"
-}
-```
-
-Save the file and return to the shell or command prompt and use **NPM** to install all the dependencies.
-
-```
-npm install
-```
-
-You should see **NPM** download a lot of files. Once it's done you'll find all the downloaded packages under the **node_modules** directory.
 
 Booting up a MongoDB Server
 ---------------------------
