@@ -109,7 +109,6 @@ var ShardingManager = function(mongosOptions) {
         opts.dbpath = dbpath + f("/data-%s", initiallConfigPort);
         opts.logpath = logpath + f("/data-%s.log", initiallConfigPort);
         opts.port = initiallConfigPort;
-        opts.fork = null;
 
         // Create a server manager
         configs.push(new ServerManager(opts));
