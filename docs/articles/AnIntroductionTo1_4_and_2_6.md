@@ -29,7 +29,7 @@ The addition off aggregation cursors to MongoDB 2.6 now means that applications 
 			var cursor = db.collection('data').aggregate([
 					{$match: {}}
 				], {
-		        allowDiskUsage: true
+		        allowDiskUse: true
 		      , cursor: {batchSize: 1000}		
 				});
 
