@@ -65,7 +65,7 @@ Let's break down the `URI` string.
 * `mongodb://` is the protocol definition
 * `localhost:27017,localhost:27018` is the servers we are connecting to to discover the topology of the ReplicaSet.
 * `/myproject` is the database we wish to connect to
-* `replicaSet=foo` is the name of the ReplicaSet we are connecting to. This ensures we are connecting to the correct Replicaset.
+* `replicaSet=foo` is the name of the ReplicaSet we are connecting to. This ensures we are connecting to the correct Replicaset. **This is a required parameter when using the 2.0 driver**
 
 ## Mongos Proxy Connection
 
@@ -154,7 +154,7 @@ Let's break down the `URI` string.
 The driver has many more options for tweaking than what's available through the `URI` specification. These can be passed to the driver using an optional parameters object. The top level fields in the options object are.
 
 * `db`, Options that affect the Db instance returned by the MongoClient.connect method.
-* `replSet`, Options that modify the Replicaset topology connection behavior.
+* `replSet`, Options that modify the Replicaset topology connection behavior. **This is a required parameter when using the 2.0 driver**
 * `mongos`, Options that modify the Mongos topology connection behavior.
 * `server`, Options that modify the Server topology connection behavior.
 
@@ -220,7 +220,7 @@ Let's look at the individual options for each of the top level fields.
 
 *  `ha` {Boolean, default:true}, turn on high availability.
 *  `haInterval` {Number, default:5000}, time between each replicaset status check.
-*  `replicaSet` {String}, the name of the replicaset to connect to.
+*  `replicaSet` {String}, the name of the replicaset to connect to. **This is a required parameter when using the 2.0 driver**
 *  `secondaryAcceptableLatencyMS` {Number, default:15}, sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)
 *  `connectWithNoPrimary` {Boolean, default:false}, Sets if the driver should connect even if no primary is available.
 * `poolSize`, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.

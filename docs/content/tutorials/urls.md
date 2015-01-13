@@ -28,6 +28,7 @@ The URL format is unified across official drivers from Mongodb with some options
 * `replicaSet=name`
     * The driver verifies that the name of the replica set it connects to matches this name. Implies that the hosts given are a seed list, and the driver will attempt to find all members of the set.
     * No default value.
+    * **This is a required parameter when using the 2.0 driver**
 
 ### Connection Configuration:
 * `ssl=true|false|prefer`
