@@ -355,6 +355,71 @@ var isConnectionDead = function(self, callback) {
 }
 
 /**
+ * Validate if the cursor is dead but was not explicitly killed by user
+ */
+var isCursorDeadButNotkilled = function(self, callback) {
+  // Cursor is dead but not marked killed, return null
+  if(self.cursorState.dead && !self.cursorState.killed) {
+    self.cursorState.notified = true;
+    self.cursorState.killed = true;
+    self.cursorState.documents = [];
+    self.cursorState.cursorIndex = 0;
+    handleCallback(callback, null, null);
+    return true;
+  }    
+
+  return false;
+}
+
+/**
+ * Validate if the cursor is dead and was killed by user
+ */
+var isCursorDeadAndKilled = function(self, callback) {
+  if(self.cursorState.dead && self.cursorState.killed) {
+    handleCallback(callback, MongoError.create("cursor is dead"));
+    return true;
+  }  
+
+  return false;
+}
+
+/**
+ * Validate if the cursor was killed by the user
+ */
+var isCursorKilled = function(self, callback) {
+  if(self.cursorState.killed) {
+    self.cursorState.notified = true;
+    self.cursorState.documents = [];
+    self.cursorState.cursorIndex = 0;
+    handleCallback(callback, null, null);
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Mark cursor as being dead and notified
+ */
+var setCursorDeadAndNotified = function(self, callback) {
+  self.cursorState.dead = true;
+  self.cursorState.notified = true;
+  self.cursorState.documents = [];
+  self.cursorState.cursorIndex = 0;
+  handleCallback(callback, null, null);  
+}
+
+/**
+ * Mark cursor as being notified
+ */
+var setCursorNotified = function(self, callback) {
+  self.cursorState.notified = true;
+  self.cursorState.documents = [];
+  self.cursorState.cursorIndex = 0;
+  handleCallback(callback, null, null);
+}
+
+/**
  * Retrieve the next document from the cursor
  * @method
  * @param {resultCallback} callback A callback function
@@ -363,27 +428,15 @@ Cursor.prototype.next = function(callback) {
   var self = this;
   // We have notified about it
   if(self.cursorState.notified) return;
+
   // Cursor is killed return null
-  if(self.cursorState.killed) {
-    self.cursorState.notified = true;
-    self.cursorState.documents = [];
-    self.cursorState.cursorIndex = 0;
-    return handleCallback(callback, null, null);
-  }
-  
+  if(isCursorKilled(self, callback)) return;  
+
   // Cursor is dead but not marked killed, return null
-  if(self.cursorState.dead && !self.cursorState.killed) {
-    self.cursorState.notified = true;
-    self.cursorState.killed = true;
-    self.cursorState.documents = [];
-    self.cursorState.cursorIndex = 0;
-    return handleCallback(callback, null, null);
-  }    
+  if(isCursorDeadButNotkilled(self, callback)) return;
 
   // We have a dead and killed cursor, attempting to call next should error
-  if(self.cursorState.dead && self.cursorState.killed) {
-    return handleCallback(callback, MongoError.create("cursor is dead"));    
-  }
+  if(isCursorDeadAndKilled(self, callback)) return;
   
   // We have just started the cursor
   if(!self.cursorState.init) {
@@ -448,10 +501,7 @@ Cursor.prototype.next = function(callback) {
     return handleCallback(callback, null, self.cursorState.documents[self.cursorState.cursorIndex++]);
   } else if(self.options.exhaust && Long.ZERO.equals(self.cursorState.cursorId)) {
     self.callbacks.unregister(self.query.requestId);
-    self.cursorState.notified = true;
-    self.cursorState.documents = [];
-    self.cursorState.cursorIndex = 0;
-    return handleCallback(callback, null, null);
+    return setCursorNotified(self, callback);
   } else if(self.options.exhaust) {
     return setTimeout(function() {
       if(Long.ZERO.equals(self.cursorState.cursorId)) return;
@@ -469,20 +519,13 @@ Cursor.prototype.next = function(callback) {
     execInitialQuery(self, self.query, self.cmd, self.options, self.cursorState, self.connection, self.logger, self.callbacks, function(err, r) {
       if(err) return handleCallback(callback, err, null);
       if(self.cursorState.documents.length == 0) {
-        self.cursorState.notified = true;
-        self.cursorState.documents = [];
-        self.cursorState.cursorIndex = 0;
-        return handleCallback(callback, null, null);
+        return setCursorNotified(self, callback);
       }
 
       self.next(callback);
     });
   } else if(self.cursorState.limit > 0 && self.cursorState.currentLimit >= self.cursorState.limit) {
-      self.cursorState.dead = true;
-      self.cursorState.notified = true;
-      self.cursorState.documents = [];
-      self.cursorState.cursorIndex = 0;
-      return handleCallback(callback, null, null);
+      return setCursorDeadAndNotified(self, callback);
   } else if(self.cursorState.cursorIndex == self.cursorState.documents.length
       && !Long.ZERO.equals(self.cursorState.cursorId)) {
       // Ensure an empty cursor state
@@ -497,6 +540,7 @@ Cursor.prototype.next = function(callback) {
       execGetMore(self, function(err, doc) {
         if(err) return handleCallback(callback, err);
         if(self.cursorState.documents.length == 0 && Long.ZERO.equals(self.cursorState.cursorId)) self.cursorState.dead = true;
+        
         // Tailable cursor getMore result, notify owner about it
         // No attempt is made here to retry, this is left to the user of the
         // core module to handle to keep core simple
@@ -509,11 +553,7 @@ Cursor.prototype.next = function(callback) {
         }
 
         if(self.cursorState.limit > 0 && self.cursorState.currentLimit >= self.cursorState.limit) {
-          self.cursorState.dead = true;
-          self.cursorState.documents = [];
-          self.cursorState.notified = true;
-          self.cursorState.cursorIndex = 0;
-          return handleCallback(callback, null, null);
+          return setCursorDeadAndNotified(self, callback);
         }
 
         self.next(callback);
@@ -527,18 +567,10 @@ Cursor.prototype.next = function(callback) {
       }));
   } else if(self.cursorState.documents.length == self.cursorState.cursorIndex 
       && Long.ZERO.equals(self.cursorState.cursorId)) {
-      self.cursorState.dead = true;
-      self.cursorState.notified = true;
-      self.cursorState.documents = [];
-      self.cursorState.cursorIndex = 0;
-      handleCallback(callback, null, null);
+      setCursorDeadAndNotified(self, callback);
   } else {
     if(self.cursorState.limit > 0 && self.cursorState.currentLimit >= self.cursorState.limit) {
-      self.cursorState.dead = true;
-      self.cursorState.notified = true;
-      self.cursorState.documents = [];
-      self.cursorState.cursorIndex = 0;
-      return handleCallback(callback, null, null);
+      return setCursorDeadAndNotified(self, callback);
     }
 
     self.cursorState.currentLimit += 1;
