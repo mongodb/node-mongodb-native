@@ -136,6 +136,6 @@ var simple_protected_method_bench = function(connection_string) {
 }
 
 // exports.simple_100_document_toArray = simple_100_document_toArray;
-exports.simple_2_document_limit_toArray = simple_2_document_limit_toArray;
+// exports.simple_2_document_limit_toArray = simple_2_document_limit_toArray;
 // exports.simple_protected_method_bench = simple_protected_method_bench;
 // exports.simple_public_method_bench = simple_public_method_bench;
