@@ -165,8 +165,12 @@ var execInitialQuery = function(self, query, cmd, options, cursorState, connecti
   var queryCallback = function(err, result) {
     if(err) return callback(err);
 
+    if (result.queryFailure) {
+      return callback(MongoError.create(result.documents[0]), null);
+    }
+
     // Check if we have a command cursor
-    if(Array.isArray(result.documents) && result.documents.length == 1) {
+    if(Array.isArray(result.documents) && result.documents.length == 1 && !cmd.find) {
       if(result.documents[0]['$err'] 
         || result.documents[0]['errmsg']) {
         return callback(MongoError.create(result.documents[0]), null);          
@@ -188,12 +192,6 @@ var execInitialQuery = function(self, query, cmd, options, cursorState, connecti
 
           // Return after processing command cursor
           return callback(null, null);
-      }
-
-      if(Array.isArray(result.documents[0].result)) {
-        cursorState.documents = result.documents[0].result;
-        cursorState.cursorId = Long.ZERO;
-        return callback(null, null);
       }
     }
 
