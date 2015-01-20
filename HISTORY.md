@@ -1,3 +1,9 @@
+1.1.9 
+----------------
+- Updated BSON dependency to 0.2.18 to fix issues with io.js and node
+- Don't treat findOne() as a command cursor
+- Refactored out state changes into methods to simplify read the next method
+
 1.1.8 09-12-2015
 ----------------
 - Stripped out Object.defineProperty for performance reasons
