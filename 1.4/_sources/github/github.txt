@@ -111,7 +111,7 @@ Object Document Modeling Libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 22:45:13 on 13/0/2015
+           - 23:21:43 on 14/0/2015
          * - **Homepage**
            - http://http://mongoosejs.com
          * - **Url**
@@ -119,9 +119,9 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/LearnBoost/mongoose.git
          * - **Forks**
-           - 886
+           - 893
          * - **Watchers**
-           - 6077
+           - 6111
 
 .. topic:: mongo-model
 
@@ -214,9 +214,9 @@ Content Management Systems
          * - **Clone Url**
            - https://github.com/cliftonc/calipso.git
          * - **Forks**
-           - 284
+           - 282
          * - **Watchers**
-           - 1533
+           - 1536
 
 Grid FS libraries or tools
 --------------------------
@@ -314,7 +314,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 17
          * - **Watchers**
-           - 136
+           - 137
 
 .. topic:: node-mongodb-wrapper
 
@@ -409,7 +409,7 @@ REST api's around MongoDB or resource based libraries
          * - **Forks**
            - 109
          * - **Watchers**
-           - 338
+           - 340
 
 .. topic:: lazyBum
 
@@ -481,7 +481,7 @@ Test helpers and libraries
          * - **Forks**
            - 2
          * - **Watchers**
-           - 24
+           - 25
 
 .. topic:: node-database-cleaner
 
@@ -504,7 +504,7 @@ Test helpers and libraries
          * - **Forks**
            - 17
          * - **Watchers**
-           - 59
+           - 61
 
 Tools or applications to manage your MongoDB's
 ----------------------------------------------
@@ -753,9 +753,9 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 392
+           - 393
          * - **Watchers**
-           - 3462
+           - 3470
 
 Libraries for the connect middleware
 ------------------------------------
@@ -802,9 +802,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 180
+           - 181
          * - **Watchers**
-           - 661
+           - 665
 
 Libraries or applications for continous integration
 ---------------------------------------------------
@@ -830,7 +830,7 @@ Libraries or applications for continous integration
          * - **Forks**
            - 68
          * - **Watchers**
-           - 453
+           - 457
 
 Exampe applications
 -------------------

@@ -226,7 +226,15 @@
 
 
 
-<h2 id="toc_0">1.1.8 09-12-2015</h2>
+<h2 id="toc_0">1.1.9</h2>
+
+<ul>
+<li>Updated BSON dependency to 0.2.18 to fix issues with io.js and node</li>
+<li>Don&rsquo;t treat findOne() as a command cursor</li>
+<li>Refactored out state changes into methods to simplify read the next method</li>
+</ul>
+
+<h2 id="toc_1">1.1.8 09-12-2015</h2>
 
 <ul>
 <li>Stripped out Object.defineProperty for performance reasons</li>
@@ -234,25 +242,25 @@
 <li>properties cursorBatchSize, cursorSkip, cursorLimit are not methods setCursorBatchSize/cursorBatchSize, setCursorSkip/cursorSkip, setCursorLimit/cursorLimit</li>
 </ul>
 
-<h2 id="toc_1">1.1.7 18-12-2014</h2>
+<h2 id="toc_2">1.1.7 18-12-2014</h2>
 
 <ul>
 <li>Use ns variable for getMore commands for command cursors to work properly with cursor version of listCollections and listIndexes.</li>
 </ul>
 
-<h2 id="toc_2">1.1.6 18-12-2014</h2>
+<h2 id="toc_3">1.1.6 18-12-2014</h2>
 
 <ul>
 <li>Server manager fixed to support 2.2.X servers for travis test matrix.</li>
 </ul>
 
-<h2 id="toc_3">1.1.5 17-12-2014</h2>
+<h2 id="toc_4">1.1.5 17-12-2014</h2>
 
 <ul>
 <li>Fall back to errmsg when creating MongoError for command errors</li>
 </ul>
 
-<h2 id="toc_4">1.1.4 17-12-2014</h2>
+<h2 id="toc_5">1.1.4 17-12-2014</h2>
 
 <ul>
 <li>Added transform method support for cursor (initially just for initial query results) to support listCollections/listIndexes in 2.8.</li>
@@ -261,7 +269,7 @@
 <li>Bumped bson to 0.2.16.</li>
 </ul>
 
-<h2 id="toc_5">1.1.3 01-12-2014</h2>
+<h2 id="toc_6">1.1.3 01-12-2014</h2>
 
 <ul>
 <li>Fixed error handling issue with nonce generation in mongocr.</li>
@@ -270,14 +278,14 @@
 <li>Cleaned up any escaping global variables.</li>
 </ul>
 
-<h2 id="toc_6">1.1.2 20-11-2014</h2>
+<h2 id="toc_7">1.1.2 20-11-2014</h2>
 
 <ul>
 <li>Correctly encoding UTF8 collection names on wire protocol messages.</li>
 <li>Added emitClose parameter to topology destroy methods to allow users to specify that they wish the topology to emit the close event to any listeners.</li>
 </ul>
 
-<h2 id="toc_7">1.1.1 14-11-2014</h2>
+<h2 id="toc_8">1.1.1 14-11-2014</h2>
 
 <ul>
 <li>Refactored code to use prototype instead of privileged methods.</li>
@@ -285,38 +293,38 @@
 <li>Several deopt optimizations for v8 to improve performance and reduce GC pauses.</li>
 </ul>
 
-<h2 id="toc_8">1.0.5 29-10-2014</h2>
+<h2 id="toc_9">1.0.5 29-10-2014</h2>
 
 <ul>
 <li>Fixed issue with wrong namespace being created for command cursors.</li>
 </ul>
 
-<h2 id="toc_9">1.0.4 24-10-2014</h2>
+<h2 id="toc_10">1.0.4 24-10-2014</h2>
 
 <ul>
 <li>switched from using shift for the cursor due to bad slowdown on big batchSizes as shift causes entire array to be copied on each call.</li>
 </ul>
 
-<h2 id="toc_10">1.0.3 21-10-2014</h2>
+<h2 id="toc_11">1.0.3 21-10-2014</h2>
 
 <ul>
 <li>fixed error issuing problem on cursor.next when iterating over a huge dataset with a very small batchSize.</li>
 </ul>
 
-<h2 id="toc_11">1.0.2 07-10-2014</h2>
+<h2 id="toc_12">1.0.2 07-10-2014</h2>
 
 <ul>
 <li>fullsetup is now defined as a primary and secondary being available allowing for all read preferences to be satisfied.</li>
 <li>fixed issue with replset_state logging.</li>
 </ul>
 
-<h2 id="toc_12">1.0.1 07-10-2014</h2>
+<h2 id="toc_13">1.0.1 07-10-2014</h2>
 
 <ul>
 <li>Dependency issue solved</li>
 </ul>
 
-<h2 id="toc_13">1.0.0 07-10-2014</h2>
+<h2 id="toc_14">1.0.0 07-10-2014</h2>
 
 <ul>
 <li>Initial release of mongodb-core</li>
