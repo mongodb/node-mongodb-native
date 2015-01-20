@@ -898,3 +898,31 @@ exports['Should correctly execute remove with elemMatch field in selector'] = {
     });
   }
 }
+
+/**
+ * @ignore
+ */
+exports['Should fail due to exiting collection'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var ObjectID = configuration.require.ObjectID;
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      db.createCollection('shouldFailDueToExistingCollection', {strict: true}, function(err, coll) {
+        test.equal(null, err);
+        test.ok(coll != null);
+
+        db.createCollection('shouldFailDueToExistingCollection', {strict: true}, function(err, coll) {
+          console.dir(err)
+          test.ok(err != null);
+
+          db.close();
+          test.done();
+        });
+      });
+    });
+  }
+}
