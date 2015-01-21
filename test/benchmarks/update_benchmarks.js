@@ -36,4 +36,4 @@ var single_doc_upsert = function(connection_string) {
   }
 }
 
-// exports.single_doc_upsert = single_doc_upsert;
+exports.single_doc_upsert = single_doc_upsert;
