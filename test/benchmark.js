@@ -117,7 +117,7 @@ var executeGnuPlot = function(key, dataFileName) {
   });
 
   gnuplot.on('close', function (code) {
-    console.log('child process exited with code ' + code);
+    // console.log('child process exited with code ' + code);
   });  
 }
 
