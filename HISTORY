@@ -1,4 +1,4 @@
-1.4.28 2014-01-21
+1.4.29 2014-01-21
 -----------------
 - Updated kerberos to support io.js/node with nan 1.5.1.
 - NODE-352 Fixed race-condition for createCollection.
