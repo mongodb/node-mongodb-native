@@ -1393,7 +1393,7 @@ exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithRemove = {
 exports.handleBSONTypeInsertsCorrectly = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'], mongodb: "<2.8.0" } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1447,6 +1447,85 @@ exports.handleBSONTypeInsertsCorrectly = {
                     test.ok(doc.maxkey instanceof MaxKey);
 
                     collection.findOne({"code": new Code("function () {}", {a: 77})}, function(err, doc) {            
+                      console.dir(err)
+                      console.dir(doc)
+
+                      test.equal(null, err);
+                      test.ok(doc != null);
+                      db.close();
+                      test.done();
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports.handleBSONTypeInsertsCorrectlyFor28OrHigher = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'], mongodb: ">=2.8.0" } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var ObjectID = configuration.require.ObjectID
+      , Symbol = configuration.require.Symbol
+      , Double = configuration.require.Double
+      , Binary = configuration.require.Binary
+      , MinKey = configuration.require.MinKey
+      , MaxKey = configuration.require.MaxKey
+      , Code = configuration.require.Code;
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      var collection = db.collection('bson_types_insert');
+
+      var document = {
+          "symbol": new Symbol("abcdefghijkl")
+        , "objid": new ObjectID("abcdefghijkl")
+        , "double": new Double(1)
+        , "binary": new Binary(new Buffer("hello world"))
+        , "minkey": new MinKey()
+        , "maxkey": new MaxKey()
+        , "code": new Code("function () {}", {a: 55})
+      }
+
+      collection.insert(document, configuration.writeConcernMax(), function(err, result) {
+        test.equal(null, err);
+
+        collection.findOne({"symbol": new Symbol("abcdefghijkl")}, function(err, doc) {
+          test.equal(null, err);
+          test.equal("abcdefghijkl", doc.symbol.toString());
+
+          collection.findOne({"objid": new ObjectID("abcdefghijkl")}, function(err, doc) {            
+            test.equal(null, err);
+            test.equal("6162636465666768696a6b6c", doc.objid.toString());
+
+            collection.findOne({"double": new Double(1)}, function(err, doc) {            
+              test.equal(null, err);
+              test.equal(1, doc.double);
+
+              collection.findOne({"binary": new Binary(new Buffer("hello world"))}, function(err, doc) {            
+                test.equal(null, err);
+                test.equal("hello world", doc.binary.toString());
+
+                collection.findOne({"minkey": new MinKey()}, function(err, doc) {            
+                  test.equal(null, err);
+                  test.ok(doc.minkey instanceof MinKey);
+
+                  collection.findOne({"maxkey": new MaxKey()}, function(err, doc) {            
+                    test.equal(null, err);
+                    test.ok(doc.maxkey instanceof MaxKey);
+
+                    collection.findOne({"code": new Code("function () {}", {a: 55})}, function(err, doc) {            
                       test.equal(null, err);
                       test.ok(doc != null);
                       db.close();
