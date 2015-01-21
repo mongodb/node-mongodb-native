@@ -1,8 +1,11 @@
+1.4.28 2014-01-21
+-----------------
+- Updated kerberos to support io.js/node with nan 1.5.1.
+- NODE-352 Fixed race-condition for createCollection.
+
 1.4.28 2014-01-06
 -----------------
 - NODE-293 fixed issue for insert on fullResult return due to getRawResponse called incorrectly.
-- Updated kerberos to support io.js/node with nan 1.5.1.
-- NODE-352 Fixed race-condition for createCollection.
 
 1.4.27 2014-01-05
 -----------------
