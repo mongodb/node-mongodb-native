@@ -1,4 +1,4 @@
-1.1.9 
+1.1.9 21-01-2015
 ----------------
 - Updated BSON dependency to 0.2.18 to fix issues with io.js and node.
 - Updated Kerberos dependency to 0.0.8 to fix issues with io.js and node.
