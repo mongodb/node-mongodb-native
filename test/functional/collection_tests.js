@@ -916,7 +916,6 @@ exports['Should fail due to exiting collection'] = {
         test.ok(coll != null);
 
         db.createCollection('shouldFailDueToExistingCollection', {strict: true}, function(err, coll) {
-          console.dir(err)
           test.ok(err != null);
 
           db.close();
