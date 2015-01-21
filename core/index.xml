@@ -1065,12 +1065,13 @@ npm install
       <guid>/node-mongodb-native/core/meta/release-notes/</guid>
       <description>
 
-&lt;h2 id=&#34;toc_0&#34;&gt;1.1.9&lt;/h2&gt;
+&lt;h2 id=&#34;toc_0&#34;&gt;1.1.9 21-01-2015&lt;/h2&gt;
 
 &lt;ul&gt;
-&lt;li&gt;Updated BSON dependency to 0.2.18 to fix issues with io.js and node&lt;/li&gt;
-&lt;li&gt;Don&amp;rsquo;t treat findOne() as a command cursor&lt;/li&gt;
-&lt;li&gt;Refactored out state changes into methods to simplify read the next method&lt;/li&gt;
+&lt;li&gt;Updated BSON dependency to 0.2.18 to fix issues with io.js and node.&lt;/li&gt;
+&lt;li&gt;Updated Kerberos dependency to 0.0.8 to fix issues with io.js and node.&lt;/li&gt;
+&lt;li&gt;Don&amp;rsquo;t treat findOne() as a command cursor.&lt;/li&gt;
+&lt;li&gt;Refactored out state changes into methods to simplify read the next method.&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h2 id=&#34;toc_1&#34;&gt;1.1.8 09-12-2015&lt;/h2&gt;

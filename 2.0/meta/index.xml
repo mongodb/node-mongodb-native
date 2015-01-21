@@ -35,10 +35,11 @@
       <guid>/node-mongodb-native/2.0/meta/release-notes/</guid>
       <description>
 
-&lt;h2 id=&#34;toc_0&#34;&gt;2.0.14&lt;/h2&gt;
+&lt;h2 id=&#34;toc_0&#34;&gt;2.0.14 2015-01-21&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Fixed some MongoClient.connect options pass through issues and added test coverage.&lt;/li&gt;
+&lt;li&gt;Bumped mongodb-core to 1.1.19 including fixes for io.js&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h2 id=&#34;toc_1&#34;&gt;2.0.13 2015-01-09&lt;/h2&gt;
