@@ -15,9 +15,9 @@ var read_all_tests = require('./util').read_all_tests
 // Load all the tests
 var tests = read_all_tests(__dirname + "/benchmarks");
 // Number of times to run the test
-var run_number_of_times = 10000;
+var run_number_of_times = 1000;
 // Number of iterations to run for JIT warmup
-var warm_up_iterations = 1000;
+var warm_up_iterations = 100;
 // Run serially or all of them at the same time
 var concurrent = false;
 // Number of operations in one concurrent batch
@@ -30,6 +30,9 @@ var options = {};
 if(argv.n != null) {
   options.test_name = argv.n;
 }
+
+// Start time
+var start = new Date();
 
 console.log("=======================================================");
 console.log("= running benchmarks                                  =")
@@ -81,11 +84,15 @@ var run_tests = function(_tests) {
 
         // console.log("============================== data for key " + key)
         // console.dir(result)
-        
+
+        // End time
+        var end = new Date();
+        // End memory size
         var endMemory = process.memoryUsage().rss;
         // Calculate the average
         var average = total_time / result.results.length;
         console.log("= test: " + key);
+        console.log("  total    :: " + (end.getTime() - start.getTime()));
         console.log("  num      :: " + stats.numDataValues);
         console.log("  avg      :: " + stats.mean);
         console.log("  variance :: " + stats.variance);
@@ -110,7 +117,7 @@ var executeGnuPlot = function(key, dataFileName) {
   });
 
   gnuplot.on('close', function (code) {
-    console.log('child process exited with code ' + code);
+    // console.log('child process exited with code ' + code);
   });  
 }
 
