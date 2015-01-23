@@ -14,13 +14,8 @@ title = "MongoDB 2.0.0 Driver"
 [[menu.main]]
     name = "driver portal"
     pre = "<i class='fa fa-file-text'></i>"
-    url = "#REPLACE/"
-    weight = -115
-[[menu.main]]
-    name = "Learn Mongo DB"
-    pre = "<i class='fa fa-file-text'></i>"
     url = "http://learnmongodbthehardway.com"
-    weight = -114
+    weight = -115
 [[menu.main]]
     name = "Mongo DB Docs"
     pre = "<i class='fa fa-file-text'></i>"
