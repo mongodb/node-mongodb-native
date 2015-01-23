@@ -1,29 +1,32 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-      <title>Tutorials on MongoDB 2.0.0 Driver </title>
-      <generator uri="https://hugo.spf13.com">Hugo</generator>
-    <link>/node-mongodb-native/2.0/tutorials/index.xml/</link>
+    <title>Tutorials on MongoDB 2.0.0 Driver</title>
+    <link>/node-mongodb-native/2.0/tutorials/</link>
+    <description>Recent content in Tutorials on MongoDB 2.0.0 Driver</description>
+    <generator>Hugo -- gohugo.io</generator>
     
     
     
-    <updated>Mon, 01 Jul 2013 00:00:00 UTC</updated>
+    
+    <lastBuildDate>Mon, 01 Jul 2013 00:00:00 UT</lastBuildDate>
+    <atom:link href="/node-mongodb-native/2.0/tutorials/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Connecting To MongoDB</title>
       <link>/node-mongodb-native/2.0/tutorials/connecting/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/2.0/tutorials/connecting/</guid>
       <description>
 
-&lt;h1 id=&#34;toc_0&#34;&gt;Connecting To MongoDB&lt;/h1&gt;
+&lt;h1 id=&#34;connecting-to-mongodb:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Connecting To MongoDB&lt;/h1&gt;
 
 &lt;hr /&gt;
 
 &lt;p&gt;Connecting to MongoDB using the driver is primarily done using the &lt;code&gt;MongoClient.connect&lt;/code&gt; method and a URI. Let&amp;rsquo;s look at how we connect to a couple of different server topologies.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_1&#34;&gt;Single Server Connection&lt;/h2&gt;
+&lt;h2 id=&#34;single-server-connection:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Single Server Connection&lt;/h2&gt;
 
 &lt;p&gt;We have a single MongoDB server instance running on the port &lt;em&gt;27017&lt;/em&gt; Let&amp;rsquo;s connect using the driver and &lt;em&gt;MongoClient.connect&lt;/em&gt;&lt;/p&gt;
 
@@ -49,7 +52,7 @@ MongoClient.connect(url, function(err, db) {
 &lt;li&gt;&lt;code&gt;/myproject&lt;/code&gt; is the database we wish to connect to&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_2&#34;&gt;Replicaset Server Connection&lt;/h2&gt;
+&lt;h2 id=&#34;replicaset-server-connection:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Replicaset Server Connection&lt;/h2&gt;
 
 &lt;p&gt;We wish to connect to a ReplicaSet consisting of one primary and 1 or more secondaries. To Do this we need to supply the driver with a seedlist of servers and the name of the ReplicaSet we wish to connect to. Let&amp;rsquo;s take a look at a code example.&lt;/p&gt;
 
@@ -76,7 +79,7 @@ MongoClient.connect(url, function(err, db) {
 &lt;li&gt;&lt;code&gt;replicaSet=foo&lt;/code&gt; is the name of the ReplicaSet we are connecting to. This ensures we are connecting to the correct Replicaset. &lt;strong&gt;This is a required parameter when using the 2.0 driver&lt;/strong&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_3&#34;&gt;Mongos Proxy Connection&lt;/h2&gt;
+&lt;h2 id=&#34;mongos-proxy-connection:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Mongos Proxy Connection&lt;/h2&gt;
 
 &lt;p&gt;We wish to connect to a set of &lt;code&gt;mongos&lt;/code&gt; proxies. Just as in the case of connecting to a ReplicaSet we can provide a seed list of &lt;code&gt;mongos&lt;/code&gt; proxies. This allows the driver to perform failover between proxies automatically in case of a proxy process having been shut down. Let&amp;rsquo;s look at an example of code connecting to a set of proxies.&lt;/p&gt;
 
@@ -102,9 +105,9 @@ MongoClient.connect(url, function(err, db) {
 &lt;li&gt;&lt;code&gt;/myproject&lt;/code&gt; is the database we wish to connect to&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_4&#34;&gt;Authentication&lt;/h2&gt;
+&lt;h2 id=&#34;authentication:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Authentication&lt;/h2&gt;
 
-&lt;h3 id=&#34;toc_5&#34;&gt;Against The Specified Database&lt;/h3&gt;
+&lt;h3 id=&#34;against-the-specified-database:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Against The Specified Database&lt;/h3&gt;
 
 &lt;p&gt;&lt;code&gt;MongoClient.connect&lt;/code&gt; also allows us to specify authentication credentials as part of the &lt;code&gt;URI&lt;/code&gt;. Let&amp;rsquo;s assume there is a user &lt;em&gt;dave&lt;/em&gt; with the password &lt;em&gt;password&lt;/em&gt; on the database &lt;em&gt;protected&lt;/em&gt;. To correctly authenticate we will do the following.&lt;/p&gt;
 
@@ -133,7 +136,7 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;&lt;em&gt;The password and username must be URI encoded to allow for all any possible illegal characters&lt;/em&gt;&lt;/p&gt;
 
-&lt;h3 id=&#34;toc_6&#34;&gt;Indirectly Against Another Database&lt;/h3&gt;
+&lt;h3 id=&#34;indirectly-against-another-database:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Indirectly Against Another Database&lt;/h3&gt;
 
 &lt;p&gt;In some cases you might have to authenticate against another database than the one you intend to connect to. This is referred to as delegated authentication. Say you wish to connect to the &lt;em&gt;myproject&lt;/em&gt; database but the user is defined in the &lt;em&gt;admin&lt;/em&gt; database. Let&amp;rsquo;s look at how we would accomplish this.&lt;/p&gt;
 
@@ -161,7 +164,7 @@ MongoClient.connect(url, function(err, db) {
 &lt;li&gt;&lt;code&gt;authSource=admin&lt;/code&gt; is the database we wish to authenticate against&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h1 id=&#34;toc_7&#34;&gt;MongoClient.connect Optional Parameters&lt;/h1&gt;
+&lt;h1 id=&#34;mongoclient-connect-optional-parameters:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;MongoClient.connect Optional Parameters&lt;/h1&gt;
 
 &lt;hr /&gt;
 
@@ -199,7 +202,7 @@ MongoClient.connect(url, {
 
 &lt;p&gt;Let&amp;rsquo;s look at the individual options for each of the top level fields.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_8&#34;&gt;Data base level options&lt;/h2&gt;
+&lt;h2 id=&#34;data-base-level-options:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Data base level options&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 is no acknowledgment of write and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write&lt;/li&gt;
@@ -218,7 +221,7 @@ MongoClient.connect(url, {
 &lt;li&gt;&lt;code&gt;bufferMaxEntries&lt;/code&gt; {Number, default: -1}, sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_9&#34;&gt;Individual Server Level Options&lt;/h2&gt;
+&lt;h2 id=&#34;individual-server-level-options:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Individual Server Level Options&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;poolSize&lt;/code&gt;, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
@@ -235,7 +238,7 @@ MongoClient.connect(url, {
 &lt;li&gt;&lt;code&gt;socketOptions.socketTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Socket timeout setting.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_10&#34;&gt;Replicaset Level Options&lt;/h2&gt;
+&lt;h2 id=&#34;replicaset-level-options:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Replicaset Level Options&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;ha&lt;/code&gt; {Boolean, default:true}, turn on high availability.&lt;/li&gt;
@@ -256,7 +259,7 @@ MongoClient.connect(url, {
 &lt;li&gt;&lt;code&gt;socketOptions.socketTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Socket timeout setting.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_11&#34;&gt;Mongos Proxy Level Options&lt;/h2&gt;
+&lt;h2 id=&#34;mongos-proxy-level-options:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Mongos Proxy Level Options&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;ha&lt;/code&gt; {Boolean, default:true}, turn on high availability.&lt;/li&gt;
@@ -280,12 +283,12 @@ MongoClient.connect(url, {
     <item>
       <title>Connection Failures</title>
       <link>/node-mongodb-native/2.0/tutorials/connection_failures/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/2.0/tutorials/connection_failures/</guid>
       <description>
 
-&lt;h1 id=&#34;toc_0&#34;&gt;Connection Failures and Retries&lt;/h1&gt;
+&lt;h1 id=&#34;connection-failures-and-retries:878abfdd112f1319523c821f1974dcfd&#34;&gt;Connection Failures and Retries&lt;/h1&gt;
 
 &lt;p&gt;This comes up a lot because there is some confusion about how the driver works when it comes to Socket timeouts and retries. This Tutorial attempts to clarify the driver&amp;rsquo;s behavior and explains why, for some legacy reasons as well as for some design reasons, the driver works the way it does.&lt;/p&gt;
 
@@ -391,7 +394,7 @@ MongoClient.connect(&#39;mongodb://localhost:27017/test?autoReconnect=false&#39;
 
 &lt;p&gt;When you shut down the &lt;code&gt;mongod&lt;/code&gt; process, the driver stops processing operations and keeps buffering them due to &lt;code&gt;bufferMaxEntries&lt;/code&gt; being &lt;code&gt;-1&lt;/code&gt; by default meaning buffer all operations. When you bring the &lt;code&gt;mongod&lt;/code&gt; process back up you will notice how it does not change the fact that we are buffering. This is a legacy behavior and less than ideal. So you will want to set &lt;code&gt;bufferMaxEntries&lt;/code&gt; to 0 or a low number if you wish to turn off &lt;code&gt;autoReconnect&lt;/code&gt;.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_1&#34;&gt;The Matrix of Behavior&lt;/h2&gt;
+&lt;h2 id=&#34;the-matrix-of-behavior:878abfdd112f1319523c821f1974dcfd&#34;&gt;The Matrix of Behavior&lt;/h2&gt;
 
 &lt;p&gt;Let&amp;rsquo;s put all the possible values of &lt;code&gt;autoReconnect&lt;/code&gt; and &lt;code&gt;bufferMaxEntries&lt;/code&gt; in a table so we can more easily understand the behavior.&lt;/p&gt;
 
@@ -447,7 +450,7 @@ MongoClient.connect(&#39;mongodb://localhost:27017/test?autoReconnect=false&#39;
 
 &lt;p&gt;Say you have a &lt;code&gt;Replicaset&lt;/code&gt; where a new primary is elected. If the driver does not buffer the operations, it will have to error out all operations until there is a new primary available in the set. This complicates people&amp;rsquo;s code as every operation could potentially fail and thus the driver a long time ago took the decision to make this transparent to the user by buffering operations until the new &lt;code&gt;primary&lt;/code&gt; is available and then replaying them. &lt;code&gt;bufferMaxEntries&lt;/code&gt; was added later to allow developers to control this behavior themselves if they wished to be instantly notified about write errors f.ex instead of letting the driver handle it.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_2&#34;&gt;The Confusion&lt;/h2&gt;
+&lt;h2 id=&#34;the-confusion:878abfdd112f1319523c821f1974dcfd&#34;&gt;The Confusion&lt;/h2&gt;
 
 &lt;p&gt;A lot of the confusion comes from mistaking &lt;code&gt;socketTimeoutMS&lt;/code&gt; with how the async driver works. &lt;code&gt;socketTimeoutMS&lt;/code&gt; only applies to sockets if they have successfully connected to the server, but have not been in use and they reach the &lt;code&gt;socketTimeoutMS&lt;/code&gt;. In contrast, &lt;code&gt;connectionTimeoutMS&lt;/code&gt; applies only to the &lt;em&gt;initial&lt;/em&gt; server connection process timeout.  The &amp;lsquo;connectionTimeoutMS&amp;rsquo; is independent of the &lt;code&gt;socketTimeoutMS&lt;/code&gt;.&lt;/p&gt;
 
@@ -461,7 +464,7 @@ MongoClient.connect(&#39;mongodb://localhost:27017/test?autoReconnect=false&#39;
 &lt;p&gt;Set &lt;em&gt;socketTimeoutMS&lt;/em&gt; to at least &lt;code&gt;2-3x&lt;/code&gt; the longest running operation in your application or the interval between operations, too ensure you don&amp;rsquo;t timeout long running operations or servers where there are big gaps of time between operations.&lt;/p&gt;
 &lt;/blockquote&gt;
 
-&lt;h2 id=&#34;toc_3&#34;&gt;What You are Probably Looking For&lt;/h2&gt;
+&lt;h2 id=&#34;what-you-are-probably-looking-for:878abfdd112f1319523c821f1974dcfd&#34;&gt;What You are Probably Looking For&lt;/h2&gt;
 
 &lt;p&gt;Most people who start changing &lt;code&gt;socketTimeoutMS&lt;/code&gt; are actually looking for the &lt;code&gt;maxTimeMS&lt;/code&gt; property to limit the time a query runs against the server before it gets aborted. Let&amp;rsquo;s look at how to apply this property on a query.&lt;/p&gt;
 
@@ -484,19 +487,19 @@ MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, function(err, db) 
     <item>
       <title>Connection URI</title>
       <link>/node-mongodb-native/2.0/tutorials/urls/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/2.0/tutorials/urls/</guid>
       <description>
 
-&lt;h2 id=&#34;toc_0&#34;&gt;The URL connection format&lt;/h2&gt;
+&lt;h2 id=&#34;the-url-connection-format:99d81047217b3d4c05529f0b727e6e5e&#34;&gt;The URL connection format&lt;/h2&gt;
 
 &lt;pre&gt;&lt;code&gt;mongodb://[username:password@]host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[database][?options]]
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;The URL format is unified across official drivers from Mongodb with some options not supported on some drivers due to implementation differences. The ones not supported by the Node.js driver are left out for simplicities sake.&lt;/p&gt;
 
-&lt;h3 id=&#34;toc_1&#34;&gt;Basic parts of the url&lt;/h3&gt;
+&lt;h3 id=&#34;basic-parts-of-the-url:99d81047217b3d4c05529f0b727e6e5e&#34;&gt;Basic parts of the url&lt;/h3&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;mongodb://&lt;/code&gt; is a required prefix to identify that this is a string in the standard connection format.&lt;/li&gt;
@@ -507,7 +510,7 @@ MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, function(err, db) 
 &lt;li&gt;&lt;code&gt;?options&lt;/code&gt; are connection options. Note that if database is absent there is still a / required between the last host and the ? introducing the options. Options are name=value pairs and the pairs are separated by &amp;ldquo;&amp;amp;&amp;ldquo;. For any unrecognized or unsupported option, a driver should log a warning and continue processing. A driver should not support any options that are not explicitly defined in this specification. This is in order to reduce the likelihood that different drivers will support overlapping that differ in small but incompatible ways (like different name, different values, or different default value).&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h3 id=&#34;toc_2&#34;&gt;Replica set configuration:&lt;/h3&gt;
+&lt;h3 id=&#34;replica-set-configuration:99d81047217b3d4c05529f0b727e6e5e&#34;&gt;Replica set configuration:&lt;/h3&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;replicaSet=name&lt;/code&gt;
@@ -519,7 +522,7 @@ MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, function(err, db) 
 &lt;/ul&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h3 id=&#34;toc_3&#34;&gt;Connection Configuration:&lt;/h3&gt;
+&lt;h3 id=&#34;connection-configuration:99d81047217b3d4c05529f0b727e6e5e&#34;&gt;Connection Configuration:&lt;/h3&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;p&gt;&lt;code&gt;ssl=true|false|prefer&lt;/code&gt;&lt;/p&gt;
@@ -546,7 +549,7 @@ MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, function(err, db) 
 &lt;/ul&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h3 id=&#34;toc_4&#34;&gt;Connection pool configuration:&lt;/h3&gt;
+&lt;h3 id=&#34;connection-pool-configuration:99d81047217b3d4c05529f0b727e6e5e&#34;&gt;Connection pool configuration:&lt;/h3&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;maxPoolSize=n:&lt;/code&gt; The maximum number of connections in the connection pool
@@ -556,7 +559,7 @@ MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, function(err, db) 
 &lt;/ul&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h3 id=&#34;toc_5&#34;&gt;Write concern configuration:&lt;/h3&gt;
+&lt;h3 id=&#34;write-concern-configuration:99d81047217b3d4c05529f0b727e6e5e&#34;&gt;Write concern configuration:&lt;/h3&gt;
 
 &lt;p&gt;More detailed information about write concerns can be found at &lt;a href=&#34;http://www.mongodb.org/display/DOCS/getLastError+Command&#34;&gt;http://www.mongodb.org/display/DOCS/getLastError+Command&lt;/a&gt;&lt;/p&gt;
 
@@ -604,7 +607,7 @@ MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, function(err, db) 
 &lt;/ul&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h3 id=&#34;toc_6&#34;&gt;Auth options&lt;/h3&gt;
+&lt;h3 id=&#34;auth-options:99d81047217b3d4c05529f0b727e6e5e&#34;&gt;Auth options&lt;/h3&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;authSource=string:&lt;/code&gt; Used when the user for authentication is stored in another database using indirect authentication.
@@ -614,7 +617,7 @@ MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, function(err, db) 
 &lt;/ul&gt;&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h3 id=&#34;toc_7&#34;&gt;Read Preference&lt;/h3&gt;
+&lt;h3 id=&#34;read-preference:99d81047217b3d4c05529f0b727e6e5e&#34;&gt;Read Preference&lt;/h3&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;p&gt;&lt;code&gt;slaveOk=true|false:&lt;/code&gt; Whether a driver connected to a replica set will send reads to slaves/secondaries.&lt;/p&gt;
@@ -652,18 +655,18 @@ MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, function(err, db) 
     <item>
       <title>CRUD Operations</title>
       <link>/node-mongodb-native/2.0/tutorials/crud_operations/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/2.0/tutorials/crud_operations/</guid>
       <description>
 
-&lt;h1 id=&#34;toc_0&#34;&gt;Driver CRUD Operations&lt;/h1&gt;
+&lt;h1 id=&#34;driver-crud-operations:35296af7b5e03e340e2ce9cac65b7c8e&#34;&gt;Driver CRUD Operations&lt;/h1&gt;
 
 &lt;p&gt;The driver crud operations are defined as the operations performed to insert/update/remove and query for documents. In this tutorial we will cover both the basic CRUD methods as well as the specialized &lt;em&gt;findAndModify&lt;/em&gt; based methods and the new Bulk API methods allowing for efficient bulk write operations. But let&amp;rsquo;s start with a simple introduction to the insert, update and remove operations that are on the collection class.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_1&#34;&gt;Write Methods&lt;/h2&gt;
+&lt;h2 id=&#34;write-methods:35296af7b5e03e340e2ce9cac65b7c8e&#34;&gt;Write Methods&lt;/h2&gt;
 
-&lt;h3 id=&#34;toc_2&#34;&gt;Inserting Documents&lt;/h3&gt;
+&lt;h3 id=&#34;inserting-documents:35296af7b5e03e340e2ce9cac65b7c8e&#34;&gt;Inserting Documents&lt;/h3&gt;
 
 &lt;p&gt;The &lt;em&gt;insertOne&lt;/em&gt; and &lt;em&gt;insertMany&lt;/em&gt; methods exists on the &lt;em&gt;Collection&lt;/em&gt; class and is used to insert documents into MongoDB. Code speaks a thousand words so let&amp;rsquo;s see two simple examples of inserting documents.&lt;/p&gt;
 
@@ -736,7 +739,7 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;That wraps up the &lt;em&gt;insert&lt;/em&gt; methods. Next let&amp;rsquo;s look at the &lt;em&gt;update&lt;/em&gt; methods.&lt;/p&gt;
 
-&lt;h3 id=&#34;toc_3&#34;&gt;Updating Documents&lt;/h3&gt;
+&lt;h3 id=&#34;updating-documents:35296af7b5e03e340e2ce9cac65b7c8e&#34;&gt;Updating Documents&lt;/h3&gt;
 
 &lt;p&gt;The &lt;em&gt;updateOne&lt;/em&gt; and &lt;em&gt;updateMany&lt;/em&gt; methods exists on the &lt;em&gt;Collection&lt;/em&gt; class and is used to update and upsert documents into MongoDB. Let&amp;rsquo;s look at a couple of usage examples.&lt;/p&gt;
 
@@ -795,7 +798,7 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;Just as for &lt;em&gt;insert&lt;/em&gt; the &lt;em&gt;update&lt;/em&gt; method allows you to specify a per operation write concern using the &lt;em&gt;w&lt;/em&gt;, &lt;em&gt;wtimeout&lt;/em&gt; and &lt;em&gt;fsync&lt;/em&gt; parameters&lt;/p&gt;
 
-&lt;h3 id=&#34;toc_4&#34;&gt;Removing Documents&lt;/h3&gt;
+&lt;h3 id=&#34;removing-documents:35296af7b5e03e340e2ce9cac65b7c8e&#34;&gt;Removing Documents&lt;/h3&gt;
 
 &lt;p&gt;The &lt;em&gt;deleteOne&lt;/em&gt; and &lt;em&gt;deleteMany&lt;/em&gt; methods exist on the &lt;em&gt;Collection&lt;/em&gt; class and is used to remove documents from MongoDB. Let&amp;rsquo;s look at a couple of usage examples.&lt;/p&gt;
 
@@ -844,7 +847,7 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;Just as for &lt;em&gt;updateOne/updateMany&lt;/em&gt; and &lt;em&gt;insertOne/insertMany&lt;/em&gt; the &lt;em&gt;deleteOne/deleteMany&lt;/em&gt; method allows you to specify a per operation write concern using the &lt;em&gt;w&lt;/em&gt;, &lt;em&gt;wtimeout&lt;/em&gt; and &lt;em&gt;fsync&lt;/em&gt; parameters&lt;/p&gt;
 
-&lt;h3 id=&#34;toc_5&#34;&gt;FindAndModify and findAndDelete&lt;/h3&gt;
+&lt;h3 id=&#34;findandmodify-and-findanddelete:35296af7b5e03e340e2ce9cac65b7c8e&#34;&gt;FindAndModify and findAndDelete&lt;/h3&gt;
 
 &lt;p&gt;The two methods &lt;em&gt;findOneAndUpdate&lt;/em&gt;, &lt;em&gt;findOneAndDelete&lt;/em&gt; and &lt;em&gt;findOneAndReplace&lt;/em&gt; are special commands that allows the user to update or upsert a document and have the modified or existing document returned. It comes at a cost as the operation takes a write lock for the duration of the operation as it needs to ensure the modification is &lt;em&gt;atomic&lt;/em&gt;. Let&amp;rsquo;s look at &lt;em&gt;findOneAndUpdate&lt;/em&gt; first using an example.&lt;/p&gt;
 
@@ -936,7 +939,7 @@ MongoClient.connect(url, function(err, db) {
 &lt;li&gt;&lt;code&gt;sort&lt;/code&gt;, (Object, default:null) Sort for find operation.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h3 id=&#34;toc_6&#34;&gt;BulkWrite&lt;/h3&gt;
+&lt;h3 id=&#34;bulkwrite:35296af7b5e03e340e2ce9cac65b7c8e&#34;&gt;BulkWrite&lt;/h3&gt;
 
 &lt;p&gt;The &lt;em&gt;bulkWrite&lt;/em&gt; function allows for a simple set of bulk operations to be done in a non fluent way as in comparison to the bulk API discussed next. Let&amp;rsquo;s look at an example.&lt;/p&gt;
 
@@ -986,7 +989,7 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;This covers the basic write operations. Let&amp;rsquo;s have a look at the Bulk write operations next.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_7&#34;&gt;Bulk Write Operations&lt;/h2&gt;
+&lt;h2 id=&#34;bulk-write-operations:35296af7b5e03e340e2ce9cac65b7c8e&#34;&gt;Bulk Write Operations&lt;/h2&gt;
 
 &lt;p&gt;The bulk write operations make it easy to write groups of operations together to MongoDB. There are some caveats and to get the best performance you need to be running against MongoDB &lt;em&gt;2.6&lt;/em&gt; or higher that support the new write commands. Bulk operations are split into &lt;em&gt;ordered&lt;/em&gt; and &lt;em&gt;unordered&lt;/em&gt; bulk operations. An &lt;em&gt;ordered&lt;/em&gt; bulk operation guarantees the order of execution of writes while the &lt;em&gt;unordered&lt;/em&gt; bulk operation makes no assumptions about the order of execution. In the Node.js driver the &lt;em&gt;unordered&lt;/em&gt; bulk operations will group operations according to type and write them in parallel. Let&amp;rsquo;s have a look at how to build an ordered bulk operation.&lt;/p&gt;
 
@@ -1066,11 +1069,11 @@ Remove Command with {b:1}
 
 &lt;p&gt;This covers write operations for MongoDB. Let&amp;rsquo;s look at querying for documents next.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_8&#34;&gt;Read Methods&lt;/h2&gt;
+&lt;h2 id=&#34;read-methods:35296af7b5e03e340e2ce9cac65b7c8e&#34;&gt;Read Methods&lt;/h2&gt;
 
-&lt;p&gt;The main method for querying the database are the &lt;em&gt;find&lt;/em&gt; and the &lt;em&gt;aggregate&lt;/em&gt; method. In this CRUD tutorial we will focus on &lt;em&gt;find&lt;/em&gt; only as &lt;em&gt;aggregate&lt;/em&gt; has it&amp;rsquo;s own &lt;a href=&#34;/tutorials/aggregation&#34;&gt;Aggregation Tutorial&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;The main method for querying the database are the &lt;em&gt;find&lt;/em&gt; and the &lt;em&gt;aggregate&lt;/em&gt; method. In this CRUD tutorial we will focus on &lt;em&gt;find&lt;/em&gt; only as &lt;em&gt;aggregate&lt;/em&gt; has it&amp;rsquo;s own &lt;a href=&#34;/node-mongodb-native/2.0/tutorials/aggregation&#34;&gt;Aggregation Tutorial&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;The &lt;em&gt;method&lt;/em&gt; return a cursor that allows us to operate on the data. The &lt;em&gt;cursor&lt;/em&gt; also implements the Node.js 0.10.x or higher stream interface allowing us to pipe the results to other streams. We will not cover streams here as they are covered in the &lt;a href=&#34;/tutorials/streams&#34;&gt;Streams Tutorial&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;The &lt;em&gt;method&lt;/em&gt; return a cursor that allows us to operate on the data. The &lt;em&gt;cursor&lt;/em&gt; also implements the Node.js 0.10.x or higher stream interface allowing us to pipe the results to other streams. We will not cover streams here as they are covered in the &lt;a href=&#34;/node-mongodb-native/2.0/tutorials/streams&#34;&gt;Streams Tutorial&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;Let&amp;rsquo;s look at a simple find example that materializes all the documents from a query using the toArray but limits the number of returned results to 2 documents.&lt;/p&gt;
 
@@ -1102,7 +1105,7 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;The cursor returned by the &lt;em&gt;find&lt;/em&gt; method has a lot of methods that allow for chaining of options for a query. Once the query is ready to be executed you can retrieve the documents using the &lt;em&gt;next&lt;/em&gt;, &lt;em&gt;each&lt;/em&gt; and &lt;em&gt;toArray&lt;/em&gt; methods. If the query returns a lot of documents it&amp;rsquo;s preferable to use the &lt;em&gt;next&lt;/em&gt; or &lt;em&gt;each&lt;/em&gt; methods as the &lt;em&gt;toArray&lt;/em&gt; method will materialize all the documents into memory before calling the callback function potentially using a lot of memory if the query returns a lot of documents.&lt;/p&gt;
 
-&lt;p&gt;We won&amp;rsquo;t look at the options we can set on the cursor as they can be viewed in the &lt;a href=&#34;/api-docs&#34;&gt;Cursor API documentation&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;We won&amp;rsquo;t look at the options we can set on the cursor as they can be viewed in the &lt;a href=&#34;/node-mongodb-native/2.0/api-docs&#34;&gt;Cursor API documentation&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;We already looked at &lt;em&gt;toArray&lt;/em&gt; method above. Let&amp;rsquo;s take a look at the &lt;em&gt;next&lt;/em&gt; method.&lt;/p&gt;
 
@@ -1171,14 +1174,14 @@ MongoClient.connect(url, function(err, db) {
     <item>
       <title>Aggregation</title>
       <link>/node-mongodb-native/2.0/tutorials/aggregation/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/2.0/tutorials/aggregation/</guid>
       <description>
 
-&lt;h1 id=&#34;toc_0&#34;&gt;Using the Aggregation Framework&lt;/h1&gt;
+&lt;h1 id=&#34;using-the-aggregation-framework:f74d38643fe7ae9d1c437e4fb3096e53&#34;&gt;Using the Aggregation Framework&lt;/h1&gt;
 
-&lt;p&gt;The aggregation framework lets you transform and apply grouping, summations and other operations on the documents before they are returned to the application. It&amp;rsquo;s a very powerful unix pipe like framework. In this tutorial we will explore the &lt;strong&gt;aggregate&lt;/strong&gt; method on the &lt;em&gt;Collection&lt;/em&gt; class and see how it can be used to return a cursor we can iterate over. This cursor also implements the Node.js 0.10.x stream interface which we will not cover in this tutorial. For more information about streams and the Node.js driver please look in the &lt;a href=&#34;/tutorials/streams&#34;&gt;Streams Tutorial&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The aggregation framework lets you transform and apply grouping, summations and other operations on the documents before they are returned to the application. It&amp;rsquo;s a very powerful unix pipe like framework. In this tutorial we will explore the &lt;strong&gt;aggregate&lt;/strong&gt; method on the &lt;em&gt;Collection&lt;/em&gt; class and see how it can be used to return a cursor we can iterate over. This cursor also implements the Node.js 0.10.x stream interface which we will not cover in this tutorial. For more information about streams and the Node.js driver please look in the &lt;a href=&#34;/node-mongodb-native/2.0/tutorials/streams&#34;&gt;Streams Tutorial&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;Let&amp;rsquo;s start with a simple example that returns a cursor to iterate over the results from a simple &lt;em&gt;$match&lt;/em&gt; and &lt;em&gt;$sum&lt;/em&gt;.&lt;/p&gt;
 
@@ -1294,12 +1297,12 @@ MongoClient.connect(url, function(err, db) {
     <item>
       <title>Streams</title>
       <link>/node-mongodb-native/2.0/tutorials/streams/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/2.0/tutorials/streams/</guid>
       <description>
 
-&lt;h1 id=&#34;toc_0&#34;&gt;Streams Support in the Node.js Driver&lt;/h1&gt;
+&lt;h1 id=&#34;streams-support-in-the-node-js-driver:16b198f86ae4a94402dc4b88db61ae41&#34;&gt;Streams Support in the Node.js Driver&lt;/h1&gt;
 
 &lt;p&gt;The MongoDB driver has extensive Stream support for cursors as well as for GridFS. In essence the following aspects of the driver supports Node 0.10.x or higher style streams.&lt;/p&gt;
 
@@ -1312,7 +1315,7 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;We will look at a simple example for supported stream starting with the &lt;em&gt;find&lt;/em&gt; command.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_1&#34;&gt;Find Cursor as a Stream&lt;/h2&gt;
+&lt;h2 id=&#34;find-cursor-as-a-stream:16b198f86ae4a94402dc4b88db61ae41&#34;&gt;Find Cursor as a Stream&lt;/h2&gt;
 
 &lt;p&gt;Let&amp;rsquo;s examine a simple query using &lt;em&gt;find&lt;/em&gt; and how to use it as a node.js stream.&lt;/p&gt;
 
@@ -1385,7 +1388,7 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;That wraps up the behaviors of the &lt;em&gt;Readable&lt;/em&gt; stream for the &lt;em&gt;find&lt;/em&gt; method. Next let&amp;rsquo;s look at the aggregate command.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_2&#34;&gt;Aggregation Cursor as a Stream&lt;/h2&gt;
+&lt;h2 id=&#34;aggregation-cursor-as-a-stream:16b198f86ae4a94402dc4b88db61ae41&#34;&gt;Aggregation Cursor as a Stream&lt;/h2&gt;
 
 &lt;p&gt;The aggregation cursor behaves very much like the &lt;em&gt;find&lt;/em&gt; cursor. It&amp;rsquo;s main difference is that it does not support a &lt;em&gt;transform&lt;/em&gt; method. Let&amp;rsquo;s have a look at a simple example.&lt;/p&gt;
 
@@ -1420,7 +1423,7 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;As one can see the cursor behaves in the exact same way as the cursor that is returned when invoking the &lt;em&gt;find&lt;/em&gt; method. Let&amp;rsquo;s have a look at the &lt;em&gt;parallelCollectionScan&lt;/em&gt; method that is a bit of a special case as it returns one or more cursors.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_3&#34;&gt;The parallelCollectionScan method&lt;/h2&gt;
+&lt;h2 id=&#34;the-parallelcollectionscan-method:16b198f86ae4a94402dc4b88db61ae41&#34;&gt;The parallelCollectionScan method&lt;/h2&gt;
 
 &lt;p&gt;The &lt;em&gt;parallelCollectionScan&lt;/em&gt; method is a specialized method that allows for parallel reading of a collection using multiple cursors. This method is only available when connecting to a single server or replicaset topology. Let&amp;rsquo;s look at an example.&lt;/p&gt;
 
@@ -1471,11 +1474,11 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;In this example we use each cursor as a stream and when all cursors have emitted the &lt;em&gt;end&lt;/em&gt; event we check that the number of inserted documents match the number of emitted documents. Each cursor returned from the &lt;em&gt;parallelCollectionScan&lt;/em&gt; method is functionally equivalent to the cursors returned from the the &lt;em&gt;find&lt;/em&gt; method.&lt;/p&gt;
 
-&lt;h1 id=&#34;toc_4&#34;&gt;GridStore the Read/Write Stream&lt;/h1&gt;
+&lt;h1 id=&#34;gridstore-the-read-write-stream:16b198f86ae4a94402dc4b88db61ae41&#34;&gt;GridStore the Read/Write Stream&lt;/h1&gt;
 
 &lt;p&gt;Until now all the methods we have covered are &lt;em&gt;Readable&lt;/em&gt; meaning they can only provide a readable stream. GridStore implements the &lt;em&gt;Duplex&lt;/em&gt; stream meaning it can not only be read as a Stream (say stream a mp3 straight from your GridFS collections) but also be written to (say upload a file directly via http into GridFS). Let&amp;rsquo;s look at the simple example of streaming a GridStore file and then one where we use an incoming stream to write to GridFS.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_5&#34;&gt;Streaming a GridFS file to disk&lt;/h2&gt;
+&lt;h2 id=&#34;streaming-a-gridfs-file-to-disk:16b198f86ae4a94402dc4b88db61ae41&#34;&gt;Streaming a GridFS file to disk&lt;/h2&gt;
 
 &lt;p&gt;Streaming a GridStore file to disk is fairly simple. The example below reads in a pdf file and saves it in GridFS. It then creates a GridStore instance pointing to the newly saved pdf file and passes the stream to a file write stream using pipe.&lt;/p&gt;
 
@@ -1516,7 +1519,7 @@ MongoClient.connect(url, function(err, db) {
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;h2 id=&#34;toc_6&#34;&gt;Streaming a File into GridFS&lt;/h2&gt;
+&lt;h2 id=&#34;streaming-a-file-into-gridfs:16b198f86ae4a94402dc4b88db61ae41&#34;&gt;Streaming a File into GridFS&lt;/h2&gt;
 
 &lt;p&gt;In the case of writing a file to GridFS using streams we do the reverse piping the file read stream into a our gridstore instance.&lt;/p&gt;
 
@@ -1563,18 +1566,18 @@ MongoClient.connect(url, function(err, db) {
     <item>
       <title>GridFS</title>
       <link>/node-mongodb-native/2.0/tutorials/gridfs/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/2.0/tutorials/gridfs/</guid>
       <description>
 
-&lt;h1 id=&#34;toc_0&#34;&gt;GridFS Support&lt;/h1&gt;
+&lt;h1 id=&#34;gridfs-support:7d9961fee83b2a3ab1ed4f1b8ad5c259&#34;&gt;GridFS Support&lt;/h1&gt;
 
 &lt;p&gt;GridFS is a scalable MongoDB &lt;em&gt;filesystem&lt;/em&gt; for storing and retrieving large files. The default limit for a MongoDB record is 16MB, so to store data that is larger than this limit, GridFS can be used. GridFS shards the data into smaller chunks automatically.  See &lt;a href=&#34;http://www.mongodb.org/display/DOCS/GridFS+Specification&#34;&gt;MongoDB documentation&lt;/a&gt; for details.&lt;/p&gt;
 
 &lt;p&gt;GridStore is a single file inside GridFS that can be managed by the script.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_1&#34;&gt;Open a GridFS file&lt;/h2&gt;
+&lt;h2 id=&#34;open-a-gridfs-file:7d9961fee83b2a3ab1ed4f1b8ad5c259&#34;&gt;Open a GridFS file&lt;/h2&gt;
 
 &lt;p&gt;Opening a GridStore (a single file in GridFS) is a bit similar to opening a database. At first you need to create a GridStore object and then &lt;code&gt;open&lt;/code&gt; it.&lt;/p&gt;
 
@@ -1630,7 +1633,7 @@ MongoClient.connect(url, function(err, db) {
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;h2 id=&#34;toc_2&#34;&gt;Writing to GridFS&lt;/h2&gt;
+&lt;h2 id=&#34;writing-to-gridfs:7d9961fee83b2a3ab1ed4f1b8ad5c259&#34;&gt;Writing to GridFS&lt;/h2&gt;
 
 &lt;p&gt;Writing can be done with &lt;code&gt;write&lt;/code&gt;&lt;/p&gt;
 
@@ -1641,7 +1644,7 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;While the GridStore is not closed, every write is appended to the opened GridStore.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_3&#34;&gt;Writing a file to GridFS&lt;/h2&gt;
+&lt;h2 id=&#34;writing-a-file-to-gridfs:7d9961fee83b2a3ab1ed4f1b8ad5c259&#34;&gt;Writing a file to GridFS&lt;/h2&gt;
 
 &lt;p&gt;This function opens the GridStore, streams the contents of the file into GridStore, and closes the GridStore.&lt;/p&gt;
 
@@ -1655,7 +1658,7 @@ MongoClient.connect(url, function(err, db) {
 &lt;li&gt;&lt;code&gt;callback&lt;/code&gt; is a function with two parameters - error object (if error occured) and the GridStore object.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_4&#34;&gt;Reading from a GridFS file&lt;/h2&gt;
+&lt;h2 id=&#34;reading-from-a-gridfs-file:7d9961fee83b2a3ab1ed4f1b8ad5c259&#34;&gt;Reading from a GridFS file&lt;/h2&gt;
 
 &lt;p&gt;Reading from GridStore can be done with &lt;code&gt;read&lt;/code&gt;&lt;/p&gt;
 
@@ -1669,7 +1672,7 @@ MongoClient.connect(url, function(err, db) {
 &lt;li&gt;&lt;code&gt;callback&lt;/code&gt; is a callback function with two parameters - error object (if an error occured) and data (binary string)&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_5&#34;&gt;Streaming from GridFS&lt;/h2&gt;
+&lt;h2 id=&#34;streaming-from-gridfs:7d9961fee83b2a3ab1ed4f1b8ad5c259&#34;&gt;Streaming from GridFS&lt;/h2&gt;
 
 &lt;p&gt;You can stream data as it comes from the database using &lt;code&gt;stream&lt;/code&gt;&lt;/p&gt;
 
@@ -1684,7 +1687,7 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;The function returns &lt;a href=&#34;http://nodejs.org/docs/v0.4.12/api/streams.html#readable_Stream&#34;&gt;read stream&lt;/a&gt; based on this GridStore file. It supports the events &amp;lsquo;read&amp;rsquo;, &amp;lsquo;error&amp;rsquo;, &amp;lsquo;close&amp;rsquo; and &amp;lsquo;end&amp;rsquo;.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_6&#34;&gt;Delete a GridFS file&lt;/h2&gt;
+&lt;h2 id=&#34;delete-a-gridfs-file:7d9961fee83b2a3ab1ed4f1b8ad5c259&#34;&gt;Delete a GridFS file&lt;/h2&gt;
 
 &lt;p&gt;GridStore files can be unlinked with &lt;code&gt;unlink&lt;/code&gt;&lt;/p&gt;
 
@@ -1699,14 +1702,14 @@ MongoClient.connect(url, function(err, db) {
 &lt;li&gt;&lt;code&gt;callback&lt;/code&gt; is the callback function&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_7&#34;&gt;Closing a GridFS file&lt;/h2&gt;
+&lt;h2 id=&#34;closing-a-gridfs-file:7d9961fee83b2a3ab1ed4f1b8ad5c259&#34;&gt;Closing a GridFS file&lt;/h2&gt;
 
 &lt;p&gt;GridStore needs to be closed after usage. This can be done with &lt;code&gt;close&lt;/code&gt;&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;gs.close(callback)
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;h2 id=&#34;toc_8&#34;&gt;Check if a GridFS file exists&lt;/h2&gt;
+&lt;h2 id=&#34;check-if-a-gridfs-file-exists:7d9961fee83b2a3ab1ed4f1b8ad5c259&#34;&gt;Check if a GridFS file exists&lt;/h2&gt;
 
 &lt;p&gt;Checking if a file exists in GridFS can be done with &lt;code&gt;exist&lt;/code&gt;&lt;/p&gt;
 
@@ -1721,7 +1724,7 @@ MongoClient.connect(url, function(err, db) {
 &lt;li&gt;&lt;code&gt;callback&lt;/code&gt; is a callback function with two parameters - an error object (if an error occured) and a boolean value indicating if the file exists or not&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_9&#34;&gt;Seek to a Specific position for Reading&lt;/h2&gt;
+&lt;h2 id=&#34;seek-to-a-specific-position-for-reading:7d9961fee83b2a3ab1ed4f1b8ad5c259&#34;&gt;Seek to a Specific position for Reading&lt;/h2&gt;
 
 &lt;p&gt;Seeking can be done with &lt;code&gt;seek&lt;/code&gt;&lt;/p&gt;
 
@@ -1735,16 +1738,16 @@ MongoClient.connect(url, function(err, db) {
     <item>
       <title>Logging</title>
       <link>/node-mongodb-native/2.0/tutorials/logging/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/2.0/tutorials/logging/</guid>
       <description>
 
-&lt;h1 id=&#34;toc_0&#34;&gt;Logging&lt;/h1&gt;
+&lt;h1 id=&#34;logging:3f3af53408cff75953b33723c0b061bb&#34;&gt;Logging&lt;/h1&gt;
 
 &lt;p&gt;The driver lets you log at 3 different levels. These are &lt;code&gt;debug&lt;/code&gt;, &lt;code&gt;info&lt;/code&gt; and &lt;code&gt;error&lt;/code&gt;. By default the log level is at &lt;code&gt;error&lt;/code&gt;. You can change the level, only allow specific classes to log and provide your own logger implementation. Let&amp;rsquo;s look at how we control the log level.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_1&#34;&gt;Setting Log level&lt;/h2&gt;
+&lt;h2 id=&#34;setting-log-level:3f3af53408cff75953b33723c0b061bb&#34;&gt;Setting Log level&lt;/h2&gt;
 
 &lt;p&gt;Setting the log level is pretty easy. Let&amp;rsquo;s look at example of adjusting it for our application only logging the Db class.&lt;/p&gt;
 
@@ -1772,7 +1775,7 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;Setting the level is as easy as calling the method &lt;code&gt;setLevel&lt;/code&gt; with the string value &lt;code&gt;debug&lt;/code&gt;, &lt;code&gt;info&lt;/code&gt; or &lt;code&gt;error&lt;/code&gt;. Log level is set globally.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_2&#34;&gt;Filtering On specific classes&lt;/h2&gt;
+&lt;h2 id=&#34;filtering-on-specific-classes:3f3af53408cff75953b33723c0b061bb&#34;&gt;Filtering On specific classes&lt;/h2&gt;
 
 &lt;p&gt;Say you are only interested in logging a specific class. You can tell the Logger to only log specific class names. Let&amp;rsquo;s take an example Where we only log the &lt;code&gt;Db&lt;/code&gt; class.&lt;/p&gt;
 
@@ -1832,7 +1835,7 @@ a.do();
 
 &lt;p&gt;Pretty simple and straightforward.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_3&#34;&gt;Custom logger&lt;/h2&gt;
+&lt;h2 id=&#34;custom-logger:3f3af53408cff75953b33723c0b061bb&#34;&gt;Custom logger&lt;/h2&gt;
 
 &lt;p&gt;Let&amp;rsquo;s say you don&amp;rsquo;t want the log statements to go to &lt;code&gt;console.log&lt;/code&gt; but want to send them to a new location or maybe transform them before you send them on. Let&amp;rsquo;s define our custom logger.&lt;/p&gt;
 
@@ -1870,12 +1873,12 @@ MongoClient.connect(url, function(err, db) {
     <item>
       <title>ObjectId</title>
       <link>/node-mongodb-native/2.0/tutorials/objectid/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/2.0/tutorials/objectid/</guid>
       <description>
 
-&lt;h1 id=&#34;toc_0&#34;&gt;ObjectId&lt;/h1&gt;
+&lt;h1 id=&#34;objectid:87db98e845d73c39820e3d0d7c99aa58&#34;&gt;ObjectId&lt;/h1&gt;
 
 &lt;p&gt;The ObjectId class is the default primary key for a MongoDB document and is usually found in the &lt;code&gt;_id&lt;/code&gt; field in an inserted document. Let&amp;rsquo;s look at an example.&lt;/p&gt;
 
@@ -1935,11 +1938,11 @@ console.log(id)
 
 &lt;p&gt;This will print the hexadecimal value &lt;code&gt;616161616161616161616161&lt;/code&gt; which corresponds to the string &lt;code&gt;aaaaaaaaaaaa&lt;/code&gt;&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_1&#34;&gt;Properties of a Generated ObjectId&lt;/h2&gt;
+&lt;h2 id=&#34;properties-of-a-generated-objectid:87db98e845d73c39820e3d0d7c99aa58&#34;&gt;Properties of a Generated ObjectId&lt;/h2&gt;
 
 &lt;p&gt;One of the main reasons ObjectId&amp;rsquo;s are generated in the fashion mentioned above by the drivers is that is contains a useful behavior due to the way sorting works. Given that it contains a 4 byte timestamp (resolution of seconds) and an incrementing counter as well as some more unique identifiers such as the machine id once can use the &lt;code&gt;_id&lt;/code&gt; field to sort documents in the order of creation just by simply sorting on the &lt;code&gt;_id&lt;/code&gt; field. This can be useful to save the space needed by an additional timestamp if you wish to track the time of creation of a document.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_2&#34;&gt;Driver ObjectId Constructor methods&lt;/h2&gt;
+&lt;h2 id=&#34;driver-objectid-constructor-methods:87db98e845d73c39820e3d0d7c99aa58&#34;&gt;Driver ObjectId Constructor methods&lt;/h2&gt;
 
 &lt;p&gt;The driver allows you to create ObjectId&amp;rsquo;s in a couple of ways as well as allowing you to introspects aspects of the ObjectId.&lt;/p&gt;
 
@@ -1963,7 +1966,7 @@ var id = new ObjectId(&amp;quot;616161616161616161616161&amp;quot;);
 
 &lt;p&gt;Creates a new specific ObjectId using the 24 byte hexadecimal 12 byte string representation. This is useful for when you are passing back Id&amp;rsquo;s from a web application.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_3&#34;&gt;Driver ObjectId Static methods&lt;/h2&gt;
+&lt;h2 id=&#34;driver-objectid-static-methods:87db98e845d73c39820e3d0d7c99aa58&#34;&gt;Driver ObjectId Static methods&lt;/h2&gt;
 
 &lt;p&gt;The ObjectId static methods are meant to be helpful in making it more explicit what your intention is when creating a new ObjectId.&lt;/p&gt;
 
@@ -1985,11 +1988,11 @@ var id = ObjectId.createFromHexString(&amp;quot;616161616161616161616161&amp;quo
 
 &lt;p&gt;Creates and ObjectId from the 24 byte hexadecimal representation of a 12 byte string.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_4&#34;&gt;Driver ObjectId Instance methods&lt;/h2&gt;
+&lt;h2 id=&#34;driver-objectid-instance-methods:87db98e845d73c39820e3d0d7c99aa58&#34;&gt;Driver ObjectId Instance methods&lt;/h2&gt;
 
 &lt;p&gt;The more interesting methods on an ObjectId instance are the following.&lt;/p&gt;
 
-&lt;h3 id=&#34;toc_5&#34;&gt;getTimestamp()&lt;/h3&gt;
+&lt;h3 id=&#34;gettimestamp:87db98e845d73c39820e3d0d7c99aa58&#34;&gt;getTimestamp()&lt;/h3&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var ObjectId = require(&#39;mongodb&#39;).ObjectID
 var id = new ObjectId();
@@ -1998,7 +2001,7 @@ console.log(id.getTimestamp())
 
 &lt;p&gt;This method returns a Date object representing the timestamp part of the 12 byte ObjectId as defined by the algorithm above. If the ObjectId is generated by the algorithm you will get the creation time Date object back. However if it&amp;rsquo;s just a random 12 byte sequence obviously the date coming back might be nonsensical.&lt;/p&gt;
 
-&lt;h3 id=&#34;toc_6&#34;&gt;toHexString()&lt;/h3&gt;
+&lt;h3 id=&#34;tohexstring:87db98e845d73c39820e3d0d7c99aa58&#34;&gt;toHexString()&lt;/h3&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var ObjectId = require(&#39;mongodb&#39;).ObjectID
 var id = new ObjectId(&amp;quot;aaaaaaaaaaaa&amp;quot;);
@@ -2007,7 +2010,7 @@ console.log(id.toHexString())
 
 &lt;p&gt;This will print out the hexadecimal representation of the ObjectId.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_7&#34;&gt;On Buffers&lt;/h2&gt;
+&lt;h2 id=&#34;on-buffers:87db98e845d73c39820e3d0d7c99aa58&#34;&gt;On Buffers&lt;/h2&gt;
 
 &lt;p&gt;Until the ObjectId natively accepts a buffer the best way to transform a Buffer into a valid ObjectId is to do the following.&lt;/p&gt;
 
@@ -2023,12 +2026,12 @@ console.log(id.toHexString())
     <item>
       <title>Tracing</title>
       <link>/node-mongodb-native/2.0/tutorials/tracing/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/2.0/tutorials/tracing/</guid>
       <description>
 
-&lt;h1 id=&#34;toc_0&#34;&gt;Tracing or Prototype Overriding&lt;/h1&gt;
+&lt;h1 id=&#34;tracing-or-prototype-overriding:016d3f73e04c7f7b0e809d99596cadb8&#34;&gt;Tracing or Prototype Overriding&lt;/h1&gt;
 
 &lt;p&gt;Tracing comes up a couple of times a year so it might be a useful thing for more people than just New Relic or other application metrics companies out there. Maybe you want to instrument the driver to keep some measurements client side on the time it takes for an operation to finish or maybe you want to log all operations somewhere for auditing purposes or maybe you have some awesome new idea about how to do something radically different. Well the good thing is that JavaScript is on your side when it comes to reaching your goals. The rescue comes in the form of the &lt;code&gt;prototype&lt;/code&gt; of the driver classes. Since code speaks a thousand words let&amp;rsquo;s just throw out code where override the &lt;code&gt;findOne&lt;/code&gt; method to print the time it took for the operation to the console.&lt;/p&gt;
 

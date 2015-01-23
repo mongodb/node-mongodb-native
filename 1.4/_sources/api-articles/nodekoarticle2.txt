@@ -69,8 +69,8 @@ might be very useful if you are for example storing images in you Mongo
 DB and need to store all the data associated with the image.
 
 One important thing is to take not that the put method return a document
-containing a **\_id**, this is an **ObjectID** identifier that you'll
-need to use if you wish to retrieve the file contents later.
+containing a \*\*\_id\ **, this is an **\ ObjectID\*\* identifier that
+you'll need to use if you wish to retrieve the file contents later.
 
 Right so we have written out first file, let's look at the other two
 simple functions supported by the Grid class.
@@ -104,8 +104,9 @@ Let's have a look at the two operations **get** and **delete**
     grid.get(fileInfo._id, function(err, data) {});
 
 The **get** method takes an ObjectID as the first argument and as we can
-se in the code we are using the one provided in **fileInfo.\_id**. This
-will read all the chunks for the file and return it as a Buffer object.
+se in the code we are using the one provided in \*\*fileInfo.\_id\*\*.
+This will read all the chunks for the file and return it as a Buffer
+object.
 
 The **delete** method also takes an ObjectID as the first argument but
 will delete the file entry and the chunks associated with the file in
@@ -319,7 +320,6 @@ Links and stuff
 ---------------
 
 -  `The driver examples, good starting point for basic
-   usage <https://github.com/mongodb/node-mongodb-native/tree/master/examples>`_
+   usage <https://github.com/mongodb/node-mongodb-native/tree/master/examples>`__
 -  `All the integration tests, they have tons of different usage
-   cases <https://github.com/mongodb/node-mongodb-native/tree/master/test>`_
-
+   cases <https://github.com/mongodb/node-mongodb-native/tree/master/test>`__

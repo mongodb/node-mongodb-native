@@ -56,7 +56,7 @@
           
               
                 <li>
-                <a class="" href="/node-mongodb-native/">
+                <a class="" href="/node-mongodb-native/core/node-mongodb-native/">
                     <i class='fa fa-file-text'></i>
                     
                     <span>driver portal</span>
@@ -185,15 +185,7 @@
           
             <li> <a href="https://jira.mongodb.org/browse/NODE" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
             
-              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/overview/quickstart.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
-            
-            <li><a href='https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge'><img src='https://badges.gitter.im/Join Chat.svg'/></a></li>
-        </ul>
-        
-    </div>
-</aside>
-
-
+              
 
       
       <section id="main-content">
@@ -230,11 +222,11 @@
 
 
 
-<h1 id="toc_0">QuickStart</h1>
+<h1 id="quickstart:09c84f91027bd18b03251c05a0da4abb">QuickStart</h1>
 
 <p>The quickstart guide will show you how to set up a simple application using Core driver and MongoDB. It scope is only how to set up the driver and perform the simple crud operations. For more inn depth coverage we encourage reading the tutorials.</p>
 
-<h2 id="toc_1">Create the package.json file</h2>
+<h2 id="create-the-package-json-file:09c84f91027bd18b03251c05a0da4abb">Create the package.json file</h2>
 
 <p>Let&rsquo;s create a directory where our application will live. In our case we will put this under our projects directory.</p>
 
@@ -272,7 +264,7 @@ cd myproject
 
 <p>You should see <strong>NPM</strong> download a lot of files. Once it&rsquo;s done you&rsquo;ll find all the downloaded packages under the <strong>node_modules</strong> directory.</p>
 
-<h2 id="toc_2">Booting up a MongoDB Server</h2>
+<h2 id="booting-up-a-mongodb-server:09c84f91027bd18b03251c05a0da4abb">Booting up a MongoDB Server</h2>
 
 <p>Let&rsquo;s boot up a MongoDB server instance. Download the right MongoDB version from <a href="http://www.mongodb.org">MongoDB</a>, open a new shell or command line and ensure the <strong>mongod</strong> command is in the shell or command line path. Now let&rsquo;s create a database directory (in our case under <strong>/data</strong>).</p>
 
@@ -281,7 +273,7 @@ cd myproject
 
 <p>You should see the <strong>mongod</strong> process start up and print some status information.</p>
 
-<h2 id="toc_3">Connecting to MongoDB</h2>
+<h2 id="connecting-to-mongodb:09c84f91027bd18b03251c05a0da4abb">Connecting to MongoDB</h2>
 
 <p>Let&rsquo;s create a new <strong>app.js</strong> file that we will use to show the basic CRUD operations using the MongoDB driver.</p>
 
@@ -411,7 +403,7 @@ server.connect();
 
 <p>The Core Driver is a building block for library builders and is not meant for usage by end users as it lacks a lot of features the end user might need such as automatic buffering of operations when a primary is changing in a replicaset or the db and collections abstraction.</p>
 
-<h2 id="toc_4">Next steps</h2>
+<h2 id="next-steps:09c84f91027bd18b03251c05a0da4abb">Next steps</h2>
 
 <p>The next steps is to get more inn depth information about how the different aspects of the core driver works and how to leverage them to extend the functionality of the cursors. Please view the tutorials for more detailed information.</p>
 

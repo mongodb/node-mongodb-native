@@ -56,20 +56,10 @@
           
               
                 <li>
-                <a class="" href="/node-mongodb-native/">
+                <a class="" href="http://learnmongodbthehardway.com/">
                     <i class='fa fa-file-text'></i>
                     
                     <span>driver portal</span>
-                </a>
-              
-              </li>
-          
-              
-                <li>
-                <a class="" href="http://learnmongodbthehardway.com">
-                    <i class='fa fa-file-text'></i>
-                    
-                    <span>Learn Mongo DB</span>
                 </a>
               
               </li>
@@ -86,7 +76,7 @@
           
               
                 <li>
-                <a class="" href="/node-mongodb-native/1.4">
+                <a class="" href="/node-mongodb-native/2.0/node-mongodb-native/1/index.4/">
                     <i class='fa fa-file-text'></i>
                     
                     <span>legacy docs 1.4.X</span>
@@ -230,15 +220,7 @@
           
             <li> <a href="https://jira.mongodb.org/browse/NODE" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
             
-              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/tutorials/urls.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
-            
-            <li><a href='https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge'><img src='https://badges.gitter.im/Join Chat.svg'/></a></li>
-        </ul>
-        
-    </div>
-</aside>
-
-
+              
 
       
       <section id="main-content">
@@ -275,14 +257,14 @@
 
 
 
-<h2 id="toc_0">The URL connection format</h2>
+<h2 id="the-url-connection-format:99d81047217b3d4c05529f0b727e6e5e">The URL connection format</h2>
 
 <pre><code>mongodb://[username:password@]host1[:port1][,host2[:port2],...[,hostN[:portN]]][/[database][?options]]
 </code></pre>
 
 <p>The URL format is unified across official drivers from Mongodb with some options not supported on some drivers due to implementation differences. The ones not supported by the Node.js driver are left out for simplicities sake.</p>
 
-<h3 id="toc_1">Basic parts of the url</h3>
+<h3 id="basic-parts-of-the-url:99d81047217b3d4c05529f0b727e6e5e">Basic parts of the url</h3>
 
 <ul>
 <li><code>mongodb://</code> is a required prefix to identify that this is a string in the standard connection format.</li>
@@ -293,7 +275,7 @@
 <li><code>?options</code> are connection options. Note that if database is absent there is still a / required between the last host and the ? introducing the options. Options are name=value pairs and the pairs are separated by &ldquo;&amp;&ldquo;. For any unrecognized or unsupported option, a driver should log a warning and continue processing. A driver should not support any options that are not explicitly defined in this specification. This is in order to reduce the likelihood that different drivers will support overlapping that differ in small but incompatible ways (like different name, different values, or different default value).</li>
 </ul>
 
-<h3 id="toc_2">Replica set configuration:</h3>
+<h3 id="replica-set-configuration:99d81047217b3d4c05529f0b727e6e5e">Replica set configuration:</h3>
 
 <ul>
 <li><code>replicaSet=name</code>
@@ -305,7 +287,7 @@
 </ul></li>
 </ul>
 
-<h3 id="toc_3">Connection Configuration:</h3>
+<h3 id="connection-configuration:99d81047217b3d4c05529f0b727e6e5e">Connection Configuration:</h3>
 
 <ul>
 <li><p><code>ssl=true|false|prefer</code></p>
@@ -332,7 +314,7 @@
 </ul></li>
 </ul>
 
-<h3 id="toc_4">Connection pool configuration:</h3>
+<h3 id="connection-pool-configuration:99d81047217b3d4c05529f0b727e6e5e">Connection pool configuration:</h3>
 
 <ul>
 <li><code>maxPoolSize=n:</code> The maximum number of connections in the connection pool
@@ -342,7 +324,7 @@
 </ul></li>
 </ul>
 
-<h3 id="toc_5">Write concern configuration:</h3>
+<h3 id="write-concern-configuration:99d81047217b3d4c05529f0b727e6e5e">Write concern configuration:</h3>
 
 <p>More detailed information about write concerns can be found at <a href="http://www.mongodb.org/display/DOCS/getLastError+Command">http://www.mongodb.org/display/DOCS/getLastError+Command</a></p>
 
@@ -390,7 +372,7 @@
 </ul></li>
 </ul>
 
-<h3 id="toc_6">Auth options</h3>
+<h3 id="auth-options:99d81047217b3d4c05529f0b727e6e5e">Auth options</h3>
 
 <ul>
 <li><code>authSource=string:</code> Used when the user for authentication is stored in another database using indirect authentication.
@@ -400,7 +382,7 @@
 </ul></li>
 </ul>
 
-<h3 id="toc_7">Read Preference</h3>
+<h3 id="read-preference:99d81047217b3d4c05529f0b727e6e5e">Read Preference</h3>
 
 <ul>
 <li><p><code>slaveOk=true|false:</code> Whether a driver connected to a replica set will send reads to slaves/secondaries.</p>

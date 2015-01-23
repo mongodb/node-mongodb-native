@@ -56,20 +56,10 @@
           
               
                 <li>
-                <a class="" href="/node-mongodb-native/">
+                <a class="" href="http://learnmongodbthehardway.com/">
                     <i class='fa fa-file-text'></i>
                     
                     <span>driver portal</span>
-                </a>
-              
-              </li>
-          
-              
-                <li>
-                <a class="" href="http://learnmongodbthehardway.com">
-                    <i class='fa fa-file-text'></i>
-                    
-                    <span>Learn Mongo DB</span>
                 </a>
               
               </li>
@@ -86,7 +76,7 @@
           
               
                 <li>
-                <a class="" href="/node-mongodb-native/1.4">
+                <a class="" href="/node-mongodb-native/2.0/node-mongodb-native/1/index.4/">
                     <i class='fa fa-file-text'></i>
                     
                     <span>legacy docs 1.4.X</span>
@@ -230,15 +220,7 @@
           
             <li> <a href="https://jira.mongodb.org/browse/NODE" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
             
-              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/tutorials/tracing.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
-            
-            <li><a href='https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge'><img src='https://badges.gitter.im/Join Chat.svg'/></a></li>
-        </ul>
-        
-    </div>
-</aside>
-
-
+              
 
       
       <section id="main-content">
@@ -275,7 +257,7 @@
 
 
 
-<h1 id="toc_0">Tracing or Prototype Overriding</h1>
+<h1 id="tracing-or-prototype-overriding:016d3f73e04c7f7b0e809d99596cadb8">Tracing or Prototype Overriding</h1>
 
 <p>Tracing comes up a couple of times a year so it might be a useful thing for more people than just New Relic or other application metrics companies out there. Maybe you want to instrument the driver to keep some measurements client side on the time it takes for an operation to finish or maybe you want to log all operations somewhere for auditing purposes or maybe you have some awesome new idea about how to do something radically different. Well the good thing is that JavaScript is on your side when it comes to reaching your goals. The rescue comes in the form of the <code>prototype</code> of the driver classes. Since code speaks a thousand words let&rsquo;s just throw out code where override the <code>findOne</code> method to print the time it took for the operation to the console.</p>
 

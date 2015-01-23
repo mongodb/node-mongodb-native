@@ -56,7 +56,7 @@ but use find to acquire a cursor. (INTERNAL TYPE)</p>
 <blockquote>
 <div><dl class="class">
 <dt id="Cursor">
-<em class="property">class </em><tt class="descname">Cursor</tt><big>(</big><big>)</big><a class="headerlink" href="#Cursor" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descname">Cursor</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Cursor" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -146,7 +146,7 @@ but use find to acquire a cursor. (INTERNAL TYPE)</p>
 <p>Clones a given cursor but uses new options</p>
 <dl class="function">
 <dt id="Cursor.cloneWithOptions">
-<tt class="descclassname">Cursor.</tt><tt class="descname">cloneWithOptions</tt><big>(</big><em>cursor</em><big>)</big><a class="headerlink" href="#Cursor.cloneWithOptions" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">Cursor.</code><code class="descname">cloneWithOptions</code><span class="sig-paren">(</span><em>cursor</em><span class="sig-paren">)</span><a class="headerlink" href="#Cursor.cloneWithOptions" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -170,7 +170,7 @@ but use find to acquire a cursor. (INTERNAL TYPE)</p>
 tailable, batchSizeValue, skipValue and limits are preserved.</p>
 <dl class="function">
 <dt>
-<tt class="descname">rewind</tt><big>(</big><big>)</big></dt>
+<code class="descname">rewind</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -242,7 +242,7 @@ results when this cursor had been previouly accessed. In that case,
 cursor.rewind() can be used to reset the cursor.</p>
 <dl class="function">
 <dt id="toArray">
-<tt class="descname">toArray</tt><big>(</big><em>callback</em><big>)</big><a class="headerlink" href="#toArray" title="Permalink to this definition">¶</a></dt>
+<code class="descname">toArray</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#toArray" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -306,7 +306,7 @@ at any given time if batch size is specified. Otherwise, the caller is responsib
 for making sure that the entire result can fit the memory.</p>
 <dl class="function">
 <dt>
-<tt class="descname">each</tt><big>(</big><em>callback</em><big>)</big></dt>
+<code class="descname">each</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -329,7 +329,7 @@ for making sure that the entire result can fit the memory.</p>
 <p>Determines how many result the query for this cursor will return</p>
 <dl class="function">
 <dt>
-<tt class="descname">count</tt><big>(</big><em>applySkipLimit</em>, <em>callback</em><big>)</big></dt>
+<code class="descname">count</code><span class="sig-paren">(</span><em>applySkipLimit</em>, <em>callback</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -393,7 +393,7 @@ for making sure that the entire result can fit the memory.</p>
 (keyOrList, direction, callback)</p>
 <dl class="function">
 <dt>
-<tt class="descname">sort</tt><big>(</big><em>keyOrList</em>, <em>direction</em>, <em>callback</em><big>)</big></dt>
+<code class="descname">sort</code><span class="sig-paren">(</span><em>keyOrList</em>, <em>direction</em>, <em>callback</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -461,7 +461,7 @@ for making sure that the entire result can fit the memory.</p>
 <p>Sets the limit parameter of this cursor to the given value.</p>
 <dl class="function">
 <dt>
-<tt class="descname">limit</tt><big>(</big><em>limit</em><span class="optional">[</span>, <em>callback</em><span class="optional">]</span><big>)</big></dt>
+<code class="descname">limit</code><span class="sig-paren">(</span><em>limit</em><span class="optional">[</span>, <em>callback</em><span class="optional">]</span><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -524,7 +524,7 @@ time is exceeded, the operation will be aborted and an error will be
 returned to the client. If maxTimeMS is null, no limit is applied.</p>
 <dl class="function">
 <dt id="maxTimeMS">
-<tt class="descname">maxTimeMS</tt><big>(</big><em>maxTimeMS</em><span class="optional">[</span>, <em>callback</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#maxTimeMS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">maxTimeMS</code><span class="sig-paren">(</span><em>maxTimeMS</em><span class="optional">[</span>, <em>callback</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#maxTimeMS" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -548,7 +548,7 @@ returned to the client. If maxTimeMS is null, no limit is applied.</p>
 <p>Sets the read preference for the cursor</p>
 <dl class="function">
 <dt id="setReadPreference">
-<tt class="descname">setReadPreference</tt><big>(</big><em>the</em><span class="optional">[</span>, <em>callback</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#setReadPreference" title="Permalink to this definition">¶</a></dt>
+<code class="descname">setReadPreference</code><span class="sig-paren">(</span><em>the</em><span class="optional">[</span>, <em>callback</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#setReadPreference" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -572,7 +572,7 @@ returned to the client. If maxTimeMS is null, no limit is applied.</p>
 <p>Sets the skip parameter of this cursor to the given value.</p>
 <dl class="function">
 <dt>
-<tt class="descname">skip</tt><big>(</big><em>skip</em><span class="optional">[</span>, <em>callback</em><span class="optional">]</span><big>)</big></dt>
+<code class="descname">skip</code><span class="sig-paren">(</span><em>skip</em><span class="optional">[</span>, <em>callback</em><span class="optional">]</span><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -633,7 +633,7 @@ returned to the client. If maxTimeMS is null, no limit is applied.</p>
 <p>Sets the batch size parameter of this cursor to the given value.</p>
 <dl class="function">
 <dt id="batchSize">
-<tt class="descname">batchSize</tt><big>(</big><em>batchSize</em><span class="optional">[</span>, <em>callback</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#batchSize" title="Permalink to this definition">¶</a></dt>
+<code class="descname">batchSize</code><span class="sig-paren">(</span><em>batchSize</em><span class="optional">[</span>, <em>callback</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#batchSize" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -695,7 +695,7 @@ documents are returned for each batch using the getMoreCommand against the Mongo
 <p>Gets the next document from the cursor.</p>
 <dl class="function">
 <dt id="nextObject">
-<tt class="descname">nextObject</tt><big>(</big><em>callback</em><big>)</big><a class="headerlink" href="#nextObject" title="Permalink to this definition">¶</a></dt>
+<code class="descname">nextObject</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#nextObject" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -753,7 +753,7 @@ documents are returned for each batch using the getMoreCommand against the Mongo
 long it took the database to process it.</p>
 <dl class="function">
 <dt>
-<tt class="descname">explain</tt><big>(</big><em>callback</em><big>)</big></dt>
+<code class="descname">explain</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -816,7 +816,7 @@ long it took the database to process it.</p>
 </dl>
 <dl class="function">
 <dt>
-<tt class="descname">stream</tt><big>(</big><big>)</big></dt>
+<code class="descname">stream</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -931,7 +931,7 @@ long it took the database to process it.</p>
 <p>Close the cursor.</p>
 <dl class="function">
 <dt>
-<tt class="descname">close</tt><big>(</big><em>callback</em><big>)</big></dt>
+<code class="descname">close</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1002,7 +1002,7 @@ long it took the database to process it.</p>
 <p>Check if the cursor is closed or open.</p>
 <dl class="function">
 <dt id="isClosed">
-<tt class="descname">isClosed</tt><big>(</big><big>)</big><a class="headerlink" href="#isClosed" title="Permalink to this definition">¶</a></dt>
+<code class="descname">isClosed</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#isClosed" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1223,7 +1223,7 @@ long it took the database to process it.</p>
    </ul>
  </li>
 </ul>
-<div id="searchbox" style="display: none">
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
       <input type="text" name="q" />
@@ -1254,7 +1254,7 @@ long it took the database to process it.</p>
     </div></div>
     <div class="footer">
         &copy; Copyright 2013, MongoDB Node.JS Team 
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2.3.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3b2.
 
     <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
     <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>

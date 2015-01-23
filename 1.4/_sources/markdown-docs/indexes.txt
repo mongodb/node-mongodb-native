@@ -7,7 +7,7 @@ index set, then the query will be a lot faster compared to if the index
 was not present.
 
 See `MongoDB
-documentation <http://www.mongodb.org/display/DOCS/Indexes>`_ for
+documentation <http://www.mongodb.org/display/DOCS/Indexes>`__ for
 details.
 
 Create indexes with createIndex()
@@ -16,13 +16,13 @@ Create indexes with createIndex()
 ``createIndex`` adds a new index to a collection. For checking if the
 index was already set, use ``ensureIndex`` instead.
 
-::
+.. code:: javascript
 
       collection.createIndex(index[, options], callback)
 
 or
 
-::
+.. code:: javascript
 
       db.createIndex(collectionname, index[, options], callback)
 
@@ -48,7 +48,7 @@ Index field
 Index field can be a simple string like ``"username"`` to index certain
 field (in this case, a field named as *username*).
 
-::
+.. code:: javascript
 
       collection.ensureIndex("username",callback)
 
@@ -56,20 +56,20 @@ It is possible to index fields inside nested objects, for example
 ``"user.firstname"`` to index field named *firstname* inside a document
 named *user*.
 
-::
+.. code:: javascript
 
       collection.ensureIndex("user.firstname",callback)
 
 It is also possible to create mixed indexes to include several fields at
 once.
 
-::
+.. code:: javascript
 
       collection.ensureIndex({firstname:1, lastname:1}, callback)
 
 or with tuples
 
-::
+.. code:: javascript
 
       collection.ensureIndex([["firstname", 1], ["lastname", 1]], callback)
 
@@ -78,7 +78,7 @@ ascending value, if it's -1 then it's descending. For example if you
 have documents with a field *date* and you want to sort these records in
 descending order then you might want to add corresponding index
 
-::
+.. code:: javascript
 
       collection.ensureIndex({date:-1}, callback)
 
@@ -87,7 +87,7 @@ Remove indexes with dropIndex()
 
 All indexes can be dropped at once with ``dropIndexes``
 
-::
+.. code:: javascript
 
       collection.dropIndexes(callback)
 
@@ -100,7 +100,7 @@ Get index information with indexInformation()
 ``indexInformation`` can be used to fetch some useful information about
 collection indexes.
 
-::
+.. code:: javascript
 
       collection.indexInformation(callback)
 
@@ -115,4 +115,9 @@ index for the ``_id`` field and an additonal descending index for
 ``"username"`` field, then the index information object would look like
 the following
 
-``javascript   {     "_id":[["_id", 1]],     "username_-1":[["username", -1]]   }``
+.. code:: javascript
+
+      {
+        "_id":[["_id", 1]],
+        "username_-1":[["username", -1]]
+      } 

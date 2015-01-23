@@ -6,15 +6,15 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <meta name="keyword" content="">
-    <link rel="shortcut icon" href="/node-mongodb-native/img/favicon.png">
+    <link rel="shortcut icon" href="/img/favicon.png">
 
     <title>MongoDB Storage</title>
 
-    <link href="/node-mongodb-native/css/bootstrap-theme.css" rel="stylesheet">
-    <link href="/node-mongodb-native/assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
-    <link href="/node-mongodb-native/css/style.css" rel="stylesheet">
-    <link href="/node-mongodb-native/css/style-responsive.css" rel="stylesheet" />
-    <link href="/node-mongodb-native/css/monokai_sublime.css" rel="stylesheet" />
+    <link href="/css/bootstrap-theme.css" rel="stylesheet">
+    <link href="/assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/style-responsive.css" rel="stylesheet" />
+    <link href="/css/monokai_sublime.css" rel="stylesheet" />
 
   </head>
 
@@ -30,7 +30,7 @@
             </div>
 
             
-            <a href="/node-mongodb-native/" class="logo"><img src="/node-mongodb-native/img/logo-mongodb-header.png" style="height:40px;"></a>
+            <a href="/" class="logo"><img src="/img/logo-mongodb-header.png" style="height:40px;"></a>
 
             <div class="nav title-row" id="top_menu">
                 <h1 class="nav top-menu"> MongoDB Storage </h1>
@@ -56,27 +56,27 @@
             </a>
                 <ul class="sub open">
                     
-                    <li><a href="/node-mongodb-native/schema/chapter1/"> Introduction </a> </li>
+                    <li><a href="/schema/chapter1/"> Introduction </a> </li>
                     
-                    <li><a href="/node-mongodb-native/schema/chapter2/"> Schema Basics </a> </li>
+                    <li><a href="/schema/chapter2/"> Schema Basics </a> </li>
                     
-                    <li class="active"><a href="/node-mongodb-native/schema/chapter3/"> MongoDB Storage </a> </li>
+                    <li class="active"><a href="/schema/chapter3/"> MongoDB Storage </a> </li>
                     
-                    <li><a href="/node-mongodb-native/schema/chapter4/"> Indexes </a> </li>
+                    <li><a href="/schema/chapter4/"> Indexes </a> </li>
                     
-                    <li><a href="/node-mongodb-native/schema/chapter5/"> Metadata </a> </li>
+                    <li><a href="/schema/chapter5/"> Metadata </a> </li>
                     
-                    <li><a href="/node-mongodb-native/schema/chapter6/"> Time Series </a> </li>
+                    <li><a href="/schema/chapter6/"> Time Series </a> </li>
                     
-                    <li><a href="/node-mongodb-native/schema/chapter7/"> Queues </a> </li>
+                    <li><a href="/schema/chapter7/"> Queues </a> </li>
                     
-                    <li><a href="/node-mongodb-native/schema/chapter8/"> Nested Categories </a> </li>
+                    <li><a href="/schema/chapter8/"> Nested Categories </a> </li>
                     
-                    <li><a href="/node-mongodb-native/schema/chapter9/"> Account Transactions </a> </li>
+                    <li><a href="/schema/chapter9/"> Account Transactions </a> </li>
                     
-                    <li><a href="/node-mongodb-native/schema/chapter10/"> Shopping Cart </a> </li>
+                    <li><a href="/schema/chapter10/"> Shopping Cart </a> </li>
                     
-                    <li><a href="/node-mongodb-native/schema/chapter11/"> Sharding </a> </li>
+                    <li><a href="/schema/chapter11/"> Sharding </a> </li>
                     
                 </ul>
               
@@ -87,7 +87,27 @@
                 <a class="" href="http://mongodb.github.com/node-mongodb-native/2.0">
                     <i class='fa fa-file-text'></i>
                     
-                    <span>node.js driver docs</span>
+                    <span>2.0 driver docs</span>
+                </a>
+              
+              </li>
+          
+              
+                <li>
+                <a class="" href="http://mongodb.github.com/node-mongodb-native/1.4">
+                    <i class='fa fa-file-text'></i>
+                    
+                    <span>1.4 driver docs</span>
+                </a>
+              
+              </li>
+          
+              
+                <li>
+                <a class="" href="http://mongodb.github.com/node-mongodb-native/core">
+                    <i class='fa fa-file-text'></i>
+                    
+                    <span>Core driver docs</span>
                 </a>
               
               </li>
@@ -137,11 +157,11 @@
 
 
 
-<h1 id="toc_0">MongoDB Storage</h1>
+<h1 id="mongodb-storage:b3a7a6b1d300a0da8d3b13d4a559ed84">MongoDB Storage</h1>
 
 <p>To properly understand how a schema design impacts performance it&rsquo;s important to understand how MongoDB works under the covers.</p>
 
-<h2 id="toc_1">Memory Mapped Files</h2>
+<h2 id="memory-mapped-files:b3a7a6b1d300a0da8d3b13d4a559ed84">Memory Mapped Files</h2>
 
 <p>MongoDB uses memory-mapped files to store it&rsquo;s data (A memory-mapped file is a segment of virtual memory which has been assigned a direct byte-for-byte correlation with some portion of a file or file).</p>
 
@@ -164,7 +184,7 @@
 
 <p>This is usually a sign that it&rsquo;s time to consider either increasing the amount of RAM in your machine or to shard your MongoDB system so more of your &ldquo;Working Set&rdquo; can be kept in memory (sharding splits your &ldquo;Working Set&rdquo; across multiple machines RAM resources).</p>
 
-<h2 id="toc_2">Padding</h2>
+<h2 id="padding:b3a7a6b1d300a0da8d3b13d4a559ed84">Padding</h2>
 
 <p>Another important aspect to understand with MongoDB is how documents physically grow in the database. Let&rsquo;s take the simple document example below.</p>
 
@@ -191,7 +211,7 @@
 <p>Over time the <strong>padding factor</strong> that governs how much extra space is appended to a document inserted into MongoDB changes as the database attempts to find the balance between the eventual size of documents and the unused space take up by the <em>padding</em>. However if the growth of individual documents is random MongoDB will not be able to correctly <strong>Pre-Allocate</strong> the right level of <em>padding</em> and the database might end up spending a lot of time copying documents around in memory and on disk instead of performing application specific work causing an impact on write performance.</p>
 
 <blockquote>
-<h2 id="toc_3">How to determine the padding factor</h2>
+<h2 id="how-to-determine-the-padding-factor:b3a7a6b1d300a0da8d3b13d4a559ed84">How to determine the padding factor</h2>
 
 <p>You can determine the <em>padding</em> factor for a specific collection in the following way</p>
 </blockquote>
@@ -206,7 +226,7 @@
 
 <p>A <strong>padding factor</strong> of 1 is usually a sign that the database is spending most of it&rsquo;s time writing new data to memory and disk instead of moving existing data. Having said that one has to take into account the scale of the writing operations. If you have only a 1000 documents in a collection it might not matter if you&rsquo;re <strong>padding factor</strong> is closer to 2. On the other hand if you are writing massive amounts of time series data the impact of moving documents around in memory and on disk might have a severe impact on your performance.</p>
 
-<h2 id="toc_4">Fragmentation</h2>
+<h2 id="fragmentation:b3a7a6b1d300a0da8d3b13d4a559ed84">Fragmentation</h2>
 
 <p>When documents move around or are removed they leave holes. MongoDB tries to reuse these holes for new documents when ever possible, but over time it will slowly and steadily find itself having a lot of holes that cannot be reused because documents cannot fit in them. This effect is called fragmentation and is common in all systems that allocate memory including your operating system.</p>
 
@@ -216,7 +236,7 @@
 <p>The effect of fragmentation is to waste space. Due to the fact that MongoDB uses memory mapped files any fragmentation on disk will be reflected in fragmentation in RAM as well. This has the effect of making less of the &ldquo;Working Set&rdquo; fit in RAM and causing more swapping to disk.</p>
 
 <blockquote>
-<h2 id="toc_5">How to determine the fragmentation</h2>
+<h2 id="how-to-determine-the-fragmentation:b3a7a6b1d300a0da8d3b13d4a559ed84">How to determine the fragmentation</h2>
 
 <p>You can get a good indication of fragmentation by</p>
 </blockquote>
@@ -278,14 +298,14 @@
   </section>
   
     
-    <script src="/node-mongodb-native/js/jquery-2.1.1.min.js"></script>
-    <script src="/node-mongodb-native/js/jquery.scrollTo.min.js"></script>
-    <script src="/node-mongodb-native/js/bootstrap.min.js"></script>
+    <script src="/js/jquery-2.1.1.min.js"></script>
+    <script src="/js/jquery.scrollTo.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
     
-    <script src="/node-mongodb-native/js/highlight.pack.js"></script>
+    <script src="/js/highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
-    <script src="/node-mongodb-native/js/scripts.js"></script>
-    <script async defer id="github-bjs" src="/node-mongodb-native/js/buttons.js"></script>
+    <script src="/js/scripts.js"></script>
+    <script async defer id="github-bjs" src="/js/buttons.js"></script>
     <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

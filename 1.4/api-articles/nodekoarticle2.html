@@ -104,8 +104,8 @@ type. Each file entry in GridFS has support for metadata documents which
 might be very useful if you are for example storing images in you Mongo
 DB and need to store all the data associated with the image.</p>
 <p>One important thing is to take not that the put method return a document
-containing a <strong>_id</strong>, this is an <strong>ObjectID</strong> identifier that you&#8217;ll
-need to use if you wish to retrieve the file contents later.</p>
+containing a **_id<a href="#id1"><span class="problematic" id="id2">**</span></a>, this is an <a href="#id3"><span class="problematic" id="id4">**</span></a>ObjectID** identifier that
+you&#8217;ll need to use if you wish to retrieve the file contents later.</p>
 <p>Right so we have written out first file, let&#8217;s look at the other two
 simple functions supported by the Grid class.</p>
 <p><strong>the requires and and other initializing stuff omitted for brevity</strong></p>
@@ -133,8 +133,9 @@ MongoClient.connect(&quot;mongodb://localhost:27017/exampleDb&quot;, function(er
 </pre></div>
 </div>
 <p>The <strong>get</strong> method takes an ObjectID as the first argument and as we can
-se in the code we are using the one provided in <strong>fileInfo._id</strong>. This
-will read all the chunks for the file and return it as a Buffer object.</p>
+se in the code we are using the one provided in **fileInfo._id**.
+This will read all the chunks for the file and return it as a Buffer
+object.</p>
 <p>The <strong>delete</strong> method also takes an ObjectID as the first argument but
 will delete the file entry and the chunks associated with the file in
 Mongo.</p>
@@ -468,7 +469,7 @@ cases</a></li>
    </ul>
  </li>
 </ul>
-<div id="searchbox" style="display: none">
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
       <input type="text" name="q" />
@@ -499,7 +500,7 @@ cases</a></li>
     </div></div>
     <div class="footer">
         &copy; Copyright 2013, MongoDB Node.JS Team 
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2.3.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3b2.
 
     <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
     <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>

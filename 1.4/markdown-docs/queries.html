@@ -53,59 +53,59 @@
 </ul>
 <div class="section" id="making-queries-with-find">
 <h2>Making queries with find()<a class="headerlink" href="#making-queries-with-find" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="collections.md">Collections</a> can be queried with <tt class="docutils literal"><span class="pre">find</span></tt>.</p>
-<div class="highlight-python"><div class="highlight"><pre>collection.find(query[[[, fields], options], callback]);
+<p><a class="reference external" href="collections.md">Collections</a> can be queried with <code class="docutils literal"><span class="pre">find</span></code>.</p>
+<div class="code javascript highlight-python"><div class="highlight"><pre>collection.find(query[[[, fields], options], callback]);
 </pre></div>
 </div>
 <p>Where</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">query</span></tt> - is a query object, defining the conditions the documents
+<li><code class="docutils literal"><span class="pre">query</span></code> - is a query object, defining the conditions the documents
 need to apply</li>
-<li><tt class="docutils literal"><span class="pre">fields</span></tt> - indicates which fields should be included in the
+<li><code class="docutils literal"><span class="pre">fields</span></code> - indicates which fields should be included in the
 response (default is all)</li>
-<li><tt class="docutils literal"><span class="pre">options</span></tt> - defines extra logic (sorting options, paging etc.)</li>
-<li><tt class="docutils literal"><span class="pre">raw</span></tt> - driver returns documents as bson binary Buffer objects,
-<tt class="docutils literal"><span class="pre">default:false</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">callback</span></tt> has two parameters - an error object (if an error
+<li><code class="docutils literal"><span class="pre">options</span></code> - defines extra logic (sorting options, paging etc.)</li>
+<li><code class="docutils literal"><span class="pre">raw</span></code> - driver returns documents as bson binary Buffer objects,
+<code class="docutils literal"><span class="pre">default:false</span></code></li>
+<li><code class="docutils literal"><span class="pre">callback</span></code> has two parameters - an error object (if an error
 occured) and a cursor object.</li>
 </ul>
 <p>The result for the query is actually a cursor object. This can be used
 directly or converted to an array.</p>
-<div class="highlight-python"><div class="highlight"><pre>var cursor = collection.find({});
+<div class="code javascript highlight-python"><div class="highlight"><pre>var cursor = collection.find({});
 cursor.each(...);
 </pre></div>
 </div>
-<p>To indicate which fields must or must no be returned <tt class="docutils literal"><span class="pre">fields</span></tt> value
-can be used. For example the following <tt class="docutils literal"><span class="pre">fields</span></tt> value</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+<p>To indicate which fields must or must no be returned <code class="docutils literal"><span class="pre">fields</span></code> value
+can be used. For example the following <code class="docutils literal"><span class="pre">fields</span></code> value</p>
+<div class="code javascript highlight-python"><div class="highlight"><pre><span class="p">{</span>
   <span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="n">true</span><span class="p">,</span>
   <span class="s">&quot;title&quot;</span><span class="p">:</span> <span class="n">true</span>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>retrieves fields <tt class="docutils literal"><span class="pre">name</span></tt> and <tt class="docutils literal"><span class="pre">title</span></tt> (and as a default also <tt class="docutils literal"><span class="pre">_id</span></tt>)
+<p>retrieves fields <code class="docutils literal"><span class="pre">name</span></code> and <code class="docutils literal"><span class="pre">title</span></code> (and as a default also <code class="docutils literal"><span class="pre">_id</span></code>)
 but not any others.</p>
 </div>
 <div class="section" id="find-first-occurence-with-findone">
 <h2>Find first occurence with findOne()<a class="headerlink" href="#find-first-occurence-with-findone" title="Permalink to this headline">¶</a></h2>
-<p><tt class="docutils literal"><span class="pre">findOne</span></tt> is a convinence method finding and returning the first match
-of a query while regular <tt class="docutils literal"><span class="pre">find</span></tt> returns a cursor object instead. Use
+<p><code class="docutils literal"><span class="pre">findOne</span></code> is a convinence method finding and returning the first match
+of a query while regular <code class="docutils literal"><span class="pre">find</span></code> returns a cursor object instead. Use
 it when you expect only one record, for example when querying with
-<tt class="docutils literal"><span class="pre">_id</span></tt> or another unique property.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">findOne</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="p">[</span><span class="n">fields</span><span class="p">,</span> <span class="p">[</span><span class="n">options</span><span class="p">]],</span> <span class="n">callback</span><span class="p">);</span>
+<code class="docutils literal"><span class="pre">_id</span></code> or another unique property.</p>
+<div class="code javascript highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">findOne</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="p">[</span><span class="n">fields</span><span class="p">,</span> <span class="p">[</span><span class="n">options</span><span class="p">]],</span> <span class="n">callback</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>Where</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">query</span></tt> is a query object or an <tt class="docutils literal"><span class="pre">_id</span></tt> value</li>
-<li><tt class="docutils literal"><span class="pre">fields</span></tt> - indicates which fields should be included in the
+<li><code class="docutils literal"><span class="pre">query</span></code> is a query object or an <code class="docutils literal"><span class="pre">_id</span></code> value</li>
+<li><code class="docutils literal"><span class="pre">fields</span></code> - indicates which fields should be included in the
 response (default is all)</li>
-<li><tt class="docutils literal"><span class="pre">options</span></tt> - defines extra logic (sorting options, paging etc.)</li>
-<li><tt class="docutils literal"><span class="pre">callback</span></tt> has two parameters - an error object (if an error
+<li><code class="docutils literal"><span class="pre">options</span></code> - defines extra logic (sorting options, paging etc.)</li>
+<li><code class="docutils literal"><span class="pre">callback</span></code> has two parameters - an error object (if an error
 occured) and the document object.</li>
 </ul>
 <p>Example:</p>
-<div class="highlight-python"><div class="highlight"><pre>collection.findOne({_id: doc_id}, function(err, document) {
+<div class="code javascript highlight-python"><div class="highlight"><pre>collection.findOne({_id: doc_id}, function(err, document) {
   console.log(document.name);
 });
 </pre></div>
@@ -113,44 +113,44 @@ occured) and the document object.</li>
 </div>
 <div class="section" id="id-values">
 <h2>_id values<a class="headerlink" href="#id-values" title="Permalink to this headline">¶</a></h2>
-<p>Default <tt class="docutils literal"><span class="pre">_id</span></tt> values are 12 byte binary hashes. You can alter the
+<p>Default <code class="docutils literal"><span class="pre">_id</span></code> values are 12 byte binary hashes. You can alter the
 format with custom Primary Key factories (see <em>Custom Primarky Keys</em> in
 <a class="reference external" href="database.md">Database</a>).</p>
 <p>In order to treat these binary _id values as strings it would be wise
 to convert binary values to hex strings. This can be done with
-<tt class="docutils literal"><span class="pre">toHexString</span></tt> property.</p>
-<div class="highlight-python"><div class="highlight"><pre>var idHex = document._id.toHexString();
+<code class="docutils literal"><span class="pre">toHexString</span></code> property.</p>
+<div class="code javascript highlight-python"><div class="highlight"><pre>var idHex = document._id.toHexString();
 </pre></div>
 </div>
 <p>Hex strings can be reverted back to binary (for example to perform
-queries) with <tt class="docutils literal"><span class="pre">ObjectID.createFromHexString</span></tt></p>
-<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span><span class="n">_id</span><span class="p">:</span> <span class="n">ObjectID</span><span class="o">.</span><span class="n">createFromHexString</span><span class="p">(</span><span class="n">idHex</span><span class="p">)}</span>
+queries) with <code class="docutils literal"><span class="pre">ObjectID.createFromHexString</span></code></p>
+<div class="code javascript highlight-python"><div class="highlight"><pre><span class="p">{</span><span class="n">_id</span><span class="p">:</span> <span class="n">ObjectID</span><span class="o">.</span><span class="n">createFromHexString</span><span class="p">(</span><span class="n">idHex</span><span class="p">)}</span>
 </pre></div>
 </div>
-<p>When inserting new records it is possible to use custom <tt class="docutils literal"><span class="pre">_id</span></tt> values
+<p>When inserting new records it is possible to use custom <code class="docutils literal"><span class="pre">_id</span></code> values
 as well which do not need to be binary hashes, for example strings.</p>
-<div class="highlight-python"><div class="highlight"><pre>collection.insert({_id: &quot;abc&quot;, ...});
+<div class="code javascript highlight-python"><div class="highlight"><pre>collection.insert({_id: &quot;abc&quot;, ...});
 collection.findOne({_id: &quot;abc&quot;},...);
 </pre></div>
 </div>
-<p>This way it is not necessary to convert <tt class="docutils literal"><span class="pre">_id</span></tt> values to hex strings
+<p>This way it is not necessary to convert <code class="docutils literal"><span class="pre">_id</span></code> values to hex strings
 and back.</p>
 </div>
 <div class="section" id="query-object">
 <h2>Query object<a class="headerlink" href="#query-object" title="Permalink to this headline">¶</a></h2>
-<p>The simplest query object is an empty one <tt class="docutils literal"><span class="pre">{}</span></tt> which matches every
+<p>The simplest query object is an empty one <code class="docutils literal"><span class="pre">{}</span></code> which matches every
 record in the database.</p>
 <p>To make a simple query where one field must match to a defined value,
 one can do it as simply as</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span><span class="n">fieldname</span><span class="p">:</span> <span class="s">&quot;fieldvalue&quot;</span><span class="p">}</span>
+<div class="code javascript highlight-python"><div class="highlight"><pre><span class="p">{</span><span class="n">fieldname</span><span class="p">:</span> <span class="s">&quot;fieldvalue&quot;</span><span class="p">}</span>
 </pre></div>
 </div>
 <p>This query matches all the records that a) have fields called
 <em>fieldname</em> and b) its value is <em>&#8220;fieldvalue&#8221;</em>.</p>
 <p>For example if we have a collection of blog posts where the structure of
-the records is <tt class="docutils literal"><span class="pre">{title,</span> <span class="pre">author,</span> <span class="pre">contents}</span></tt> and we want to retrieve all
+the records is <code class="docutils literal"><span class="pre">{title,</span> <span class="pre">author,</span> <span class="pre">contents}</span></code> and we want to retrieve all
 the posts for a specific author then we can do it like this:</p>
-<div class="highlight-python"><div class="highlight"><pre>posts = pointer_to_collection;
+<div class="code javascript highlight-python"><div class="highlight"><pre>posts = pointer_to_collection;
 posts.find({author:&quot;Daniel&quot;}).toArray(function(err, results){
     console.log(results); // output all records
 });
@@ -158,18 +158,18 @@ posts.find({author:&quot;Daniel&quot;}).toArray(function(err, results){
 </div>
 <p>If the queried field is inside an object then that can be queried also.
 For example if we have a record with the following structure:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+<div class="code javascript highlight-python"><div class="highlight"><pre><span class="p">{</span>
   <span class="n">user</span><span class="p">:</span> <span class="p">{</span>
     <span class="n">name</span><span class="p">:</span> <span class="s">&quot;Daniel&quot;</span>
   <span class="p">}</span>
 <span class="p">}</span>
 </pre></div>
 </div>
-<p>Then we can query the &#8220;name&#8221; field like this: <tt class="docutils literal"><span class="pre">{&quot;user.name&quot;:&quot;Daniel&quot;}</span></tt></p>
+<p>Then we can query the &#8220;name&#8221; field like this: <code class="docutils literal"><span class="pre">{&quot;user.name&quot;:&quot;Daniel&quot;}</span></code></p>
 <div class="section" id="and">
 <h3>AND<a class="headerlink" href="#and" title="Permalink to this headline">¶</a></h3>
 <p>If more than one fieldname is specified, then it&#8217;s an AND query</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+<div class="code javascript highlight-python"><div class="highlight"><pre><span class="p">{</span>
   <span class="n">key1</span><span class="p">:</span> <span class="s">&quot;value1&quot;</span><span class="p">,</span>
   <span class="n">name2</span><span class="p">:</span> <span class="s">&quot;value2&quot;</span>
 <span class="p">}</span>
@@ -180,10 +180,10 @@ For example if we have a record with the following structure:</p>
 </div>
 <div class="section" id="or">
 <h3>OR<a class="headerlink" href="#or" title="Permalink to this headline">¶</a></h3>
-<p>OR queries are a bit trickier but doable with the <tt class="docutils literal"><span class="pre">$or</span></tt> operator.
+<p>OR queries are a bit trickier but doable with the <code class="docutils literal"><span class="pre">$or</span></code> operator.
 Query operator takes an array which includes a set of query objects and
 at least one of these must match a document before it is retrieved</p>
-<div class="highlight-python"><div class="highlight"><pre>{
+<div class="code javascript highlight-python"><div class="highlight"><pre>{
   $or:[
     {author:&quot;Daniel&quot;},
     {author:&quot;Jessica&quot;}
@@ -194,7 +194,7 @@ at least one of these must match a document before it is retrieved</p>
 <p>This query match all the documents where author is Daniel or Jessica.</p>
 <p>To mix AND and OR queries, you just need to use $or as one of regular
 query fields.</p>
-<div class="highlight-python"><div class="highlight"><pre>{
+<div class="code javascript highlight-python"><div class="highlight"><pre>{
   title:&quot;MongoDB&quot;,
   $or:[
     {author:&quot;Daniel&quot;},
@@ -206,25 +206,25 @@ query fields.</p>
 </div>
 <div class="section" id="conditionals">
 <h3>Conditionals<a class="headerlink" href="#conditionals" title="Permalink to this headline">¶</a></h3>
-<p>Conditional operators <tt class="docutils literal"><span class="pre">&lt;</span></tt>, <tt class="docutils literal"><span class="pre">&lt;=</span></tt>, <tt class="docutils literal"><span class="pre">&gt;</span></tt>, <tt class="docutils literal"><span class="pre">&gt;=</span></tt> and <tt class="docutils literal"><span class="pre">!=</span></tt> can&#8217;t be
+<p>Conditional operators <code class="docutils literal"><span class="pre">&lt;</span></code>, <code class="docutils literal"><span class="pre">&lt;=</span></code>, <code class="docutils literal"><span class="pre">&gt;</span></code>, <code class="docutils literal"><span class="pre">&gt;=</span></code> and <code class="docutils literal"><span class="pre">!=</span></code> can&#8217;t be
 used directly, as the query object format doesn&#8217;t support it but the
-same can be achieved with their aliases <tt class="docutils literal"><span class="pre">$lt</span></tt>, <tt class="docutils literal"><span class="pre">$lte</span></tt>, <tt class="docutils literal"><span class="pre">$gt</span></tt>,
-<tt class="docutils literal"><span class="pre">$gte</span></tt> and <tt class="docutils literal"><span class="pre">$ne</span></tt>. When a field value needs to match a conditional,
+same can be achieved with their aliases <code class="docutils literal"><span class="pre">$lt</span></code>, <code class="docutils literal"><span class="pre">$lte</span></code>, <code class="docutils literal"><span class="pre">$gt</span></code>,
+<code class="docutils literal"><span class="pre">$gte</span></code> and <code class="docutils literal"><span class="pre">$ne</span></code>. When a field value needs to match a conditional,
 the value must be wrapped into a separate object.</p>
-<div class="highlight-python"><div class="highlight"><pre>{&quot;fieldname&quot;:{$gte:100}}
+<div class="code javascript highlight-python"><div class="highlight"><pre>{&quot;fieldname&quot;:{$gte:100}}
 </pre></div>
 </div>
 <p>This query defines that <em>fieldname</em> must be greater than or equal to
-<tt class="docutils literal"><span class="pre">100</span></tt>.</p>
+<code class="docutils literal"><span class="pre">100</span></code>.</p>
 <p>Conditionals can also be mixed to create ranges.</p>
-<div class="highlight-python"><div class="highlight"><pre>{&quot;fieldname&quot;: {$lte:10, $gte:100}}
+<div class="code javascript highlight-python"><div class="highlight"><pre>{&quot;fieldname&quot;: {$lte:10, $gte:100}}
 </pre></div>
 </div>
 </div>
 <div class="section" id="regular-expressions-in-queries">
 <h3>Regular expressions in queries<a class="headerlink" href="#regular-expressions-in-queries" title="Permalink to this headline">¶</a></h3>
 <p>Queried field values can also be matched with regular expressions</p>
-<div class="highlight-python"><div class="highlight"><pre>{author:/^Daniel/}
+<div class="code javascript highlight-python"><div class="highlight"><pre>{author:/^Daniel/}
 </pre></div>
 </div>
 </div>
@@ -232,16 +232,16 @@ the value must be wrapped into a separate object.</p>
 <h3>Special query operators<a class="headerlink" href="#special-query-operators" title="Permalink to this headline">¶</a></h3>
 <p>In addition to OR and conditional there&#8217;s some more operators:</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">$in</span></tt> - specifies an array of possible matches,
-<tt class="docutils literal"><span class="pre">{&quot;name&quot;:{$in:[1,2,3]}}</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">$nin</span></tt> - specifies an array of unwanted matches</li>
-<li><tt class="docutils literal"><span class="pre">$all</span></tt> - array value must match to the condition
-<tt class="docutils literal"><span class="pre">{&quot;name&quot;:{$all:[1,2,3]}}</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">$exists</span></tt> - checks for existence of a field
-<tt class="docutils literal"><span class="pre">{&quot;name&quot;:{$exists:true}}</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">$mod</span></tt> - check for a modulo <tt class="docutils literal"><span class="pre">{&quot;name&quot;:{$mod:{3,2}}</span></tt> is the same as
-<tt class="docutils literal"><span class="pre">&quot;name&quot;</span> <span class="pre">%</span> <span class="pre">3</span> <span class="pre">==</span> <span class="pre">2</span></tt></li>
-<li><tt class="docutils literal"><span class="pre">$size</span></tt> - checks the size of an array value <tt class="docutils literal"><span class="pre">{&quot;name&quot;:</span> <span class="pre">{$size:2}}</span></tt>
+<li><code class="docutils literal"><span class="pre">$in</span></code> - specifies an array of possible matches,
+<code class="docutils literal"><span class="pre">{&quot;name&quot;:{$in:[1,2,3]}}</span></code></li>
+<li><code class="docutils literal"><span class="pre">$nin</span></code> - specifies an array of unwanted matches</li>
+<li><code class="docutils literal"><span class="pre">$all</span></code> - array value must match to the condition
+<code class="docutils literal"><span class="pre">{&quot;name&quot;:{$all:[1,2,3]}}</span></code></li>
+<li><code class="docutils literal"><span class="pre">$exists</span></code> - checks for existence of a field
+<code class="docutils literal"><span class="pre">{&quot;name&quot;:{$exists:true}}</span></code></li>
+<li><code class="docutils literal"><span class="pre">$mod</span></code> - check for a modulo <code class="docutils literal"><span class="pre">{&quot;name&quot;:{$mod:{3,2}}</span></code> is the same as
+<code class="docutils literal"><span class="pre">&quot;name&quot;</span> <span class="pre">%</span> <span class="pre">3</span> <span class="pre">==</span> <span class="pre">2</span></code></li>
+<li><code class="docutils literal"><span class="pre">$size</span></code> - checks the size of an array value <code class="docutils literal"><span class="pre">{&quot;name&quot;:</span> <span class="pre">{$size:2}}</span></code>
 matches arrays <em>name</em> with 2 elements</li>
 </ul>
 </div>
@@ -251,7 +251,7 @@ matches arrays <em>name</em> with 2 elements</li>
 <p>If you have a document with nested objects/arrays then the keys inside
 these nested objects can still be used for queries.</p>
 <p>For example with the following document</p>
-<div class="highlight-python"><div class="highlight"><pre>{
+<div class="code javascript highlight-python"><div class="highlight"><pre>{
   &quot;_id&quot;: idvalue,
   &quot;author&quot;:{
     &quot;firstname&quot;:&quot;Daniel&quot;,
@@ -266,21 +266,21 @@ these nested objects can still be used for queries.</p>
 }
 </pre></div>
 </div>
-<p>not only the <tt class="docutils literal"><span class="pre">_id</span></tt> field can be used as a query field - also the
-<tt class="docutils literal"><span class="pre">firstname</span></tt> and even <tt class="docutils literal"><span class="pre">title</span></tt> can be used. This can be done when
+<p>not only the <code class="docutils literal"><span class="pre">_id</span></code> field can be used as a query field - also the
+<code class="docutils literal"><span class="pre">firstname</span></code> and even <code class="docutils literal"><span class="pre">title</span></code> can be used. This can be done when
 using nested field names as strings, concated with periods.</p>
-<div class="highlight-python"><div class="highlight"><pre>collection.find({&quot;author.firstname&quot;:&quot;Daniel})
+<div class="code javascript highlight-python"><div class="highlight"><pre>collection.find({&quot;author.firstname&quot;:&quot;Daniel})
 </pre></div>
 </div>
 <p>Works even inside arrays</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">find</span><span class="p">({</span><span class="s">&quot;books.year&quot;</span><span class="p">:</span><span class="mi">1714</span><span class="p">})</span>
+<div class="code javascript highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">find</span><span class="p">({</span><span class="s">&quot;books.year&quot;</span><span class="p">:</span><span class="mi">1714</span><span class="p">})</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="query-options">
 <h2>Query options<a class="headerlink" href="#query-options" title="Permalink to this headline">¶</a></h2>
 <p>Query options define the behavior of the query.</p>
-<div class="highlight-python"><div class="highlight"><pre>var options = {
+<div class="code javascript highlight-python"><div class="highlight"><pre>var options = {
     &quot;limit&quot;: 20,
     &quot;skip&quot;: 10,
     &quot;sort&quot;: &quot;title&quot;
@@ -291,8 +291,8 @@ collection.find({}, options).toArray(...);
 </div>
 <div class="section" id="paging">
 <h3>Paging<a class="headerlink" href="#paging" title="Permalink to this headline">¶</a></h3>
-<p>Paging can be achieved with option parameters <tt class="docutils literal"><span class="pre">limit</span></tt> and <tt class="docutils literal"><span class="pre">skip</span></tt></p>
-<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+<p>Paging can be achieved with option parameters <code class="docutils literal"><span class="pre">limit</span></code> and <code class="docutils literal"><span class="pre">skip</span></code></p>
+<div class="code javascript highlight-python"><div class="highlight"><pre><span class="p">{</span>
   <span class="s">&quot;limit&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
   <span class="s">&quot;skip&quot;</span><span class="p">:</span> <span class="mi">10</span>
 <span class="p">}</span>
@@ -302,16 +302,16 @@ collection.find({}, options).toArray(...);
 </div>
 <div class="section" id="sorting">
 <h3>Sorting<a class="headerlink" href="#sorting" title="Permalink to this headline">¶</a></h3>
-<p>Sorting can be acieved with option parameter <tt class="docutils literal"><span class="pre">sort</span></tt> which takes an
+<p>Sorting can be acieved with option parameter <code class="docutils literal"><span class="pre">sort</span></code> which takes an
 array of sort preferences</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+<div class="code javascript highlight-python"><div class="highlight"><pre><span class="p">{</span>
   <span class="s">&quot;sort&quot;</span><span class="p">:</span> <span class="p">[[</span><span class="s">&#39;field1&#39;</span><span class="p">,</span><span class="s">&#39;asc&#39;</span><span class="p">],</span> <span class="p">[</span><span class="s">&#39;field2&#39;</span><span class="p">,</span><span class="s">&#39;desc&#39;</span><span class="p">]]</span>
 <span class="p">}</span>
 </pre></div>
 </div>
 <p>With single ascending field the array can be replaced with the name of
 the field.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+<div class="code javascript highlight-python"><div class="highlight"><pre><span class="p">{</span>
   <span class="s">&quot;sort&quot;</span><span class="p">:</span> <span class="s">&quot;name&quot;</span>
 <span class="p">}</span>
 </pre></div>
@@ -319,7 +319,7 @@ the field.</p>
 </div>
 <div class="section" id="explain">
 <h3>Explain<a class="headerlink" href="#explain" title="Permalink to this headline">¶</a></h3>
-<p>Option parameter <tt class="docutils literal"><span class="pre">explain</span></tt> turns the query into an explain query.</p>
+<p>Option parameter <code class="docutils literal"><span class="pre">explain</span></code> turns the query into an explain query.</p>
 </div>
 </div>
 <div class="section" id="cursors">
@@ -328,21 +328,21 @@ the field.</p>
 individual fields from the database.</p>
 <div class="section" id="nextobject">
 <h3>nextObject<a class="headerlink" href="#nextobject" title="Permalink to this headline">¶</a></h3>
-<p><tt class="docutils literal"><span class="pre">cursor.nextObject(function(err,</span> <span class="pre">doc){})</span></tt> retrieves the next record
+<p><code class="docutils literal"><span class="pre">cursor.nextObject(function(err,</span> <span class="pre">doc){})</span></code> retrieves the next record
 from database. If doc is null, then there weren&#8217;t any more records.</p>
 </div>
 <div class="section" id="each">
 <h3>each<a class="headerlink" href="#each" title="Permalink to this headline">¶</a></h3>
-<p><tt class="docutils literal"><span class="pre">cursor.each(function(err,</span> <span class="pre">doc){})</span></tt> retrieves all matching records one
+<p><code class="docutils literal"><span class="pre">cursor.each(function(err,</span> <span class="pre">doc){})</span></code> retrieves all matching records one
 by one.</p>
 </div>
 <div class="section" id="toarray">
 <h3>toArray<a class="headerlink" href="#toarray" title="Permalink to this headline">¶</a></h3>
-<p><tt class="docutils literal"><span class="pre">cursor.toArray(function(err,</span> <span class="pre">docs){})</span></tt> converts the cursor object
+<p><code class="docutils literal"><span class="pre">cursor.toArray(function(err,</span> <span class="pre">docs){})</span></code> converts the cursor object
 into an array of all the matching records. Probably the most convenient
 way to retrieve results but be careful with large datasets as every
 record is loaded into memory.</p>
-<div class="highlight-python"><div class="highlight"><pre>collection.find().toArray(function(err, docs){
+<div class="code javascript highlight-python"><div class="highlight"><pre>collection.find().toArray(function(err, docs){
     console.log(&quot;retrieved records:&quot;);
     console.log(docs);
 });
@@ -351,21 +351,23 @@ record is loaded into memory.</p>
 </div>
 <div class="section" id="rewind">
 <h3>rewind<a class="headerlink" href="#rewind" title="Permalink to this headline">¶</a></h3>
-<p><tt class="docutils literal"><span class="pre">cursor.rewind()</span></tt> resets the internal pointer in the cursor to the
-beginning
-## Counting matches</p>
+<div class="line-block">
+<div class="line"><code class="docutils literal"><span class="pre">cursor.rewind()</span></code> resets the internal pointer in the cursor to the
+beginning</div>
+<div class="line">## Counting matches</div>
+</div>
 <p>Counting total number of found matches can be done against cursors with
-method <tt class="docutils literal"><span class="pre">count</span></tt>.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">cursor</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
+method <code class="docutils literal"><span class="pre">count</span></code>.</p>
+<div class="code javascript highlight-python"><div class="highlight"><pre><span class="n">cursor</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Where</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">callback</span></tt> is the callback function with two parameters - an error
+<li><code class="docutils literal"><span class="pre">callback</span></code> is the callback function with two parameters - an error
 object (if an error occured) and the number on matches as an integer.</li>
 </ul>
 <p>Example</p>
-<div class="highlight-python"><div class="highlight"><pre>cursor.count(function(err, count){
+<div class="code javascript highlight-python"><div class="highlight"><pre>cursor.count(function(err, count){
   console.log(&quot;Total matches: &quot;+count);
 });
 </pre></div>
@@ -539,7 +541,7 @@ object (if an error occured) and the number on matches as an integer.</li>
    </ul>
  </li>
 </ul>
-<div id="searchbox" style="display: none">
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
       <input type="text" name="q" />
@@ -570,7 +572,7 @@ object (if an error occured) and the number on matches as an integer.</li>
     </div></div>
     <div class="footer">
         &copy; Copyright 2013, MongoDB Node.JS Team 
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2.3.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3b2.
 
     <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
     <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>

@@ -1,27 +1,30 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-      <title>Recent Content on MongoDB Core 1.0.0 </title>
-      <generator uri="https://hugo.spf13.com">Hugo</generator>
-    <link>/node-mongodb-native/core/index.xml/</link>
+    <title>MongoDB Core 1.0.0</title>
+    <link>/node-mongodb-native/core/</link>
+    <description>Recent content on MongoDB Core 1.0.0</description>
+    <generator>Hugo -- gohugo.io</generator>
     
     
     
-    <updated>Mon, 01 Jul 2013 00:00:00 UTC</updated>
+    
+    <lastBuildDate>Mon, 01 Jul 2013 00:00:00 UT</lastBuildDate>
+    <atom:link href="/node-mongodb-native/core/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Connecting To MongoDB</title>
       <link>/node-mongodb-native/core/tutorials/connecting/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/core/tutorials/connecting/</guid>
       <description>
 
-&lt;h1 id=&#34;toc_0&#34;&gt;Connecting To MongoDB&lt;/h1&gt;
+&lt;h1 id=&#34;connecting-to-mongodb:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Connecting To MongoDB&lt;/h1&gt;
 
 &lt;p&gt;Connecting to MongoDB using the driver is done using the Topology classes &lt;code&gt;Server&lt;/code&gt;, &lt;code&gt;ReplSet&lt;/code&gt; and &lt;code&gt;Mongos&lt;/code&gt;. There is no auto detection of the server topology as this is a low level driver.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_1&#34;&gt;Single Server Connection&lt;/h2&gt;
+&lt;h2 id=&#34;single-server-connection:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Single Server Connection&lt;/h2&gt;
 
 &lt;p&gt;We have a single MongoDB server instance running on the port &lt;em&gt;27017&lt;/em&gt; Let&amp;rsquo;s connect using the driver and &lt;em&gt;MongoClient.connect&lt;/em&gt;&lt;/p&gt;
 
@@ -64,7 +67,7 @@ server.connect();
 &lt;li&gt;&lt;code&gt;promoteLongs&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; Convert Long values from the db into Numbers if they fit into 53 bits&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_2&#34;&gt;Replicaset Connection&lt;/h2&gt;
+&lt;h2 id=&#34;replicaset-connection:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Replicaset Connection&lt;/h2&gt;
 
 &lt;p&gt;We wish to connect to a ReplicaSet consisting of one primary and 1 or more secondaries. To Do this we need to supply the driver with a seedlist of servers and the name of the ReplicaSet we wish to connect to. Let&amp;rsquo;s take a look at a code example.&lt;/p&gt;
 
@@ -107,7 +110,7 @@ server.connect();
 &lt;li&gt;&lt;code&gt;promoteLongs&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; Convert Long values from the db into Numbers if they fit into 53 bits&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_3&#34;&gt;Mongos Proxy Connection&lt;/h2&gt;
+&lt;h2 id=&#34;mongos-proxy-connection:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Mongos Proxy Connection&lt;/h2&gt;
 
 &lt;p&gt;We wish to connect to a set of &lt;code&gt;mongos&lt;/code&gt; proxies. Just as in the case of connecting to a ReplicaSet we can provide a seed list of &lt;code&gt;mongos&lt;/code&gt; proxies. This allows the driver to perform failover between proxies automatically in case of a proxy process having been shut down. Let&amp;rsquo;s look at an example of code connecting to a set of proxies.&lt;/p&gt;
 
@@ -149,7 +152,7 @@ server.connect();
 &lt;li&gt;&lt;code&gt;promoteLongs&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; Convert Long values from the db into Numbers if they fit into 53 bits&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_4&#34;&gt;Authentication using the Core Driver&lt;/h2&gt;
+&lt;h2 id=&#34;authentication-using-the-core-driver:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Authentication using the Core Driver&lt;/h2&gt;
 
 &lt;p&gt;Authentication is fairly easy to perform and is done using the &lt;code&gt;auth&lt;/code&gt; method on the connected topology instance. Let&amp;rsquo;s look at a simple example of authenticating using the &lt;code&gt;MongoCR&lt;/code&gt; authentication strategy.&lt;/p&gt;
 
@@ -186,16 +189,16 @@ server.connect();
     <item>
       <title>CRUD Operations</title>
       <link>/node-mongodb-native/core/tutorials/crud_operations/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/core/tutorials/crud_operations/</guid>
       <description>
 
-&lt;h1 id=&#34;toc_0&#34;&gt;Driver CRUD Operations&lt;/h1&gt;
+&lt;h1 id=&#34;driver-crud-operations:35296af7b5e03e340e2ce9cac65b7c8e&#34;&gt;Driver CRUD Operations&lt;/h1&gt;
 
 &lt;p&gt;The Core Driver CRUD operations are defined by the methods available on the driver topologies in the form of the &lt;code&gt;insert&lt;/code&gt;, &lt;code&gt;update&lt;/code&gt;, &lt;code&gt;remove&lt;/code&gt;, &lt;code&gt;cursor&lt;/code&gt; and &lt;code&gt;command&lt;/code&gt;.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_1&#34;&gt;Inserting Documents&lt;/h2&gt;
+&lt;h2 id=&#34;inserting-documents:35296af7b5e03e340e2ce9cac65b7c8e&#34;&gt;Inserting Documents&lt;/h2&gt;
 
 &lt;p&gt;Inserting documents is fairly straightforward. Let&amp;rsquo;s look at an example.&lt;/p&gt;
 
@@ -230,11 +233,11 @@ server.connect();
 &lt;li&gt;&lt;code&gt;order&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; Execute the inserts in order or out of order.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_2&#34;&gt;Updating Documents&lt;/h2&gt;
+&lt;h2 id=&#34;updating-documents:35296af7b5e03e340e2ce9cac65b7c8e&#34;&gt;Updating Documents&lt;/h2&gt;
 
 &lt;p&gt;Updating documents is also fairly straightforward with the main difference being that the actual documents passed in need a specific set of options for each operation.&lt;/p&gt;
 
-&lt;h3 id=&#34;toc_3&#34;&gt;Update operation document&lt;/h3&gt;
+&lt;h3 id=&#34;update-operation-document:35296af7b5e03e340e2ce9cac65b7c8e&#34;&gt;Update operation document&lt;/h3&gt;
 
 &lt;p&gt;An update operation document is made up of the following fields.&lt;/p&gt;
 
@@ -277,11 +280,11 @@ server.connect();
 &lt;li&gt;&lt;code&gt;order&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; Execute the inserts in order or out of order.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_4&#34;&gt;Removing Documents&lt;/h2&gt;
+&lt;h2 id=&#34;removing-documents:35296af7b5e03e340e2ce9cac65b7c8e&#34;&gt;Removing Documents&lt;/h2&gt;
 
 &lt;p&gt;Removing documents is also fairly straightforward with the main difference being that the actual documents passed in need a specific set of options for each operation.&lt;/p&gt;
 
-&lt;h3 id=&#34;toc_5&#34;&gt;Remove operation document&lt;/h3&gt;
+&lt;h3 id=&#34;remove-operation-document:35296af7b5e03e340e2ce9cac65b7c8e&#34;&gt;Remove operation document&lt;/h3&gt;
 
 &lt;p&gt;A remove operation document is made up of the following fields.&lt;/p&gt;
 
@@ -323,7 +326,7 @@ server.connect();
 &lt;li&gt;&lt;code&gt;order&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; Execute the inserts in order or out of order.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_6&#34;&gt;Executing a Command against MongoDB&lt;/h2&gt;
+&lt;h2 id=&#34;executing-a-command-against-mongodb:35296af7b5e03e340e2ce9cac65b7c8e&#34;&gt;Executing a Command against MongoDB&lt;/h2&gt;
 
 &lt;p&gt;Executing a command is also fairly straightforward but allows for the usage of readPreferences. The Core driver does not enforce the correct readPreferences on write commands so be aware that you need to ensure a &lt;code&gt;findAndModify&lt;/code&gt; command is correctly routed to a primary instead of a secondary when the topology is a replicaset. Let&amp;rsquo;s look at an example.&lt;/p&gt;
 
@@ -356,7 +359,7 @@ server.connect();
 &lt;li&gt;&lt;code&gt;connection&lt;/code&gt; &lt;strong&gt;{Connection}&lt;/strong&gt; Specify connection object to execute command against&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_7&#34;&gt;Executing Queries against MongoDB&lt;/h2&gt;
+&lt;h2 id=&#34;executing-queries-against-mongodb:35296af7b5e03e340e2ce9cac65b7c8e&#34;&gt;Executing Queries against MongoDB&lt;/h2&gt;
 
 &lt;p&gt;Executing queries against MongoDB is done using the &lt;code&gt;cursor&lt;/code&gt; method on the topology. The cursor can then be used with the &lt;code&gt;next&lt;/code&gt; method to iterate over all the results. The Low level Core driver does not implement streams or other methods this is left to library developers to implement by extending the cursor using the &lt;code&gt;cursorFactory&lt;/code&gt; option. Let&amp;rsquo;s look at a simple example first and then look at the options available.&lt;/p&gt;
 
@@ -396,7 +399,7 @@ server.connect();
 &lt;li&gt;&lt;code&gt;documents&lt;/code&gt;, &lt;strong&gt;{object[]}&lt;/strong&gt; Initial documents list for cursor.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h3 id=&#34;toc_8&#34;&gt;The Virtual Find Method&lt;/h3&gt;
+&lt;h3 id=&#34;the-virtual-find-method:35296af7b5e03e340e2ce9cac65b7c8e&#34;&gt;The Virtual Find Method&lt;/h3&gt;
 
 &lt;p&gt;To simplify the way the code is we have defined the current way of doing queries in MongoDB as a virtual find command. This find command is a document with the following fields.&lt;/p&gt;
 
@@ -434,16 +437,16 @@ server.connect();
     <item>
       <title>Logging</title>
       <link>/node-mongodb-native/core/tutorials/logging/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/core/tutorials/logging/</guid>
       <description>
 
-&lt;h1 id=&#34;toc_0&#34;&gt;Logging&lt;/h1&gt;
+&lt;h1 id=&#34;logging:3f3af53408cff75953b33723c0b061bb&#34;&gt;Logging&lt;/h1&gt;
 
 &lt;p&gt;The driver lets you log at 3 different levels. These are &lt;code&gt;debug&lt;/code&gt;, &lt;code&gt;info&lt;/code&gt; and &lt;code&gt;error&lt;/code&gt;. By default the log level is at &lt;code&gt;error&lt;/code&gt;. You can change the level, only allow specific classes to log and provide your own logger implementation. Let&amp;rsquo;s look at how we control the log level.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_1&#34;&gt;Setting Log level&lt;/h2&gt;
+&lt;h2 id=&#34;setting-log-level:3f3af53408cff75953b33723c0b061bb&#34;&gt;Setting Log level&lt;/h2&gt;
 
 &lt;p&gt;Setting the log level is pretty easy. Let&amp;rsquo;s look at example of adjusting it for our application only logging the Server class.&lt;/p&gt;
 
@@ -476,7 +479,7 @@ server.connect();
 
 &lt;p&gt;Setting the level is as easy as calling the method &lt;code&gt;setLevel&lt;/code&gt; with the string value &lt;code&gt;debug&lt;/code&gt;, &lt;code&gt;info&lt;/code&gt; or &lt;code&gt;error&lt;/code&gt;. Log level is set globally.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_2&#34;&gt;Filtering On specific classes&lt;/h2&gt;
+&lt;h2 id=&#34;filtering-on-specific-classes:3f3af53408cff75953b33723c0b061bb&#34;&gt;Filtering On specific classes&lt;/h2&gt;
 
 &lt;p&gt;Say you are only interested in logging a specific class. You can tell the Logger to only log specific class names. Let&amp;rsquo;s take an example Where we only log the &lt;code&gt;Server&lt;/code&gt; class.&lt;/p&gt;
 
@@ -540,7 +543,7 @@ a.do();
 
 &lt;p&gt;Pretty simple and straightforward.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_3&#34;&gt;Custom logger&lt;/h2&gt;
+&lt;h2 id=&#34;custom-logger:3f3af53408cff75953b33723c0b061bb&#34;&gt;Custom logger&lt;/h2&gt;
 
 &lt;p&gt;Let&amp;rsquo;s say you don&amp;rsquo;t want the log statements to go to &lt;code&gt;console.log&lt;/code&gt; but want to send them to a new location or maybe transform them before you send them on. Let&amp;rsquo;s define our custom logger.&lt;/p&gt;
 
@@ -583,12 +586,12 @@ server.connect();
     <item>
       <title>Cursor</title>
       <link>/node-mongodb-native/core/tutorials/cursor/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/core/tutorials/cursor/</guid>
       <description>
 
-&lt;h1 id=&#34;toc_0&#34;&gt;Extending the functionality of the Driver Cursor&lt;/h1&gt;
+&lt;h1 id=&#34;extending-the-functionality-of-the-driver-cursor:dbde94d5e52e9101ed0eecf5262623af&#34;&gt;Extending the functionality of the Driver Cursor&lt;/h1&gt;
 
 &lt;p&gt;The Core Driver cursor is a very minimalist cursor by design and only supports a single &lt;code&gt;next&lt;/code&gt; method to iterate over the query results. In this tutorial we will examine how we can extend the cursor to support an additional &lt;code&gt;toArray&lt;/code&gt; method and show how we can configure our topology to always return the new extended Cursor on all &lt;code&gt;cursor&lt;/code&gt; method calls.&lt;/p&gt;
 
@@ -674,26 +677,26 @@ server.connect();
     <item>
       <title>Mailing List</title>
       <link>/node-mongodb-native/core/community/mailing-list/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/core/community/mailing-list/</guid>
       <description>
 
 &lt;p&gt;The Node.js MongoDB driver has one main Mailing list.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_0&#34;&gt;Discussion&lt;/h2&gt;
+&lt;h2 id=&#34;discussion:d3f5bfe80773e9cb94f62cf6b7642307&#34;&gt;Discussion&lt;/h2&gt;
 
 &lt;p&gt;For all questions and discussions:&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&#34;https://groups.google.com/forum/#!forum/node-mongodb-native&#34;&gt;https://groups.google.com/forum/#!forum/node-mongodb-native&lt;/a&gt;&lt;/p&gt;
 
-&lt;h1 id=&#34;toc_1&#34;&gt;Other Resources&lt;/h1&gt;
+&lt;h1 id=&#34;other-resources:d3f5bfe80773e9cb94f62cf6b7642307&#34;&gt;Other Resources&lt;/h1&gt;
 
-&lt;h2 id=&#34;toc_2&#34;&gt;Issues&lt;/h2&gt;
+&lt;h2 id=&#34;issues:d3f5bfe80773e9cb94f62cf6b7642307&#34;&gt;Issues&lt;/h2&gt;
 
 &lt;p&gt;&lt;a href=&#34;https://jira.mongodb.org/browse/NODE&#34;&gt;https://jira.mongodb.org/browse/NODE&lt;/a&gt;&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_3&#34;&gt;Twitter&lt;/h2&gt;
+&lt;h2 id=&#34;twitter:d3f5bfe80773e9cb94f62cf6b7642307&#34;&gt;Twitter&lt;/h2&gt;
 
 &lt;p&gt;The Node.js driver doesn&amp;rsquo;t have its own Twitter handle, but feel free to tweet it&amp;rsquo;s main developer at &lt;a href=&#34;http://twitter.com/christkv&#34;&gt;@christkv&lt;/a&gt;.&lt;/p&gt;
 </description>
@@ -702,25 +705,25 @@ server.connect();
     <item>
       <title>Driver introduction</title>
       <link>/node-mongodb-native/core/overview/introduction/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/core/overview/introduction/</guid>
       <description>
 
-&lt;h2 id=&#34;toc_0&#34;&gt;What is MongoDB Core&lt;/h2&gt;
+&lt;h2 id=&#34;what-is-mongodb-core:2767292a573dc549b9b4297b701af3ab&#34;&gt;What is MongoDB Core&lt;/h2&gt;
 
 &lt;p&gt;The MongoDB core driver is the minimal viable driver and contains no abstractions of any kind. It&amp;rsquo;s the basis on what the 2.X or higher driver builds on.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_1&#34;&gt;Who would use this ?&lt;/h2&gt;
+&lt;h2 id=&#34;who-would-use-this:2767292a573dc549b9b4297b701af3ab&#34;&gt;Who would use this ?&lt;/h2&gt;
 
 &lt;p&gt;The target audience of this module are developers building higher level abstractions like ODM&amp;rsquo;s, queue managers, caches and others where the additional layers of abstraction and helpers in the main driver is not needed. The lack of all of these abstractions should also help if you are trying to implement your own driver in another language or plan to write your own specialized MongoDB Node.js driver.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_2&#34;&gt;Next Steps&lt;/h2&gt;
+&lt;h2 id=&#34;next-steps:2767292a573dc549b9b4297b701af3ab&#34;&gt;Next Steps&lt;/h2&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;/overview/installing&#34;&gt;Install Driver&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/overview/quickstart&#34;&gt;Quick start&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/community/mailing-list&#34;&gt;Join the Mailing List&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/core/overview/installing&#34;&gt;Install Driver&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/core/overview/quickstart&#34;&gt;Quick start&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/core/community/mailing-list&#34;&gt;Join the Mailing List&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;https://github.com/christkv/mongodb-core&#34;&gt;Star us on GitHub&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 </description>
@@ -729,7 +732,7 @@ server.connect();
     <item>
       <title>API Documentation</title>
       <link>/node-mongodb-native/core/api-docs/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/core/api-docs/</guid>
       <description></description>
@@ -738,19 +741,19 @@ server.connect();
     <item>
       <title>Installing The Driver</title>
       <link>/node-mongodb-native/core/overview/installing/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/core/overview/installing/</guid>
       <description>
 
-&lt;h2 id=&#34;toc_0&#34;&gt;Installing The MongoDB Core driver using NPM&lt;/h2&gt;
+&lt;h2 id=&#34;installing-the-mongodb-core-driver-using-npm:3cef5cab5612f8cc3d40c6e13331783b&#34;&gt;Installing The MongoDB Core driver using NPM&lt;/h2&gt;
 
 &lt;p&gt;Installing the MongoDB Core driver using NPM is very easy. First you need to ensure you have Node.js and NPM correctly set up and in your path. Installing the driver is as easy as.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;npm install mongodb-core
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;h2 id=&#34;toc_1&#34;&gt;Installing MongoDB Core driver as part of your project&lt;/h2&gt;
+&lt;h2 id=&#34;installing-mongodb-core-driver-as-part-of-your-project:3cef5cab5612f8cc3d40c6e13331783b&#34;&gt;Installing MongoDB Core driver as part of your project&lt;/h2&gt;
 
 &lt;p&gt;Setting up the Node.js driver for your project is a simple as adding it to the &lt;strong&gt;package.json&lt;/strong&gt; dependencies section. An example &lt;strong&gt;package.json&lt;/strong&gt; file is shown below.&lt;/p&gt;
 
@@ -787,16 +790,16 @@ server.connect();
     <item>
       <title>QuickStart</title>
       <link>/node-mongodb-native/core/overview/quickstart/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/core/overview/quickstart/</guid>
       <description>
 
-&lt;h1 id=&#34;toc_0&#34;&gt;QuickStart&lt;/h1&gt;
+&lt;h1 id=&#34;quickstart:09c84f91027bd18b03251c05a0da4abb&#34;&gt;QuickStart&lt;/h1&gt;
 
 &lt;p&gt;The quickstart guide will show you how to set up a simple application using Core driver and MongoDB. It scope is only how to set up the driver and perform the simple crud operations. For more inn depth coverage we encourage reading the tutorials.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_1&#34;&gt;Create the package.json file&lt;/h2&gt;
+&lt;h2 id=&#34;create-the-package-json-file:09c84f91027bd18b03251c05a0da4abb&#34;&gt;Create the package.json file&lt;/h2&gt;
 
 &lt;p&gt;Let&amp;rsquo;s create a directory where our application will live. In our case we will put this under our projects directory.&lt;/p&gt;
 
@@ -834,7 +837,7 @@ cd myproject
 
 &lt;p&gt;You should see &lt;strong&gt;NPM&lt;/strong&gt; download a lot of files. Once it&amp;rsquo;s done you&amp;rsquo;ll find all the downloaded packages under the &lt;strong&gt;node_modules&lt;/strong&gt; directory.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_2&#34;&gt;Booting up a MongoDB Server&lt;/h2&gt;
+&lt;h2 id=&#34;booting-up-a-mongodb-server:09c84f91027bd18b03251c05a0da4abb&#34;&gt;Booting up a MongoDB Server&lt;/h2&gt;
 
 &lt;p&gt;Let&amp;rsquo;s boot up a MongoDB server instance. Download the right MongoDB version from &lt;a href=&#34;http://www.mongodb.org&#34;&gt;MongoDB&lt;/a&gt;, open a new shell or command line and ensure the &lt;strong&gt;mongod&lt;/strong&gt; command is in the shell or command line path. Now let&amp;rsquo;s create a database directory (in our case under &lt;strong&gt;/data&lt;/strong&gt;).&lt;/p&gt;
 
@@ -843,7 +846,7 @@ cd myproject
 
 &lt;p&gt;You should see the &lt;strong&gt;mongod&lt;/strong&gt; process start up and print some status information.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_3&#34;&gt;Connecting to MongoDB&lt;/h2&gt;
+&lt;h2 id=&#34;connecting-to-mongodb:09c84f91027bd18b03251c05a0da4abb&#34;&gt;Connecting to MongoDB&lt;/h2&gt;
 
 &lt;p&gt;Let&amp;rsquo;s create a new &lt;strong&gt;app.js&lt;/strong&gt; file that we will use to show the basic CRUD operations using the MongoDB driver.&lt;/p&gt;
 
@@ -973,7 +976,7 @@ server.connect();
 
 &lt;p&gt;The Core Driver is a building block for library builders and is not meant for usage by end users as it lacks a lot of features the end user might need such as automatic buffering of operations when a primary is changing in a replicaset or the db and collections abstraction.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_4&#34;&gt;Next steps&lt;/h2&gt;
+&lt;h2 id=&#34;next-steps:09c84f91027bd18b03251c05a0da4abb&#34;&gt;Next steps&lt;/h2&gt;
 
 &lt;p&gt;The next steps is to get more inn depth information about how the different aspects of the core driver works and how to leverage them to extend the functionality of the cursors. Please view the tutorials for more detailed information.&lt;/p&gt;
 </description>
@@ -982,14 +985,14 @@ server.connect();
     <item>
       <title>Contributing</title>
       <link>/node-mongodb-native/core/community/contributing/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/core/community/contributing/</guid>
       <description>
 
 &lt;p&gt;To contribute to the project &lt;em&gt;we encourage pull requests allowing for discussion of code changes.&lt;/em&gt;&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_0&#34;&gt;Contributing&lt;/h2&gt;
+&lt;h2 id=&#34;contributing:cc4aac3e9be04e0413c9520f223b493c&#34;&gt;Contributing&lt;/h2&gt;
 
 &lt;p&gt;When you are ready to send us a pull request make sure you perform the following steps first.&lt;/p&gt;
 
@@ -999,7 +1002,7 @@ server.connect();
 &lt;li&gt;Squash all your commits into a single commit. &lt;code&gt;git rebase -i&lt;/code&gt;. You can force update your pull request as history for it is not important for us to keep.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_1&#34;&gt;Contribution Steps&lt;/h2&gt;
+&lt;h2 id=&#34;contribution-steps:cc4aac3e9be04e0413c9520f223b493c&#34;&gt;Contribution Steps&lt;/h2&gt;
 
 &lt;ol&gt;
 &lt;li&gt;Fork the Node.js driver from &lt;a href=&#34;https://github.com/christkv/mongodb-core&#34;&gt;https://github.com/christkv/mongodb-core&lt;/a&gt;&lt;/li&gt;
@@ -1011,16 +1014,16 @@ server.connect();
 &lt;li&gt;Create a new Pull Request on github.&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;h1 id=&#34;toc_2&#34;&gt;Running Tests&lt;/h1&gt;
+&lt;h1 id=&#34;running-tests:cc4aac3e9be04e0413c9520f223b493c&#34;&gt;Running Tests&lt;/h1&gt;
 
-&lt;h2 id=&#34;toc_3&#34;&gt;Clone repository locally&lt;/h2&gt;
+&lt;h2 id=&#34;clone-repository-locally:cc4aac3e9be04e0413c9520f223b493c&#34;&gt;Clone repository locally&lt;/h2&gt;
 
 &lt;pre&gt;&lt;code&gt;git clone https://github.com/christkv/mongodb-core
 cd node-mongodb-native
 npm install
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;h2 id=&#34;toc_4&#34;&gt;Running The Test Suite&lt;/h2&gt;
+&lt;h2 id=&#34;running-the-test-suite:cc4aac3e9be04e0413c9520f223b493c&#34;&gt;Running The Test Suite&lt;/h2&gt;
 
 &lt;p&gt;Make sure the &lt;em&gt;mongod&lt;/em&gt; executable is in your shell or command line &lt;em&gt;path&lt;/em&gt;. Then run the functional test suite.&lt;/p&gt;
 
@@ -1042,12 +1045,12 @@ npm install
     <item>
       <title>License</title>
       <link>/node-mongodb-native/core/meta/license/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/core/meta/license/</guid>
       <description>
 
-&lt;h2 id=&#34;toc_0&#34;&gt;Licensed Under Apache License 2.0&lt;/h2&gt;
+&lt;h2 id=&#34;licensed-under-apache-license-2-0:53e892b8b41cc4caece1cfd5ef21d6e7&#34;&gt;Licensed Under Apache License 2.0&lt;/h2&gt;
 
 &lt;p&gt;Licensed under the Apache License, Version 2.0 (the &amp;ldquo;License&amp;rdquo;); you may not use this file except in compliance with the License. You may obtain a copy of the License at&lt;/p&gt;
 
@@ -1060,12 +1063,12 @@ npm install
     <item>
       <title>Release Notes</title>
       <link>/node-mongodb-native/core/meta/release-notes/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/core/meta/release-notes/</guid>
       <description>
 
-&lt;h2 id=&#34;toc_0&#34;&gt;1.1.9 21-01-2015&lt;/h2&gt;
+&lt;h2 id=&#34;1-1-9-21-01-2015:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.1.9 21-01-2015&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Updated BSON dependency to 0.2.18 to fix issues with io.js and node.&lt;/li&gt;
@@ -1074,7 +1077,7 @@ npm install
 &lt;li&gt;Refactored out state changes into methods to simplify read the next method.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_1&#34;&gt;1.1.8 09-12-2015&lt;/h2&gt;
+&lt;h2 id=&#34;1-1-8-09-12-2015:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.1.8 09-12-2015&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Stripped out Object.defineProperty for performance reasons&lt;/li&gt;
@@ -1082,25 +1085,25 @@ npm install
 &lt;li&gt;properties cursorBatchSize, cursorSkip, cursorLimit are not methods setCursorBatchSize/cursorBatchSize, setCursorSkip/cursorSkip, setCursorLimit/cursorLimit&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_2&#34;&gt;1.1.7 18-12-2014&lt;/h2&gt;
+&lt;h2 id=&#34;1-1-7-18-12-2014:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.1.7 18-12-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Use ns variable for getMore commands for command cursors to work properly with cursor version of listCollections and listIndexes.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_3&#34;&gt;1.1.6 18-12-2014&lt;/h2&gt;
+&lt;h2 id=&#34;1-1-6-18-12-2014:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.1.6 18-12-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Server manager fixed to support 2.2.X servers for travis test matrix.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_4&#34;&gt;1.1.5 17-12-2014&lt;/h2&gt;
+&lt;h2 id=&#34;1-1-5-17-12-2014:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.1.5 17-12-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Fall back to errmsg when creating MongoError for command errors&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_5&#34;&gt;1.1.4 17-12-2014&lt;/h2&gt;
+&lt;h2 id=&#34;1-1-4-17-12-2014:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.1.4 17-12-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Added transform method support for cursor (initially just for initial query results) to support listCollections/listIndexes in 2.8.&lt;/li&gt;
@@ -1109,7 +1112,7 @@ npm install
 &lt;li&gt;Bumped bson to 0.2.16.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_6&#34;&gt;1.1.3 01-12-2014&lt;/h2&gt;
+&lt;h2 id=&#34;1-1-3-01-12-2014:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.1.3 01-12-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Fixed error handling issue with nonce generation in mongocr.&lt;/li&gt;
@@ -1118,14 +1121,14 @@ npm install
 &lt;li&gt;Cleaned up any escaping global variables.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_7&#34;&gt;1.1.2 20-11-2014&lt;/h2&gt;
+&lt;h2 id=&#34;1-1-2-20-11-2014:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.1.2 20-11-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Correctly encoding UTF8 collection names on wire protocol messages.&lt;/li&gt;
 &lt;li&gt;Added emitClose parameter to topology destroy methods to allow users to specify that they wish the topology to emit the close event to any listeners.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_8&#34;&gt;1.1.1 14-11-2014&lt;/h2&gt;
+&lt;h2 id=&#34;1-1-1-14-11-2014:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.1.1 14-11-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Refactored code to use prototype instead of privileged methods.&lt;/li&gt;
@@ -1133,38 +1136,38 @@ npm install
 &lt;li&gt;Several deopt optimizations for v8 to improve performance and reduce GC pauses.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_9&#34;&gt;1.0.5 29-10-2014&lt;/h2&gt;
+&lt;h2 id=&#34;1-0-5-29-10-2014:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.0.5 29-10-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Fixed issue with wrong namespace being created for command cursors.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_10&#34;&gt;1.0.4 24-10-2014&lt;/h2&gt;
+&lt;h2 id=&#34;1-0-4-24-10-2014:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.0.4 24-10-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;switched from using shift for the cursor due to bad slowdown on big batchSizes as shift causes entire array to be copied on each call.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_11&#34;&gt;1.0.3 21-10-2014&lt;/h2&gt;
+&lt;h2 id=&#34;1-0-3-21-10-2014:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.0.3 21-10-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;fixed error issuing problem on cursor.next when iterating over a huge dataset with a very small batchSize.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_12&#34;&gt;1.0.2 07-10-2014&lt;/h2&gt;
+&lt;h2 id=&#34;1-0-2-07-10-2014:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.0.2 07-10-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;fullsetup is now defined as a primary and secondary being available allowing for all read preferences to be satisfied.&lt;/li&gt;
 &lt;li&gt;fixed issue with replset_state logging.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_13&#34;&gt;1.0.1 07-10-2014&lt;/h2&gt;
+&lt;h2 id=&#34;1-0-1-07-10-2014:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.0.1 07-10-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Dependency issue solved&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_14&#34;&gt;1.0.0 07-10-2014&lt;/h2&gt;
+&lt;h2 id=&#34;1-0-0-07-10-2014:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.0.0 07-10-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Initial release of mongodb-core&lt;/li&gt;

@@ -56,20 +56,10 @@
           
               
                 <li>
-                <a class="" href="/node-mongodb-native/">
+                <a class="" href="http://learnmongodbthehardway.com/">
                     <i class='fa fa-file-text'></i>
                     
                     <span>driver portal</span>
-                </a>
-              
-              </li>
-          
-              
-                <li>
-                <a class="" href="http://learnmongodbthehardway.com">
-                    <i class='fa fa-file-text'></i>
-                    
-                    <span>Learn Mongo DB</span>
                 </a>
               
               </li>
@@ -86,7 +76,7 @@
           
               
                 <li>
-                <a class="" href="/node-mongodb-native/1.4">
+                <a class="" href="/node-mongodb-native/2.0/node-mongodb-native/1/index.4/">
                     <i class='fa fa-file-text'></i>
                     
                     <span>legacy docs 1.4.X</span>
@@ -230,15 +220,7 @@
           
             <li> <a href="https://jira.mongodb.org/browse/NODE" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
             
-              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/tutorials/streams.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
-            
-            <li><a href='https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge'><img src='https://badges.gitter.im/Join Chat.svg'/></a></li>
-        </ul>
-        
-    </div>
-</aside>
-
-
+              
 
       
       <section id="main-content">
@@ -275,7 +257,7 @@
 
 
 
-<h1 id="toc_0">Streams Support in the Node.js Driver</h1>
+<h1 id="streams-support-in-the-node-js-driver:16b198f86ae4a94402dc4b88db61ae41">Streams Support in the Node.js Driver</h1>
 
 <p>The MongoDB driver has extensive Stream support for cursors as well as for GridFS. In essence the following aspects of the driver supports Node 0.10.x or higher style streams.</p>
 
@@ -288,7 +270,7 @@
 
 <p>We will look at a simple example for supported stream starting with the <em>find</em> command.</p>
 
-<h2 id="toc_1">Find Cursor as a Stream</h2>
+<h2 id="find-cursor-as-a-stream:16b198f86ae4a94402dc4b88db61ae41">Find Cursor as a Stream</h2>
 
 <p>Let&rsquo;s examine a simple query using <em>find</em> and how to use it as a node.js stream.</p>
 
@@ -361,7 +343,7 @@ MongoClient.connect(url, function(err, db) {
 
 <p>That wraps up the behaviors of the <em>Readable</em> stream for the <em>find</em> method. Next let&rsquo;s look at the aggregate command.</p>
 
-<h2 id="toc_2">Aggregation Cursor as a Stream</h2>
+<h2 id="aggregation-cursor-as-a-stream:16b198f86ae4a94402dc4b88db61ae41">Aggregation Cursor as a Stream</h2>
 
 <p>The aggregation cursor behaves very much like the <em>find</em> cursor. It&rsquo;s main difference is that it does not support a <em>transform</em> method. Let&rsquo;s have a look at a simple example.</p>
 
@@ -396,7 +378,7 @@ MongoClient.connect(url, function(err, db) {
 
 <p>As one can see the cursor behaves in the exact same way as the cursor that is returned when invoking the <em>find</em> method. Let&rsquo;s have a look at the <em>parallelCollectionScan</em> method that is a bit of a special case as it returns one or more cursors.</p>
 
-<h2 id="toc_3">The parallelCollectionScan method</h2>
+<h2 id="the-parallelcollectionscan-method:16b198f86ae4a94402dc4b88db61ae41">The parallelCollectionScan method</h2>
 
 <p>The <em>parallelCollectionScan</em> method is a specialized method that allows for parallel reading of a collection using multiple cursors. This method is only available when connecting to a single server or replicaset topology. Let&rsquo;s look at an example.</p>
 
@@ -447,11 +429,11 @@ MongoClient.connect(url, function(err, db) {
 
 <p>In this example we use each cursor as a stream and when all cursors have emitted the <em>end</em> event we check that the number of inserted documents match the number of emitted documents. Each cursor returned from the <em>parallelCollectionScan</em> method is functionally equivalent to the cursors returned from the the <em>find</em> method.</p>
 
-<h1 id="toc_4">GridStore the Read/Write Stream</h1>
+<h1 id="gridstore-the-read-write-stream:16b198f86ae4a94402dc4b88db61ae41">GridStore the Read/Write Stream</h1>
 
 <p>Until now all the methods we have covered are <em>Readable</em> meaning they can only provide a readable stream. GridStore implements the <em>Duplex</em> stream meaning it can not only be read as a Stream (say stream a mp3 straight from your GridFS collections) but also be written to (say upload a file directly via http into GridFS). Let&rsquo;s look at the simple example of streaming a GridStore file and then one where we use an incoming stream to write to GridFS.</p>
 
-<h2 id="toc_5">Streaming a GridFS file to disk</h2>
+<h2 id="streaming-a-gridfs-file-to-disk:16b198f86ae4a94402dc4b88db61ae41">Streaming a GridFS file to disk</h2>
 
 <p>Streaming a GridStore file to disk is fairly simple. The example below reads in a pdf file and saves it in GridFS. It then creates a GridStore instance pointing to the newly saved pdf file and passes the stream to a file write stream using pipe.</p>
 
@@ -492,7 +474,7 @@ MongoClient.connect(url, function(err, db) {
 });
 </code></pre>
 
-<h2 id="toc_6">Streaming a File into GridFS</h2>
+<h2 id="streaming-a-file-into-gridfs:16b198f86ae4a94402dc4b88db61ae41">Streaming a File into GridFS</h2>
 
 <p>In the case of writing a file to GridFS using streams we do the reverse piping the file read stream into a our gridstore instance.</p>
 

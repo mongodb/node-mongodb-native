@@ -36,7 +36,7 @@ look at a simple use of the aggregation cursor.
 ::
 
         var MongoClient = require('mongodb').MongoClient;
-
+         
         MongoClient.connect("mongodb://localhost:27017/test", function(err, db) {
             // Get an aggregation cursor
             var cursor = db.collection('data').aggregate([
@@ -71,7 +71,7 @@ property with a query.
 ::
 
         var MongoClient = require('mongodb').MongoClient;
-
+         
         MongoClient.connect("mongodb://localhost:27017/test", function(err, db) {
             // Get an aggregation cursor
             var cursor = db.collection('data')
@@ -112,7 +112,7 @@ operations.
 ::
 
         var MongoClient = require('mongodb').MongoClient;
-
+         
         MongoClient.connect("mongodb://localhost:27017/test", function(err, db) {
           // Get the collection
           var col = db.collection('batch_write_ordered_ops');
@@ -168,7 +168,7 @@ reading out an entire collection using **numCursors** parallel cursors.
 ::
 
         var MongoClient = require('mongodb').MongoClient;
-
+         
         MongoClient.connect("mongodb://localhost:27017/test", function(err, db) {
             // Get an aggregation cursor
             db.collection('data').parallelCollectionScan({numCursors:3}, function(err, cursors) {
@@ -205,7 +205,7 @@ by default. A simple example.
 ::
 
         var MongoClient = require('mongodb').MongoClient;
-
+         
         MongoClient.connect("mongodb://localhost:27017/test", function(err, db) {
           // Get the collection
           var collection = db.collection('textSearchWithSort');
@@ -243,7 +243,7 @@ buffered operations.
 ::
 
         var MongoClient = require('mongodb').MongoClient;
-
+         
         MongoClient.connect("mongodb://localhost:27017,localhost:27027/test", function(err, db) {
             db.serverConfig.on('joined', function(err, server) {
                 console.log("server joined");
@@ -270,7 +270,7 @@ attempting to reconnect.
 ::
 
         var MongoClient = require('mongodb').MongoClient;
-
+         
         MongoClient.connect("mongodb://localhost:27017/test", {
                 db: {bufferMaxEntries:0},
             }, function(err, db) {
@@ -305,4 +305,3 @@ semantics apply.
    running with journaling, this acts the same as the ``j`` option,
    blocking until write operations have been committed to the journal.
    Cannot be used in combination with ``j``.
-

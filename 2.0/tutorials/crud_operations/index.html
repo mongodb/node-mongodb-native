@@ -56,20 +56,10 @@
           
               
                 <li>
-                <a class="" href="/node-mongodb-native/">
+                <a class="" href="http://learnmongodbthehardway.com/">
                     <i class='fa fa-file-text'></i>
                     
                     <span>driver portal</span>
-                </a>
-              
-              </li>
-          
-              
-                <li>
-                <a class="" href="http://learnmongodbthehardway.com">
-                    <i class='fa fa-file-text'></i>
-                    
-                    <span>Learn Mongo DB</span>
                 </a>
               
               </li>
@@ -86,7 +76,7 @@
           
               
                 <li>
-                <a class="" href="/node-mongodb-native/1.4">
+                <a class="" href="/node-mongodb-native/2.0/node-mongodb-native/1/index.4/">
                     <i class='fa fa-file-text'></i>
                     
                     <span>legacy docs 1.4.X</span>
@@ -230,15 +220,7 @@
           
             <li> <a href="https://jira.mongodb.org/browse/NODE" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
             
-              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/tutorials/crud_operations.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
-            
-            <li><a href='https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge'><img src='https://badges.gitter.im/Join Chat.svg'/></a></li>
-        </ul>
-        
-    </div>
-</aside>
-
-
+              
 
       
       <section id="main-content">
@@ -275,13 +257,13 @@
 
 
 
-<h1 id="toc_0">Driver CRUD Operations</h1>
+<h1 id="driver-crud-operations:35296af7b5e03e340e2ce9cac65b7c8e">Driver CRUD Operations</h1>
 
 <p>The driver crud operations are defined as the operations performed to insert/update/remove and query for documents. In this tutorial we will cover both the basic CRUD methods as well as the specialized <em>findAndModify</em> based methods and the new Bulk API methods allowing for efficient bulk write operations. But let&rsquo;s start with a simple introduction to the insert, update and remove operations that are on the collection class.</p>
 
-<h2 id="toc_1">Write Methods</h2>
+<h2 id="write-methods:35296af7b5e03e340e2ce9cac65b7c8e">Write Methods</h2>
 
-<h3 id="toc_2">Inserting Documents</h3>
+<h3 id="inserting-documents:35296af7b5e03e340e2ce9cac65b7c8e">Inserting Documents</h3>
 
 <p>The <em>insertOne</em> and <em>insertMany</em> methods exists on the <em>Collection</em> class and is used to insert documents into MongoDB. Code speaks a thousand words so let&rsquo;s see two simple examples of inserting documents.</p>
 
@@ -354,7 +336,7 @@ MongoClient.connect(url, function(err, db) {
 
 <p>That wraps up the <em>insert</em> methods. Next let&rsquo;s look at the <em>update</em> methods.</p>
 
-<h3 id="toc_3">Updating Documents</h3>
+<h3 id="updating-documents:35296af7b5e03e340e2ce9cac65b7c8e">Updating Documents</h3>
 
 <p>The <em>updateOne</em> and <em>updateMany</em> methods exists on the <em>Collection</em> class and is used to update and upsert documents into MongoDB. Let&rsquo;s look at a couple of usage examples.</p>
 
@@ -413,7 +395,7 @@ MongoClient.connect(url, function(err, db) {
 
 <p>Just as for <em>insert</em> the <em>update</em> method allows you to specify a per operation write concern using the <em>w</em>, <em>wtimeout</em> and <em>fsync</em> parameters</p>
 
-<h3 id="toc_4">Removing Documents</h3>
+<h3 id="removing-documents:35296af7b5e03e340e2ce9cac65b7c8e">Removing Documents</h3>
 
 <p>The <em>deleteOne</em> and <em>deleteMany</em> methods exist on the <em>Collection</em> class and is used to remove documents from MongoDB. Let&rsquo;s look at a couple of usage examples.</p>
 
@@ -462,7 +444,7 @@ MongoClient.connect(url, function(err, db) {
 
 <p>Just as for <em>updateOne/updateMany</em> and <em>insertOne/insertMany</em> the <em>deleteOne/deleteMany</em> method allows you to specify a per operation write concern using the <em>w</em>, <em>wtimeout</em> and <em>fsync</em> parameters</p>
 
-<h3 id="toc_5">FindAndModify and findAndDelete</h3>
+<h3 id="findandmodify-and-findanddelete:35296af7b5e03e340e2ce9cac65b7c8e">FindAndModify and findAndDelete</h3>
 
 <p>The two methods <em>findOneAndUpdate</em>, <em>findOneAndDelete</em> and <em>findOneAndReplace</em> are special commands that allows the user to update or upsert a document and have the modified or existing document returned. It comes at a cost as the operation takes a write lock for the duration of the operation as it needs to ensure the modification is <em>atomic</em>. Let&rsquo;s look at <em>findOneAndUpdate</em> first using an example.</p>
 
@@ -554,7 +536,7 @@ MongoClient.connect(url, function(err, db) {
 <li><code>sort</code>, (Object, default:null) Sort for find operation.</li>
 </ul>
 
-<h3 id="toc_6">BulkWrite</h3>
+<h3 id="bulkwrite:35296af7b5e03e340e2ce9cac65b7c8e">BulkWrite</h3>
 
 <p>The <em>bulkWrite</em> function allows for a simple set of bulk operations to be done in a non fluent way as in comparison to the bulk API discussed next. Let&rsquo;s look at an example.</p>
 
@@ -604,7 +586,7 @@ MongoClient.connect(url, function(err, db) {
 
 <p>This covers the basic write operations. Let&rsquo;s have a look at the Bulk write operations next.</p>
 
-<h2 id="toc_7">Bulk Write Operations</h2>
+<h2 id="bulk-write-operations:35296af7b5e03e340e2ce9cac65b7c8e">Bulk Write Operations</h2>
 
 <p>The bulk write operations make it easy to write groups of operations together to MongoDB. There are some caveats and to get the best performance you need to be running against MongoDB <em>2.6</em> or higher that support the new write commands. Bulk operations are split into <em>ordered</em> and <em>unordered</em> bulk operations. An <em>ordered</em> bulk operation guarantees the order of execution of writes while the <em>unordered</em> bulk operation makes no assumptions about the order of execution. In the Node.js driver the <em>unordered</em> bulk operations will group operations according to type and write them in parallel. Let&rsquo;s have a look at how to build an ordered bulk operation.</p>
 
@@ -684,7 +666,7 @@ Remove Command with {b:1}
 
 <p>This covers write operations for MongoDB. Let&rsquo;s look at querying for documents next.</p>
 
-<h2 id="toc_8">Read Methods</h2>
+<h2 id="read-methods:35296af7b5e03e340e2ce9cac65b7c8e">Read Methods</h2>
 
 <p>The main method for querying the database are the <em>find</em> and the <em>aggregate</em> method. In this CRUD tutorial we will focus on <em>find</em> only as <em>aggregate</em> has it&rsquo;s own <a href="/tutorials/aggregation">Aggregation Tutorial</a></p>
 

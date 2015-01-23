@@ -56,20 +56,10 @@
           
               
                 <li>
-                <a class="" href="/node-mongodb-native/">
+                <a class="" href="http://learnmongodbthehardway.com/">
                     <i class='fa fa-file-text'></i>
                     
                     <span>driver portal</span>
-                </a>
-              
-              </li>
-          
-              
-                <li>
-                <a class="" href="http://learnmongodbthehardway.com">
-                    <i class='fa fa-file-text'></i>
-                    
-                    <span>Learn Mongo DB</span>
                 </a>
               
               </li>
@@ -86,7 +76,7 @@
           
               
                 <li>
-                <a class="" href="/node-mongodb-native/1.4">
+                <a class="" href="/node-mongodb-native/2.0/node-mongodb-native/1/index.4/">
                     <i class='fa fa-file-text'></i>
                     
                     <span>legacy docs 1.4.X</span>
@@ -230,15 +220,7 @@
           
             <li> <a href="https://jira.mongodb.org/browse/NODE" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
             
-              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/articles/node_knockout_article_2.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
-            
-            <li><a href='https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge'><img src='https://badges.gitter.im/Join Chat.svg'/></a></li>
-        </ul>
-        
-    </div>
-</aside>
-
-
+              
 
       
       <section id="main-content">
@@ -275,11 +257,11 @@
 
 
 
-<h1 id="toc_0">A primer for GridFS using the Mongo DB driver</h1>
+<h1 id="a-primer-for-gridfs-using-the-mongo-db-driver:dc0ec283d606e0db29886f78fadefb7c">A primer for GridFS using the Mongo DB driver</h1>
 
 <p>In the first tutorial we targeted general usage of the database. But Mongo DB is much more than this. One of the additional very useful features is to act as a file storage system. This is accomplish in Mongo by having a file collection and a chunks collection where each document in the chunks collection makes up a <strong>Block</strong> of the file. In this tutorial we will look at how to use the GridFS functionality and what functions are available.</p>
 
-<h2 id="toc_1">A simple example</h2>
+<h2 id="a-simple-example:dc0ec283d606e0db29886f78fadefb7c">A simple example</h2>
 
 <p>Let&rsquo;s dive straight into a simple example on how to write a file to the grid using the simplified Grid class.</p>
 
@@ -355,7 +337,7 @@ MongoClient.connect(&quot;mongodb://localhost:27017/exampleDb&quot;, function(er
 
 <p>This <strong>api</strong> is the simplest one you can use to interact with GridFS but it&rsquo;s not suitable for all kinds of files. One of it&rsquo;s main drawbacks is you are trying to write large files to Mongo. This api will require you to read the entire file into memory when writing and reading from Mongo which most likely is not feasible if you have to store large files like Video or RAW Pictures. Luckily this is not the only way to work with GridFS. That&rsquo;s not to say this api is not useful. If you are storing tons of small files the memory usage vs the simplicity might be a worthwhile tradeoff. Let&rsquo;s dive into some of the more advanced ways of using GridFS.</p>
 
-<h2 id="toc_2">Advanced GridFS or how not to run out of memory</h2>
+<h2 id="advanced-gridfs-or-how-not-to-run-out-of-memory:dc0ec283d606e0db29886f78fadefb7c">Advanced GridFS or how not to run out of memory</h2>
 
 <p>As we just said controlling memory consumption for you file writing and reading is key if you want to scale up the application. That means not reading in entire files before either writing or reading from Mongo DB. The good news is, it&rsquo;s supported. Let&rsquo;s throw some code out there straight away and look at how to do chunk sized streaming writes and reads.</p>
 
@@ -455,7 +437,7 @@ gridStore.open(function(err, gridStore) {
 
 <p>Right that&rsquo;s it for writing to GridFS in an efficient Manner. I&rsquo;ll outline some other useful function on the Gridstore object.</p>
 
-<h2 id="toc_3">Other useful methods on the Gridstore object</h2>
+<h2 id="other-useful-methods-on-the-gridstore-object:dc0ec283d606e0db29886f78fadefb7c">Other useful methods on the Gridstore object</h2>
 
 <p>There are some other methods that are useful</p>
 
@@ -492,7 +474,7 @@ gridStore.open(function(err, gridStore) {
 
 <p>This should be plenty to get you on your way building your first GridFS based application. As in the previous article the following links might be useful for you. Good luck and have fun.</p>
 
-<h2 id="toc_4">Links and stuff</h2>
+<h2 id="links-and-stuff:dc0ec283d606e0db29886f78fadefb7c">Links and stuff</h2>
 
 <ul>
 <li><a href="https://github.com/mongodb/node-mongodb-native/tree/master/examples">The driver examples, good starting point for basic usage</a></li>

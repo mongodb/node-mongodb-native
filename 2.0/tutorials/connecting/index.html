@@ -56,20 +56,10 @@
           
               
                 <li>
-                <a class="" href="/node-mongodb-native/">
+                <a class="" href="http://learnmongodbthehardway.com/">
                     <i class='fa fa-file-text'></i>
                     
                     <span>driver portal</span>
-                </a>
-              
-              </li>
-          
-              
-                <li>
-                <a class="" href="http://learnmongodbthehardway.com">
-                    <i class='fa fa-file-text'></i>
-                    
-                    <span>Learn Mongo DB</span>
                 </a>
               
               </li>
@@ -86,7 +76,7 @@
           
               
                 <li>
-                <a class="" href="/node-mongodb-native/1.4">
+                <a class="" href="/node-mongodb-native/2.0/node-mongodb-native/1/index.4/">
                     <i class='fa fa-file-text'></i>
                     
                     <span>legacy docs 1.4.X</span>
@@ -230,15 +220,7 @@
           
             <li> <a href="https://jira.mongodb.org/browse/NODE" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
             
-              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/tutorials/connecting.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
-            
-            <li><a href='https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge'><img src='https://badges.gitter.im/Join Chat.svg'/></a></li>
-        </ul>
-        
-    </div>
-</aside>
-
-
+              
 
       
       <section id="main-content">
@@ -275,13 +257,13 @@
 
 
 
-<h1 id="toc_0">Connecting To MongoDB</h1>
+<h1 id="connecting-to-mongodb:d67a243cdf521fafcb45cf3f560d3e12">Connecting To MongoDB</h1>
 
 <hr />
 
 <p>Connecting to MongoDB using the driver is primarily done using the <code>MongoClient.connect</code> method and a URI. Let&rsquo;s look at how we connect to a couple of different server topologies.</p>
 
-<h2 id="toc_1">Single Server Connection</h2>
+<h2 id="single-server-connection:d67a243cdf521fafcb45cf3f560d3e12">Single Server Connection</h2>
 
 <p>We have a single MongoDB server instance running on the port <em>27017</em> Let&rsquo;s connect using the driver and <em>MongoClient.connect</em></p>
 
@@ -307,7 +289,7 @@ MongoClient.connect(url, function(err, db) {
 <li><code>/myproject</code> is the database we wish to connect to</li>
 </ul>
 
-<h2 id="toc_2">Replicaset Server Connection</h2>
+<h2 id="replicaset-server-connection:d67a243cdf521fafcb45cf3f560d3e12">Replicaset Server Connection</h2>
 
 <p>We wish to connect to a ReplicaSet consisting of one primary and 1 or more secondaries. To Do this we need to supply the driver with a seedlist of servers and the name of the ReplicaSet we wish to connect to. Let&rsquo;s take a look at a code example.</p>
 
@@ -334,7 +316,7 @@ MongoClient.connect(url, function(err, db) {
 <li><code>replicaSet=foo</code> is the name of the ReplicaSet we are connecting to. This ensures we are connecting to the correct Replicaset. <strong>This is a required parameter when using the 2.0 driver</strong></li>
 </ul>
 
-<h2 id="toc_3">Mongos Proxy Connection</h2>
+<h2 id="mongos-proxy-connection:d67a243cdf521fafcb45cf3f560d3e12">Mongos Proxy Connection</h2>
 
 <p>We wish to connect to a set of <code>mongos</code> proxies. Just as in the case of connecting to a ReplicaSet we can provide a seed list of <code>mongos</code> proxies. This allows the driver to perform failover between proxies automatically in case of a proxy process having been shut down. Let&rsquo;s look at an example of code connecting to a set of proxies.</p>
 
@@ -360,9 +342,9 @@ MongoClient.connect(url, function(err, db) {
 <li><code>/myproject</code> is the database we wish to connect to</li>
 </ul>
 
-<h2 id="toc_4">Authentication</h2>
+<h2 id="authentication:d67a243cdf521fafcb45cf3f560d3e12">Authentication</h2>
 
-<h3 id="toc_5">Against The Specified Database</h3>
+<h3 id="against-the-specified-database:d67a243cdf521fafcb45cf3f560d3e12">Against The Specified Database</h3>
 
 <p><code>MongoClient.connect</code> also allows us to specify authentication credentials as part of the <code>URI</code>. Let&rsquo;s assume there is a user <em>dave</em> with the password <em>password</em> on the database <em>protected</em>. To correctly authenticate we will do the following.</p>
 
@@ -391,7 +373,7 @@ MongoClient.connect(url, function(err, db) {
 
 <p><em>The password and username must be URI encoded to allow for all any possible illegal characters</em></p>
 
-<h3 id="toc_6">Indirectly Against Another Database</h3>
+<h3 id="indirectly-against-another-database:d67a243cdf521fafcb45cf3f560d3e12">Indirectly Against Another Database</h3>
 
 <p>In some cases you might have to authenticate against another database than the one you intend to connect to. This is referred to as delegated authentication. Say you wish to connect to the <em>myproject</em> database but the user is defined in the <em>admin</em> database. Let&rsquo;s look at how we would accomplish this.</p>
 
@@ -419,7 +401,7 @@ MongoClient.connect(url, function(err, db) {
 <li><code>authSource=admin</code> is the database we wish to authenticate against</li>
 </ul>
 
-<h1 id="toc_7">MongoClient.connect Optional Parameters</h1>
+<h1 id="mongoclient-connect-optional-parameters:d67a243cdf521fafcb45cf3f560d3e12">MongoClient.connect Optional Parameters</h1>
 
 <hr />
 
@@ -457,7 +439,7 @@ MongoClient.connect(url, {
 
 <p>Let&rsquo;s look at the individual options for each of the top level fields.</p>
 
-<h2 id="toc_8">Data base level options</h2>
+<h2 id="data-base-level-options:d67a243cdf521fafcb45cf3f560d3e12">Data base level options</h2>
 
 <ul>
 <li><code>w</code>, {Number/String, &gt; -1 || &lsquo;majority&rsquo;} the write concern for the operation where &lt; 1 is no acknowledgment of write and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write</li>
@@ -476,7 +458,7 @@ MongoClient.connect(url, {
 <li><code>bufferMaxEntries</code> {Number, default: -1}, sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited.</li>
 </ul>
 
-<h2 id="toc_9">Individual Server Level Options</h2>
+<h2 id="individual-server-level-options:d67a243cdf521fafcb45cf3f560d3e12">Individual Server Level Options</h2>
 
 <ul>
 <li><code>poolSize</code>, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.</li>
@@ -493,7 +475,7 @@ MongoClient.connect(url, {
 <li><code>socketOptions.socketTimeoutMS</code>, {Number, default: 0} TCP Socket timeout setting.</li>
 </ul>
 
-<h2 id="toc_10">Replicaset Level Options</h2>
+<h2 id="replicaset-level-options:d67a243cdf521fafcb45cf3f560d3e12">Replicaset Level Options</h2>
 
 <ul>
 <li><code>ha</code> {Boolean, default:true}, turn on high availability.</li>
@@ -514,7 +496,7 @@ MongoClient.connect(url, {
 <li><code>socketOptions.socketTimeoutMS</code>, {Number, default: 0} TCP Socket timeout setting.</li>
 </ul>
 
-<h2 id="toc_11">Mongos Proxy Level Options</h2>
+<h2 id="mongos-proxy-level-options:d67a243cdf521fafcb45cf3f560d3e12">Mongos Proxy Level Options</h2>
 
 <ul>
 <li><code>ha</code> {Boolean, default:true}, turn on high availability.</li>

@@ -319,16 +319,16 @@ out instead of falling over correctly.</p>
 semantics apply.</p>
 <ul class="simple">
 <li>j: If true block until write operations have been committed to the
-journal. Cannot be used in combination with <tt class="docutils literal"><span class="pre">fsync</span></tt>. Prior to
+journal. Cannot be used in combination with <code class="docutils literal"><span class="pre">fsync</span></code>. Prior to
 MongoDB 2.6 this option was ignored if the server was running without
 journaling. Starting with MongoDB 2.6 write operations will fail with
 an exception if this option is used when the server is running
 without journaling.</li>
 <li>fsync: If true and the server is running without journaling, blocks
 until the server has synced all data files to disk. If the server is
-running with journaling, this acts the same as the <tt class="docutils literal"><span class="pre">j</span></tt> option,
+running with journaling, this acts the same as the <code class="docutils literal"><span class="pre">j</span></code> option,
 blocking until write operations have been committed to the journal.
-Cannot be used in combination with <tt class="docutils literal"><span class="pre">j</span></tt>.</li>
+Cannot be used in combination with <code class="docutils literal"><span class="pre">j</span></code>.</li>
 </ul>
 </div>
 </div>
@@ -481,7 +481,7 @@ Cannot be used in combination with <tt class="docutils literal"><span class="pre
    </ul>
  </li>
 </ul>
-<div id="searchbox" style="display: none">
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
       <input type="text" name="q" />
@@ -512,7 +512,7 @@ Cannot be used in combination with <tt class="docutils literal"><span class="pre
     </div></div>
     <div class="footer">
         &copy; Copyright 2013, MongoDB Node.JS Team 
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2.3.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3b2.
 
     <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
     <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>

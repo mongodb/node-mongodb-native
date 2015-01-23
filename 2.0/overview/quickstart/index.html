@@ -56,20 +56,10 @@
           
               
                 <li>
-                <a class="" href="/node-mongodb-native/">
+                <a class="" href="http://learnmongodbthehardway.com/">
                     <i class='fa fa-file-text'></i>
                     
                     <span>driver portal</span>
-                </a>
-              
-              </li>
-          
-              
-                <li>
-                <a class="" href="http://learnmongodbthehardway.com">
-                    <i class='fa fa-file-text'></i>
-                    
-                    <span>Learn Mongo DB</span>
                 </a>
               
               </li>
@@ -86,7 +76,7 @@
           
               
                 <li>
-                <a class="" href="/node-mongodb-native/1.4">
+                <a class="" href="/node-mongodb-native/2.0/node-mongodb-native/1/index.4/">
                     <i class='fa fa-file-text'></i>
                     
                     <span>legacy docs 1.4.X</span>
@@ -230,15 +220,7 @@
           
             <li> <a href="https://jira.mongodb.org/browse/NODE" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
             
-              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/overview/quickstart.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
-            
-            <li><a href='https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge'><img src='https://badges.gitter.im/Join Chat.svg'/></a></li>
-        </ul>
-        
-    </div>
-</aside>
-
-
+              
 
       
       <section id="main-content">
@@ -275,11 +257,11 @@
 
 
 
-<h1 id="toc_0">QuickStart</h1>
+<h1 id="quickstart:09c84f91027bd18b03251c05a0da4abb">QuickStart</h1>
 
 <p>The quickstart guide will show you how to set up a simple application using node.js and MongoDB. It scope is only how to set up the driver and perform the simple crud operations. For more inn depth coverage we encourage reading the tutorials.</p>
 
-<h2 id="toc_1">Create the package.json file</h2>
+<h2 id="create-the-package-json-file:09c84f91027bd18b03251c05a0da4abb">Create the package.json file</h2>
 
 <p>Let&rsquo;s create a directory where our application will live. In our case we will put this under our projects directory.</p>
 
@@ -317,7 +299,7 @@ cd myproject
 
 <p>You should see <strong>NPM</strong> download a lot of files. Once it&rsquo;s done you&rsquo;ll find all the downloaded packages under the <strong>node_modules</strong> directory.</p>
 
-<h2 id="toc_2">Booting up a MongoDB Server</h2>
+<h2 id="booting-up-a-mongodb-server:09c84f91027bd18b03251c05a0da4abb">Booting up a MongoDB Server</h2>
 
 <p>Let&rsquo;s boot up a MongoDB server instance. Download the right MongoDB version from <a href="http://www.mongodb.org">MongoDB</a>, open a new shell or command line and ensure the <strong>mongod</strong> command is in the shell or command line path. Now let&rsquo;s create a database directory (in our case under <strong>/data</strong>).</p>
 
@@ -326,7 +308,7 @@ cd myproject
 
 <p>You should see the <strong>mongod</strong> process start up and print some status information.</p>
 
-<h2 id="toc_3">Connecting to MongoDB</h2>
+<h2 id="connecting-to-mongodb:09c84f91027bd18b03251c05a0da4abb">Connecting to MongoDB</h2>
 
 <p>Let&rsquo;s create a new <strong>app.js</strong> file that we will use to show the basic CRUD operations using the MongoDB driver.</p>
 
@@ -350,7 +332,7 @@ MongoClient.connect(url, function(err, db) {
 
 <p>Let&rsquo;s Add some code to show the different CRUD operations available.</p>
 
-<h2 id="toc_4">Inserting a Document</h2>
+<h2 id="inserting-a-document:09c84f91027bd18b03251c05a0da4abb">Inserting a Document</h2>
 
 <p>Let&rsquo;s create a function that will insert some documents for us.</p>
 
@@ -407,7 +389,7 @@ MongoClient.connect(url, function(err, db) {
 Inserted 3 document into the document collection
 </code></pre>
 
-<h2 id="toc_5">Updating a document</h2>
+<h2 id="updating-a-document:09c84f91027bd18b03251c05a0da4abb">Updating a document</h2>
 
 <p>Let&rsquo;s look at how to do a simple document update by adding a new field <strong>b</strong> to the document that has the field <strong>a</strong> set to <strong>2</strong>.</p>
 
@@ -445,7 +427,7 @@ MongoClient.connect(url, function(err, db) {
 });
 </code></pre>
 
-<h2 id="toc_6">Remove a document</h2>
+<h2 id="remove-a-document:09c84f91027bd18b03251c05a0da4abb">Remove a document</h2>
 
 <p>Next lets remove the document where the field <strong>a</strong> equals to <strong>3</strong>.</p>
 
@@ -486,7 +468,7 @@ MongoClient.connect(url, function(err, db) {
 
 <p>Finally let&rsquo;s retrieve all the documents using a simple find.</p>
 
-<h2 id="toc_7">Find All Documents</h2>
+<h2 id="find-all-documents:09c84f91027bd18b03251c05a0da4abb">Find All Documents</h2>
 
 <p>We will finish up the Quickstart CRUD methods by performing a simple query that returns all the documents matching the query.</p>
 

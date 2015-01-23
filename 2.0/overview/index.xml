@@ -1,31 +1,34 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-      <title>Overviews on MongoDB 2.0.0 Driver </title>
-      <generator uri="https://hugo.spf13.com">Hugo</generator>
-    <link>/node-mongodb-native/2.0/overview/index.xml/</link>
+    <title>Overviews on MongoDB 2.0.0 Driver</title>
+    <link>/node-mongodb-native/2.0/overview/</link>
+    <description>Recent content in Overviews on MongoDB 2.0.0 Driver</description>
+    <generator>Hugo -- gohugo.io</generator>
     
     
     
-    <updated>Mon, 01 Jul 2013 00:00:00 UTC</updated>
+    
+    <lastBuildDate>Mon, 01 Jul 2013 00:00:00 UT</lastBuildDate>
+    <atom:link href="/node-mongodb-native/2.0/overview/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Driver introduction</title>
       <link>/node-mongodb-native/2.0/overview/introduction/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/2.0/overview/introduction/</guid>
       <description>
 
-&lt;h2 id=&#34;toc_0&#34;&gt;What is Node.js Native?&lt;/h2&gt;
+&lt;h2 id=&#34;what-is-node-js-native:2767292a573dc549b9b4297b701af3ab&#34;&gt;What is Node.js Native?&lt;/h2&gt;
 
 &lt;p&gt;Node.js Native is the MongoDB official Node.js driver allowing you to use MongoDB in you applications.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_1&#34;&gt;What does Node.js Native?&lt;/h2&gt;
+&lt;h2 id=&#34;what-does-node-js-native:2767292a573dc549b9b4297b701af3ab&#34;&gt;What does Node.js Native?&lt;/h2&gt;
 
 &lt;p&gt;The Node.js driver handles the connections to a single MongoDB server, a replicaset or a set of Mongos proxies in a sharded system. It let&amp;rsquo;s your application interact with the server and lets it perform operations against the database.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_2&#34;&gt;Next Steps&lt;/h2&gt;
+&lt;h2 id=&#34;next-steps:2767292a573dc549b9b4297b701af3ab&#34;&gt;Next Steps&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;http://learnmongodbthehardway.com/&#34;&gt;Learn MongoDB The Hard Way&lt;/a&gt;&lt;/li&gt;
@@ -41,19 +44,19 @@
     <item>
       <title>Installing The Driver</title>
       <link>/node-mongodb-native/2.0/overview/installing/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/2.0/overview/installing/</guid>
       <description>
 
-&lt;h2 id=&#34;toc_0&#34;&gt;Installing MongoDB Node.js driver using NPM&lt;/h2&gt;
+&lt;h2 id=&#34;installing-mongodb-node-js-driver-using-npm:3cef5cab5612f8cc3d40c6e13331783b&#34;&gt;Installing MongoDB Node.js driver using NPM&lt;/h2&gt;
 
 &lt;p&gt;Installing the MongoDB Node.js driver using NPM is very easy. First you need to ensure you have Node.js and NPM correctly set up and in your path. Installing the driver is as easy as.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;npm install mongodb
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;h2 id=&#34;toc_1&#34;&gt;Installing MongoDB Node.js driver as part of your project&lt;/h2&gt;
+&lt;h2 id=&#34;installing-mongodb-node-js-driver-as-part-of-your-project:3cef5cab5612f8cc3d40c6e13331783b&#34;&gt;Installing MongoDB Node.js driver as part of your project&lt;/h2&gt;
 
 &lt;p&gt;Setting up the Node.js driver for your project is a simple as adding it to the &lt;strong&gt;package.json&lt;/strong&gt; dependencies section. An example &lt;strong&gt;package.json&lt;/strong&gt; file is shown below.&lt;/p&gt;
 
@@ -90,16 +93,16 @@
     <item>
       <title>QuickStart</title>
       <link>/node-mongodb-native/2.0/overview/quickstart/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/2.0/overview/quickstart/</guid>
       <description>
 
-&lt;h1 id=&#34;toc_0&#34;&gt;QuickStart&lt;/h1&gt;
+&lt;h1 id=&#34;quickstart:09c84f91027bd18b03251c05a0da4abb&#34;&gt;QuickStart&lt;/h1&gt;
 
 &lt;p&gt;The quickstart guide will show you how to set up a simple application using node.js and MongoDB. It scope is only how to set up the driver and perform the simple crud operations. For more inn depth coverage we encourage reading the tutorials.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_1&#34;&gt;Create the package.json file&lt;/h2&gt;
+&lt;h2 id=&#34;create-the-package-json-file:09c84f91027bd18b03251c05a0da4abb&#34;&gt;Create the package.json file&lt;/h2&gt;
 
 &lt;p&gt;Let&amp;rsquo;s create a directory where our application will live. In our case we will put this under our projects directory.&lt;/p&gt;
 
@@ -137,7 +140,7 @@ cd myproject
 
 &lt;p&gt;You should see &lt;strong&gt;NPM&lt;/strong&gt; download a lot of files. Once it&amp;rsquo;s done you&amp;rsquo;ll find all the downloaded packages under the &lt;strong&gt;node_modules&lt;/strong&gt; directory.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_2&#34;&gt;Booting up a MongoDB Server&lt;/h2&gt;
+&lt;h2 id=&#34;booting-up-a-mongodb-server:09c84f91027bd18b03251c05a0da4abb&#34;&gt;Booting up a MongoDB Server&lt;/h2&gt;
 
 &lt;p&gt;Let&amp;rsquo;s boot up a MongoDB server instance. Download the right MongoDB version from &lt;a href=&#34;http://www.mongodb.org&#34;&gt;MongoDB&lt;/a&gt;, open a new shell or command line and ensure the &lt;strong&gt;mongod&lt;/strong&gt; command is in the shell or command line path. Now let&amp;rsquo;s create a database directory (in our case under &lt;strong&gt;/data&lt;/strong&gt;).&lt;/p&gt;
 
@@ -146,7 +149,7 @@ cd myproject
 
 &lt;p&gt;You should see the &lt;strong&gt;mongod&lt;/strong&gt; process start up and print some status information.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_3&#34;&gt;Connecting to MongoDB&lt;/h2&gt;
+&lt;h2 id=&#34;connecting-to-mongodb:09c84f91027bd18b03251c05a0da4abb&#34;&gt;Connecting to MongoDB&lt;/h2&gt;
 
 &lt;p&gt;Let&amp;rsquo;s create a new &lt;strong&gt;app.js&lt;/strong&gt; file that we will use to show the basic CRUD operations using the MongoDB driver.&lt;/p&gt;
 
@@ -170,7 +173,7 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;Let&amp;rsquo;s Add some code to show the different CRUD operations available.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_4&#34;&gt;Inserting a Document&lt;/h2&gt;
+&lt;h2 id=&#34;inserting-a-document:09c84f91027bd18b03251c05a0da4abb&#34;&gt;Inserting a Document&lt;/h2&gt;
 
 &lt;p&gt;Let&amp;rsquo;s create a function that will insert some documents for us.&lt;/p&gt;
 
@@ -227,7 +230,7 @@ MongoClient.connect(url, function(err, db) {
 Inserted 3 document into the document collection
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;h2 id=&#34;toc_5&#34;&gt;Updating a document&lt;/h2&gt;
+&lt;h2 id=&#34;updating-a-document:09c84f91027bd18b03251c05a0da4abb&#34;&gt;Updating a document&lt;/h2&gt;
 
 &lt;p&gt;Let&amp;rsquo;s look at how to do a simple document update by adding a new field &lt;strong&gt;b&lt;/strong&gt; to the document that has the field &lt;strong&gt;a&lt;/strong&gt; set to &lt;strong&gt;2&lt;/strong&gt;.&lt;/p&gt;
 
@@ -265,7 +268,7 @@ MongoClient.connect(url, function(err, db) {
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;h2 id=&#34;toc_6&#34;&gt;Remove a document&lt;/h2&gt;
+&lt;h2 id=&#34;remove-a-document:09c84f91027bd18b03251c05a0da4abb&#34;&gt;Remove a document&lt;/h2&gt;
 
 &lt;p&gt;Next lets remove the document where the field &lt;strong&gt;a&lt;/strong&gt; equals to &lt;strong&gt;3&lt;/strong&gt;.&lt;/p&gt;
 
@@ -306,7 +309,7 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;Finally let&amp;rsquo;s retrieve all the documents using a simple find.&lt;/p&gt;
 
-&lt;h2 id=&#34;toc_7&#34;&gt;Find All Documents&lt;/h2&gt;
+&lt;h2 id=&#34;find-all-documents:09c84f91027bd18b03251c05a0da4abb&#34;&gt;Find All Documents&lt;/h2&gt;
 
 &lt;p&gt;We will finish up the Quickstart CRUD methods by performing a simple query that returns all the documents matching the query.&lt;/p&gt;
 

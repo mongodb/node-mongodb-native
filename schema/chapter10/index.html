@@ -6,15 +6,15 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <meta name="keyword" content="">
-    <link rel="shortcut icon" href="/node-mongodb-native/img/favicon.png">
+    <link rel="shortcut icon" href="/img/favicon.png">
 
     <title>Shopping Cart</title>
 
-    <link href="/node-mongodb-native/css/bootstrap-theme.css" rel="stylesheet">
-    <link href="/node-mongodb-native/assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
-    <link href="/node-mongodb-native/css/style.css" rel="stylesheet">
-    <link href="/node-mongodb-native/css/style-responsive.css" rel="stylesheet" />
-    <link href="/node-mongodb-native/css/monokai_sublime.css" rel="stylesheet" />
+    <link href="/css/bootstrap-theme.css" rel="stylesheet">
+    <link href="/assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+    <link href="/css/style.css" rel="stylesheet">
+    <link href="/css/style-responsive.css" rel="stylesheet" />
+    <link href="/css/monokai_sublime.css" rel="stylesheet" />
 
   </head>
 
@@ -30,7 +30,7 @@
             </div>
 
             
-            <a href="/node-mongodb-native/" class="logo"><img src="/node-mongodb-native/img/logo-mongodb-header.png" style="height:40px;"></a>
+            <a href="/" class="logo"><img src="/img/logo-mongodb-header.png" style="height:40px;"></a>
 
             <div class="nav title-row" id="top_menu">
                 <h1 class="nav top-menu"> Shopping Cart </h1>
@@ -56,27 +56,27 @@
             </a>
                 <ul class="sub open">
                     
-                    <li><a href="/node-mongodb-native/schema/chapter1/"> Introduction </a> </li>
+                    <li><a href="/schema/chapter1/"> Introduction </a> </li>
                     
-                    <li><a href="/node-mongodb-native/schema/chapter2/"> Schema Basics </a> </li>
+                    <li><a href="/schema/chapter2/"> Schema Basics </a> </li>
                     
-                    <li><a href="/node-mongodb-native/schema/chapter3/"> MongoDB Storage </a> </li>
+                    <li><a href="/schema/chapter3/"> MongoDB Storage </a> </li>
                     
-                    <li><a href="/node-mongodb-native/schema/chapter4/"> Indexes </a> </li>
+                    <li><a href="/schema/chapter4/"> Indexes </a> </li>
                     
-                    <li><a href="/node-mongodb-native/schema/chapter5/"> Metadata </a> </li>
+                    <li><a href="/schema/chapter5/"> Metadata </a> </li>
                     
-                    <li><a href="/node-mongodb-native/schema/chapter6/"> Time Series </a> </li>
+                    <li><a href="/schema/chapter6/"> Time Series </a> </li>
                     
-                    <li><a href="/node-mongodb-native/schema/chapter7/"> Queues </a> </li>
+                    <li><a href="/schema/chapter7/"> Queues </a> </li>
                     
-                    <li><a href="/node-mongodb-native/schema/chapter8/"> Nested Categories </a> </li>
+                    <li><a href="/schema/chapter8/"> Nested Categories </a> </li>
                     
-                    <li><a href="/node-mongodb-native/schema/chapter9/"> Account Transactions </a> </li>
+                    <li><a href="/schema/chapter9/"> Account Transactions </a> </li>
                     
-                    <li class="active"><a href="/node-mongodb-native/schema/chapter10/"> Shopping Cart </a> </li>
+                    <li class="active"><a href="/schema/chapter10/"> Shopping Cart </a> </li>
                     
-                    <li><a href="/node-mongodb-native/schema/chapter11/"> Sharding </a> </li>
+                    <li><a href="/schema/chapter11/"> Sharding </a> </li>
                     
                 </ul>
               
@@ -87,7 +87,27 @@
                 <a class="" href="http://mongodb.github.com/node-mongodb-native/2.0">
                     <i class='fa fa-file-text'></i>
                     
-                    <span>node.js driver docs</span>
+                    <span>2.0 driver docs</span>
+                </a>
+              
+              </li>
+          
+              
+                <li>
+                <a class="" href="http://mongodb.github.com/node-mongodb-native/1.4">
+                    <i class='fa fa-file-text'></i>
+                    
+                    <span>1.4 driver docs</span>
+                </a>
+              
+              </li>
+          
+              
+                <li>
+                <a class="" href="http://mongodb.github.com/node-mongodb-native/core">
+                    <i class='fa fa-file-text'></i>
+                    
+                    <span>Core driver docs</span>
                 </a>
               
               </li>
@@ -137,7 +157,7 @@
 
 
 
-<h1 id="toc_0">Shopping Cart</h1>
+<h1 id="shopping-cart:61a6257a1d794ac1b525cf782a2a26b3">Shopping Cart</h1>
 
 <p><img src="/images/originals/shopping_cart_racing.png" alt="Metadata, courtesy of http://www.wpclipart.com/working/work_supplies/shopping_cart_racing.png.html" />
 </p>
@@ -156,7 +176,7 @@ col.insert({
 });
 </code></pre>
 
-<h2 id="toc_1">Adding the product to the Shopping Cart</h2>
+<h2 id="adding-the-product-to-the-shopping-cart:61a6257a1d794ac1b525cf782a2a26b3">Adding the product to the Shopping Cart</h2>
 
 <p>When the user indicates they want to add the product to their shopping cart we need to perform the following 3 steps.</p>
 
@@ -206,7 +226,7 @@ col.update({
 
 <p>This reserves the quantity of the customer request only if there is product inventory to cover it. If there is inventory we decrement the available inventory and push a reservation into the <strong>reserved</strong> array.</p>
 
-<h2 id="toc_2">Not Enough Inventory</h2>
+<h2 id="not-enough-inventory:61a6257a1d794ac1b525cf782a2a26b3">Not Enough Inventory</h2>
 
 <p>If we don&rsquo;t have enough inventory to cover the customer request we need to rollback the addition to the shopping cart.</p>
 
@@ -222,7 +242,7 @@ col.update({
 
 <p>This removes the shopping cart reservation.</p>
 
-<h2 id="toc_3">Adjusting The Number Of Items In The Cart</h2>
+<h2 id="adjusting-the-number-of-items-in-the-cart:61a6257a1d794ac1b525cf782a2a26b3">Adjusting The Number Of Items In The Cart</h2>
 
 <p>If the customer changes their mind about the number of items they want to shop we need to perform an update of the shopping cart. We need to perform a couple of steps to ensure proper recording of the right value.</p>
 
@@ -280,7 +300,7 @@ col.update({
 <li>If delta is a <strong>positive</strong> number the $gte will only hold if inventory is equal to the delta and is then decreased by delta, reserving more product.</li>
 </ol>
 
-<h2 id="toc_4">Rolling back Attempted Increase of Reservation for A Product</h2>
+<h2 id="rolling-back-attempted-increase-of-reservation-for-a-product:61a6257a1d794ac1b525cf782a2a26b3">Rolling back Attempted Increase of Reservation for A Product</h2>
 
 <p>If there is not enough inventory to fulfill the new reservation we need to rollback the change we made in the cart. We do that by re-applying the old quantity.</p>
 
@@ -297,7 +317,7 @@ col.update({
 });
 </code></pre>
 
-<h2 id="toc_5">Expiring Carts</h2>
+<h2 id="expiring-carts:61a6257a1d794ac1b525cf782a2a26b3">Expiring Carts</h2>
 
 <p>It&rsquo;s common for customers to have put items in a cart and then abandon it. This means there is a need for a process to expire carts that have been abandoned. For each expired cart we need to.</p>
 
@@ -341,7 +361,7 @@ while(carts.hasNext()) {
 
 <p>For each cart we iterate over all the products in it and for each product we return the quantity to the product inventory and at the same time remove that cart from the <strong>reserved</strong> array of the product. After returning the inventory we set the status of the cart to <strong>expired</strong>. Notice that we don&rsquo;t clean up the cart. We are keeping the expired cart as history. Any new customer will create a new cart.</p>
 
-<h2 id="toc_6">Checkout</h2>
+<h2 id="checkout:61a6257a1d794ac1b525cf782a2a26b3">Checkout</h2>
 
 <p>The customer clicked the checkout button on the website and entered their payment details. It&rsquo;s time to issue an purchase order and clean up the cart and product reservations.</p>
 
@@ -382,9 +402,9 @@ productCol.update({
 <li>Removing the cart from the <strong>reserved</strong> arrays of all products where it&rsquo;s present using a multi update</li>
 </ol>
 
-<h2 id="toc_7">Indexes</h2>
+<h2 id="indexes:61a6257a1d794ac1b525cf782a2a26b3">Indexes</h2>
 
-<h2 id="toc_8">Some Possible Changes</h2>
+<h2 id="some-possible-changes:61a6257a1d794ac1b525cf782a2a26b3">Some Possible Changes</h2>
 
 <p>It&rsquo;s possible to split out product information from the inventory by creating an <strong>inventory</strong> collection that references the production metadata collection and contains the amount of the product.</p>
 
@@ -424,14 +444,14 @@ productCol.update({
   </section>
   
     
-    <script src="/node-mongodb-native/js/jquery-2.1.1.min.js"></script>
-    <script src="/node-mongodb-native/js/jquery.scrollTo.min.js"></script>
-    <script src="/node-mongodb-native/js/bootstrap.min.js"></script>
+    <script src="/js/jquery-2.1.1.min.js"></script>
+    <script src="/js/jquery.scrollTo.min.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
     
-    <script src="/node-mongodb-native/js/highlight.pack.js"></script>
+    <script src="/js/highlight.pack.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
-    <script src="/node-mongodb-native/js/scripts.js"></script>
-    <script async defer id="github-bjs" src="/node-mongodb-native/js/buttons.js"></script>
+    <script src="/js/scripts.js"></script>
+    <script async defer id="github-bjs" src="/js/buttons.js"></script>
     <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),

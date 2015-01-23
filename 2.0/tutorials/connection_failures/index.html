@@ -56,20 +56,10 @@
           
               
                 <li>
-                <a class="" href="/node-mongodb-native/">
+                <a class="" href="http://learnmongodbthehardway.com/">
                     <i class='fa fa-file-text'></i>
                     
                     <span>driver portal</span>
-                </a>
-              
-              </li>
-          
-              
-                <li>
-                <a class="" href="http://learnmongodbthehardway.com">
-                    <i class='fa fa-file-text'></i>
-                    
-                    <span>Learn Mongo DB</span>
                 </a>
               
               </li>
@@ -86,7 +76,7 @@
           
               
                 <li>
-                <a class="" href="/node-mongodb-native/1.4">
+                <a class="" href="/node-mongodb-native/2.0/node-mongodb-native/1/index.4/">
                     <i class='fa fa-file-text'></i>
                     
                     <span>legacy docs 1.4.X</span>
@@ -230,15 +220,7 @@
           
             <li> <a href="https://jira.mongodb.org/browse/NODE" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
             
-              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/tutorials/connection_failures.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
-            
-            <li><a href='https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge'><img src='https://badges.gitter.im/Join Chat.svg'/></a></li>
-        </ul>
-        
-    </div>
-</aside>
-
-
+              
 
       
       <section id="main-content">
@@ -275,7 +257,7 @@
 
 
 
-<h1 id="toc_0">Connection Failures and Retries</h1>
+<h1 id="connection-failures-and-retries:878abfdd112f1319523c821f1974dcfd">Connection Failures and Retries</h1>
 
 <p>This comes up a lot because there is some confusion about how the driver works when it comes to Socket timeouts and retries. This Tutorial attempts to clarify the driver&rsquo;s behavior and explains why, for some legacy reasons as well as for some design reasons, the driver works the way it does.</p>
 
@@ -381,7 +363,7 @@ MongoClient.connect('mongodb://localhost:27017/test?autoReconnect=false', functi
 
 <p>When you shut down the <code>mongod</code> process, the driver stops processing operations and keeps buffering them due to <code>bufferMaxEntries</code> being <code>-1</code> by default meaning buffer all operations. When you bring the <code>mongod</code> process back up you will notice how it does not change the fact that we are buffering. This is a legacy behavior and less than ideal. So you will want to set <code>bufferMaxEntries</code> to 0 or a low number if you wish to turn off <code>autoReconnect</code>.</p>
 
-<h2 id="toc_1">The Matrix of Behavior</h2>
+<h2 id="the-matrix-of-behavior:878abfdd112f1319523c821f1974dcfd">The Matrix of Behavior</h2>
 
 <p>Let&rsquo;s put all the possible values of <code>autoReconnect</code> and <code>bufferMaxEntries</code> in a table so we can more easily understand the behavior.</p>
 
@@ -437,7 +419,7 @@ MongoClient.connect('mongodb://localhost:27017/test?autoReconnect=false', functi
 
 <p>Say you have a <code>Replicaset</code> where a new primary is elected. If the driver does not buffer the operations, it will have to error out all operations until there is a new primary available in the set. This complicates people&rsquo;s code as every operation could potentially fail and thus the driver a long time ago took the decision to make this transparent to the user by buffering operations until the new <code>primary</code> is available and then replaying them. <code>bufferMaxEntries</code> was added later to allow developers to control this behavior themselves if they wished to be instantly notified about write errors f.ex instead of letting the driver handle it.</p>
 
-<h2 id="toc_2">The Confusion</h2>
+<h2 id="the-confusion:878abfdd112f1319523c821f1974dcfd">The Confusion</h2>
 
 <p>A lot of the confusion comes from mistaking <code>socketTimeoutMS</code> with how the async driver works. <code>socketTimeoutMS</code> only applies to sockets if they have successfully connected to the server, but have not been in use and they reach the <code>socketTimeoutMS</code>. In contrast, <code>connectionTimeoutMS</code> applies only to the <em>initial</em> server connection process timeout.  The &lsquo;connectionTimeoutMS&rsquo; is independent of the <code>socketTimeoutMS</code>.</p>
 
@@ -451,7 +433,7 @@ MongoClient.connect('mongodb://localhost:27017/test?autoReconnect=false', functi
 <p>Set <em>socketTimeoutMS</em> to at least <code>2-3x</code> the longest running operation in your application or the interval between operations, too ensure you don&rsquo;t timeout long running operations or servers where there are big gaps of time between operations.</p>
 </blockquote>
 
-<h2 id="toc_3">What You are Probably Looking For</h2>
+<h2 id="what-you-are-probably-looking-for:878abfdd112f1319523c821f1974dcfd">What You are Probably Looking For</h2>
 
 <p>Most people who start changing <code>socketTimeoutMS</code> are actually looking for the <code>maxTimeMS</code> property to limit the time a query runs against the server before it gets aborted. Let&rsquo;s look at how to apply this property on a query.</p>
 

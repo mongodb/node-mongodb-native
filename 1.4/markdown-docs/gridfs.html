@@ -58,27 +58,27 @@ script.</p>
 <h2>Open GridStore<a class="headerlink" href="#open-gridstore" title="Permalink to this headline">¶</a></h2>
 <p>Opening a GridStore (a single file in GridFS) is a bit similar to
 opening a database. At first you need to create a GridStore object and
-then <tt class="docutils literal"><span class="pre">open</span></tt> it.</p>
-<div class="highlight-python"><div class="highlight"><pre>var gs = new mongodb.GridStore(db, filename, mode[, options])
+then <code class="docutils literal"><span class="pre">open</span></code> it.</p>
+<div class="code javascript highlight-python"><div class="highlight"><pre>var gs = new mongodb.GridStore(db, filename, mode[, options])
 </pre></div>
 </div>
 <p>Where</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">db</span></tt> is the database object</li>
-<li><tt class="docutils literal"><span class="pre">filename</span></tt> is the name of the file in GridFS that needs to be
+<li><code class="docutils literal"><span class="pre">db</span></code> is the database object</li>
+<li><code class="docutils literal"><span class="pre">filename</span></code> is the name of the file in GridFS that needs to be
 accessed/created</li>
-<li><tt class="docutils literal"><span class="pre">mode</span></tt> indicates the operation, can be one of:<ul>
+<li><code class="docutils literal"><span class="pre">mode</span></code> indicates the operation, can be one of:<ul>
 <li>&#8220;r&#8221; (Read): Looks for the file information in fs.files collection,
 or creates a new id for this object.</li>
 <li>&#8220;w&#8221; (Write): Erases all chunks if the file already exist.</li>
 <li>&#8220;w+&#8221; (Append): Finds the last chunk, and keeps writing after it.</li>
 </ul>
 </li>
-<li><tt class="docutils literal"><span class="pre">options</span></tt> can be used to specify some metadata for the file, for
-example <tt class="docutils literal"><span class="pre">content_type</span></tt>, <tt class="docutils literal"><span class="pre">metadata</span></tt> and <tt class="docutils literal"><span class="pre">chunk_size</span></tt></li>
+<li><code class="docutils literal"><span class="pre">options</span></code> can be used to specify some metadata for the file, for
+example <code class="docutils literal"><span class="pre">content_type</span></code>, <code class="docutils literal"><span class="pre">metadata</span></code> and <code class="docutils literal"><span class="pre">chunk_size</span></code></li>
 </ul>
 <p>Example:</p>
-<div class="highlight-python"><div class="highlight"><pre>var gs = new mongodb.GridStore(db, &quot;test.png&quot;, &quot;w&quot;, {
+<div class="code javascript highlight-python"><div class="highlight"><pre>var gs = new mongodb.GridStore(db, &quot;test.png&quot;, &quot;w&quot;, {
   &quot;content_type&quot;: &quot;image/png&quot;,
   &quot;metadata&quot;:{
       &quot;author&quot;: &quot;Daniel&quot;
@@ -88,21 +88,21 @@ example <tt class="docutils literal"><span class="pre">content_type</span></tt>,
 </pre></div>
 </div>
 <p>When GridStore object is created, it needs to be opened.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">gs</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">callback</span><span class="p">);</span>
+<div class="code javascript highlight-python"><div class="highlight"><pre><span class="n">gs</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">callback</span><span class="p">);</span>
 </pre></div>
 </div>
-<p><tt class="docutils literal"><span class="pre">callback</span></tt> gets two parameters - and error object (if error occured)
+<p><code class="docutils literal"><span class="pre">callback</span></code> gets two parameters - and error object (if error occured)
 and the GridStore object.</p>
 <p>Opened GridStore object has a set of useful properties</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">gs.length</span></tt> - length of the file in bytes</li>
-<li><tt class="docutils literal"><span class="pre">gs.contentType</span></tt> - the content type for the file</li>
-<li><tt class="docutils literal"><span class="pre">gs.uploadDate</span></tt> - when the file was uploaded</li>
-<li><tt class="docutils literal"><span class="pre">gs.metadata</span></tt> - metadata that was saved with the file</li>
-<li><tt class="docutils literal"><span class="pre">gs.chunkSize</span></tt> - chunk size</li>
+<li><code class="docutils literal"><span class="pre">gs.length</span></code> - length of the file in bytes</li>
+<li><code class="docutils literal"><span class="pre">gs.contentType</span></code> - the content type for the file</li>
+<li><code class="docutils literal"><span class="pre">gs.uploadDate</span></code> - when the file was uploaded</li>
+<li><code class="docutils literal"><span class="pre">gs.metadata</span></code> - metadata that was saved with the file</li>
+<li><code class="docutils literal"><span class="pre">gs.chunkSize</span></code> - chunk size</li>
 </ul>
 <p>Example</p>
-<div class="highlight-python"><div class="highlight"><pre>gs.open(function(err, gs){
+<div class="code javascript highlight-python"><div class="highlight"><pre>gs.open(function(err, gs){
     console.log(&quot;this file was uploaded at &quot;+gs.uploadDate);
 });
 </pre></div>
@@ -110,11 +110,11 @@ and the GridStore object.</p>
 </div>
 <div class="section" id="writing-to-gridstore">
 <h2>Writing to GridStore<a class="headerlink" href="#writing-to-gridstore" title="Permalink to this headline">¶</a></h2>
-<p>Writing can be done with <tt class="docutils literal"><span class="pre">write</span></tt></p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">gs</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
+<p>Writing can be done with <code class="docutils literal"><span class="pre">write</span></code></p>
+<div class="code javascript highlight-python"><div class="highlight"><pre><span class="n">gs</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>where <tt class="docutils literal"><span class="pre">data</span></tt> is a <tt class="docutils literal"><span class="pre">Buffer</span></tt> or a string, callback gets two parameters
+<p>where <code class="docutils literal"><span class="pre">data</span></code> is a <code class="docutils literal"><span class="pre">Buffer</span></code> or a string, callback gets two parameters
 - an error object (if error occured) and result value which indicates if
 the write was successful or not.</p>
 <p>While the GridStore is not closed, every write is appended to the opened
@@ -124,38 +124,38 @@ GridStore.</p>
 <h2>Writing a file to GridStore<a class="headerlink" href="#writing-a-file-to-gridstore" title="Permalink to this headline">¶</a></h2>
 <p>This function opens the GridStore, streams the contents of the file into
 GridStore, and closes the GridStore.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">gs</span><span class="o">.</span><span class="n">writeFile</span><span class="p">(</span> <span class="nb">file</span><span class="p">,</span> <span class="n">callback</span> <span class="p">)</span>
+<div class="code javascript highlight-python"><div class="highlight"><pre><span class="n">gs</span><span class="o">.</span><span class="n">writeFile</span><span class="p">(</span> <span class="nb">file</span><span class="p">,</span> <span class="n">callback</span> <span class="p">)</span>
 </pre></div>
 </div>
 <p>where</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">file</span></tt> is a file descriptor, or a string file path</li>
-<li><tt class="docutils literal"><span class="pre">callback</span></tt> is a function with two parameters - error object (if
+<li><code class="docutils literal"><span class="pre">file</span></code> is a file descriptor, or a string file path</li>
+<li><code class="docutils literal"><span class="pre">callback</span></code> is a function with two parameters - error object (if
 error occured) and the GridStore object.</li>
 </ul>
 </div>
 <div class="section" id="reading-from-gridstore">
 <h2>Reading from GridStore<a class="headerlink" href="#reading-from-gridstore" title="Permalink to this headline">¶</a></h2>
-<p>Reading from GridStore can be done with <tt class="docutils literal"><span class="pre">read</span></tt></p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">gs</span><span class="o">.</span><span class="n">read</span><span class="p">([</span><span class="n">size</span><span class="p">],</span> <span class="n">callback</span><span class="p">)</span>
+<p>Reading from GridStore can be done with <code class="docutils literal"><span class="pre">read</span></code></p>
+<div class="code javascript highlight-python"><div class="highlight"><pre><span class="n">gs</span><span class="o">.</span><span class="n">read</span><span class="p">([</span><span class="n">size</span><span class="p">],</span> <span class="n">callback</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>where</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">size</span></tt> is the length of the data to be read</li>
-<li><tt class="docutils literal"><span class="pre">callback</span></tt> is a callback function with two parameters - error
+<li><code class="docutils literal"><span class="pre">size</span></code> is the length of the data to be read</li>
+<li><code class="docutils literal"><span class="pre">callback</span></code> is a callback function with two parameters - error
 object (if an error occured) and data (binary string)</li>
 </ul>
 </div>
 <div class="section" id="streaming-from-gridstore">
 <h2>Streaming from GridStore<a class="headerlink" href="#streaming-from-gridstore" title="Permalink to this headline">¶</a></h2>
-<p>You can stream data as it comes from the database using <tt class="docutils literal"><span class="pre">stream</span></tt></p>
-<div class="highlight-python"><div class="highlight"><pre>gs.stream([autoclose=false])
+<p>You can stream data as it comes from the database using <code class="docutils literal"><span class="pre">stream</span></code></p>
+<div class="code javascript highlight-python"><div class="highlight"><pre>gs.stream([autoclose=false])
 </pre></div>
 </div>
 <p>where</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">autoclose</span></tt> If true current GridStore will be closed when EOF and
+<li><code class="docutils literal"><span class="pre">autoclose</span></code> If true current GridStore will be closed when EOF and
 &#8216;close&#8217; event will be fired</li>
 </ul>
 <p>The function returns <a class="reference external" href="http://nodejs.org/docs/v0.4.12/api/streams.html#readable_Stream">read
@@ -165,46 +165,46 @@ based on this GridStore file. It supports the events &#8216;read&#8217;, &#8216;
 </div>
 <div class="section" id="delete-a-gridstore">
 <h2>Delete a GridStore<a class="headerlink" href="#delete-a-gridstore" title="Permalink to this headline">¶</a></h2>
-<p>GridStore files can be unlinked with <tt class="docutils literal"><span class="pre">unlink</span></tt></p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">mongodb</span><span class="o">.</span><span class="n">GridStore</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
+<p>GridStore files can be unlinked with <code class="docutils literal"><span class="pre">unlink</span></code></p>
+<div class="code javascript highlight-python"><div class="highlight"><pre><span class="n">mongodb</span><span class="o">.</span><span class="n">GridStore</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Where</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">db</span></tt> is the database object</li>
-<li><tt class="docutils literal"><span class="pre">name</span></tt> is either the name of a GridStore object or an array of
+<li><code class="docutils literal"><span class="pre">db</span></code> is the database object</li>
+<li><code class="docutils literal"><span class="pre">name</span></code> is either the name of a GridStore object or an array of
 GridStore object names</li>
-<li><tt class="docutils literal"><span class="pre">callback</span></tt> is the callback function</li>
+<li><code class="docutils literal"><span class="pre">callback</span></code> is the callback function</li>
 </ul>
 </div>
 <div class="section" id="closing-the-gridstore">
 <h2>Closing the GridStore<a class="headerlink" href="#closing-the-gridstore" title="Permalink to this headline">¶</a></h2>
 <p>GridStore needs to be closed after usage. This can be done with
-<tt class="docutils literal"><span class="pre">close</span></tt></p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">gs</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
+<code class="docutils literal"><span class="pre">close</span></code></p>
+<div class="code javascript highlight-python"><div class="highlight"><pre><span class="n">gs</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="check-the-existance-of-a-gridstore-file">
 <h2>Check the existance of a GridStore file<a class="headerlink" href="#check-the-existance-of-a-gridstore-file" title="Permalink to this headline">¶</a></h2>
-<p>Checking if a file exists in GridFS can be done with <tt class="docutils literal"><span class="pre">exist</span></tt></p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">mongodb</span><span class="o">.</span><span class="n">GridStore</span><span class="o">.</span><span class="n">exist</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
+<p>Checking if a file exists in GridFS can be done with <code class="docutils literal"><span class="pre">exist</span></code></p>
+<div class="code javascript highlight-python"><div class="highlight"><pre><span class="n">mongodb</span><span class="o">.</span><span class="n">GridStore</span><span class="o">.</span><span class="n">exist</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Where</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">db</span></tt> is the database object</li>
-<li><tt class="docutils literal"><span class="pre">filename</span></tt> is the name of the file to be checked or a regular
+<li><code class="docutils literal"><span class="pre">db</span></code> is the database object</li>
+<li><code class="docutils literal"><span class="pre">filename</span></code> is the name of the file to be checked or a regular
 expression</li>
-<li><tt class="docutils literal"><span class="pre">callback</span></tt> is a callback function with two parameters - an error
+<li><code class="docutils literal"><span class="pre">callback</span></code> is a callback function with two parameters - an error
 object (if an error occured) and a boolean value indicating if the
 file exists or not</li>
 </ul>
 </div>
 <div class="section" id="seeking-in-a-gridstore">
 <h2>Seeking in a GridStore<a class="headerlink" href="#seeking-in-a-gridstore" title="Permalink to this headline">¶</a></h2>
-<p>Seeking can be done with <tt class="docutils literal"><span class="pre">seek</span></tt></p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">gs</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">position</span><span class="p">);</span>
+<p>Seeking can be done with <code class="docutils literal"><span class="pre">seek</span></code></p>
+<div class="code javascript highlight-python"><div class="highlight"><pre><span class="n">gs</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">position</span><span class="p">);</span>
 </pre></div>
 </div>
 <p>This function moves the internal pointer to the specified position.</p>
@@ -360,7 +360,7 @@ file exists or not</li>
    </ul>
  </li>
 </ul>
-<div id="searchbox" style="display: none">
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
       <input type="text" name="q" />
@@ -391,7 +391,7 @@ file exists or not</li>
     </div></div>
     <div class="footer">
         &copy; Copyright 2013, MongoDB Node.JS Team 
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2.3.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3b2.
 
     <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
     <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>

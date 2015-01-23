@@ -55,86 +55,91 @@ documentation</a> for
 details.</p>
 <div class="section" id="create-indexes-with-createindex">
 <h2>Create indexes with createIndex()<a class="headerlink" href="#create-indexes-with-createindex" title="Permalink to this headline">¶</a></h2>
-<p><tt class="docutils literal"><span class="pre">createIndex</span></tt> adds a new index to a collection. For checking if the
-index was already set, use <tt class="docutils literal"><span class="pre">ensureIndex</span></tt> instead.</p>
-<div class="highlight-python"><div class="highlight"><pre>collection.createIndex(index[, options], callback)
+<p><code class="docutils literal"><span class="pre">createIndex</span></code> adds a new index to a collection. For checking if the
+index was already set, use <code class="docutils literal"><span class="pre">ensureIndex</span></code> instead.</p>
+<div class="code javascript highlight-python"><div class="highlight"><pre>collection.createIndex(index[, options], callback)
 </pre></div>
 </div>
 <p>or</p>
-<div class="highlight-python"><div class="highlight"><pre>db.createIndex(collectionname, index[, options], callback)
+<div class="code javascript highlight-python"><div class="highlight"><pre>db.createIndex(collectionname, index[, options], callback)
 </pre></div>
 </div>
 <p>where</p>
 <ul class="simple">
-<li><tt class="docutils literal"><span class="pre">index</span></tt> is the field or fields to be indexed. See <em>index field</em></li>
-<li><tt class="docutils literal"><span class="pre">options</span></tt> are options, for example <tt class="docutils literal"><span class="pre">{sparse:</span> <span class="pre">true}</span></tt> to include
-only records that have indexed field set or <tt class="docutils literal"><span class="pre">{unique:</span> <span class="pre">true}</span></tt> for
-unique indexes. If the <tt class="docutils literal"><span class="pre">options</span></tt> is a boolean value, then it
+<li><code class="docutils literal"><span class="pre">index</span></code> is the field or fields to be indexed. See <em>index field</em></li>
+<li><code class="docutils literal"><span class="pre">options</span></code> are options, for example <code class="docutils literal"><span class="pre">{sparse:</span> <span class="pre">true}</span></code> to include
+only records that have indexed field set or <code class="docutils literal"><span class="pre">{unique:</span> <span class="pre">true}</span></code> for
+unique indexes. If the <code class="docutils literal"><span class="pre">options</span></code> is a boolean value, then it
 indicates if it&#8217;s an unique index or not.</li>
-<li><tt class="docutils literal"><span class="pre">callback</span></tt> gets two parameters - an error object (if an error
+<li><code class="docutils literal"><span class="pre">callback</span></code> gets two parameters - an error object (if an error
 occured) and the name for the newly created index</li>
 </ul>
 </div>
 <div class="section" id="ensure-indexes-with-ensureindex">
 <h2>Ensure indexes with ensureIndex()<a class="headerlink" href="#ensure-indexes-with-ensureindex" title="Permalink to this headline">¶</a></h2>
-<p>Same as <tt class="docutils literal"><span class="pre">createIndex</span></tt> with the difference that the index is checked
+<p>Same as <code class="docutils literal"><span class="pre">createIndex</span></code> with the difference that the index is checked
 for existence before adding to avoid duplicate indexes.</p>
 </div>
 <div class="section" id="index-field">
 <h2>Index field<a class="headerlink" href="#index-field" title="Permalink to this headline">¶</a></h2>
-<p>Index field can be a simple string like <tt class="docutils literal"><span class="pre">&quot;username&quot;</span></tt> to index certain
+<p>Index field can be a simple string like <code class="docutils literal"><span class="pre">&quot;username&quot;</span></code> to index certain
 field (in this case, a field named as <em>username</em>).</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">ensureIndex</span><span class="p">(</span><span class="s">&quot;username&quot;</span><span class="p">,</span><span class="n">callback</span><span class="p">)</span>
+<div class="code javascript highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">ensureIndex</span><span class="p">(</span><span class="s">&quot;username&quot;</span><span class="p">,</span><span class="n">callback</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>It is possible to index fields inside nested objects, for example
-<tt class="docutils literal"><span class="pre">&quot;user.firstname&quot;</span></tt> to index field named <em>firstname</em> inside a document
+<code class="docutils literal"><span class="pre">&quot;user.firstname&quot;</span></code> to index field named <em>firstname</em> inside a document
 named <em>user</em>.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">ensureIndex</span><span class="p">(</span><span class="s">&quot;user.firstname&quot;</span><span class="p">,</span><span class="n">callback</span><span class="p">)</span>
+<div class="code javascript highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">ensureIndex</span><span class="p">(</span><span class="s">&quot;user.firstname&quot;</span><span class="p">,</span><span class="n">callback</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>It is also possible to create mixed indexes to include several fields at
 once.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">ensureIndex</span><span class="p">({</span><span class="n">firstname</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="n">lastname</span><span class="p">:</span><span class="mi">1</span><span class="p">},</span> <span class="n">callback</span><span class="p">)</span>
+<div class="code javascript highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">ensureIndex</span><span class="p">({</span><span class="n">firstname</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="n">lastname</span><span class="p">:</span><span class="mi">1</span><span class="p">},</span> <span class="n">callback</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>or with tuples</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">ensureIndex</span><span class="p">([[</span><span class="s">&quot;firstname&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="s">&quot;lastname&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span> <span class="n">callback</span><span class="p">)</span>
+<div class="code javascript highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">ensureIndex</span><span class="p">([[</span><span class="s">&quot;firstname&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="s">&quot;lastname&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span> <span class="n">callback</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>The number value indicates direction - if it&#8217;s 1, then it is an
 ascending value, if it&#8217;s -1 then it&#8217;s descending. For example if you
 have documents with a field <em>date</em> and you want to sort these records in
 descending order then you might want to add corresponding index</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">ensureIndex</span><span class="p">({</span><span class="n">date</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">},</span> <span class="n">callback</span><span class="p">)</span>
+<div class="code javascript highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">ensureIndex</span><span class="p">({</span><span class="n">date</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">},</span> <span class="n">callback</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="remove-indexes-with-dropindex">
 <h2>Remove indexes with dropIndex()<a class="headerlink" href="#remove-indexes-with-dropindex" title="Permalink to this headline">¶</a></h2>
-<p>All indexes can be dropped at once with <tt class="docutils literal"><span class="pre">dropIndexes</span></tt></p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">dropIndexes</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
+<p>All indexes can be dropped at once with <code class="docutils literal"><span class="pre">dropIndexes</span></code></p>
+<div class="code javascript highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">dropIndexes</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
 </pre></div>
 </div>
-<p><tt class="docutils literal"><span class="pre">callback</span></tt> gets two parameters - an error object (if an error occured)
+<p><code class="docutils literal"><span class="pre">callback</span></code> gets two parameters - an error object (if an error occured)
 and a boolean value true if operation succeeded.</p>
 </div>
 <div class="section" id="get-index-information-with-indexinformation">
 <h2>Get index information with indexInformation()<a class="headerlink" href="#get-index-information-with-indexinformation" title="Permalink to this headline">¶</a></h2>
-<p><tt class="docutils literal"><span class="pre">indexInformation</span></tt> can be used to fetch some useful information about
+<p><code class="docutils literal"><span class="pre">indexInformation</span></code> can be used to fetch some useful information about
 collection indexes.</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">indexInformation</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
+<div class="code javascript highlight-python"><div class="highlight"><pre><span class="n">collection</span><span class="o">.</span><span class="n">indexInformation</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Where <tt class="docutils literal"><span class="pre">callback</span></tt> gets two parameters - an error object (if an error
+<p>Where <code class="docutils literal"><span class="pre">callback</span></code> gets two parameters - an error object (if an error
 occured) and an index information object.</p>
 <p>The keys in the index object are the index names and the values are
 tuples of included fields.</p>
 <p>For example if a collection has two indexes - as a default an ascending
-index for the <tt class="docutils literal"><span class="pre">_id</span></tt> field and an additonal descending index for
-<tt class="docutils literal"><span class="pre">&quot;username&quot;</span></tt> field, then the index information object would look like
+index for the <code class="docutils literal"><span class="pre">_id</span></code> field and an additonal descending index for
+<code class="docutils literal"><span class="pre">&quot;username&quot;</span></code> field, then the index information object would look like
 the following</p>
-<p><tt class="docutils literal"><span class="pre">javascript</span>&nbsp;&nbsp; <span class="pre">{</span>&nbsp;&nbsp;&nbsp;&nbsp; <span class="pre">&quot;_id&quot;:[[&quot;_id&quot;,</span> <span class="pre">1]],</span>&nbsp;&nbsp;&nbsp;&nbsp; <span class="pre">&quot;username_-1&quot;:[[&quot;username&quot;,</span> <span class="pre">-1]]</span>&nbsp;&nbsp; <span class="pre">}</span></tt></p>
+<div class="code javascript highlight-python"><div class="highlight"><pre><span class="p">{</span>
+  <span class="s">&quot;_id&quot;</span><span class="p">:[[</span><span class="s">&quot;_id&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span>
+  <span class="s">&quot;username_-1&quot;</span><span class="p">:[[</span><span class="s">&quot;username&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
 </div>
 </div>
 
@@ -283,7 +288,7 @@ the following</p>
    </ul>
  </li>
 </ul>
-<div id="searchbox" style="display: none">
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
       <input type="text" name="q" />
@@ -314,7 +319,7 @@ the following</p>
     </div></div>
     <div class="footer">
         &copy; Copyright 2013, MongoDB Node.JS Team 
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2.3.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3b2.
 
     <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
     <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>

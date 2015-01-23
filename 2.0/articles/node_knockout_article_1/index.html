@@ -56,20 +56,10 @@
           
               
                 <li>
-                <a class="" href="/node-mongodb-native/">
+                <a class="" href="http://learnmongodbthehardway.com/">
                     <i class='fa fa-file-text'></i>
                     
                     <span>driver portal</span>
-                </a>
-              
-              </li>
-          
-              
-                <li>
-                <a class="" href="http://learnmongodbthehardway.com">
-                    <i class='fa fa-file-text'></i>
-                    
-                    <span>Learn Mongo DB</span>
                 </a>
               
               </li>
@@ -86,7 +76,7 @@
           
               
                 <li>
-                <a class="" href="/node-mongodb-native/1.4">
+                <a class="" href="/node-mongodb-native/2.0/node-mongodb-native/1/index.4/">
                     <i class='fa fa-file-text'></i>
                     
                     <span>legacy docs 1.4.X</span>
@@ -230,15 +220,7 @@
           
             <li> <a href="https://jira.mongodb.org/browse/NODE" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
             
-              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/articles/node_knockout_article_1.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
-            
-            <li><a href='https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge'><img src='https://badges.gitter.im/Join Chat.svg'/></a></li>
-        </ul>
-        
-    </div>
-</aside>
-
-
+              
 
       
       <section id="main-content">
@@ -275,7 +257,7 @@
 
 
 
-<h1 id="toc_0">A Basic introduction to Mongo DB</h1>
+<h1 id="a-basic-introduction-to-mongo-db:528200be65452eab20c3373647e9fb8a">A Basic introduction to Mongo DB</h1>
 
 <p>Mongo DB has rapidly grown to become a popular database for web applications and is a perfect fit for Node.JS applications, letting you write Javascript for the client, backend and database layer. Its schemaless nature is a better match to our constantly evolving data structures in web applications, and the integrated support for location queries is a bonus that&rsquo;s hard to ignore. Throw in Replica Sets for scaling, and we&rsquo;re looking at really nice platform to grow your storage needs now and in the future.</p>
 
@@ -287,7 +269,7 @@
 
 <p>Once this business is taken care of, let&rsquo;s move through the types available for the driver and then how to connect to your Mongo DB instance before facing the usage of some CRUD operations.</p>
 
-<h2 id="toc_1">Mongo DB data types</h2>
+<h2 id="mongo-db-data-types:528200be65452eab20c3373647e9fb8a">Mongo DB data types</h2>
 
 <p>So there is an important thing to keep in mind when working with Mongo DB, and that is the slight mapping difference between types Mongo DB supports and native Javascript data types. Let&rsquo;s have a look at the types supported out of the box and then how types are promoted by the driver to fit as close to native Javascript types as possible.</p>
 
@@ -308,7 +290,7 @@
 
 <p>As we see the number type can be a little tricky due to the way integers are implemented in Javascript. The latest driver will do correct conversion up to 53 bits of complexity. If you need to handle big integers the recommendation is to use the Long class to operate on the numbers.</p>
 
-<h2 id="toc_2">Getting that connection to the database</h2>
+<h2 id="getting-that-connection-to-the-database:528200be65452eab20c3373647e9fb8a">Getting that connection to the database</h2>
 
 <p>Let&rsquo;s get around to setting up a connection with the Mongo DB database. Jumping straight into the code let&rsquo;s do direct connection and then look at the code.</p>
 
@@ -340,7 +322,7 @@ dispatch and read from the tcp connection.</p>
 <p>We are up and running with a connection to the database. Let&rsquo;s move on
 and look at what collections are and how they work.</p>
 
-<h2 id="toc_3">Mongo DB and Collections</h2>
+<h2 id="mongo-db-and-collections:528200be65452eab20c3373647e9fb8a">Mongo DB and Collections</h2>
 
 <p>Collections are the equivalent of tables in traditional databases and contain all your documents. A database can have many collections. So how do we go about defining and using collections. Well there are a couple of methods that we can use. Let&rsquo;s jump straight into code and then look at the code.</p>
 
@@ -388,7 +370,7 @@ MongoClient.connect(&quot;mongodb://localhost:27017/exampleDb&quot;, function(er
 
 <p>With an open db connection and a collection defined we are ready to do some CRUD operation on the data.</p>
 
-<h2 id="toc_4">And then there was CRUD</h2>
+<h2 id="and-then-there-was-crud:528200be65452eab20c3373647e9fb8a">And then there was CRUD</h2>
 
 <p>So let&rsquo;s get dirty with the basic operations for Mongo DB. The Mongo DB wire protocol is built around 4 main operations <strong>insert/update/remove/query</strong>. Most operations on the database are actually queries with special json objects defining the operation on the database. But I&rsquo;m getting ahead of myself. Let&rsquo;s go back and look at insert first and do it with some code.</p>
 
@@ -532,7 +514,7 @@ MongoClient.connect(&quot;mongodb://localhost:27017/exampleDb&quot;, function(er
 
 <p>This last one will remove all documents in the collection.</p>
 
-<h2 id="toc_5">Time to Query</h2>
+<h2 id="time-to-query:528200be65452eab20c3373647e9fb8a">Time to Query</h2>
 
 <p>Queries is of course a fundamental part of interacting with a database and Mongo DB is no exception. Fortunately for us it has a rich query interface with cursors and close to SQL concepts for slicing and dicing your datasets. To build queries we have lots of operators to choose from <a href="http://www.mongodb.org/display/DOCS/Advanced+Queries">Mongo DB advanced queries</a>. There are literarily tons of ways to search and ways to limit the query. Let&rsquo;s look at some simple code for dealing with queries in different ways.</p>
 
@@ -583,7 +565,7 @@ stream.on(&quot;end&quot;, function() {});
 
 <p>That&rsquo;s pretty much it for the quick intro on how to use the database. I have also included a list of links to where to go to find more information and also a sample crude location application I wrote using express JS and mongo DB.</p>
 
-<h2 id="toc_6">Links and stuff</h2>
+<h2 id="links-and-stuff:528200be65452eab20c3373647e9fb8a">Links and stuff</h2>
 
 <ul>
 <li><a href="https://github.com/mongodb/node-mongodb-native/tree/master/examples">The driver examples, good starting point for basic usage</a></li>

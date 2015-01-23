@@ -1,23 +1,26 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-      <title>Meta on MongoDB Core 1.0.0 </title>
-      <generator uri="https://hugo.spf13.com">Hugo</generator>
-    <link>/node-mongodb-native/core/meta/index.xml/</link>
+    <title>Meta on MongoDB Core 1.0.0</title>
+    <link>/node-mongodb-native/core/meta/</link>
+    <description>Recent content in Meta on MongoDB Core 1.0.0</description>
+    <generator>Hugo -- gohugo.io</generator>
     
     
     
-    <updated>Mon, 01 Jul 2013 00:00:00 UTC</updated>
+    
+    <lastBuildDate>Mon, 01 Jul 2013 00:00:00 UT</lastBuildDate>
+    <atom:link href="/node-mongodb-native/core/meta/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>License</title>
       <link>/node-mongodb-native/core/meta/license/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/core/meta/license/</guid>
       <description>
 
-&lt;h2 id=&#34;toc_0&#34;&gt;Licensed Under Apache License 2.0&lt;/h2&gt;
+&lt;h2 id=&#34;licensed-under-apache-license-2-0:53e892b8b41cc4caece1cfd5ef21d6e7&#34;&gt;Licensed Under Apache License 2.0&lt;/h2&gt;
 
 &lt;p&gt;Licensed under the Apache License, Version 2.0 (the &amp;ldquo;License&amp;rdquo;); you may not use this file except in compliance with the License. You may obtain a copy of the License at&lt;/p&gt;
 
@@ -30,12 +33,12 @@
     <item>
       <title>Release Notes</title>
       <link>/node-mongodb-native/core/meta/release-notes/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UTC</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/core/meta/release-notes/</guid>
       <description>
 
-&lt;h2 id=&#34;toc_0&#34;&gt;1.1.9 21-01-2015&lt;/h2&gt;
+&lt;h2 id=&#34;1-1-9-21-01-2015:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.1.9 21-01-2015&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Updated BSON dependency to 0.2.18 to fix issues with io.js and node.&lt;/li&gt;
@@ -44,7 +47,7 @@
 &lt;li&gt;Refactored out state changes into methods to simplify read the next method.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_1&#34;&gt;1.1.8 09-12-2015&lt;/h2&gt;
+&lt;h2 id=&#34;1-1-8-09-12-2015:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.1.8 09-12-2015&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Stripped out Object.defineProperty for performance reasons&lt;/li&gt;
@@ -52,25 +55,25 @@
 &lt;li&gt;properties cursorBatchSize, cursorSkip, cursorLimit are not methods setCursorBatchSize/cursorBatchSize, setCursorSkip/cursorSkip, setCursorLimit/cursorLimit&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_2&#34;&gt;1.1.7 18-12-2014&lt;/h2&gt;
+&lt;h2 id=&#34;1-1-7-18-12-2014:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.1.7 18-12-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Use ns variable for getMore commands for command cursors to work properly with cursor version of listCollections and listIndexes.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_3&#34;&gt;1.1.6 18-12-2014&lt;/h2&gt;
+&lt;h2 id=&#34;1-1-6-18-12-2014:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.1.6 18-12-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Server manager fixed to support 2.2.X servers for travis test matrix.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_4&#34;&gt;1.1.5 17-12-2014&lt;/h2&gt;
+&lt;h2 id=&#34;1-1-5-17-12-2014:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.1.5 17-12-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Fall back to errmsg when creating MongoError for command errors&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_5&#34;&gt;1.1.4 17-12-2014&lt;/h2&gt;
+&lt;h2 id=&#34;1-1-4-17-12-2014:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.1.4 17-12-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Added transform method support for cursor (initially just for initial query results) to support listCollections/listIndexes in 2.8.&lt;/li&gt;
@@ -79,7 +82,7 @@
 &lt;li&gt;Bumped bson to 0.2.16.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_6&#34;&gt;1.1.3 01-12-2014&lt;/h2&gt;
+&lt;h2 id=&#34;1-1-3-01-12-2014:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.1.3 01-12-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Fixed error handling issue with nonce generation in mongocr.&lt;/li&gt;
@@ -88,14 +91,14 @@
 &lt;li&gt;Cleaned up any escaping global variables.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_7&#34;&gt;1.1.2 20-11-2014&lt;/h2&gt;
+&lt;h2 id=&#34;1-1-2-20-11-2014:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.1.2 20-11-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Correctly encoding UTF8 collection names on wire protocol messages.&lt;/li&gt;
 &lt;li&gt;Added emitClose parameter to topology destroy methods to allow users to specify that they wish the topology to emit the close event to any listeners.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_8&#34;&gt;1.1.1 14-11-2014&lt;/h2&gt;
+&lt;h2 id=&#34;1-1-1-14-11-2014:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.1.1 14-11-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Refactored code to use prototype instead of privileged methods.&lt;/li&gt;
@@ -103,38 +106,38 @@
 &lt;li&gt;Several deopt optimizations for v8 to improve performance and reduce GC pauses.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_9&#34;&gt;1.0.5 29-10-2014&lt;/h2&gt;
+&lt;h2 id=&#34;1-0-5-29-10-2014:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.0.5 29-10-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Fixed issue with wrong namespace being created for command cursors.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_10&#34;&gt;1.0.4 24-10-2014&lt;/h2&gt;
+&lt;h2 id=&#34;1-0-4-24-10-2014:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.0.4 24-10-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;switched from using shift for the cursor due to bad slowdown on big batchSizes as shift causes entire array to be copied on each call.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_11&#34;&gt;1.0.3 21-10-2014&lt;/h2&gt;
+&lt;h2 id=&#34;1-0-3-21-10-2014:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.0.3 21-10-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;fixed error issuing problem on cursor.next when iterating over a huge dataset with a very small batchSize.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_12&#34;&gt;1.0.2 07-10-2014&lt;/h2&gt;
+&lt;h2 id=&#34;1-0-2-07-10-2014:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.0.2 07-10-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;fullsetup is now defined as a primary and secondary being available allowing for all read preferences to be satisfied.&lt;/li&gt;
 &lt;li&gt;fixed issue with replset_state logging.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_13&#34;&gt;1.0.1 07-10-2014&lt;/h2&gt;
+&lt;h2 id=&#34;1-0-1-07-10-2014:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.0.1 07-10-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Dependency issue solved&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;h2 id=&#34;toc_14&#34;&gt;1.0.0 07-10-2014&lt;/h2&gt;
+&lt;h2 id=&#34;1-0-0-07-10-2014:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.0.0 07-10-2014&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Initial release of mongodb-core&lt;/li&gt;

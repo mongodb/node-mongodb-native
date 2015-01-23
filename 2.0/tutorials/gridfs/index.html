@@ -56,20 +56,10 @@
           
               
                 <li>
-                <a class="" href="/node-mongodb-native/">
+                <a class="" href="http://learnmongodbthehardway.com/">
                     <i class='fa fa-file-text'></i>
                     
                     <span>driver portal</span>
-                </a>
-              
-              </li>
-          
-              
-                <li>
-                <a class="" href="http://learnmongodbthehardway.com">
-                    <i class='fa fa-file-text'></i>
-                    
-                    <span>Learn Mongo DB</span>
                 </a>
               
               </li>
@@ -86,7 +76,7 @@
           
               
                 <li>
-                <a class="" href="/node-mongodb-native/1.4">
+                <a class="" href="/node-mongodb-native/2.0/node-mongodb-native/1/index.4/">
                     <i class='fa fa-file-text'></i>
                     
                     <span>legacy docs 1.4.X</span>
@@ -230,15 +220,7 @@
           
             <li> <a href="https://jira.mongodb.org/browse/NODE" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
             
-              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/tutorials/gridfs.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
-            
-            <li><a href='https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge'><img src='https://badges.gitter.im/Join Chat.svg'/></a></li>
-        </ul>
-        
-    </div>
-</aside>
-
-
+              
 
       
       <section id="main-content">
@@ -275,13 +257,13 @@
 
 
 
-<h1 id="toc_0">GridFS Support</h1>
+<h1 id="gridfs-support:7d9961fee83b2a3ab1ed4f1b8ad5c259">GridFS Support</h1>
 
 <p>GridFS is a scalable MongoDB <em>filesystem</em> for storing and retrieving large files. The default limit for a MongoDB record is 16MB, so to store data that is larger than this limit, GridFS can be used. GridFS shards the data into smaller chunks automatically.  See <a href="http://www.mongodb.org/display/DOCS/GridFS+Specification">MongoDB documentation</a> for details.</p>
 
 <p>GridStore is a single file inside GridFS that can be managed by the script.</p>
 
-<h2 id="toc_1">Open a GridFS file</h2>
+<h2 id="open-a-gridfs-file:7d9961fee83b2a3ab1ed4f1b8ad5c259">Open a GridFS file</h2>
 
 <p>Opening a GridStore (a single file in GridFS) is a bit similar to opening a database. At first you need to create a GridStore object and then <code>open</code> it.</p>
 
@@ -337,7 +319,7 @@
 });
 </code></pre>
 
-<h2 id="toc_2">Writing to GridFS</h2>
+<h2 id="writing-to-gridfs:7d9961fee83b2a3ab1ed4f1b8ad5c259">Writing to GridFS</h2>
 
 <p>Writing can be done with <code>write</code></p>
 
@@ -348,7 +330,7 @@
 
 <p>While the GridStore is not closed, every write is appended to the opened GridStore.</p>
 
-<h2 id="toc_3">Writing a file to GridFS</h2>
+<h2 id="writing-a-file-to-gridfs:7d9961fee83b2a3ab1ed4f1b8ad5c259">Writing a file to GridFS</h2>
 
 <p>This function opens the GridStore, streams the contents of the file into GridStore, and closes the GridStore.</p>
 
@@ -362,7 +344,7 @@
 <li><code>callback</code> is a function with two parameters - error object (if error occured) and the GridStore object.</li>
 </ul>
 
-<h2 id="toc_4">Reading from a GridFS file</h2>
+<h2 id="reading-from-a-gridfs-file:7d9961fee83b2a3ab1ed4f1b8ad5c259">Reading from a GridFS file</h2>
 
 <p>Reading from GridStore can be done with <code>read</code></p>
 
@@ -376,7 +358,7 @@
 <li><code>callback</code> is a callback function with two parameters - error object (if an error occured) and data (binary string)</li>
 </ul>
 
-<h2 id="toc_5">Streaming from GridFS</h2>
+<h2 id="streaming-from-gridfs:7d9961fee83b2a3ab1ed4f1b8ad5c259">Streaming from GridFS</h2>
 
 <p>You can stream data as it comes from the database using <code>stream</code></p>
 
@@ -391,7 +373,7 @@
 
 <p>The function returns <a href="http://nodejs.org/docs/v0.4.12/api/streams.html#readable_Stream">read stream</a> based on this GridStore file. It supports the events &lsquo;read&rsquo;, &lsquo;error&rsquo;, &lsquo;close&rsquo; and &lsquo;end&rsquo;.</p>
 
-<h2 id="toc_6">Delete a GridFS file</h2>
+<h2 id="delete-a-gridfs-file:7d9961fee83b2a3ab1ed4f1b8ad5c259">Delete a GridFS file</h2>
 
 <p>GridStore files can be unlinked with <code>unlink</code></p>
 
@@ -406,14 +388,14 @@
 <li><code>callback</code> is the callback function</li>
 </ul>
 
-<h2 id="toc_7">Closing a GridFS file</h2>
+<h2 id="closing-a-gridfs-file:7d9961fee83b2a3ab1ed4f1b8ad5c259">Closing a GridFS file</h2>
 
 <p>GridStore needs to be closed after usage. This can be done with <code>close</code></p>
 
 <pre><code class="language-js">gs.close(callback)
 </code></pre>
 
-<h2 id="toc_8">Check if a GridFS file exists</h2>
+<h2 id="check-if-a-gridfs-file-exists:7d9961fee83b2a3ab1ed4f1b8ad5c259">Check if a GridFS file exists</h2>
 
 <p>Checking if a file exists in GridFS can be done with <code>exist</code></p>
 
@@ -428,7 +410,7 @@
 <li><code>callback</code> is a callback function with two parameters - an error object (if an error occured) and a boolean value indicating if the file exists or not</li>
 </ul>
 
-<h2 id="toc_9">Seek to a Specific position for Reading</h2>
+<h2 id="seek-to-a-specific-position-for-reading:7d9961fee83b2a3ab1ed4f1b8ad5c259">Seek to a Specific position for Reading</h2>
 
 <p>Seeking can be done with <code>seek</code></p>
 

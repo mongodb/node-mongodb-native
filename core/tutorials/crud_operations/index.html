@@ -56,7 +56,7 @@
           
               
                 <li>
-                <a class="" href="/node-mongodb-native/">
+                <a class="" href="/node-mongodb-native/core/node-mongodb-native/">
                     <i class='fa fa-file-text'></i>
                     
                     <span>driver portal</span>
@@ -185,15 +185,7 @@
           
             <li> <a href="https://jira.mongodb.org/browse/NODE" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
             
-              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/tutorials/crud_operations.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
-            
-            <li><a href='https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge'><img src='https://badges.gitter.im/Join Chat.svg'/></a></li>
-        </ul>
-        
-    </div>
-</aside>
-
-
+              
 
       
       <section id="main-content">
@@ -230,11 +222,11 @@
 
 
 
-<h1 id="toc_0">Driver CRUD Operations</h1>
+<h1 id="driver-crud-operations:35296af7b5e03e340e2ce9cac65b7c8e">Driver CRUD Operations</h1>
 
 <p>The Core Driver CRUD operations are defined by the methods available on the driver topologies in the form of the <code>insert</code>, <code>update</code>, <code>remove</code>, <code>cursor</code> and <code>command</code>.</p>
 
-<h2 id="toc_1">Inserting Documents</h2>
+<h2 id="inserting-documents:35296af7b5e03e340e2ce9cac65b7c8e">Inserting Documents</h2>
 
 <p>Inserting documents is fairly straightforward. Let&rsquo;s look at an example.</p>
 
@@ -269,11 +261,11 @@ server.connect();
 <li><code>order</code> <strong>{boolean, default:true}</strong> Execute the inserts in order or out of order.</li>
 </ul>
 
-<h2 id="toc_2">Updating Documents</h2>
+<h2 id="updating-documents:35296af7b5e03e340e2ce9cac65b7c8e">Updating Documents</h2>
 
 <p>Updating documents is also fairly straightforward with the main difference being that the actual documents passed in need a specific set of options for each operation.</p>
 
-<h3 id="toc_3">Update operation document</h3>
+<h3 id="update-operation-document:35296af7b5e03e340e2ce9cac65b7c8e">Update operation document</h3>
 
 <p>An update operation document is made up of the following fields.</p>
 
@@ -316,11 +308,11 @@ server.connect();
 <li><code>order</code> <strong>{boolean, default:true}</strong> Execute the inserts in order or out of order.</li>
 </ul>
 
-<h2 id="toc_4">Removing Documents</h2>
+<h2 id="removing-documents:35296af7b5e03e340e2ce9cac65b7c8e">Removing Documents</h2>
 
 <p>Removing documents is also fairly straightforward with the main difference being that the actual documents passed in need a specific set of options for each operation.</p>
 
-<h3 id="toc_5">Remove operation document</h3>
+<h3 id="remove-operation-document:35296af7b5e03e340e2ce9cac65b7c8e">Remove operation document</h3>
 
 <p>A remove operation document is made up of the following fields.</p>
 
@@ -362,7 +354,7 @@ server.connect();
 <li><code>order</code> <strong>{boolean, default:true}</strong> Execute the inserts in order or out of order.</li>
 </ul>
 
-<h2 id="toc_6">Executing a Command against MongoDB</h2>
+<h2 id="executing-a-command-against-mongodb:35296af7b5e03e340e2ce9cac65b7c8e">Executing a Command against MongoDB</h2>
 
 <p>Executing a command is also fairly straightforward but allows for the usage of readPreferences. The Core driver does not enforce the correct readPreferences on write commands so be aware that you need to ensure a <code>findAndModify</code> command is correctly routed to a primary instead of a secondary when the topology is a replicaset. Let&rsquo;s look at an example.</p>
 
@@ -395,7 +387,7 @@ server.connect();
 <li><code>connection</code> <strong>{Connection}</strong> Specify connection object to execute command against</li>
 </ul>
 
-<h2 id="toc_7">Executing Queries against MongoDB</h2>
+<h2 id="executing-queries-against-mongodb:35296af7b5e03e340e2ce9cac65b7c8e">Executing Queries against MongoDB</h2>
 
 <p>Executing queries against MongoDB is done using the <code>cursor</code> method on the topology. The cursor can then be used with the <code>next</code> method to iterate over all the results. The Low level Core driver does not implement streams or other methods this is left to library developers to implement by extending the cursor using the <code>cursorFactory</code> option. Let&rsquo;s look at a simple example first and then look at the options available.</p>
 
@@ -435,7 +427,7 @@ server.connect();
 <li><code>documents</code>, <strong>{object[]}</strong> Initial documents list for cursor.</li>
 </ul>
 
-<h3 id="toc_8">The Virtual Find Method</h3>
+<h3 id="the-virtual-find-method:35296af7b5e03e340e2ce9cac65b7c8e">The Virtual Find Method</h3>
 
 <p>To simplify the way the code is we have defined the current way of doing queries in MongoDB as a virtual find command. This find command is a document with the following fields.</p>
 

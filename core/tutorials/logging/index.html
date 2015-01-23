@@ -56,7 +56,7 @@
           
               
                 <li>
-                <a class="" href="/node-mongodb-native/">
+                <a class="" href="/node-mongodb-native/core/node-mongodb-native/">
                     <i class='fa fa-file-text'></i>
                     
                     <span>driver portal</span>
@@ -185,15 +185,7 @@
           
             <li> <a href="https://jira.mongodb.org/browse/NODE" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
             
-              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/tutorials/logging.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
-            
-            <li><a href='https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge'><img src='https://badges.gitter.im/Join Chat.svg'/></a></li>
-        </ul>
-        
-    </div>
-</aside>
-
-
+              
 
       
       <section id="main-content">
@@ -230,11 +222,11 @@
 
 
 
-<h1 id="toc_0">Logging</h1>
+<h1 id="logging:3f3af53408cff75953b33723c0b061bb">Logging</h1>
 
 <p>The driver lets you log at 3 different levels. These are <code>debug</code>, <code>info</code> and <code>error</code>. By default the log level is at <code>error</code>. You can change the level, only allow specific classes to log and provide your own logger implementation. Let&rsquo;s look at how we control the log level.</p>
 
-<h2 id="toc_1">Setting Log level</h2>
+<h2 id="setting-log-level:3f3af53408cff75953b33723c0b061bb">Setting Log level</h2>
 
 <p>Setting the log level is pretty easy. Let&rsquo;s look at example of adjusting it for our application only logging the Server class.</p>
 
@@ -267,7 +259,7 @@ server.connect();
 
 <p>Setting the level is as easy as calling the method <code>setLevel</code> with the string value <code>debug</code>, <code>info</code> or <code>error</code>. Log level is set globally.</p>
 
-<h2 id="toc_2">Filtering On specific classes</h2>
+<h2 id="filtering-on-specific-classes:3f3af53408cff75953b33723c0b061bb">Filtering On specific classes</h2>
 
 <p>Say you are only interested in logging a specific class. You can tell the Logger to only log specific class names. Let&rsquo;s take an example Where we only log the <code>Server</code> class.</p>
 
@@ -331,7 +323,7 @@ a.do();
 
 <p>Pretty simple and straightforward.</p>
 
-<h2 id="toc_3">Custom logger</h2>
+<h2 id="custom-logger:3f3af53408cff75953b33723c0b061bb">Custom logger</h2>
 
 <p>Let&rsquo;s say you don&rsquo;t want the log statements to go to <code>console.log</code> but want to send them to a new location or maybe transform them before you send them on. Let&rsquo;s define our custom logger.</p>
 

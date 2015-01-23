@@ -3,15 +3,15 @@ Inserting and updating
 
 See also:
 
--  `Database <database.md>`_
--  `Collections <collections.md>`_
+-  `Database <database.md>`__
+-  `Collections <collections.md>`__
 
 Insert
 ------
 
 Records can be inserted to a collection with ``insert``
 
-::
+.. code:: javascript
 
       collection.insert(docs[[, options], callback])
 
@@ -23,7 +23,7 @@ Where
 
 For example
 
-::
+.. code:: javascript
 
       var document = {name:"David", title:"About MongoDB"};
       collection.insert(document, {w: 1}, function(err, records){
@@ -33,7 +33,7 @@ For example
 If trying to insert a record with an existing ``_id`` value, then the
 operation yields in error.
 
-::
+.. code:: javascript
 
       collection.insert({_id:1}, {w:1}, function(err, doc){
         // no error, inserted new document, with _id=1
@@ -49,7 +49,7 @@ Shorthand for insert/update is ``save`` - if ``_id`` value set, the
 record is updated if it exists or inserted if it does not; if the
 ``_id`` value is not set, then the record is inserted as a new one.
 
-::
+.. code:: javascript
 
       collection.save({_id:"abc", user:"David"},{w:1}, callback)
 
@@ -61,14 +61,14 @@ Update
 
 Updates can be done with ``update``
 
-::
+.. code:: javascript
 
       collection.update(criteria, update[[, options], callback]);
 
 Where
 
 -  ``criteria`` is a query object to find records that need to be
-   updated (see `Queries <queries.md>`_)
+   updated (see `Queries <queries.md>`__)
 -  ``update`` is the replacement object
 -  ``options`` is an options object (see below)
 -  ``callback`` is the callback to be run after the records are updated.
@@ -94,7 +94,7 @@ Replacement object
 If the replacement object is a document, the matching documents will be
 replaced (except the ``_id`` values if no ``_id`` is set).
 
-::
+.. code:: javascript
 
       collection.update({_id:"123"}, {author:"Jessica", title:"Mongo facts"});
 
@@ -105,12 +105,12 @@ To update only selected fields, ``$set`` operator needs to be used.
 Following replacement object replaces author value but leaves everything
 else intact.
 
-::
+.. code:: javascript
 
       collection.update({_id:"123"}, {$set: {author:"Jessica"}});
 
 See `MongoDB
-documentation <http://www.mongodb.org/display/DOCS/Updating>`_ for all
+documentation <http://www.mongodb.org/display/DOCS/Updating>`__ for all
 possible operators.
 
 Find and Modify
@@ -119,7 +119,7 @@ Find and Modify
 To update and retrieve the contents for one single record you can use
 ``findAndModify``.
 
-::
+.. code:: javascript
 
       collection.findAndModify(criteria[, sort[, update[, options]]], callback)
 
@@ -128,7 +128,7 @@ Where
 -  ``criteria`` is the query object to find the record
 -  ``sort`` indicates the order of the matches if there's more than one
    matching record. The first record on the result set will be used. See
-   `Queries->find->options->sort <queries.md>`_ for the format.
+   `Queries->find->options->sort <queries.md>`__ for the format.
 -  ``update`` is the replacement object
 -  ``options`` define the behavior of the function
 -  ``callback`` is the function to run after the update is done. Has two
@@ -151,7 +151,7 @@ Options object can be used for the following options:
 Example
 ~~~~~~~
 
-::
+.. code:: javascript
 
       var MongoClient = require('mongodb').MongoClient
         , format = require('util').format;    
@@ -172,4 +172,3 @@ Example
             }
         });
       });
-

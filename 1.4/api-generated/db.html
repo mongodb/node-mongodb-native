@@ -54,7 +54,7 @@
 <blockquote>
 <div><dl class="class">
 <dt id="Db">
-<em class="property">class </em><tt class="descname">Db</tt><big>(</big><big>)</big><a class="headerlink" href="#Db" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descname">Db</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Db" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -122,7 +122,7 @@
 <p>Initialize the database connection.</p>
 <dl class="function">
 <dt>
-<tt class="descname">open</tt><big>(</big><em>callback</em><big>)</big></dt>
+<code class="descname">open</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -192,7 +192,7 @@
 <p>Create a new Db instance sharing the current socket connections.</p>
 <dl class="function">
 <dt>
-<tt class="descname">db</tt><big>(</big><em>dbName</em><big>)</big></dt>
+<code class="descname">db</code><span class="sig-paren">(</span><em>dbName</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -262,7 +262,7 @@
 <p>Close the current db connection, including all the child db instances. Emits close event and calls optional callback.</p>
 <dl class="function">
 <dt>
-<tt class="descname">close</tt><big>(</big><span class="optional">[</span><em>forceClose</em>, <span class="optional">]</span><em>callback</em><big>)</big></dt>
+<code class="descname">close</code><span class="sig-paren">(</span><span class="optional">[</span><em>forceClose</em>, <span class="optional">]</span><em>callback</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -349,7 +349,7 @@
 <p>Access the Admin database</p>
 <dl class="function">
 <dt>
-<tt class="descname">admin</tt><big>(</big><span class="optional">[</span><em>callback</em><span class="optional">]</span><big>)</big></dt>
+<code class="descname">admin</code><span class="sig-paren">(</span><span class="optional">[</span><em>callback</em><span class="optional">]</span><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -406,7 +406,7 @@
 </dl>
 <dl class="function">
 <dt id="listCollections">
-<tt class="descname">listCollections</tt><big>(</big><em>filter</em><span class="optional">[</span>, <em>options</em><span class="optional">]</span><span class="optional">[</span>, <em>options.batchSize=null</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#listCollections" title="Permalink to this definition">¶</a></dt>
+<code class="descname">listCollections</code><span class="sig-paren">(</span><em>filter</em><span class="optional">[</span>, <em>options</em><span class="optional">]</span><span class="optional">[</span>, <em>options.batchSize=null</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#listCollections" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -518,7 +518,7 @@
 </dl>
 <dl class="function">
 <dt id="collectionNames">
-<tt class="descname">collectionNames</tt><big>(</big><em>[collectionName][, options], callback</em><big>)</big><a class="headerlink" href="#collectionNames" title="Permalink to this definition">¶</a></dt>
+<code class="descname">collectionNames</code><span class="sig-paren">(</span><em>[collectionName][, options], callback</em><span class="sig-paren">)</span><a class="headerlink" href="#collectionNames" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -559,7 +559,7 @@ can use it without a callback in the following way. var collection = db.collecti
 </dl>
 <dl class="function">
 <dt>
-<tt class="descname">collection</tt><big>(</big><em>collectionName</em>, <span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><big>)</big></dt>
+<code class="descname">collection</code><span class="sig-paren">(</span><em>collectionName</em>, <span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -630,7 +630,7 @@ can use it without a callback in the following way. var collection = db.collecti
 <p>Fetch all collections for the current db.</p>
 <dl class="function">
 <dt>
-<tt class="descname">collections</tt><big>(</big><em>callback</em><big>)</big></dt>
+<code class="descname">collections</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -692,7 +692,7 @@ can use it without a callback in the following way. var collection = db.collecti
 </dl>
 <dl class="function">
 <dt>
-<tt class="descname">eval</tt><big>(</big><em>code</em>, <span class="optional">[</span><em>parameters</em>, <span class="optional">]</span><span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><big>)</big></dt>
+<code class="descname">eval</code><span class="sig-paren">(</span><em>code</em>, <span class="optional">[</span><em>parameters</em>, <span class="optional">]</span><span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -846,7 +846,7 @@ can use it without a callback in the following way. var collection = db.collecti
 <p>Dereference a dbref, against a db</p>
 <dl class="function">
 <dt>
-<tt class="descname">dereference</tt><big>(</big><em>dbRef</em>, <em>callback</em><big>)</big></dt>
+<code class="descname">dereference</code><span class="sig-paren">(</span><em>dbRef</em>, <em>callback</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -878,7 +878,7 @@ can use it without a callback in the following way. var collection = db.collecti
 </dl>
 <dl class="function">
 <dt>
-<tt class="descname">logout</tt><big>(</big><em>callback</em><span class="optional">[</span>, <em>options</em><span class="optional">]</span><big>)</big></dt>
+<code class="descname">logout</code><span class="sig-paren">(</span><em>callback</em><span class="optional">[</span>, <em>options</em><span class="optional">]</span><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -954,7 +954,7 @@ Options</p>
 </div></blockquote>
 <dl class="function">
 <dt>
-<tt class="descname">authenticate</tt><big>(</big><em>username</em>, <em>password</em>, <span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><big>)</big></dt>
+<code class="descname">authenticate</code><span class="sig-paren">(</span><em>username</em>, <em>password</em>, <span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1031,7 +1031,7 @@ Options</p>
 </dl>
 <dl class="function">
 <dt id="addUser">
-<tt class="descname">addUser</tt><big>(</big><em>username</em>, <em>password</em>, <span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><big>)</big><a class="headerlink" href="#addUser" title="Permalink to this definition">¶</a></dt>
+<code class="descname">addUser</code><span class="sig-paren">(</span><em>username</em>, <em>password</em>, <span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#addUser" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1101,7 +1101,7 @@ Options</p>
 </dl>
 <dl class="function">
 <dt id="removeUser">
-<tt class="descname">removeUser</tt><big>(</big><em>username</em>, <span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><big>)</big><a class="headerlink" href="#removeUser" title="Permalink to this definition">¶</a></dt>
+<code class="descname">removeUser</code><span class="sig-paren">(</span><em>username</em>, <span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#removeUser" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1193,7 +1193,7 @@ Options</p>
 </dl>
 <dl class="function">
 <dt id="createCollection">
-<tt class="descname">createCollection</tt><big>(</big><em>collectionName</em>, <span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><big>)</big><a class="headerlink" href="#createCollection" title="Permalink to this definition">¶</a></dt>
+<code class="descname">createCollection</code><span class="sig-paren">(</span><em>collectionName</em>, <span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#createCollection" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1263,7 +1263,7 @@ Options</p>
 </dl>
 <dl class="function">
 <dt>
-<tt class="descname">command</tt><big>(</big><em>selector</em>, <span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><big>)</big></dt>
+<code class="descname">command</code><span class="sig-paren">(</span><em>selector</em>, <span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1317,7 +1317,7 @@ Options</p>
 <p>Drop a collection from the database, removing it permanently. New accesses will create a new collection.</p>
 <dl class="function">
 <dt id="dropCollection">
-<tt class="descname">dropCollection</tt><big>(</big><em>collectionName</em>, <em>callback</em><big>)</big><a class="headerlink" href="#dropCollection" title="Permalink to this definition">¶</a></dt>
+<code class="descname">dropCollection</code><span class="sig-paren">(</span><em>collectionName</em>, <em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#dropCollection" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1397,7 +1397,7 @@ Options</p>
 </dl>
 <dl class="function">
 <dt id="renameCollection">
-<tt class="descname">renameCollection</tt><big>(</big><em>fromCollection</em>, <em>toCollection</em>, <span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><big>)</big><a class="headerlink" href="#renameCollection" title="Permalink to this definition">¶</a></dt>
+<code class="descname">renameCollection</code><span class="sig-paren">(</span><em>fromCollection</em>, <em>toCollection</em>, <span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#renameCollection" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1500,7 +1500,7 @@ Options</p>
 </dl>
 <dl class="function">
 <dt id="createIndex">
-<tt class="descname">createIndex</tt><big>(</big><em>collectionName</em>, <em>fieldOrSpec</em>, <span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><big>)</big><a class="headerlink" href="#createIndex" title="Permalink to this definition">¶</a></dt>
+<code class="descname">createIndex</code><span class="sig-paren">(</span><em>collectionName</em>, <em>fieldOrSpec</em>, <span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#createIndex" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1592,7 +1592,7 @@ Options</p>
 </dl>
 <dl class="function">
 <dt id="ensureIndex">
-<tt class="descname">ensureIndex</tt><big>(</big><em>collectionName</em>, <em>fieldOrSpec</em>, <span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><big>)</big><a class="headerlink" href="#ensureIndex" title="Permalink to this definition">¶</a></dt>
+<code class="descname">ensureIndex</code><span class="sig-paren">(</span><em>collectionName</em>, <em>fieldOrSpec</em>, <span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#ensureIndex" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1673,7 +1673,7 @@ Options</p>
 </dl>
 <dl class="function">
 <dt id="cursorInfo">
-<tt class="descname">cursorInfo</tt><big>(</big><span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><big>)</big><a class="headerlink" href="#cursorInfo" title="Permalink to this definition">¶</a></dt>
+<code class="descname">cursorInfo</code><span class="sig-paren">(</span><span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#cursorInfo" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1697,7 +1697,7 @@ Options</p>
 <p>Drop an index on a collection.</p>
 <dl class="function">
 <dt id="dropIndex">
-<tt class="descname">dropIndex</tt><big>(</big><em>collectionName</em>, <em>indexName</em>, <em>callback</em><big>)</big><a class="headerlink" href="#dropIndex" title="Permalink to this definition">¶</a></dt>
+<code class="descname">dropIndex</code><span class="sig-paren">(</span><em>collectionName</em>, <em>indexName</em>, <em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#dropIndex" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1723,7 +1723,7 @@ Options</p>
 Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground) and will be slow for large collections.</p>
 <dl class="function">
 <dt id="reIndex">
-<tt class="descname">reIndex</tt><big>(</big><em>collectionName</em>, <em>callback</em><big>)</big><a class="headerlink" href="#reIndex" title="Permalink to this definition">¶</a></dt>
+<code class="descname">reIndex</code><span class="sig-paren">(</span><em>collectionName</em>, <em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#reIndex" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1752,7 +1752,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
 </dl>
 <dl class="function">
 <dt id="indexInformation">
-<tt class="descname">indexInformation</tt><big>(</big><em>collectionName</em>, <span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><big>)</big><a class="headerlink" href="#indexInformation" title="Permalink to this definition">¶</a></dt>
+<code class="descname">indexInformation</code><span class="sig-paren">(</span><em>collectionName</em>, <span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#indexInformation" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1777,7 +1777,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
 <p>Drop a database.</p>
 <dl class="function">
 <dt id="dropDatabase">
-<tt class="descname">dropDatabase</tt><big>(</big><em>callback</em><big>)</big><a class="headerlink" href="#dropDatabase" title="Permalink to this definition">¶</a></dt>
+<code class="descname">dropDatabase</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#dropDatabase" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1863,7 +1863,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
 </dl>
 <dl class="function">
 <dt>
-<tt class="descname">stats</tt><big>(</big><span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><big>)</big></dt>
+<code class="descname">stats</code><span class="sig-paren">(</span><span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1928,7 +1928,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
 </dl>
 <dl class="function">
 <dt id="Db.connect">
-<tt class="descclassname">Db.</tt><tt class="descname">connect</tt><big>(</big><em>url</em>, <span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><big>)</big><a class="headerlink" href="#Db.connect" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">Db.</code><code class="descname">connect</code><span class="sig-paren">(</span><em>url</em>, <span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#Db.connect" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -2119,7 +2119,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
    </ul>
  </li>
 </ul>
-<div id="searchbox" style="display: none">
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
       <input type="text" name="q" />
@@ -2150,7 +2150,7 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
     </div></div>
     <div class="footer">
         &copy; Copyright 2013, MongoDB Node.JS Team 
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2.3.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3b2.
 
     <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
     <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>

@@ -1,0 +1,1864 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Source: lib/topologies/server.js</title>
+    
+    
+    
+    
+    
+    <meta property="og:title" content=""/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:image" content=""/>
+    
+    <meta property="og:url" content=""/>
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <script src="scripts/jquery.min.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/bootstrap.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/jaguar.css">
+    
+    
+    <script>
+    var config = {"monospaceLinks":true,"cleverLinks":true,"default":{"outputSourceFiles":true},"applicationName":"Node.js MongoDB Driver API","disqus":true,"googleAnalytics":"UA-29229787-1","openGraph":{"title":"","type":"website","image":"","site_name":"","url":""},"meta":{"title":"","description":"","keyword":""},"linenums":true};
+    </script>
+    
+
+    
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', UA-29229787-1, 'auto');
+      ga('send', 'pageview');
+    </script>    
+    
+</head>
+<body>
+<div id="wrap" class="clearfix" style="width:100%;">
+    <table style="height:100%;width:100%">
+        <tr>
+            <td valign='top'>        
+                <div class="main">
+                    <h1 class="page-title" data-filename="lib_topologies_server.js.html">Source: lib/topologies/server.js</h1>
+                    
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code> "use strict";
+
+var inherits = require('util').inherits
+  , f = require('util').format
+  , bindToCurrentDomain = require('../connection/utils').bindToCurrentDomain
+  , EventEmitter = require('events').EventEmitter
+  , Pool = require('../connection/pool')
+  , b = require('bson')
+  , Query = require('../connection/commands').Query
+  , MongoError = require('../error')
+  , ReadPreference = require('./read_preference')
+  , BasicCursor = require('../cursor')
+  , CommandResult = require('./command_result')
+  , getSingleProperty = require('../connection/utils').getSingleProperty
+  , getProperty = require('../connection/utils').getProperty
+  , debugOptions = require('../connection/utils').debugOptions
+  , BSON = require('bson').native().BSON
+  , PreTwoSixWireProtocolSupport = require('../wireprotocol/2_4_support')
+  , TwoSixWireProtocolSupport = require('../wireprotocol/2_6_support')
+  , Session = require('./session')
+  , Logger = require('../connection/logger')
+  , MongoCR = require('../auth/mongocr')
+  , X509 = require('../auth/x509')
+  , Plain = require('../auth/plain')
+  , GSSAPI = require('../auth/gssapi')
+  , SSPI = require('../auth/sspi')
+  , ScramSHA1 = require('../auth/scram');
+
+/**
+ * @fileOverview The **Server** class is a class that represents a single server topology and is
+ * used to construct connections.
+ * 
+ * @example
+ * var Server = require('mongodb-core').Server
+ *   , ReadPreference = require('mongodb-core').ReadPreference
+ *   , assert = require('assert');
+ * 
+ * var server = new Server({host: 'localhost', port: 27017});
+ * // Wait for the connection event
+ * server.on('connect', function(server) {
+ *   server.destroy();
+ * });
+ * 
+ * // Start connecting
+ * server.connect();
+ */
+ 
+// All bson types
+var bsonTypes = [b.Long, b.ObjectID, b.Binary, b.Code, b.DBRef, b.Symbol, b.Double, b.Timestamp, b.MaxKey, b.MinKey];
+// BSON parser
+var bsonInstance = null;
+// Server instance id
+var serverId = 0;
+// Callbacks instance id
+var callbackId = 0;
+
+// Single store for all callbacks
+var Callbacks = function() {
+  // EventEmitter.call(this);
+  var self = this;
+  // Callbacks
+  this.callbacks = {};
+  // Set the callbacks id
+  this.id = callbackId++;
+  // Set the type to server
+  this.type = 'server';
+}
+
+//
+// Flush all callbacks
+Callbacks.prototype.flush = function(err) {
+  for(var id in this.callbacks) {
+    if(!isNaN(parseInt(id, 10))) {
+      var callback = this.callbacks[id];
+      delete this.callbacks[id];
+      callback(err, null);
+    }
+  }
+}
+
+Callbacks.prototype.emit = function(id, err, value) {
+  var callback = this.callbacks[id];
+  delete this.callbacks[id];
+  callback(err, value);
+}
+
+Callbacks.prototype.raw = function(id) {
+  if(this.callbacks[id] == null) return false;
+  return this.callbacks[id].raw == true ? true : false
+}
+
+Callbacks.prototype.unregister = function(id) {
+  delete this.callbacks[id];
+}
+
+Callbacks.prototype.register = function(id, callback) {
+  this.callbacks[id] = bindToCurrentDomain(callback);
+}
+
+/**
+ * @ignore
+ */
+var bindToCurrentDomain = function(callback) {
+  var domain = process.domain;
+  if(domain == null || callback == null) return callback;
+  return domain.bind(callback);
+}
+
+var DISCONNECTED = 'disconnected';
+var CONNECTING = 'connecting';
+var CONNECTED = 'connected';
+var DESTROYED = 'destroyed';
+
+// Supports server
+var supportsServer = function(_s) {
+  return _s.ismaster &amp;&amp; typeof _s.ismaster.minWireVersion == 'number';
+}
+
+//
+// createWireProtocolHandler
+var createWireProtocolHandler = function(result) {
+  // 2.6 wire protocol handler
+  if(result &amp;&amp; result.maxWireVersion >= 2) {
+    return new TwoSixWireProtocolSupport();  
+  }
+
+  // 2.4 or earlier wire protocol handler
+  return new PreTwoSixWireProtocolSupport();
+}
+
+//
+// Reconnect server
+var reconnectServer = function(self, state) {
+  state.state = CONNECTING;
+  // Create a new Pool
+  state.pool = new Pool(state.options);
+  // error handler
+  var reconnectErrorHandler = function(err) {
+    state.state = DISCONNECTED;
+    // Destroy the pool
+    state.pool.destroy();
+    // Adjust the number of retries
+    state.currentReconnectRetry = state.currentReconnectRetry - 1;
+    // No more retries
+    if(state.currentReconnectRetry &lt;= 0) {
+      self.emit('error', f('failed to connect to %s:%s after %s retries', state.options.host, state.options.port, state.reconnectTries));
+    } else {
+      setTimeout(function() {
+        reconnectServer(self, state);
+      }, state.reconnectInterval);
+    }
+  }
+
+  //
+  // Attempt to connect
+  state.pool.once('connect', function() {
+    // Remove any non used handlers
+    var events = ['error', 'close', 'timeout', 'parseError'];
+    events.forEach(function(e) {
+      state.pool.removeAllListeners(e);
+    });
+
+    // Set connected state
+    state.state = CONNECTED;
+
+    // Add proper handlers
+    state.pool.once('error', reconnectErrorHandler);
+    state.pool.once('close', closeHandler(self, state));
+    state.pool.once('timeout', timeoutHandler(self, state));
+    state.pool.once('parseError', fatalErrorHandler(self, state));
+
+    // We need to ensure we have re-authenticated
+    var keys = Object.keys(state.authProviders);
+    if(keys.length == 0) return self.emit('reconnect', self);
+
+    // Execute all providers
+    var count = keys.length;
+    // Iterate over keys
+    for(var i = 0; i &lt; keys.length; i++) {
+      state.authProviders[keys[i]].reauthenticate(self, state.pool, function(err, r) {
+        count = count - 1;
+        // We are done, emit reconnect event
+        if(count == 0) {
+          return self.emit('reconnect', self);
+        }
+      });
+    }
+  });
+
+  //
+  // Handle connection failure
+  state.pool.once('error', errorHandler(self, state));
+  state.pool.once('close', errorHandler(self, state));
+  state.pool.once('timeout', errorHandler(self, state));
+  state.pool.once('parseError', errorHandler(self, state));
+
+  // Connect pool
+  state.pool.connect();
+}
+
+//
+// Handlers
+var messageHandler = function(self, state) {
+  return function(response, connection) {
+    try {
+      // Parse the message
+      response.parse({raw: state.callbacks.raw(response.responseTo)});
+      if(state.logger.isDebug()) state.logger.debug(f('message [%s] received from %s', response.raw.toString('hex'), self.name));
+      state.callbacks.emit(response.responseTo, null, response);
+    } catch (err) {
+      state.callbacks.flush(new MongoError(err));
+      self.destroy();
+    }
+  }
+}
+
+var errorHandler = function(self, state) {
+  return function(err, connection) {
+    if(state.state == DISCONNECTED || state.state == DESTROYED) return;
+    // Set disconnected state
+    state.state = DISCONNECTED;
+    if(state.readPreferenceStrategies != null) notifyStrategies(self, self.s, 'error', [self]);
+    if(state.logger.isInfo()) state.logger.info(f('server %s errored out with %s', self.name, JSON.stringify(err)));
+    // Flush out all the callbacks
+    if(state.callbacks) state.callbacks.flush(new MongoError(f("server %s received an error %s", self.name, JSON.stringify(err))));
+    // Destroy all connections
+    self.destroy();    
+    // Emit error event
+    if(state.emitError &amp;&amp; self.listeners('error').length > 0) self.emit('error', err, self);
+    // If we specified the driver to reconnect perform it
+    if(state.reconnect) setTimeout(function() { state.currentReconnectRetry = state.reconnectTries, reconnectServer(self, state) }, state.reconnectInterval);
+  }
+}
+
+var fatalErrorHandler = function(self, state) {
+  return function(err, connection) {
+    if(state.state == DISCONNECTED || state.state == DESTROYED) return;
+    // Set disconnected state
+    state.state = DISCONNECTED;
+
+    if(state.readPreferenceStrategies != null) notifyStrategies(self, self.s, 'error', [self]);
+    if(state.logger.isInfo()) state.logger.info(f('server %s errored out with %s', self.name, JSON.stringify(err)));    
+    // Flush out all the callbacks
+    if(state.callbacks) state.callbacks.flush(new MongoError(f("server %s received an error %s", self.name, JSON.stringify(err))));
+    // Emit error event
+    self.emit('error', err, self);
+    // If we specified the driver to reconnect perform it
+    if(state.reconnect) setTimeout(function() { state.currentReconnectRetry = state.reconnectTries, reconnectServer(self, state) }, state.reconnectInterval);
+    // Destroy all connections
+    self.destroy();
+  }
+}  
+
+var timeoutHandler = function(self, state) {
+  return function(err, connection) {
+    if(state.state == DISCONNECTED || state.state == DESTROYED) return;
+    // Set disconnected state
+    state.state = DISCONNECTED;
+
+    if(state.readPreferenceStrategies != null) notifyStrategies(self, self.s, 'timeout', [self]);
+    if(state.logger.isInfo()) state.logger.info(f('server %s timed out', self.name));
+    // Flush out all the callbacks
+    if(state.callbacks) state.callbacks.flush(new MongoError(f("server %s timed out", self.name)));
+    // Emit error event
+    self.emit('timeout', err, self);
+    // If we specified the driver to reconnect perform it
+    if(state.reconnect) setTimeout(function() { state.currentReconnectRetry = state.reconnectTries, reconnectServer(self, state) }, state.reconnectInterval);
+    // Destroy all connections
+    self.destroy();
+  }
+}
+
+var closeHandler = function(self, state) {
+  return function(err, connection) {
+    if(state.state == DISCONNECTED || state.state == DESTROYED) return;
+    // Set disconnected state
+    state.state = DISCONNECTED;
+
+    if(state.readPreferenceStrategies != null) notifyStrategies(self, self.s, 'close', [self]);
+    if(state.logger.isInfo()) state.logger.info(f('server %s closed', self.name));
+    // Flush out all the callbacks
+    if(state.callbacks) state.callbacks.flush(new MongoError(f("server %s sockets closed", self.name)));
+    // Emit error event
+    self.emit('close', err, self);
+    // If we specified the driver to reconnect perform it
+    if(state.reconnect) setTimeout(function() { state.currentReconnectRetry = state.reconnectTries, reconnectServer(self, state) }, state.reconnectInterval);
+    // Destroy all connections
+    self.destroy();
+  }
+}
+
+var connectHandler = function(self, state) {
+  // Apply all stored authentications
+  var applyAuthentications = function(callback) {
+    // We need to ensure we have re-authenticated
+    var keys = Object.keys(state.authProviders);
+    if(keys.length == 0) return callback(null, null);
+
+    // Execute all providers
+    var count = keys.length;
+    // Iterate over keys
+    for(var i = 0; i &lt; keys.length; i++) {
+      state.authProviders[keys[i]].reauthenticate(self, state.pool, function(err, r) {
+        count = count - 1;
+        // We are done, emit reconnect event
+        if(count == 0) {
+          return callback(null, null);
+        }
+      });
+    }
+  }
+
+  return function(connection) {
+    // Apply any applyAuthentications
+    applyAuthentications(function() {
+
+      // Execute an ismaster
+      self.command('system.$cmd', {ismaster:true}, function(err, r) {
+        if(err) {
+          state.state = DISCONNECTED;
+          return self.emit('close', err, self);
+        }
+
+        // Set the current ismaster
+        if(!err) {
+          state.ismaster = r.result;
+        }
+
+        // Determine the wire protocol handler
+        state.wireProtocolHandler = createWireProtocolHandler(state.ismaster);
+
+        // Set the wireProtocolHandler
+        state.options.wireProtocolHandler = state.wireProtocolHandler;
+
+        // Log the ismaster if available
+        if(state.logger.isInfo()) state.logger.info(f('server %s connected with ismaster [%s]', self.name, JSON.stringify(r.result)));
+
+        // Validate if we it's a server we can connect to
+        if(!supportsServer(state) &amp;&amp; state.wireProtocolHandler == null) {
+          state.state = DISCONNECTED
+          return self.emit('error', new MongoError("non supported server version"), self);
+        }
+
+        // Set the details
+        if(state.ismaster &amp;&amp; state.ismaster.me) state.serverDetails.name = state.ismaster.me;
+
+        // No read preference strategies just emit connect
+        if(state.readPreferenceStrategies == null) {
+          state.state = CONNECTED;
+          return self.emit('connect', self);
+        }
+
+        // Signal connect to all readPreferences
+        notifyStrategies(self, self.s, 'connect', [self], function(err, result) {
+          state.state = CONNECTED;
+          return self.emit('connect', self);
+        });        
+      });      
+    });
+  }
+}
+
+var slaveOk = function(r) {
+  if(r) return r.slaveOk()
+  return false;
+}
+
+//
+// Execute readPreference Strategies
+var notifyStrategies = function(self, state, op, params, callback) {
+  if(typeof callback != 'function') {
+    // Notify query start to any read Preference strategies
+    for(var name in state.readPreferenceStrategies) {
+      if(state.readPreferenceStrategies[name][op]) {
+        var strat = state.readPreferenceStrategies[name];
+        strat[op].apply(strat, params);
+      }
+    }
+    // Finish up
+    return;
+  }
+
+  // Execute the async callbacks
+  var nPreferences = Object.keys(state.readPreferenceStrategies).length;
+  if(nPreferences == 0) return callback(null, null);
+  for(var name in state.readPreferenceStrategies) {
+    if(state.readPreferenceStrategies[name][op]) {
+      var strat = state.readPreferenceStrategies[name];
+      // Add a callback to params
+      var cParams = params.slice(0);
+      cParams.push(function(err, r) {
+        nPreferences = nPreferences - 1;
+        if(nPreferences == 0) {
+          callback(null, null);
+        }
+      })
+      // Execute the readPreference
+      strat[op].apply(strat, cParams);
+    }
+  }    
+}
+
+var debugFields = ['reconnect', 'reconnectTries', 'reconnectInterval', 'emitError', 'cursorFactory', 'host'
+  , 'port', 'size', 'keepAlive', 'keepAliveInitialDelay', 'noDelay', 'connectionTimeout'
+  , 'socketTimeout', 'singleBufferSerializtion', 'ssl', 'ca', 'cert', 'key', 'rejectUnauthorized', 'promoteLongs'];
+
+/**
+ * Creates a new Server instance
+ * @class
+ * @param {boolean} [options.reconnect=true] Server will attempt to reconnect on loss of connection
+ * @param {number} [options.reconnectTries=30] Server attempt to reconnect #times
+ * @param {number} [options.reconnectInterval=1000] Server will wait # milliseconds between retries
+ * @param {boolean} [options.emitError=false] Server will emit errors events
+ * @param {Cursor} [options.cursorFactory=Cursor] The cursor factory class used for all query cursors
+ * @param {string} options.host The server host
+ * @param {number} options.port The server port
+ * @param {number} [options.size=5] Server connection pool size
+ * @param {boolean} [options.keepAlive=true] TCP Connection keep alive enabled
+ * @param {number} [options.keepAliveInitialDelay=0] Initial delay before TCP keep alive enabled
+ * @param {boolean} [options.noDelay=true] TCP Connection no delay
+ * @param {number} [options.connectionTimeout=0] TCP Connection timeout setting
+ * @param {number} [options.socketTimeout=0] TCP Socket timeout setting
+ * @param {boolean} [options.singleBufferSerializtion=true] Serialize into single buffer, trade of peak memory for serialization speed
+ * @param {boolean} [options.ssl=false] Use SSL for connection
+ * @param {Buffer} [options.ca] SSL Certificate store binary buffer
+ * @param {Buffer} [options.cert] SSL Certificate binary buffer
+ * @param {Buffer} [options.key] SSL Key file binary buffer
+ * @param {string} [options.passphrase] SSL Certificate pass phrase
+ * @param {boolean} [options.rejectUnauthorized=false] Reject unauthorized server certificates
+ * @param {boolean} [options.promoteLongs=true] Convert Long values from the db into Numbers if they fit into 53 bits
+ * @return {Server} A cursor instance
+ * @fires Server#connect
+ * @fires Server#close
+ * @fires Server#error
+ * @fires Server#timeout
+ * @fires Server#parseError
+ * @fires Server#reconnect
+ */
+var Server = function(options) {
+  var self = this;
+
+  // Add event listener
+  EventEmitter.call(this);
+
+  // BSON Parser, ensure we have a single instance
+  if(bsonInstance == null) {
+    bsonInstance = new BSON(bsonTypes);
+  }
+
+  // Reconnect retries
+  var reconnectTries = options.reconnectTries || 30;
+
+  // Keeps all the internal state of the server
+  this.s = {
+    // Options
+      options: options
+    // Contains all the callbacks
+    , callbacks: new Callbacks()
+    // Logger
+    , logger: Logger('Server', options)
+    // Server state
+    , state: DISCONNECTED
+    // Reconnect option
+    , reconnect: typeof options.reconnect == 'boolean' ? options.reconnect :  true
+    , reconnectTries: reconnectTries
+    , reconnectInterval: options.reconnectInterval || 1000
+    // Swallow or emit errors
+    , emitError: typeof options.emitError == 'boolean' ? options.emitError : false
+    // Current state
+    , currentReconnectRetry: reconnectTries
+    // Contains the ismaster
+    , ismaster: null 
+    // Contains any alternate strategies for picking
+    , readPreferenceStrategies: options.readPreferenceStrategies
+    // Auth providers
+    , authProviders: options.authProviders || {}
+    // Server instance id
+    , id: serverId++
+    // Grouping tag used for debugging purposes
+    , tag: options.tag
+    // Do we have a not connected handler
+    , disconnectHandler: options.disconnectHandler
+    // wireProtocolHandler methods
+    , wireProtocolHandler: options.wireProtocolHandler || new PreTwoSixWireProtocolSupport()
+    // Factory overrides
+    , Cursor: options.cursorFactory || BasicCursor
+    // BSON Parser, ensure we have a single instance
+    , bsonInstance: bsonInstance
+    // Pick the right bson parser
+    , bson: options.bson ? options.bson : bsonInstance
+    // Internal connection pool
+    , pool: null
+    // Server details
+    , serverDetails: {
+        host: options.host
+      , port: options.port
+      , name: options.port ? f("%s:%s", options.host, options.port) : options.host
+    }
+  }
+
+  // Reference state
+  var s = this.s;
+
+  // Add bson parser to options
+  options.bson = s.bson;
+
+  // Set error properties
+  getProperty(this, 'name', 'name', s.serverDetails, {});
+  getProperty(this, 'bson', 'bson', s.options, {});
+  getProperty(this, 'wireProtocolHandler', 'wireProtocolHandler', s.options, {});
+  getSingleProperty(this, 'id', s.id);
+
+  // Add auth providers
+  this.addAuthProvider('mongocr', new MongoCR());
+  this.addAuthProvider('x509', new X509());
+  this.addAuthProvider('plain', new Plain());
+  this.addAuthProvider('gssapi', new GSSAPI());
+  this.addAuthProvider('sspi', new SSPI());
+  this.addAuthProvider('scram-sha-1', new ScramSHA1());
+}
+
+inherits(Server, EventEmitter);
+
+/**
+ * Execute a command
+ * @method
+ * @param {string} type Type of BSON parser to use (c++ or js)
+ */
+Server.prototype.setBSONParserType = function(type) {
+  var nBSON = null;
+
+  if(type == 'c++') {
+    nBSON = require('bson').native().BSON;
+  } else if(type == 'js') {
+    nBSON = require('bson').pure().BSON;
+  } else {
+    throw new MongoError(f("% parser not supported", type));
+  }
+
+  this.s.options.bson = new nBSON(bsonTypes);
+}  
+
+/**
+ * Returns the last known ismaster document for this server
+ * @method
+ * @return {object}
+ */
+Server.prototype.lastIsMaster = function() {
+  return this.s.ismaster;
+}
+
+/**
+ * Initiate server connect
+ * @method
+ */
+Server.prototype.connect = function(_options) {
+  var self = this;
+  // Set server specific settings
+  _options = _options || {}
+  if(typeof _options.promoteLongs == 'boolean')  {
+    self.s.options.promoteLongs = _options.promoteLongs;
+  }
+
+  // Destroy existing pool
+  if(self.s.pool) {
+    self.s.pool.destroy();
+    self.s.pool = null;
+  }
+  
+  // Set the state to connection
+  self.s.state = CONNECTING;
+  // Create a new connection pool
+  if(!self.s.pool) {
+    self.s.options.messageHandler = messageHandler(self, self.s);
+    self.s.pool = new Pool(self.s.options);      
+  }
+
+  // Add all the event handlers
+  self.s.pool.once('timeout', timeoutHandler(self, self.s));
+  self.s.pool.once('close', closeHandler(self, self.s));
+  self.s.pool.once('error', errorHandler(self, self.s));
+  self.s.pool.once('connect', connectHandler(self, self.s));
+  self.s.pool.once('parseError', fatalErrorHandler(self, self.s));
+
+  // Connect the pool
+  self.s.pool.connect(); 
+}
+
+/**
+ * Destroy the server connection
+ * @method
+ */
+Server.prototype.destroy = function(emitClose) {
+  var self = this;
+  if(self.s.logger.isDebug()) self.s.logger.debug(f('destroy called on server %s', self.name));
+  // Emit close
+  if(emitClose &amp;&amp; self.listeners('close').length > 0) self.emit('close', self);
+  // Set state as destroyed
+  self.s.state = DESTROYED;
+  // Close the pool
+  self.s.pool.destroy();
+  // Flush out all the callbacks
+  if(self.s.callbacks) self.s.callbacks.flush(new MongoError(f("server %s sockets closed", self.name)));
+}
+
+/**
+ * Figure out if the server is connected
+ * @method
+ * @return {boolean}
+ */
+Server.prototype.isConnected = function() {
+  var self = this;
+  if(self.s.pool) return self.s.pool.isConnected();
+  return false;
+}
+
+/**
+ * Execute a command
+ * @method
+ * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+ * @param {object} cmd The command hash
+ * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+ * @param {Connection} [options.connection] Specify connection object to execute command against
+ * @param {opResultCallback} callback A callback function
+ */
+Server.prototype.command = function(ns, cmd, options, callback) {
+  var self = this;
+  if(typeof options == 'function') callback = options, options = {};
+  // Ensure we have no options
+  options = options || {};
+  // Do we have a read Preference it need to be of type ReadPreference
+  if(options.readPreference &amp;&amp; !(options.readPreference instanceof ReadPreference)) {
+    throw new Error("readPreference must be an instance of ReadPreference");
+  }
+
+  // Debug log
+  if(self.s.logger.isDebug()) self.s.logger.debug(f('executing command [%s] against %s', JSON.stringify({
+    ns: ns, cmd: cmd, options: debugOptions(debugFields, options)
+  }), self.name));
+
+  // Topology is not connected, save the call in the provided store to be
+  // Executed at some point when the handler deems it's reconnected
+  if(!self.isConnected() &amp;&amp; self.s.disconnectHandler != null) {
+    callback = bindToCurrentDomain(callback);
+    return self.s.disconnectHandler.add('command', ns, cmd, options, callback);
+  }
+
+  // If we have no connection error
+  if(!self.s.pool.isConnected()) return callback(new MongoError(f("no connection available to server %s", self.name)));
+  
+  // Execute on all connections
+  var onAll = typeof options.onAll == 'boolean' ? options.onAll : false;
+
+  // Check keys
+  var checkKeys = typeof options.checkKeys == 'boolean' ? options.checkKeys: false;
+
+  // Serialize function
+  var serializeFunctions = typeof options.serializeFunctions == 'boolean' ? options.serializeFunctions : false;
+
+  // Query options
+  var queryOptions = {
+    numberToSkip: 0, numberToReturn: -1, checkKeys: checkKeys
+  };
+
+  if(serializeFunctions) queryOptions.serializeFunctions = serializeFunctions;
+
+  // Create a query instance
+  var query = new Query(self.s.bson, ns, cmd, queryOptions);
+
+  // Set slave OK
+  query.slaveOk = slaveOk(options.readPreference);
+
+  // Notify query start to any read Preference strategies
+  if(self.s.readPreferenceStrategies != null)
+    notifyStrategies(self, self.s, 'startOperation', [self, query, new Date()]);
+
+  // Get a connection (either passed or from the pool)
+  var connection = options.connection || self.s.pool.get();
+
+  // Double check if we have a valid connection
+  if(!connection.isConnected()) {
+    return callback(new MongoError(f("no connection available to server %s", self.name)));
+  }
+
+  // Print cmd and execution connection if in debug mode for logging
+  if(self.s.logger.isDebug()) {
+    var json = connection.toJSON();
+    self.s.logger.debug(f('cmd [%s] about to be executed on connection with id %s at %s:%s', JSON.stringify(cmd), json.id, json.host, json.port));
+  }
+
+  // Execute multiple queries
+  if(onAll) {
+    var connections = self.s.pool.getAll();
+    var total = connections.length;
+    // We have an error
+    var error = null;
+    // Execute on all connections
+    for(var i = 0; i &lt; connections.length; i++) {
+      try {
+        query.incRequestId();
+        connections[i].write(query.toBin());
+      } catch(err) {
+        total = total - 1;
+        if(total == 0) return callback(MongoError.create(err));
+      }
+
+      // Register the callback
+      self.s.callbacks.register(query.requestId, function(err, result) {
+        if(err) error = err;
+        total = total - 1;
+
+        // Done
+        if(total == 0) {
+          // Notify end of command
+          notifyStrategies(self, self.s, 'endOperation', [self, error, result, new Date()]);
+          if(error) return callback(MongoError.create(error));
+          // Execute callback, catch and rethrow if needed
+          try { callback(null, new CommandResult(result.documents[0], connections)); }
+          catch(err) { process.nextTick(function() { throw err}); }
+        }
+      });
+    }
+
+    return;
+  }
+
+  // Execute a single command query
+  try {
+    connection.write(query.toBin());
+  } catch(err) {
+    return callback(MongoError.create(err));
+  }
+
+  // Register the callback
+  self.s.callbacks.register(query.requestId, function(err, result) {
+    // Notify end of command
+    notifyStrategies(self, self.s, 'endOperation', [self, err, result, new Date()]);
+    if(err) return callback(err);
+    if(result.documents[0]['$err'] 
+      || result.documents[0]['errmsg']
+      || result.documents[0]['err']
+      || result.documents[0]['code']) return callback(MongoError.create(result.documents[0]));
+      // Execute callback, catch and rethrow if needed
+      try { callback(null, new CommandResult(result.documents[0], connection)); }
+      catch(err) { process.nextTick(function() { throw err}); }
+  });
+}
+
+/**
+ * Insert one or more documents
+ * @method
+ * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+ * @param {array} ops An array of documents to insert
+ * @param {boolean} [options.ordered=true] Execute in order or out of order
+ * @param {object} [options.writeConcern={}] Write concern for the operation
+ * @param {opResultCallback} callback A callback function
+ */
+Server.prototype.insert = function(ns, ops, options, callback) {
+  var self = this;
+  // Topology is not connected, save the call in the provided store to be
+  // Executed at some point when the handler deems it's reconnected
+  if(!self.isConnected() &amp;&amp; self.s.disconnectHandler != null) {
+    callback = bindToCurrentDomain(callback);
+    return self.s.disconnectHandler.add('insert', ns, ops, options, callback);
+  }
+
+  // Setup the docs as an array
+  ops = Array.isArray(ops) ? ops : [ops];
+  // Execute write
+  return self.s.wireProtocolHandler.insert(self, self.s.ismaster, ns, self.s.bson, self.s.pool, self.s.callbacks, ops, options, callback);
+}
+
+/**
+ * Perform one or more update operations
+ * @method
+ * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+ * @param {array} ops An array of updates
+ * @param {boolean} [options.ordered=true] Execute in order or out of order
+ * @param {object} [options.writeConcern={}] Write concern for the operation
+ * @param {opResultCallback} callback A callback function
+ */
+Server.prototype.update = function(ns, ops, options, callback) {
+  var self = this;
+  // Topology is not connected, save the call in the provided store to be
+  // Executed at some point when the handler deems it's reconnected
+  if(!self.isConnected() &amp;&amp; self.s.disconnectHandler != null) {
+    callback = bindToCurrentDomain(callback);
+    return self.s.disconnectHandler.add('update', ns, ops, options, callback);
+  }
+
+  // Setup the docs as an array
+  ops = Array.isArray(ops) ? ops : [ops];
+  // Execute write
+  return self.s.wireProtocolHandler.update(self, self.s.ismaster, ns, self.s.bson, self.s.pool, self.s.callbacks, ops, options, callback);
+}
+
+/**
+ * Perform one or more remove operations
+ * @method
+ * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+ * @param {array} ops An array of removes
+ * @param {boolean} [options.ordered=true] Execute in order or out of order
+ * @param {object} [options.writeConcern={}] Write concern for the operation
+ * @param {opResultCallback} callback A callback function
+ */
+Server.prototype.remove = function(ns, ops, options, callback) {
+  var self = this;
+  // Topology is not connected, save the call in the provided store to be
+  // Executed at some point when the handler deems it's reconnected
+  if(!self.isConnected() &amp;&amp; self.s.disconnectHandler != null) {
+    callback = bindToCurrentDomain(callback);
+    return self.s.disconnectHandler.add('remove', ns, ops, options, callback);
+  }
+
+  // Setup the docs as an array
+  ops = Array.isArray(ops) ? ops : [ops];
+  // Execute write
+  return self.s.wireProtocolHandler.remove(self, self.s.ismaster, ns, self.s.bson, self.s.pool, self.s.callbacks, ops, options, callback);
+}
+
+/**
+ * Authenticate using a specified mechanism
+ * @method
+ * @param {string} mechanism The Auth mechanism we are invoking
+ * @param {string} db The db we are invoking the mechanism against
+ * @param {...object} param Parameters for the specific mechanism
+ * @param {authResultCallback} callback A callback function
+ */
+Server.prototype.auth = function(mechanism, db) {
+  var self = this;
+  var args = Array.prototype.slice.call(arguments, 2);
+  var callback = args.pop();
+
+  // If we don't have the mechanism fail
+  if(self.s.authProviders[mechanism] == null &amp;&amp; mechanism != 'default') 
+    throw new MongoError(f("auth provider %s does not exist", mechanism));
+
+  // If we have the default mechanism we pick mechanism based on the wire
+  // protocol max version. If it's >= 3 then scram-sha1 otherwise mongodb-cr
+  if(mechanism == 'default' &amp;&amp; self.s.ismaster &amp;&amp; self.s.ismaster.maxWireVersion >= 3) {
+    mechanism = 'scram-sha-1';
+  } else if(mechanism == 'default') {
+    mechanism = 'mongocr';
+  }
+  
+  // Actual arguments
+  var finalArguments = [self, self.s.pool, db].concat(args.slice(0)).concat([function(err, r) {
+    if(err) return callback(err);
+    if(!r) return callback(new MongoError('could not authenticate'));
+    callback(null, new Session({}, self));
+  }]);
+
+  // Let's invoke the auth mechanism
+  self.s.authProviders[mechanism].auth.apply(self.s.authProviders[mechanism], finalArguments);
+}
+
+//
+// Plugin methods
+//
+
+/**
+ * Add custom read preference strategy
+ * @method
+ * @param {string} name Name of the read preference strategy
+ * @param {object} strategy Strategy object instance
+ */
+Server.prototype.addReadPreferenceStrategy = function(name, strategy) {
+  var self = this;
+  if(self.s.readPreferenceStrategies == null) self.s.readPreferenceStrategies = {};
+  self.s.readPreferenceStrategies[name] = strategy;
+}
+
+/**
+ * Add custom authentication mechanism
+ * @method
+ * @param {string} name Name of the authentication mechanism
+ * @param {object} provider Authentication object instance
+ */
+Server.prototype.addAuthProvider = function(name, provider) {
+  var self = this;
+  self.s.authProviders[name] = provider;
+}
+
+/**
+ * Compare two server instances
+ * @method
+ * @param {Server} server Server to compare equality against
+ * @return {boolean}
+ */
+Server.prototype.equals = function(server) {    
+  if(typeof server == 'string') return server == this.name;
+  return server.name == this.name;
+}
+
+/**
+ * All raw connections
+ * @method
+ * @return {Connection[]}
+ */
+Server.prototype.connections = function() {
+  return this.s.pool.getAll();
+}
+
+/**
+ * Get server
+ * @method
+ * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+ * @return {Server}
+ */
+Server.prototype.getServer = function(options) {
+  return this;
+}
+
+/**
+ * Get connection
+ * @method
+ * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+ * @return {Connection}
+ */
+Server.prototype.getConnection = function(options) {
+  return this.s.pool.get();
+}
+
+/**
+ * Get callbacks object
+ * @method
+ * @return {Callbacks}
+ */
+Server.prototype.getCallbacks = function() {
+  return this.s.callbacks;
+}
+
+/**
+ * Name of BSON parser currently used
+ * @method
+ * @return {string}
+ */
+Server.prototype.parserType = function() {
+  var s = this.s;
+  if(s.options.bson.serialize.toString().indexOf('[native code]') != -1)
+    return 'c++';
+  return 'js';
+}
+
+// // Command
+// {
+//     find: ns
+//   , query: &lt;object>
+//   , limit: &lt;n>
+//   , fields: &lt;object>
+//   , skip: &lt;n>
+//   , hint: &lt;string>
+//   , explain: &lt;boolean>
+//   , snapshot: &lt;boolean>
+//   , batchSize: &lt;n>
+//   , returnKey: &lt;boolean>
+//   , maxScan: &lt;n>
+//   , min: &lt;n>
+//   , max: &lt;n>
+//   , showDiskLoc: &lt;boolean>
+//   , comment: &lt;string>
+//   , maxTimeMS: &lt;n>
+//   , raw: &lt;boolean>
+//   , readPreference: &lt;ReadPreference>
+//   , tailable: &lt;boolean>
+//   , oplogReplay: &lt;boolean>
+//   , noCursorTimeout: &lt;boolean>
+//   , awaitdata: &lt;boolean>
+//   , exhaust: &lt;boolean>
+//   , partial: &lt;boolean>
+// }
+
+/**
+ * Perform one or more remove operations
+ * @method
+ * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+ * @param {{object}|{Long}} cmd Can be either a command returning a cursor or a cursorId
+ * @param {object} [options.batchSize=0] Batchsize for the operation
+ * @param {array} [options.documents=[]] Initial documents list for cursor
+ * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+ * @param {opResultCallback} callback A callback function
+ */
+Server.prototype.cursor = function(ns, cmd, cursorOptions) {
+  var s = this.s;
+  cursorOptions = cursorOptions || {};
+  var FinalCursor = cursorOptions.cursorFactory || s.Cursor;
+  return new FinalCursor(s.bson, ns, cmd, cursorOptions, this, s.options);
+}
+
+/**
+ * A server connect event, used to verify that the connection is up and running
+ *
+ * @event Server#connect
+ * @type {Server}
+ */
+
+/**
+ * The server connection closed, all pool connections closed
+ *
+ * @event Server#close
+ * @type {Server}
+ */
+
+/**
+ * The server connection caused an error, all pool connections closed
+ *
+ * @event Server#error
+ * @type {Server}
+ */
+
+/**
+ * The server connection timed out, all pool connections closed
+ *
+ * @event Server#timeout
+ * @type {Server}
+ */
+
+/**
+ * The driver experienced an invalid message, all pool connections closed
+ *
+ * @event Server#parseError
+ * @type {Server}
+ */
+
+/**
+ * The server reestablished the connection
+ *
+ * @event Server#reconnect
+ * @type {Server}
+ */
+
+/**
+ * This is an insert result callback
+ *
+ * @callback opResultCallback
+ * @param {error} error An error object. Set to null if no error present
+ * @param {CommandResult} command result
+ */
+
+/**
+ * This is an authentication result callback
+ *
+ * @callback authResultCallback
+ * @param {error} error An error object. Set to null if no error present
+ * @param {Session} an authenticated session
+ */
+
+module.exports = Server;</code></pre>
+        </article>
+    </section>
+
+
+
+
+
+
+                    
+                    <!-- disqus code -->
+                    <div id="disqus_thread"></div>
+                    <script type="text/javascript">
+                        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+                        var disqus_shortname = 'nodejsmongodbdriver'; // required: replace example with your forum shortname
+
+                        /* * * DON'T EDIT BELOW THIS LINE * * */
+                        (function() {
+                            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                        })();
+                    </script>
+                    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+                    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>                    
+                    <!-- // disqus code -->
+                    
+
+                    <footer>
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha13</a> on Fri Jan 23 2015 16:43:42 GMT+0100 (CET)
+                    </footer>
+                </div>
+            </td>
+            <td valign='top'>
+                
+<div class="navigation">
+    <h3 class="applicationName"><a href="index.html">Node.js MongoDB Driver API</a></h3>
+
+    <div class="search">
+        <input id="search" type="text" class="form-control input-sm" placeholder="Search Documentations">
+    </div>
+    <ul class="list">
+    
+        <li class="item" data-name="CommandResult">
+            <span class="title">
+                <a href="CommandResult.html">CommandResult</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="CommandResult#toJSON"><a href="CommandResult.html#toJSON">toJSON</a></li>
+            
+                <li data-name="CommandResult#toString"><a href="CommandResult.html#toString">toString</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Connection">
+            <span class="title">
+                <a href="Connection.html">Connection</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Connection#connect"><a href="Connection.html#connect">connect</a></li>
+            
+                <li data-name="Connection#destroy"><a href="Connection.html#destroy">destroy</a></li>
+            
+                <li data-name="Connection#isConnected"><a href="Connection.html#isConnected">isConnected</a></li>
+            
+                <li data-name="Connection#toJSON"><a href="Connection.html#toJSON">toJSON</a></li>
+            
+                <li data-name="Connection#toString"><a href="Connection.html#toString">toString</a></li>
+            
+                <li data-name="Connection#write"><a href="Connection.html#write">write</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="Connection#event:close"><a href="Connection.html#event:close">close</a></li>
+            
+                <li data-name="Connection#event:connect"><a href="Connection.html#event:connect">connect</a></li>
+            
+                <li data-name="Connection#event:error"><a href="Connection.html#event:error">error</a></li>
+            
+                <li data-name="Connection#event:parseError"><a href="Connection.html#event:parseError">parseError</a></li>
+            
+                <li data-name="Connection#event:timeout"><a href="Connection.html#event:timeout">timeout</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Cursor">
+            <span class="title">
+                <a href="Cursor.html">Cursor</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Cursor#bufferedCount"><a href="Cursor.html#bufferedCount">bufferedCount</a></li>
+            
+                <li data-name="Cursor#clone"><a href="Cursor.html#clone">clone</a></li>
+            
+                <li data-name="Cursor#isDead"><a href="Cursor.html#isDead">isDead</a></li>
+            
+                <li data-name="Cursor#isKilled"><a href="Cursor.html#isKilled">isKilled</a></li>
+            
+                <li data-name="Cursor#isNotified"><a href="Cursor.html#isNotified">isNotified</a></li>
+            
+                <li data-name="Cursor#kill"><a href="Cursor.html#kill">kill</a></li>
+            
+                <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
+            
+                <li data-name="Cursor#readBufferedDocuments"><a href="Cursor.html#readBufferedDocuments">readBufferedDocuments</a></li>
+            
+                <li data-name="Cursor#rewind"><a href="Cursor.html#rewind">rewind</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Logger">
+            <span class="title">
+                <a href="Logger.html">Logger</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Logger.currentLogger"><a href="Logger.html#.currentLogger">currentLogger</a></li>
+            
+                <li data-name="Logger.filter"><a href="Logger.html#.filter">filter</a></li>
+            
+                <li data-name="Logger.reset"><a href="Logger.html#.reset">reset</a></li>
+            
+                <li data-name="Logger.setCurrentLogger"><a href="Logger.html#.setCurrentLogger">setCurrentLogger</a></li>
+            
+                <li data-name="Logger.setLevel"><a href="Logger.html#.setLevel">setLevel</a></li>
+            
+                <li data-name="Logger#debug"><a href="Logger.html#debug">debug</a></li>
+            
+                <li data-name="Logger#error"><a href="Logger.html#error">error</a></li>
+            
+                <li data-name="Logger#info"><a href="Logger.html#info">info</a></li>
+            
+                <li data-name="Logger#isDebug"><a href="Logger.html#isDebug">isDebug</a></li>
+            
+                <li data-name="Logger#isError"><a href="Logger.html#isError">isError</a></li>
+            
+                <li data-name="Logger#isInfo"><a href="Logger.html#isInfo">isInfo</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MongoError">
+            <span class="title">
+                <a href="MongoError.html">MongoError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MongoError.create">
+            <span class="title">
+                <a href="MongoError.create.html">MongoError.create</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Mongos">
+            <span class="title">
+                <a href="Mongos.html">Mongos</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Mongos#addAuthProvider"><a href="Mongos.html#addAuthProvider">addAuthProvider</a></li>
+            
+                <li data-name="Mongos#addReadPreferenceStrategy"><a href="Mongos.html#addReadPreferenceStrategy">addReadPreferenceStrategy</a></li>
+            
+                <li data-name="Mongos#auth"><a href="Mongos.html#auth">auth</a></li>
+            
+                <li data-name="Mongos#command"><a href="Mongos.html#command">command</a></li>
+            
+                <li data-name="Mongos#connect"><a href="Mongos.html#connect">connect</a></li>
+            
+                <li data-name="Mongos#connections"><a href="Mongos.html#connections">connections</a></li>
+            
+                <li data-name="Mongos#cursor"><a href="Mongos.html#cursor">cursor</a></li>
+            
+                <li data-name="Mongos#destroy"><a href="Mongos.html#destroy">destroy</a></li>
+            
+                <li data-name="Mongos#getConnection"><a href="Mongos.html#getConnection">getConnection</a></li>
+            
+                <li data-name="Mongos#getServer"><a href="Mongos.html#getServer">getServer</a></li>
+            
+                <li data-name="Mongos#insert"><a href="Mongos.html#insert">insert</a></li>
+            
+                <li data-name="Mongos#isConnected"><a href="Mongos.html#isConnected">isConnected</a></li>
+            
+                <li data-name="Mongos#lastIsMaster"><a href="Mongos.html#lastIsMaster">lastIsMaster</a></li>
+            
+                <li data-name="Mongos#remove"><a href="Mongos.html#remove">remove</a></li>
+            
+                <li data-name="Mongos#setBSONParserType"><a href="Mongos.html#setBSONParserType">setBSONParserType</a></li>
+            
+                <li data-name="Mongos#update"><a href="Mongos.html#update">update</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="Mongos#event:connect"><a href="Mongos.html#event:connect">connect</a></li>
+            
+                <li data-name="Mongos#event:joined"><a href="Mongos.html#event:joined">joined</a></li>
+            
+                <li data-name="Mongos#event:left"><a href="Mongos.html#event:left">left</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="ReadPreference">
+            <span class="title">
+                <a href="ReadPreference.html">ReadPreference</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="ReadPreference.nearest"><a href="ReadPreference.html#.nearest">nearest</a></li>
+            
+                <li data-name="ReadPreference.primary"><a href="ReadPreference.html#.primary">primary</a></li>
+            
+                <li data-name="ReadPreference.primaryPreferred"><a href="ReadPreference.html#.primaryPreferred">primaryPreferred</a></li>
+            
+                <li data-name="ReadPreference.secondary"><a href="ReadPreference.html#.secondary">secondary</a></li>
+            
+                <li data-name="ReadPreference.secondaryPreferred"><a href="ReadPreference.html#.secondaryPreferred">secondaryPreferred</a></li>
+            
+                <li data-name="ReadPreference#equals"><a href="ReadPreference.html#equals">equals</a></li>
+            
+                <li data-name="ReadPreference#slaveOk"><a href="ReadPreference.html#slaveOk">slaveOk</a></li>
+            
+                <li data-name="ReadPreference#toJSON"><a href="ReadPreference.html#toJSON">toJSON</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="ReplSet">
+            <span class="title">
+                <a href="ReplSet.html">ReplSet</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="ReplSet#addAuthProvider"><a href="ReplSet.html#addAuthProvider">addAuthProvider</a></li>
+            
+                <li data-name="ReplSet#addReadPreferenceStrategy"><a href="ReplSet.html#addReadPreferenceStrategy">addReadPreferenceStrategy</a></li>
+            
+                <li data-name="ReplSet#auth"><a href="ReplSet.html#auth">auth</a></li>
+            
+                <li data-name="ReplSet#command"><a href="ReplSet.html#command">command</a></li>
+            
+                <li data-name="ReplSet#connect"><a href="ReplSet.html#connect">connect</a></li>
+            
+                <li data-name="ReplSet#connections"><a href="ReplSet.html#connections">connections</a></li>
+            
+                <li data-name="ReplSet#cursor"><a href="ReplSet.html#cursor">cursor</a></li>
+            
+                <li data-name="ReplSet#destroy"><a href="ReplSet.html#destroy">destroy</a></li>
+            
+                <li data-name="ReplSet#getConnection"><a href="ReplSet.html#getConnection">getConnection</a></li>
+            
+                <li data-name="ReplSet#getServer"><a href="ReplSet.html#getServer">getServer</a></li>
+            
+                <li data-name="ReplSet#insert"><a href="ReplSet.html#insert">insert</a></li>
+            
+                <li data-name="ReplSet#isConnected"><a href="ReplSet.html#isConnected">isConnected</a></li>
+            
+                <li data-name="ReplSet#lastIsMaster"><a href="ReplSet.html#lastIsMaster">lastIsMaster</a></li>
+            
+                <li data-name="ReplSet#parserType"><a href="ReplSet.html#parserType">parserType</a></li>
+            
+                <li data-name="ReplSet#remove"><a href="ReplSet.html#remove">remove</a></li>
+            
+                <li data-name="ReplSet#setBSONParserType"><a href="ReplSet.html#setBSONParserType">setBSONParserType</a></li>
+            
+                <li data-name="ReplSet#update"><a href="ReplSet.html#update">update</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="ReplSet#event:connect"><a href="ReplSet.html#event:connect">connect</a></li>
+            
+                <li data-name="ReplSet#event:ha"><a href="ReplSet.html#event:ha">ha</a></li>
+            
+                <li data-name="ReplSet#event:joined"><a href="ReplSet.html#event:joined">joined</a></li>
+            
+                <li data-name="ReplSet#event:left"><a href="ReplSet.html#event:left">left</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Represents a BSON Binary type.">
+            <span class="title">
+                <a href="Represents%2520a%2520BSON%2520Binary%2520type..html">Represents a BSON Binary type.</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Represents a BSON Code and Code with scope type.">
+            <span class="title">
+                <a href="Represents%2520a%2520BSON%2520Code%2520and%2520Code%2520with%2520scope%2520type..html">Represents a BSON Code and Code with scope type.</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Represents a BSON DbRef type.">
+            <span class="title">
+                <a href="Represents%2520a%2520BSON%2520DbRef%2520type..html">Represents a BSON DbRef type.</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Represents a BSON Double type.">
+            <span class="title">
+                <a href="Represents%2520a%2520BSON%2520Double%2520type..html">Represents a BSON Double type.</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Represents a BSON MaxKey type.">
+            <span class="title">
+                <a href="Represents%2520a%2520BSON%2520MaxKey%2520type..html">Represents a BSON MaxKey type.</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Represents a BSON MinKey type.">
+            <span class="title">
+                <a href="Represents%2520a%2520BSON%2520MinKey%2520type..html">Represents a BSON MinKey type.</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Represents a BSON ObjectId type.">
+            <span class="title">
+                <a href="Represents%2520a%2520BSON%2520ObjectId%2520type..html">Represents a BSON ObjectId type.</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Represents a BSON Symbol type.">
+            <span class="title">
+                <a href="Represents%2520a%2520BSON%2520Symbol%2520type..html">Represents a BSON Symbol type.</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Represents the BSON Long type.">
+            <span class="title">
+                <a href="Represents%2520the%2520BSON%2520Long%2520type..html">Represents the BSON Long type.</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Represents the BSON Timestamp type.">
+            <span class="title">
+                <a href="Represents%2520the%2520BSON%2520Timestamp%2520type..html">Represents the BSON Timestamp type.</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Server">
+            <span class="title">
+                <a href="Server.html">Server</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Server#addAuthProvider"><a href="Server.html#addAuthProvider">addAuthProvider</a></li>
+            
+                <li data-name="Server#addReadPreferenceStrategy"><a href="Server.html#addReadPreferenceStrategy">addReadPreferenceStrategy</a></li>
+            
+                <li data-name="Server#auth"><a href="Server.html#auth">auth</a></li>
+            
+                <li data-name="Server#command"><a href="Server.html#command">command</a></li>
+            
+                <li data-name="Server#connect"><a href="Server.html#connect">connect</a></li>
+            
+                <li data-name="Server#connections"><a href="Server.html#connections">connections</a></li>
+            
+                <li data-name="Server#cursor"><a href="Server.html#cursor">cursor</a></li>
+            
+                <li data-name="Server#destroy"><a href="Server.html#destroy">destroy</a></li>
+            
+                <li data-name="Server#equals"><a href="Server.html#equals">equals</a></li>
+            
+                <li data-name="Server#getCallbacks"><a href="Server.html#getCallbacks">getCallbacks</a></li>
+            
+                <li data-name="Server#getConnection"><a href="Server.html#getConnection">getConnection</a></li>
+            
+                <li data-name="Server#getServer"><a href="Server.html#getServer">getServer</a></li>
+            
+                <li data-name="Server#insert"><a href="Server.html#insert">insert</a></li>
+            
+                <li data-name="Server#isConnected"><a href="Server.html#isConnected">isConnected</a></li>
+            
+                <li data-name="Server#lastIsMaster"><a href="Server.html#lastIsMaster">lastIsMaster</a></li>
+            
+                <li data-name="Server#parserType"><a href="Server.html#parserType">parserType</a></li>
+            
+                <li data-name="Server#remove"><a href="Server.html#remove">remove</a></li>
+            
+                <li data-name="Server#setBSONParserType"><a href="Server.html#setBSONParserType">setBSONParserType</a></li>
+            
+                <li data-name="Server#update"><a href="Server.html#update">update</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            <span class="subtitle">Events</span>
+            
+                <li data-name="Server#event:close"><a href="Server.html#event:close">close</a></li>
+            
+                <li data-name="Server#event:connect"><a href="Server.html#event:connect">connect</a></li>
+            
+                <li data-name="Server#event:error"><a href="Server.html#event:error">error</a></li>
+            
+                <li data-name="Server#event:parseError"><a href="Server.html#event:parseError">parseError</a></li>
+            
+                <li data-name="Server#event:reconnect"><a href="Server.html#event:reconnect">reconnect</a></li>
+            
+                <li data-name="Server#event:timeout"><a href="Server.html#event:timeout">timeout</a></li>
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="Session">
+            <span class="title">
+                <a href="Session.html">Session</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="Session#command"><a href="Session.html#command">command</a></li>
+            
+                <li data-name="Session#cursor"><a href="Session.html#cursor">cursor</a></li>
+            
+                <li data-name="Session#insert"><a href="Session.html#insert">insert</a></li>
+            
+                <li data-name="Session#remove"><a href="Session.html#remove">remove</a></li>
+            
+                <li data-name="Session#update"><a href="Session.html#update">update</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="State">
+            <span class="title">
+                <a href="State.html">State</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="State#addArbiter"><a href="State.html#addArbiter">addArbiter</a></li>
+            
+                <li data-name="State#addPassive"><a href="State.html#addPassive">addPassive</a></li>
+            
+                <li data-name="State#addSecondary"><a href="State.html#addSecondary">addSecondary</a></li>
+            
+                <li data-name="State#clean"><a href="State.html#clean">clean</a></li>
+            
+                <li data-name="State#contains"><a href="State.html#contains">contains</a></li>
+            
+                <li data-name="State#destroy"><a href="State.html#destroy">destroy</a></li>
+            
+                <li data-name="State#get"><a href="State.html#get">get</a></li>
+            
+                <li data-name="State#getAll"><a href="State.html#getAll">getAll</a></li>
+            
+                <li data-name="State#getAllConnections"><a href="State.html#getAllConnections">getAllConnections</a></li>
+            
+                <li data-name="State#isPassive"><a href="State.html#isPassive">isPassive</a></li>
+            
+                <li data-name="State#isPrimary"><a href="State.html#isPrimary">isPrimary</a></li>
+            
+                <li data-name="State#isPrimaryConnected"><a href="State.html#isPrimaryConnected">isPrimaryConnected</a></li>
+            
+                <li data-name="State#isSecondary"><a href="State.html#isSecondary">isSecondary</a></li>
+            
+                <li data-name="State#isSecondaryConnected"><a href="State.html#isSecondaryConnected">isSecondaryConnected</a></li>
+            
+                <li data-name="State#lastIsMaster"><a href="State.html#lastIsMaster">lastIsMaster</a></li>
+            
+                <li data-name="State#promotePrimary"><a href="State.html#promotePrimary">promotePrimary</a></li>
+            
+                <li data-name="State#remove"><a href="State.html#remove">remove</a></li>
+            
+                <li data-name="State#toJSON"><a href="State.html#toJSON">toJSON</a></li>
+            
+                <li data-name="State#update"><a href="State.html#update">update</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+    </ul>
+</div>
+            </td>
+        </tr>
+    </table>
+</div>
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+<script src="scripts/main.js"></script>
+</body>
+</html>

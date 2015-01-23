@@ -56,20 +56,10 @@
           
               
                 <li>
-                <a class="" href="/node-mongodb-native/">
+                <a class="" href="http://learnmongodbthehardway.com/">
                     <i class='fa fa-file-text'></i>
                     
                     <span>driver portal</span>
-                </a>
-              
-              </li>
-          
-              
-                <li>
-                <a class="" href="http://learnmongodbthehardway.com">
-                    <i class='fa fa-file-text'></i>
-                    
-                    <span>Learn Mongo DB</span>
                 </a>
               
               </li>
@@ -86,7 +76,7 @@
           
               
                 <li>
-                <a class="" href="/node-mongodb-native/1.4">
+                <a class="" href="/node-mongodb-native/2.0/node-mongodb-native/1/index.4/">
                     <i class='fa fa-file-text'></i>
                     
                     <span>legacy docs 1.4.X</span>
@@ -230,15 +220,7 @@
           
             <li> <a href="https://jira.mongodb.org/browse/NODE" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
             
-              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/articles/node_knockout_article_3.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
-            
-            <li><a href='https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge'><img src='https://badges.gitter.im/Join Chat.svg'/></a></li>
-        </ul>
-        
-    </div>
-</aside>
-
-
+              
 
       
       <section id="main-content">
@@ -275,7 +257,7 @@
 
 
 
-<h1 id="toc_0">The wonderful world of GEO spatial indexes in MongoDB</h1>
+<h1 id="the-wonderful-world-of-geo-spatial-indexes-in-mongodb:1f9a2529b924eca7193c4abdd79e34a5">The wonderful world of GEO spatial indexes in MongoDB</h1>
 
 <p>MongoDB has native support for geospatial indexes and extensions to the query language to
 support a lot of different ways of querying your geo spatial documents. We will touch on a
@@ -292,7 +274,7 @@ below.</p>
 <p>But first let&rsquo;s cover the basics of getting you up and running starting with what a document needs to look like
 for the indexing to work.</p>
 
-<h2 id="toc_1">Geospatialize your documents</h2>
+<h2 id="geospatialize-your-documents:1f9a2529b924eca7193c4abdd79e34a5">Geospatialize your documents</h2>
 
 <p>Somehow we need to tell MongoDB what fields represent our geospatial coordinates. Luckily for us this is very simple. Lets take a simple sample document representing the best imaginative Burger place in the world.</p>
 
@@ -356,7 +338,7 @@ MongoClient.connect(&quot;mongodb://localhost:27017/geodb&quot;, function(err, d
 
 <p><strong>ensureIndex</strong> does the trick creating the index if it does not already exist. By specifying <strong>{loc: &ldquo;2d&rdquo;}</strong> MongoDB will index the array contained in every document under the field name <strong>loc</strong>. The <strong>min</strong> and <strong>max</strong> defines the boundaries of our (Burgoria) and means that points outside -500 and 500 will throw an error as it&rsquo;s not on the planet.</p>
 
-<h2 id="toc_2">Basic queries for your geospatial documents</h2>
+<h2 id="basic-queries-for-your-geospatial-documents:1f9a2529b924eca7193c4abdd79e34a5">Basic queries for your geospatial documents</h2>
 
 <p>Since we now have a geospatial index on our collection let&rsquo;s play around with the query methods and learn how we can work with the data. First however let&rsquo;s add some more documents so we can see the effects of the different boundaries.</p>
 
@@ -463,11 +445,11 @@ MongoClient.connect(&quot;mongodb://localhost:27017/geodb&quot;, function(err, d
 
 <p>Notice that <strong>geoNear</strong> is a command not a find query so it returns a single document with the results in the results field of the returned document. As we can see from the results each returned result has a field called <strong>dis</strong> that is the distance of the document from the center point of our search. Cool we&rsquo;ve now covered the basics of geospatial search so let&rsquo;s move onto more advanced queries.</p>
 
-<h2 id="toc_3">Advanced queries for your geospatial documents</h2>
+<h2 id="advanced-queries-for-your-geospatial-documents:1f9a2529b924eca7193c4abdd79e34a5">Advanced queries for your geospatial documents</h2>
 
 <p>So besides these simple queries we can also do <strong>bounds queries</strong>. With bounds queries we mean we can look for points of interest inside a defined boundary. This can be useful if you have such things as a post code area, congressional district or any sort of bounding box that is not a pure circle (say look for all restaurants in the west village in new york). Let&rsquo;s go through the basics.</p>
 
-<h3 id="toc_4">The magical boundry box query</h3>
+<h3 id="the-magical-boundry-box-query:1f9a2529b924eca7193c4abdd79e34a5">The magical boundry box query</h3>
 
 <p>Our country Whopper on Burgoria is a perfectly bound box (imagine that). Our application wants to restrict our searches to only burger bars in Burgonia. The boundaries for Burgonia are defined by (30, 30) -&gt; (30, 60) and (30, 60) -&gt; (60, 60). Great let&rsquo;s peform a box bounded query.</p>
 
@@ -492,7 +474,7 @@ MongoClient.connect(&quot;mongodb://localhost:27017/geodb&quot;, function(err, d
 { &quot;_id&quot; : 509a47337d6ab61b2871ee90, &quot;name&quot; : &quot;More or less an Awesome burger bar&quot;, &quot;loc&quot; : [ 45
 </code></pre>
 
-<h3 id="toc_5">A polygon to far</h3>
+<h3 id="a-polygon-to-far:1f9a2529b924eca7193c4abdd79e34a5">A polygon to far</h3>
 
 <p>Awesome we can now do a query by our perfectly boxed country. Inside Whopper the country is split into triangles where triangle one is made up of three points (40, 40), (40, 50), (45, 45). We want to look for points that are only inside this triangle. Let&rsquo;s have a look at the query.</p>
 
@@ -518,11 +500,11 @@ MongoClient.connect(&quot;mongodb://localhost:27017/geodb&quot;, function(err, d
 
 <p>Cool things you can use this with is f.ex with the data at <a href="https://nycopendata.socrata.com/browse?tags=geographic">https://nycopendata.socrata.com/browse?tags=geographic</a> you can create queries slicing new york into areas and look for data points inside those areas. So we&rsquo;ve seen how we can query geo spatially in a lot of different ways. In closing we want to mention some simple ideas to get your mind churning.</p>
 
-<h2 id="toc_6">Geospatial interesting tidbits</h2>
+<h2 id="geospatial-interesting-tidbits:1f9a2529b924eca7193c4abdd79e34a5">Geospatial interesting tidbits</h2>
 
 <p>So geospatial is what we mostly promote the features as but at some point you&rsquo;ll realize that it&rsquo;s a generic set of 2d indexes that can be used to index and <strong>x,y</strong> data. You could consider indexing any data points that fit into a 2d space and using the geo query functionality to retrieve subsets of that data. Say if you map price vs apartment size and want to say giving an apartment find me everything that is &ldquo;close&rdquo; to the ideal price and size that I&rsquo;m looking for. The limit here is your fantasy but as you can see it&rsquo;s a pretty general and very powerful feature once you get over looking at the feature as a pure geographical function. With that I leave you to experiment and have fun with the features we have introduced.</p>
 
-<h2 id="toc_7">Links and stuff</h2>
+<h2 id="links-and-stuff:1f9a2529b924eca7193c4abdd79e34a5">Links and stuff</h2>
 
 <ul>
 <li><a href="https://github.com/mongodb/node-mongodb-native/tree/master/examples">The driver examples, good starting point for basic usage</a></li>

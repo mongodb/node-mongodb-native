@@ -54,7 +54,7 @@
 <blockquote>
 <div><dl class="class">
 <dt id="GridStore">
-<em class="property">class </em><tt class="descname">GridStore</tt><big>(</big><big>)</big><a class="headerlink" href="#GridStore" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descname">GridStore</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#GridStore" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -142,13 +142,13 @@
 <p>Returns the current chunksize of the file.</p>
 <dl class="attribute">
 <dt id="chunkSize number [Getter|Setter]">
-<tt class="descname">chunkSize number [Getter|Setter]</tt><a class="headerlink" href="#chunkSize number [Getter|Setter]" title="Permalink to this definition">¶</a></dt>
+<code class="descname">chunkSize number [Getter|Setter]</code><a class="headerlink" href="#chunkSize number [Getter|Setter]" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <p>The md5 checksum for this file.</p>
 <dl class="attribute">
 <dt id="md5 number [Getter|Setter]">
-<tt class="descname">md5 number [Getter|Setter]</tt><a class="headerlink" href="#md5 number [Getter|Setter]" title="Permalink to this definition">¶</a></dt>
+<code class="descname">md5 number [Getter|Setter]</code><a class="headerlink" href="#md5 number [Getter|Setter]" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -158,7 +158,7 @@
 new one if file does not exist.</p>
 <dl class="function">
 <dt>
-<tt class="descname">open</tt><big>(</big><em>callback</em><big>)</big></dt>
+<code class="descname">open</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -334,7 +334,7 @@ new one if file does not exist.</p>
 <p>Stores a file from the file system to the GridFS database.</p>
 <dl class="function">
 <dt id="writeFile">
-<tt class="descname">writeFile</tt><big>(</big><em>file</em>, <em>callback</em><big>)</big><a class="headerlink" href="#writeFile" title="Permalink to this definition">¶</a></dt>
+<code class="descname">writeFile</code><span class="sig-paren">(</span><em>file</em>, <em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#writeFile" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -454,7 +454,7 @@ already exists. This will work properly only if mode was initialized to
 &#8220;w&#8221; or &#8220;w+&#8221;.</p>
 <dl class="function">
 <dt>
-<tt class="descname">close</tt><big>(</big><em>callback</em><big>)</big></dt>
+<code class="descname">close</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -518,7 +518,7 @@ already exists. This will work properly only if mode was initialized to
 <p>Retrieve this file&#8217;s chunks collection.</p>
 <dl class="function">
 <dt id="chunkCollection">
-<tt class="descname">chunkCollection</tt><big>(</big><em>callback</em><big>)</big><a class="headerlink" href="#chunkCollection" title="Permalink to this definition">¶</a></dt>
+<code class="descname">chunkCollection</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#chunkCollection" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -578,7 +578,7 @@ already exists. This will work properly only if mode was initialized to
 <p>Deletes all the chunks of this file in the database.</p>
 <dl class="function">
 <dt>
-<tt class="descname">unlink</tt><big>(</big><em>callback</em><big>)</big></dt>
+<code class="descname">unlink</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -657,7 +657,7 @@ already exists. This will work properly only if mode was initialized to
 <p>Retrieves the file collection associated with this object.</p>
 <dl class="function">
 <dt>
-<tt class="descname">collection</tt><big>(</big><em>callback</em><big>)</big></dt>
+<code class="descname">collection</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -717,7 +717,7 @@ already exists. This will work properly only if mode was initialized to
 <p>Reads the data of this file.</p>
 <dl class="function">
 <dt>
-<tt class="descname">readlines</tt><big>(</big><span class="optional">[</span><em>separator</em>, <span class="optional">]</span><em>callback</em><big>)</big></dt>
+<code class="descname">readlines</code><span class="sig-paren">(</span><span class="optional">[</span><em>separator</em>, <span class="optional">]</span><em>callback</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -800,7 +800,7 @@ already exists. This will work properly only if mode was initialized to
 &#8220;w+&#8221; and resets the read/write head to the initial position.</p>
 <dl class="function">
 <dt>
-<tt class="descname">rewind</tt><big>(</big><em>callback</em><big>)</big></dt>
+<code class="descname">rewind</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -889,7 +889,7 @@ already exists. This will work properly only if mode was initialized to
 (length, buffer, callback)</p>
 <dl class="function">
 <dt>
-<tt class="descname">read</tt><big>(</big><em>[length][, buffer], callback</em><big>)</big></dt>
+<code class="descname">read</code><span class="sig-paren">(</span><em>[length][, buffer], callback</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -964,7 +964,7 @@ already exists. This will work properly only if mode was initialized to
 <p>Retrieves the position of the read/write head of this file.</p>
 <dl class="function">
 <dt>
-<tt class="descname">tell</tt><big>(</big><em>callback</em><big>)</big></dt>
+<code class="descname">tell</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1046,7 +1046,7 @@ already exists. This will work properly only if mode was initialized to
 </dl>
 <dl class="function">
 <dt>
-<tt class="descname">seek</tt><big>(</big><em>[position][, seekLocation], callback</em><big>)</big></dt>
+<code class="descname">seek</code><span class="sig-paren">(</span><em>[position][, seekLocation], callback</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1182,7 +1182,7 @@ already exists. This will work properly only if mode was initialized to
 <p>Verify if the file is at EOF.</p>
 <dl class="function">
 <dt>
-<tt class="descname">eof</tt><big>(</big><big>)</big></dt>
+<code class="descname">eof</code><span class="sig-paren">(</span><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1237,7 +1237,7 @@ already exists. This will work properly only if mode was initialized to
 <p>Retrieves a single character from this file.</p>
 <dl class="function">
 <dt>
-<tt class="descname">getc</tt><big>(</big><em>callback</em><big>)</big></dt>
+<code class="descname">getc</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1304,7 +1304,7 @@ already exists. This will work properly only if mode was initialized to
 the given string does not have one.</p>
 <dl class="function">
 <dt>
-<tt class="descname">puts</tt><big>(</big><em>string</em>, <em>callback</em><big>)</big></dt>
+<code class="descname">puts</code><span class="sig-paren">(</span><em>string</em>, <em>callback</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1378,7 +1378,7 @@ the given string does not have one.</p>
 </dl>
 <dl class="function">
 <dt>
-<tt class="descname">stream</tt><big>(</big><em>autoclose</em><big>)</big></dt>
+<code class="descname">stream</code><span class="sig-paren">(</span><em>autoclose</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1516,7 +1516,7 @@ the given string does not have one.</p>
 </dl>
 <dl class="function">
 <dt id="GridStore.exist">
-<tt class="descclassname">GridStore.</tt><tt class="descname">exist</tt><big>(</big><em>db</em>, <em>name</em>, <span class="optional">[</span><em>rootCollection</em>, <span class="optional">]</span><em>callback</em><big>)</big><a class="headerlink" href="#GridStore.exist" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">GridStore.</code><code class="descname">exist</code><span class="sig-paren">(</span><em>db</em>, <em>name</em>, <span class="optional">[</span><em>rootCollection</em>, <span class="optional">]</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#GridStore.exist" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1599,7 +1599,7 @@ the given string does not have one.</p>
 <p>Gets the list of files stored in the GridFS.</p>
 <dl class="function">
 <dt id="GridStore.list">
-<tt class="descclassname">GridStore.</tt><tt class="descname">list</tt><big>(</big><em>db</em>, <span class="optional">[</span><em>rootCollection</em>, <span class="optional">]</span><em>callback</em><big>)</big><a class="headerlink" href="#GridStore.list" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">GridStore.</code><code class="descname">list</code><span class="sig-paren">(</span><em>db</em>, <span class="optional">[</span><em>rootCollection</em>, <span class="optional">]</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#GridStore.list" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1737,7 +1737,7 @@ the given string does not have one.</p>
 (db, name, length, offset, options, callback)</p>
 <dl class="function">
 <dt id="GridStore.read">
-<tt class="descclassname">GridStore.</tt><tt class="descname">read</tt><big>(</big><em>db</em>, <em>name</em>, <span class="optional">[</span><em>length</em>, <span class="optional">]</span><span class="optional">[</span><em>offset</em>, <span class="optional">]</span><span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><big>)</big><a class="headerlink" href="#GridStore.read" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">GridStore.</code><code class="descname">read</code><span class="sig-paren">(</span><em>db</em>, <em>name</em>, <span class="optional">[</span><em>length</em>, <span class="optional">]</span><span class="optional">[</span><em>offset</em>, <span class="optional">]</span><span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#GridStore.read" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1807,7 +1807,7 @@ the given string does not have one.</p>
 <p>Reads the data of this file.</p>
 <dl class="function">
 <dt id="GridStore.readlines">
-<tt class="descclassname">GridStore.</tt><tt class="descname">readlines</tt><big>(</big><em>db</em>, <em>name</em>, <span class="optional">[</span><em>separator</em>, <span class="optional">]</span><span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><big>)</big><a class="headerlink" href="#GridStore.readlines" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">GridStore.</code><code class="descname">readlines</code><span class="sig-paren">(</span><em>db</em>, <em>name</em>, <span class="optional">[</span><em>separator</em>, <span class="optional">]</span><span class="optional">[</span><em>options</em>, <span class="optional">]</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#GridStore.readlines" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1887,7 +1887,7 @@ the given string does not have one.</p>
 <p>Deletes the chunks and metadata information of a file from GridFS.</p>
 <dl class="function">
 <dt id="GridStore.unlink">
-<tt class="descclassname">GridStore.</tt><tt class="descname">unlink</tt><big>(</big><em>db</em>, <em>names</em><span class="optional">[</span>, <em>options</em><span class="optional">]</span><big>)</big><a class="headerlink" href="#GridStore.unlink" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">GridStore.</code><code class="descname">unlink</code><span class="sig-paren">(</span><em>db</em>, <em>names</em><span class="optional">[</span>, <em>options</em><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#GridStore.unlink" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1984,7 +1984,7 @@ the given string does not have one.</p>
 <p>Writes some data. This method will work properly only if initialized with mode &#8220;w&#8221; or &#8220;w+&#8221;.</p>
 <dl class="function">
 <dt>
-<tt class="descname">write</tt><big>(</big><em>data</em>, <span class="optional">[</span><em>close</em>, <span class="optional">]</span><em>callback</em><big>)</big></dt>
+<code class="descname">write</code><span class="sig-paren">(</span><em>data</em>, <span class="optional">[</span><em>close</em>, <span class="optional">]</span><em>callback</em><span class="sig-paren">)</span></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -2219,7 +2219,7 @@ the given string does not have one.</p>
    </ul>
  </li>
 </ul>
-<div id="searchbox" style="display: none">
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../search.html" method="get">
       <input type="text" name="q" />
@@ -2250,7 +2250,7 @@ the given string does not have one.</p>
     </div></div>
     <div class="footer">
         &copy; Copyright 2013, MongoDB Node.JS Team 
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.2.3.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.3b2.
 
     <p>The MongoDB Documentation Project uses <a href="https://github.com/mongodb/docs">GitHub</a>. Fork the repository and submit pull requests to contribute.</p>
     <p>If you find any issues with the documentation feel free to open a <a href="http://jira.mongodb.org/browse/DOCS">Jira Case</a> and we'll work to resolve it promptly.</p>

@@ -366,4 +366,3 @@ Other minor changes
 -  Connection pool is now set to 5 by default. Override if there is need
    for either a bigger or smaller pool per node process.
 -  Gridfs now ensures an index on the chunks collection on file\_id.
-

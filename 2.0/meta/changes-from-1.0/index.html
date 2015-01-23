@@ -56,20 +56,10 @@
           
               
                 <li>
-                <a class="" href="/node-mongodb-native/">
+                <a class="" href="http://learnmongodbthehardway.com/">
                     <i class='fa fa-file-text'></i>
                     
                     <span>driver portal</span>
-                </a>
-              
-              </li>
-          
-              
-                <li>
-                <a class="" href="http://learnmongodbthehardway.com">
-                    <i class='fa fa-file-text'></i>
-                    
-                    <span>Learn Mongo DB</span>
                 </a>
               
               </li>
@@ -86,7 +76,7 @@
           
               
                 <li>
-                <a class="" href="/node-mongodb-native/1.4">
+                <a class="" href="/node-mongodb-native/2.0/node-mongodb-native/1/index.4/">
                     <i class='fa fa-file-text'></i>
                     
                     <span>legacy docs 1.4.X</span>
@@ -230,15 +220,7 @@
           
             <li> <a href="https://jira.mongodb.org/browse/NODE" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
             
-              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/meta/changes-from-1.0.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
-            
-            <li><a href='https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge'><img src='https://badges.gitter.im/Join Chat.svg'/></a></li>
-        </ul>
-        
-    </div>
-</aside>
-
-
+              
 
       
       <section id="main-content">
@@ -271,29 +253,29 @@
 
 
 
-<h1 id="toc_0">Migrating Your Application To 2.0</h1>
+<h1 id="migrating-your-application-to-2-0:31f17a8ea04d538e2cee306fee449eb0">Migrating Your Application To 2.0</h1>
 
 <p>There are some key changes in the driver going from 1.X to 2.X that one needs to be aware off before changing your application to using the new 2.X versions. There has been some cleanup of API&rsquo;s and some deprecations of 1.X features.</p>
 
-<h2 id="toc_1">Design differences in 2.X</h2>
+<h2 id="design-differences-in-2-x:31f17a8ea04d538e2cee306fee449eb0">Design differences in 2.X</h2>
 
 <p>One of the main changes is that the driver has been split into two pieces. There is a new <code>mongodb-core</code> that contains the low level MongoDB API&rsquo;s while <code>mongodb</code> contains the high level driver. <code>mongodb-core</code> is targeted to creators of libraries like <code>Mongoose</code> and other ODM&rsquo;s who do not need the abstractions available in the <code>mongodb</code> driver. The driver is also as of the time of writing compatible with the 0.11.x node.js branch including Kerberos support as well as MongoDB 2.8.</p>
 
-<h2 id="toc_2">Changes</h2>
+<h2 id="changes:31f17a8ea04d538e2cee306fee449eb0">Changes</h2>
 
 <p>We will outline where changes have occurred that could break your existing application.</p>
 
-<h3 id="toc_3">Node.JS versions and Streams</h3>
+<h3 id="node-js-versions-and-streams:31f17a8ea04d538e2cee306fee449eb0">Node.JS versions and Streams</h3>
 
 <p>The 2.0 driver drops support for 0.8.x style streams and moves to 0.10.x or higher style pull based streams making for more reliable and faster streams. Backwards compatibility is by using the <code>readable-stream</code> npm package that might cause some slight behavior changes for the cursor streams.</p>
 
 <p>All dependencies have now been updated to use the <code>nan</code> package meaning they will compile and work on 0.11.x or higher.</p>
 
-<h3 id="toc_4">Grid Object</h3>
+<h3 id="grid-object:31f17a8ea04d538e2cee306fee449eb0">Grid Object</h3>
 
 <p>The grid object has been removed as it&rsquo;s not widely used and offers very limited GridStore capabilities.</p>
 
-<h3 id="toc_5">Db Object</h3>
+<h3 id="db-object:31f17a8ea04d538e2cee306fee449eb0">Db Object</h3>
 
 <p>The db instance object have had several changes made to it. We&rsquo;ve removed the following methods.</p>
 
@@ -311,7 +293,7 @@
 <li><code>db.listCollections</code> to replace all other collection inquiry method as it will do the correct thing for MongoDB 2.8 and higher as well as provide backwards compatibility for MongoDB 2.6 or lower.</li>
 </ul>
 
-<h3 id="toc_6">Collection Object</h3>
+<h3 id="collection-object:31f17a8ea04d538e2cee306fee449eb0">Collection Object</h3>
 
 <p>A collection instance has also had several changes made to it. Most importantly we now return the <code>mongodb-core</code> result objects directly with all the associated information returned from the server instead of the current selective information returned in the 1.4.x version.</p>
 
@@ -336,11 +318,11 @@
 
 <p>Another important change is in how <code>collection.find</code> works. The idea is to chain commands instead of passing them into the <code>find</code> method. It still supports existing behavior from 1.4 so no code should break but the API documentation reflects the new preferred way to use the find to execute queries.</p>
 
-<h3 id="toc_7">GridStore</h3>
+<h3 id="gridstore:31f17a8ea04d538e2cee306fee449eb0">GridStore</h3>
 
 <p>The GridStore object has had some major changes due to issues discovered by users related to parallel writing using the previous available <code>w+</code> append mode. Thus <code>w+</code> in 2.0 only allows for changes to the file metadata and does not allow for appending to a file avoiding the possible data corruption. The hope is to create a new GridStore spec in the future that allows for proper handling parallel writing to an existing file but this requires changes for all drivers as well as the server.</p>
 
-<h3 id="toc_8">MongoClient</h3>
+<h3 id="mongoclient:31f17a8ea04d538e2cee306fee449eb0">MongoClient</h3>
 
 <p>MongoClient now only has the class method <code>connect</code>. Constructing of a new MongoClient using <code>Server</code>, <code>ReplSet</code> or <code>Mongos</code> has been removed due to the confusion it caused in duplicating the way one can build a topology connection using <code>Db</code> in 1.4. <code>MongoClient.connect</code> is the recommended way to connect to a MongoDB topology.</p>
 
