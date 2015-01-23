@@ -2,7 +2,7 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Schemas on </title>
-    <link>/schema/</link>
+    <link>/node-mongodb-native/schema/</link>
     <description>Recent content in Schemas on </description>
     <generator>Hugo -- gohugo.io</generator>
     
@@ -10,14 +10,14 @@
     
     
     <lastBuildDate>Mon, 01 Jul 2013 00:00:00 UT</lastBuildDate>
-    <atom:link href="/schema/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="/node-mongodb-native/schema/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Introduction</title>
-      <link>/schema/chapter1/</link>
+      <link>/node-mongodb-native/schema/chapter1/</link>
       <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
-      <guid>/schema/chapter1/</guid>
+      <guid>/node-mongodb-native/schema/chapter1/</guid>
       <description>
 
 &lt;h1 id=&#34;introduction:1f0c5186ba9c3d3a3f0bb58c806f2c79&#34;&gt;Introduction&lt;/h1&gt;
@@ -38,10 +38,10 @@
     
     <item>
       <title>Schema Basics</title>
-      <link>/schema/chapter2/</link>
+      <link>/node-mongodb-native/schema/chapter2/</link>
       <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
-      <guid>/schema/chapter2/</guid>
+      <guid>/node-mongodb-native/schema/chapter2/</guid>
       <description>
 
 &lt;h1 id=&#34;schema-basics:180b2e7d3d86507c8acb2f575cf95af4&#34;&gt;Schema Basics&lt;/h1&gt;
@@ -50,7 +50,7 @@
 
 &lt;h1 id=&#34;one-to-one-1-1:180b2e7d3d86507c8acb2f575cf95af4&#34;&gt;One-To-One (1:1)&lt;/h1&gt;
 
-&lt;p&gt;&lt;img src=&#34;/images/originals/one-to-one.png&#34; alt=&#34;A One to One Relational Example&#34; /&gt;
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/one-to-one.png&#34; alt=&#34;A One to One Relational Example&#34; /&gt;
 &lt;/p&gt;
 
 &lt;p&gt;The &lt;strong&gt;1:1&lt;/strong&gt; relationship can be modeled in two ways using MongoDB. The first way is to embed the relationship as a document, the second one is as a link to a document in a separate collection. Let&amp;rsquo;s look at both ways of modeling the one to one relationship using the following two documents.&lt;/p&gt;
@@ -115,7 +115,7 @@
 
 &lt;h1 id=&#34;one-to-many-1-n:180b2e7d3d86507c8acb2f575cf95af4&#34;&gt;One-To-Many (1:N)&lt;/h1&gt;
 
-&lt;p&gt;&lt;img src=&#34;/images/originals/one-to-many.png&#34; alt=&#34;A One to Many Relational Example&#34; /&gt;
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/one-to-many.png&#34; alt=&#34;A One to Many Relational Example&#34; /&gt;
 &lt;/p&gt;
 
 &lt;p&gt;The &lt;strong&gt;1:N&lt;/strong&gt; relationship can be modeled in couple of different ways using MongoDB . The first one is embedding, the second one is linking and the third one is a bucketing strategy that is useful for some particular cases. Let&amp;rsquo;s use the model of a &lt;strong&gt;Blog Post&lt;/strong&gt; and its &lt;strong&gt;Comments&lt;/strong&gt;.&lt;/p&gt;
@@ -256,7 +256,7 @@
 
 &lt;h1 id=&#34;many-to-many-n-m:180b2e7d3d86507c8acb2f575cf95af4&#34;&gt;Many-To-Many (N:M)&lt;/h1&gt;
 
-&lt;p&gt;&lt;img src=&#34;/images/originals/many-to-many.png&#34; alt=&#34;A Many to Many Relational Example&#34; /&gt;
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/many-to-many.png&#34; alt=&#34;A Many to Many Relational Example&#34; /&gt;
 &lt;/p&gt;
 
 &lt;p&gt;&lt;strong&gt;N:M&lt;/strong&gt; relationships are modeled in the relational database by using a join table. A typical example is the relationship between books and authors where an author has authored multiple authors and a book can be written by multiple authors. Let&amp;rsquo;s look at two ways of modeling many to many relationships.&lt;/p&gt;
@@ -375,10 +375,10 @@ var books = booksCollection.find({categories: category.id}).toArray();
     
     <item>
       <title>MongoDB Storage</title>
-      <link>/schema/chapter3/</link>
+      <link>/node-mongodb-native/schema/chapter3/</link>
       <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
-      <guid>/schema/chapter3/</guid>
+      <guid>/node-mongodb-native/schema/chapter3/</guid>
       <description>
 
 &lt;h1 id=&#34;mongodb-storage:b3a7a6b1d300a0da8d3b13d4a559ed84&#34;&gt;MongoDB Storage&lt;/h1&gt;
@@ -389,7 +389,7 @@ var books = booksCollection.find({categories: category.id}).toArray();
 
 &lt;p&gt;MongoDB uses memory-mapped files to store it&amp;rsquo;s data (A memory-mapped file is a segment of virtual memory which has been assigned a direct byte-for-byte correlation with some portion of a file or file).&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/images/originals/memory_mapping.png&#34; alt=&#34;Memory Mapped Files&#34; /&gt;
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/memory_mapping.png&#34; alt=&#34;Memory Mapped Files&#34; /&gt;
 &lt;/p&gt;
 
 &lt;p&gt;Memory mapped files lets MongoDB delegate the handling of Virtual Memory to the operating system instead of explicitly managing memory itself. Since the Virtual Address Space is much larger than any physical RAM (Random Access Memory) installed in a computer there is contention about what parts of the Virtual Memory is kept in RAM at any given point in time. When the operating system runs out of RAM and an application requests something that&amp;rsquo;s not currently in RAM it will swap out memory to disk to make space for the newly requested data. Most operating systems will do this using a Least Recently Used (LRU) strategy where the oldest data is swapped to disk first.&lt;/p&gt;
@@ -429,7 +429,7 @@ var books = booksCollection.find({categories: category.id}).toArray();
 
 &lt;p&gt;However MongoDB stored the original document it added a bit of empty space at the end of the document hence referred to as &lt;strong&gt;padding&lt;/strong&gt;. The reason for this padding is that MongoDB expects the document to grow in size over time. As long as this document growth stays inside the additional &lt;strong&gt;padding&lt;/strong&gt; space MongoDB does not need to move the document to a new bigger space thus avoiding the cost of copying bytes around in memory, and on disk.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/images/originals/document_with_padding.png&#34; alt=&#34;Document With Padding&#34; /&gt;
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/document_with_padding.png&#34; alt=&#34;Document With Padding&#34; /&gt;
 &lt;/p&gt;
 
 &lt;p&gt;Over time the &lt;strong&gt;padding factor&lt;/strong&gt; that governs how much extra space is appended to a document inserted into MongoDB changes as the database attempts to find the balance between the eventual size of documents and the unused space take up by the &lt;em&gt;padding&lt;/em&gt;. However if the growth of individual documents is random MongoDB will not be able to correctly &lt;strong&gt;Pre-Allocate&lt;/strong&gt; the right level of &lt;em&gt;padding&lt;/em&gt; and the database might end up spending a lot of time copying documents around in memory and on disk instead of performing application specific work causing an impact on write performance.&lt;/p&gt;
@@ -454,7 +454,7 @@ var books = booksCollection.find({categories: category.id}).toArray();
 
 &lt;p&gt;When documents move around or are removed they leave holes. MongoDB tries to reuse these holes for new documents when ever possible, but over time it will slowly and steadily find itself having a lot of holes that cannot be reused because documents cannot fit in them. This effect is called fragmentation and is common in all systems that allocate memory including your operating system.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/images/originals/fragmentation.png&#34; alt=&#34;Document With Padding&#34; /&gt;
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/fragmentation.png&#34; alt=&#34;Document With Padding&#34; /&gt;
 &lt;/p&gt;
 
 &lt;p&gt;The effect of fragmentation is to waste space. Due to the fact that MongoDB uses memory mapped files any fragmentation on disk will be reflected in fragmentation in RAM as well. This has the effect of making less of the &amp;ldquo;Working Set&amp;rdquo; fit in RAM and causing more swapping to disk.&lt;/p&gt;
@@ -490,15 +490,15 @@ var books = booksCollection.find({categories: category.id}).toArray();
     
     <item>
       <title>Indexes</title>
-      <link>/schema/chapter4/</link>
+      <link>/node-mongodb-native/schema/chapter4/</link>
       <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
-      <guid>/schema/chapter4/</guid>
+      <guid>/node-mongodb-native/schema/chapter4/</guid>
       <description>
 
 &lt;h1 id=&#34;indexes:0336f6e2875b14063cc3d24d40aee459&#34;&gt;Indexes&lt;/h1&gt;
 
-&lt;p&gt;&lt;img src=&#34;/images/originals/btree.png&#34; alt=&#34;A Btree Example, http://commons.wikimedia.org/wiki/File:Btree.png&#34; /&gt;
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/btree.png&#34; alt=&#34;A Btree Example, http://commons.wikimedia.org/wiki/File:Btree.png&#34; /&gt;
 &lt;/p&gt;
 
 &lt;p&gt;Indexes are the root to high performance in MongoDB, as it allows the database to search through less documents to satisfy a query. Without an index MongoDB has to scan through all of the documents to ensure it has answered the query correctly.&lt;/p&gt;
@@ -916,15 +916,15 @@ covered.find({text: &amp;quot;hello&amp;quot;}, {_id: 0, text:1, site:1}).explai
     
     <item>
       <title>Metadata</title>
-      <link>/schema/chapter5/</link>
+      <link>/node-mongodb-native/schema/chapter5/</link>
       <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
-      <guid>/schema/chapter5/</guid>
+      <guid>/node-mongodb-native/schema/chapter5/</guid>
       <description>
 
 &lt;h1 id=&#34;metadata:88f6cb0c2dababd96ac958a2c7592492&#34;&gt;Metadata&lt;/h1&gt;
 
-&lt;p&gt;&lt;img src=&#34;/images/originals/metadata.png&#34; alt=&#34;Metadata, courtesy of http://www.flickr.com/photos/sjcockell/6126442977&#34; /&gt;
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/metadata.png&#34; alt=&#34;Metadata, courtesy of http://www.flickr.com/photos/sjcockell/6126442977&#34; /&gt;
 &lt;/p&gt;
 
 &lt;p&gt;Metadata is data that describes and gives information about other data. A classic example is the information about a digital image file such as the ISO settings, resolution, pixel depth, exposure, camera settings, camera type and so forth.&lt;/p&gt;
@@ -1096,15 +1096,15 @@ col.find({ metadata: { $all: [
     
     <item>
       <title>Time Series</title>
-      <link>/schema/chapter6/</link>
+      <link>/node-mongodb-native/schema/chapter6/</link>
       <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
-      <guid>/schema/chapter6/</guid>
+      <guid>/node-mongodb-native/schema/chapter6/</guid>
       <description>
 
 &lt;h1 id=&#34;time-series:b7673b314677a8560e182fed1b34792e&#34;&gt;Time Series&lt;/h1&gt;
 
-&lt;p&gt;&lt;img src=&#34;/images/originals/time_series.png&#34; alt=&#34;An Example Time Series&#34; /&gt;
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/time_series.png&#34; alt=&#34;An Example Time Series&#34; /&gt;
 &lt;/p&gt;
 
 &lt;p&gt;The first pattern we are going to explore is the time series pattern. This pattern is a write optimization pattern to ensure maximum write performance for a typical analytics application. A time series is made up of discreet measurements at timed intervals. Examples can include counting the number of page views in a second or the temperature per minute. For this pattern we will discuss time series in the context of web page views.&lt;/p&gt;
@@ -1249,17 +1249,17 @@ col.find()
     
     <item>
       <title>Queues</title>
-      <link>/schema/chapter7/</link>
+      <link>/node-mongodb-native/schema/chapter7/</link>
       <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
-      <guid>/schema/chapter7/</guid>
+      <guid>/node-mongodb-native/schema/chapter7/</guid>
       <description>
 
 &lt;h1 id=&#34;queues:350c6b49ae8b36a26012060b0876f863&#34;&gt;Queues&lt;/h1&gt;
 
 &lt;p&gt;A queue lets multiple publishers push messages to it and multiple subscribers can pull messages off it. The message is only delivered to a single subscriber.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/images/originals/queue.png&#34; alt=&#34;A Queue With Publishers and Subscribers&#34; /&gt;
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/queue.png&#34; alt=&#34;A Queue With Publishers and Subscribers&#34; /&gt;
 &lt;/p&gt;
 
 &lt;p&gt;A variant of a queue is called a topic and the difference with a queue is that all subscribers receive all messages. In MongoDB the classic example is the &lt;strong&gt;oplog&lt;/strong&gt; that contains all operations performed on the &lt;strong&gt;master&lt;/strong&gt; database and that all &lt;strong&gt;secondaries&lt;/strong&gt; listen to for changes.&lt;/p&gt;
@@ -1328,7 +1328,7 @@ col.update({_id: job._id}, {$set: {end_time: new Date()}});
 
 &lt;p&gt;A &lt;strong&gt;capped collection&lt;/strong&gt; is basically what we call a ring buffer meaning they have a fixed size. Once the application goes over the size it starts overwriting documents.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/images/originals/ring_buffer.png&#34; alt=&#34;A Ring Buffer&#34; /&gt;
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/ring_buffer.png&#34; alt=&#34;A Ring Buffer&#34; /&gt;
 &lt;/p&gt;
 
 &lt;p&gt;The benefit of the &lt;strong&gt;capped collection&lt;/strong&gt; is that it allows for &lt;strong&gt;tailing&lt;/strong&gt; meaning applications can listen to new documents being inserted. Let&amp;rsquo;s set up our stock ticker schema.&lt;/p&gt;
@@ -1401,17 +1401,17 @@ db.expire.ensureIndex({ &amp;quot;created_on&amp;quot;: 1}, {expireAfterSeconds:
     
     <item>
       <title>Nested Categories</title>
-      <link>/schema/chapter8/</link>
+      <link>/node-mongodb-native/schema/chapter8/</link>
       <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
-      <guid>/schema/chapter8/</guid>
+      <guid>/node-mongodb-native/schema/chapter8/</guid>
       <description>
 
 &lt;h1 id=&#34;nested-categories:32486c278e1ddf0a50ecd2904ca850af&#34;&gt;Nested Categories&lt;/h1&gt;
 
 &lt;p&gt;The nested categories schema design pattern targets the hierarchical structures traditionally found in a product catalog on an line e-commerce website.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/images/originals/hierarchy.png&#34; alt=&#34;A Category Hierarchy Example&#34; /&gt;
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/hierarchy.png&#34; alt=&#34;A Category Hierarchy Example&#34; /&gt;
 &lt;/p&gt;
 
 &lt;h2 id=&#34;trees-using-paths:32486c278e1ddf0a50ecd2904ca850af&#34;&gt;Trees using Paths&lt;/h2&gt;
@@ -1655,15 +1655,15 @@ col.ensureIndex({categories:1})
     
     <item>
       <title>Account Transactions</title>
-      <link>/schema/chapter9/</link>
+      <link>/node-mongodb-native/schema/chapter9/</link>
       <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
-      <guid>/schema/chapter9/</guid>
+      <guid>/node-mongodb-native/schema/chapter9/</guid>
       <description>
 
 &lt;h1 id=&#34;account-transactions:38a9a76b33f1cbc2606833c72cbf6c68&#34;&gt;Account Transactions&lt;/h1&gt;
 
-&lt;p&gt;&lt;img src=&#34;/images/originals/bank.png&#34; alt=&#34;Metadata, courtesy of http://www.flickr.com/photos/68751915@N05/6629034769&#34; /&gt;
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/bank.png&#34; alt=&#34;Metadata, courtesy of http://www.flickr.com/photos/68751915@N05/6629034769&#34; /&gt;
 &lt;/p&gt;
 
 &lt;p&gt;MongoDB does not as of 2.6 support any notion of a transaction across a document or multiple documents. It does however guarantee atomic operations on single documents. This allows us to implement a Two-Phase commit strategy using double bookkeeping. However it&amp;rsquo;s important to note that due to only single document operations being atomic, MongoDB can only offer transaction-like semantics. It&amp;rsquo;s still possible for applications to return intermediate during the two-phase commit or rollback.&lt;/p&gt;
@@ -1817,15 +1817,15 @@ col.transactions.find({application: &amp;quot;A1&amp;quot;, state: &amp;quot;pen
     
     <item>
       <title>Shopping Cart</title>
-      <link>/schema/chapter10/</link>
+      <link>/node-mongodb-native/schema/chapter10/</link>
       <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
-      <guid>/schema/chapter10/</guid>
+      <guid>/node-mongodb-native/schema/chapter10/</guid>
       <description>
 
 &lt;h1 id=&#34;shopping-cart:61a6257a1d794ac1b525cf782a2a26b3&#34;&gt;Shopping Cart&lt;/h1&gt;
 
-&lt;p&gt;&lt;img src=&#34;/images/originals/shopping_cart_racing.png&#34; alt=&#34;Metadata, courtesy of http://www.wpclipart.com/working/work_supplies/shopping_cart_racing.png.html&#34; /&gt;
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/shopping_cart_racing.png&#34; alt=&#34;Metadata, courtesy of http://www.wpclipart.com/working/work_supplies/shopping_cart_racing.png.html&#34; /&gt;
 &lt;/p&gt;
 
 &lt;p&gt;The traditional E-commerce shopping cart can be modeled in MongoDB by using double bookkeeping. Given that we have the following initial documents.&lt;/p&gt;
@@ -2078,10 +2078,10 @@ productCol.update({
     
     <item>
       <title>Sharding</title>
-      <link>/schema/chapter11/</link>
+      <link>/node-mongodb-native/schema/chapter11/</link>
       <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
-      <guid>/schema/chapter11/</guid>
+      <guid>/node-mongodb-native/schema/chapter11/</guid>
       <description>
 
 &lt;h1 id=&#34;sharding:783a13680e5de96acfee68995945d897&#34;&gt;Sharding&lt;/h1&gt;
@@ -2092,7 +2092,7 @@ productCol.update({
 
 &lt;p&gt;In MongoDB sharding happens at the &lt;strong&gt;collection&lt;/strong&gt; level. That is to say that you can have a combination of sharded and unsharded collections. Let&amp;rsquo;s look at a simple topology.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/images/originals/sharded.png&#34; alt=&#34;Simple Two Shard Topology&#34; /&gt;
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/sharded.png&#34; alt=&#34;Simple Two Shard Topology&#34; /&gt;
 &lt;/p&gt;
 
 &lt;p&gt;The application talks to the &lt;strong&gt;Mongos&lt;/strong&gt; proxies to write to the sharded system.&lt;/p&gt;
@@ -2183,7 +2183,7 @@ productCol.update({
 
 &lt;p&gt;We want to ensure we meet two specific goals. The first one is to write to multiple recipients on separate shards thus leveraging the write scalability. However for a user to read their email box, one wants to read from a single shard avoid scatter/gather queries.&lt;/p&gt;
 
-&lt;p&gt;&lt;img src=&#34;/images/originals/sharded_inbox_write.png&#34; alt=&#34;Fan out write, Single shard Read&#34; /&gt;
+&lt;p&gt;&lt;img src=&#34;/node-mongodb-native/images/originals/sharded_inbox_write.png&#34; alt=&#34;Fan out write, Single shard Read&#34; /&gt;
 &lt;/p&gt;
 
 &lt;p&gt;How does one go about getting the correct shard key. Let&amp;rsquo;s assume we have two collections &lt;strong&gt;inbox&lt;/strong&gt; and &lt;strong&gt;users&lt;/strong&gt; in our &lt;strong&gt;social&lt;/strong&gt; database. Let&amp;rsquo;s do the collection sharding.&lt;/p&gt;

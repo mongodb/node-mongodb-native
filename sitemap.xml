@@ -2,63 +2,63 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>/</loc>
+    <loc>/node-mongodb-native/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/schema/chapter1/</loc>
+    <loc>/node-mongodb-native/schema/chapter1/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/schema/chapter2/</loc>
+    <loc>/node-mongodb-native/schema/chapter2/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/schema/chapter3/</loc>
+    <loc>/node-mongodb-native/schema/chapter3/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/schema/chapter4/</loc>
+    <loc>/node-mongodb-native/schema/chapter4/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/schema/chapter5/</loc>
+    <loc>/node-mongodb-native/schema/chapter5/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/schema/chapter6/</loc>
+    <loc>/node-mongodb-native/schema/chapter6/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/schema/chapter7/</loc>
+    <loc>/node-mongodb-native/schema/chapter7/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/schema/chapter8/</loc>
+    <loc>/node-mongodb-native/schema/chapter8/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/schema/chapter9/</loc>
+    <loc>/node-mongodb-native/schema/chapter9/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/schema/chapter10/</loc>
+    <loc>/node-mongodb-native/schema/chapter10/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/schema/chapter11/</loc>
+    <loc>/node-mongodb-native/schema/chapter11/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
   
