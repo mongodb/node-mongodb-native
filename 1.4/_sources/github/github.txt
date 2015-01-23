@@ -111,7 +111,7 @@ Object Document Modeling Libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 0:16:59 on 21/0/2015
+           - 17:53:22 on 22/0/2015
          * - **Homepage**
            - http://http://mongoosejs.com
          * - **Url**
@@ -119,9 +119,9 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/LearnBoost/mongoose.git
          * - **Forks**
-           - 896
+           - 900
          * - **Watchers**
-           - 6118
+           - 6134
 
 .. topic:: mongo-model
 
@@ -214,7 +214,7 @@ Content Management Systems
          * - **Clone Url**
            - https://github.com/cliftonc/calipso.git
          * - **Forks**
-           - 282
+           - 283
          * - **Watchers**
            - 1538
 
@@ -314,7 +314,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 17
          * - **Watchers**
-           - 137
+           - 138
 
 .. topic:: node-mongodb-wrapper
 
@@ -755,7 +755,7 @@ Libraries or Applications for analytics
          * - **Forks**
            - 393
          * - **Watchers**
-           - 3470
+           - 3469
 
 Libraries for the connect middleware
 ------------------------------------
@@ -794,7 +794,7 @@ Libraries for the connect middleware
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 21:34:31 on 12/0/2015
+           - 15:52:11 on 23/0/2015
          * - **Homepage**
            - http://http://kcbanner.github.com/connect-mongo/
          * - **Url**
@@ -830,7 +830,7 @@ Libraries or applications for continous integration
          * - **Forks**
            - 68
          * - **Watchers**
-           - 458
+           - 459
 
 Exampe applications
 -------------------
