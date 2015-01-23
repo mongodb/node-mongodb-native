@@ -24,7 +24,7 @@ title = "MongoDB 2.0.0 Driver"
 [[menu.main]]
     name = "legacy docs 1.4.X"
     pre = "<i class='fa fa-file-text'></i>"
-    url = "#REPLACE/1.4"
+    url = "http://mongodb.github.io/node-mongodb-native/1.4/"
     weight = -110
 [[menu.main]]
     name = "about driver"
