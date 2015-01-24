@@ -953,3 +953,35 @@ exports['Should not fail due to exiting collection in non-strict mode'] = {
     });
   }
 }
+
+/**
+ * @ignore
+ */
+exports.shouldFilterCorrectlyDuringList = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+
+    // The collection happens to contain the database name
+    var testCollection = 'integration_tests_collection_123';
+    db.open(function(err, client) {
+      // Create two collections
+      db.createCollection(testCollection, function(r) {
+        test.equal(null, err);
+        db.listCollections({name: testCollection}).toArray(function(err, documents) {
+          test.equal(null, err);
+          test.equal(documents.length, 1);
+          var found = false;
+          documents.forEach(function(document) {
+            if(document.name == "integration_tests_." + testCollection) found = true;
+          });
+          test.ok(true, found);
+          db.close();
+          test.done();
+        });
+      });
+    });
+  }
+}
