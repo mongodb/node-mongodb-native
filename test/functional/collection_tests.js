@@ -17,9 +17,9 @@ exports.shouldCorrectExecuteBasicCollectionMethods = {
         db.listCollections().toArray(function(err, documents) {
           var found = false;
           documents.forEach(function(document) {
-            if(document.name == "integration_tests_.test_collection_methods") found = true;
+            if(document.name == "integration_tests.test_collection_methods") found = true;
           });
-          test.ok(true, found);
+          test.ok(found);
 
           // Rename the collection and check that it's gone
           db.renameCollection("test_collection_methods", "test_collection_methods2", function(err, reply) {
@@ -975,9 +975,9 @@ exports.shouldFilterCorrectlyDuringList = {
           test.equal(documents.length, 1);
           var found = false;
           documents.forEach(function(document) {
-            if(document.name == "integration_tests_." + testCollection) found = true;
+            if(document.name == "integration_tests." + testCollection) found = true;
           });
-          test.ok(true, found);
+          test.ok(found);
           db.close();
           test.done();
         });
