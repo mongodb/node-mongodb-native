@@ -99,7 +99,7 @@ weight: 50
 
 2.0.0-alpha2 2014-10-02
 -----------------------
-- CRUD API (insertOne, insertMany, updateOne, updateMany, removeOne, removeMany, bulkWrite, findOneAndDelete, findOneAndUpdate, findOneAndReplace)
+- CRUD API (insertOne, insertMany, updateOne, updateMany, deleteOne, deleteMany, bulkWrite, findOneAndDelete, findOneAndUpdate, findOneAndReplace)
 - Cluster Management Spec compatible
 
 2.0.0-alpha1 2014-09-08

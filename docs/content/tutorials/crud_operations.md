@@ -182,7 +182,7 @@ MongoClient.connect(url, function(err, db) {
 });
 ```
 
-The *removeOne* and *deleteMany* methods also accepts an second argument that can be an options object. This object can have the following fields.
+The *deleteOne* and *deleteMany* methods also accepts an second argument that can be an options object. This object can have the following fields.
 
 *  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
 *  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
