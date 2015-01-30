@@ -11,7 +11,7 @@ exports['Should correctly authenticate against admin db'] = {
       , MongoClient = configuration.require.MongoClient
       , Server = configuration.require.Server;
     // restart server
-    configuration.restart(function() {
+    configuration.restart({purge:true, kill:true}, function() {
       var db1 = new Db('mongo-ruby-test-auth1', new Server(configuration.host, configuration.port, {auto_reconnect: true}), {w:1});
       db1.open(function(err, db) {
         test.equal(null, err);
