@@ -10,9 +10,33 @@ menu:
 title: Release Notes
 weight: 50
 ---
-2.0.10
-----------------
-- NODE-328 fixed db.open return when no callback available issue and added test
+2.0.14 2015-01-21
+-----------------
+- Fixed some MongoClient.connect options pass through issues and added test coverage.
+- Bumped mongodb-core to 1.1.19 including fixes for io.js
+
+2.0.13 2015-01-09
+-----------------
+- Bumped mongodb-core to 1.1.8.
+- Optimized query path for performance, moving Object.defineProperty outside of constructors.
+
+2.0.12 2014-12-22
+-----------------
+- Minor fixes to listCollections to ensure correct querying of a collection when using a string.
+
+2.0.11 2014-12-19
+-----------------
+- listCollections filters out index namespaces on < 2.8 correctly
+- Bumped mongo-client to 1.1.7
+
+2.0.10 2014-12-18
+-----------------
+- NODE-328 fixed db.open return when no callback available issue and added test.
+- NODE-327 Refactored listCollections to return cursor to support 2.8.
+- NODE-327 Added listIndexes method and refactored internal methods to use the new command helper.
+- NODE-335 Cannot create index for nested objects fixed by relaxing key checking for createIndex helper.
+- Enable setting of connectTimeoutMS (Issue #1235, https://github.com/vkarpov15)
+- Bumped mongo-client to 1.1.6
 
 2.0.9 2014-12-01
 ----------------
@@ -75,7 +99,7 @@ weight: 50
 
 2.0.0-alpha2 2014-10-02
 -----------------------
-- CRUD API (insertOne, insertMany, updateOne, updateMany, removeOne, removeMany, bulkWrite, findOneAndDelete, findOneAndUpdate, findOneAndReplace)
+- CRUD API (insertOne, insertMany, updateOne, updateMany, deleteOne, deleteMany, bulkWrite, findOneAndDelete, findOneAndUpdate, findOneAndReplace)
 - Cluster Management Spec compatible
 
 2.0.0-alpha1 2014-09-08

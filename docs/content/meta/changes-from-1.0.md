@@ -50,8 +50,8 @@ We've added the following new methods
 * `collection.replaceOne` Replace an existing document fully.
 * `collection.updateOne` Update a single document.
 * `collection.updateMany` Update multiple documents in one go.
-* `collection.removeOne` Remove a single document.
-* `collection.removeMany` Remove multiple documents in one go.
+* `collection.deleteOne` Delete a single document.
+* `collection.deleteMany` Delete multiple documents in one go.
 * `collection.findOneAndUpdate` Use findAndModify to update a document.
 * `collection.findOneAndRemove` Use findAndModify to remove a specific document.
 * `collection.findOneAndReplace` Use findAndModify to replace a specific document.
