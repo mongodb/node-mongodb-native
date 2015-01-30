@@ -774,3 +774,26 @@ exports['should correctly execute findAndModify methods using crud api'] = {
     });
   }
 }
+
+exports['should correctly execute removeMany with no selector'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    // Establish connection to db
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      // Delete all items with no selector
+      db.collection('t6_1').deleteMany(function(err, r) {
+        test.equal(null, err);
+
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
