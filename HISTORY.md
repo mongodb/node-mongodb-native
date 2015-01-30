@@ -1,3 +1,7 @@
+1.1.10 31-01-2015
+-----------------
+- Added tranforms.doc option to cursor to allow for pr. document transformations.
+
 1.1.9 21-01-2015
 ----------------
 - Updated BSON dependency to 0.2.18 to fix issues with io.js and node.
