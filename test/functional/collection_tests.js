@@ -925,3 +925,76 @@ exports['Should fail due to exiting collection'] = {
     });
   }
 }
+
+/**
+ * @ignore
+ */
+exports.shouldFilterCorrectlyDuringList = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+
+    // The collection happens to contain the database name
+    var testCollection = 'integration_tests_collection_123';
+    db.open(function(err, client) {
+      // Create a collection
+      db.createCollection(testCollection, function(err, r) {
+        test.equal(null, err);
+
+        db.listCollections({name: testCollection}).toArray(function(err, documents) {
+          test.equal(null, err);
+          test.equal(documents.length, 1);
+          var found = false;
+          documents.forEach(function(document) {
+            if(document.name == "integration_tests." + testCollection) found = true;
+          });
+          test.ok(found);
+          db.close();
+          test.done();
+        });
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports.shouldFilterCorrectlyWithIndexDuringList = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+
+    var testCollection = 'collection_124';
+    db.open(function(err, client) {
+      // Create a collection
+      db.createCollection(testCollection, function(err, r) {
+        test.equal(null, err);
+        
+        // Index name happens to be the same as collection name
+        db.createIndex(testCollection, 'collection_124', {w:1}, function(err, indexName) {
+          test.equal(null, err);
+          test.equal("collection_124_1", indexName);
+
+          db.listCollections().toArray(function(err, documents) {
+            test.equal(null, err);
+            test.ok(documents.length > 1);
+            var found = false;
+            
+            documents.forEach(function(document) {
+              if(document.name == "integration_tests." + testCollection) found = true;
+            });
+            
+            test.ok(found);
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
+  }
+}

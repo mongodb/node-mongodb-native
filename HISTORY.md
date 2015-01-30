@@ -1,7 +1,12 @@
+2.0.15
+-----------------
+- Unified behavior of listCollections results so 3.0 and pre 3.0 return same type of results.
+- Bumped mongodb-core to 1.1.10 to support per document tranforms in cursors.
+
 2.0.14 2015-01-21
 -----------------
 - Fixed some MongoClient.connect options pass through issues and added test coverage.
-- Bumped mongodb-core to 1.1.19 including fixes for io.js
+- Bumped mongodb-core to 1.1.9 including fixes for io.js
 
 2.0.13 2015-01-09
 -----------------
