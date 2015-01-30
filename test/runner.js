@@ -422,8 +422,7 @@ if(argv.t == 'functional') {
   } else if(argv.e == 'auth') {
     // Create ssl server
     config = createConfiguration({
-        fork:null
-      , auth: null
+        auth: null
 
       , topology: function(host, port, serverOptions) {
         var m = require('../');
