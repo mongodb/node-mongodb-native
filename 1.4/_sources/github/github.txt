@@ -111,7 +111,7 @@ Object Document Modeling Libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 17:53:22 on 22/0/2015
+           - 0:36:23 on 1/1/2015
          * - **Homepage**
            - http://http://mongoosejs.com
          * - **Url**
@@ -119,9 +119,9 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/LearnBoost/mongoose.git
          * - **Forks**
-           - 900
+           - 911
          * - **Watchers**
-           - 6134
+           - 6175
 
 .. topic:: mongo-model
 
@@ -214,9 +214,9 @@ Content Management Systems
          * - **Clone Url**
            - https://github.com/cliftonc/calipso.git
          * - **Forks**
-           - 283
+           - 284
          * - **Watchers**
-           - 1538
+           - 1542
 
 Grid FS libraries or tools
 --------------------------
@@ -291,7 +291,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 4
          * - **Watchers**
-           - 67
+           - 68
 
 .. topic:: mongolia
 
@@ -337,7 +337,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 12
          * - **Watchers**
-           - 55
+           - 54
 
 .. topic:: mdoq-mongodb
 
@@ -383,7 +383,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 14
          * - **Watchers**
-           - 100
+           - 99
 
 REST api's around MongoDB or resource based libraries
 -----------------------------------------------------
@@ -407,7 +407,7 @@ REST api's around MongoDB or resource based libraries
          * - **Clone Url**
            - https://github.com/tdegrunt/mongodb-rest.git
          * - **Forks**
-           - 109
+           - 110
          * - **Watchers**
            - 341
 
@@ -494,7 +494,7 @@ Test helpers and libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 22:42:37 on 25/9/2014
+           - 19:28:30 on 24/0/2015
          * - **Homepage**
            - http://
          * - **Url**
@@ -753,9 +753,9 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 393
+           - 396
          * - **Watchers**
-           - 3469
+           - 3475
 
 Libraries for the connect middleware
 ------------------------------------
@@ -794,7 +794,7 @@ Libraries for the connect middleware
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 15:52:11 on 23/0/2015
+           - 8:11:54 on 31/0/2015
          * - **Homepage**
            - http://http://kcbanner.github.com/connect-mongo/
          * - **Url**
@@ -802,7 +802,7 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 181
+           - 186
          * - **Watchers**
            - 666
 
@@ -879,5 +879,5 @@ Exampe applications
          * - **Forks**
            - 1
          * - **Watchers**
-           - 6
+           - 7
 

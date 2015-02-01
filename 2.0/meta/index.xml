@@ -38,11 +38,18 @@
       <guid>/node-mongodb-native/2.0/meta/release-notes/</guid>
       <description>
 
+&lt;h2 id=&#34;2-0-15:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.15&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Unified behavior of listCollections results so 3.0 and pre 3.0 return same type of results.&lt;/li&gt;
+&lt;li&gt;Bumped mongodb-core to 1.1.10 to support per document tranforms in cursors.&lt;/li&gt;
+&lt;/ul&gt;
+
 &lt;h2 id=&#34;2-0-14-2015-01-21:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.14 2015-01-21&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Fixed some MongoClient.connect options pass through issues and added test coverage.&lt;/li&gt;
-&lt;li&gt;Bumped mongodb-core to 1.1.19 including fixes for io.js&lt;/li&gt;
+&lt;li&gt;Bumped mongodb-core to 1.1.9 including fixes for io.js&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h2 id=&#34;2-0-13-2015-01-09:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.13 2015-01-09&lt;/h2&gt;
@@ -1467,8 +1474,8 @@
 &lt;li&gt;&lt;code&gt;collection.replaceOne&lt;/code&gt; Replace an existing document fully.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;collection.updateOne&lt;/code&gt; Update a single document.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;collection.updateMany&lt;/code&gt; Update multiple documents in one go.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;collection.removeOne&lt;/code&gt; Remove a single document.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;collection.removeMany&lt;/code&gt; Remove multiple documents in one go.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;collection.deleteOne&lt;/code&gt; Delete a single document.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;collection.deleteMany&lt;/code&gt; Delete multiple documents in one go.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;collection.findOneAndUpdate&lt;/code&gt; Use findAndModify to update a document.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;collection.findOneAndRemove&lt;/code&gt; Use findAndModify to remove a specific document.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;collection.findOneAndReplace&lt;/code&gt; Use findAndModify to replace a specific document.&lt;/li&gt;

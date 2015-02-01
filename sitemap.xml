@@ -8,57 +8,7 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/schema/chapter1/</loc>
-    <lastmod>2013-07-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/schema/chapter2/</loc>
-    <lastmod>2013-07-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/schema/chapter3/</loc>
-    <lastmod>2013-07-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/schema/chapter4/</loc>
-    <lastmod>2013-07-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/schema/chapter5/</loc>
-    <lastmod>2013-07-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/schema/chapter6/</loc>
-    <lastmod>2013-07-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/schema/chapter7/</loc>
-    <lastmod>2013-07-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/schema/chapter8/</loc>
-    <lastmod>2013-07-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/schema/chapter9/</loc>
-    <lastmod>2013-07-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/schema/chapter10/</loc>
-    <lastmod>2013-07-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/schema/chapter11/</loc>
+    <loc>/node-mongodb-native/modules/mongoose/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
   
