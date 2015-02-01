@@ -38,12 +38,12 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/tutorials/logging/</loc>
+    <loc>/node-mongodb-native/2.0/tutorials/gridfs/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/tutorials/gridfs/</loc>
+    <loc>/node-mongodb-native/2.0/tutorials/logging/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
   
