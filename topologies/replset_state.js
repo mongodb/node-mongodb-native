@@ -338,6 +338,12 @@ State.prototype.update = function(ismaster, server) {
     return false;
   }
 
+  // Set the setName if it's not set from the first server
+  if(self.setName == null && ismaster.setName) {
+    if(self.logger.isInfo()) self.logger.info(f('[%s] setting setName to %s', self.id, ismaster.setName));
+    self.setName = ismaster.setName;
+  }
+
   // Check if the replicaset name matches the provided one
   if(ismaster.setName && self.setName != ismaster.setName) {
     if(self.logger.isError()) self.logger.error(f('[%s] server in replset %s is not part of the specified setName %s', self.id, ismaster.setName, self.setName));
