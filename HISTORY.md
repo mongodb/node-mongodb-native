@@ -3,6 +3,7 @@
 - Unified behavior of listCollections results so 3.0 and pre 3.0 return same type of results.
 - Bumped mongodb-core to 1.1.10 to support per document tranforms in cursors.
 - NODE-360 Aggregation cursor and command correctly passing down the maxTimeMS property.
+- Added ~1.0 mongodb-tools module for test running.
 
 2.0.14 2015-01-21
 -----------------

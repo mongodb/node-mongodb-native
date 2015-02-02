@@ -995,7 +995,7 @@ exports['Replicaset connection where a server is standalone'] = {
   test: function(configuration, test) {
     var Server = configuration.require.Server
       , ReplSet = configuration.require.ReplSet
-      , ServerManager = require('mongodb-core').ServerManager
+      , ServerManager = require('mongodb-tools').ServerManager
       , MongoClient = configuration.require.MongoClient
       , manager = configuration.manager;
 

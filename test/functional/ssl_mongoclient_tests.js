@@ -265,7 +265,7 @@ exports['should correctly connect using SSL to ReplSetManager'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ReplSetManager = require('mongodb-core').ReplSetManager
+    var ReplSetManager = require('mongodb-tools').ReplSetManager
       , MongoClient = configuration.require.MongoClient;
 
     // All inserted docs
@@ -320,7 +320,7 @@ exports.shouldCorrectlySendCertificateToReplSetAndValidateServerCertificate = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ReplSetManager = require('mongodb-core').ReplSetManager
+    var ReplSetManager = require('mongodb-tools').ReplSetManager
       , MongoClient = configuration.require.MongoClient;
     // All inserted docs
     var docs = [];
@@ -382,7 +382,7 @@ exports.shouldSendWrongCertificateToReplSetAndValidateServerCertificate = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ReplSetManager = require('mongodb-core').ReplSetManager
+    var ReplSetManager = require('mongodb-tools').ReplSetManager
       , MongoClient = configuration.require.MongoClient;
     // All inserted docs
     var docs = [];
@@ -447,7 +447,7 @@ exports['should correctly to replicaset using ssl connect with password'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ReplSetManager = require('mongodb-core').ReplSetManager
+    var ReplSetManager = require('mongodb-tools').ReplSetManager
       , MongoClient = configuration.require.MongoClient;
     // All inserted docs
     var docs = [];
