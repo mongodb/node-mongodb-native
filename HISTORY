@@ -1,3 +1,7 @@
+1.4.30
+-----------------
+- NODE-360 Aggregation cursor and command correctly passing down the maxTimeMS property.
+
 1.4.29 2014-01-21
 -----------------
 - Updated kerberos to support io.js/node with nan 1.5.1.
