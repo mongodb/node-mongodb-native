@@ -13,7 +13,7 @@
     "legacy"
   ],
   "dependencies": {
-      "mongodb-core": "1.1.10"
+      "mongodb-core": "1.1.11"
     , "readable-stream": "1.0.31"
   },
   "devDependencies": {

@@ -96,6 +96,36 @@ exports['Should correctly connect with default replicaset'] = {
   }
 }
 
+exports['Should correctly connect with default replicaset and no setName specified'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var ReplSet = configuration.require.ReplSet
+      , Server = configuration.require.Server
+      , Db = configuration.require.Db;
+
+    // Replset start port
+    configuration.manager.shutdown('secondary', {signal:15}, function() {
+      // Replica configuration
+      var replSet = new ReplSet([
+          new Server(configuration.host, configuration.port),
+          new Server(configuration.host, configuration.port + 1),
+          new Server(configuration.host, configuration.port + 2)
+        ]
+        , {}
+      );
+
+      var db = new Db('integration_test_', replSet, {w:0});
+      db.open(function(err, p_db) {
+        test.equal(null, err);
+        p_db.close();
+        restartAndDone(configuration, test);
+      })
+    });
+  }
+}
+
 exports['Should correctly connect with default replicaset and socket options set'] = {
   metadata: { requires: { topology: 'replicaset' } },
   
