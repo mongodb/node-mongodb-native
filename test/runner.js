@@ -52,7 +52,7 @@ var createConfiguration = function(options) {
     var Db = mongo.Db;
     var Server = mongo.Server;
     var Logger = mongo.Logger;
-    var ServerManager = require('mongodb-core').ServerManager;
+    var ServerManager = require('mongodb-tools').ServerManager;
     var database = "integration_tests";
     var url = options.url || "mongodb://%slocalhost:27017/" + database;
     var port = options.port || 27017;
@@ -423,7 +423,6 @@ if(argv.t == 'functional') {
     // Create ssl server
     config = createConfiguration({
         auth: null
-
       , topology: function(host, port, serverOptions) {
         var m = require('../');
         host = host || 'localhost'; port = port || 27017;

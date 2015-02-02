@@ -665,3 +665,106 @@ exports['Should fail aggregation due to illegal cursor option and streams'] = {
     });
   }
 }
+
+/**
+ * Correctly call the aggregation framework to return a cursor with batchSize 1 and get the first result using next
+ *
+ * @ignore
+ */
+exports['Ensure MaxTimeMS is correctly passed down into command execution when using a cursor'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: {
+    requires: {
+        mongodb: ">=2.6.0"
+      , topology: 'single'
+      , node: ">0.10.0"
+    }
+  },
+  
+  // The actual test we wish to run
+  test: function(configure, test) {
+    var db = configure.newDbInstance({w:1}, {poolSize:1});
+
+    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
+    // DOC_START
+    db.open(function(err, db) {
+      // Some docs for insertion
+      var docs = [{
+          title : "this is my title", author : "bob", posted : new Date() ,
+          pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+          comments : [
+            { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+          ]}];
+
+      // Create a collection
+      var collection = db.collection('shouldCorrectlyDoAggWithCursorMaxTimeMSSet');
+      // Insert the docs
+      collection.insert(docs, {w: 1}, function(err, result) {
+
+        // Execute aggregate, notice the pipeline is expressed as an Array
+        var cursor = collection.aggregate([
+            { $project : {
+              author : 1,
+              tags : 1
+            }},
+            { $unwind : "$tags" },
+            { $group : {
+              _id : {tags : "$tags"},
+              authors : { $addToSet : "$author" }
+            }}
+          ], {
+              cursor: {batchSize:1}
+            , maxTimeMS: 1000
+          });
+
+        // Override the db.command to validate the correct command
+        // is executed
+        var cmd = db.command;
+        // Validate the command
+        db.command = function(c) {
+          test.equal(null, err);
+          test.equal(1000, c.maxTimeMS);
+          // Apply to existing command
+          cmd.apply(db, Array.prototype.slice.call(arguments, 0));
+        }
+
+        // Iterate over all the items in the cursor
+        cursor.next(function(err, result) {
+          test.equal(null, err);
+          test.equal('good', result._id.tags);
+          test.deepEqual(['bob'], result.authors);
+
+          // Validate the command
+          db.command = function(c) {
+            test.equal(null, err);
+            test.equal(1000, c.maxTimeMS);
+            // Apply to existing command
+            cmd.apply(db, Array.prototype.slice.call(arguments, 0));
+          }
+
+          // Execute aggregate, notice the pipeline is expressed as an Array
+          var cursor = collection.aggregate([
+              { $project : {
+                author : 1,
+                tags : 1
+              }},
+              { $unwind : "$tags" },
+              { $group : {
+                _id : {tags : "$tags"},
+                authors : { $addToSet : "$author" }
+              }}
+            ], {
+              maxTimeMS: 1000
+            }, function(err, r) {
+              // Return the command
+              db.command = cmd;
+              db.close();
+              test.done();        
+            });          
+        });
+      });
+    });
+    // DOC_END
+  }
+}

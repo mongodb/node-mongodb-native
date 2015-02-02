@@ -908,11 +908,12 @@ exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary =
       db.open(function(err, db_p) {});
       db.on('all', function(err, db_p) {
         test.ok(db_p != null);
-
+        console.log("--------------------------------------------- 0")
         db_p.admin().addUser("me", "secret", {w:4, wtimeout:25000}, function runWhatever(err, result) {
           // Just set auths for the manager to handle it correctly
           replSetManager.setCredentials("mongocr", "admin", "me", "secret");
 
+        console.log("--------------------------------------------- 1")
           db_p.admin().authenticate("me", "secret", function(err, result) {
             test.equal(null, err);
 
@@ -923,9 +924,10 @@ exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary =
                 test.equal(null, err);                
                 test.ok(result != null);
 
-                // Step down the primary
-                replSetManager.stepDown({force:true}, function(err, result) {
+        console.log("--------------------------------------------- 2")
                   db.serverConfig.on('joined', function(t) {
+        console.log("--------------------------------------------- 3")
+        console.dir(t)
                     if(t == 'primary') {
                       var counter = 1000;
                       var errors = 0;
@@ -951,6 +953,12 @@ exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary =
                       }                        
                     }
                   });
+                  db.serverConfig.on('left', function(t) {
+        console.log("--------------------------------------------- 4")
+        console.dir(t)
+                  });
+                // Step down the primary
+                replSetManager.stepDown({force:true}, function(err, result) {
                 });
               });
             });
