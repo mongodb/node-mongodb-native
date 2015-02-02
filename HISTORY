@@ -1,4 +1,4 @@
-1.4.30
+1.4.30 2015-02-02
 -----------------
 - NODE-360 Aggregation cursor and command correctly passing down the maxTimeMS property.
 
