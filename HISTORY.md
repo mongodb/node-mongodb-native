@@ -1,4 +1,4 @@
-2.0.15
+2.0.15 2015-02-02
 -----------------
 - Unified behavior of listCollections results so 3.0 and pre 3.0 return same type of results.
 - Bumped mongodb-core to 1.1.11 to support per document tranforms in cursors as well as relaxing the setName requirement.
