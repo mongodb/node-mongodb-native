@@ -11,9 +11,9 @@ var Runner = require('integra').Runner
   , TravisFilter = require('./filters/travis_filter')
   , FileFilter = require('integra').FileFilter
   , TestNameFilter = require('integra').TestNameFilter
-  , ServerManager = require('../lib/tools/server_manager')
-  , ReplSetManager = require('../lib/tools/replset_manager')
-  , ShardingManager = require('../lib/tools/sharding_manager');
+  , ServerManager = require('mongodb-tools').ServerManager
+  , ReplSetManager = require('mongodb-tools').ReplSetManager
+  , ShardingManager = require('mongodb-tools').ShardingManager;
 
 var detector = require('gleak')();
 var smokePlugin = require('../lib/tools/smoke_plugin.js');
@@ -247,6 +247,7 @@ if(argv.t == 'functional') {
         host: 'localhost'
       , port: 31000
       , setName: 'rs'
+      // , fork:null
       // , skipStart: true
       // , skipTermination: true
       , topology: function(self, _mongo) {

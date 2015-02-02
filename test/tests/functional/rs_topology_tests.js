@@ -239,7 +239,7 @@ exports['Ghost discovered/Member brought up as standalone'] = {
 
   test: function(configuration, test) {
     var Server = configuration.require.Server
-      , ServerManager = configuration.require.ServerManager
+      , ServerManager = require('mongodb-tools').ServerManager
       , ReplSet = configuration.require.ReplSet
       , manager = configuration.manager;
 
@@ -368,7 +368,7 @@ exports['Member removed by reconfig'] = {
 
   test: function(configuration, test) {
     var Server = configuration.require.Server
-      , ServerManager = configuration.require.ServerManager
+      , ServerManager = require('mongodb-tools').ServerManager
       , ReplSet = configuration.require.ReplSet
       , manager = configuration.manager;
 
@@ -398,7 +398,8 @@ exports['Member removed by reconfig'] = {
           var removedServer = null;
 
           // Let's listen to changes
-          server.on('left', function(_t, _server) {});
+          server.on('left', function(_t, _server) {
+          });
 
           server.on('joined', function(_t, _server) {
             if(_t == 'primary') {
@@ -440,7 +441,7 @@ exports['New primary'] = {
 
   test: function(configuration, test) {
     var Server = configuration.require.Server
-      , ServerManager = configuration.require.ServerManager
+      , ServerManager = require('mongodb-tools').ServerManager
       , ReplSet = configuration.require.ReplSet
       , manager = configuration.manager;
 
@@ -501,7 +502,7 @@ exports['Primary becomes standalone'] = {
 
   test: function(configuration, test) {
     var Server = configuration.require.Server
-      , ServerManager = configuration.require.ServerManager
+      , ServerManager = require('mongodb-tools').ServerManager
       , ReplSet = configuration.require.ReplSet
       , manager = configuration.manager;
 

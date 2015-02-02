@@ -9,11 +9,6 @@ module.exports = {
   , BSON: require('bson')
   // Raw operations
   , Query: require('./lib/connection/commands').Query
-  // Tools exported for testing
-  , ServerManager: require('./lib/tools/server_manager')
-  , ReplSetManager: require('./lib/tools/replset_manager')
-  , MongosManager: require('./lib/tools/mongos_manager')
-  , ShardingManager: require('./lib/tools/sharding_manager')
   // Auth mechanisms
   , MongoCR: require('./lib/auth/mongocr')
   , X509: require('./lib/auth/x509')
