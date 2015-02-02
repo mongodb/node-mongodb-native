@@ -359,7 +359,7 @@ if(argv.t == 'functional') {
         }, 
 
         manager: function() {
-          var ShardingManager = require('mongodb-core').ShardingManager;
+          var ShardingManager = require('mongodb-tools').ShardingManager;
           return new ShardingManager({
               dbpath: path.join(path.resolve('db'))
             , logpath: path.join(path.resolve('db'))
