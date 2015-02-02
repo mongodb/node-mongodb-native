@@ -1189,7 +1189,7 @@ exports.shouldCorrectlyAuthAgainstNormalDbUsingMongoClient = {
 var shardedManager;
 
 var setUpSharded = function(configuration, options, callback) {
-  var ShardingManager = require('mongodb-core').ShardingManager
+  var ShardingManager = require('mongodb-tools').ShardingManager
     , Db = configuration.require.Db
     , Server = configuration.require.Server
     , MongoClient = configuration.require.MongoClient
