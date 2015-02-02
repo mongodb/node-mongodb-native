@@ -1,3 +1,7 @@
+1.1.11 02-02-2015
+-----------------
+- Remove the required setName for replicaset connections, if not set it will pick the first setName returned.
+
 1.1.10 31-01-2015
 -----------------
 - Added tranforms.doc option to cursor to allow for pr. document transformations.
