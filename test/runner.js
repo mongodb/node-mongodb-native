@@ -332,7 +332,7 @@ if(argv.t == 'functional') {
         }, 
         
         manager: function() {
-          var ReplSetManager = require('mongodb-core').ReplSetManager;
+          var ReplSetManager = require('mongodb-tools').ReplSetManager;
           // Return manager
           return new ReplSetManager({
               dbpath: path.join(path.resolve('db'))
@@ -390,7 +390,7 @@ if(argv.t == 'functional') {
     // Create single server instance running heap storage engine
     config = createConfiguration({
         manager: function() {
-          var ServerManager = require('mongodb-core').ServerManager;
+          var ServerManager = require('mongodb-tools').ServerManager;
           // Return manager
           return new ServerManager({
               host: 'localhost'
@@ -403,7 +403,7 @@ if(argv.t == 'functional') {
     // Create single server instance running heap storage engine
     config = createConfiguration({
         manager: function() {
-          var ServerManager = require('mongodb-core').ServerManager;
+          var ServerManager = require('mongodb-tools').ServerManager;
           // Return manager
           return new ServerManager({
               host: 'localhost'

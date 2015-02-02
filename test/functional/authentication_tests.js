@@ -288,7 +288,7 @@ exports['Unordered bulk operation should fail correctly when not authenticated']
 var replSetManager;
 
 var setUp = function(configuration, options, callback) {
-  var ReplSetManager = require('mongodb-core').ReplSetManager
+  var ReplSetManager = require('mongodb-tools').ReplSetManager
     , Db = configuration.require.Db
     , Server = configuration.require.Server
     , MongoClient = configuration.require.MongoClient;

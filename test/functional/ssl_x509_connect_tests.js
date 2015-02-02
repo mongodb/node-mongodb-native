@@ -11,7 +11,7 @@ exports['Should correctly authenticate using x509'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ServerManager = require('mongodb-core').ServerManager
+    var ServerManager = require('mongodb-tools').ServerManager
       , MongoClient = configuration.require.MongoClient;
 
     // All inserted docs
@@ -113,7 +113,7 @@ exports['Should correctly handle bad x509 certificate'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ServerManager = require('mongodb-core').ServerManager
+    var ServerManager = require('mongodb-tools').ServerManager
       , MongoClient = configuration.require.MongoClient;
 
     // All inserted docs
@@ -213,7 +213,7 @@ exports['Should give reasonable error on x509 authentication failure'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ServerManager = require('mongodb-core').ServerManager
+    var ServerManager = require('mongodb-tools').ServerManager
       , MongoClient = configuration.require.MongoClient;
 
     // All inserted docs
@@ -312,7 +312,7 @@ exports['Should give helpful error when attempting to use x509 without SSL'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ServerManager = require('mongodb-core').ServerManager
+    var ServerManager = require('mongodb-tools').ServerManager
       , MongoClient = configuration.require.MongoClient;
 
     // All inserted docs
@@ -398,7 +398,7 @@ exports['Should correctly reauthenticate against x509'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ServerManager = require('mongodb-core').ServerManager
+    var ServerManager = require('mongodb-tools').ServerManager
       , MongoClient = configuration.require.MongoClient;
 
     // All inserted docs

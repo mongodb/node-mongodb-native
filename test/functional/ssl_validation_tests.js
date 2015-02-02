@@ -4,7 +4,7 @@ var fs = require('fs');
 var replSetManager;
 
 var setUp = function(configuration, options, callback) {
-  var ReplSetManager = require('mongodb-core').ReplSetManager
+  var ReplSetManager = require('mongodb-tools').ReplSetManager
     , Db = configuration.require.Db
     , Server = configuration.require.Server
     , MongoClient = configuration.require.MongoClient;
@@ -56,7 +56,7 @@ var setUp = function(configuration, options, callback) {
   
 //   // The actual test we wish to run
 //   test: function(configuration, test) {
-//     var ReplSetManager = require('mongodb-core').ReplSetManager
+//     var ReplSetManager = require('mongodb-tools').ReplSetManager
 //       , Db = configuration.require.Db
 //       , Server = configuration.require.Server
 //       , ReplSet = configuration.require.ReplSet
@@ -109,7 +109,7 @@ var setUp = function(configuration, options, callback) {
   
 //   // The actual test we wish to run
 //   test: function(configuration, test) {
-//     var ReplSetManager = require('mongodb-core').ReplSetManager
+//     var ReplSetManager = require('mongodb-tools').ReplSetManager
 //       , Db = configuration.require.Db
 //       , Server = configuration.require.Server
 //       , ReplSet = configuration.require.ReplSet
@@ -174,7 +174,7 @@ var setUp = function(configuration, options, callback) {
   
 //   // The actual test we wish to run
 //   test: function(configuration, test) {
-//     var ReplSetManager = require('mongodb-core').ReplSetManager
+//     var ReplSetManager = require('mongodb-tools').ReplSetManager
 //       , Db = configuration.require.Db
 //       , Server = configuration.require.Server
 //       , ReplSet = configuration.require.ReplSet
@@ -241,7 +241,7 @@ var setUp = function(configuration, options, callback) {
   
 //   // The actual test we wish to run
 //   test: function(configuration, test) {
-//     var ReplSetManager = require('mongodb-core').ReplSetManager
+//     var ReplSetManager = require('mongodb-tools').ReplSetManager
 //       , Db = configuration.require.Db
 //       , Server = configuration.require.Server
 //       , ReplSet = configuration.require.ReplSet
@@ -298,7 +298,7 @@ var setUp = function(configuration, options, callback) {
   
 //   // The actual test we wish to run
 //   test: function(configuration, test) {
-//     var ReplSetManager = require('mongodb-core').ReplSetManager
+//     var ReplSetManager = require('mongodb-tools').ReplSetManager
 //       , Db = configuration.require.Db
 //       , Server = configuration.require.Server
 //       , ReplSet = configuration.require.ReplSet
@@ -346,7 +346,7 @@ var setUp = function(configuration, options, callback) {
   
 //   // The actual test we wish to run
 //   test: function(configuration, test) {
-//     var ReplSetManager = require('mongodb-core').ReplSetManager
+//     var ReplSetManager = require('mongodb-tools').ReplSetManager
 //       , Db = configuration.require.Db
 //       , Server = configuration.require.Server
 //       , ReplSet = configuration.require.ReplSet
@@ -395,7 +395,7 @@ exports.shouldCorrectlyPresentPasswordProtectedCertificate = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ReplSetManager = require('mongodb-core').ReplSetManager
+    var ReplSetManager = require('mongodb-tools').ReplSetManager
       , Db = configuration.require.Db
       , Server = configuration.require.Server
       , ReplSet = configuration.require.ReplSet
@@ -483,7 +483,7 @@ exports.shouldCorrectlyValidateServerSSLCertificate = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ReplSetManager = require('mongodb-core').ReplSetManager
+    var ReplSetManager = require('mongodb-tools').ReplSetManager
       , Db = configuration.require.Db
       , Server = configuration.require.Server
       , ReplSet = configuration.require.ReplSet
@@ -556,7 +556,7 @@ exports.shouldFailToValidateServerSSLCertificate = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ReplSetManager = require('mongodb-core').ReplSetManager
+    var ReplSetManager = require('mongodb-tools').ReplSetManager
       , Db = configuration.require.Db
       , Server = configuration.require.Server
       , ReplSet = configuration.require.ReplSet
