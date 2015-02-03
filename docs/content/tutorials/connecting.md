@@ -5,7 +5,7 @@ date: 2013-07-01
 menu:
   main:
     parent: tutorials
-prev: ../../tutorials/tracing
+prev: ../../tutorials/changes-from-1.0
 next: ../../tutorials/connection_failures
 title: Connecting To MongoDB
 weight: 1

@@ -6,7 +6,9 @@ aliases:
 date: 2013-07-01
 menu:
   main:
-    parent: about
+    parent: tutorials
+prev: ../../tutorials/tracing
+next: ../../tutorials/connecting
 title: Migrating to 2.X
 weight: 60
 ---

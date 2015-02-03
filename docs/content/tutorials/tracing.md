@@ -6,7 +6,7 @@ menu:
   main:
     parent: tutorials
 prev: ../../tutorials/objectid
-next: ../../tutorials/connecting
+next: ../../tutorials/changes-from-1.0
 title: Tracing
 weight: 9
 ---

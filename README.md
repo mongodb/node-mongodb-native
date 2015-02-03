@@ -54,9 +54,15 @@ mkdir myproject
 cd myproject
 ```
 
-Create a **package.json** using your favorite text editor and fill it in.
+Enter the following command and answer the questions to create the initial structure for your new project
 
-```json
+```
+npm init
+```
+
+Next we need to edit the generated package.json file to add the dependency for the MongoDB driver. The package.json file below is just an example and your will look different depending on how you answered the questions after entering `npm init`
+
+```
 {
   "name": "myproject",
   "version": "1.0.0",
@@ -308,3 +314,9 @@ MongoClient.connect(url, function(err, db) {
 ```
 
 This concludes the QuickStart of connecting and performing some Basic operations using the MongoDB Node.js driver. For more detailed information you can look at the tutorials covering more specific topics of interest.
+
+## Next Steps
+
+ * [MongoDB Documentation](http://mongodb.org/)
+ * [Read about Schmeas](http://learnmongodbthehardway.com/)
+ * [Star us on GitHub](https://github.com/mongodb/node-mongodb-native)

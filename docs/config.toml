@@ -7,39 +7,30 @@ title = "MongoDB 2.0.0 Driver"
   group = "groups"
 
 [[menu.main]]
-    name = "api"
+    name = "API Docs"
     pre = "<i class='fa fa-file-text'></i>"
-    url = "api-docs/index.html"
-    weight = -90
+    url = "/api/index.html"
+    weight = -114
 [[menu.main]]
     name = "driver portal"
     pre = "<i class='fa fa-file-text'></i>"
-    url = "http://learnmongodbthehardway.com"
+    url = "http://mongodb.github.io/node-mongodb-native/"
     weight = -115
 [[menu.main]]
     name = "Mongo DB Docs"
     pre = "<i class='fa fa-file-text'></i>"
     url = "http://mongodb.org"
-    weight = -113
+    weight = -112
 [[menu.main]]
-    name = "legacy docs 1.4.X"
-    pre = "<i class='fa fa-file-text'></i>"
-    url = "http://mongodb.github.io/node-mongodb-native/1.4/"
-    weight = -110
-[[menu.main]]
-    name = "Core driver docs"
+    name = "1.1 Core Docs"
     pre = "<i class='fa fa-file-text'></i>"
     url = "http://mongodb.github.com/node-mongodb-native/core"
-    weight = -107
+    weight = -113
 [[menu.main]]
     name = "about driver"
     pre = "<i class='fa fa-gift'></i>"
     weight = -105
     identifier = "about"
-[[menu.main]]
-    name = "getting started"
-    pre = "<i class='fa fa-road'></i>"
-    weight = -100
 [[menu.main]]
     name = "tutorials"
     pre = "<i class='fa fa-book'></i>"
@@ -51,4 +42,4 @@ title = "MongoDB 2.0.0 Driver"
 [[menu.main]]
     name = "community"
     pre = "<i class='fa fa-group'></i>"
-    weight = -60
+    weight = -10

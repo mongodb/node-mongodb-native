@@ -19,6 +19,7 @@ docs/public
 public/
 .idea/
 t.js
+.DS_Store
 
 # Directory for dbs
 db

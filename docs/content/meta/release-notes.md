@@ -10,10 +10,18 @@ menu:
 title: Release Notes
 weight: 50
 ---
+2.0.15 2015-02-02
+-----------------
+- Unified behavior of listCollections results so 3.0 and pre 3.0 return same type of results.
+- Bumped mongodb-core to 1.1.11 to support per document tranforms in cursors as well as relaxing the setName requirement.
+- NODE-360 Aggregation cursor and command correctly passing down the maxTimeMS property.
+- Added ~1.0 mongodb-tools module for test running.
+- Remove the required setName for replicaset connections, if not set it will pick the first setName returned.
+
 2.0.14 2015-01-21
 -----------------
 - Fixed some MongoClient.connect options pass through issues and added test coverage.
-- Bumped mongodb-core to 1.1.19 including fixes for io.js
+- Bumped mongodb-core to 1.1.9 including fixes for io.js
 
 2.0.13 2015-01-09
 -----------------
@@ -99,7 +107,7 @@ weight: 50
 
 2.0.0-alpha2 2014-10-02
 -----------------------
-- CRUD API (insertOne, insertMany, updateOne, updateMany, deleteOne, deleteMany, bulkWrite, findOneAndDelete, findOneAndUpdate, findOneAndReplace)
+- CRUD API (insertOne, insertMany, updateOne, updateMany, removeOne, removeMany, bulkWrite, findOneAndDelete, findOneAndUpdate, findOneAndReplace)
 - Cluster Management Spec compatible
 
 2.0.0-alpha1 2014-09-08
