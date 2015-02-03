@@ -3,10 +3,6 @@
   "source": {
     "include": [
       "test/tests/functional/operation_example_tests.js",
-      "lib/tools/mongos_manager.js", 
-      "lib/tools/replset_manager.js", 
-      "lib/tools/server_manager.js", 
-      "lib/tools/sharding_manager.js", 
       "lib/topologies/mongos.js",
       "lib/topologies/command_result.js",
       "lib/topologies/read_preference.js",
