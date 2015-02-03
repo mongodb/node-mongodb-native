@@ -2073,5 +2073,88 @@ MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, function(err, db) 
 </description>
     </item>
     
+    <item>
+      <title>Migrating to 2.X</title>
+      <link>/node-mongodb-native/2.0/tutorials/changes-from-1.0/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/tutorials/changes-from-1.0/</guid>
+      <description>
+
+&lt;h1 id=&#34;migrating-your-application-to-2-0:31f17a8ea04d538e2cee306fee449eb0&#34;&gt;Migrating Your Application To 2.0&lt;/h1&gt;
+
+&lt;p&gt;There are some key changes in the driver going from 1.X to 2.X that one needs to be aware off before changing your application to using the new 2.X versions. There has been some cleanup of API&amp;rsquo;s and some deprecations of 1.X features.&lt;/p&gt;
+
+&lt;h2 id=&#34;design-differences-in-2-x:31f17a8ea04d538e2cee306fee449eb0&#34;&gt;Design differences in 2.X&lt;/h2&gt;
+
+&lt;p&gt;One of the main changes is that the driver has been split into two pieces. There is a new &lt;code&gt;mongodb-core&lt;/code&gt; that contains the low level MongoDB API&amp;rsquo;s while &lt;code&gt;mongodb&lt;/code&gt; contains the high level driver. &lt;code&gt;mongodb-core&lt;/code&gt; is targeted to creators of libraries like &lt;code&gt;Mongoose&lt;/code&gt; and other ODM&amp;rsquo;s who do not need the abstractions available in the &lt;code&gt;mongodb&lt;/code&gt; driver. The driver is also as of the time of writing compatible with the 0.11.x node.js branch including Kerberos support as well as MongoDB 2.8.&lt;/p&gt;
+
+&lt;h2 id=&#34;changes:31f17a8ea04d538e2cee306fee449eb0&#34;&gt;Changes&lt;/h2&gt;
+
+&lt;p&gt;We will outline where changes have occurred that could break your existing application.&lt;/p&gt;
+
+&lt;h3 id=&#34;node-js-versions-and-streams:31f17a8ea04d538e2cee306fee449eb0&#34;&gt;Node.JS versions and Streams&lt;/h3&gt;
+
+&lt;p&gt;The 2.0 driver drops support for 0.8.x style streams and moves to 0.10.x or higher style pull based streams making for more reliable and faster streams. Backwards compatibility is by using the &lt;code&gt;readable-stream&lt;/code&gt; npm package that might cause some slight behavior changes for the cursor streams.&lt;/p&gt;
+
+&lt;p&gt;All dependencies have now been updated to use the &lt;code&gt;nan&lt;/code&gt; package meaning they will compile and work on 0.11.x or higher.&lt;/p&gt;
+
+&lt;h3 id=&#34;grid-object:31f17a8ea04d538e2cee306fee449eb0&#34;&gt;Grid Object&lt;/h3&gt;
+
+&lt;p&gt;The grid object has been removed as it&amp;rsquo;s not widely used and offers very limited GridStore capabilities.&lt;/p&gt;
+
+&lt;h3 id=&#34;db-object:31f17a8ea04d538e2cee306fee449eb0&#34;&gt;Db Object&lt;/h3&gt;
+
+&lt;p&gt;The db instance object have had several changes made to it. We&amp;rsquo;ve removed the following methods.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;db.dereference&lt;/code&gt; due to db references being deprecated in the server.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;db.cursorInfo&lt;/code&gt; removed as it never worked reliably.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;db.stats&lt;/code&gt; removed as inconsistent.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;db.collectionNames&lt;/code&gt; removed as it&amp;rsquo;s just a specialized version of the new &lt;code&gt;listCollections&lt;/code&gt; helper.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;db.collectionInfo&lt;/code&gt; removed as it&amp;rsquo;s not compatible with the new MongoDB 2.8 or higher alternative storage enginers.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Added the following method&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;db.listCollections&lt;/code&gt; to replace all other collection inquiry method as it will do the correct thing for MongoDB 2.8 and higher as well as provide backwards compatibility for MongoDB 2.6 or lower.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&#34;collection-object:31f17a8ea04d538e2cee306fee449eb0&#34;&gt;Collection Object&lt;/h3&gt;
+
+&lt;p&gt;A collection instance has also had several changes made to it. Most importantly we now return the &lt;code&gt;mongodb-core&lt;/code&gt; result objects directly with all the associated information returned from the server instead of the current selective information returned in the 1.4.x version.&lt;/p&gt;
+
+&lt;p&gt;We&amp;rsquo;ve added the following new methods&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;collection.insertOne&lt;/code&gt; Insert a single document.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;collection.insertMany&lt;/code&gt; Insert an array of documents.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;collection.replaceOne&lt;/code&gt; Replace an existing document fully.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;collection.updateOne&lt;/code&gt; Update a single document.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;collection.updateMany&lt;/code&gt; Update multiple documents in one go.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;collection.deleteOne&lt;/code&gt; Delete a single document.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;collection.deleteMany&lt;/code&gt; Delete multiple documents in one go.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;collection.findOneAndUpdate&lt;/code&gt; Use findAndModify to update a document.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;collection.findOneAndRemove&lt;/code&gt; Use findAndModify to remove a specific document.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;collection.findOneAndReplace&lt;/code&gt; Use findAndModify to replace a specific document.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The current &lt;code&gt;insert&lt;/code&gt;, &lt;code&gt;update&lt;/code&gt; and &lt;code&gt;remove&lt;/code&gt; methods are marked for deprecation and will be removed in a future 3.0 driver. These 3 methods now also return the full &lt;code&gt;mongodb-core&lt;/code&gt; results and have had their third return value removed to ensure less compatibility problems with orchestration libraries like &lt;code&gt;async&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;The insert methods are now capping at the &lt;code&gt;maxWriteBatchSize&lt;/code&gt; passed back from MongoDB on the results from the &lt;code&gt;ismaster&lt;/code&gt; command. For MongoDB 2.4 or lower this means a max of 1000 documents in each insert batch. Legacy insert mode has been deprecated in favor of proper emulation of current 2.6 or higher write commands.&lt;/p&gt;
+
+&lt;p&gt;Another important change is in how &lt;code&gt;collection.find&lt;/code&gt; works. The idea is to chain commands instead of passing them into the &lt;code&gt;find&lt;/code&gt; method. It still supports existing behavior from 1.4 so no code should break but the API documentation reflects the new preferred way to use the find to execute queries.&lt;/p&gt;
+
+&lt;h3 id=&#34;gridstore:31f17a8ea04d538e2cee306fee449eb0&#34;&gt;GridStore&lt;/h3&gt;
+
+&lt;p&gt;The GridStore object has had some major changes due to issues discovered by users related to parallel writing using the previous available &lt;code&gt;w+&lt;/code&gt; append mode. Thus &lt;code&gt;w+&lt;/code&gt; in 2.0 only allows for changes to the file metadata and does not allow for appending to a file avoiding the possible data corruption. The hope is to create a new GridStore spec in the future that allows for proper handling parallel writing to an existing file but this requires changes for all drivers as well as the server.&lt;/p&gt;
+
+&lt;h3 id=&#34;mongoclient:31f17a8ea04d538e2cee306fee449eb0&#34;&gt;MongoClient&lt;/h3&gt;
+
+&lt;p&gt;MongoClient now only has the class method &lt;code&gt;connect&lt;/code&gt;. Constructing of a new MongoClient using &lt;code&gt;Server&lt;/code&gt;, &lt;code&gt;ReplSet&lt;/code&gt; or &lt;code&gt;Mongos&lt;/code&gt; has been removed due to the confusion it caused in duplicating the way one can build a topology connection using &lt;code&gt;Db&lt;/code&gt; in 1.4. &lt;code&gt;MongoClient.connect&lt;/code&gt; is the recommended way to connect to a MongoDB topology.&lt;/p&gt;
+</description>
+    </item>
+    
   </channel>
 </rss>

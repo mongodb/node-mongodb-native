@@ -8,7 +8,7 @@
     <meta name="keyword" content="">
     <link rel="shortcut icon" href="/node-mongodb-native/2.0/img/favicon.png">
 
-    <title>Logging</title>
+    <title>Migrating to 2.X</title>
 
     <link href="/node-mongodb-native/2.0/css/bootstrap-theme.css" rel="stylesheet">
     <link href="/node-mongodb-native/2.0/assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
@@ -138,13 +138,13 @@
                     
                     <li><a href="/node-mongodb-native/2.0/tutorials/gridfs/"> GridFS </a> </li>
                     
-                    <li class="active"><a href="/node-mongodb-native/2.0/tutorials/logging/"> Logging </a> </li>
+                    <li><a href="/node-mongodb-native/2.0/tutorials/logging/"> Logging </a> </li>
                     
                     <li><a href="/node-mongodb-native/2.0/tutorials/objectid/"> ObjectId </a> </li>
                     
                     <li><a href="/node-mongodb-native/2.0/tutorials/tracing/"> Tracing </a> </li>
                     
-                    <li><a href="/node-mongodb-native/2.0/tutorials/changes-from-1.0/"> Migrating to 2.X </a> </li>
+                    <li class="active"><a href="/node-mongodb-native/2.0/tutorials/changes-from-1.0/"> Migrating to 2.X </a> </li>
                     
                 </ul>
               
@@ -192,7 +192,7 @@
           
             <li> <a href="https://jira.mongodb.org/browse/NODE" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
             
-              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/tutorials/logging.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
+              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/tutorials/changes-from-1.0.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
             
             <li><a href='https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge'><img src='https://badges.gitter.im/Join Chat.svg'/></a></li>
         </ul>
@@ -222,7 +222,7 @@
                   <div class="col-md-1">
                       
                       
-                      <a class="navigation prev" href="../../tutorials/gridfs">
+                      <a class="navigation prev" href="../../tutorials/tracing">
                       <i class="fa fa-angle-left"></i>
                       </a>
                       
@@ -237,130 +237,78 @@
 
 
 
-<h1 id="logging:3f3af53408cff75953b33723c0b061bb">Logging</h1>
+<h1 id="migrating-your-application-to-2-0:31f17a8ea04d538e2cee306fee449eb0">Migrating Your Application To 2.0</h1>
 
-<p>The driver lets you log at 3 different levels. These are <code>debug</code>, <code>info</code> and <code>error</code>. By default the log level is at <code>error</code>. You can change the level, only allow specific classes to log and provide your own logger implementation. Let&rsquo;s look at how we control the log level.</p>
+<p>There are some key changes in the driver going from 1.X to 2.X that one needs to be aware off before changing your application to using the new 2.X versions. There has been some cleanup of API&rsquo;s and some deprecations of 1.X features.</p>
 
-<h2 id="setting-log-level:3f3af53408cff75953b33723c0b061bb">Setting Log level</h2>
+<h2 id="design-differences-in-2-x:31f17a8ea04d538e2cee306fee449eb0">Design differences in 2.X</h2>
 
-<p>Setting the log level is pretty easy. Let&rsquo;s look at example of adjusting it for our application only logging the Db class.</p>
+<p>One of the main changes is that the driver has been split into two pieces. There is a new <code>mongodb-core</code> that contains the low level MongoDB API&rsquo;s while <code>mongodb</code> contains the high level driver. <code>mongodb-core</code> is targeted to creators of libraries like <code>Mongoose</code> and other ODM&rsquo;s who do not need the abstractions available in the <code>mongodb</code> driver. The driver is also as of the time of writing compatible with the 0.11.x node.js branch including Kerberos support as well as MongoDB 2.8.</p>
 
-<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
-  , Logger = require('mongodb').Logger
-  , assert = require('assert');
+<h2 id="changes:31f17a8ea04d538e2cee306fee449eb0">Changes</h2>
 
-// Connection URL
-var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log(&quot;Connected correctly to server&quot;);
+<p>We will outline where changes have occurred that could break your existing application.</p>
 
-  // Set debug level
-  Logger.setLevel('debug');
+<h3 id="node-js-versions-and-streams:31f17a8ea04d538e2cee306fee449eb0">Node.JS versions and Streams</h3>
 
-  // Insert a single document
-  db.command({ismaster:true}, function(err, d) {
-    assert.equal(null, err);
-    db.close();
-  });
-});
-</code></pre>
+<p>The 2.0 driver drops support for 0.8.x style streams and moves to 0.10.x or higher style pull based streams making for more reliable and faster streams. Backwards compatibility is by using the <code>readable-stream</code> npm package that might cause some slight behavior changes for the cursor streams.</p>
 
-<p>Setting the level is as easy as calling the method <code>setLevel</code> with the string value <code>debug</code>, <code>info</code> or <code>error</code>. Log level is set globally.</p>
+<p>All dependencies have now been updated to use the <code>nan</code> package meaning they will compile and work on 0.11.x or higher.</p>
 
-<h2 id="filtering-on-specific-classes:3f3af53408cff75953b33723c0b061bb">Filtering On specific classes</h2>
+<h3 id="grid-object:31f17a8ea04d538e2cee306fee449eb0">Grid Object</h3>
 
-<p>Say you are only interested in logging a specific class. You can tell the Logger to only log specific class names. Let&rsquo;s take an example Where we only log the <code>Db</code> class.</p>
+<p>The grid object has been removed as it&rsquo;s not widely used and offers very limited GridStore capabilities.</p>
 
-<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
-  , Logger = require('mongodb').Logger
-  , assert = require('assert');
+<h3 id="db-object:31f17a8ea04d538e2cee306fee449eb0">Db Object</h3>
 
-// Connection URL
-var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log(&quot;Connected correctly to server&quot;);
-
-  // Set debug level
-  Logger.setLevel('debug');
-  Logger.filter('class', ['Db']);
-
-  // Insert a single document
-  db.command({ismaster:true}, function(err, d) {
-    assert.equal(null, err);
-    db.close();
-  });
-});
-</code></pre>
-
-<p>This will only log statements on the <code>Db</code> class. The available classes in the driver are.</p>
+<p>The db instance object have had several changes made to it. We&rsquo;ve removed the following methods.</p>
 
 <ul>
-<li><code>Db</code>: The Db instance log statements</li>
-<li><code>Server</code>: A server instance (either standalone, a mongos or replicaset member)</li>
-<li><code>ReplSet</code>: Replicaset related log statements</li>
-<li><code>Mongos</code>: Mongos related log statements</li>
-<li><code>Cursor</code>: Cursor log statements</li>
-<li><code>Pool</code>: Connection Pool specific log statements</li>
-<li><code>Connection</code>: Singular connection specific log statements</li>
-<li><code>Ping</code>: Replicaset ping inquiry log statements</li>
+<li><code>db.dereference</code> due to db references being deprecated in the server.</li>
+<li><code>db.cursorInfo</code> removed as it never worked reliably.</li>
+<li><code>db.stats</code> removed as inconsistent.</li>
+<li><code>db.collectionNames</code> removed as it&rsquo;s just a specialized version of the new <code>listCollections</code> helper.</li>
+<li><code>db.collectionInfo</code> removed as it&rsquo;s not compatible with the new MongoDB 2.8 or higher alternative storage enginers.</li>
 </ul>
 
-<p>You can add your own classes to the logger if you wish by creating your own logger instances. Let&rsquo;s look at a simple example on how to add our custom class to the Logger.</p>
+<p>Added the following method</p>
 
-<pre><code class="language-js">var Logger = require('mongodb').Logger
-  , assert = require('assert');
+<ul>
+<li><code>db.listCollections</code> to replace all other collection inquiry method as it will do the correct thing for MongoDB 2.8 and higher as well as provide backwards compatibility for MongoDB 2.6 or lower.</li>
+</ul>
 
-var A = function() {
-  var logger = Logger('A', options);
+<h3 id="collection-object:31f17a8ea04d538e2cee306fee449eb0">Collection Object</h3>
 
-  this.do = function() {
-    if(logger.isInfo()) logger.info('logging A', {});
-  }
-}
+<p>A collection instance has also had several changes made to it. Most importantly we now return the <code>mongodb-core</code> result objects directly with all the associated information returned from the server instead of the current selective information returned in the 1.4.x version.</p>
 
-// Execute A
-var a = new A();
-a.do();
-</code></pre>
+<p>We&rsquo;ve added the following new methods</p>
 
-<p>Pretty simple and straightforward.</p>
+<ul>
+<li><code>collection.insertOne</code> Insert a single document.</li>
+<li><code>collection.insertMany</code> Insert an array of documents.</li>
+<li><code>collection.replaceOne</code> Replace an existing document fully.</li>
+<li><code>collection.updateOne</code> Update a single document.</li>
+<li><code>collection.updateMany</code> Update multiple documents in one go.</li>
+<li><code>collection.deleteOne</code> Delete a single document.</li>
+<li><code>collection.deleteMany</code> Delete multiple documents in one go.</li>
+<li><code>collection.findOneAndUpdate</code> Use findAndModify to update a document.</li>
+<li><code>collection.findOneAndRemove</code> Use findAndModify to remove a specific document.</li>
+<li><code>collection.findOneAndReplace</code> Use findAndModify to replace a specific document.</li>
+</ul>
 
-<h2 id="custom-logger:3f3af53408cff75953b33723c0b061bb">Custom logger</h2>
+<p>The current <code>insert</code>, <code>update</code> and <code>remove</code> methods are marked for deprecation and will be removed in a future 3.0 driver. These 3 methods now also return the full <code>mongodb-core</code> results and have had their third return value removed to ensure less compatibility problems with orchestration libraries like <code>async</code>.</p>
 
-<p>Let&rsquo;s say you don&rsquo;t want the log statements to go to <code>console.log</code> but want to send them to a new location or maybe transform them before you send them on. Let&rsquo;s define our custom logger.</p>
+<p>The insert methods are now capping at the <code>maxWriteBatchSize</code> passed back from MongoDB on the results from the <code>ismaster</code> command. For MongoDB 2.4 or lower this means a max of 1000 documents in each insert batch. Legacy insert mode has been deprecated in favor of proper emulation of current 2.6 or higher write commands.</p>
 
-<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
-  , Logger = require('mongodb').Logger
-  , assert = require('assert');
+<p>Another important change is in how <code>collection.find</code> works. The idea is to chain commands instead of passing them into the <code>find</code> method. It still supports existing behavior from 1.4 so no code should break but the API documentation reflects the new preferred way to use the find to execute queries.</p>
 
-// Connection URL
-var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log(&quot;Connected correctly to server&quot;);
+<h3 id="gridstore:31f17a8ea04d538e2cee306fee449eb0">GridStore</h3>
 
-  // Set debug level
-  Logger.setLevel('debug');
-  
-  // Set our own logger
-  Logger.setCurrentLogger(function(msg, context) {
-    console.log(msg, context);
-  });
+<p>The GridStore object has had some major changes due to issues discovered by users related to parallel writing using the previous available <code>w+</code> append mode. Thus <code>w+</code> in 2.0 only allows for changes to the file metadata and does not allow for appending to a file avoiding the possible data corruption. The hope is to create a new GridStore spec in the future that allows for proper handling parallel writing to an existing file but this requires changes for all drivers as well as the server.</p>
 
-  // Insert a single document
-  db.command({ismaster:true}, function(err, d) {
-    assert.equal(null, err);
-    db.close();
-  });
-});
-</code></pre>
+<h3 id="mongoclient:31f17a8ea04d538e2cee306fee449eb0">MongoClient</h3>
 
-<p>That wraps up the Logging support in the driver.</p>
+<p>MongoClient now only has the class method <code>connect</code>. Constructing of a new MongoClient using <code>Server</code>, <code>ReplSet</code> or <code>Mongos</code> has been removed due to the confusion it caused in duplicating the way one can build a topology connection using <code>Db</code> in 1.4. <code>MongoClient.connect</code> is the recommended way to connect to a MongoDB topology.</p>
 
                       
                       <div id="disqus_thread"></div>
@@ -384,7 +332,7 @@ MongoClient.connect(url, function(err, db) {
                 <div class="col-md-1">
                     
                     
-                    <a class="navigation next" href="../../tutorials/objectid">
+                    <a class="navigation next" href="../../tutorials/connecting">
                         <i class="fa fa-angle-right"> </i>
                     </a>
                     

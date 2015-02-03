@@ -63,26 +63,6 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/overview/introduction/</loc>
-    <lastmod>2013-07-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/2.0/api-docs/</loc>
-    <lastmod>2013-07-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/2.0/overview/installing/</loc>
-    <lastmod>2013-07-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/2.0/overview/quickstart/</loc>
-    <lastmod>2013-07-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/node-mongodb-native/2.0/articles/node_knockout_article_1/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
@@ -113,7 +93,7 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/meta/changes-from-1.0/</loc>
+    <loc>/node-mongodb-native/2.0/tutorials/changes-from-1.0/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
   

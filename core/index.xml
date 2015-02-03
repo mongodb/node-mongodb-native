@@ -1068,6 +1068,12 @@ npm install
       <guid>/node-mongodb-native/core/meta/release-notes/</guid>
       <description>
 
+&lt;h2 id=&#34;1-1-11-02-02-2015:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.1.11 02-02-2015&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Remove the required setName for replicaset connections, if not set it will pick the first setName returned.&lt;/li&gt;
+&lt;/ul&gt;
+
 &lt;h2 id=&#34;1-1-10-31-01-2015:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.1.10 31-01-2015&lt;/h2&gt;
 
 &lt;ul&gt;
