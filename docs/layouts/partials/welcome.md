@@ -284,9 +284,7 @@ This concludes the QuickStart of connecting and performing some Basic operations
 Next Steps
 ----------
 
- * [Important Changes from 1.X to 2.X](meta/changes-from-1.0)
- * [Install Driver](overview/installing)
- * [Quick start](overview/quickstart)
+ * [Important Changes from 1.X to 2.X](tutorials/changes-from-1.0)
  * [MongoDB Documentation](http://mongodb.org/)
  * [Read about Schmeas](http://learnmongodbthehardway.com/)
  * [Join the Mailing List](community/mailing-list)
