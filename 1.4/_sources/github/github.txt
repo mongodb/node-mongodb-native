@@ -111,7 +111,7 @@ Object Document Modeling Libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 21:32:51 on 1/1/2015
+           - 17:0:26 on 3/1/2015
          * - **Homepage**
            - http://http://mongoosejs.com
          * - **Url**
@@ -119,9 +119,9 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/LearnBoost/mongoose.git
          * - **Forks**
-           - 911
+           - 913
          * - **Watchers**
-           - 6188
+           - 6193
 
 .. topic:: mongo-model
 
@@ -794,7 +794,7 @@ Libraries for the connect middleware
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 8:11:54 on 31/0/2015
+           - 16:51:23 on 3/1/2015
          * - **Homepage**
            - http://http://kcbanner.github.com/connect-mongo/
          * - **Url**
@@ -804,7 +804,7 @@ Libraries for the connect middleware
          * - **Forks**
            - 187
          * - **Watchers**
-           - 665
+           - 666
 
 Libraries or applications for continous integration
 ---------------------------------------------------
