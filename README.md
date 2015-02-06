@@ -318,5 +318,5 @@ This concludes the QuickStart of connecting and performing some Basic operations
 ## Next Steps
 
  * [MongoDB Documentation](http://mongodb.org/)
- * [Read about Schmeas](http://learnmongodbthehardway.com/)
+ * [Read about Schemas](http://learnmongodbthehardway.com/)
  * [Star us on GitHub](https://github.com/mongodb/node-mongodb-native)
