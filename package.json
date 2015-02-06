@@ -14,6 +14,7 @@
   ],
   "dependencies": {
       "mongodb-core": "1.1.11"
+    , "mongodb-ns": "1.0.0"
     , "readable-stream": "1.0.31"
   },
   "devDependencies": {
