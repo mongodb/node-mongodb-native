@@ -2472,3 +2472,26 @@ exports['Should correctly handle batchSize of 2'] = {
     });
   }
 }
+
+/**
+ * @ignore
+ */
+exports['Should report database name and collection name'] = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    // Establish connection to db
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      db.collection('myCollection').find({}, function(error, cursor) {
+        test.equal(null, err);
+        test.equal('myCollection', cursor.namespace.collection);
+        test.equal('integration_tests', cursor.namespace.database);
+        test.done();
+      });
+    });
+  }
+};
