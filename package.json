@@ -1,7 +1,7 @@
 { "name" :            "mongodb"
 , "description" :     "A node.js driver for MongoDB"
 , "keywords" :        ["mongodb", "mongo", "driver", "db"]
-, "version" :         "1.4.30"
+, "version" :         "1.4.31"
 , "author" :          "Christian Amor Kvalheim <christkv@gmail.com>"
 , "contributors" :  [ "Aaron Heckmann",
                       "Christoph Pojer",
@@ -85,7 +85,7 @@
     , "mongodb-tools": "~1.0"
   }
 , "optionalDependencies": {
-      "kerberos": "0.0.8"
+      "kerberos": "0.0.9"
     , "readable-stream": "latest"
   }
 , "config":         { "native" : false }
