@@ -1,6 +1,8 @@
 2.0.16 2015-02-16
 -----------------
 - listCollection now returns filtered result correctly removing db name for 2.6 or earlier servers.
+- Bumped mongodb-core 1.1.12 to correctly work for node 0.12.0 and io.js.
+- Add ability to get collection name from cursor (Issue #1253, https://github.com/vkarpov15)
 
 2.0.15 2015-02-02
 -----------------
