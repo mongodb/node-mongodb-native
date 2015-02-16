@@ -1,3 +1,7 @@
+1.1.12 02-16-2015
+-----------------
+- Fixed cursor transforms for buffered document reads from cursor.
+
 1.1.11 02-02-2015
 -----------------
 - Remove the required setName for replicaset connections, if not set it will pick the first setName returned.
