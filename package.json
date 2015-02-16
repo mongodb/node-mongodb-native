@@ -1,6 +1,6 @@
 {
   "name": "mongodb-core",
-  "version": "1.1.11",
+  "version": "1.1.12",
   "description": "Core MongoDB driver functionality, no bells and whistles and meant for integration not end applications",
   "main": "index.js",
   "scripts": {
@@ -15,12 +15,12 @@
     "core"
   ],
   "dependencies": {
-    "bson": "0.2.18",
+    "bson": "0.2.19",
     "mkdirp": "0.5.0",
     "rimraf": "2.2.6"
   },
   "devDependencies": {
-    "integra": "0.1.1",
+    "integra": "0.1.8",
     "optimist": "latest",
     "jsdoc": "3.3.0-alpha8",
     "semver": "4.1.0",
@@ -28,7 +28,7 @@
     "mongodb-tools": "~1.0"
   },
   "optionalDependencies": {
-    "kerberos": "0.0.8"
+    "kerberos": "0.0.9"
   },
   "author": "Christian Kvalheim",
   "license": "Apache 2.0",
