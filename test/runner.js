@@ -15,6 +15,8 @@ var Runner = require('integra').Runner
   , ReplSetManager = require('mongodb-tools').ReplSetManager
   , ShardingManager = require('mongodb-tools').ShardingManager;
 
+console.dir(require('integra'))
+
 var detector = require('gleak')();
 var smokePlugin = require('../lib/tools/smoke_plugin.js');
 var argv = require('optimist')
@@ -164,6 +166,7 @@ var testFiles =[
   , '/test/tests/functional/operation_example_tests.js'
   , '/test/tests/functional/cursor_tests.js'
   , '/test/tests/functional/error_tests.js'
+  , '/test/tests/functional/tailable_cursor_tests.js'
 ]
 
 // Add all the tests to run
