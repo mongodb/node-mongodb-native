@@ -286,7 +286,7 @@ Next Steps
 
  * [Important Changes from 1.X to 2.X](tutorials/changes-from-1.0)
  * [MongoDB Documentation](http://mongodb.org/)
- * [Read about Schmeas](http://learnmongodbthehardway.com/)
+ * [Read about Schemas](http://learnmongodbthehardway.com/)
  * [Join the Mailing List](community/mailing-list)
  * [Star us on GitHub](https://github.com/mongodb/node-mongodb-native)
 
