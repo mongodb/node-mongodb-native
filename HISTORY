@@ -1,6 +1,7 @@
 1.4.31 2015-02-16
 -----------------
 - Upgraded kerberos version to 0.0.9 to support node.js 0.12.0 and io.js 1.10.0
+- Emit close on parseError on db for single servers (Issue #1248, https://github.com/vkarpov15)
 
 1.4.30 2015-02-02
 -----------------
