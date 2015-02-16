@@ -948,7 +948,7 @@ exports.shouldFilterCorrectlyDuringList = {
           test.equal(documents.length, 1);
           var found = false;
           documents.forEach(function(document) {
-            if(document.name == "integration_tests." + testCollection) found = true;
+            if(document.name == testCollection) found = true;
           });
           test.ok(found);
           db.close();
@@ -986,7 +986,7 @@ exports.shouldFilterCorrectlyWithIndexDuringList = {
             var found = false;
             
             documents.forEach(function(document) {
-              if(document.name == "integration_tests." + testCollection) found = true;
+              if(document.name == testCollection) found = true;
             });
             
             test.ok(found);

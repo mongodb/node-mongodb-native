@@ -1,3 +1,7 @@
+2.0.16 2015-02-16
+-----------------
+- listCollection now returns filtered result correctly removing db name for 2.6 or earlier servers.
+
 2.0.15 2015-02-02
 -----------------
 - Unified behavior of listCollections results so 3.0 and pre 3.0 return same type of results.
