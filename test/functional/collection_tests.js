@@ -998,3 +998,49 @@ exports.shouldFilterCorrectlyWithIndexDuringList = {
     });
   }
 }
+
+/**
+ * @ignore
+ */
+exports['Should correctly list multipleCollections'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, client) {
+      test.equal(null, err);
+
+      var emptyDb = db.db('listCollectionsDb');
+      emptyDb.createCollection('test1', function(err) {
+        test.equal(null, err);
+
+        emptyDb.createCollection('test2', function(err) {
+          test.equal(null, err);
+
+          emptyDb.createCollection('test3', function(err) {
+            test.equal(null, err);
+
+            emptyDb.listCollections().toArray(function(err, collections) {
+              test.equal(null, err);
+              // By name
+              var names = {};
+
+              for(var i = 0; i < collections.length; i++) {
+                names[collections[i].name] = collections[i];
+              }
+
+              test.ok(names['test1'] != null);
+              test.ok(names['test2'] != null);
+              test.ok(names['test3'] != null);
+              test.ok(names['system.indexes'] != null);
+
+              db.close();
+              test.done();
+            });
+          });
+        });
+      });
+    });
+  }
+}

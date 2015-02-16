@@ -1854,35 +1854,31 @@ exports.shouldCloseDeadTailableCursors = {
       db.createCollection('test_if_dead_tailable_cursors_close', options, function(err, collection) {
         test.equal(null, err);
         var closed = false;
+        var stream = collection.find({}, { tailable: true }).stream();
 
-        // insert(function query () {
-          var stream = collection.find({}, { tailable: true }).stream();
+        // Just hammer the server
+        for(var i = 0; i < 1000; i++) {
+          collection.insert({id: i});
+        }
 
-          // Just hammer the server
-          for(var i = 0; i < 1000; i++) {
+        stream.on('data', function (doc) {});
+
+        stream.on('error', function (err) {
+          // shouldn't happen
+          test.equal(null, err);
+        });
+
+        stream.on('close', function () {
+          // this is what we need
+          closed = true;
+        });
+
+        // Just hammer the server
+        for(var i = 0; i < 10000; i++) {
+          process.nextTick(function() {
             collection.insert({id: i});
-          }
-
-          stream.on('data', function (doc) {});
-
-          stream.on('error', function (err) {
-            // shouldn't happen
-            test.equal(null, err);
-          });
-
-          stream.on('close', function () {
-            // this is what we need
-            closed = true;
-          });
-
-          // Just hammer the server
-          for(var i = 0; i < 10000; i++) {
-            process.nextTick(function() {
-              collection.insert({id: i});
-            })
-          }
-
-        // });
+          })
+        }
 
         setTimeout(function () {
           db.close();
@@ -1912,10 +1908,12 @@ exports.shouldAwaitData = {
       var options = { capped: true, size: 8};
       db.createCollection('should_await_data', options, function(err, collection) {
         collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
-
+          var s = new Date();
           // Create cursor with awaitdata, and timeout after the period specified
           collection.find({}, {tailable:true, awaitdata:true, numberOfRetries:1}).each(function(err, result) {
             if(err != null) {
+              var e = new Date();
+              test.ok((e.getTime() - s.getTime()) > 1000);
               db.close();
               test.done();
             }
