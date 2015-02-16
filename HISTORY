@@ -2,6 +2,7 @@
 -----------------
 - Upgraded kerberos version to 0.0.9 to support node.js 0.12.0 and io.js 1.10.0
 - Emit close on parseError on db for single servers (Issue #1248, https://github.com/vkarpov15)
+- listCollection now returns filtered result correctly removing db name for 2.6 or earlier servers.
 
 1.4.30 2015-02-02
 -----------------

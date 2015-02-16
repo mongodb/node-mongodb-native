@@ -17,7 +17,7 @@ exports.shouldCorrectExecuteBasicCollectionMethods = {
         db.listCollections().toArray(function(err, documents) {
           var found = false;
           documents.forEach(function(document) {
-            if(document.name == "integration_tests.test_collection_methods") found = true;
+            if(document.name == "test_collection_methods") found = true;
           });
           test.ok(found);
 
@@ -975,7 +975,7 @@ exports.shouldFilterCorrectlyDuringList = {
           test.equal(documents.length, 1);
           var found = false;
           documents.forEach(function(document) {
-            if(document.name == "integration_tests." + testCollection) found = true;
+            if(document.name == testCollection) found = true;
           });
           test.ok(found);
           db.close();
@@ -1012,7 +1012,7 @@ exports.shouldFilterCorrectlyWithIndexDuringList = {
             test.ok(documents.length > 1);
             var found = false;
             documents.forEach(function(document) {
-              if(document.name == "integration_tests." + testCollection) found = true;
+              if(document.name == testCollection) found = true;
             });
             test.ok(found);
             db.close();
@@ -1048,10 +1048,18 @@ exports['Should correctly list multipleCollections'] = {
 
             emptyDb.listCollections().toArray(function(err, collections) {
               test.equal(null, err);
+              // By name
+              var names = {};
 
-              console.log("------------------------------------------------")
-              console.dir(collections)
-              process.exit(0)
+              for(var i = 0; i < collections.length; i++) {
+                names[collections[i].name] = collections[i];
+              }
+
+              test.ok(names['test1'] != null);
+              test.ok(names['test2'] != null);
+              test.ok(names['test3'] != null);
+              test.ok(names['system.indexes'] != null);
+
               db.close();
               test.done();
             });
@@ -1061,4 +1069,3 @@ exports['Should correctly list multipleCollections'] = {
     });
   }
 }
-
