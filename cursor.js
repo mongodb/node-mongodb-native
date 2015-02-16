@@ -497,17 +497,17 @@ Cursor.prototype.next = function(callback) {
   }    
 
   // If we have exhaust
-  if(self.options.exhaust && self.cursorState.cursorId == null) {
+  if(self.cmd.exhaust && self.cursorState.cursorId == null) {
     // Handle all the exhaust responses
     self.callbacks.register(self.query.requestId, processExhaustMessages);
     // Write the initial command out
     return self.connection.write(self.query.toBin());
-  } else if(self.options.exhaust && self.cursorState.cursorIndex < self.cursorState.documents.length) {
+  } else if(self.cmd.exhaust && self.cursorState.cursorIndex < self.cursorState.documents.length) {
     return handleCallback(callback, null, self.cursorState.documents[self.cursorState.cursorIndex++]);
-  } else if(self.options.exhaust && Long.ZERO.equals(self.cursorState.cursorId)) {
+  } else if(self.cmd.exhaust && Long.ZERO.equals(self.cursorState.cursorId)) {
     self.callbacks.unregister(self.query.requestId);
     return setCursorNotified(self, callback);
-  } else if(self.options.exhaust) {
+  } else if(self.cmd.exhaust) {
     return setTimeout(function() {
       if(Long.ZERO.equals(self.cursorState.cursorId)) return;
       self.next(callback);
@@ -549,11 +549,11 @@ Cursor.prototype.next = function(callback) {
         // Tailable cursor getMore result, notify owner about it
         // No attempt is made here to retry, this is left to the user of the
         // core module to handle to keep core simple
-        if(self.cursorState.documents.length == 0 && self.options.tailable) {
+        if(self.cursorState.documents.length == 0 && self.cmd.tailable) {
           return handleCallback(callback, MongoError.create({
               message: "No more documents in tailed cursor"
-            , tailable: self.options.tailable
-            , awaitData: self.options.awaitData
+            , tailable: self.cmd.tailable
+            , awaitData: self.cmd.awaitData
           }));
         }
 
@@ -564,11 +564,11 @@ Cursor.prototype.next = function(callback) {
         self.next(callback);
       });
   } else if(self.cursorState.documents.length == self.cursorState.cursorIndex 
-    && self.options.tailable) { 
+    && self.cmd.tailable) { 
       return handleCallback(callback, MongoError.create({
           message: "No more documents in tailed cursor"
-        , tailable: self.options.tailable
-        , awaitData: self.options.awaitData
+        , tailable: self.cmd.tailable
+        , awaitData: self.cmd.awaitData
       }));
   } else if(self.cursorState.documents.length == self.cursorState.cursorIndex 
       && Long.ZERO.equals(self.cursorState.cursorId)) {

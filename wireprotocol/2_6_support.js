@@ -231,13 +231,6 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
   // Set query flags
   query.slaveOk = readPreference.slaveOk();
 
-  // Options
-  if(typeof options.tailable == 'boolean') query.tailable = options.tailable;
-  if(typeof options.oplogReplay == 'boolean') query.oplogReplay = options.oplogReplay;
-  if(typeof options.noCursorTimeout == 'boolean') query.noCursorTimeout = options.noCursorTimeout;
-  if(typeof options.awaitdata == 'boolean') query.awaitdata = options.awaitdata;
-  if(typeof options.exhaust == 'boolean') query.exhaust = options.exhaust;
-  if(typeof options.partial == 'boolean') query.partial = options.partial;
   // Return the query
   return query;
 }

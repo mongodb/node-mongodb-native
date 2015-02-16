@@ -245,13 +245,6 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
   // Set query flags
   query.slaveOk = readPreference.slaveOk();
 
-  // Options
-  if(options.tailable) query.tailable = options.tailable;
-  if(options.oplogReplay)query.oplogReplay = options.oplogReplay;
-  if(options.noCursorTimeout) query.noCursorTimeout = options.noCursorTimeout;
-  if(options.awaitdata) query.awaitdata = options.awaitdata;
-  if(options.exhaust) query.exhaust = options.exhaust;
-  if(options.partial) query.partial = options.partial;
   // Return the query
   return query;
 }
