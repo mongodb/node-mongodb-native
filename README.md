@@ -13,7 +13,7 @@ The MongoDB driver is the high level part of the 2.0 or higher MongoDB driver an
 | what          | where                                          |
 |---------------|------------------------------------------------|
 | documentation | http://mongodb.github.io/node-mongodb-native/  |
-| apidoc        | http://mongodb.github.io/node-mongodb-native/  |
+| api-doc        | http://mongodb.github.io/node-mongodb-native/  |
 | source        | https://github.com/mongodb/node-mongodb-native |
 | mongodb       | http://www.mongodb.org/                        |
 
