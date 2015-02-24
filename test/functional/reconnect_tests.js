@@ -2,7 +2,7 @@
  * @ignore
  */
 exports['Should correctly stop reconnection attempts after limit reached'] = {
-  metadata: { requires: { topology: ['single'] } },
+  metadata: { requires: { topology: ['single'] }, ignore: { travis:true } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
