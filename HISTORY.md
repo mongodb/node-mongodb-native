@@ -1,3 +1,7 @@
+1.1.13 02-24-2015
+-----------------
+- NODE-365 mongoDB native node.js driver infinite reconnect attempts (fixed issue around handling of retry attempts)
+
 1.1.12 02-16-2015
 -----------------
 - Fixed cursor transforms for buffered document reads from cursor.

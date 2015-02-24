@@ -30,14 +30,14 @@ exports['Discover arbiters'] = {
       var server = new ReplSet([{
           host: serverManager.host
         , port: serverManager.port
-      }], { 
-        setName: configuration.setName 
+      }], {
+        setName: configuration.setName
       });
 
       server.on('joined', function(_type, _server) {
         if(_type == 'arbiter') {
           server.destroy();
-          test.done();          
+          test.done();
         }
       });
 
@@ -68,14 +68,14 @@ exports['Discover passives'] = {
       var server = new ReplSet([{
           host: serverManager.host
         , port: serverManager.port
-      }], { 
+      }], {
         setName: configuration.setName
       });
 
       server.on('joined', function(_type, _server) {
         if(_type == 'passive') {
           server.destroy();
-          test.done();          
+          test.done();
         }
       });
 
@@ -106,14 +106,14 @@ exports['Discover primary'] = {
       var server = new ReplSet([{
           host: serverManager.host
         , port: serverManager.port
-      }], { 
-        setName: configuration.setName 
+      }], {
+        setName: configuration.setName
       });
 
       server.on('joined', function(_type, _server) {
         if(_type == 'primary') {
           server.destroy();
-          test.done();          
+          test.done();
         }
       });
 
@@ -144,8 +144,8 @@ exports['Discover secondaries'] = {
       var server = new ReplSet([{
           host: serverManager.host
         , port: serverManager.port
-      }], { 
-        setName: configuration.setName 
+      }], {
+        setName: configuration.setName
       });
 
       var count = 0;
@@ -153,7 +153,7 @@ exports['Discover secondaries'] = {
         if(_type == 'secondary') count = count + 1;
         if(count == 2) {
           server.destroy();
-          test.done();          
+          test.done();
         }
       });
 
@@ -186,8 +186,8 @@ exports['Replica set discovery'] = {
       var server = new ReplSet([{
           host: serverManager.host
         , port: serverManager.port
-      }], { 
-        setName: configuration.setName 
+      }], {
+        setName: configuration.setName
       });
 
       server.on('joined', function(_type, _server) {
@@ -198,7 +198,7 @@ exports['Replica set discovery'] = {
           && state.arbiter == 0
           && state.passive == 0) {
           server.destroy();
-          test.done();          
+          test.done();
         }
       });
 
@@ -214,7 +214,7 @@ var waitForPrimary = function(ReplSet, count, config, options, callback) {
   var server = new ReplSet(config, options);
   server.on('error', function(err) {
     server.destroy();
-    
+
     setTimeout(function() {
       waitForPrimary(ReplSet, count - 1, config, options, callback);
     }, 1000);
@@ -271,8 +271,8 @@ exports['Ghost discovered/Member brought up as standalone'] = {
               , port: primaryServerManager.port
             }];
 
-            var options = { 
-              setName: configuration.setName 
+            var options = {
+              setName: configuration.setName
             };
 
             // Wait for primary
@@ -336,8 +336,8 @@ exports['Host list differs from seeds'] = {
       }, {
           host: 'localhost'
         , port: 41000
-      }], { 
-        setName: configuration.setName 
+      }], {
+        setName: configuration.setName
       });
 
       server.on('joined', function(_type, _server) {
@@ -348,7 +348,7 @@ exports['Host list differs from seeds'] = {
           && state.arbiter == 0
           && state.passive == 0) {
           server.destroy();
-          test.done();          
+          test.done();
         }
       });
 
@@ -386,8 +386,8 @@ exports['Member removed by reconfig'] = {
           , port: primaryServerManager.port
         }];
 
-        var options = { 
-          setName: configuration.setName 
+        var options = {
+          setName: configuration.setName
         };
 
         // Contains the details for the removed server
@@ -397,6 +397,11 @@ exports['Member removed by reconfig'] = {
         server.on('fullsetup', function(_server) {
           var removedServer = null;
 
+          // Save number of secondaries
+          var numberOfSecondaries = server.state.secondaries.length;
+          var numberOfArbiters = server.state.arbiters.length;
+          var numberOfPassives = server.state.passives.length;
+
           // Let's listen to changes
           server.on('left', function(_t, _server) {
           });
@@ -404,7 +409,7 @@ exports['Member removed by reconfig'] = {
           server.on('joined', function(_t, _server) {
             if(_t == 'primary') {
               test.ok(server.state.primary != null);
-              test.equal(1, server.state.secondaries.length);
+              test.ok(numberOfSecondaries != server.state.secondaries.length);
               test.equal(1, server.state.arbiters.length);
               test.equal(1, server.state.passives.length);
               server.destroy();
@@ -421,6 +426,9 @@ exports['Member removed by reconfig'] = {
           manager.remove('secondary', function(err, _removedServer) {
             test.equal(null, err);
             removedServer = _removedServer;
+
+            // Force new election
+            manager.stepDown({force:true}, function(err) {});
           });
         });
 
@@ -456,8 +464,8 @@ exports['New primary'] = {
         , port: primaryServerManager.port
       }];
 
-      var options = { 
-        setName: configuration.setName 
+      var options = {
+        setName: configuration.setName
       };
 
       // Attempt to connect
@@ -530,8 +538,8 @@ exports['Primary becomes standalone'] = {
           , port: serverManager.port
         }];
 
-        var options = { 
-          setName: configuration.setName 
+        var options = {
+          setName: configuration.setName
         };
 
         // Attempt to connect
@@ -562,7 +570,7 @@ exports['Primary becomes standalone'] = {
 
                 // Stop the normal server
                 nonReplSetMember.stop(function() {
-                  
+
                   // Restart the primary server
                   primaryServerManager.start(function() {
 
