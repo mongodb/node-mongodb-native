@@ -329,6 +329,12 @@ exports['Should correctly reconnect and finish query operation'] = {
 
       db.collection('test_reconnect').insert({a:1}, function(err, doc) {
         test.equal(null, err);
+        // Signal db reconnect
+        var dbReconnect = false;
+
+        db.once('reconnect', function() {
+          dbReconnect = true;
+        });
 
         db.serverConfig.once('reconnect', function() {
 
@@ -344,6 +350,7 @@ exports['Should correctly reconnect and finish query operation'] = {
             db.collection('test_reconnect').findOne(function(err, doc) {
               test.equal(null, err);
               test.equal(1, doc.a);
+              test.equal(true, dbReconnect);
 
               db.close();
               test.done();
