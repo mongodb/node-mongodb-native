@@ -9,7 +9,7 @@ var inherits = require('util').inherits
   , debugOptions = require('./utils').debugOptions
   , Response = require('./commands').Response
   , MongoError = require('../error')
-  , Logger = require('./logger');  
+  , Logger = require('./logger');
 
 var _id = 0;
 var debugFields = ['host', 'port', 'size', 'keepAlive', 'keepAliveInitialDelay', 'noDelay'
@@ -42,7 +42,7 @@ var debugFields = ['host', 'port', 'size', 'keepAlive', 'keepAliveInitialDelay',
  * @fires Connection#parseError
  * @return {Connection} A cursor instance
  */
-var Connection = function(options) {  
+var Connection = function(options) {
   // Add event listener
   EventEmitter.call(this);
   // Set empty if no options passed
@@ -80,7 +80,7 @@ var Connection = function(options) {
   // Serialize commands using function
   this.singleBufferSerializtion = typeof options.singleBufferSerializtion == 'boolean' ? options.singleBufferSerializtion : true;
   this.serializationFunction = this.singleBufferSerializtion ? 'toBinUnified' : 'toBin';
-  
+
   // SSL options
   this.ca = options.ca || null;
   this.cert = options.cert || null;
@@ -108,7 +108,7 @@ inherits(Connection, EventEmitter);
 //
 // Connection handlers
 var errorHandler = function(self) {
-  return function(err) {  
+  return function(err) {
     // Debug information
     if(self.logger.isDebug()) self.logger.debug(f('connection %s for [%s:%s] errored out with [%s]', self.id, self.host, self.port, JSON.stringify(err)));
     // Emit the error
@@ -135,9 +135,9 @@ var closeHandler = function(self) {
     if(!hadError) {
       self.emit("close"
         , MongoError.create(f("connection %s to %s:%s closed", self.id, self.host, self.port))
-        , self);        
+        , self);
     }
-  }  
+  }
 }
 
 var dataHandler = function(self) {
@@ -317,7 +317,7 @@ Connection.prototype.connect = function(_options) {
   }
 
   // Create new connection instance
-  self.connection = self.domainSocket 
+  self.connection = self.domainSocket
     ? net.createConnection(self.host)
     : net.createConnection(self.port, self.host);
 
@@ -339,10 +339,10 @@ Connection.prototype.connect = function(_options) {
     if(self.passphrase) sslOptions.passphrase = self.passphrase;
 
     // Attempt SSL connection
-    self.connection = tls.connect(self.port, self.host, sslOptions, function() {      
+    self.connection = tls.connect(self.port, self.host, sslOptions, function() {
       // Error on auth or skip
-      if(self.connection.authorizationError && self.rejectUnauthorized) {  
-        return self.emit("error", self.connection.authorizationError, self, {ssl:true});        
+      if(self.connection.authorizationError && self.rejectUnauthorized) {
+        return self.emit("error", self.connection.authorizationError, self, {ssl:true});
       }
 
       // Set socket timeout instead of connection timeout
@@ -355,7 +355,7 @@ Connection.prototype.connect = function(_options) {
       // Set socket timeout instead of connection timeout
       self.connection.setTimeout(self.socketTimeout);
       // Emit connect event
-      self.emit('connect', self);        
+      self.emit('connect', self);
     });
   }
 
@@ -380,8 +380,6 @@ Connection.prototype.destroy = function() {
  * @param {Command} command Command to write out need to implement toBin and toBinUnified
  */
 Connection.prototype.write = function(buffer) {
-  // console.dir("===========================================================")
-  // console.dir(buffer)
   // Debug log
   if(this.logger.isDebug()) this.logger.debug(f('writing buffer [%s] to %s:%s', buffer.toString('hex'), this.host, this.port));
   // Write out the command
