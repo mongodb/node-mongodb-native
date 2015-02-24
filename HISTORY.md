@@ -1,3 +1,7 @@
+2.0.17
+-----------------
+- NODE-336 Added length function to ordered and unordered bulk operations to be able know the amount of current operations in bulk.
+
 2.0.16 2015-02-16
 -----------------
 - listCollection now returns filtered result correctly removing db name for 2.6 or earlier servers.
@@ -303,7 +307,7 @@
 - Fixed possible issue where killcursor command might leave hanging functions
 - Fixed issue where Mongos was not correctly removing dead servers from the pool of eligable servers
 - Throw error if dbName or collection name contains null character (at command level and at collection level)
-- Updated bson parser to 0.2.1 with security fix and non-promotion of Long values to javascript Numbers (once a long always a long) 
+- Updated bson parser to 0.2.1 with security fix and non-promotion of Long values to javascript Numbers (once a long always a long)
 
 1.3.11 2013-07-04
 -----------------

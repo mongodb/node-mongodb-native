@@ -16,7 +16,7 @@ exports.beforeTests = function(configuration, callback) {
 
 exports['Should throw error due to mongos connection usage'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet
@@ -40,7 +40,7 @@ exports['Should throw error due to mongos connection usage'] = {
 
 exports['Should correctly handle error when no server up in replicaset'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet
@@ -68,7 +68,7 @@ exports['Should correctly handle error when no server up in replicaset'] = {
 
 exports['Should correctly connect with default replicaset'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet
@@ -98,7 +98,7 @@ exports['Should correctly connect with default replicaset'] = {
 
 exports['Should correctly connect with default replicaset and no setName specified'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet
@@ -128,7 +128,7 @@ exports['Should correctly connect with default replicaset and no setName specifi
 
 exports['Should correctly connect with default replicaset and socket options set'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet
@@ -140,7 +140,7 @@ exports['Should correctly connect with default replicaset and socket options set
         new Server(configuration.host, configuration.port),
         new Server(configuration.host, configuration.port + 1),
         new Server(configuration.host, configuration.port + 2)
-      ], 
+      ],
       {socketOptions: {keepAlive:100}, rs_name:configuration.replicasetName}
     );
 
@@ -158,7 +158,7 @@ exports['Should correctly connect with default replicaset and socket options set
 
 exports['Should emit close no callback'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet
@@ -170,7 +170,7 @@ exports['Should emit close no callback'] = {
         new Server(configuration.host, configuration.port),
         new Server(configuration.host, configuration.port + 1),
         new Server(configuration.host, configuration.port + 2)
-      ], 
+      ],
       {rs_name:configuration.replicasetName}
     );
 
@@ -192,7 +192,7 @@ exports['Should emit close no callback'] = {
 
 exports['Should emit close with callback'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet
@@ -204,15 +204,15 @@ exports['Should emit close with callback'] = {
         new Server(configuration.host, configuration.port),
         new Server(configuration.host, configuration.port + 1),
         new Server(configuration.host, configuration.port + 2)
-      ], 
+      ],
       {rs_name:configuration.replicasetName}
     );
 
     new Db('integration_test_', replSet, {w:0}).open(function(err, db) {
       test.equal(null, err);
       var dbCloseCount = 0;
-      db.on('close', function() { 
-        ++dbCloseCount; 
+      db.on('close', function() {
+        ++dbCloseCount;
       });
 
       db.close(function() {
@@ -228,7 +228,7 @@ exports['Should emit close with callback'] = {
 
 exports['Should correctly pass error when wrong replicaSet'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet
@@ -240,7 +240,7 @@ exports['Should correctly pass error when wrong replicaSet'] = {
         new Server(configuration.host, configuration.port),
         new Server(configuration.host, configuration.port + 1),
         new Server(configuration.host, configuration.port + 2)
-      ], 
+      ],
       {rs_name:configuration.replicasetName + "-wrong"}
     );
 
@@ -264,7 +264,7 @@ var ensureConnection = function(configuration, numberOfTries, callback) {
       new Server(configuration.host, configuration.port),
       new Server(configuration.host, configuration.port + 1),
       new Server(configuration.host, configuration.port + 2)
-    ], 
+    ],
     {rs_name:configuration.replicasetName, socketOptions: {connectTimeoutMS: 1000}}
   );
 
@@ -289,7 +289,7 @@ var ensureConnection = function(configuration, numberOfTries, callback) {
 
 exports['Should connect with primary stepped down'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet
@@ -301,7 +301,7 @@ exports['Should connect with primary stepped down'] = {
         new Server(configuration.host, configuration.port),
         new Server(configuration.host, configuration.port + 1),
         new Server(configuration.host, configuration.port + 2)
-      ], 
+      ],
       {rs_name:configuration.replicasetName}
     );
 
@@ -325,7 +325,7 @@ exports['Should connect with primary stepped down'] = {
 
 exports['Should connect with third node killed'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet
@@ -339,13 +339,13 @@ exports['Should connect with third node killed'] = {
           new Server(configuration.host, configuration.port),
           new Server(configuration.host, configuration.port + 1),
           new Server(configuration.host, configuration.port + 2)
-        ], 
+        ],
         {rs_name:configuration.replicasetName}
       );
 
       // Wait for new primary to pop up
       ensureConnection(configuration, retries, function(err, p_db) {
-        
+
         new Db('integration_test_', replSet, {w:0}).open(function(err, p_db) {
           test.ok(err == null);
           // Get a connection
@@ -362,7 +362,7 @@ exports['Should connect with third node killed'] = {
 
 exports['Should connect with primary node killed'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet
@@ -376,12 +376,12 @@ exports['Should connect with primary node killed'] = {
           new Server(configuration.host, configuration.port),
           new Server(configuration.host, configuration.port + 1),
           new Server(configuration.host, configuration.port + 2)
-        ], 
+        ],
         {rs_name:configuration.replicasetName}
       );
 
       // Wait for new primary to pop up
-      ensureConnection(configuration, retries, function(err, p_db) {      
+      ensureConnection(configuration, retries, function(err, p_db) {
         new Db('integration_test_', replSet, {w:0}).open(function(err, p_db) {
           test.ok(err == null);
           // Get a connection
@@ -398,7 +398,7 @@ exports['Should connect with primary node killed'] = {
 
 exports['Should correctly emit open signal and full set signal'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet
@@ -411,7 +411,7 @@ exports['Should correctly emit open signal and full set signal'] = {
         new Server(configuration.host, configuration.port),
         new Server(configuration.host, configuration.port + 1),
         new Server(configuration.host, configuration.port + 2)
-      ], 
+      ],
       {rs_name:configuration.replicasetName}
     );
 
@@ -434,7 +434,7 @@ exports['Should correctly emit open signal and full set signal'] = {
 
 exports['ReplSet honors socketOptions options'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet
@@ -446,7 +446,7 @@ exports['ReplSet honors socketOptions options'] = {
         new Server(configuration.host, configuration.port),
         new Server(configuration.host, configuration.port + 1),
         new Server(configuration.host, configuration.port + 2)
-      ], 
+      ],
       {socketOptions: {
           connectTimeoutMS:1000
         , socketTimeoutMS: 3000
@@ -470,7 +470,7 @@ exports['ReplSet honors socketOptions options'] = {
 
 exports['Should correctly emit all signals even if not yet connected'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet
@@ -482,7 +482,7 @@ exports['Should correctly emit all signals even if not yet connected'] = {
         new Server(configuration.host, configuration.port),
         new Server(configuration.host, configuration.port + 1),
         new Server(configuration.host, configuration.port + 2)
-      ], 
+      ],
       {rs_name:configuration.replicasetName}
     );
 
@@ -494,16 +494,16 @@ exports['Should correctly emit all signals even if not yet connected'] = {
 
     db2.on('close', function() {
       close_count = close_count + 1;
-    });                                                                             
-    
+    });
+
     db_conn.on('close', function() {
       close_count = close_count + 1;
-    });                                                                             
+    });
 
     db2.on('open', function(err, db) {
       test.equal('integration_test_2', db.databaseName);
       open_count = open_count + 1;
-    }); 
+    });
 
     db_conn.on('open', function(err, db) {
       test.equal('integration_test_', db.databaseName);
@@ -520,42 +520,42 @@ exports['Should correctly emit all signals even if not yet connected'] = {
       fullsetup_count = fullsetup_count + 1;
     });
 
-    db_conn.open(function (err) {                                                   
-      if(err) throw err;                                                           
-                  
+    db_conn.open(function (err) {
+      if(err) throw err;
+
       // Wait for fullset
       var interval = setInterval(function() {
         if(fullsetup_count == 2) {
           clearInterval(interval);
 
-          var col1 = db_conn.collection('test');                                        
-          var col2 = db2.collection('test');                                            
-                                                                                        
-          var testData = { value : "something" };                                       
-          col1.insert(testData, function (err) {                                        
-            if (err) throw err;                                                         
+          var col1 = db_conn.collection('test');
+          var col2 = db2.collection('test');
 
-            var testData = { value : "something" };                                       
-            col2.insert(testData, function (err) {                                      
-              if (err) throw err;                                                       
+          var testData = { value : "something" };
+          col1.insert(testData, function (err) {
+            if (err) throw err;
+
+            var testData = { value : "something" };
+            col2.insert(testData, function (err) {
+              if (err) throw err;
               db2.close(function() {
                 setTimeout(function() {
                   test.equal(2, close_count);
                   test.equal(2, open_count);
                   restartAndDone(configuration, test);
                 }, 1000);
-              });                                                                      
-            });                                                                         
-          });                                                                           
+              });
+            });
+          });
         }
       }, 200);
-    });               
+    });
   }
 }
 
 exports['Should receive all events for primary and secondary leaving'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet
@@ -567,7 +567,7 @@ exports['Should receive all events for primary and secondary leaving'] = {
         new Server(configuration.host, configuration.port),
         new Server(configuration.host, configuration.port + 1),
         new Server(configuration.host, configuration.port + 2)
-      ], 
+      ],
       {rs_name:configuration.replicasetName}
     );
 
@@ -599,7 +599,7 @@ exports['Should receive all events for primary and secondary leaving'] = {
 
 exports['Should Fail due to bufferMaxEntries = 0 not causing any buffering'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet
@@ -611,7 +611,7 @@ exports['Should Fail due to bufferMaxEntries = 0 not causing any buffering'] = {
         new Server(configuration.host, configuration.port),
         new Server(configuration.host, configuration.port + 1),
         new Server(configuration.host, configuration.port + 2)
-      ], 
+      ],
       {rs_name:configuration.replicasetName}
     );
 
@@ -632,7 +632,7 @@ exports['Should Fail due to bufferMaxEntries = 0 not causing any buffering'] = {
             test.ok(err.message.indexOf("0") != -1)
             db.close();
             restartAndDone(configuration, test);
-          });        
+          });
         }
       });
 
@@ -646,19 +646,19 @@ exports['Should Fail due to bufferMaxEntries = 0 not causing any buffering'] = {
 
 exports['Should correctly receive ping and ha events'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet
       , Server = configuration.require.Server
       , Db = configuration.require.Db;
-    
+
     // Replica configuration
     var replSet = new ReplSet([
         new Server(configuration.host, configuration.port),
         new Server(configuration.host, configuration.port + 1),
         new Server(configuration.host, configuration.port + 2)
-      ], 
+      ],
       {rs_name:configuration.replicasetName}
     );
 
@@ -695,7 +695,7 @@ exports['Should correctly receive ping and ha events'] = {
 
 exports['Should correctly connect to arbiter with single connection'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -731,7 +731,7 @@ exports['Should correctly connect to arbiter with single connection'] = {
 
 exports['Should correctly connect to secondary with single connection'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -765,7 +765,7 @@ exports['Should correctly connect to secondary with single connection'] = {
  */
 exports['Should correctly connect to a replicaset with additional options'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -804,7 +804,7 @@ exports['Should correctly connect to a replicaset with additional options'] = {
  */
 exports['Should correctly connect to a replicaset with readPreference set'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -834,7 +834,7 @@ exports['Should correctly connect to a replicaset with readPreference set'] = {
  */
 exports['Should give an error for non-existing servers'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -859,7 +859,7 @@ exports['Should give an error for non-existing servers'] = {
  */
 exports['Should correctly connect to a replicaset with writeConcern specified and GridStore should inherit correctly'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -890,19 +890,19 @@ exports['Should correctly connect to a replicaset with writeConcern specified an
  */
 exports['Should Correctly remove server going into recovery mode'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet
       , Server = configuration.require.Server
       , Db = configuration.require.Db;
-    
+
     // Replica configuration
     var replSet = new ReplSet([
         new Server(configuration.host, configuration.port),
         new Server(configuration.host, configuration.port + 1),
         new Server(configuration.host, configuration.port + 2)
-      ], 
+      ],
       {rs_name:configuration.replicasetName}
     );
 
@@ -951,7 +951,7 @@ exports['Should Correctly remove server going into recovery mode'] = {
  */
 exports['Should not give an error when using a single server seed and no setName'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -972,9 +972,9 @@ exports['Should not give an error when using a single server seed and no setName
 /**
  * @ignore
  */
-exports['Should give an error when using a two server seeds and no setName'] = {
+exports['Should not give an error when using a two server seeds and no setName'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -986,8 +986,8 @@ exports['Should give an error when using a two server seeds and no setName'] = {
       , "integration_test_");
 
     MongoClient.connect(url, function(err, db) {
-      test.ok(err != null);
-
+      test.equal(null, err);
+      
       restartAndDone(configuration, test);
     });
   }
@@ -1000,7 +1000,7 @@ var waitForPrimary = function(count, config, options, callback) {
   var server = new ReplSet(config, options);
   server.on('error', function(err) {
     server.destroy();
-    
+
     setTimeout(function() {
       waitForPrimary(count - 1, config, options, callback);
     }, 1000);
@@ -1053,7 +1053,7 @@ exports['Replicaset connection where a server is standalone'] = {
           , port: serverManager.port
         }];
 
-        var options = { 
+        var options = {
           setName: configuration.replicasetName
         };
 
@@ -1086,4 +1086,3 @@ exports['Replicaset connection where a server is standalone'] = {
     });
   }
 }
-

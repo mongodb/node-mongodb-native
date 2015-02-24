@@ -5,7 +5,7 @@
  */
 exports['Should correctly connect to server using domain socket'] = {
   metadata: { requires: { topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstanceWithDomainSocket({w:1}, {poolSize: 1, host: "/tmp/mongodb-27017.sock"});
@@ -32,7 +32,7 @@ exports['Should correctly connect to server using domain socket'] = {
  */
 exports['Should correctly connect to server using just events'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:true});
@@ -50,7 +50,7 @@ exports['Should correctly connect to server using just events'] = {
  */
 exports['Should connect to server using domain socket with undefined port'] = {
   metadata: { requires: { topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstanceWithDomainSocket({w:1}, {poolSize: 1, host: "/tmp/mongodb-27017.sock", port:undefined});
@@ -77,14 +77,14 @@ exports['Should connect to server using domain socket with undefined port'] = {
  */
 exports['Should fail to connect using non-domain socket with undefined port'] = {
   metadata: { requires: { topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Server = configuration.require.Server
       , Db = configuration.require.Db;
-    
+
     var error;
-    try {    
+    try {
       var db = new Db('test', new Server("localhost", undefined), {w:0});
       db.open(function(){ });
     } catch (err){
@@ -125,7 +125,7 @@ function connectionTester(test, testName, callback) {
  */
 exports.testConnectNoOptions = {
   metadata: { requires: { topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var connect = configuration.require;
@@ -141,14 +141,14 @@ exports.testConnectNoOptions = {
  */
 exports.testConnectServerOptions = {
   metadata: { requires: { topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var connect = configuration.require;
 
     connect(configuration.url(),
             { server: {auto_reconnect: true, poolSize: 4} },
-            connectionTester(test, 'testConnectServerOptions', function(db) {            
+            connectionTester(test, 'testConnectServerOptions', function(db) {
       test.equal(4, db.serverConfig.poolSize);
       test.equal(true, db.serverConfig.autoReconnect);
       test.done();
@@ -161,7 +161,7 @@ exports.testConnectServerOptions = {
  */
 exports.testConnectAllOptions = {
   metadata: { requires: { topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var connect = configuration.require;
@@ -182,7 +182,7 @@ exports.testConnectAllOptions = {
  */
 exports.testConnectGoodAuth = {
   metadata: { requires: { topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var connect = configuration.require;
@@ -190,7 +190,7 @@ exports.testConnectGoodAuth = {
     // First add a user.
     connect(configuration.url(), function(err, db) {
       test.equal(err, null);
-      
+
       db.addUser(user, password, function(err, result) {
         test.equal(err, null);
         db.close();
@@ -199,7 +199,7 @@ exports.testConnectGoodAuth = {
     });
 
     function restOfTest() {
-      connect(configuration.url(user, password), connectionTester(test, 'testConnectGoodAuth', function(db) {            
+      connect(configuration.url(user, password), connectionTester(test, 'testConnectGoodAuth', function(db) {
         test.done();
       }));
     }
@@ -211,12 +211,12 @@ exports.testConnectGoodAuth = {
  */
 exports.testConnectBadAuth = {
   metadata: { requires: { topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var connect = configuration.require;
 
-    connect(configuration.url('slithy', 'toves'), function(err, db) { 
+    connect(configuration.url('slithy', 'toves'), function(err, db) {
       test.ok(err);
       test.equal(null, db);
       test.done();
@@ -229,7 +229,7 @@ exports.testConnectBadAuth = {
  */
 exports.testConnectThrowsNoCallbackProvided = {
   metadata: { requires: { topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var connect = configuration.require;
@@ -246,7 +246,7 @@ exports.testConnectThrowsNoCallbackProvided = {
  */
 exports.testConnectBadUrl = {
   metadata: { requires: { topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var connect = configuration.require;
@@ -265,7 +265,7 @@ exports.testConnectBadUrl = {
  */
 exports.shouldCorrectlyReturnTheRightDbObjectOnOpenEmit = {
   metadata: { requires: { topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db_conn = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -273,27 +273,27 @@ exports.shouldCorrectlyReturnTheRightDbObjectOnOpenEmit = {
 
     db2.on('open', function (err, db) {
       test.equal(db2.databaseName, db.databaseName);
-    });                                                                             
+    });
 
-    db_conn.on('open', function (err, db) {                                                
+    db_conn.on('open', function (err, db) {
       test.equal(db_conn.databaseName, db.databaseName);
-    });                                                                                                          
+    });
 
-    db_conn.open(function (err) {                                                   
-      if(err) throw err;                                                           
-      var col1 = db_conn.collection('test');                                        
-      var col2 = db2.collection('test');                                            
+    db_conn.open(function (err) {
+      if(err) throw err;
+      var col1 = db_conn.collection('test');
+      var col2 = db2.collection('test');
 
-      var testData = { value : "something" };                                       
-      col1.insert(testData, function (err) {                                        
-        if (err) throw err;                                                         
-        col2.insert(testData, function (err) {                                      
-          if (err) throw err;                                                       
-          db2.close();                                                              
-          test.done();                                                     
-        });                                                                         
-      });                                                                           
-    });  
+      var testData = { value : "something" };
+      col1.insert(testData, function (err) {
+        if (err) throw err;
+        col2.insert(testData, function (err) {
+          if (err) throw err;
+          db2.close();
+          test.done();
+        });
+      });
+    });
   }
 }
 
@@ -302,7 +302,7 @@ exports.shouldCorrectlyReturnTheRightDbObjectOnOpenEmit = {
  */
 exports.shouldCorrectlyReturnFalseOnIsConnectBeforeConnectionHappened = {
   metadata: { requires: { topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db_conn = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -316,7 +316,7 @@ exports.shouldCorrectlyReturnFalseOnIsConnectBeforeConnectionHappened = {
  */
 exports['Should correctly reconnect and finish query operation'] = {
   metadata: { requires: { topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Db = configuration.require.Db
@@ -325,14 +325,14 @@ exports['Should correctly reconnect and finish query operation'] = {
 
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:true});
     db.open(function(err, db) {
-      test.equal(null, err);    
+      test.equal(null, err);
 
       db.collection('test_reconnect').insert({a:1}, function(err, doc) {
         test.equal(null, err);
 
         db.serverConfig.once('reconnect', function() {
-          
-          // Await reconnect and re-authentication    
+
+          // Await reconnect and re-authentication
           db.collection('test_reconnect').findOne(function(err, doc) {
             test.equal(null, err);
             test.equal(1, doc.a);
@@ -340,7 +340,7 @@ exports['Should correctly reconnect and finish query operation'] = {
             // Attempt disconnect again
             db.serverConfig.connections()[0].destroy();
 
-            // Await reconnect and re-authentication    
+            // Await reconnect and re-authentication
             db.collection('test_reconnect').findOne(function(err, doc) {
               test.equal(null, err);
               test.equal(1, doc.a);
@@ -350,11 +350,10 @@ exports['Should correctly reconnect and finish query operation'] = {
             });
           });
         })
-        
+
         // Force close
         db.serverConfig.connections()[0].destroy();
       });
     });
   }
 }
-

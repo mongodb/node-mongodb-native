@@ -43,7 +43,7 @@ var startupOptions = {
 /**
  * Standalone MongoDB Configuration
  */
-var createConfiguration = function(options) {  
+var createConfiguration = function(options) {
   options = options || {};
 
   // Create the configuration
@@ -60,7 +60,7 @@ var createConfiguration = function(options) {
     var replicasetName = options.replicasetName || 'rs';
     var writeConcern = options.writeConcern || {w:1};
     var writeConcernMax = options.writeConcernMax || {w:1};
-    
+
     Logger.setCurrentLogger(function() {});
     Logger.setLevel('debug');
 
@@ -69,7 +69,7 @@ var createConfiguration = function(options) {
     options.journal = false;
 
     // Override manager or use default
-    var manager = options.manager ? options.manager() : new ServerManager(fOptions);  
+    var manager = options.manager ? options.manager() : new ServerManager(fOptions);
 
     // clone
     var clone = function(o) {
@@ -101,7 +101,7 @@ var createConfiguration = function(options) {
 
           // Finish stop
           callback();
-        });        
+        });
       },
 
       restart: function(options, callback) {
@@ -112,7 +112,7 @@ var createConfiguration = function(options) {
         manager.restart({purge:purge, kill:kill}, function() {
           setTimeout(function() {
             callback();
-          }, 1000);          
+          }, 1000);
         });
       },
 
@@ -235,15 +235,17 @@ var testFiles =[
   , '/test/functional/bulk_tests.js'
   , '/test/functional/operation_example_tests.js'
   , '/test/functional/crud_api_tests.js'
+  , '/test/functional/reconnect_tests.js'
+
 
   // Logging tests
   , '/test/functional/logger_tests.js'
 
   // Replicaset tests
-  , '/test/functional/replset_failover_tests.js'
-  , '/test/functional/replset_connection_tests.js'
   , '/test/functional/replset_operations_tests.js'
   , '/test/functional/replset_read_preference_tests.js'
+  , '/test/functional/replset_failover_tests.js'
+  , '/test/functional/replset_connection_tests.js'
 
   // Sharding tests
   , '/test/functional/sharding_failover_tests.js'
@@ -259,13 +261,13 @@ var testFiles =[
   , '/test/functional/scram_tests.js'
 
   // LDAP Tests
-  , '/test/functional/ldap_tests.js'  
+  , '/test/functional/ldap_tests.js'
 
   // Kerberos Tests
-  , '/test/functional/kerberos_tests.js'  
+  , '/test/functional/kerberos_tests.js'
 
   // Authentication Tests
-  , '/test/functional/authentication_tests.js'  
+  , '/test/functional/authentication_tests.js'
 ]
 
 // Add all the tests to run
@@ -328,7 +330,7 @@ if(argv.t == 'functional') {
         url: "mongodb://%slocalhost:31000/integration_tests?rs_name=rs",
         writeConcernMax: {w: 'majority', wtimeout: 5000},
         replicasetName: 'rs',
-        
+
         topology: function(host, port, serverOptions) {
           var m = require('../');
           host = host || 'localhost'; port = port || 31000;
@@ -336,8 +338,8 @@ if(argv.t == 'functional') {
           serverOptions.rs_name = 'rs';
           serverOptions.poolSize = 1;
           return new m.ReplSet([new m.Server(host, port)], serverOptions);
-        }, 
-        
+        },
+
         manager: function() {
           var ReplSetManager = require('mongodb-tools').ReplSetManager;
           // Return manager
@@ -356,14 +358,14 @@ if(argv.t == 'functional') {
         host: 'localhost',
         url: "mongodb://%slocalhost:50000/integration_tests",
         writeConcernMax: {w: 'majority', wtimeout: 5000},
-        
+
         topology: function(host, port, serverOptions) {
           var m = require('../');
           host = host || 'localhost'; port = port || 50000;
           serverOptions = shallowClone(serverOptions);
           serverOptions.poolSize = 1;
           return new m.Mongos([new m.Server(host, port, serverOptions)]);
-        }, 
+        },
 
         manager: function() {
           var ShardingManager = require('mongodb-tools').ShardingManager;
@@ -383,7 +385,7 @@ if(argv.t == 'functional') {
       , fork:null
       , sslPEMKeyFile: __dirname + "/functional/ssl/server.pem"
       , url: "mongodb://%slocalhost:27017/integration_tests?ssl=true"
-      
+
       , topology: function(host, port, serverOptions) {
         var m = require('../');
         host = host || 'localhost'; port = port || 27017;
@@ -391,7 +393,7 @@ if(argv.t == 'functional') {
         serverOptions.poolSize = 1;
         serverOptions.ssl = true;
         return new m.Server(host, port, serverOptions);
-      }, 
+      },
     });
   } else if(argv.e == 'heap') {
     // Create single server instance running heap storage engine
@@ -429,7 +431,7 @@ if(argv.t == 'functional') {
         serverOptions = shallowClone(serverOptions);
         serverOptions.poolSize = 1;
         return new m.Server(host, port, serverOptions);
-      }, 
+      },
     });
   } else if(argv.e == 'ldap' || argv.e == 'kerberos') {
     startupOptions.skipStartup = true;
@@ -449,8 +451,8 @@ if(argv.t == 'functional') {
         serverOptions = shallowClone(serverOptions);
         serverOptions.poolSize = 1;
         return new m.Server(host, port, serverOptions);
-      }, 
-    });    
+      },
+    });
   }
 
     // startupOptions.skipStartup = true;
@@ -490,8 +492,3 @@ if(argv.t == 'functional') {
     });
   });
 }
-
-
-
-
-
