@@ -2,7 +2,7 @@
 
 exports['Should correctly handle ordered single batch api write command error'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -56,7 +56,7 @@ exports['Should correctly handle ordered single batch api write command error'] 
 
 exports['Should correctly handle ordered multiple batch api write command error'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -107,7 +107,7 @@ exports['Should correctly handle ordered multiple batch api write command error'
 
 exports['Should fail due to ordered document being to big'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -139,7 +139,7 @@ exports['Should fail due to ordered document being to big'] = {
 
 exports['Should correctly split up ordered messages into more batches'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -179,7 +179,7 @@ exports['Should correctly split up ordered messages into more batches'] = {
 
 exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations using write commands'] = {
   metadata: { requires: { mongodb: '>2.5.4', topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -260,7 +260,7 @@ exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations
 
 exports['Should Correctly Execute Ordered Batch of Write Operations with duplicate key errors on updates'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -306,7 +306,7 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with duplica
 
 exports['Should Correctly Execute Ordered Batch of Write Operations with upserts causing duplicate key errors on updates'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -363,7 +363,7 @@ exports['Should Correctly Execute Ordered Batch of Write Operations with upserts
 
 exports['Should correctly perform ordered upsert with custom _id'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -384,7 +384,7 @@ exports['Should correctly perform ordered upsert with custom _id'] = {
         test.equal(0, result.nMatched);
         test.ok(0 == result.nModified || result.nModified == null);
         test.equal(0, result.nRemoved);
-        
+
         var upserts = result.getUpsertedIds();
         test.equal(1, upserts.length);
         test.equal(0, upserts[0].index);
@@ -400,7 +400,7 @@ exports['Should correctly perform ordered upsert with custom _id'] = {
 
 exports['Should throw an error when no operations in ordered batch'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -418,14 +418,14 @@ exports['Should throw an error when no operations in ordered batch'] = {
 
       test.equal(true, threw);
       db.close();
-      test.done();        
+      test.done();
     });
   }
 }
 
 exports['Should correctly execute ordered batch using w:0'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -453,7 +453,7 @@ exports['Should correctly execute ordered batch using w:0'] = {
         test.equal(false, result.hasWriteErrors());
 
         db.close();
-        test.done();        
+        test.done();
       });
     });
   }
@@ -461,7 +461,7 @@ exports['Should correctly execute ordered batch using w:0'] = {
 
 exports['Should correctly handle single unordered batch API'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -518,7 +518,7 @@ exports['Should correctly handle single unordered batch API'] = {
 
 exports['Should correctly handle multiple unordered batch API'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -559,7 +559,7 @@ exports['Should correctly handle multiple unordered batch API'] = {
                 test.equal(2, error.getOperation().q.b);
                 test.equal(1, error.getOperation().u['$set'].a);
                 test.equal(false, error.getOperation().multi);
-                test.equal(true, error.getOperation().upsert);              
+                test.equal(true, error.getOperation().upsert);
                 break;
               case 3:
                 test.equal(11000, error.code);
@@ -569,7 +569,7 @@ exports['Should correctly handle multiple unordered batch API'] = {
                 test.equal(false, error.getOperation().multi);
                 test.equal(true, error.getOperation().upsert);
                 break;
-              case 2:              
+              case 2:
                 test.equal(11000, error.code);
                 test.ok(error.errmsg != null);
                 test.equal(5, error.getOperation().b);
@@ -597,7 +597,7 @@ exports['Should correctly handle multiple unordered batch API'] = {
 
 exports['Should fail due to document being to big for unordered batch'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -629,7 +629,7 @@ exports['Should fail due to document being to big for unordered batch'] = {
 
 exports['Should correctly split up messages into more batches for unordered batches'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -669,7 +669,7 @@ exports['Should correctly split up messages into more batches for unordered batc
 
 exports['Should Correctly Fail Unordered Batch Operation due to illegal Operations'] = {
   metadata: { requires: { mongodb: '>2.5.4', topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -709,7 +709,7 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
           // Add illegal remove
           batch.find({$set:{a:1}}).removeOne();
           // Execute the operations
-          batch.execute(function(err, result) {            
+          batch.execute(function(err, result) {
             // Test basic settings
             test.equal(0, result.nInserted);
             test.equal(0, result.nMatched);
@@ -757,7 +757,7 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
 
 exports['Should Correctly Execute Unordered Batch with duplicate key errors on updates'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -801,7 +801,7 @@ exports['Should Correctly Execute Unordered Batch with duplicate key errors on u
 
 exports['Should Correctly Execute Unordered Batch of with upserts causing duplicate key errors on updates'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -858,7 +858,7 @@ exports['Should Correctly Execute Unordered Batch of with upserts causing duplic
 
 exports['Should correctly perform unordered upsert with custom _id'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -879,7 +879,7 @@ exports['Should correctly perform unordered upsert with custom _id'] = {
         test.equal(0, result.nMatched);
         test.ok(0 == result.nModified || result.nModified == null);
         test.equal(0, result.nRemoved);
-        
+
         var upserts = result.getUpsertedIds();
         test.equal(1, upserts.length);
         test.equal(0, upserts[0].index);
@@ -895,7 +895,7 @@ exports['Should correctly perform unordered upsert with custom _id'] = {
 
 exports['Should prohibit batch finds with no selector'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -928,7 +928,7 @@ exports['Should prohibit batch finds with no selector'] = {
 
 exports['Should throw an error when no operations in unordered batch'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -946,14 +946,14 @@ exports['Should throw an error when no operations in unordered batch'] = {
 
       test.equal(true, threw);
       db.close();
-      test.done();        
+      test.done();
     });
   }
 }
 
 exports['Should correctly execute unordered batch using w:0'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -981,7 +981,7 @@ exports['Should correctly execute unordered batch using w:0'] = {
         test.equal(false, result.hasWriteErrors());
 
         db.close();
-        test.done();        
+        test.done();
       });
     });
   }
@@ -994,7 +994,7 @@ exports['Should correctly execute unordered batch using w:0'] = {
  *******************************************************************/
 exports['Should fail with journal write concern due to --nojournal ordered'] = {
   metadata: { requires: { topology: 'single', mongodb: '>2.5.4' }},
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -1023,7 +1023,7 @@ exports['Should fail with journal write concern due to --nojournal ordered'] = {
 
 exports['Should fail with w:2 and wtimeout write concern due single mongod instance ordered'] = {
   metadata: { requires: { topology: 'single', mongodb: '>2.5.4' }},
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -1057,7 +1057,7 @@ exports['Should fail with w:2 and wtimeout write concern due single mongod insta
  *******************************************************************/
 exports['Should fail with journal write concern due to --nojournal unordered'] = {
   metadata: { requires: { topology: 'single', mongodb: '>2.5.4' }},
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -1086,7 +1086,7 @@ exports['Should fail with journal write concern due to --nojournal unordered'] =
 
 exports['Should fail with w:2 and wtimeout write concern due single mongod instance unordered'] = {
   metadata: { requires: { topology: 'single', mongodb: '>2.5.4' }},
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -1100,7 +1100,7 @@ exports['Should fail with w:2 and wtimeout write concern due single mongod insta
       batch.insert({a:2});
 
       // Execute the operations
-      batch.execute({w:2, wtimeout:1000}, function(err, result) {        
+      batch.execute({w:2, wtimeout:1000}, function(err, result) {
         test.ok(err != null);
         test.ok(err.code != null);
         test.ok(err.errmsg != null);
@@ -1109,6 +1109,37 @@ exports['Should fail with w:2 and wtimeout write concern due single mongod insta
         db.close();
         test.done();
       });
+    });
+  }
+}
+
+exports['should correctly return the number of operations in the bulk'] = {
+  metadata: { requires: { topology: 'single', mongodb: '>2.5.4' }},
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      // Get the collection
+      var col = db.collection('batch_write_concerns_ops_1');
+      // Initialize the Ordered Batch
+      var batch = col.initializeOrderedBulkOp();
+      batch.insert({a:1});
+      batch.find({}).upsert().update({$set: {b: 1}});
+
+      // Check how many ops we have
+      test.equal(2, batch.length());
+
+      var batch = col.initializeUnorderedBulkOp();
+      batch.insert({a:1});
+      batch.find({}).upsert().update({$set: {b: 1}});
+
+      // Check how many ops we have
+      test.equal(2, batch.length());
+
+      // Finish up test
+      db.close();
+      test.done();
     });
   }
 }
