@@ -417,3 +417,21 @@ exports['should correctly list collection names with batchSize 1 for 2.8 or high
     });
   }
 }
+
+/**
+ * @ignore
+ */
+exports.shouldCrashOnBadPoolSize = {
+  metadata: { requires: { topology: 'single' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:'bad!'});
+    test.throws(function() {
+      db.open(function() {
+        db.close();
+      });
+    });
+    test.done();
+  }
+}
