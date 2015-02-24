@@ -1,6 +1,7 @@
 "use strict";
 
 var TravisFilter = function(name) {
+  console.dir(process.env)
   name = name || "ON_TRAVIS";
   // Get environmental variables that are known
   this.filter = function(test) {
