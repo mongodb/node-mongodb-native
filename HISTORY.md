@@ -1,3 +1,7 @@
+1.1.14 02-26-2015
+-----------------
+- NODE-374 correctly adding passive secondaries to the list of eligable servers for reads
+
 1.1.13 02-24-2015
 -----------------
 - NODE-365 mongoDB native node.js driver infinite reconnect attempts (fixed issue around handling of retry attempts)
