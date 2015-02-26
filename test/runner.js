@@ -55,7 +55,7 @@ var Configuration = function(options) {
   return function(context) {
     mongo = require('..');
 
-    return {    
+    return {
       start: function(callback) {
         var self = this;
         if(skipStart) return callback();
@@ -70,7 +70,7 @@ var Configuration = function(options) {
               callback();
             });
           });
-          
+
           // Connect
           server.connect();
         });
@@ -87,14 +87,16 @@ var Configuration = function(options) {
 
           // Finish up the tests
           callback();
-        });        
+        });
       },
 
-      restart: function(callback) {
-        manager.restart({purge:true, kill:true}, function() {
+      restart: function(options, callback) {
+        if(typeof options == 'function') callback = options, options = {purge:true, kill:true};
+
+        manager.restart(options, function() {
           setTimeout(function() {
             callback();
-          }, 1000);          
+          }, 1000);
         });
       },
 
@@ -160,9 +162,9 @@ var testFiles =[
   , '/test/tests/functional/extend_cursor_tests.js'
   , '/test/tests/functional/pool_tests.js'
   , '/test/tests/functional/connection_tests.js'
-  , '/test/tests/functional/single_topology_tests.js'
   , '/test/tests/functional/rs_topology_tests.js'
   , '/test/tests/functional/rs_topology_state_tests.js'
+  , '/test/tests/functional/single_topology_tests.js'
   , '/test/tests/functional/operation_example_tests.js'
   , '/test/tests/functional/cursor_tests.js'
   , '/test/tests/functional/error_tests.js'
@@ -228,7 +230,7 @@ if(argv.r) {
 
 // Are we running a functional test
 if(argv.t == 'functional') {
-  // 
+  //
   // Single server
   var config = {
       host: 'localhost'
@@ -244,7 +246,7 @@ if(argv.t == 'functional') {
   }
 
   if(argv.e == 'replicaset') {
-    // 
+    //
     // Replicaset
     config = {
         host: 'localhost'
@@ -258,7 +260,7 @@ if(argv.t == 'functional') {
             host: 'localhost'
           , port: 31000
         }], { setName: 'rs' });
-      }  
+      }
       , manager: new ReplSetManager({
           dbpath: path.join(path.resolve('db'))
         , logpath: path.join(path.resolve('db'))
@@ -268,7 +270,7 @@ if(argv.t == 'functional') {
       })
     }
   } else if(argv.e == 'sharded') {
-    // 
+    //
     // Sharded
     config = {
         host: 'localhost'
