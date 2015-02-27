@@ -8,7 +8,7 @@ menu:
 prev: ../../tutorials/changes-from-1.0
 next: ../../tutorials/connecting
 title: Driver Enterprise Features
-weight: 3
+weight: 61
 ---
 
 # Enterprise Driver Features
