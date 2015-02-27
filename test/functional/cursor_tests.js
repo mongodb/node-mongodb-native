@@ -10,7 +10,7 @@ exports.cursorShouldBeAbleToResetOnToArrayRunningQueryAgain = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -50,7 +50,7 @@ exports['cursor should close after first next operation'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -65,7 +65,7 @@ exports['cursor should close after first next operation'] = {
 
             cursor.close();
             db.close();
-            test.done();            
+            test.done();
           });
         });
       });
@@ -81,7 +81,7 @@ exports['cursor should trigger getMore'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -95,7 +95,7 @@ exports['cursor should trigger getMore'] = {
             test.equal(null, err);
 
             db.close();
-            test.done();            
+            test.done();
           });
         });
       });
@@ -111,7 +111,7 @@ exports.shouldCorrectlyExecuteCursorExplain = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -140,7 +140,7 @@ exports.shouldCorrectlyExecuteCursorCount = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -213,7 +213,7 @@ exports.shouldCorrectlyExecuteSortOnCursor = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -261,9 +261,9 @@ exports.shouldCorrectlyExecuteSortOnCursor = {
           var cursor = collection.find();
           cursor.nextObject(function(err, doc) {
             try {
-              cursor.sort(['a']);  
+              cursor.sort(['a']);
             } catch(err) {
-              test.equal("Cursor is closed", err.message);finished();            
+              test.equal("Cursor is closed", err.message);finished();
             }
           });
 
@@ -278,7 +278,7 @@ exports.shouldCorrectlyExecuteSortOnCursor = {
 
         insert(function() {
           f();
-        });      
+        });
       });
     });
   }
@@ -292,7 +292,7 @@ exports.shouldCorrectlyThrowErrorOnToArrayWhenMissingCallback = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -322,7 +322,7 @@ exports.shouldCorrectlyThrowErrorOnToArrayWhenMissingCallback = {
 
         insert(function() {
           finished();
-        });      
+        });
       });
     });
   }
@@ -336,7 +336,7 @@ exports.shouldThrowErrorOnEachWhenMissingCallback = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -366,7 +366,7 @@ exports.shouldThrowErrorOnEachWhenMissingCallback = {
 
         insert(function() {
           finished();
-        });      
+        });
       });
     });
   }
@@ -380,7 +380,7 @@ exports.shouldCorrectlyHandleLimitOnCursor = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -400,7 +400,7 @@ exports.shouldCorrectlyHandleLimitOnCursor = {
         function finished() {
           collection.find().limit(5).toArray(function(err, items) {
             test.equal(5, items.length);
-            
+
             // Let's close the db
             db.close();
             test.done();
@@ -409,7 +409,7 @@ exports.shouldCorrectlyHandleLimitOnCursor = {
 
         insert(function() {
           finished();
-        });      
+        });
       });
     });
   }
@@ -423,7 +423,7 @@ exports.shouldCorrectlyHandleNegativeOneLimitOnCursor = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -443,7 +443,7 @@ exports.shouldCorrectlyHandleNegativeOneLimitOnCursor = {
         function finished() {
           collection.find().limit(-1).toArray(function(err, items) {
             test.equal(1, items.length);
-            
+
             // Let's close the db
             db.close();
             test.done();
@@ -452,7 +452,7 @@ exports.shouldCorrectlyHandleNegativeOneLimitOnCursor = {
 
         insert(function() {
           finished();
-        });      
+        });
       });
     });
   }
@@ -466,7 +466,7 @@ exports.shouldCorrectlyHandleAnyNegativeLimitOnCursor = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -486,7 +486,7 @@ exports.shouldCorrectlyHandleAnyNegativeLimitOnCursor = {
         function finished() {
           collection.find().limit(-5).toArray(function(err, items) {
             test.equal(5, items.length);
-            
+
             // Let's close the db
             db.close();
             test.done();
@@ -495,7 +495,7 @@ exports.shouldCorrectlyHandleAnyNegativeLimitOnCursor = {
 
         insert(function() {
           finished();
-        });      
+        });
       });
     });
   }
@@ -509,7 +509,7 @@ exports.shouldCorrectlyReturnErrorsOnIllegalLimitValues = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -518,7 +518,7 @@ exports.shouldCorrectlyReturnErrorsOnIllegalLimitValues = {
         collection.insert({'a':1}, configuration.writeConcernMax(), function(err, docs) {});
         collection.find(function(err, cursor) {
           try {
-            cursor.limit('not-an-integer');          
+            cursor.limit('not-an-integer');
           } catch(err) {
             test.equal("limit requires an integer", err.message);
           }
@@ -538,9 +538,9 @@ exports.shouldCorrectlyReturnErrorsOnIllegalLimitValues = {
             } catch(err) {
               test.equal("Cursor is closed", err.message);
             }
-              
+
             collection.find(function(err, cursor) {
-              cursor.nextObject(function(err, doc) {          
+              cursor.nextObject(function(err, doc) {
                 try {
                   cursor.limit(1);
                 } catch(err) {
@@ -555,7 +555,7 @@ exports.shouldCorrectlyReturnErrorsOnIllegalLimitValues = {
                 }
 
                 db.close();
-                test.done();                
+                test.done();
               });
             });
 
@@ -580,7 +580,7 @@ exports.shouldCorrectlySkipRecordsOnCursor = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -631,7 +631,7 @@ exports.shouldCorrectlySkipRecordsOnCursor = {
 
         insert(function() {
           finished();
-        });      
+        });
       });
     });
   }
@@ -645,7 +645,7 @@ exports.shouldCorrectlyReturnErrorsOnIllegalSkipValues = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -661,7 +661,7 @@ exports.shouldCorrectlyReturnErrorsOnIllegalSkipValues = {
         var cursor = collection.find()
         cursor.nextObject(function(err, doc) {
           try {
-            cursor.skip(1);  
+            cursor.skip(1);
           } catch(err) {
             test.equal("Cursor is closed", err.message);
           }
@@ -669,7 +669,7 @@ exports.shouldCorrectlyReturnErrorsOnIllegalSkipValues = {
           var cursor2 = collection.find()
           cursor2.close(function(err, cursor) {
             try {
-              cursor2.skip(1);  
+              cursor2.skip(1);
             } catch(err) {
               test.equal("Cursor is closed", err.message);
             }
@@ -691,7 +691,7 @@ exports.shouldReturnErrorsOnIllegalBatchSizes = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -744,7 +744,7 @@ exports.shouldCorrectlyHandleChangesInBatchSizes = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -823,7 +823,7 @@ exports.shouldCorrectlyHandleBatchSize = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -886,7 +886,7 @@ exports.shouldHandleWhenLimitBiggerThanBatchSize = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -944,7 +944,7 @@ exports.shouldHandleLimitLessThanBatchSize = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -992,7 +992,7 @@ exports.shouldHandleSkipLimitChaining = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -1048,7 +1048,7 @@ exports.shouldCorrectlyHandleLimitSkipChainingInline = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -1104,7 +1104,7 @@ exports.shouldCloseCursorNoQuerySent = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -1129,7 +1129,7 @@ exports.shouldCorrectlyRefillViaGetMoreCommand = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var COUNT = 1000;
@@ -1177,7 +1177,7 @@ exports.shouldCorrectlyRefillViaGetMoreCommand = {
                     collection.count(function(err, count) {
                       test.equal(COUNT, count);
                       test.equal(total, total2);
-                      
+
                       // Let's close the db
                       db.close();
                       test.done();
@@ -1205,7 +1205,7 @@ exports.shouldCorrectlyRefillViaGetMoreAlternativeCollection = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -1252,7 +1252,7 @@ exports.shouldCorrectlyRefillViaGetMoreAlternativeCollection = {
                     collection.count(function(err, count) {
                       test.equal(1000, count);
                       test.equal(total, total2);
-                      
+
                       // Let's close the db
                       db.close();
                       test.done();
@@ -1280,7 +1280,7 @@ exports.shouldCloseCursorAfterQueryHasBeenSent = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -1310,7 +1310,7 @@ exports.shouldCorrectlyExecuteCursorCountWithFields = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -1343,7 +1343,7 @@ exports.shouldCorrectlyCountWithFieldsUsingExclude = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -1371,7 +1371,7 @@ exports.shouldCorrectlyExecuteEnsureIndexWithNoCallback = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var docs = [];
@@ -1413,7 +1413,7 @@ exports['Should correctly execute count on cursor'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var docs = [];
@@ -1464,7 +1464,7 @@ exports['should be able to stream documents'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var docs = [];
@@ -1554,7 +1554,7 @@ exports['immediately destroying a stream prevents the query from executing'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var i = 0
@@ -1581,7 +1581,7 @@ exports['immediately destroying a stream prevents the query from executing'] = {
           stream.destroy();
 
           function done (e) {
-            return function(err) {              
+            return function(err) {
               test.equal(++doneCalled, 1);
               test.equal(undefined, err);
               test.strictEqual(0, i);
@@ -1604,7 +1604,7 @@ exports['destroying a stream stops it'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -1665,7 +1665,7 @@ exports['cursor stream errors'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -1688,7 +1688,7 @@ exports['cursor stream errors'] = {
 
           var stream = collection.find({}, { batchSize: 5 }).stream();
 
-          stream.on('data', function (doc) {            
+          stream.on('data', function (doc) {
             if (++i === 5) {
               client.close();
             }
@@ -1699,7 +1699,7 @@ exports['cursor stream errors'] = {
           stream.on('error', done('error'));
 
           function done (e) {
-            return function(err) {              
+            return function(err) {
               ++finished;
               setTimeout(function () {
                 test.equal(5, i);
@@ -1724,7 +1724,7 @@ exports['cursor stream errors connection force closed'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -1747,7 +1747,7 @@ exports['cursor stream errors connection force closed'] = {
 
           var stream = collection.find({}, { batchSize: 5 }).stream();
 
-          stream.on('data', function (doc) {            
+          stream.on('data', function (doc) {
             if (++i === 5) {
               client.serverConfig.connections()[0].destroy();
             }
@@ -1781,7 +1781,7 @@ exports['cursor stream pipe'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var fs = require('fs');
@@ -1842,7 +1842,7 @@ exports.shouldCloseDeadTailableCursors = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     // http://www.mongodb.org/display/DOCS/Tailable+Cursors
@@ -1898,7 +1898,7 @@ exports.shouldAwaitData = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     // http://www.mongodb.org/display/DOCS/Tailable+Cursors
@@ -1931,7 +1931,7 @@ exports.shouldNotAwaitDataWhenFalse = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     // NODE-98
@@ -1961,7 +1961,7 @@ exports.shouldCorrectExecuteExplainHonoringLimit = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var docs = []
@@ -2021,7 +2021,7 @@ exports.shouldNotExplainWhenFalse = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var doc = { "name" : "camera", "_keywords" : [ "compact", "ii2gd", "led", "red", "aet" ]};
@@ -2048,7 +2048,7 @@ exports.shouldFailToSetReadPreferenceOnCursor = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -2056,12 +2056,12 @@ exports.shouldFailToSetReadPreferenceOnCursor = {
     // Establish connection to db
     db.open(function(err, db) {
       try {
-        db.collection('shouldFailToSetReadPreferenceOnCursor').find().setReadPreference("notsecondary");      
+        db.collection('shouldFailToSetReadPreferenceOnCursor').find().setReadPreference("notsecondary");
         test.ok(false);
       } catch (err) {
       }
 
-      db.collection('shouldFailToSetReadPreferenceOnCursor').find().setReadPreference("secondary");      
+      db.collection('shouldFailToSetReadPreferenceOnCursor').find().setReadPreference("secondary");
 
       db.close();
       test.done()
@@ -2077,7 +2077,7 @@ exports.shouldNotFailDueToStackOverflowEach = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -2108,7 +2108,7 @@ exports.shouldNotFailDueToStackOverflowEach = {
               collection.find({}).each(function(err, item) {
                 if(item == null) {
                   var e = new Date().getTime();
-                  
+
                   test.equal(30000, total);
                   db.close();
                   test.done();
@@ -2132,7 +2132,7 @@ exports.shouldNotFailDueToStackOverflowToArray = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -2187,7 +2187,7 @@ exports.shouldCorrectlySkipAndLimit = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -2220,7 +2220,7 @@ exports.shouldFailToTailANormalCollection = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -2232,6 +2232,8 @@ exports.shouldFailToTailANormalCollection = {
       collection.insert(docs, configuration.writeConcernMax(), function(err, ids) {
         collection.find({}, {tailable:true}).each(function(err, doc) {
           test.ok(err instanceof Error);
+          test.ok(typeof(err.code) === 'number');
+          
           db.close();
           test.done();
         });
@@ -2247,7 +2249,7 @@ exports.shouldCorrectlyUseFindAndCursorCount = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -2356,7 +2358,7 @@ exports['Terminate each after first document by returning false'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -2401,7 +2403,7 @@ exports['Should correctly handle maxTimeMS as part of findOne options'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -2438,7 +2440,7 @@ exports['Should correctly handle batchSize of 2'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -2448,20 +2450,20 @@ exports['Should correctly handle batchSize of 2'] = {
 
       db.collection('should_correctly_handle_batchSize_2').insert([{ x: 1 }, { x: 2 }, { x: 3 }], function(error) {
         test.equal(null, err);
-   
+
         db.collection('should_correctly_handle_batchSize_2').find({}, {batchSize: 2}, function(error, cursor) {
           test.equal(null, err);
-   
+
           cursor.nextObject(function(err, obj) {
             test.equal(null, err);
             db.close();
 
             cursor.nextObject(function(err, obj) {
               test.equal(null, err);
-    
+
               cursor.nextObject(function(err, obj) {
-                test.ok(err != null);   
-                test.done();             
+                test.ok(err != null);
+                test.done();
               });
             });
           });
