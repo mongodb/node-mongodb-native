@@ -8,7 +8,7 @@ menu:
   main:
     parent: tutorials
 prev: ../../tutorials/tracing
-next: ../../tutorials/connecting
+next: ../../tutorials/enterprise_features
 title: Migrating to 2.X
 weight: 60
 ---
@@ -69,4 +69,3 @@ The GridStore object has had some major changes due to issues discovered by user
 
 ### MongoClient
 MongoClient now only has the class method `connect`. Constructing of a new MongoClient using `Server`, `ReplSet` or `Mongos` has been removed due to the confusion it caused in duplicating the way one can build a topology connection using `Db` in 1.4. `MongoClient.connect` is the recommended way to connect to a MongoDB topology.
-

@@ -12,7 +12,7 @@ var format = require('util').format;
  */
 exports['Should Correctly Authenticate using kerberos with MongoClient'] = {
   metadata: { requires: { topology: 'kerberos', os: "!win32"  } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Db = configuration.require.Db
@@ -43,7 +43,7 @@ exports['Should Correctly Authenticate using kerberos with MongoClient'] = {
  */
 exports['Should Correctly Authenticate using kerberos with MongoClient and then reconnect'] = {
   metadata: { requires: { topology: 'kerberos', os: "!win32"  } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Db = configuration.require.Db
@@ -65,7 +65,7 @@ exports['Should Correctly Authenticate using kerberos with MongoClient and then 
         test.equal(true, doc.kerberos);
 
         db.serverConfig.once('reconnect', function() {
-          // Await reconnect and re-authentication    
+          // Await reconnect and re-authentication
           db.db('kerberos').collection('test').findOne(function(err, doc) {
             test.equal(null, err);
             test.equal(true, doc.kerberos);
@@ -73,7 +73,7 @@ exports['Should Correctly Authenticate using kerberos with MongoClient and then 
             // Attempt disconnect again
             db.serverConfig.connections()[0].destroy();
 
-            // Await reconnect and re-authentication    
+            // Await reconnect and re-authentication
             db.db('kerberos').collection('test').findOne(function(err, doc) {
               test.equal(null, err);
               test.equal(true, doc.kerberos);
@@ -82,7 +82,7 @@ exports['Should Correctly Authenticate using kerberos with MongoClient and then 
             });
           });
         })
-        
+
         // Force close
         db.serverConfig.connections()[0].destroy();
       });
@@ -95,7 +95,7 @@ exports['Should Correctly Authenticate using kerberos with MongoClient and then 
  */
 exports['Should Correctly Authenticate authenticate method manually'] = {
   metadata: { requires: { topology: 'kerberos', os: "!win32"  } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Db = configuration.require.Db
@@ -129,7 +129,7 @@ exports['Should Correctly Authenticate authenticate method manually'] = {
  */
 exports['Should Fail to Authenticate due to illegal service name'] = {
   metadata: { requires: { topology: 'kerberos', os: "!win32"  } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Db = configuration.require.Db
@@ -154,7 +154,7 @@ exports['Should Fail to Authenticate due to illegal service name'] = {
  */
 exports['Should Correctly Authenticate on Win32 using kerberos with MongoClient'] = {
   metadata: { requires: { topology: 'kerberos', os: "win32" } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Db = configuration.require.Db
@@ -187,7 +187,7 @@ exports['Should Correctly Authenticate on Win32 using kerberos with MongoClient'
  */
 exports['Should Correctly Authenticate using kerberos on Win32 with MongoClient and then reconnect'] = {
   metadata: { requires: { topology: 'kerberos', os: "win32" } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Db = configuration.require.Db
@@ -211,7 +211,7 @@ exports['Should Correctly Authenticate using kerberos on Win32 with MongoClient 
         test.equal(true, doc.kerberos);
 
         db.serverConfig.once('reconnect', function() {
-          // Await reconnect and re-authentication    
+          // Await reconnect and re-authentication
           db.db('kerberos').collection('test').findOne(function(err, doc) {
             test.equal(null, err);
             test.equal(true, doc.kerberos);
@@ -219,7 +219,7 @@ exports['Should Correctly Authenticate using kerberos on Win32 with MongoClient 
             // Attempt disconnect again
             db.serverConfig.connections()[0].destroy();
 
-            // Await reconnect and re-authentication    
+            // Await reconnect and re-authentication
             db.db('kerberos').collection('test').findOne(function(err, doc) {
               test.equal(null, err);
               test.equal(true, doc.kerberos);
@@ -228,7 +228,7 @@ exports['Should Correctly Authenticate using kerberos on Win32 with MongoClient 
             });
           });
         })
-        
+
         // Force close
         db.serverConfig.connections()[0].destroy();
       });
@@ -241,7 +241,7 @@ exports['Should Correctly Authenticate using kerberos on Win32 with MongoClient 
  */
 exports['Should Correctly Authenticate on Win32 authenticate method manually'] = {
   metadata: { requires: { topology: 'kerberos', os: "win32" } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Db = configuration.require.Db
@@ -277,7 +277,7 @@ exports['Should Correctly Authenticate on Win32 authenticate method manually'] =
  */
 exports['Should Fail to Authenticate due to illegal service name on win32'] = {
   metadata: { requires: { topology: 'kerberos', os: "win32" } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Db = configuration.require.Db

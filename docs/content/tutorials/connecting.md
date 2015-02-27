@@ -5,14 +5,13 @@ date: 2013-07-01
 menu:
   main:
     parent: tutorials
-prev: ../../tutorials/changes-from-1.0
+prev: ../../tutorials/enterprise_features
 next: ../../tutorials/connection_failures
 title: Connecting To MongoDB
 weight: 1
 ---
 
 # Connecting To MongoDB
----------------------------------------
 
 Connecting to MongoDB using the driver is primarily done using the `MongoClient.connect` method and a URI. Let's look at how we connect to a couple of different server topologies.
 
@@ -32,7 +31,7 @@ MongoClient.connect(url, function(err, db) {
   console.log("Connected correctly to server");
 
   db.close();
-});    
+});
 ```
 
 Let's break down the `URI` string we passed as the first argument to MongoClient.connect.
@@ -57,7 +56,7 @@ MongoClient.connect(url, function(err, db) {
   console.log("Connected correctly to server");
 
   db.close();
-});    
+});
 ```
 
 Let's break down the `URI` string.
@@ -83,7 +82,7 @@ MongoClient.connect(url, function(err, db) {
   console.log("Connected correctly to server");
 
   db.close();
-});    
+});
 ```
 
 Let's break down the `URI` string.
@@ -170,7 +169,7 @@ var url = 'mongodb://dave:password@localhost:27017/myproject';
 MongoClient.connect(url, {
     db: {
       raw: true
-    }, 
+    },
     server: {
       poolSize: 10
     }
@@ -212,7 +211,7 @@ Let's look at the individual options for each of the top level fields.
 * `sslPass`, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).
 * `autoReconnect`, {Boolean, default: true} Reconnect on error.
 * `socketOptions.noDelay`, {Boolean, default: true} TCP Socket NoDelay option.
-* `socketOptions.keepAlive`, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start. 
+* `socketOptions.keepAlive`, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start.
 * `socketOptions.connectTimeoutMS`, {Number, default: 0} TCP Connection timeout setting.
 * `socketOptions.socketTimeoutMS`, {Number, default: 0} TCP Socket timeout setting.
 
@@ -231,7 +230,7 @@ Let's look at the individual options for each of the top level fields.
 * `sslKey`, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).
 * `sslPass`, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).
 * `socketOptions.noDelay`, {Boolean, default: true} TCP Socket NoDelay option.
-* `socketOptions.keepAlive`, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start. 
+* `socketOptions.keepAlive`, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start.
 * `socketOptions.connectTimeoutMS`, {Number, default: 0} TCP Connection timeout setting.
 * `socketOptions.socketTimeoutMS`, {Number, default: 0} TCP Socket timeout setting.
 
@@ -248,6 +247,6 @@ Let's look at the individual options for each of the top level fields.
 * `sslKey`, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).
 * `sslPass`, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).
 * `socketOptions.noDelay`, {Boolean, default: true} TCP Socket NoDelay option.
-* `socketOptions.keepAlive`, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start. 
+* `socketOptions.keepAlive`, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start.
 * `socketOptions.connectTimeoutMS`, {Number, default: 0} TCP Connection timeout setting.
 * `socketOptions.socketTimeoutMS`, {Number, default: 0} TCP Socket timeout setting.
