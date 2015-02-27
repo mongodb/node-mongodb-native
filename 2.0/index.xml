@@ -13,210 +13,6 @@
     <atom:link href="/node-mongodb-native/2.0/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
-      <title>Connection Failures</title>
-      <link>/node-mongodb-native/2.0/tutorials/connection_failures/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
-      
-      <guid>/node-mongodb-native/2.0/tutorials/connection_failures/</guid>
-      <description>
-
-&lt;h1 id=&#34;connection-failures-and-retries:878abfdd112f1319523c821f1974dcfd&#34;&gt;Connection Failures and Retries&lt;/h1&gt;
-
-&lt;p&gt;This comes up a lot because there is some confusion about how the driver works when it comes to Socket timeouts and retries. This Tutorial attempts to clarify the driver&amp;rsquo;s behavior and explains why, for some legacy reasons as well as for some design reasons, the driver works the way it does.&lt;/p&gt;
-
-&lt;p&gt;Let&amp;rsquo;s start off by looking at the Simple case of a single server connection and how it behaves when tweaking the options that control the driver behavior on server disconnects.&lt;/p&gt;
-
-&lt;p&gt;First let&amp;rsquo;s start with a simple script performing inserts and find, and running against a server on &lt;code&gt;localhost:27017&lt;/code&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
-  , f = require(&#39;util&#39;).format;
-
-MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, function(err, db) {
-  var col = db.collection(&#39;t&#39;);
-
-  setInterval(function() {
-    col.insert({a:1}, function(err, r) {
-      console.log(&amp;quot;insert&amp;quot;)
-      console.log(err)
-
-      col.findOne({}, function(err, doc) {
-        console.log(&amp;quot;findOne&amp;quot;)
-        console.log(err)
-      });
-    })
-  }, 1000)
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Start the script and notice how it prints out &lt;code&gt;insert&lt;/code&gt; and &lt;code&gt;findOne&lt;/code&gt; every second. Now shut down the &lt;code&gt;mongod&lt;/code&gt; process and notice how you stop seeing the console printouts. What is happening is that the server is buffering operations until the &lt;code&gt;mongod&lt;/code&gt; returns because the two parameters controlling this behavior are set to the default value. These parameters are:&lt;/p&gt;
-
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th&gt;&lt;code&gt;Parameter&lt;/code&gt;&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;&lt;code&gt;Value&lt;/code&gt;&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;&lt;code&gt;Description&lt;/code&gt;&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td&gt;autoReconnect&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;true&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Driver will attempt to auto reconnect&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td&gt;bufferMaxEntries&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;-1&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Max Number of operations buffered while waiting for server reconnect. Driver will error out all operations if the number of buffered operations goes over the limit set&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;p&gt;By default the driver attempts to reconnect and buffers all operations until it can. This is due to backward compatibility.&lt;/p&gt;
-
-&lt;p&gt;Now let&amp;rsquo;s try to disable the &lt;code&gt;bufferMaxEntries&lt;/code&gt; by setting it to &lt;code&gt;0&lt;/code&gt; and see what happens.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
-  , f = require(&#39;util&#39;).format;
-
-MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, {
-    db: { bufferMaxEntries: 0 }
-  }, function(err, db) {
-  var col = db.collection(&#39;t&#39;);
-
-  setInterval(function() {
-    col.insert({a:1}, function(err, r) {
-      console.log(&amp;quot;insert&amp;quot;)
-      console.log(err)
-
-      col.findOne({}, function(err, doc) {
-        console.log(&amp;quot;findOne&amp;quot;)
-        console.log(err)
-      });
-    })
-  }, 1000)
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Start the script running and then shut down the &lt;code&gt;mongod&lt;/code&gt; process. Notice how all operations are now erroring out instead of just being buffered? Now restart the &lt;code&gt;mongod&lt;/code&gt; service and you will see the the operations once again correctly being executed.&lt;/p&gt;
-
-&lt;p&gt;So what happens if we disable &lt;code&gt;autoReconnect&lt;/code&gt; by setting it to &lt;code&gt;false&lt;/code&gt;? Let&amp;rsquo;s take a look.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
-  , f = require(&#39;util&#39;).format;
-
-MongoClient.connect(&#39;mongodb://localhost:27017/test?autoReconnect=false&#39;, function(err, db) {
-  var col = db.collection(&#39;t&#39;);
-
-  setInterval(function() {
-    col.insert({a:1}, function(err, r) {
-      console.log(&amp;quot;insert&amp;quot;)
-      console.log(err)
-
-      col.findOne({}, function(err, doc) {
-        console.log(&amp;quot;findOne&amp;quot;)
-        console.log(err)
-      });
-    })
-  }, 1000)
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;When you shut down the &lt;code&gt;mongod&lt;/code&gt; process, the driver stops processing operations and keeps buffering them due to &lt;code&gt;bufferMaxEntries&lt;/code&gt; being &lt;code&gt;-1&lt;/code&gt; by default meaning buffer all operations. When you bring the &lt;code&gt;mongod&lt;/code&gt; process back up you will notice how it does not change the fact that we are buffering. This is a legacy behavior and less than ideal. So you will want to set &lt;code&gt;bufferMaxEntries&lt;/code&gt; to 0 or a low number if you wish to turn off &lt;code&gt;autoReconnect&lt;/code&gt;.&lt;/p&gt;
-
-&lt;h2 id=&#34;the-matrix-of-behavior:878abfdd112f1319523c821f1974dcfd&#34;&gt;The Matrix of Behavior&lt;/h2&gt;
-
-&lt;p&gt;Let&amp;rsquo;s put all the possible values of &lt;code&gt;autoReconnect&lt;/code&gt; and &lt;code&gt;bufferMaxEntries&lt;/code&gt; in a table so we can more easily understand the behavior.&lt;/p&gt;
-
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th align=&#34;left&#34;&gt;&lt;code&gt;autoReconnect&lt;/code&gt;&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;&lt;code&gt;bufferMaxEntries&lt;/code&gt;&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;&lt;code&gt;Description&lt;/code&gt;&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;true&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;0&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Auto reconnect but do not buffer operations, error out until server reconnect&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;true&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;-1&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Auto reconnect, buffer all operations until memory run out&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;true&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;&amp;gt; 0&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Auto reconnect, buffer all operations until the bufferMaxEntries is reached and then error out all buffered operations&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;false&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;0&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Auto reconnect is off, do not buffer operations, error out all operations&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;false&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;-1&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Auto reconnect is off, buffer all operations until memory run out&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;false&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;&amp;gt; 0&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Auto reconnect is off, buffer all operations until the bufferMaxEntries is reached and then error out all buffered operations&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;p&gt;So why is this the case? Well, the main reason is a combination of the asynchronous behavior of &lt;code&gt;node.js&lt;/code&gt; as well as &lt;code&gt;Replicasets&lt;/code&gt;. When you are using a single server the behavior might be a bit mystifying, but it makes sense in the context of the &lt;code&gt;Replicaset&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;Say you have a &lt;code&gt;Replicaset&lt;/code&gt; where a new primary is elected. If the driver does not buffer the operations, it will have to error out all operations until there is a new primary available in the set. This complicates people&amp;rsquo;s code as every operation could potentially fail and thus the driver a long time ago took the decision to make this transparent to the user by buffering operations until the new &lt;code&gt;primary&lt;/code&gt; is available and then replaying them. &lt;code&gt;bufferMaxEntries&lt;/code&gt; was added later to allow developers to control this behavior themselves if they wished to be instantly notified about write errors f.ex instead of letting the driver handle it.&lt;/p&gt;
-
-&lt;h2 id=&#34;the-confusion:878abfdd112f1319523c821f1974dcfd&#34;&gt;The Confusion&lt;/h2&gt;
-
-&lt;p&gt;A lot of the confusion comes from mistaking &lt;code&gt;socketTimeoutMS&lt;/code&gt; with how the async driver works. &lt;code&gt;socketTimeoutMS&lt;/code&gt; only applies to sockets if they have successfully connected to the server, but have not been in use and they reach the &lt;code&gt;socketTimeoutMS&lt;/code&gt;. In contrast, &lt;code&gt;connectionTimeoutMS&lt;/code&gt; applies only to the &lt;em&gt;initial&lt;/em&gt; server connection process timeout.  The &amp;lsquo;connectionTimeoutMS&amp;rsquo; is independent of the &lt;code&gt;socketTimeoutMS&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;However, some people set &lt;code&gt;socketTimeoutMS&lt;/code&gt; expecting it to influence timeouts for operations. But as we have seen above the &lt;code&gt;autoReconnect&lt;/code&gt; and &lt;code&gt;bufferMaxEntries&lt;/code&gt; are the two settings that control that behavior.&lt;/p&gt;
-
-&lt;p&gt;It&amp;rsquo;s worth noting that you should ensure you have a reasonable &lt;code&gt;socketTimeoutMS&lt;/code&gt;. A lot of people set it way way too low and find themselves with timeouts happening all the time as operations are infrequent enough to cause constant connection closing and reconnect events.&lt;/p&gt;
-
-&lt;p&gt;The rule of thumb I always impart is:&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;Set &lt;em&gt;socketTimeoutMS&lt;/em&gt; to at least &lt;code&gt;2-3x&lt;/code&gt; the longest running operation in your application or the interval between operations, too ensure you don&amp;rsquo;t timeout long running operations or servers where there are big gaps of time between operations.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&#34;what-you-are-probably-looking-for:878abfdd112f1319523c821f1974dcfd&#34;&gt;What You are Probably Looking For&lt;/h2&gt;
-
-&lt;p&gt;Most people who start changing &lt;code&gt;socketTimeoutMS&lt;/code&gt; are actually looking for the &lt;code&gt;maxTimeMS&lt;/code&gt; property to limit the time a query runs against the server before it gets aborted. Let&amp;rsquo;s look at how to apply this property on a query.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
-  , f = require(&#39;util&#39;).format;
-
-MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, function(err, db) {
-  var cursor = db.collection(&#39;t&#39;).find({}).maxTimeMS(1000);
-  cursor.toArray(function(err, docs) {
-    console.dir(docs)
-    db.close();
-  });
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This executes a query and sets the &lt;code&gt;maxTimeMS&lt;/code&gt; property to &lt;code&gt;1000&lt;/code&gt; milliseconds. If the query runs for longer than that time it will be aborted by the server.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
       <title>Connecting To MongoDB</title>
       <link>/node-mongodb-native/2.0/tutorials/connecting/</link>
       <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
@@ -479,6 +275,210 @@ MongoClient.connect(url, {
 &lt;li&gt;&lt;code&gt;socketOptions.connectTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Connection timeout setting.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;socketOptions.socketTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Socket timeout setting.&lt;/li&gt;
 &lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Connection Failures</title>
+      <link>/node-mongodb-native/2.0/tutorials/connection_failures/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/tutorials/connection_failures/</guid>
+      <description>
+
+&lt;h1 id=&#34;connection-failures-and-retries:878abfdd112f1319523c821f1974dcfd&#34;&gt;Connection Failures and Retries&lt;/h1&gt;
+
+&lt;p&gt;This comes up a lot because there is some confusion about how the driver works when it comes to Socket timeouts and retries. This Tutorial attempts to clarify the driver&amp;rsquo;s behavior and explains why, for some legacy reasons as well as for some design reasons, the driver works the way it does.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s start off by looking at the Simple case of a single server connection and how it behaves when tweaking the options that control the driver behavior on server disconnects.&lt;/p&gt;
+
+&lt;p&gt;First let&amp;rsquo;s start with a simple script performing inserts and find, and running against a server on &lt;code&gt;localhost:27017&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , f = require(&#39;util&#39;).format;
+
+MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, function(err, db) {
+  var col = db.collection(&#39;t&#39;);
+
+  setInterval(function() {
+    col.insert({a:1}, function(err, r) {
+      console.log(&amp;quot;insert&amp;quot;)
+      console.log(err)
+
+      col.findOne({}, function(err, doc) {
+        console.log(&amp;quot;findOne&amp;quot;)
+        console.log(err)
+      });
+    })
+  }, 1000)
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Start the script and notice how it prints out &lt;code&gt;insert&lt;/code&gt; and &lt;code&gt;findOne&lt;/code&gt; every second. Now shut down the &lt;code&gt;mongod&lt;/code&gt; process and notice how you stop seeing the console printouts. What is happening is that the server is buffering operations until the &lt;code&gt;mongod&lt;/code&gt; returns because the two parameters controlling this behavior are set to the default value. These parameters are:&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;code&gt;Parameter&lt;/code&gt;&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;&lt;code&gt;Value&lt;/code&gt;&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;&lt;code&gt;Description&lt;/code&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;autoReconnect&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;true&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Driver will attempt to auto reconnect&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;bufferMaxEntries&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;-1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Max Number of operations buffered while waiting for server reconnect. Driver will error out all operations if the number of buffered operations goes over the limit set&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;By default the driver attempts to reconnect and buffers all operations until it can. This is due to backward compatibility.&lt;/p&gt;
+
+&lt;p&gt;Now let&amp;rsquo;s try to disable the &lt;code&gt;bufferMaxEntries&lt;/code&gt; by setting it to &lt;code&gt;0&lt;/code&gt; and see what happens.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , f = require(&#39;util&#39;).format;
+
+MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, {
+    db: { bufferMaxEntries: 0 }
+  }, function(err, db) {
+  var col = db.collection(&#39;t&#39;);
+
+  setInterval(function() {
+    col.insert({a:1}, function(err, r) {
+      console.log(&amp;quot;insert&amp;quot;)
+      console.log(err)
+
+      col.findOne({}, function(err, doc) {
+        console.log(&amp;quot;findOne&amp;quot;)
+        console.log(err)
+      });
+    })
+  }, 1000)
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Start the script running and then shut down the &lt;code&gt;mongod&lt;/code&gt; process. Notice how all operations are now erroring out instead of just being buffered? Now restart the &lt;code&gt;mongod&lt;/code&gt; service and you will see the the operations once again correctly being executed.&lt;/p&gt;
+
+&lt;p&gt;So what happens if we disable &lt;code&gt;autoReconnect&lt;/code&gt; by setting it to &lt;code&gt;false&lt;/code&gt;? Let&amp;rsquo;s take a look.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , f = require(&#39;util&#39;).format;
+
+MongoClient.connect(&#39;mongodb://localhost:27017/test?autoReconnect=false&#39;, function(err, db) {
+  var col = db.collection(&#39;t&#39;);
+
+  setInterval(function() {
+    col.insert({a:1}, function(err, r) {
+      console.log(&amp;quot;insert&amp;quot;)
+      console.log(err)
+
+      col.findOne({}, function(err, doc) {
+        console.log(&amp;quot;findOne&amp;quot;)
+        console.log(err)
+      });
+    })
+  }, 1000)
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;When you shut down the &lt;code&gt;mongod&lt;/code&gt; process, the driver stops processing operations and keeps buffering them due to &lt;code&gt;bufferMaxEntries&lt;/code&gt; being &lt;code&gt;-1&lt;/code&gt; by default meaning buffer all operations. When you bring the &lt;code&gt;mongod&lt;/code&gt; process back up you will notice how it does not change the fact that we are buffering. This is a legacy behavior and less than ideal. So you will want to set &lt;code&gt;bufferMaxEntries&lt;/code&gt; to 0 or a low number if you wish to turn off &lt;code&gt;autoReconnect&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;the-matrix-of-behavior:878abfdd112f1319523c821f1974dcfd&#34;&gt;The Matrix of Behavior&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s put all the possible values of &lt;code&gt;autoReconnect&lt;/code&gt; and &lt;code&gt;bufferMaxEntries&lt;/code&gt; in a table so we can more easily understand the behavior.&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;&lt;code&gt;autoReconnect&lt;/code&gt;&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;&lt;code&gt;bufferMaxEntries&lt;/code&gt;&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;&lt;code&gt;Description&lt;/code&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;true&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;0&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Auto reconnect but do not buffer operations, error out until server reconnect&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;true&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;-1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Auto reconnect, buffer all operations until memory run out&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;true&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&amp;gt; 0&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Auto reconnect, buffer all operations until the bufferMaxEntries is reached and then error out all buffered operations&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;false&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;0&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Auto reconnect is off, do not buffer operations, error out all operations&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;false&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;-1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Auto reconnect is off, buffer all operations until memory run out&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;false&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&amp;gt; 0&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Auto reconnect is off, buffer all operations until the bufferMaxEntries is reached and then error out all buffered operations&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;So why is this the case? Well, the main reason is a combination of the asynchronous behavior of &lt;code&gt;node.js&lt;/code&gt; as well as &lt;code&gt;Replicasets&lt;/code&gt;. When you are using a single server the behavior might be a bit mystifying, but it makes sense in the context of the &lt;code&gt;Replicaset&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Say you have a &lt;code&gt;Replicaset&lt;/code&gt; where a new primary is elected. If the driver does not buffer the operations, it will have to error out all operations until there is a new primary available in the set. This complicates people&amp;rsquo;s code as every operation could potentially fail and thus the driver a long time ago took the decision to make this transparent to the user by buffering operations until the new &lt;code&gt;primary&lt;/code&gt; is available and then replaying them. &lt;code&gt;bufferMaxEntries&lt;/code&gt; was added later to allow developers to control this behavior themselves if they wished to be instantly notified about write errors f.ex instead of letting the driver handle it.&lt;/p&gt;
+
+&lt;h2 id=&#34;the-confusion:878abfdd112f1319523c821f1974dcfd&#34;&gt;The Confusion&lt;/h2&gt;
+
+&lt;p&gt;A lot of the confusion comes from mistaking &lt;code&gt;socketTimeoutMS&lt;/code&gt; with how the async driver works. &lt;code&gt;socketTimeoutMS&lt;/code&gt; only applies to sockets if they have successfully connected to the server, but have not been in use and they reach the &lt;code&gt;socketTimeoutMS&lt;/code&gt;. In contrast, &lt;code&gt;connectionTimeoutMS&lt;/code&gt; applies only to the &lt;em&gt;initial&lt;/em&gt; server connection process timeout.  The &amp;lsquo;connectionTimeoutMS&amp;rsquo; is independent of the &lt;code&gt;socketTimeoutMS&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;However, some people set &lt;code&gt;socketTimeoutMS&lt;/code&gt; expecting it to influence timeouts for operations. But as we have seen above the &lt;code&gt;autoReconnect&lt;/code&gt; and &lt;code&gt;bufferMaxEntries&lt;/code&gt; are the two settings that control that behavior.&lt;/p&gt;
+
+&lt;p&gt;It&amp;rsquo;s worth noting that you should ensure you have a reasonable &lt;code&gt;socketTimeoutMS&lt;/code&gt;. A lot of people set it way way too low and find themselves with timeouts happening all the time as operations are infrequent enough to cause constant connection closing and reconnect events.&lt;/p&gt;
+
+&lt;p&gt;The rule of thumb I always impart is:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Set &lt;em&gt;socketTimeoutMS&lt;/em&gt; to at least &lt;code&gt;2-3x&lt;/code&gt; the longest running operation in your application or the interval between operations, too ensure you don&amp;rsquo;t timeout long running operations or servers where there are big gaps of time between operations.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&#34;what-you-are-probably-looking-for:878abfdd112f1319523c821f1974dcfd&#34;&gt;What You are Probably Looking For&lt;/h2&gt;
+
+&lt;p&gt;Most people who start changing &lt;code&gt;socketTimeoutMS&lt;/code&gt; are actually looking for the &lt;code&gt;maxTimeMS&lt;/code&gt; property to limit the time a query runs against the server before it gets aborted. Let&amp;rsquo;s look at how to apply this property on a query.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , f = require(&#39;util&#39;).format;
+
+MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, function(err, db) {
+  var cursor = db.collection(&#39;t&#39;).find({}).maxTimeMS(1000);
+  cursor.toArray(function(err, docs) {
+    console.dir(docs)
+    db.close();
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This executes a query and sets the &lt;code&gt;maxTimeMS&lt;/code&gt; property to &lt;code&gt;1000&lt;/code&gt; milliseconds. If the query runs for longer than that time it will be aborted by the server.&lt;/p&gt;
 </description>
     </item>
     
@@ -1166,174 +1166,6 @@ MongoClient.connect(url, function(err, db) {
 &lt;p&gt;The &lt;em&gt;each&lt;/em&gt; method will call the supplied callback until there are no more documents available that satisfy the query. Once the available documents is exhausted it will return &lt;em&gt;null&lt;/em&gt; for the second parameter in the callback. If you wish to terminate the each early you should return false in your &lt;em&gt;each&lt;/em&gt; callback. This will stop the cursor from returning documents.&lt;/p&gt;
 
 &lt;p&gt;This covers the basic crud operations in the Node.js MongoDB driver.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Driver Enterprise Features</title>
-      <link>/node-mongodb-native/2.0/tutorials/enterprise_features/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
-      
-      <guid>/node-mongodb-native/2.0/tutorials/enterprise_features/</guid>
-      <description>
-
-&lt;h1 id=&#34;enterprise-driver-features:6e3614dc6c70ae01cdc1669aeb0efb13&#34;&gt;Enterprise Driver Features&lt;/h1&gt;
-
-&lt;p&gt;This tutorial covers aspects of the driver related to the Subscription version of MongoDB that includes SSL, X509, ldap and kerberos support.&lt;/p&gt;
-
-&lt;h2 id=&#34;connecting-using-ssl:6e3614dc6c70ae01cdc1669aeb0efb13&#34;&gt;Connecting using SSL&lt;/h2&gt;
-
-&lt;h3 id=&#34;no-validation-of-certificate-chain:6e3614dc6c70ae01cdc1669aeb0efb13&#34;&gt;No validation of certificate chain&lt;/h3&gt;
-
-&lt;p&gt;If the server does not perform any validation of the certificate chain connecting to the server is straightforward.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient;
-
-MongoClient.connect(&amp;quot;mongodb://localhost:27017/test?ssl=true&amp;quot;, function(err, db) {
-  db.close();
-});
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&#34;driver-should-validate-server-certificate:6e3614dc6c70ae01cdc1669aeb0efb13&#34;&gt;Driver should validate Server certificate&lt;/h3&gt;
-
-&lt;p&gt;If the server presents a certificate that we wish to validate client side we need a couple more parameters.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
-  , fs = require(&#39;fs&#39;);
-
-// Read the certificate authority
-var ca = [fs.readFileSync(__dirname + &amp;quot;/ssl/ca.pem&amp;quot;)];
-
-// Connect validating the returned certificates from the server
-MongoClient.connect(&amp;quot;mongodb://localhost:27017/test?ssl=true&amp;quot;, {
-  server: {
-      sslValidate:true
-    , sslCA:ca
-  }
-}, function(err, db) {
-  db.close();
-});
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&#34;driver-should-validate-server-certificate-and-present-valid-certificate:6e3614dc6c70ae01cdc1669aeb0efb13&#34;&gt;Driver should validate Server certificate and present valid Certificate&lt;/h3&gt;
-
-&lt;p&gt;If the server is configured to perform certificate validation we need to pass a certificate through the driver as well as verify the one retrieved. In this case our certificate password is &lt;code&gt;10gen&lt;/code&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
-  , fs = require(&#39;fs&#39;);
-
-// Read the certificate authority
-var ca = [fs.readFileSync(__dirname + &amp;quot;/ssl/ca.pem&amp;quot;)];
-var cert = fs.readFileSync(__dirname + &amp;quot;/ssl/client.pem&amp;quot;);
-var key = fs.readFileSync(__dirname + &amp;quot;/ssl/client.pem&amp;quot;);
-
-// Connect validating the returned certificates from the server
-MongoClient.connect(&amp;quot;mongodb://localhost:27017/test?ssl=true&amp;quot;, {
-  server: {
-      sslValidate:true
-    , sslCA:ca
-    , sslKey:key
-    , sslCert:cert
-    , sslPass:&#39;10gen&#39;
-  }
-}, function(err, db) {
-  db.close();
-});
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;connecting-using-x509:6e3614dc6c70ae01cdc1669aeb0efb13&#34;&gt;Connecting using X509&lt;/h2&gt;
-
-&lt;p&gt;X509 is a certification validation process similar to normal SSL validation but it also includes specific user information that can be used for authorization. Connecting is very similar to the previous SSL examples.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
-  , fs = require(&#39;fs&#39;);
-
-// Read the cert and key
-var cert = fs.readFileSync(__dirname + &amp;quot;/ssl/x509/client.pem&amp;quot;);
-var key = fs.readFileSync(__dirname + &amp;quot;/ssl/x509/client.pem&amp;quot;);
-
-// User name
-var userName = &amp;quot;CN=client,OU=kerneluser,O=10Gen,L=New York City,ST=New York,C=US&amp;quot;;
-
-// Connect using the MONGODB-X509 authentication mechanism
-MongoClient.connect(f(&#39;mongodb://%s@server:27017/test?authMechanism=%s&amp;amp;ssl=true&#39;
-    , encodeURIComponent(userName), &#39;MONGODB-X509&#39;), {
-  server: {
-      sslKey:key
-    , sslCert:cert
-  }
-}, function(err, db) {
-  db.close();
-});
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;connecting-using-ldap:6e3614dc6c70ae01cdc1669aeb0efb13&#34;&gt;Connecting using LDAP&lt;/h2&gt;
-
-&lt;p&gt;The LDAP support in the subscription version of MongoDB allows for integrating against corporate LDAP server to manage authentication and authorization. To connect using LDAP we need to do the following.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
-  , f = require(&#39;util&#39;).format;
-
-// LDAP credentials
-var server = &amp;quot;ldaptest.someserver.com&amp;quot;;
-var user = &amp;quot;drivers-team&amp;quot;;
-var pass = &amp;quot;mongo0x$server&amp;quot;;
-
-// Url
-var url = f(&amp;quot;mongodb://%s:%s@%s/test?authMechanism=PLAIN&amp;amp;maxPoolSize=1&amp;quot;, user, pass, server);
-
-// Connect using ldap credentials
-MongoClient.connect(url, function(err, db) {
-  db.close();
-});
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;connecting-using-kerberos:6e3614dc6c70ae01cdc1669aeb0efb13&#34;&gt;Connecting using Kerberos&lt;/h2&gt;
-
-&lt;p&gt;The subscription version of MongoDB support kerberos authentication and authorization support using SSPI under windwos and GSAPI under unix. To connect with kerberos (this example expects there to be a valid kerberos ticket for the user).&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient;
-  , f = require(&#39;util&#39;).format;
-
-// KDC Server
-var server = &amp;quot;ldaptest.10gen.cc&amp;quot;;
-var principal = &amp;quot;drivers@LDAPTEST.10GEN.CC&amp;quot;;
-var urlEncodedPrincipal = encodeURIComponent(principal);
-
-// Url
-var url = f(&amp;quot;mongodb://%s@%s/kerberos?authMechanism=GSSAPI&amp;amp;gssapiServiceName=mongodb&amp;quot;, urlEncodedPrincipal, server);
-
-// Connect using kerberos details
-MongoClient.connect(url, function(err, db) {
-  db.close();
-});
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;You can also pass in password credentials for a kerberos connection, this is useful on windows if you don&amp;rsquo;t have a security domain set up.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient;
-  , f = require(&#39;util&#39;).format;
-
-// KDC Server
-var server = &amp;quot;ldaptest.10gen.cc&amp;quot;;
-var principal = &amp;quot;drivers@LDAPTEST.10GEN.CC&amp;quot;;
-var urlEncodedPrincipal = encodeURIComponent(principal);
-
-// Url
-var url = f(&amp;quot;mongodb://%s:%s@%s/kerberos?authMechanism=GSSAPI&amp;amp;maxPoolSize=1&amp;quot;, urlEncodedPrincipal, pass, server);
-
-// Connect using kerberos details
-MongoClient.connect(url, function(err, db) {
-  db.close();
-});
-
-&lt;/code&gt;&lt;/pre&gt;
 </description>
     </item>
     
@@ -2884,6 +2716,272 @@ gridStore.open(function(err, gridStore) {
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;https://github.com/mongodb/node-mongodb-native/tree/master/examples&#34;&gt;The driver examples, good starting point for basic usage&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;https://github.com/mongodb/node-mongodb-native/tree/master/test&#34;&gt;All the integration tests, they have tons of different usage cases&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Node Knockout, GEO</title>
+      <link>/node-mongodb-native/2.0/articles/node_knockout_article_3/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/articles/node_knockout_article_3/</guid>
+      <description>
+
+&lt;h1 id=&#34;the-wonderful-world-of-geo-spatial-indexes-in-mongodb:1f9a2529b924eca7193c4abdd79e34a5&#34;&gt;The wonderful world of GEO spatial indexes in MongoDB&lt;/h1&gt;
+
+&lt;p&gt;MongoDB has native support for geospatial indexes and extensions to the query language to
+support a lot of different ways of querying your geo spatial documents. We will touch on a
+all of the available features of the MongoDB geospatial support point by point as outlined
+below.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Query $near a point with a maximum distance around that point&lt;/li&gt;
+&lt;li&gt;Set the minimum and maximum range for the 2d space letting you map any data to the space&lt;/li&gt;
+&lt;li&gt;GeoNear command lets you return the distance from each point found&lt;/li&gt;
+&lt;li&gt;$within query lets you set a shape for you query letting you use a circle, box or arbitrary polygon, letting you map complex geo queries such as congressional districts or post code zones.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;But first let&amp;rsquo;s cover the basics of getting you up and running starting with what a document needs to look like
+for the indexing to work.&lt;/p&gt;
+
+&lt;h2 id=&#34;geospatialize-your-documents:1f9a2529b924eca7193c4abdd79e34a5&#34;&gt;Geospatialize your documents&lt;/h2&gt;
+
+&lt;p&gt;Somehow we need to tell MongoDB what fields represent our geospatial coordinates. Luckily for us this is very simple. Lets take a simple sample document representing the best imaginative Burger place in the world.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var document = {
+  name: &amp;quot;Awesome burger bar&amp;quot;      
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Not we need know that it&amp;rsquo;s located on the fictitious planet (Burgoria) and more specifically at the coordinates
+[50, 50]. So how do we add this to the document so we can look it up using geospatial searches ? Well it&amp;rsquo;s very
+simple just add it as a field as shown below.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var document = {
+  name: &amp;quot;Awesome burger bar&amp;quot;,
+  loc: [50, 50]      
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Easy right? The only thing you have to ensure is that the first coordinate is the &lt;strong&gt;x&lt;/strong&gt; coordinate and the second one is the &lt;strong&gt;y&lt;/strong&gt; coordinate &lt;strong&gt;[x, y]&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s go ahead and connect to the database and insert the document&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient;
+
+var document = {
+  name: &amp;quot;Awesome burger bar&amp;quot;,
+  loc: [50, 50]      
+}
+
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/geodb&amp;quot;, function(err, db) {
+  if(err) return console.dir(err)
+
+  db.collection(&#39;places&#39;).insert(document, {w:1}, function(err, result) {
+    if(err) return console.dir(err)
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;So now we have a document in our collection. We now need to tell MongoDB to index our collection and create a 2D index on our loc attribute so we can avail us of the awesome geospatial features. This turns out to be easy as well. Let&amp;rsquo;s modify the code to ensure we have the index on startup.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient;
+
+var document = {
+  name: &amp;quot;Awesome burger bar&amp;quot;,
+  loc: [50, 50]      
+}
+
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/geodb&amp;quot;, function(err, db) {
+  if(err) return console.dir(err)
+  var collection = db.collection(&#39;places&#39;);
+
+  collection.ensureIndex({loc: &amp;quot;2d&amp;quot;}, {min: -500, max: 500, w:1}, function(err, result) {
+    if(err) return console.dir(err);
+
+    collection.insert(document, {w:1}, function(err, result) {
+      if(err) return console.dir(err)
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;strong&gt;ensureIndex&lt;/strong&gt; does the trick creating the index if it does not already exist. By specifying &lt;strong&gt;{loc: &amp;ldquo;2d&amp;rdquo;}&lt;/strong&gt; MongoDB will index the array contained in every document under the field name &lt;strong&gt;loc&lt;/strong&gt;. The &lt;strong&gt;min&lt;/strong&gt; and &lt;strong&gt;max&lt;/strong&gt; defines the boundaries of our (Burgoria) and means that points outside -500 and 500 will throw an error as it&amp;rsquo;s not on the planet.&lt;/p&gt;
+
+&lt;h2 id=&#34;basic-queries-for-your-geospatial-documents:1f9a2529b924eca7193c4abdd79e34a5&#34;&gt;Basic queries for your geospatial documents&lt;/h2&gt;
+
+&lt;p&gt;Since we now have a geospatial index on our collection let&amp;rsquo;s play around with the query methods and learn how we can work with the data. First however let&amp;rsquo;s add some more documents so we can see the effects of the different boundaries.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient;
+
+var documents = [
+    {name: &amp;quot;Awesome burger bar&amp;quot;, loc: [50, 50]}
+  , {name: &amp;quot;Not an Awesome burger bar&amp;quot;, loc: [10, 10]}
+  , {name: &amp;quot;More or less an Awesome burger bar&amp;quot;, loc: [45, 45]}
+]
+
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/geodb&amp;quot;, function(err, db) {
+  if(err) return console.dir(err)
+  var collection = db.collection(&#39;places&#39;);
+
+  collection.ensureIndex({loc: &amp;quot;2d&amp;quot;}, {min: -500, max: 500, w:1}, function(err, result) {
+    if(err) return console.dir(err);
+
+    collection.insert(documents, {w:1}, function(err, result) {
+      if(err) return console.dir(err)
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Right from now one for brevities sake we are going to assume we have the documents stored in the collection and the index created so we can work on queries without the boilerplate insert and index creation code. The first thing we are going to do is locate all the documents that&amp;rsquo;s a distance of 10 away from 50, 50.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  assert = require(&#39;assert&#39;);
+
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/geodb&amp;quot;, function(err, db) {
+  if(err) return console.dir(err)
+
+  db.collection(&#39;places&#39;).find({loc: {$near: [50,50], $maxDistance: 10}}).toArray(function(err, docs) {
+    if(err) return console.dir(err)
+
+    assert.equal(docs.length, 2);
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This returns the following results (ignore the _id it will be different as it&amp;rsquo;s a collection assigned key).&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{ &amp;quot;_id&amp;quot; : 509a47337d6ab61b2871ee8e, &amp;quot;name&amp;quot; : &amp;quot;Awesome burger bar&amp;quot;, &amp;quot;loc&amp;quot; : [ 50, 50 ] }
+{ &amp;quot;_id&amp;quot; : 509a47337d6ab61b2871ee90, &amp;quot;name&amp;quot; : &amp;quot;More or less an Awesome burger bar&amp;quot;, &amp;quot;loc&amp;quot; : [ 45
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s look at the query. &lt;strong&gt;$near&lt;/strong&gt; specifies the center point for the geospatial query and &lt;strong&gt;$maxDistance&lt;/strong&gt; the radius of the search circle. Given this the query will return the two documents at &lt;strong&gt;[50, 50]&lt;/strong&gt; and &lt;strong&gt;[10, 10]&lt;/strong&gt;. Now this is a nice feature but what if we need to know the distance from each of the found documents to the originating center for our query. Luckily we have a command that support that called &lt;strong&gt;geoNear&lt;/strong&gt;. Let&amp;rsquo;s execute it and look at the results.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  assert = require(&#39;assert&#39;);
+
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/geodb&amp;quot;, function(err, db) {
+  if(err) return console.dir(err)
+
+  db.collection(&#39;places&#39;).geoNear(50, 50, {$maxDistance:10}, function(err, result) {
+    if(err) return console.dir(err)
+
+    assert.equal(result.results, 2);
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s look at the results returned by the query.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{
+  &amp;quot;ns&amp;quot; : &amp;quot;test.places&amp;quot;,
+  &amp;quot;near&amp;quot; : &amp;quot;1100000011110000111100001111000011110000111100001111&amp;quot;,
+  &amp;quot;results&amp;quot; : [
+    {
+      &amp;quot;dis&amp;quot; : 0,
+      &amp;quot;obj&amp;quot; : {
+        &amp;quot;_id&amp;quot; : 509a47337d6ab61b2871ee8e,
+        &amp;quot;name&amp;quot; : &amp;quot;Awesome burger bar&amp;quot;,
+        &amp;quot;loc&amp;quot; : [
+          50,
+          50
+        ]
+      }
+    },
+    {
+      &amp;quot;dis&amp;quot; : 7.0710678118654755,
+      &amp;quot;obj&amp;quot; : {
+        &amp;quot;_id&amp;quot; : 509a47337d6ab61b2871ee90,
+        &amp;quot;name&amp;quot; : &amp;quot;More or less an Awesome burger bar&amp;quot;,
+        &amp;quot;loc&amp;quot; : [
+          45,
+          45
+        ]
+      }
+    }
+  ],
+  &amp;quot;stats&amp;quot; : {
+    &amp;quot;time&amp;quot; : 0,
+    &amp;quot;btreelocs&amp;quot; : 0,
+    &amp;quot;nscanned&amp;quot; : 2,
+    &amp;quot;objectsLoaded&amp;quot; : 2,
+    &amp;quot;avgDistance&amp;quot; : 3.5355339059327378,
+    &amp;quot;maxDistance&amp;quot; : 7.071128503792992
+  },
+  &amp;quot;ok&amp;quot; : 1
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Notice that &lt;strong&gt;geoNear&lt;/strong&gt; is a command not a find query so it returns a single document with the results in the results field of the returned document. As we can see from the results each returned result has a field called &lt;strong&gt;dis&lt;/strong&gt; that is the distance of the document from the center point of our search. Cool we&amp;rsquo;ve now covered the basics of geospatial search so let&amp;rsquo;s move onto more advanced queries.&lt;/p&gt;
+
+&lt;h2 id=&#34;advanced-queries-for-your-geospatial-documents:1f9a2529b924eca7193c4abdd79e34a5&#34;&gt;Advanced queries for your geospatial documents&lt;/h2&gt;
+
+&lt;p&gt;So besides these simple queries we can also do &lt;strong&gt;bounds queries&lt;/strong&gt;. With bounds queries we mean we can look for points of interest inside a defined boundary. This can be useful if you have such things as a post code area, congressional district or any sort of bounding box that is not a pure circle (say look for all restaurants in the west village in new york). Let&amp;rsquo;s go through the basics.&lt;/p&gt;
+
+&lt;h3 id=&#34;the-magical-boundry-box-query:1f9a2529b924eca7193c4abdd79e34a5&#34;&gt;The magical boundry box query&lt;/h3&gt;
+
+&lt;p&gt;Our country Whopper on Burgoria is a perfectly bound box (imagine that). Our application wants to restrict our searches to only burger bars in Burgonia. The boundaries for Burgonia are defined by (30, 30) -&amp;gt; (30, 60) and (30, 60) -&amp;gt; (60, 60). Great let&amp;rsquo;s peform a box bounded query.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  assert = require(&#39;assert&#39;);
+
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/geodb&amp;quot;, function(err, db) {
+  if(err) return console.dir(err)
+  var box = [[30, 30], [60, 60]];
+
+  db.collection(&#39;places&#39;).find({loc: {$within: {$box: box}}).toArray(function(err, docs) {
+    if(err) return console.dir(err)
+
+    assert.equal(docs.length, 2);
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The results returned are.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{ &amp;quot;_id&amp;quot; : 509a47337d6ab61b2871ee8e, &amp;quot;name&amp;quot; : &amp;quot;Awesome burger bar&amp;quot;, &amp;quot;loc&amp;quot; : [ 50, 50 ] }
+{ &amp;quot;_id&amp;quot; : 509a47337d6ab61b2871ee90, &amp;quot;name&amp;quot; : &amp;quot;More or less an Awesome burger bar&amp;quot;, &amp;quot;loc&amp;quot; : [ 45
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;a-polygon-to-far:1f9a2529b924eca7193c4abdd79e34a5&#34;&gt;A polygon to far&lt;/h3&gt;
+
+&lt;p&gt;Awesome we can now do a query by our perfectly boxed country. Inside Whopper the country is split into triangles where triangle one is made up of three points (40, 40), (40, 50), (45, 45). We want to look for points that are only inside this triangle. Let&amp;rsquo;s have a look at the query.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  assert = require(&#39;assert&#39;);
+
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/geodb&amp;quot;, function(err, db) {
+  if(err) return console.dir(err)
+  var triangle = [[40, 40], [40, 50], [45, 45]];
+
+  db.collection(&#39;places&#39;).find({loc: {$within: {$polygon: triangle}}).toArray(function(err, docs) {
+    if(err) return console.dir(err)
+
+    assert.equal(docs.length, 2);
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The results returned are.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;{ &amp;quot;_id&amp;quot; : ObjectId(&amp;quot;509a47337d6ab61b2871ee90&amp;quot;), &amp;quot;name&amp;quot; : &amp;quot;More or less an Awesome burger bar&amp;quot;, &amp;quot;loc&amp;quot; : [ 45, 45 ] }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Cool things you can use this with is f.ex with the data at &lt;a href=&#34;https://nycopendata.socrata.com/browse?tags=geographic&#34;&gt;https://nycopendata.socrata.com/browse?tags=geographic&lt;/a&gt; you can create queries slicing new york into areas and look for data points inside those areas. So we&amp;rsquo;ve seen how we can query geo spatially in a lot of different ways. In closing we want to mention some simple ideas to get your mind churning.&lt;/p&gt;
+
+&lt;h2 id=&#34;geospatial-interesting-tidbits:1f9a2529b924eca7193c4abdd79e34a5&#34;&gt;Geospatial interesting tidbits&lt;/h2&gt;
+
+&lt;p&gt;So geospatial is what we mostly promote the features as but at some point you&amp;rsquo;ll realize that it&amp;rsquo;s a generic set of 2d indexes that can be used to index and &lt;strong&gt;x,y&lt;/strong&gt; data. You could consider indexing any data points that fit into a 2d space and using the geo query functionality to retrieve subsets of that data. Say if you map price vs apartment size and want to say giving an apartment find me everything that is &amp;ldquo;close&amp;rdquo; to the ideal price and size that I&amp;rsquo;m looking for. The limit here is your fantasy but as you can see it&amp;rsquo;s a pretty general and very powerful feature once you get over looking at the feature as a pure geographical function. With that I leave you to experiment and have fun with the features we have introduced.&lt;/p&gt;
+
+&lt;h2 id=&#34;links-and-stuff:1f9a2529b924eca7193c4abdd79e34a5&#34;&gt;Links and stuff&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/mongodb/node-mongodb-native/tree/master/examples&#34;&gt;The driver examples, good starting point for basic usage&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;https://github.com/mongodb/node-mongodb-native/tree/master/test&#34;&gt;All the integration tests, they have tons of different usage cases&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.mongodb.org/display/DOCS/Geospatial+Indexing&#34;&gt;MongoDB geospatial pages&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;http://www.mongodb.org/display/DOCS/Geospatial+Haystack+Indexing&#34;&gt;More specialized geo haystack indexing&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 </description>
     </item>
