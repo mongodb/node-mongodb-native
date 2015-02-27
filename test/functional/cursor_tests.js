@@ -2207,6 +2207,7 @@ exports.shouldFailToTailANormalCollection = {
       collection.insert(docs, configuration.writeConcernMax(), function(err, ids) {
         collection.find({}, {tailable:true}).each(function(err, doc) {
           test.ok(err instanceof Error);
+          test.ok(typeof(err.code) === 'number');
           db.close();
           test.done();
         });
