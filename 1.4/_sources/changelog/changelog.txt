@@ -2,9 +2,10 @@
 Changelog
 =========
 
-1.4.32
+1.4.32 2015-02-27
 -----------------
 - NODE-369 Unhandled exception while connecting
+- Keep numeric error code in query errors (Issue #1259, https://github.com/glasser)
 
 1.4.31 2015-02-16
 -----------------

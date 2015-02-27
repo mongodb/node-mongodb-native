@@ -38,10 +38,11 @@
       <guid>/node-mongodb-native/2.0/meta/release-notes/</guid>
       <description>
 
-&lt;h2 id=&#34;2-0-17:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.17&lt;/h2&gt;
+&lt;h2 id=&#34;2-0-17-2015-02-27:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.17 2015-02-27&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;NODE-336 Added length function to ordered and unordered bulk operations to be able know the amount of current operations in bulk.&lt;/li&gt;
+&lt;li&gt;Bumped mongodb-core 1.1.13 to ensure passives are correctly added as secondaries.&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h2 id=&#34;2-0-16-2015-02-16:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.16 2015-02-16&lt;/h2&gt;
