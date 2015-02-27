@@ -1,3 +1,7 @@
+2.0.18 2015-02-27
+-----------------
+- Bumped mongodb-core 1.1.14 to ensure passives are correctly added as secondaries.
+
 2.0.17 2015-02-27
 -----------------
 - NODE-336 Added length function to ordered and unordered bulk operations to be able know the amount of current operations in bulk.
