@@ -8,12 +8,12 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/tutorials/connecting/</loc>
+    <loc>/node-mongodb-native/2.0/tutorials/connection_failures/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/tutorials/connection_failures/</loc>
+    <loc>/node-mongodb-native/2.0/tutorials/connecting/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
   
@@ -24,6 +24,11 @@
   
   <url>
     <loc>/node-mongodb-native/2.0/tutorials/crud_operations/</loc>
+    <lastmod>2013-07-01T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.0/tutorials/enterprise_features/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
   
@@ -83,12 +88,12 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/meta/license/</loc>
+    <loc>/node-mongodb-native/2.0/meta/release-notes/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/meta/release-notes/</loc>
+    <loc>/node-mongodb-native/2.0/meta/license/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
   

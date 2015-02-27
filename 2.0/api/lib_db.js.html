@@ -83,7 +83,7 @@ var debugFields = ['authSource', 'w', 'wtimeout', 'j', 'native_parser', 'forceSe
 
 /**
  * @fileOverview The **Db** class is a class that represents a MongoDB Database.
- * 
+ *
  * @example
  * var MongoClient = require('mongodb').MongoClient,
  *   test = require('assert');
@@ -135,7 +135,7 @@ var debugFields = ['authSource', 'w', 'wtimeout', 'j', 'native_parser', 'forceSe
  */
 var Db = function(databaseName, topology, options) {
   options = options || {};
-  if(!(this instanceof Db)) return new Db(databaseName, topology, options);  
+  if(!(this instanceof Db)) return new Db(databaseName, topology, options);
   EventEmitter.call(this);
   var self = this;
   // var self = this;  // Internal state of the db object
@@ -185,7 +185,7 @@ var Db = function(databaseName, topology, options) {
   Object.defineProperty(this, 'options', {
     enumerable:true,
     get: function() { return self.s.options; }
-  });  
+  });
 
   // Last ismaster
   Object.defineProperty(this, 'native_parser', {
@@ -203,11 +203,11 @@ var Db = function(databaseName, topology, options) {
       }
       return false;
     }
-  });  
+  });
 
   Object.defineProperty(this, 'writeConcern', {
     enumerable:true,
-    get: function() { 
+    get: function() {
       var ops = {};
       if(self.s.options.w != null) ops.w = self.s.options.w;
       if(self.s.options.j != null) ops.j = self.s.options.j;
@@ -215,7 +215,7 @@ var Db = function(databaseName, topology, options) {
       if(self.s.options.wtimeout != null) ops.wtimeout = self.s.options.wtimeout;
       return ops;
     }
-  });  
+  });
 
   topology.once('error', createListener(self, 'error', self));
   topology.once('timeout', createListener(self, 'timeout', self));
@@ -224,6 +224,7 @@ var Db = function(databaseName, topology, options) {
   topology.once('open', createListener(self, 'open', self));
   topology.once('fullsetup', createListener(self, 'fullsetup', self));
   topology.once('all', createListener(self, 'all', self));
+  topology.once('reconnect', createListener(self, 'reconnect', self));
 }
 
 inherits(Db, EventEmitter);
@@ -281,7 +282,7 @@ Db.prototype.command = function(command, options, callback) {
   // Clone the options
   options = shallowClone(options);
   // If we have a readPreference set
-  if(options.readPreference == null &amp;&amp; self.s.readPreference) {      
+  if(options.readPreference == null &amp;&amp; self.s.readPreference) {
     options.readPreference = self.s.readPreference;
   }
 
@@ -374,7 +375,7 @@ Db.prototype.collection = function(name, options, callback) {
     } catch(err) {
       if(callback) return callback(err);
       throw err;
-    }      
+    }
   }
 
   // Strict mode
@@ -392,7 +393,7 @@ Db.prototype.collection = function(name, options, callback) {
     } catch(err) {
       return handleCallback(callback, err, null);
     }
-  });    
+  });
 }
 
 /**
@@ -438,10 +439,10 @@ Db.prototype.createCollection = function(name, options, callback) {
 
     // Create collection command
     var cmd = {'create':name};
-    
+
     // Add all optional parameters
     for(var n in options) {
-      if(options[n] != null &amp;&amp; typeof options[n] != 'function') 
+      if(options[n] != null &amp;&amp; typeof options[n] != 'function')
         cmd[n] = options[n];
     }
 
@@ -451,7 +452,7 @@ Db.prototype.createCollection = function(name, options, callback) {
       handleCallback(callback, null, new Collection(self, self.s.topology, self.s.databaseName, name, self.s.pkFactory, options));
     });
   });
-}  
+}
 
 /**
  * Get all the db statistics.
@@ -475,9 +476,16 @@ Db.prototype.stats = function(options, callback) {
 
 // Transformation methods for cursor results
 var listCollectionsTranforms = function(databaseName) {
+  var matching = f('%s.', databaseName);
+
   return {
     doc: function(doc) {
-      doc.name = f('%s.%s', databaseName, doc.name);
+      var index = doc.name.indexOf(matching);
+      // Remove database name if available
+      if(doc.name &amp;&amp; index == 0) {
+        doc.name = doc.name.substr(index + matching.length);
+      }
+
       return doc;
     }
   }
@@ -531,8 +539,10 @@ Db.prototype.listCollections = function(filter, options) {
     filter = {name:/^((?!\$).)*$/};
   }
 
+  // Return options
+  var options = {transforms: listCollectionsTranforms(this.s.databaseName)}
   // Get the cursor
-  var cursor = this.collection(Db.SYSTEM_NAMESPACE_COLLECTION).find(filter);
+  var cursor = this.collection(Db.SYSTEM_NAMESPACE_COLLECTION).find(filter, options);
   // Set the passed in batch size if one was provided
   if(options.batchSize) cursor = cursor.batchSize(options.batchSize);
   // We have a fallback mode using legacy systems collections
@@ -559,7 +569,7 @@ Db.prototype.eval = function(code, parameters, options, callback) {
 
   var finalCode = code;
   var finalParameters = [];
-  
+
   // If not a code object translate to one
   if(!(finalCode instanceof Code)) finalCode = new Code(finalCode);
   // Ensure the parameters are correct
@@ -647,7 +657,7 @@ Db.prototype.dropDatabase = function(callback) {
     if(err) return handleCallback(callback, err, null);
     handleCallback(callback, null, result.ok ? true : false);
   });
-}  
+}
 
 /**
  * The callback format for the collections method.
@@ -678,7 +688,7 @@ Db.prototype.collections = function(callback) {
       return new Collection(self, self.s.topology, self.s.databaseName, d.name.replace(self.s.databaseName + ".", ''), self.s.pkFactory, self.s.options);
     }));
   });
-};  
+};
 
 /**
  * Runs a command on the database as admin.
@@ -807,7 +817,7 @@ Db.prototype.ensureIndex = function(name, fieldOrSpec, options, callback) {
       if(typeof callback === 'function') return handleCallback(callback, null, index_name);
     }
   });
-};  
+};
 
 /**
  * Create a new Db instance sharing the current socket connections.
@@ -833,12 +843,12 @@ Db.prototype.db = function(dbName) {
   this.once('close', createListener(this, 'close', db));
   this.once('parseError', createListener(this, 'parseError', db));
   // Return the database
-  return db;    
+  return db;
 };
 
 var _executeAuthCreateUserCommand = function(self, username, password, options, callback) {
   // Special case where there is no password ($external users)
-  if(typeof username == 'string' 
+  if(typeof username == 'string'
     &amp;&amp; password != null &amp;&amp; typeof password == 'object') {
     options = password;
     password = null;
@@ -848,7 +858,7 @@ var _executeAuthCreateUserCommand = function(self, username, password, options, 
   if(typeof options == 'function') {
     callback = options;
     options = {};
-  }  
+  }
 
   // Error out if we digestPassword set
   if(options.digestPassword != null) {
@@ -937,20 +947,20 @@ Db.prototype.addUser = function(username, password, options, callback) {
   // Attempt to execute auth command
   _executeAuthCreateUserCommand(this, username, password, options, function(err, r) {
     // We need to perform the backward compatible insert operation
-    if(err &amp;&amp; err.code == -5000) {        
+    if(err &amp;&amp; err.code == -5000) {
       var finalOptions = writeConcern(shallowClone(options), self, options);
       // Use node md5 generator
       var md5 = crypto.createHash('md5');
       // Generate keys used for authentication
       md5.update(username + ":mongo:" + password);
       var userPassword = md5.digest('hex');
-      
+
       // If we have another db set
       var db = options.dbName ? self.db(options.dbName) : self;
 
       // Fetch a user collection
       var collection = db.collection(Db.SYSTEM_USER_COLLECTION);
-      
+
       // Check if we are inserting the first user
       collection.count({}, function(err, count) {
         // We got an error (f.ex not authorized)
@@ -1030,7 +1040,7 @@ Db.prototype.removeUser = function(username, options, callback) {
 
   // Attempt to execute command
   _executeAuthRemoveUserCommand(this, username, options, function(err, result) {
-    if(err &amp;&amp; err.code == -5000) {        
+    if(err &amp;&amp; err.code == -5000) {
       var finalOptions = writeConcern(shallowClone(options), self, options);
       // If we have another db set
       var db = options.dbName ? self.db(options.dbName) : self;
@@ -1045,12 +1055,12 @@ Db.prototype.removeUser = function(username, options, callback) {
           handleCallback(callback, err, true);
         });
       });
-    
+
       return;
     }
 
     if(err) return handleCallback(callback, err);
-    handleCallback(callback, err, result);      
+    handleCallback(callback, err, result);
   });
 };
 
@@ -1070,7 +1080,7 @@ Db.prototype.authenticate = function(username, password, options, callback) {
   // Set default mechanism
   if(!options.authMechanism) {
     options.authMechanism = 'DEFAULT';
-  } else if(options.authMechanism != 'GSSAPI' 
+  } else if(options.authMechanism != 'GSSAPI'
     &amp;&amp; options.authMechanism != 'MONGODB-CR'
     &amp;&amp; options.authMechanism != 'MONGODB-X509'
     &amp;&amp; options.authMechanism != 'SCRAM-SHA-1'
@@ -1082,7 +1092,7 @@ Db.prototype.authenticate = function(username, password, options, callback) {
   // if authententicate is called from a retry context, it may be another one, like admin
   var authdb = options.authdb ? options.authdb : options.dbName;
   authdb = options.authSource ? options.authSource : authdb;
-  authdb = authdb ? authdb : this.databaseName; 
+  authdb = authdb ? authdb : this.databaseName;
 
   // Callback
   var _callback = function(err, result) {
@@ -1135,7 +1145,7 @@ Db.prototype.authenticate = function(username, password, options, callback) {
     this.s.topology.auth('default', authdb, username, password, function(err, result) {
       if(err) return handleCallback(callback, err, false);
       _callback(null, true);
-    });      
+    });
   } else {
     handleCallback(callback, new MongoError(f("authentication mechanism %s not supported", options.authMechanism), false));
   }
@@ -1149,14 +1159,14 @@ Db.prototype.authenticate = function(username, password, options, callback) {
  * @param {Db~resultCallback} callback The command result callback
  * @return {null}
  */
-Db.prototype.logout = function(options, callback) {    
+Db.prototype.logout = function(options, callback) {
   var args = Array.prototype.slice.call(arguments, 0);
   callback = args.pop();
   options = args.length ? args.shift() || {} : {};
 
   // logout command
   var cmd = {'logout':1};
-  
+
   // Add onAll to login to ensure all connection are logged out
   options.onAll = true;
 
@@ -1424,7 +1434,7 @@ module.exports = Db;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha13</a> on Wed Feb 04 2015 16:32:44 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha13</a> on Fri Feb 27 2015 12:28:40 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>
@@ -2049,6 +2059,72 @@ module.exports = Db;
             </ul>
         </li>
     
+        <li class="item" data-name="FindOperatorsOrdered">
+            <span class="title">
+                <a href="FindOperatorsOrdered.html">FindOperatorsOrdered</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="FindOperatorsOrdered#delete"><a href="FindOperatorsOrdered.html#delete">delete</a></li>
+            
+                <li data-name="FindOperatorsOrdered#deleteOne"><a href="FindOperatorsOrdered.html#deleteOne">deleteOne</a></li>
+            
+                <li data-name="FindOperatorsOrdered#replaceOne"><a href="FindOperatorsOrdered.html#replaceOne">replaceOne</a></li>
+            
+                <li data-name="FindOperatorsOrdered#update"><a href="FindOperatorsOrdered.html#update">update</a></li>
+            
+                <li data-name="FindOperatorsOrdered#updateOne"><a href="FindOperatorsOrdered.html#updateOne">updateOne</a></li>
+            
+                <li data-name="FindOperatorsOrdered#upsert"><a href="FindOperatorsOrdered.html#upsert">upsert</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="FindOperatorsUnordered">
+            <span class="title">
+                <a href="FindOperatorsUnordered.html">FindOperatorsUnordered</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="FindOperatorsUnordered#remove"><a href="FindOperatorsUnordered.html#remove">remove</a></li>
+            
+                <li data-name="FindOperatorsUnordered#removeOne"><a href="FindOperatorsUnordered.html#removeOne">removeOne</a></li>
+            
+                <li data-name="FindOperatorsUnordered#replaceOne"><a href="FindOperatorsUnordered.html#replaceOne">replaceOne</a></li>
+            
+                <li data-name="FindOperatorsUnordered#update"><a href="FindOperatorsUnordered.html#update">update</a></li>
+            
+                <li data-name="FindOperatorsUnordered#updateOne"><a href="FindOperatorsUnordered.html#updateOne">updateOne</a></li>
+            
+                <li data-name="FindOperatorsUnordered#upsert"><a href="FindOperatorsUnordered.html#upsert">upsert</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
         <li class="item" data-name="GridStore">
             <span class="title">
                 <a href="GridStore.html">GridStore</a>
@@ -2328,6 +2404,8 @@ module.exports = Db;
                 <li data-name="OrderedBulkOperation#find"><a href="OrderedBulkOperation.html#find">find</a></li>
             
                 <li data-name="OrderedBulkOperation#insert"><a href="OrderedBulkOperation.html#insert">insert</a></li>
+            
+                <li data-name="OrderedBulkOperation#length"><a href="OrderedBulkOperation.html#length">length</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -2656,6 +2734,8 @@ module.exports = Db;
                 <li data-name="UnorderedBulkOperation#find"><a href="UnorderedBulkOperation.html#find">find</a></li>
             
                 <li data-name="UnorderedBulkOperation#insert"><a href="UnorderedBulkOperation.html#insert">insert</a></li>
+            
+                <li data-name="UnorderedBulkOperation#length"><a href="UnorderedBulkOperation.html#length">length</a></li>
             
             </ul>
             <ul class="events itemMembers">

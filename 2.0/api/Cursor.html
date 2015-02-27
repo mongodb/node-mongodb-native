@@ -1311,7 +1311,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="count">
             
-            count<span class="signature">(applySkipLimit, readPreference, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            count<span class="signature">(applySkipLimit, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
         </h4>
     
         
@@ -1386,41 +1386,6 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
                     
                 
                 <p>Should the count command apply limit and skip settings on the cursor or in the passed in options.</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>readPreference</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-|
-
-<span class="param-type"><a href="ReadPreference.html">ReadPreference</a></span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                    
-                        
-                    
-                
-                <p>The new read preference for the cursor.</p></td>
         </tr>
 	
 	
@@ -1619,6 +1584,45 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
                     
                 
                 <p>An index name hint for the query.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>readPreference</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="ReadPreference.html">ReadPreference</a></span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</p></td>
         </tr>
 	
 	
@@ -3364,7 +3368,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line766">line 766</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line789">line 789</a>
         </div>
         
     </div>
@@ -3442,7 +3446,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line772">line 772</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line795">line 795</a>
         </div>
         
     </div>
@@ -3736,7 +3740,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line746">line 746</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line769">line 769</a>
         </div>
         
     </div>
@@ -3859,7 +3863,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line760">line 760</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line783">line 783</a>
         </div>
         
     </div>
@@ -4378,7 +4382,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line753">line 753</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line776">line 776</a>
         </div>
         
     </div>
@@ -5462,7 +5466,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line780">line 780</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line803">line 803</a>
         </div>
         
     </div>
@@ -5592,7 +5596,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line787">line 787</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line810">line 810</a>
         </div>
         
     </div>
@@ -5718,7 +5722,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line794">line 794</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line817">line 817</a>
         </div>
         
     </div>
@@ -6846,7 +6850,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha13</a> on Wed Feb 04 2015 16:32:44 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha13</a> on Fri Feb 27 2015 12:28:40 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>
@@ -7471,6 +7475,72 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             </ul>
         </li>
     
+        <li class="item" data-name="FindOperatorsOrdered">
+            <span class="title">
+                <a href="FindOperatorsOrdered.html">FindOperatorsOrdered</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="FindOperatorsOrdered#delete"><a href="FindOperatorsOrdered.html#delete">delete</a></li>
+            
+                <li data-name="FindOperatorsOrdered#deleteOne"><a href="FindOperatorsOrdered.html#deleteOne">deleteOne</a></li>
+            
+                <li data-name="FindOperatorsOrdered#replaceOne"><a href="FindOperatorsOrdered.html#replaceOne">replaceOne</a></li>
+            
+                <li data-name="FindOperatorsOrdered#update"><a href="FindOperatorsOrdered.html#update">update</a></li>
+            
+                <li data-name="FindOperatorsOrdered#updateOne"><a href="FindOperatorsOrdered.html#updateOne">updateOne</a></li>
+            
+                <li data-name="FindOperatorsOrdered#upsert"><a href="FindOperatorsOrdered.html#upsert">upsert</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="FindOperatorsUnordered">
+            <span class="title">
+                <a href="FindOperatorsUnordered.html">FindOperatorsUnordered</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="FindOperatorsUnordered#remove"><a href="FindOperatorsUnordered.html#remove">remove</a></li>
+            
+                <li data-name="FindOperatorsUnordered#removeOne"><a href="FindOperatorsUnordered.html#removeOne">removeOne</a></li>
+            
+                <li data-name="FindOperatorsUnordered#replaceOne"><a href="FindOperatorsUnordered.html#replaceOne">replaceOne</a></li>
+            
+                <li data-name="FindOperatorsUnordered#update"><a href="FindOperatorsUnordered.html#update">update</a></li>
+            
+                <li data-name="FindOperatorsUnordered#updateOne"><a href="FindOperatorsUnordered.html#updateOne">updateOne</a></li>
+            
+                <li data-name="FindOperatorsUnordered#upsert"><a href="FindOperatorsUnordered.html#upsert">upsert</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
         <li class="item" data-name="GridStore">
             <span class="title">
                 <a href="GridStore.html">GridStore</a>
@@ -7750,6 +7820,8 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
                 <li data-name="OrderedBulkOperation#find"><a href="OrderedBulkOperation.html#find">find</a></li>
             
                 <li data-name="OrderedBulkOperation#insert"><a href="OrderedBulkOperation.html#insert">insert</a></li>
+            
+                <li data-name="OrderedBulkOperation#length"><a href="OrderedBulkOperation.html#length">length</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -8078,6 +8150,8 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
                 <li data-name="UnorderedBulkOperation#find"><a href="UnorderedBulkOperation.html#find">find</a></li>
             
                 <li data-name="UnorderedBulkOperation#insert"><a href="UnorderedBulkOperation.html#insert">insert</a></li>
+            
+                <li data-name="UnorderedBulkOperation#length"><a href="UnorderedBulkOperation.html#length">length</a></li>
             
             </ul>
             <ul class="events itemMembers">

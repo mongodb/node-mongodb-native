@@ -8,7 +8,7 @@
     <meta name="keyword" content="">
     <link rel="shortcut icon" href="/node-mongodb-native/2.0/img/favicon.png">
 
-    <title>Tracing</title>
+    <title>Driver Enterprise Features</title>
 
     <link href="/node-mongodb-native/2.0/css/bootstrap-theme.css" rel="stylesheet">
     <link href="/node-mongodb-native/2.0/assets/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
@@ -132,7 +132,7 @@
                     
                     <li><a href="/node-mongodb-native/2.0/tutorials/crud_operations/"> CRUD Operations </a> </li>
                     
-                    <li><a href="/node-mongodb-native/2.0/tutorials/enterprise_features/"> Driver Enterprise Features </a> </li>
+                    <li class="active"><a href="/node-mongodb-native/2.0/tutorials/enterprise_features/"> Driver Enterprise Features </a> </li>
                     
                     <li><a href="/node-mongodb-native/2.0/tutorials/aggregation/"> Aggregation </a> </li>
                     
@@ -144,7 +144,7 @@
                     
                     <li><a href="/node-mongodb-native/2.0/tutorials/objectid/"> ObjectId </a> </li>
                     
-                    <li class="active"><a href="/node-mongodb-native/2.0/tutorials/tracing/"> Tracing </a> </li>
+                    <li><a href="/node-mongodb-native/2.0/tutorials/tracing/"> Tracing </a> </li>
                     
                     <li><a href="/node-mongodb-native/2.0/tutorials/changes-from-1.0/"> Migrating to 2.X </a> </li>
                     
@@ -194,7 +194,7 @@
           
             <li> <a href="https://jira.mongodb.org/browse/NODE" target="blank"><i class='fa fa-life-ring'></i>Issues & Help</a> </li>
             
-              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/tutorials/tracing.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
+              <li><a href="https://github.com/mongodb/node-mongodb-native/docs/content/tutorials/enterprise_features.md" target="blank"><i class='fa fa-edit'></i> Refine this Page</a> </li>
             
             <li><a href='https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge'><img src='https://badges.gitter.im/Join Chat.svg'/></a></li>
         </ul>
@@ -224,7 +224,7 @@
                   <div class="col-md-1">
                       
                       
-                      <a class="navigation prev" href="../../tutorials/objectid">
+                      <a class="navigation prev" href="../../tutorials/changes-from-1.0">
                       <i class="fa fa-angle-left"></i>
                       </a>
                       
@@ -239,45 +239,163 @@
 
 
 
-<h1 id="tracing-or-prototype-overriding:016d3f73e04c7f7b0e809d99596cadb8">Tracing or Prototype Overriding</h1>
+<h1 id="enterprise-driver-features:6e3614dc6c70ae01cdc1669aeb0efb13">Enterprise Driver Features</h1>
 
-<p>Tracing comes up a couple of times a year so it might be a useful thing for more people than just New Relic or other application metrics companies out there. Maybe you want to instrument the driver to keep some measurements client side on the time it takes for an operation to finish or maybe you want to log all operations somewhere for auditing purposes or maybe you have some awesome new idea about how to do something radically different. Well the good thing is that JavaScript is on your side when it comes to reaching your goals. The rescue comes in the form of the <code>prototype</code> of the driver classes. Since code speaks a thousand words let&rsquo;s just throw out code where override the <code>findOne</code> method to print the time it took for the operation to the console.</p>
+<p>This tutorial covers aspects of the driver related to the Subscription version of MongoDB that includes SSL, X509, ldap and kerberos support.</p>
 
-<pre><code class="language-javascript">var Collection = require('mongodb').Collection
-  , MongoClient = require('mongodb').MongoClient
-  , f = require('util').format;
+<h2 id="connecting-using-ssl:6e3614dc6c70ae01cdc1669aeb0efb13">Connecting using SSL</h2>
 
-// Keep the original findOne method
-var findOne = Collection.prototype.findOne;
-// Create our own overriding findOne method that wraps the original
-Collection.prototype.findOne = function() {
-  var startTime = new Date().getTime();
-  // Get all the passed in arguments as an array
-  var args = Array.prototype.slice.call(arguments, 0);
-  // Get the callback at the end of the function
-  var callback = args.pop();
-  // Push our own callback handler that calls the original 
-  // callback after finishing up it's goals
-  args.push(function(err, r) {
-    var endTime = new Date().getTime();
-    console.log(f(&quot;findOne took %s milliseconds&quot;, (endTime - startTime)))
-    callback(err, r)
-  });
+<h3 id="no-validation-of-certificate-chain:6e3614dc6c70ae01cdc1669aeb0efb13">No validation of certificate chain</h3>
 
-  // Call the original prototype method findOne on this instance
-  return findOne.apply(this, args);
-}
+<p>If the server does not perform any validation of the certificate chain connecting to the server is straightforward.</p>
 
-MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-  db.collection('t').findOne({}, function(err, r) {
-    db.close();
-  });
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient;
+
+MongoClient.connect(&quot;mongodb://localhost:27017/test?ssl=true&quot;, function(err, db) {
+  db.close();
 });
+
 </code></pre>
 
-<p>In this code we change the behavior of the findOne method by wrapping it in our own method that records the start and end times of the findOne operation and prints the number of milliseconds it took to the console. The cool thing is that this is global. Once we changed <code>Collection.prototype</code> we automatically get our new wrapped method for all methods that create a new <code>Collection</code> instance allowing us to instruments all calls using <code>Collection.findOne</code> across our application.</p>
+<h3 id="driver-should-validate-server-certificate:6e3614dc6c70ae01cdc1669aeb0efb13">Driver should validate Server certificate</h3>
 
-<p>There is not much more to it so go ahead and think of some crazy ways to use this and if you do something very clever let me know :).</p>
+<p>If the server presents a certificate that we wish to validate client side we need a couple more parameters.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
+  , fs = require('fs');
+
+// Read the certificate authority
+var ca = [fs.readFileSync(__dirname + &quot;/ssl/ca.pem&quot;)];
+
+// Connect validating the returned certificates from the server
+MongoClient.connect(&quot;mongodb://localhost:27017/test?ssl=true&quot;, {
+  server: {
+      sslValidate:true
+    , sslCA:ca
+  }
+}, function(err, db) {
+  db.close();
+});
+
+</code></pre>
+
+<h3 id="driver-should-validate-server-certificate-and-present-valid-certificate:6e3614dc6c70ae01cdc1669aeb0efb13">Driver should validate Server certificate and present valid Certificate</h3>
+
+<p>If the server is configured to perform certificate validation we need to pass a certificate through the driver as well as verify the one retrieved. In this case our certificate password is <code>10gen</code>.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
+  , fs = require('fs');
+
+// Read the certificate authority
+var ca = [fs.readFileSync(__dirname + &quot;/ssl/ca.pem&quot;)];
+var cert = fs.readFileSync(__dirname + &quot;/ssl/client.pem&quot;);
+var key = fs.readFileSync(__dirname + &quot;/ssl/client.pem&quot;);
+
+// Connect validating the returned certificates from the server
+MongoClient.connect(&quot;mongodb://localhost:27017/test?ssl=true&quot;, {
+  server: {
+      sslValidate:true
+    , sslCA:ca
+    , sslKey:key
+    , sslCert:cert
+    , sslPass:'10gen'
+  }
+}, function(err, db) {
+  db.close();
+});
+
+</code></pre>
+
+<h2 id="connecting-using-x509:6e3614dc6c70ae01cdc1669aeb0efb13">Connecting using X509</h2>
+
+<p>X509 is a certification validation process similar to normal SSL validation but it also includes specific user information that can be used for authorization. Connecting is very similar to the previous SSL examples.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
+  , fs = require('fs');
+
+// Read the cert and key
+var cert = fs.readFileSync(__dirname + &quot;/ssl/x509/client.pem&quot;);
+var key = fs.readFileSync(__dirname + &quot;/ssl/x509/client.pem&quot;);
+
+// User name
+var userName = &quot;CN=client,OU=kerneluser,O=10Gen,L=New York City,ST=New York,C=US&quot;;
+
+// Connect using the MONGODB-X509 authentication mechanism
+MongoClient.connect(f('mongodb://%s@server:27017/test?authMechanism=%s&amp;ssl=true'
+    , encodeURIComponent(userName), 'MONGODB-X509'), {
+  server: {
+      sslKey:key
+    , sslCert:cert
+  }
+}, function(err, db) {
+  db.close();
+});
+
+</code></pre>
+
+<h2 id="connecting-using-ldap:6e3614dc6c70ae01cdc1669aeb0efb13">Connecting using LDAP</h2>
+
+<p>The LDAP support in the subscription version of MongoDB allows for integrating against corporate LDAP server to manage authentication and authorization. To connect using LDAP we need to do the following.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
+  , f = require('util').format;
+
+// LDAP credentials
+var server = &quot;ldaptest.someserver.com&quot;;
+var user = &quot;drivers-team&quot;;
+var pass = &quot;mongo0x$server&quot;;
+
+// Url
+var url = f(&quot;mongodb://%s:%s@%s/test?authMechanism=PLAIN&amp;maxPoolSize=1&quot;, user, pass, server);
+
+// Connect using ldap credentials
+MongoClient.connect(url, function(err, db) {
+  db.close();
+});
+
+</code></pre>
+
+<h2 id="connecting-using-kerberos:6e3614dc6c70ae01cdc1669aeb0efb13">Connecting using Kerberos</h2>
+
+<p>The subscription version of MongoDB support kerberos authentication and authorization support using SSPI under windwos and GSAPI under unix. To connect with kerberos (this example expects there to be a valid kerberos ticket for the user).</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient;
+  , f = require('util').format;
+
+// KDC Server
+var server = &quot;ldaptest.10gen.cc&quot;;
+var principal = &quot;drivers@LDAPTEST.10GEN.CC&quot;;
+var urlEncodedPrincipal = encodeURIComponent(principal);
+
+// Url
+var url = f(&quot;mongodb://%s@%s/kerberos?authMechanism=GSSAPI&amp;gssapiServiceName=mongodb&quot;, urlEncodedPrincipal, server);
+
+// Connect using kerberos details
+MongoClient.connect(url, function(err, db) {
+  db.close();
+});
+
+</code></pre>
+
+<p>You can also pass in password credentials for a kerberos connection, this is useful on windows if you don&rsquo;t have a security domain set up.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient;
+  , f = require('util').format;
+
+// KDC Server
+var server = &quot;ldaptest.10gen.cc&quot;;
+var principal = &quot;drivers@LDAPTEST.10GEN.CC&quot;;
+var urlEncodedPrincipal = encodeURIComponent(principal);
+
+// Url
+var url = f(&quot;mongodb://%s:%s@%s/kerberos?authMechanism=GSSAPI&amp;maxPoolSize=1&quot;, urlEncodedPrincipal, pass, server);
+
+// Connect using kerberos details
+MongoClient.connect(url, function(err, db) {
+  db.close();
+});
+
+</code></pre>
 
                       
                       <div id="disqus_thread"></div>
@@ -301,7 +419,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
                 <div class="col-md-1">
                     
                     
-                    <a class="navigation next" href="../../tutorials/changes-from-1.0">
+                    <a class="navigation next" href="../../tutorials/connecting">
                         <i class="fa fa-angle-right"> </i>
                     </a>
                     

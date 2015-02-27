@@ -132,6 +132,8 @@
                     
                     <li><a href="/node-mongodb-native/2.0/tutorials/crud_operations/"> CRUD Operations </a> </li>
                     
+                    <li><a href="/node-mongodb-native/2.0/tutorials/enterprise_features/"> Driver Enterprise Features </a> </li>
+                    
                     <li><a href="/node-mongodb-native/2.0/tutorials/aggregation/"> Aggregation </a> </li>
                     
                     <li><a href="/node-mongodb-native/2.0/tutorials/streams/"> Streams </a> </li>
@@ -222,7 +224,7 @@
                   <div class="col-md-1">
                       
                       
-                      <a class="navigation prev" href="../../tutorials/changes-from-1.0">
+                      <a class="navigation prev" href="../../tutorials/enterprise_features">
                       <i class="fa fa-angle-left"></i>
                       </a>
                       
@@ -238,8 +240,6 @@
 
 
 <h1 id="connecting-to-mongodb:d67a243cdf521fafcb45cf3f560d3e12">Connecting To MongoDB</h1>
-
-<hr />
 
 <p>Connecting to MongoDB using the driver is primarily done using the <code>MongoClient.connect</code> method and a URI. Let&rsquo;s look at how we connect to a couple of different server topologies.</p>
 
@@ -258,7 +258,7 @@ MongoClient.connect(url, function(err, db) {
   console.log(&quot;Connected correctly to server&quot;);
 
   db.close();
-});    
+});
 </code></pre>
 
 <p>Let&rsquo;s break down the <code>URI</code> string we passed as the first argument to MongoClient.connect.</p>
@@ -284,7 +284,7 @@ MongoClient.connect(url, function(err, db) {
   console.log(&quot;Connected correctly to server&quot;);
 
   db.close();
-});    
+});
 </code></pre>
 
 <p>Let&rsquo;s break down the <code>URI</code> string.</p>
@@ -311,7 +311,7 @@ MongoClient.connect(url, function(err, db) {
   console.log(&quot;Connected correctly to server&quot;);
 
   db.close();
-});    
+});
 </code></pre>
 
 <p>Let&rsquo;s break down the <code>URI</code> string.</p>
@@ -405,7 +405,7 @@ var url = 'mongodb://dave:password@localhost:27017/myproject';
 MongoClient.connect(url, {
     db: {
       raw: true
-    }, 
+    },
     server: {
       poolSize: 10
     }

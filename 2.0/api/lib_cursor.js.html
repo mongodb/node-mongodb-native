@@ -75,9 +75,9 @@ var inherits = require('util').inherits
 /**
  * @fileOverview The **Cursor** class is an internal class that embodies a cursor on MongoDB
  * allowing for iteration over the results returned from the underlying query. It supports
- * one by one document iteration, conversion to an array or can be iterated as a Node 0.10.X 
+ * one by one document iteration, conversion to an array or can be iterated as a Node 0.10.X
  * or higher stream
- * 
+ *
  * **CURSORS Cannot directly be instantiated**
  * @example
  * var MongoClient = require('mongodb').MongoClient,
@@ -93,7 +93,7 @@ var inherits = require('util').inherits
  *     , {a:2, b:2}, {a:3, b:3}
  *     , {a:4, b:4}], {w:1}, function(err, result) {
  *     test.equal(null, err);
- * 
+ *
  *     // Show that duplicate records got dropped
  *     col.find({}).toArray(function(err, items) {
  *       test.equal(null, err);
@@ -206,7 +206,7 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
  */
 
 // Inherit from Readable
-inherits(Cursor, Readable);  
+inherits(Cursor, Readable);
 
 for(var name in CoreCursor.prototype) {
   Cursor.prototype[name] = CoreCursor.prototype[name];
@@ -348,7 +348,7 @@ Cursor.prototype.batchSize = function(value) {
  * @throws {MongoError}
  * @return {Cursor}
  */
-Cursor.prototype.limit = function(value) {  
+Cursor.prototype.limit = function(value) {
   if(this.s.options.tailable) throw new MongoError("Tailable cursor doesn't support limit");
   if(this.s.state == Cursor.OPEN || this.s.state == Cursor.CLOSED || this.isDead()) throw new MongoError("Cursor is closed");
   if(typeof value != 'number') throw new MongoError("limit requires an integer");
@@ -435,13 +435,13 @@ Cursor.prototype.skip = function(value) {
  * Clone the cursor
  * @function external:CoreCursor#clone
  * @return {Cursor}
- */  
+ */
 
 /**
  * Resets the cursor
  * @function external:CoreCursor#rewind
  * @return {null}
- */  
+ */
 
 /**
  * Get the next available document from the cursor, returns null if no more documents are available.
@@ -461,7 +461,7 @@ Cursor.prototype.nextObject = function(callback) {
       return handleCallback(callback, err);
     }
   }
-  
+
   // Get the next object
   self.next(function(err, doc) {
     if(err &amp;&amp; err.tailable &amp;&amp; self.s.currentNumberOfRetries == 0) return callback(err);
@@ -538,7 +538,7 @@ var _each = function(self, callback) {
       if(handleCallback(callback, null, item) == false) return;
       _each(self, callback);
     })
-  }    
+  }
 }
 
 /**
@@ -565,11 +565,11 @@ Cursor.prototype.forEach = function(iterator, callback) {
   this.each(function(err, doc){
     if(err) { callback(err); return false; }
     if(doc != null) { iterator(doc); return true; }
-    if(doc == null &amp;&amp; callback) { 
+    if(doc == null &amp;&amp; callback) {
       var internalCallback = callback;
       callback = null;
-      internalCallback(null); 
-      return false; 
+      internalCallback(null);
+      return false;
     }
   });
 }
@@ -590,7 +590,7 @@ Cursor.prototype.setReadPreference = function(r) {
   }
 
   return this;
-}  
+}
 
 /**
  * The callback format for results
@@ -614,7 +614,7 @@ Cursor.prototype.toArray = function(callback) {
   if(!callback) throw new MongoError('callback is mandatory');
   if(self.s.options.tailable) return handleCallback(callback, new MongoError("Tailable cursor cannot be converted to array"), null);
   var items = [];
-  
+
   // Reset cursor
   this.rewind();
   self.s.state = Cursor.INIT;
@@ -638,7 +638,7 @@ Cursor.prototype.toArray = function(callback) {
 
       // Attempt a fetch
       fetchDocs();
-    })      
+    })
   }
 
   fetchDocs();
@@ -655,12 +655,12 @@ Cursor.prototype.toArray = function(callback) {
  * Get the count of documents for this cursor
  * @method
  * @param {boolean} applySkipLimit Should the count command apply limit and skip settings on the cursor or in the passed in options.
- * @param {(string|ReadPreference)} readPreference The new read preference for the cursor.
  * @param {object} [options=null] Optional settings.
  * @param {number} [options.skip=null] The number of documents to skip.
  * @param {number} [options.limit=null] The maximum amounts to count before aborting.
  * @param {number} [options.maxTimeMS=null] Number of miliseconds to wait before aborting the query.
  * @param {string} [options.hint=null] An index name hint for the query.
+ * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  * @param {Cursor~countResultCallback} callback The result callback.
  * @return {null}
  */
@@ -677,7 +677,7 @@ Cursor.prototype.count = function(applySkipLimit, opts, callback) {
   var opts = {};
   if(applySkipLimit) {
     if(typeof this.cursorSkip() == 'number') opts.skip = this.cursorSkip();
-    if(typeof this.cursorLimit() == 'number') opts.limit = this.cursorLimit();    
+    if(typeof this.cursorLimit() == 'number') opts.limit = this.cursorLimit();
   }
 
   // Command
@@ -711,7 +711,7 @@ Cursor.prototype.count = function(applySkipLimit, opts, callback) {
   // Set up callback
   callbacks.register(query.requestId, function(err, result) {
     if(err) return handleCallback(callback, err);
-    if(result.documents.length == 1 
+    if(result.documents.length == 1
       &amp;&amp; (result.documents[0].errmsg
       || result.documents[0].err
       || result.documents[0]['$err'])) return callback(MongoError.create(result.documents[0]));
@@ -733,9 +733,9 @@ Cursor.prototype.close = function(callback) {
   // Kill the cursor
   this.kill();
   // Emit the close event for the cursor
-  this.emit('close');      
+  this.emit('close');
   // Callback if provided
-  if(callback) return handleCallback(callback, null, this);  
+  if(callback) return handleCallback(callback, null, this);
 }
 
 /**
@@ -798,37 +798,60 @@ Cursor.prototype._read = function(n) {
     // Return the result
     self.push(result);
   });
-}  
+}
+
+Object.defineProperty(Cursor.prototype, 'namespace', {
+  enumerable: true,
+  get: function() {
+    if (!this || !this.s) {
+      return null;
+    }
+
+    // TODO: refactor this logic into core
+    var ns = this.s.ns || '';
+    var firstDot = ns.indexOf('.');
+    if (firstDot &lt; 0) {
+      return {
+        database: this.s.ns,
+        collection: ''
+      };
+    }
+    return {
+      database: ns.substr(0, firstDot),
+      collection: ns.substr(firstDot + 1)
+    };
+  }
+});
 
 /**
  * The read() method pulls some data out of the internal buffer and returns it. If there is no data available, then it will return null.
- * @function external:Readable#read 
+ * @function external:Readable#read
  * @param {number} size Optional argument to specify how much data to read.
  * @return {(String | Buffer | null)}
  */
 
 /**
  * Call this function to cause the stream to return strings of the specified encoding instead of Buffer objects.
- * @function external:Readable#setEncoding 
+ * @function external:Readable#setEncoding
  * @param {string} encoding The encoding to use.
  * @return {null}
  */
 
 /**
  * This method will cause the readable stream to resume emitting data events.
- * @function external:Readable#resume 
+ * @function external:Readable#resume
  * @return {null}
  */
 
 /**
  * This method will cause a stream in flowing-mode to stop emitting data events. Any data that becomes available will remain in the internal buffer.
- * @function external:Readable#pause 
+ * @function external:Readable#pause
  * @return {null}
  */
 
 /**
  * This method pulls all the data out of a readable stream, and writes it to the supplied destination, automatically managing the flow so that the destination is not overwhelmed by a fast readable stream.
- * @function external:Readable#pipe 
+ * @function external:Readable#pipe
  * @param {Writable} destination The destination for writing data
  * @param {object} [options] Pipe options
  * @return {null}
@@ -836,41 +859,32 @@ Cursor.prototype._read = function(n) {
 
 /**
  * This method will remove the hooks set up for a previous pipe() call.
- * @function external:Readable#unpipe 
+ * @function external:Readable#unpipe
  * @param {Writable} [destination] The destination for writing data
  * @return {null}
  */
 
 /**
  * This is useful in certain cases where a stream is being consumed by a parser, which needs to "un-consume" some data that it has optimistically pulled out of the source, so that the stream can be passed on to some other party.
- * @function external:Readable#unshift 
+ * @function external:Readable#unshift
  * @param {(Buffer|string)} chunk Chunk of data to unshift onto the read queue.
  * @return {null}
  */
 
 /**
  * Versions of Node prior to v0.10 had streams that did not implement the entire Streams API as it is today. (See "Compatibility" below for more information.)
- * @function external:Readable#wrap 
+ * @function external:Readable#wrap
  * @param {Stream} stream An "old style" readable stream.
  * @return {null}
  */
-
-// for(var name in Readable.prototype) {
-//   Cursor.prototype[name] = Readable.prototype[name];
-// }
-
-// // Extend the Cursor
-// inherits(Cursor, CoreCursor);
-
-// // Inherit from Readable
-// inherits(Cursor, Readable);  
 
 Cursor.INIT = 0;
 Cursor.OPEN = 1;
 Cursor.CLOSED = 2;
 Cursor.GET_MORE = 3;
 
-module.exports = Cursor;</code></pre>
+module.exports = Cursor;
+</code></pre>
         </article>
     </section>
 
@@ -899,7 +913,7 @@ module.exports = Cursor;</code></pre>
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha13</a> on Wed Feb 04 2015 16:32:44 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha13</a> on Fri Feb 27 2015 12:28:39 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>
@@ -1524,6 +1538,72 @@ module.exports = Cursor;</code></pre>
             </ul>
         </li>
     
+        <li class="item" data-name="FindOperatorsOrdered">
+            <span class="title">
+                <a href="FindOperatorsOrdered.html">FindOperatorsOrdered</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="FindOperatorsOrdered#delete"><a href="FindOperatorsOrdered.html#delete">delete</a></li>
+            
+                <li data-name="FindOperatorsOrdered#deleteOne"><a href="FindOperatorsOrdered.html#deleteOne">deleteOne</a></li>
+            
+                <li data-name="FindOperatorsOrdered#replaceOne"><a href="FindOperatorsOrdered.html#replaceOne">replaceOne</a></li>
+            
+                <li data-name="FindOperatorsOrdered#update"><a href="FindOperatorsOrdered.html#update">update</a></li>
+            
+                <li data-name="FindOperatorsOrdered#updateOne"><a href="FindOperatorsOrdered.html#updateOne">updateOne</a></li>
+            
+                <li data-name="FindOperatorsOrdered#upsert"><a href="FindOperatorsOrdered.html#upsert">upsert</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="FindOperatorsUnordered">
+            <span class="title">
+                <a href="FindOperatorsUnordered.html">FindOperatorsUnordered</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            <span class="subtitle">Methods</span>
+            
+                <li data-name="FindOperatorsUnordered#remove"><a href="FindOperatorsUnordered.html#remove">remove</a></li>
+            
+                <li data-name="FindOperatorsUnordered#removeOne"><a href="FindOperatorsUnordered.html#removeOne">removeOne</a></li>
+            
+                <li data-name="FindOperatorsUnordered#replaceOne"><a href="FindOperatorsUnordered.html#replaceOne">replaceOne</a></li>
+            
+                <li data-name="FindOperatorsUnordered#update"><a href="FindOperatorsUnordered.html#update">update</a></li>
+            
+                <li data-name="FindOperatorsUnordered#updateOne"><a href="FindOperatorsUnordered.html#updateOne">updateOne</a></li>
+            
+                <li data-name="FindOperatorsUnordered#upsert"><a href="FindOperatorsUnordered.html#upsert">upsert</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
         <li class="item" data-name="GridStore">
             <span class="title">
                 <a href="GridStore.html">GridStore</a>
@@ -1803,6 +1883,8 @@ module.exports = Cursor;</code></pre>
                 <li data-name="OrderedBulkOperation#find"><a href="OrderedBulkOperation.html#find">find</a></li>
             
                 <li data-name="OrderedBulkOperation#insert"><a href="OrderedBulkOperation.html#insert">insert</a></li>
+            
+                <li data-name="OrderedBulkOperation#length"><a href="OrderedBulkOperation.html#length">length</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -2131,6 +2213,8 @@ module.exports = Cursor;</code></pre>
                 <li data-name="UnorderedBulkOperation#find"><a href="UnorderedBulkOperation.html#find">find</a></li>
             
                 <li data-name="UnorderedBulkOperation#insert"><a href="UnorderedBulkOperation.html#insert">insert</a></li>
+            
+                <li data-name="UnorderedBulkOperation#length"><a href="UnorderedBulkOperation.html#length">length</a></li>
             
             </ul>
             <ul class="events itemMembers">

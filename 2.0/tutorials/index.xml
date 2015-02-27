@@ -22,8 +22,6 @@
 
 &lt;h1 id=&#34;connecting-to-mongodb:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Connecting To MongoDB&lt;/h1&gt;
 
-&lt;hr /&gt;
-
 &lt;p&gt;Connecting to MongoDB using the driver is primarily done using the &lt;code&gt;MongoClient.connect&lt;/code&gt; method and a URI. Let&amp;rsquo;s look at how we connect to a couple of different server topologies.&lt;/p&gt;
 
 &lt;h2 id=&#34;single-server-connection:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Single Server Connection&lt;/h2&gt;
@@ -41,7 +39,7 @@ MongoClient.connect(url, function(err, db) {
   console.log(&amp;quot;Connected correctly to server&amp;quot;);
 
   db.close();
-});    
+});
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Let&amp;rsquo;s break down the &lt;code&gt;URI&lt;/code&gt; string we passed as the first argument to MongoClient.connect.&lt;/p&gt;
@@ -67,7 +65,7 @@ MongoClient.connect(url, function(err, db) {
   console.log(&amp;quot;Connected correctly to server&amp;quot;);
 
   db.close();
-});    
+});
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Let&amp;rsquo;s break down the &lt;code&gt;URI&lt;/code&gt; string.&lt;/p&gt;
@@ -94,7 +92,7 @@ MongoClient.connect(url, function(err, db) {
   console.log(&amp;quot;Connected correctly to server&amp;quot;);
 
   db.close();
-});    
+});
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Let&amp;rsquo;s break down the &lt;code&gt;URI&lt;/code&gt; string.&lt;/p&gt;
@@ -188,7 +186,7 @@ var url = &#39;mongodb://dave:password@localhost:27017/myproject&#39;;
 MongoClient.connect(url, {
     db: {
       raw: true
-    }, 
+    },
     server: {
       poolSize: 10
     }
@@ -1168,6 +1166,174 @@ MongoClient.connect(url, function(err, db) {
 &lt;p&gt;The &lt;em&gt;each&lt;/em&gt; method will call the supplied callback until there are no more documents available that satisfy the query. Once the available documents is exhausted it will return &lt;em&gt;null&lt;/em&gt; for the second parameter in the callback. If you wish to terminate the each early you should return false in your &lt;em&gt;each&lt;/em&gt; callback. This will stop the cursor from returning documents.&lt;/p&gt;
 
 &lt;p&gt;This covers the basic crud operations in the Node.js MongoDB driver.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Driver Enterprise Features</title>
+      <link>/node-mongodb-native/2.0/tutorials/enterprise_features/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/tutorials/enterprise_features/</guid>
+      <description>
+
+&lt;h1 id=&#34;enterprise-driver-features:6e3614dc6c70ae01cdc1669aeb0efb13&#34;&gt;Enterprise Driver Features&lt;/h1&gt;
+
+&lt;p&gt;This tutorial covers aspects of the driver related to the Subscription version of MongoDB that includes SSL, X509, ldap and kerberos support.&lt;/p&gt;
+
+&lt;h2 id=&#34;connecting-using-ssl:6e3614dc6c70ae01cdc1669aeb0efb13&#34;&gt;Connecting using SSL&lt;/h2&gt;
+
+&lt;h3 id=&#34;no-validation-of-certificate-chain:6e3614dc6c70ae01cdc1669aeb0efb13&#34;&gt;No validation of certificate chain&lt;/h3&gt;
+
+&lt;p&gt;If the server does not perform any validation of the certificate chain connecting to the server is straightforward.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient;
+
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/test?ssl=true&amp;quot;, function(err, db) {
+  db.close();
+});
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;driver-should-validate-server-certificate:6e3614dc6c70ae01cdc1669aeb0efb13&#34;&gt;Driver should validate Server certificate&lt;/h3&gt;
+
+&lt;p&gt;If the server presents a certificate that we wish to validate client side we need a couple more parameters.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , fs = require(&#39;fs&#39;);
+
+// Read the certificate authority
+var ca = [fs.readFileSync(__dirname + &amp;quot;/ssl/ca.pem&amp;quot;)];
+
+// Connect validating the returned certificates from the server
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/test?ssl=true&amp;quot;, {
+  server: {
+      sslValidate:true
+    , sslCA:ca
+  }
+}, function(err, db) {
+  db.close();
+});
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;driver-should-validate-server-certificate-and-present-valid-certificate:6e3614dc6c70ae01cdc1669aeb0efb13&#34;&gt;Driver should validate Server certificate and present valid Certificate&lt;/h3&gt;
+
+&lt;p&gt;If the server is configured to perform certificate validation we need to pass a certificate through the driver as well as verify the one retrieved. In this case our certificate password is &lt;code&gt;10gen&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , fs = require(&#39;fs&#39;);
+
+// Read the certificate authority
+var ca = [fs.readFileSync(__dirname + &amp;quot;/ssl/ca.pem&amp;quot;)];
+var cert = fs.readFileSync(__dirname + &amp;quot;/ssl/client.pem&amp;quot;);
+var key = fs.readFileSync(__dirname + &amp;quot;/ssl/client.pem&amp;quot;);
+
+// Connect validating the returned certificates from the server
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/test?ssl=true&amp;quot;, {
+  server: {
+      sslValidate:true
+    , sslCA:ca
+    , sslKey:key
+    , sslCert:cert
+    , sslPass:&#39;10gen&#39;
+  }
+}, function(err, db) {
+  db.close();
+});
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;connecting-using-x509:6e3614dc6c70ae01cdc1669aeb0efb13&#34;&gt;Connecting using X509&lt;/h2&gt;
+
+&lt;p&gt;X509 is a certification validation process similar to normal SSL validation but it also includes specific user information that can be used for authorization. Connecting is very similar to the previous SSL examples.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , fs = require(&#39;fs&#39;);
+
+// Read the cert and key
+var cert = fs.readFileSync(__dirname + &amp;quot;/ssl/x509/client.pem&amp;quot;);
+var key = fs.readFileSync(__dirname + &amp;quot;/ssl/x509/client.pem&amp;quot;);
+
+// User name
+var userName = &amp;quot;CN=client,OU=kerneluser,O=10Gen,L=New York City,ST=New York,C=US&amp;quot;;
+
+// Connect using the MONGODB-X509 authentication mechanism
+MongoClient.connect(f(&#39;mongodb://%s@server:27017/test?authMechanism=%s&amp;amp;ssl=true&#39;
+    , encodeURIComponent(userName), &#39;MONGODB-X509&#39;), {
+  server: {
+      sslKey:key
+    , sslCert:cert
+  }
+}, function(err, db) {
+  db.close();
+});
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;connecting-using-ldap:6e3614dc6c70ae01cdc1669aeb0efb13&#34;&gt;Connecting using LDAP&lt;/h2&gt;
+
+&lt;p&gt;The LDAP support in the subscription version of MongoDB allows for integrating against corporate LDAP server to manage authentication and authorization. To connect using LDAP we need to do the following.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , f = require(&#39;util&#39;).format;
+
+// LDAP credentials
+var server = &amp;quot;ldaptest.someserver.com&amp;quot;;
+var user = &amp;quot;drivers-team&amp;quot;;
+var pass = &amp;quot;mongo0x$server&amp;quot;;
+
+// Url
+var url = f(&amp;quot;mongodb://%s:%s@%s/test?authMechanism=PLAIN&amp;amp;maxPoolSize=1&amp;quot;, user, pass, server);
+
+// Connect using ldap credentials
+MongoClient.connect(url, function(err, db) {
+  db.close();
+});
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;connecting-using-kerberos:6e3614dc6c70ae01cdc1669aeb0efb13&#34;&gt;Connecting using Kerberos&lt;/h2&gt;
+
+&lt;p&gt;The subscription version of MongoDB support kerberos authentication and authorization support using SSPI under windwos and GSAPI under unix. To connect with kerberos (this example expects there to be a valid kerberos ticket for the user).&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient;
+  , f = require(&#39;util&#39;).format;
+
+// KDC Server
+var server = &amp;quot;ldaptest.10gen.cc&amp;quot;;
+var principal = &amp;quot;drivers@LDAPTEST.10GEN.CC&amp;quot;;
+var urlEncodedPrincipal = encodeURIComponent(principal);
+
+// Url
+var url = f(&amp;quot;mongodb://%s@%s/kerberos?authMechanism=GSSAPI&amp;amp;gssapiServiceName=mongodb&amp;quot;, urlEncodedPrincipal, server);
+
+// Connect using kerberos details
+MongoClient.connect(url, function(err, db) {
+  db.close();
+});
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You can also pass in password credentials for a kerberos connection, this is useful on windows if you don&amp;rsquo;t have a security domain set up.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient;
+  , f = require(&#39;util&#39;).format;
+
+// KDC Server
+var server = &amp;quot;ldaptest.10gen.cc&amp;quot;;
+var principal = &amp;quot;drivers@LDAPTEST.10GEN.CC&amp;quot;;
+var urlEncodedPrincipal = encodeURIComponent(principal);
+
+// Url
+var url = f(&amp;quot;mongodb://%s:%s@%s/kerberos?authMechanism=GSSAPI&amp;amp;maxPoolSize=1&amp;quot;, urlEncodedPrincipal, pass, server);
+
+// Connect using kerberos details
+MongoClient.connect(url, function(err, db) {
+  db.close();
+});
+
+&lt;/code&gt;&lt;/pre&gt;
 </description>
     </item>
     

@@ -13,274 +13,6 @@
     <atom:link href="/node-mongodb-native/2.0/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
-      <title>Connecting To MongoDB</title>
-      <link>/node-mongodb-native/2.0/tutorials/connecting/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
-      
-      <guid>/node-mongodb-native/2.0/tutorials/connecting/</guid>
-      <description>
-
-&lt;h1 id=&#34;connecting-to-mongodb:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Connecting To MongoDB&lt;/h1&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;Connecting to MongoDB using the driver is primarily done using the &lt;code&gt;MongoClient.connect&lt;/code&gt; method and a URI. Let&amp;rsquo;s look at how we connect to a couple of different server topologies.&lt;/p&gt;
-
-&lt;h2 id=&#34;single-server-connection:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Single Server Connection&lt;/h2&gt;
-
-&lt;p&gt;We have a single MongoDB server instance running on the port &lt;em&gt;27017&lt;/em&gt; Let&amp;rsquo;s connect using the driver and &lt;em&gt;MongoClient.connect&lt;/em&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
-  , assert = require(&#39;assert&#39;);
-
-// Connection URL
-var url = &#39;mongodb://localhost:27017/myproject&#39;;
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log(&amp;quot;Connected correctly to server&amp;quot;);
-
-  db.close();
-});    
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Let&amp;rsquo;s break down the &lt;code&gt;URI&lt;/code&gt; string we passed as the first argument to MongoClient.connect.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;mongodb://&lt;/code&gt; is the protocol definition&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;localhost:27017&lt;/code&gt; is the server we are connecting to&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;/myproject&lt;/code&gt; is the database we wish to connect to&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;replicaset-server-connection:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Replicaset Server Connection&lt;/h2&gt;
-
-&lt;p&gt;We wish to connect to a ReplicaSet consisting of one primary and 1 or more secondaries. To Do this we need to supply the driver with a seedlist of servers and the name of the ReplicaSet we wish to connect to. Let&amp;rsquo;s take a look at a code example.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
-  , assert = require(&#39;assert&#39;);
-
-// Connection URL
-var url = &#39;mongodb://localhost:27017,localhost:27018/myproject?replicaSet=foo&#39;;
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log(&amp;quot;Connected correctly to server&amp;quot;);
-
-  db.close();
-});    
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Let&amp;rsquo;s break down the &lt;code&gt;URI&lt;/code&gt; string.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;mongodb://&lt;/code&gt; is the protocol definition&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;localhost:27017,localhost:27018&lt;/code&gt; is the servers we are connecting to to discover the topology of the ReplicaSet.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;/myproject&lt;/code&gt; is the database we wish to connect to&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;replicaSet=foo&lt;/code&gt; is the name of the ReplicaSet we are connecting to. This ensures we are connecting to the correct Replicaset. &lt;strong&gt;This is a required parameter when using the 2.0 driver&lt;/strong&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;mongos-proxy-connection:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Mongos Proxy Connection&lt;/h2&gt;
-
-&lt;p&gt;We wish to connect to a set of &lt;code&gt;mongos&lt;/code&gt; proxies. Just as in the case of connecting to a ReplicaSet we can provide a seed list of &lt;code&gt;mongos&lt;/code&gt; proxies. This allows the driver to perform failover between proxies automatically in case of a proxy process having been shut down. Let&amp;rsquo;s look at an example of code connecting to a set of proxies.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
-  , assert = require(&#39;assert&#39;);
-
-// Connection URL
-var url = &#39;mongodb://localhost:50000,localhost:50001/myproject&#39;;
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log(&amp;quot;Connected correctly to server&amp;quot;);
-
-  db.close();
-});    
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Let&amp;rsquo;s break down the &lt;code&gt;URI&lt;/code&gt; string.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;mongodb://&lt;/code&gt; is the protocol definition&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;localhost:50000,localhost:50001&lt;/code&gt; is the &lt;em&gt;mongos&lt;/em&gt; proxies we are connecting to.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;/myproject&lt;/code&gt; is the database we wish to connect to&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;authentication:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Authentication&lt;/h2&gt;
-
-&lt;h3 id=&#34;against-the-specified-database:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Against The Specified Database&lt;/h3&gt;
-
-&lt;p&gt;&lt;code&gt;MongoClient.connect&lt;/code&gt; also allows us to specify authentication credentials as part of the &lt;code&gt;URI&lt;/code&gt;. Let&amp;rsquo;s assume there is a user &lt;em&gt;dave&lt;/em&gt; with the password &lt;em&gt;password&lt;/em&gt; on the database &lt;em&gt;protected&lt;/em&gt;. To correctly authenticate we will do the following.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
-  , assert = require(&#39;assert&#39;);
-
-// Connection URL
-var url = &#39;mongodb://dave:password@localhost:27017/myproject&#39;;
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log(&amp;quot;Connected correctly to server&amp;quot;);
-
-  db.close();
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Let&amp;rsquo;s break down the &lt;code&gt;URI&lt;/code&gt; string.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;mongodb://&lt;/code&gt; is the protocol definition&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;dave:password&lt;/code&gt; is the user name and password for the database&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;localhost:27017&lt;/code&gt; is the server we are connecting to&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;/myproject&lt;/code&gt; is the database we wish to connect to&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;&lt;em&gt;The password and username must be URI encoded to allow for all any possible illegal characters&lt;/em&gt;&lt;/p&gt;
-
-&lt;h3 id=&#34;indirectly-against-another-database:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Indirectly Against Another Database&lt;/h3&gt;
-
-&lt;p&gt;In some cases you might have to authenticate against another database than the one you intend to connect to. This is referred to as delegated authentication. Say you wish to connect to the &lt;em&gt;myproject&lt;/em&gt; database but the user is defined in the &lt;em&gt;admin&lt;/em&gt; database. Let&amp;rsquo;s look at how we would accomplish this.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
-  , assert = require(&#39;assert&#39;);
-
-// Connection URL
-var url = &#39;mongodb://dave:password@localhost:27017/myproject?authSource=admin&#39;;
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log(&amp;quot;Connected correctly to server&amp;quot;);
-
-  db.close();
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Let&amp;rsquo;s break down the &lt;code&gt;URI&lt;/code&gt; string.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;mongodb://&lt;/code&gt; is the protocol definition&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;dave:password&lt;/code&gt; is the user name and password for the database&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;localhost:27017&lt;/code&gt; is the server we are connecting to&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;/myproject&lt;/code&gt; is the database we wish to connect to&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;authSource=admin&lt;/code&gt; is the database we wish to authenticate against&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h1 id=&#34;mongoclient-connect-optional-parameters:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;MongoClient.connect Optional Parameters&lt;/h1&gt;
-
-&lt;hr /&gt;
-
-&lt;p&gt;The driver has many more options for tweaking than what&amp;rsquo;s available through the &lt;code&gt;URI&lt;/code&gt; specification. These can be passed to the driver using an optional parameters object. The top level fields in the options object are.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;db&lt;/code&gt;, Options that affect the Db instance returned by the MongoClient.connect method.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;replSet&lt;/code&gt;, Options that modify the Replicaset topology connection behavior. &lt;strong&gt;This is a required parameter when using the 2.0 driver&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;mongos&lt;/code&gt;, Options that modify the Mongos topology connection behavior.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;server&lt;/code&gt;, Options that modify the Server topology connection behavior.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;A simple example connecting to a single server setting all returned queries to be raw BSON buffers and adjusting the poolSize to be 10 connections for this connection.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
-  , assert = require(&#39;assert&#39;);
-
-// Connection URL
-var url = &#39;mongodb://dave:password@localhost:27017/myproject&#39;;
-// Use connect method to connect to the Server
-MongoClient.connect(url, {
-    db: {
-      raw: true
-    }, 
-    server: {
-      poolSize: 10
-    }
-  }, function(err, db) {
-  assert.equal(null, err);
-  console.log(&amp;quot;Connected correctly to server&amp;quot;);
-
-  db.close();
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Let&amp;rsquo;s look at the individual options for each of the top level fields.&lt;/p&gt;
-
-&lt;h2 id=&#34;data-base-level-options:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Data base level options&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 is no acknowledgment of write and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;wtimeout&lt;/code&gt;, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;fsync&lt;/code&gt;, (Boolean, default:false) write waits for fsync before returning&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;j&lt;/code&gt;, (Boolean, default:false) write waits for journal sync before returning&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;readPreference&lt;/code&gt; {String}, the preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;readPreferenceTags&lt;/code&gt; {Object, default:null}, the tags object {&amp;lsquo;loc&amp;rsquo;:&amp;lsquo;ny&amp;rsquo;} used with the readPreference.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;native_parser&lt;/code&gt; {Boolean, default:false}, use c++ bson parser.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;forceServerObjectId&lt;/code&gt; {Boolean, default:false}, force server to create _id fields instead of client.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;pkFactory&lt;/code&gt; {Object}, object overriding the basic ObjectID primary key generation.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;serializeFunctions&lt;/code&gt; {Boolean, default:false}, serialize functions.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;raw&lt;/code&gt; {Boolean, default:false}, perform operations using raw bson buffers.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;retryMiliSeconds&lt;/code&gt; {Number, default:5000}, number of milliseconds between retries.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;numberOfRetries&lt;/code&gt; {Number, default:5}, number of retries off connection.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;bufferMaxEntries&lt;/code&gt; {Number, default: -1}, sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;individual-server-level-options:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Individual Server Level Options&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;poolSize&lt;/code&gt;, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ssl&lt;/code&gt;, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslValidate&lt;/code&gt;, {Boolean, default: false} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslCA&lt;/code&gt;, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslCert&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslKey&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslPass&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;autoReconnect&lt;/code&gt;, {Boolean, default: true} Reconnect on error.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;socketOptions.noDelay&lt;/code&gt;, {Boolean, default: true} TCP Socket NoDelay option.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;socketOptions.keepAlive&lt;/code&gt;, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;socketOptions.connectTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Connection timeout setting.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;socketOptions.socketTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Socket timeout setting.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;replicaset-level-options:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Replicaset Level Options&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;ha&lt;/code&gt; {Boolean, default:true}, turn on high availability.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;haInterval&lt;/code&gt; {Number, default:5000}, time between each replicaset status check.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;replicaSet&lt;/code&gt; {String}, the name of the replicaset to connect to. &lt;strong&gt;This is a required parameter when using the 2.0 driver&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;secondaryAcceptableLatencyMS&lt;/code&gt; {Number, default:15}, sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;connectWithNoPrimary&lt;/code&gt; {Boolean, default:false}, Sets if the driver should connect even if no primary is available.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;poolSize&lt;/code&gt;, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ssl&lt;/code&gt;, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslValidate&lt;/code&gt;, {Boolean, default: false} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslCA&lt;/code&gt;, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslCert&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslKey&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslPass&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;socketOptions.noDelay&lt;/code&gt;, {Boolean, default: true} TCP Socket NoDelay option.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;socketOptions.keepAlive&lt;/code&gt;, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;socketOptions.connectTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Connection timeout setting.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;socketOptions.socketTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Socket timeout setting.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;mongos-proxy-level-options:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Mongos Proxy Level Options&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;ha&lt;/code&gt; {Boolean, default:true}, turn on high availability.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;haInterval&lt;/code&gt; {Number, default:5000}, time between each replicaset status check.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;secondaryAcceptableLatencyMS&lt;/code&gt; {Number, default:15}, sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;poolSize&lt;/code&gt;, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ssl&lt;/code&gt;, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslValidate&lt;/code&gt;, {Boolean, default: false} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslCA&lt;/code&gt;, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslCert&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslKey&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslPass&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;socketOptions.noDelay&lt;/code&gt;, {Boolean, default: true} TCP Socket NoDelay option.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;socketOptions.keepAlive&lt;/code&gt;, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;socketOptions.connectTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Connection timeout setting.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;socketOptions.socketTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Socket timeout setting.&lt;/li&gt;
-&lt;/ul&gt;
-</description>
-    </item>
-    
-    <item>
       <title>Connection Failures</title>
       <link>/node-mongodb-native/2.0/tutorials/connection_failures/</link>
       <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
@@ -481,6 +213,272 @@ MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, function(err, db) 
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;This executes a query and sets the &lt;code&gt;maxTimeMS&lt;/code&gt; property to &lt;code&gt;1000&lt;/code&gt; milliseconds. If the query runs for longer than that time it will be aborted by the server.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Connecting To MongoDB</title>
+      <link>/node-mongodb-native/2.0/tutorials/connecting/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/tutorials/connecting/</guid>
+      <description>
+
+&lt;h1 id=&#34;connecting-to-mongodb:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Connecting To MongoDB&lt;/h1&gt;
+
+&lt;p&gt;Connecting to MongoDB using the driver is primarily done using the &lt;code&gt;MongoClient.connect&lt;/code&gt; method and a URI. Let&amp;rsquo;s look at how we connect to a couple of different server topologies.&lt;/p&gt;
+
+&lt;h2 id=&#34;single-server-connection:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Single Server Connection&lt;/h2&gt;
+
+&lt;p&gt;We have a single MongoDB server instance running on the port &lt;em&gt;27017&lt;/em&gt; Let&amp;rsquo;s connect using the driver and &lt;em&gt;MongoClient.connect&lt;/em&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  db.close();
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s break down the &lt;code&gt;URI&lt;/code&gt; string we passed as the first argument to MongoClient.connect.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;mongodb://&lt;/code&gt; is the protocol definition&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;localhost:27017&lt;/code&gt; is the server we are connecting to&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;/myproject&lt;/code&gt; is the database we wish to connect to&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;replicaset-server-connection:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Replicaset Server Connection&lt;/h2&gt;
+
+&lt;p&gt;We wish to connect to a ReplicaSet consisting of one primary and 1 or more secondaries. To Do this we need to supply the driver with a seedlist of servers and the name of the ReplicaSet we wish to connect to. Let&amp;rsquo;s take a look at a code example.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017,localhost:27018/myproject?replicaSet=foo&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  db.close();
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s break down the &lt;code&gt;URI&lt;/code&gt; string.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;mongodb://&lt;/code&gt; is the protocol definition&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;localhost:27017,localhost:27018&lt;/code&gt; is the servers we are connecting to to discover the topology of the ReplicaSet.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;/myproject&lt;/code&gt; is the database we wish to connect to&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;replicaSet=foo&lt;/code&gt; is the name of the ReplicaSet we are connecting to. This ensures we are connecting to the correct Replicaset. &lt;strong&gt;This is a required parameter when using the 2.0 driver&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;mongos-proxy-connection:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Mongos Proxy Connection&lt;/h2&gt;
+
+&lt;p&gt;We wish to connect to a set of &lt;code&gt;mongos&lt;/code&gt; proxies. Just as in the case of connecting to a ReplicaSet we can provide a seed list of &lt;code&gt;mongos&lt;/code&gt; proxies. This allows the driver to perform failover between proxies automatically in case of a proxy process having been shut down. Let&amp;rsquo;s look at an example of code connecting to a set of proxies.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:50000,localhost:50001/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  db.close();
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s break down the &lt;code&gt;URI&lt;/code&gt; string.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;mongodb://&lt;/code&gt; is the protocol definition&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;localhost:50000,localhost:50001&lt;/code&gt; is the &lt;em&gt;mongos&lt;/em&gt; proxies we are connecting to.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;/myproject&lt;/code&gt; is the database we wish to connect to&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;authentication:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Authentication&lt;/h2&gt;
+
+&lt;h3 id=&#34;against-the-specified-database:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Against The Specified Database&lt;/h3&gt;
+
+&lt;p&gt;&lt;code&gt;MongoClient.connect&lt;/code&gt; also allows us to specify authentication credentials as part of the &lt;code&gt;URI&lt;/code&gt;. Let&amp;rsquo;s assume there is a user &lt;em&gt;dave&lt;/em&gt; with the password &lt;em&gt;password&lt;/em&gt; on the database &lt;em&gt;protected&lt;/em&gt;. To correctly authenticate we will do the following.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://dave:password@localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  db.close();
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s break down the &lt;code&gt;URI&lt;/code&gt; string.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;mongodb://&lt;/code&gt; is the protocol definition&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;dave:password&lt;/code&gt; is the user name and password for the database&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;localhost:27017&lt;/code&gt; is the server we are connecting to&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;/myproject&lt;/code&gt; is the database we wish to connect to&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;em&gt;The password and username must be URI encoded to allow for all any possible illegal characters&lt;/em&gt;&lt;/p&gt;
+
+&lt;h3 id=&#34;indirectly-against-another-database:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Indirectly Against Another Database&lt;/h3&gt;
+
+&lt;p&gt;In some cases you might have to authenticate against another database than the one you intend to connect to. This is referred to as delegated authentication. Say you wish to connect to the &lt;em&gt;myproject&lt;/em&gt; database but the user is defined in the &lt;em&gt;admin&lt;/em&gt; database. Let&amp;rsquo;s look at how we would accomplish this.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://dave:password@localhost:27017/myproject?authSource=admin&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  db.close();
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s break down the &lt;code&gt;URI&lt;/code&gt; string.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;mongodb://&lt;/code&gt; is the protocol definition&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;dave:password&lt;/code&gt; is the user name and password for the database&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;localhost:27017&lt;/code&gt; is the server we are connecting to&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;/myproject&lt;/code&gt; is the database we wish to connect to&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;authSource=admin&lt;/code&gt; is the database we wish to authenticate against&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h1 id=&#34;mongoclient-connect-optional-parameters:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;MongoClient.connect Optional Parameters&lt;/h1&gt;
+
+&lt;hr /&gt;
+
+&lt;p&gt;The driver has many more options for tweaking than what&amp;rsquo;s available through the &lt;code&gt;URI&lt;/code&gt; specification. These can be passed to the driver using an optional parameters object. The top level fields in the options object are.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;db&lt;/code&gt;, Options that affect the Db instance returned by the MongoClient.connect method.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;replSet&lt;/code&gt;, Options that modify the Replicaset topology connection behavior. &lt;strong&gt;This is a required parameter when using the 2.0 driver&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;mongos&lt;/code&gt;, Options that modify the Mongos topology connection behavior.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;server&lt;/code&gt;, Options that modify the Server topology connection behavior.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;A simple example connecting to a single server setting all returned queries to be raw BSON buffers and adjusting the poolSize to be 10 connections for this connection.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://dave:password@localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, {
+    db: {
+      raw: true
+    },
+    server: {
+      poolSize: 10
+    }
+  }, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  db.close();
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s look at the individual options for each of the top level fields.&lt;/p&gt;
+
+&lt;h2 id=&#34;data-base-level-options:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Data base level options&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 is no acknowledgment of write and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;wtimeout&lt;/code&gt;, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;fsync&lt;/code&gt;, (Boolean, default:false) write waits for fsync before returning&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;j&lt;/code&gt;, (Boolean, default:false) write waits for journal sync before returning&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;readPreference&lt;/code&gt; {String}, the preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;readPreferenceTags&lt;/code&gt; {Object, default:null}, the tags object {&amp;lsquo;loc&amp;rsquo;:&amp;lsquo;ny&amp;rsquo;} used with the readPreference.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;native_parser&lt;/code&gt; {Boolean, default:false}, use c++ bson parser.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;forceServerObjectId&lt;/code&gt; {Boolean, default:false}, force server to create _id fields instead of client.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;pkFactory&lt;/code&gt; {Object}, object overriding the basic ObjectID primary key generation.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;serializeFunctions&lt;/code&gt; {Boolean, default:false}, serialize functions.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;raw&lt;/code&gt; {Boolean, default:false}, perform operations using raw bson buffers.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;retryMiliSeconds&lt;/code&gt; {Number, default:5000}, number of milliseconds between retries.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;numberOfRetries&lt;/code&gt; {Number, default:5}, number of retries off connection.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;bufferMaxEntries&lt;/code&gt; {Number, default: -1}, sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;individual-server-level-options:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Individual Server Level Options&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;poolSize&lt;/code&gt;, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ssl&lt;/code&gt;, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslValidate&lt;/code&gt;, {Boolean, default: false} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslCA&lt;/code&gt;, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslCert&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslKey&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslPass&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;autoReconnect&lt;/code&gt;, {Boolean, default: true} Reconnect on error.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketOptions.noDelay&lt;/code&gt;, {Boolean, default: true} TCP Socket NoDelay option.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketOptions.keepAlive&lt;/code&gt;, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketOptions.connectTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Connection timeout setting.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketOptions.socketTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Socket timeout setting.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;replicaset-level-options:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Replicaset Level Options&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;ha&lt;/code&gt; {Boolean, default:true}, turn on high availability.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;haInterval&lt;/code&gt; {Number, default:5000}, time between each replicaset status check.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;replicaSet&lt;/code&gt; {String}, the name of the replicaset to connect to. &lt;strong&gt;This is a required parameter when using the 2.0 driver&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;secondaryAcceptableLatencyMS&lt;/code&gt; {Number, default:15}, sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;connectWithNoPrimary&lt;/code&gt; {Boolean, default:false}, Sets if the driver should connect even if no primary is available.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;poolSize&lt;/code&gt;, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ssl&lt;/code&gt;, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslValidate&lt;/code&gt;, {Boolean, default: false} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslCA&lt;/code&gt;, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslCert&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslKey&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslPass&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketOptions.noDelay&lt;/code&gt;, {Boolean, default: true} TCP Socket NoDelay option.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketOptions.keepAlive&lt;/code&gt;, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketOptions.connectTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Connection timeout setting.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketOptions.socketTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Socket timeout setting.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;mongos-proxy-level-options:d67a243cdf521fafcb45cf3f560d3e12&#34;&gt;Mongos Proxy Level Options&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;ha&lt;/code&gt; {Boolean, default:true}, turn on high availability.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;haInterval&lt;/code&gt; {Number, default:5000}, time between each replicaset status check.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;secondaryAcceptableLatencyMS&lt;/code&gt; {Number, default:15}, sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;poolSize&lt;/code&gt;, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ssl&lt;/code&gt;, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslValidate&lt;/code&gt;, {Boolean, default: false} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslCA&lt;/code&gt;, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslCert&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslKey&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslPass&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketOptions.noDelay&lt;/code&gt;, {Boolean, default: true} TCP Socket NoDelay option.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketOptions.keepAlive&lt;/code&gt;, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketOptions.connectTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Connection timeout setting.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;socketOptions.socketTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Socket timeout setting.&lt;/li&gt;
+&lt;/ul&gt;
 </description>
     </item>
     
@@ -1168,6 +1166,174 @@ MongoClient.connect(url, function(err, db) {
 &lt;p&gt;The &lt;em&gt;each&lt;/em&gt; method will call the supplied callback until there are no more documents available that satisfy the query. Once the available documents is exhausted it will return &lt;em&gt;null&lt;/em&gt; for the second parameter in the callback. If you wish to terminate the each early you should return false in your &lt;em&gt;each&lt;/em&gt; callback. This will stop the cursor from returning documents.&lt;/p&gt;
 
 &lt;p&gt;This covers the basic crud operations in the Node.js MongoDB driver.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Driver Enterprise Features</title>
+      <link>/node-mongodb-native/2.0/tutorials/enterprise_features/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/tutorials/enterprise_features/</guid>
+      <description>
+
+&lt;h1 id=&#34;enterprise-driver-features:6e3614dc6c70ae01cdc1669aeb0efb13&#34;&gt;Enterprise Driver Features&lt;/h1&gt;
+
+&lt;p&gt;This tutorial covers aspects of the driver related to the Subscription version of MongoDB that includes SSL, X509, ldap and kerberos support.&lt;/p&gt;
+
+&lt;h2 id=&#34;connecting-using-ssl:6e3614dc6c70ae01cdc1669aeb0efb13&#34;&gt;Connecting using SSL&lt;/h2&gt;
+
+&lt;h3 id=&#34;no-validation-of-certificate-chain:6e3614dc6c70ae01cdc1669aeb0efb13&#34;&gt;No validation of certificate chain&lt;/h3&gt;
+
+&lt;p&gt;If the server does not perform any validation of the certificate chain connecting to the server is straightforward.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient;
+
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/test?ssl=true&amp;quot;, function(err, db) {
+  db.close();
+});
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;driver-should-validate-server-certificate:6e3614dc6c70ae01cdc1669aeb0efb13&#34;&gt;Driver should validate Server certificate&lt;/h3&gt;
+
+&lt;p&gt;If the server presents a certificate that we wish to validate client side we need a couple more parameters.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , fs = require(&#39;fs&#39;);
+
+// Read the certificate authority
+var ca = [fs.readFileSync(__dirname + &amp;quot;/ssl/ca.pem&amp;quot;)];
+
+// Connect validating the returned certificates from the server
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/test?ssl=true&amp;quot;, {
+  server: {
+      sslValidate:true
+    , sslCA:ca
+  }
+}, function(err, db) {
+  db.close();
+});
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;driver-should-validate-server-certificate-and-present-valid-certificate:6e3614dc6c70ae01cdc1669aeb0efb13&#34;&gt;Driver should validate Server certificate and present valid Certificate&lt;/h3&gt;
+
+&lt;p&gt;If the server is configured to perform certificate validation we need to pass a certificate through the driver as well as verify the one retrieved. In this case our certificate password is &lt;code&gt;10gen&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , fs = require(&#39;fs&#39;);
+
+// Read the certificate authority
+var ca = [fs.readFileSync(__dirname + &amp;quot;/ssl/ca.pem&amp;quot;)];
+var cert = fs.readFileSync(__dirname + &amp;quot;/ssl/client.pem&amp;quot;);
+var key = fs.readFileSync(__dirname + &amp;quot;/ssl/client.pem&amp;quot;);
+
+// Connect validating the returned certificates from the server
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/test?ssl=true&amp;quot;, {
+  server: {
+      sslValidate:true
+    , sslCA:ca
+    , sslKey:key
+    , sslCert:cert
+    , sslPass:&#39;10gen&#39;
+  }
+}, function(err, db) {
+  db.close();
+});
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;connecting-using-x509:6e3614dc6c70ae01cdc1669aeb0efb13&#34;&gt;Connecting using X509&lt;/h2&gt;
+
+&lt;p&gt;X509 is a certification validation process similar to normal SSL validation but it also includes specific user information that can be used for authorization. Connecting is very similar to the previous SSL examples.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , fs = require(&#39;fs&#39;);
+
+// Read the cert and key
+var cert = fs.readFileSync(__dirname + &amp;quot;/ssl/x509/client.pem&amp;quot;);
+var key = fs.readFileSync(__dirname + &amp;quot;/ssl/x509/client.pem&amp;quot;);
+
+// User name
+var userName = &amp;quot;CN=client,OU=kerneluser,O=10Gen,L=New York City,ST=New York,C=US&amp;quot;;
+
+// Connect using the MONGODB-X509 authentication mechanism
+MongoClient.connect(f(&#39;mongodb://%s@server:27017/test?authMechanism=%s&amp;amp;ssl=true&#39;
+    , encodeURIComponent(userName), &#39;MONGODB-X509&#39;), {
+  server: {
+      sslKey:key
+    , sslCert:cert
+  }
+}, function(err, db) {
+  db.close();
+});
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;connecting-using-ldap:6e3614dc6c70ae01cdc1669aeb0efb13&#34;&gt;Connecting using LDAP&lt;/h2&gt;
+
+&lt;p&gt;The LDAP support in the subscription version of MongoDB allows for integrating against corporate LDAP server to manage authentication and authorization. To connect using LDAP we need to do the following.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , f = require(&#39;util&#39;).format;
+
+// LDAP credentials
+var server = &amp;quot;ldaptest.someserver.com&amp;quot;;
+var user = &amp;quot;drivers-team&amp;quot;;
+var pass = &amp;quot;mongo0x$server&amp;quot;;
+
+// Url
+var url = f(&amp;quot;mongodb://%s:%s@%s/test?authMechanism=PLAIN&amp;amp;maxPoolSize=1&amp;quot;, user, pass, server);
+
+// Connect using ldap credentials
+MongoClient.connect(url, function(err, db) {
+  db.close();
+});
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;connecting-using-kerberos:6e3614dc6c70ae01cdc1669aeb0efb13&#34;&gt;Connecting using Kerberos&lt;/h2&gt;
+
+&lt;p&gt;The subscription version of MongoDB support kerberos authentication and authorization support using SSPI under windwos and GSAPI under unix. To connect with kerberos (this example expects there to be a valid kerberos ticket for the user).&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient;
+  , f = require(&#39;util&#39;).format;
+
+// KDC Server
+var server = &amp;quot;ldaptest.10gen.cc&amp;quot;;
+var principal = &amp;quot;drivers@LDAPTEST.10GEN.CC&amp;quot;;
+var urlEncodedPrincipal = encodeURIComponent(principal);
+
+// Url
+var url = f(&amp;quot;mongodb://%s@%s/kerberos?authMechanism=GSSAPI&amp;amp;gssapiServiceName=mongodb&amp;quot;, urlEncodedPrincipal, server);
+
+// Connect using kerberos details
+MongoClient.connect(url, function(err, db) {
+  db.close();
+});
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You can also pass in password credentials for a kerberos connection, this is useful on windows if you don&amp;rsquo;t have a security domain set up.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient;
+  , f = require(&#39;util&#39;).format;
+
+// KDC Server
+var server = &amp;quot;ldaptest.10gen.cc&amp;quot;;
+var principal = &amp;quot;drivers@LDAPTEST.10GEN.CC&amp;quot;;
+var urlEncodedPrincipal = encodeURIComponent(principal);
+
+// Url
+var url = f(&amp;quot;mongodb://%s:%s@%s/kerberos?authMechanism=GSSAPI&amp;amp;maxPoolSize=1&amp;quot;, urlEncodedPrincipal, pass, server);
+
+// Connect using kerberos details
+MongoClient.connect(url, function(err, db) {
+  db.close();
+});
+
+&lt;/code&gt;&lt;/pre&gt;
 </description>
     </item>
     
@@ -2718,272 +2884,6 @@ gridStore.open(function(err, gridStore) {
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;https://github.com/mongodb/node-mongodb-native/tree/master/examples&#34;&gt;The driver examples, good starting point for basic usage&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;https://github.com/mongodb/node-mongodb-native/tree/master/test&#34;&gt;All the integration tests, they have tons of different usage cases&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Node Knockout, GEO</title>
-      <link>/node-mongodb-native/2.0/articles/node_knockout_article_3/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
-      
-      <guid>/node-mongodb-native/2.0/articles/node_knockout_article_3/</guid>
-      <description>
-
-&lt;h1 id=&#34;the-wonderful-world-of-geo-spatial-indexes-in-mongodb:1f9a2529b924eca7193c4abdd79e34a5&#34;&gt;The wonderful world of GEO spatial indexes in MongoDB&lt;/h1&gt;
-
-&lt;p&gt;MongoDB has native support for geospatial indexes and extensions to the query language to
-support a lot of different ways of querying your geo spatial documents. We will touch on a
-all of the available features of the MongoDB geospatial support point by point as outlined
-below.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Query $near a point with a maximum distance around that point&lt;/li&gt;
-&lt;li&gt;Set the minimum and maximum range for the 2d space letting you map any data to the space&lt;/li&gt;
-&lt;li&gt;GeoNear command lets you return the distance from each point found&lt;/li&gt;
-&lt;li&gt;$within query lets you set a shape for you query letting you use a circle, box or arbitrary polygon, letting you map complex geo queries such as congressional districts or post code zones.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;But first let&amp;rsquo;s cover the basics of getting you up and running starting with what a document needs to look like
-for the indexing to work.&lt;/p&gt;
-
-&lt;h2 id=&#34;geospatialize-your-documents:1f9a2529b924eca7193c4abdd79e34a5&#34;&gt;Geospatialize your documents&lt;/h2&gt;
-
-&lt;p&gt;Somehow we need to tell MongoDB what fields represent our geospatial coordinates. Luckily for us this is very simple. Lets take a simple sample document representing the best imaginative Burger place in the world.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var document = {
-  name: &amp;quot;Awesome burger bar&amp;quot;      
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Not we need know that it&amp;rsquo;s located on the fictitious planet (Burgoria) and more specifically at the coordinates
-[50, 50]. So how do we add this to the document so we can look it up using geospatial searches ? Well it&amp;rsquo;s very
-simple just add it as a field as shown below.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var document = {
-  name: &amp;quot;Awesome burger bar&amp;quot;,
-  loc: [50, 50]      
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Easy right? The only thing you have to ensure is that the first coordinate is the &lt;strong&gt;x&lt;/strong&gt; coordinate and the second one is the &lt;strong&gt;y&lt;/strong&gt; coordinate &lt;strong&gt;[x, y]&lt;/strong&gt;.&lt;/p&gt;
-
-&lt;p&gt;Let&amp;rsquo;s go ahead and connect to the database and insert the document&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient;
-
-var document = {
-  name: &amp;quot;Awesome burger bar&amp;quot;,
-  loc: [50, 50]      
-}
-
-MongoClient.connect(&amp;quot;mongodb://localhost:27017/geodb&amp;quot;, function(err, db) {
-  if(err) return console.dir(err)
-
-  db.collection(&#39;places&#39;).insert(document, {w:1}, function(err, result) {
-    if(err) return console.dir(err)
-  });
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;So now we have a document in our collection. We now need to tell MongoDB to index our collection and create a 2D index on our loc attribute so we can avail us of the awesome geospatial features. This turns out to be easy as well. Let&amp;rsquo;s modify the code to ensure we have the index on startup.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient;
-
-var document = {
-  name: &amp;quot;Awesome burger bar&amp;quot;,
-  loc: [50, 50]      
-}
-
-MongoClient.connect(&amp;quot;mongodb://localhost:27017/geodb&amp;quot;, function(err, db) {
-  if(err) return console.dir(err)
-  var collection = db.collection(&#39;places&#39;);
-
-  collection.ensureIndex({loc: &amp;quot;2d&amp;quot;}, {min: -500, max: 500, w:1}, function(err, result) {
-    if(err) return console.dir(err);
-
-    collection.insert(document, {w:1}, function(err, result) {
-      if(err) return console.dir(err)
-    });
-  });
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;&lt;strong&gt;ensureIndex&lt;/strong&gt; does the trick creating the index if it does not already exist. By specifying &lt;strong&gt;{loc: &amp;ldquo;2d&amp;rdquo;}&lt;/strong&gt; MongoDB will index the array contained in every document under the field name &lt;strong&gt;loc&lt;/strong&gt;. The &lt;strong&gt;min&lt;/strong&gt; and &lt;strong&gt;max&lt;/strong&gt; defines the boundaries of our (Burgoria) and means that points outside -500 and 500 will throw an error as it&amp;rsquo;s not on the planet.&lt;/p&gt;
-
-&lt;h2 id=&#34;basic-queries-for-your-geospatial-documents:1f9a2529b924eca7193c4abdd79e34a5&#34;&gt;Basic queries for your geospatial documents&lt;/h2&gt;
-
-&lt;p&gt;Since we now have a geospatial index on our collection let&amp;rsquo;s play around with the query methods and learn how we can work with the data. First however let&amp;rsquo;s add some more documents so we can see the effects of the different boundaries.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient;
-
-var documents = [
-    {name: &amp;quot;Awesome burger bar&amp;quot;, loc: [50, 50]}
-  , {name: &amp;quot;Not an Awesome burger bar&amp;quot;, loc: [10, 10]}
-  , {name: &amp;quot;More or less an Awesome burger bar&amp;quot;, loc: [45, 45]}
-]
-
-MongoClient.connect(&amp;quot;mongodb://localhost:27017/geodb&amp;quot;, function(err, db) {
-  if(err) return console.dir(err)
-  var collection = db.collection(&#39;places&#39;);
-
-  collection.ensureIndex({loc: &amp;quot;2d&amp;quot;}, {min: -500, max: 500, w:1}, function(err, result) {
-    if(err) return console.dir(err);
-
-    collection.insert(documents, {w:1}, function(err, result) {
-      if(err) return console.dir(err)
-    });
-  });
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Right from now one for brevities sake we are going to assume we have the documents stored in the collection and the index created so we can work on queries without the boilerplate insert and index creation code. The first thing we are going to do is locate all the documents that&amp;rsquo;s a distance of 10 away from 50, 50.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
-  assert = require(&#39;assert&#39;);
-
-MongoClient.connect(&amp;quot;mongodb://localhost:27017/geodb&amp;quot;, function(err, db) {
-  if(err) return console.dir(err)
-
-  db.collection(&#39;places&#39;).find({loc: {$near: [50,50], $maxDistance: 10}}).toArray(function(err, docs) {
-    if(err) return console.dir(err)
-
-    assert.equal(docs.length, 2);
-  });
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This returns the following results (ignore the _id it will be different as it&amp;rsquo;s a collection assigned key).&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;{ &amp;quot;_id&amp;quot; : 509a47337d6ab61b2871ee8e, &amp;quot;name&amp;quot; : &amp;quot;Awesome burger bar&amp;quot;, &amp;quot;loc&amp;quot; : [ 50, 50 ] }
-{ &amp;quot;_id&amp;quot; : 509a47337d6ab61b2871ee90, &amp;quot;name&amp;quot; : &amp;quot;More or less an Awesome burger bar&amp;quot;, &amp;quot;loc&amp;quot; : [ 45
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Let&amp;rsquo;s look at the query. &lt;strong&gt;$near&lt;/strong&gt; specifies the center point for the geospatial query and &lt;strong&gt;$maxDistance&lt;/strong&gt; the radius of the search circle. Given this the query will return the two documents at &lt;strong&gt;[50, 50]&lt;/strong&gt; and &lt;strong&gt;[10, 10]&lt;/strong&gt;. Now this is a nice feature but what if we need to know the distance from each of the found documents to the originating center for our query. Luckily we have a command that support that called &lt;strong&gt;geoNear&lt;/strong&gt;. Let&amp;rsquo;s execute it and look at the results.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
-  assert = require(&#39;assert&#39;);
-
-MongoClient.connect(&amp;quot;mongodb://localhost:27017/geodb&amp;quot;, function(err, db) {
-  if(err) return console.dir(err)
-
-  db.collection(&#39;places&#39;).geoNear(50, 50, {$maxDistance:10}, function(err, result) {
-    if(err) return console.dir(err)
-
-    assert.equal(result.results, 2);
-  });
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Let&amp;rsquo;s look at the results returned by the query.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;{
-  &amp;quot;ns&amp;quot; : &amp;quot;test.places&amp;quot;,
-  &amp;quot;near&amp;quot; : &amp;quot;1100000011110000111100001111000011110000111100001111&amp;quot;,
-  &amp;quot;results&amp;quot; : [
-    {
-      &amp;quot;dis&amp;quot; : 0,
-      &amp;quot;obj&amp;quot; : {
-        &amp;quot;_id&amp;quot; : 509a47337d6ab61b2871ee8e,
-        &amp;quot;name&amp;quot; : &amp;quot;Awesome burger bar&amp;quot;,
-        &amp;quot;loc&amp;quot; : [
-          50,
-          50
-        ]
-      }
-    },
-    {
-      &amp;quot;dis&amp;quot; : 7.0710678118654755,
-      &amp;quot;obj&amp;quot; : {
-        &amp;quot;_id&amp;quot; : 509a47337d6ab61b2871ee90,
-        &amp;quot;name&amp;quot; : &amp;quot;More or less an Awesome burger bar&amp;quot;,
-        &amp;quot;loc&amp;quot; : [
-          45,
-          45
-        ]
-      }
-    }
-  ],
-  &amp;quot;stats&amp;quot; : {
-    &amp;quot;time&amp;quot; : 0,
-    &amp;quot;btreelocs&amp;quot; : 0,
-    &amp;quot;nscanned&amp;quot; : 2,
-    &amp;quot;objectsLoaded&amp;quot; : 2,
-    &amp;quot;avgDistance&amp;quot; : 3.5355339059327378,
-    &amp;quot;maxDistance&amp;quot; : 7.071128503792992
-  },
-  &amp;quot;ok&amp;quot; : 1
-}
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Notice that &lt;strong&gt;geoNear&lt;/strong&gt; is a command not a find query so it returns a single document with the results in the results field of the returned document. As we can see from the results each returned result has a field called &lt;strong&gt;dis&lt;/strong&gt; that is the distance of the document from the center point of our search. Cool we&amp;rsquo;ve now covered the basics of geospatial search so let&amp;rsquo;s move onto more advanced queries.&lt;/p&gt;
-
-&lt;h2 id=&#34;advanced-queries-for-your-geospatial-documents:1f9a2529b924eca7193c4abdd79e34a5&#34;&gt;Advanced queries for your geospatial documents&lt;/h2&gt;
-
-&lt;p&gt;So besides these simple queries we can also do &lt;strong&gt;bounds queries&lt;/strong&gt;. With bounds queries we mean we can look for points of interest inside a defined boundary. This can be useful if you have such things as a post code area, congressional district or any sort of bounding box that is not a pure circle (say look for all restaurants in the west village in new york). Let&amp;rsquo;s go through the basics.&lt;/p&gt;
-
-&lt;h3 id=&#34;the-magical-boundry-box-query:1f9a2529b924eca7193c4abdd79e34a5&#34;&gt;The magical boundry box query&lt;/h3&gt;
-
-&lt;p&gt;Our country Whopper on Burgoria is a perfectly bound box (imagine that). Our application wants to restrict our searches to only burger bars in Burgonia. The boundaries for Burgonia are defined by (30, 30) -&amp;gt; (30, 60) and (30, 60) -&amp;gt; (60, 60). Great let&amp;rsquo;s peform a box bounded query.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
-  assert = require(&#39;assert&#39;);
-
-MongoClient.connect(&amp;quot;mongodb://localhost:27017/geodb&amp;quot;, function(err, db) {
-  if(err) return console.dir(err)
-  var box = [[30, 30], [60, 60]];
-
-  db.collection(&#39;places&#39;).find({loc: {$within: {$box: box}}).toArray(function(err, docs) {
-    if(err) return console.dir(err)
-
-    assert.equal(docs.length, 2);
-  });
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The results returned are.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;{ &amp;quot;_id&amp;quot; : 509a47337d6ab61b2871ee8e, &amp;quot;name&amp;quot; : &amp;quot;Awesome burger bar&amp;quot;, &amp;quot;loc&amp;quot; : [ 50, 50 ] }
-{ &amp;quot;_id&amp;quot; : 509a47337d6ab61b2871ee90, &amp;quot;name&amp;quot; : &amp;quot;More or less an Awesome burger bar&amp;quot;, &amp;quot;loc&amp;quot; : [ 45
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&#34;a-polygon-to-far:1f9a2529b924eca7193c4abdd79e34a5&#34;&gt;A polygon to far&lt;/h3&gt;
-
-&lt;p&gt;Awesome we can now do a query by our perfectly boxed country. Inside Whopper the country is split into triangles where triangle one is made up of three points (40, 40), (40, 50), (45, 45). We want to look for points that are only inside this triangle. Let&amp;rsquo;s have a look at the query.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
-  assert = require(&#39;assert&#39;);
-
-MongoClient.connect(&amp;quot;mongodb://localhost:27017/geodb&amp;quot;, function(err, db) {
-  if(err) return console.dir(err)
-  var triangle = [[40, 40], [40, 50], [45, 45]];
-
-  db.collection(&#39;places&#39;).find({loc: {$within: {$polygon: triangle}}).toArray(function(err, docs) {
-    if(err) return console.dir(err)
-
-    assert.equal(docs.length, 2);
-  });
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The results returned are.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;{ &amp;quot;_id&amp;quot; : ObjectId(&amp;quot;509a47337d6ab61b2871ee90&amp;quot;), &amp;quot;name&amp;quot; : &amp;quot;More or less an Awesome burger bar&amp;quot;, &amp;quot;loc&amp;quot; : [ 45, 45 ] }
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Cool things you can use this with is f.ex with the data at &lt;a href=&#34;https://nycopendata.socrata.com/browse?tags=geographic&#34;&gt;https://nycopendata.socrata.com/browse?tags=geographic&lt;/a&gt; you can create queries slicing new york into areas and look for data points inside those areas. So we&amp;rsquo;ve seen how we can query geo spatially in a lot of different ways. In closing we want to mention some simple ideas to get your mind churning.&lt;/p&gt;
-
-&lt;h2 id=&#34;geospatial-interesting-tidbits:1f9a2529b924eca7193c4abdd79e34a5&#34;&gt;Geospatial interesting tidbits&lt;/h2&gt;
-
-&lt;p&gt;So geospatial is what we mostly promote the features as but at some point you&amp;rsquo;ll realize that it&amp;rsquo;s a generic set of 2d indexes that can be used to index and &lt;strong&gt;x,y&lt;/strong&gt; data. You could consider indexing any data points that fit into a 2d space and using the geo query functionality to retrieve subsets of that data. Say if you map price vs apartment size and want to say giving an apartment find me everything that is &amp;ldquo;close&amp;rdquo; to the ideal price and size that I&amp;rsquo;m looking for. The limit here is your fantasy but as you can see it&amp;rsquo;s a pretty general and very powerful feature once you get over looking at the feature as a pure geographical function. With that I leave you to experiment and have fun with the features we have introduced.&lt;/p&gt;
-
-&lt;h2 id=&#34;links-and-stuff:1f9a2529b924eca7193c4abdd79e34a5&#34;&gt;Links and stuff&lt;/h2&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/mongodb/node-mongodb-native/tree/master/examples&#34;&gt;The driver examples, good starting point for basic usage&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;https://github.com/mongodb/node-mongodb-native/tree/master/test&#34;&gt;All the integration tests, they have tons of different usage cases&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://www.mongodb.org/display/DOCS/Geospatial+Indexing&#34;&gt;MongoDB geospatial pages&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;http://www.mongodb.org/display/DOCS/Geospatial+Haystack+Indexing&#34;&gt;More specialized geo haystack indexing&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 </description>
     </item>
