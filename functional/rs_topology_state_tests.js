@@ -7,7 +7,7 @@ var fs = require('fs')
 var parseTopologyTests = function(dir, excludes) {
   var entries = fs.readdirSync(dir);
   excludes = excludes || [];
-  
+
   // Locate all the .json files
   entries = entries.filter(function(x) {
     if(x.indexOf('.json') != -1) {
@@ -33,7 +33,7 @@ var executeState = function(assert, test) {
   }, {
     id: 1, setName: 'rs', connectingServers: {}, secondaryOnlyConnectionAllowed: false
   })
-  
+
   // Let's do the steps
   for(var i = 0; i < test.phases.length; i++) {
     // Get the phase
@@ -41,8 +41,8 @@ var executeState = function(assert, test) {
     // Process the responses, running them through the spec
     for(var j = 0; j < phase.responses.length; j++) {
       // Get all the ismasters, set the me variable
-      phase.responses[j][1].me = phase.responses[j][0];      
-      
+      phase.responses[j][1].me = phase.responses[j][0];
+
       // Execute an update
       var update = function(_ismaster, _name) {
         state.update(_ismaster, {name: _name, equals: function(s) {
@@ -82,11 +82,11 @@ var testOutcome = function(assert, state, outcome) {
     } else if(s.type == 'RSGhost' || s.type == 'Unknown') {
       assert.equal(0, state.secondaries.filter(function(x) {
         return x.name == name;
-      }).length);      
+      }).length);
 
       assert.equal(0, state.passives.filter(function(x) {
         return x.name == name;
-      }).length);      
+      }).length);
 
       assert.equal(0, state.arbiters.filter(function(x) {
         return x.name == name;
