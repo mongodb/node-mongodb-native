@@ -4,6 +4,9 @@ var core = require('mongodb-core');
 // Set up the connect function
 var connect = require('./lib/mongo_client').connect;
 
+// Expose error class
+connect.MongoError = core.MongoError;
+
 // Actual driver classes exported
 connect.MongoClient = require('./lib/mongo_client');
 connect.Db = require('./lib/db');
