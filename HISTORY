@@ -1,3 +1,7 @@
+1.4.33 2015-03-03
+-----------------
+- Backported NODE-376 Fixes issue - Unordered batch incorrectly tracks batch size when switching batch types (Issue #1261, https://github.com/meirgottlieb)
+
 1.4.32 2015-02-27
 -----------------
 - NODE-369 Unhandled exception while connecting
