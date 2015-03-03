@@ -1143,3 +1143,62 @@ exports['should correctly return the number of operations in the bulk'] = {
     });
   }
 }
+
+exports['should correctly split unordered bulk batch'] = {
+  metadata: { requires: { topology: 'single', mongodb: '>2.5.4' }},
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      var insertFirst = false;
+      var batchSize = 1000;
+      // Get the collection
+      var collection = db.collection('batch_write_unordered_split_test');
+      // Create an unordered bulk
+      var operation = collection.initializeUnorderedBulkOp(),
+          documents = [];
+
+      for(var i = 0; i < 10000; i++) {
+        var document = { name: 'bob' + i };
+        documents.push(document);
+        operation.insert(document);
+      }
+
+      operation.execute(function(err, result) {
+        test.equal(null, err);
+
+        operation = collection.initializeUnorderedBulkOp();
+
+        if(insertFirst) {
+          // if you add the inserts to the batch first, it works fine.
+          insertDocuments();
+          replaceDocuments();
+        } else {
+          // if you add the updates to the batch first, it fails with the error "insert must contain at least one document"
+          replaceDocuments();
+          insertDocuments();
+        }
+
+        operation.execute(function(err, result) {
+          test.equal(null, err);
+          
+          db.close();
+          test.done();
+        });
+      });
+
+      function insertDocuments() {
+        for(i = 10000; i < 10200; i++) {
+          operation.insert({name: 'bob' + i});
+        }
+      }
+
+      function replaceDocuments() {
+        for(var i = 0; i < batchSize; i++) {
+          operation.find({_id: documents[i]._id}).replaceOne({name: 'joe' + i});
+        }
+      }
+    });
+  }
+}
