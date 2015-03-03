@@ -38,6 +38,20 @@
       <guid>/node-mongodb-native/2.0/meta/release-notes/</guid>
       <description>
 
+&lt;h2 id=&#34;2-0-19-2015-03-03:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.19 2015-03-03&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;NODE-376 Fixes issue - Unordered batch incorrectly tracks batch size when switching batch types (Issue #1261, &lt;a href=&#34;https://github.com/meirgottlieb&#34;&gt;https://github.com/meirgottlieb&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;NODE-379 Fixes bug in cursor.count() that causes the result to always be zero for dotted collection names (Issue #1262, &lt;a href=&#34;https://github.com/vsivsi&#34;&gt;https://github.com/vsivsi&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;Expose MongoError from mongodb-core (Issue #1260, &lt;a href=&#34;https://github.com/tjconcept&#34;&gt;https://github.com/tjconcept&lt;/a&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;2-0-18-2015-02-27:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.18 2015-02-27&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Bumped mongodb-core 1.1.14 to ensure passives are correctly added as secondaries.&lt;/li&gt;
+&lt;/ul&gt;
+
 &lt;h2 id=&#34;2-0-17-2015-02-27:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.17 2015-02-27&lt;/h2&gt;
 
 &lt;ul&gt;
