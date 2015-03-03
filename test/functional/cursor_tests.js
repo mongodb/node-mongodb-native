@@ -209,6 +209,79 @@ exports.shouldCorrectlyExecuteCursorCount = {
  * @ignore
  * @api private
  */
+exports.shouldCorrectlyExecuteCursorCountWithDottedCollectionName = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      db.createCollection('test_count.ext', function(err, collection) {
+        collection.find().count(function(err, count) {
+          // test.equal(0, count);
+
+          function insert(callback) {
+            var total = 10;
+
+            for(var i = 0; i < 10; i++) {
+              collection.insert({'x':i}, configuration.writeConcernMax(), function(e, r) {
+                total = total - 1;
+                if(total == 0) callback();
+              });
+            }
+          }
+
+          function finished() {
+            collection.find().count(function(err, count) {
+              test.equal(10, count);
+              test.ok(count.constructor == Number);
+
+              collection.find({}, {'limit':5}).count(function(err, count) {
+                test.equal(5, count);
+
+                collection.find({}, {'skip':5}).count(function(err, count) {
+                  test.equal(5, count);
+
+                  db.collection('acollectionthatdoesn').count(function(err, count) {
+                    test.equal(0, count);
+
+                    var cursor = collection.find();
+                    cursor.count(function(err, count) {
+                      test.equal(10, count);
+
+                      cursor.each(function(err, item) {
+                        if(item == null) {
+                          cursor.count(function(err, count2) {
+                            test.equal(10, count2);
+                            test.equal(count, count2);
+                            // Let's close the db
+                            db.close();
+                            test.done();
+                          });
+                        }
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          }
+
+          insert(function() {
+            finished();
+          });
+        });
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ * @api private
+ */
 exports.shouldCorrectlyExecuteSortOnCursor = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
