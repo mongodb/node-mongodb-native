@@ -1,3 +1,9 @@
+2.0.19 2015-03-03
+-----------------
+- NODE-376 Fixes issue - Unordered batch incorrectly tracks batch size when switching batch types (Issue #1261, https://github.com/meirgottlieb)
+- NODE-379 Fixes bug in cursor.count() that causes the result to always be zero for dotted collection names (Issue #1262, https://github.com/vsivsi)
+- Expose MongoError from mongodb-core (Issue #1260, https://github.com/tjconcept)
+
 2.0.18 2015-02-27
 -----------------
 - Bumped mongodb-core 1.1.14 to ensure passives are correctly added as secondaries.
