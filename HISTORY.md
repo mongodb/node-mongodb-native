@@ -1,3 +1,7 @@
+1.1.15 03-04-2015
+-----------------
+- Removed check for type in replset pickserver function.
+
 1.1.14 02-26-2015
 -----------------
 - NODE-374 correctly adding passive secondaries to the list of eligable servers for reads
