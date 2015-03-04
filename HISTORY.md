@@ -1,3 +1,7 @@
+2.0.20 2015-03-04
+-----------------
+- Updated mongodb-core 1.1.15 to relax pickserver method.
+
 2.0.19 2015-03-03
 -----------------
 - NODE-376 Fixes issue - Unordered batch incorrectly tracks batch size when switching batch types (Issue #1261, https://github.com/meirgottlieb)
