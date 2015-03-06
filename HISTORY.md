@@ -1,3 +1,7 @@
+1.1.16 03-06-2015
+-----------------
+- rejectUnauthorized parameter is set to true for ssl certificates by default instead of false.
+
 1.1.15 03-04-2015
 -----------------
 - Removed check for type in replset pickserver function.
