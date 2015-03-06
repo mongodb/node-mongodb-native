@@ -33,7 +33,7 @@ var debugFields = ['host', 'port', 'size', 'keepAlive', 'keepAliveInitialDelay',
  * @param {Buffer} [options.cert] SSL Certificate binary buffer
  * @param {Buffer} [options.key] SSL Key file binary buffer
  * @param {string} [options.passphrase] SSL Certificate pass phrase
- * @param {boolean} [options.rejectUnauthorized=false] Reject unauthorized server certificates
+ * @param {boolean} [options.rejectUnauthorized=true] Reject unauthorized server certificates
  * @param {boolean} [options.promoteLongs=true] Convert Long values from the db into Numbers if they fit into 53 bits
  * @fires Connection#connect
  * @fires Connection#close
@@ -87,7 +87,7 @@ var Connection = function(options) {
   this.key = options.key || null;
   this.passphrase = options.passphrase || null;
   this.ssl = typeof options.ssl == 'boolean' ? options.ssl : false;
-  this.rejectUnauthorized = typeof options.rejectUnauthorized == 'boolean' ? options.rejectUnauthorized : false
+  this.rejectUnauthorized = typeof options.rejectUnauthorized == 'boolean' ? options.rejectUnauthorized : true
 
   // Response options
   this.responseOptions = {
