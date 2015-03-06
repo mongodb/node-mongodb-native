@@ -99,6 +99,54 @@ exports.shouldCorrectlyValidateServerCertificate = {
 /**
  * @ignore
  */
+exports['should fail to validate certificate due to illegal host name'] = {
+  metadata: { requires: { topology: 'ssl' } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var ServerManager = require('mongodb-tools').ServerManager
+      , MongoClient = configuration.require.MongoClient;
+
+    // All inserted docs
+    var docs = [];
+    var errs = [];
+    var insertDocs = [];
+
+    // Read the ca
+    var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
+
+    // Start server
+    var serverManager = new ServerManager({
+        journal:null
+      , sslOnNormalPorts: null
+      , sslPEMKeyFile: __dirname + "/ssl/server.pem"
+      // EnsureUp options
+      , host: 'server'
+      , ca:ca
+    });
+
+    serverManager.start({purge:true, kill:true, signal:-9}, function() {
+
+      // Connect and validate the server certificate
+      MongoClient.connect("mongodb://localhost:27017/test?ssl=true&maxPoolSize=1", {
+        server: {
+            sslValidate:true
+          , sslCA:ca
+        }
+      }, function(err, db) {
+        test.ok(err != null);
+
+        serverManager.stop(function() {
+          test.done();
+        });
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyValidatePresentedServerCertificateAndPresentValidCertificate = {
   metadata: { requires: { topology: 'ssl' } },
   
