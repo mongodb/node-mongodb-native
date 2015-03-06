@@ -38,6 +38,18 @@
       <guid>/node-mongodb-native/2.0/meta/release-notes/</guid>
       <description>
 
+&lt;h2 id=&#34;2-0-21-2015-03-06:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.21 2015-03-06&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Upgraded mongodb-core to 1.1.16 making sslValidate default to true to force validation on connection unless overriden by the user.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;2-0-20-2015-03-04:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.20 2015-03-04&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Updated mongodb-core 1.1.15 to relax pickserver method.&lt;/li&gt;
+&lt;/ul&gt;
+
 &lt;h2 id=&#34;2-0-19-2015-03-03:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.19 2015-03-03&lt;/h2&gt;
 
 &lt;ul&gt;
