@@ -27,19 +27,20 @@ exports.shouldCorrectlyCommunicateUsingSSLSocket = {
 
     // Start the server
     serverManager.start({purge:true, kill:true, signal:-9}, function(err) {
-      console.dir(err)
       test.equal(null, err);
       
       // Connect
-      MongoClient.connect("mongodb://localhost:27017/test?ssl=true", function(err, db) {
+      MongoClient.connect("mongodb://localhost:27017/test?ssl=true", {
+        server: { sslValidate: false }
+      }, function(err, db) {
         test.equal(null, err);
         test.ok(db != null);
 
         db.close();
 
-        serverManager.stop(function() {
+        // serverManager.stop(function() {
           test.done();
-        });
+        // });
       });
     });
   }
@@ -88,9 +89,9 @@ exports.shouldCorrectlyValidateServerCertificate = {
 
         db.close();
 
-        serverManager.stop(function() {
+        // serverManager.stop(function() {
           test.done();
-        });
+        // });
       });
     });
   }
@@ -134,12 +135,11 @@ exports['should fail to validate certificate due to illegal host name'] = {
           , sslCA:ca
         }
       }, function(err, db) {
-        console.dir(err)
         test.ok(err != null);
 
-        serverManager.stop(function() {
+        // serverManager.stop(function() {
           test.done();
-        });
+        // });
       });
     });
   }
@@ -197,9 +197,9 @@ exports.shouldCorrectlyValidatePresentedServerCertificateAndPresentValidCertific
 
         db.close();
 
-        serverManager.stop(function() {
+        // serverManager.stop(function() {
           test.done();
-        });
+        // });
       });
     });
   }
@@ -262,9 +262,9 @@ exports.shouldValidatePresentedServerCertificateButPresentInvalidCertificate = {
       }, function(err, db) {
         test.ok(err != null);
 
-        serverManager.stop(function() {
+        // serverManager.stop(function() {
           test.done();
-        });
+        // });
       });
     });
   }
@@ -298,9 +298,9 @@ exports['Should correctly shut down if attempting to connect to ssl server with 
       MongoClient.connect("mongodb://localhost:27017/test?ssl=false", function(err, db) {
         test.ok(err != null);
 
-        serverManager.stop(function() {
+        // serverManager.stop(function() {
           test.done();
-        });
+        // });
       });
     });
   }
@@ -353,9 +353,9 @@ exports['should correctly connect using SSL to ReplSetManager'] = {
 
         db.close();
 
-        replicasetManager.stop(function() {
+        // replicasetManager.stop(function() {
           test.done();
-        });
+        // });
       });
     });
   }
@@ -415,9 +415,9 @@ exports.shouldCorrectlySendCertificateToReplSetAndValidateServerCertificate = {
 
         db.close();
 
-        replSetManager.stop(function() {
+        // replSetManager.stop(function() {
           test.done();
-        });
+        // });
       });
     });
   }
@@ -480,9 +480,9 @@ exports.shouldSendWrongCertificateToReplSetAndValidateServerCertificate = {
       }, function(err, db) {
         test.ok(err != null)
 
-        replSetManager.stop(function() {
+        // replSetManager.stop(function() {
           test.done();
-        });
+        // });
       });
     });
   }
@@ -541,9 +541,9 @@ exports['should correctly to replicaset using ssl connect with password'] = {
       }, function(err, db) {
         test.equal(null, err)
 
-        replSetManager.stop(function() {
+        // replSetManager.stop(function() {
           test.done();
-        });
+        // });
       });
     });
   }

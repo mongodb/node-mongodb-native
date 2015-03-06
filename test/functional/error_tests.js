@@ -162,7 +162,7 @@ exports['Should handle MongoClient throw error in db operation correctly'] = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
-    MongoClient.connect(configuration.url(), function(err, db) {
+    MongoClient.connect(configuration.url(), {server: {sslValidate:false}}, function(err, db) {
       process.once("uncaughtException", function(err) {
         db.close();
         test.done();
@@ -190,7 +190,9 @@ exports['Should handle Error thrown during operation'] = {
     });
 
     var MongoClient = configuration.require.MongoClient;
-    MongoClient.connect(configuration.url(), function(err, _db) {
+    MongoClient.connect(configuration.url()
+      , {server: {sslValidate:false}, replset: {sslValidate:false}, mongos: {sslValidate:false}}
+      , function(err, _db) {
       test.equal(null, err);
       db = _db;
 

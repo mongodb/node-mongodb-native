@@ -169,6 +169,65 @@ exports['Should correctly receive ping and ha events using ssl'] = {
 /**
  * @ignore
  */
+exports.shouldFailToValidateServerSSLCertificate = {
+  metadata: { requires: { topology: 'ssl' } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var ReplSetManager = require('mongodb-tools').ReplSetManager
+      , Db = configuration.require.Db
+      , Server = configuration.require.Server
+      , ReplSet = configuration.require.ReplSet
+      , MongoClient = configuration.require.MongoClient;
+
+    var ca = [fs.readFileSync(__dirname + "/ssl/mycert.pem")];
+
+    // Default rs options
+    var rsOptions = {
+      // SSL information
+      host: "server",
+      ssl:true,
+      sslPEMKeyFile: __dirname + "/ssl/server.pem",
+      sslMode: 'requireSSL',
+
+      // ReplSet settings
+      secondaries: 2
+    }
+
+    // Startup replicaset
+    setUp(configuration, rsOptions, function() {
+      // Create new 
+      var replSet = new ReplSet( [ 
+          new Server( "server", replSetManager.startPort + 1, { auto_reconnect: true } ),
+          new Server( "server", replSetManager.startPort, { auto_reconnect: true } ),
+        ], {
+            rs_name:configuration.replicasetName
+          , ssl:true
+          , sslValidate:true
+          , sslCA:ca
+          , poolSize:1
+        } 
+      );
+
+      // Connect to the replicaset
+      var slaveDb = null;
+      var db = new Db('foo', replSet, configuration.writeConcernMax());
+      db.open(function(err, p_db) {
+        test.ok(err != null);
+
+        db.close();
+
+        replSetManager.stop(function() {
+          test.done();
+        });
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
 exports.shouldCorrectlyValidateAndPresentCertificateReplSet = {
   metadata: { requires: { topology: 'ssl' } },
   
@@ -212,20 +271,17 @@ exports.shouldCorrectlyValidateAndPresentCertificateReplSet = {
 
         // Create a collection
         db.createCollection('shouldCorrectlyValidateAndPresentCertificateReplSet1', function(err, collection) {
-          collection.remove({});
-          collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
-          collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
-          collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
-          collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
-          collection.insert([{a:1}, {b:2}, {c:'hello world'}], configuration.writeConcernMax(), function(err, result) {
-            collection.find({}).toArray(function(err, items) {
-              test.equal(15, items.length);
-              db.close();
+          collection.remove({}, configuration.writeConcernMax(), function() {
+            collection.insert([{a:1}, {b:2}, {c:'hello world'}], configuration.writeConcernMax(), function(err, result) {
+              collection.find({}).toArray(function(err, items) {
+                test.equal(3, items.length);
+                db.close();
 
-              replSetManager.stop(function() {
-                test.done();
-              });
-            })
+                replSetManager.stop(function() {
+                  test.done();
+                });
+              })
+            });            
           });
         });
       });
@@ -453,18 +509,16 @@ exports.shouldCorrectlyPresentPasswordProtectedCertificate = {
 
         // Create a collection
         db.createCollection('shouldCorrectlyValidateAndPresentCertificate2', function(err, collection) {
-          collection.remove({});
-          collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
-          collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
-          collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
-          collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
-          collection.insert([{a:1}, {b:2}, {c:'hello world'}], configuration.writeConcernMax(), function(err, result) {
-            collection.find({}).toArray(function(err, items) {
-              test.equal(15, items.length);
-              db.close();
+          collection.remove({}, configuration.writeConcernMax(), function() {
 
-              replSetManager.stop(function() {
-                test.done();
+            collection.insert([{a:1}, {b:2}, {c:'hello world'}], configuration.writeConcernMax(), function(err, result) {
+              collection.find({}).toArray(function(err, items) {
+                test.equal(3, items.length);
+                db.close();
+
+                replSetManager.stop(function() {
+                  test.done();
+                });
               });
             });
           });
@@ -526,81 +580,20 @@ exports.shouldCorrectlyValidateServerSSLCertificate = {
 
         // Create a collection
         db.createCollection('shouldCorrectlyCommunicateUsingSSLSocket', function(err, collection) {
-          collection.remove({});
-          collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
-          collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
-          collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
-          collection.insert([{a:1}, {b:2}, {c:'hello world'}]);          
-          collection.insert([{a:1}, {b:2}, {c:'hello world'}], configuration.writeConcernMax(), function(err, result) {
-            collection.find({}).toArray(function(err, items) {
-              test.equal(15, items.length);
-              db.close();
+          collection.remove({}, configuration.writeConcernMax(), function() {
 
-              replSetManager.stop(function() {
-                test.done();
+            collection.insert([{a:1}, {b:2}, {c:'hello world'}], configuration.writeConcernMax(), function(err, result) {
+              collection.find({}).toArray(function(err, items) {
+                test.equal(3, items.length);
+                db.close();
+
+                replSetManager.stop(function() {
+                  test.done();
+                });
               });
             });
           });
         });        
-      });
-    });
-  }
-}
-
-/**
- * @ignore
- */
-exports.shouldFailToValidateServerSSLCertificate = {
-  metadata: { requires: { topology: 'ssl' } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var ReplSetManager = require('mongodb-tools').ReplSetManager
-      , Db = configuration.require.Db
-      , Server = configuration.require.Server
-      , ReplSet = configuration.require.ReplSet
-      , MongoClient = configuration.require.MongoClient;
-
-    var ca = [fs.readFileSync(__dirname + "/ssl/mycert.pem")];
-
-    // Default rs options
-    var rsOptions = {
-      // SSL information
-      host: "server",
-      ssl:true,
-      sslPEMKeyFile: __dirname + "/ssl/server.pem",
-      sslMode: 'requireSSL',
-
-      // ReplSet settings
-      secondaries: 2
-    }
-
-    // Startup replicaset
-    setUp(configuration, rsOptions, function() {
-      // Create new 
-      var replSet = new ReplSet( [ 
-          new Server( "server", replSetManager.startPort + 1, { auto_reconnect: true } ),
-          new Server( "server", replSetManager.startPort, { auto_reconnect: true } ),
-        ], {
-            rs_name:configuration.replicasetName
-          , ssl:true
-          , sslValidate:true
-          , sslCA:ca
-          , poolSize:1
-        } 
-      );
-
-      // Connect to the replicaset
-      var slaveDb = null;
-      var db = new Db('foo', replSet, configuration.writeConcernMax());
-      db.open(function(err, p_db) {
-        test.ok(err != null);
-
-        db.close();
-
-        replSetManager.stop(function() {
-          test.done();
-        });
       });
     });
   }

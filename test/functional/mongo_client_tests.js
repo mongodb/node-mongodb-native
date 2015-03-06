@@ -12,7 +12,7 @@ exports['Should Correctly Do MongoClient with bufferMaxEntries:0'] = {
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
     MongoClient.connect(configuration.url(), {
-      db: {bufferMaxEntries:0},
+      db: {bufferMaxEntries:0}, server: { sslValidate: false },
     }, function(err, db) {
       // Listener for closing event
       var closeListener = function(has_error) {

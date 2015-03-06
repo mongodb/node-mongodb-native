@@ -391,7 +391,8 @@ if(argv.t == 'functional') {
         host = host || 'localhost'; port = port || 27017;
         serverOptions = shallowClone(serverOptions);
         serverOptions.poolSize = 1;
-        serverOptions.ssl = true;
+        serverOptions.ssl = true
+        serverOptions.sslValidate = false;
         return new m.Server(host, port, serverOptions);
       },
     });

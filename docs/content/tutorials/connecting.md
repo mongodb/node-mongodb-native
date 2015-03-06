@@ -204,7 +204,7 @@ Let's look at the individual options for each of the top level fields.
 
 * `poolSize`, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.
 * `ssl`, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.
-* `sslValidate`, {Boolean, default: false} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).
+* `sslValidate`, {Boolean, default: true} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).
 * `sslCA`, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).
 * `sslCert`, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).
 * `sslKey`, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).
@@ -224,7 +224,7 @@ Let's look at the individual options for each of the top level fields.
 *  `connectWithNoPrimary` {Boolean, default:false}, Sets if the driver should connect even if no primary is available.
 * `poolSize`, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.
 * `ssl`, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.
-* `sslValidate`, {Boolean, default: false} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).
+* `sslValidate`, {Boolean, default: true} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).
 * `sslCA`, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).
 * `sslCert`, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).
 * `sslKey`, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).
@@ -241,7 +241,7 @@ Let's look at the individual options for each of the top level fields.
 *  `secondaryAcceptableLatencyMS` {Number, default:15}, sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)
 * `poolSize`, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.
 * `ssl`, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.
-* `sslValidate`, {Boolean, default: false} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).
+* `sslValidate`, {Boolean, default: true} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).
 * `sslCA`, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).
 * `sslCert`, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).
 * `sslKey`, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).

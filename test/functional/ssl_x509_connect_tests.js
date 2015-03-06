@@ -50,12 +50,13 @@ exports['Should correctly authenticate using x509'] = {
     var serverManager = new ServerManager(rsOptions);
   
     // Start the server manager
-    serverManager.start({purge:true, signal:-9}, function() {
+    serverManager.start({purge:true, kill:true, signal:-9}, function() {
       // Connect and validate the server certificate
       MongoClient.connect("mongodb://server:27017/test?ssl=true&maxPoolSize=1", {
         server: {
             sslKey:key
           , sslCert:cert
+          , sslValidate:false
         }
       }, function(err, db) {
         test.equal(null, err);
@@ -87,6 +88,7 @@ exports['Should correctly authenticate using x509'] = {
               server: {
                   sslKey:key
                 , sslCert:cert
+                , sslValidate:false
               }
             }, function(err, db) {
               test.equal(null, err);
@@ -94,9 +96,9 @@ exports['Should correctly authenticate using x509'] = {
 
               db.close();
 
-              serverManager.stop(function() {
+              // serverManager.stop(function() {
                 test.done();
-              });
+              // });
             });
           });
         });
@@ -151,12 +153,13 @@ exports['Should correctly handle bad x509 certificate'] = {
 
     // Create server manager
     var serverManager = new ServerManager(rsOptions);
-    serverManager.start({purge:true, signal:-9}, function() {
+    serverManager.start({purge:true, kill:true, signal:-9}, function() {
       // Connect and validate the server certificate
       MongoClient.connect("mongodb://server:27017/test?ssl=true&maxPoolSize=1", {
         server: {
             sslKey:key
           , sslCert:cert
+          , sslValidate:false
         }
       }, function(err, db) {
         test.equal(null, err);
@@ -188,15 +191,16 @@ exports['Should correctly handle bad x509 certificate'] = {
               server: {
                   sslKey:serverPem
                 , sslCert:serverPem
+                , sslValidate:false
               }
             }, function(err, db) {
               test.equal(null, db);
               test.equal(0, err.ok);
               test.equal("auth failed", err.errmsg);
 
-              serverManager.stop(function() {
+              // serverManager.stop(function() {
                 test.done();
-              });
+              // });
             });
           });
         });
@@ -250,12 +254,13 @@ exports['Should give reasonable error on x509 authentication failure'] = {
 
     // Create server manager
     var serverManager = new ServerManager(rsOptions);
-    serverManager.start({purge:true, signal:-9}, function() {
+    serverManager.start({purge:true, kill:true, signal:-9}, function() {
       // Connect and validate the server certificate
       MongoClient.connect("mongodb://server:27017/test?ssl=true&maxPoolSize=1", {
         server: {
             sslKey:key
           , sslCert:cert
+          , sslValidate:false
         }
       }, function(err, db) {
         test.equal(null, err);
@@ -287,15 +292,16 @@ exports['Should give reasonable error on x509 authentication failure'] = {
               server: {
                   sslKey:key
                 , sslCert:cert
+                , sslValidate:false
               }
             }, function(err, db) {
               test.equal(null, db);
               test.equal(0, err.ok);
               test.equal("auth failed", err.errmsg);
 
-              serverManager.stop(function() {
+              // serverManager.stop(function() {
                 test.done();
-              });
+              // });
             });
           });
         });
@@ -335,12 +341,13 @@ exports['Should give helpful error when attempting to use x509 without SSL'] = {
 
     // Create server manager
     var serverManager = new ServerManager(rsOptions);
-    serverManager.start({purge:true, signal:-9}, function() {
+    serverManager.start({purge:true, kill:true, signal:-9}, function() {
       // Connect and validate the server certificate
       MongoClient.connect("mongodb://server:27017/test?ssl=false&maxPoolSize=1", {
         server: {
             sslKey:key
           , sslCert:cert
+          , sslValidate:false
         }
       }, function(err, db) {
         test.equal(null, err);
@@ -372,6 +379,7 @@ exports['Should give helpful error when attempting to use x509 without SSL'] = {
               server: {
                   sslKey:serverPem
                 , sslCert:serverPem
+                , sslValidate:false
               }
             }, function(err, db) {
               test.equal(null, db);
@@ -379,9 +387,9 @@ exports['Should give helpful error when attempting to use x509 without SSL'] = {
               test.equal(0, err.ok);
               test.equal("SSL support is required for the MONGODB-X509 mechanism.", err.errmsg);
 
-              serverManager.stop(function() {
+              // serverManager.stop(function() {
                 test.done();
-              });
+              // });
             });
           });
         });
@@ -437,12 +445,13 @@ exports['Should correctly reauthenticate against x509'] = {
     var serverManager = new ServerManager(rsOptions);
   
     // Start the server manager
-    serverManager.start({purge:true, signal:-9}, function() {
+    serverManager.start({purge:true, kill:true, signal:-9}, function() {
       // Connect and validate the server certificate
       MongoClient.connect("mongodb://server:27017/test?ssl=true&maxPoolSize=1", {
         server: {
             sslKey:key
           , sslCert:cert
+          , sslValidate:false
         }
       }, function(err, db) {
         test.equal(null, err);
@@ -474,6 +483,7 @@ exports['Should correctly reauthenticate against x509'] = {
               server: {
                   sslKey:key
                 , sslCert:cert
+                , sslValidate:false
               }
             }, function(err, db) {
               test.equal(null, err);
@@ -502,9 +512,9 @@ exports['Should correctly reauthenticate against x509'] = {
 
                         db.close();
 
-                        serverManager.stop(function() {
+                        // serverManager.stop(function() {
                           test.done();
-                        });
+                        // });
                       });
                     });
                   })

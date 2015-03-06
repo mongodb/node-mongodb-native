@@ -1,3 +1,7 @@
+2.0.21 2015-03-06
+-----------------
+- Upgraded mongodb-core to 1.1.16 making sslValidate default to true to force validation on connection unless overriden by the user.
+
 2.0.20 2015-03-04
 -----------------
 - Updated mongodb-core 1.1.15 to relax pickserver method.
