@@ -1,3 +1,7 @@
+1.4.34 2015-03-09
+-----------------
+- NODE-382 Added better SCRAM error handling
+
 1.4.33 2015-03-03
 -----------------
 - Backported NODE-376 Fixes issue - Unordered batch incorrectly tracks batch size when switching batch types (Issue #1261, https://github.com/meirgottlieb)
