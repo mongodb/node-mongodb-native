@@ -30,8 +30,8 @@
   "author": "Christian Kvalheim",
   "license": "Apache 2.0",
   "bugs": {
-    "url": "https://github.com/christkv/mongodb-legacy/issues"
+    "url": "https://github.com/mongodb/node-mongodb-native/issues"
   },
   "scripts": { "test" : "node test/runner.js -t functional" },
-  "homepage": "https://github.com/christkv/mongodb-legacy"
+  "homepage": "https://github.com/mongodb/node-mongodb-native"
 }
