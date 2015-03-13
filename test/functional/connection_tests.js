@@ -330,10 +330,10 @@ exports['Should correctly reconnect and finish query operation'] = {
       db.collection('test_reconnect').insert({a:1}, function(err, doc) {
         test.equal(null, err);
         // Signal db reconnect
-        var dbReconnect = false;
+        var dbReconnect = 0;
 
-        db.once('reconnect', function() {
-          dbReconnect = true;
+        db.on('reconnect', function() {
+          ++dbReconnect;
         });
 
         db.serverConfig.once('reconnect', function() {
@@ -342,6 +342,7 @@ exports['Should correctly reconnect and finish query operation'] = {
           db.collection('test_reconnect').findOne(function(err, doc) {
             test.equal(null, err);
             test.equal(1, doc.a);
+            test.equal(1, dbReconnect);
 
             // Attempt disconnect again
             db.serverConfig.connections()[0].destroy();
@@ -350,7 +351,7 @@ exports['Should correctly reconnect and finish query operation'] = {
             db.collection('test_reconnect').findOne(function(err, doc) {
               test.equal(null, err);
               test.equal(1, doc.a);
-              test.equal(true, dbReconnect);
+              test.equal(2, dbReconnect);
 
               db.close();
               test.done();
