@@ -1,4 +1,4 @@
-1.1.17
+1.1.17 03-16-2015
 -----------------
 - NODE-377, fixed issue where tags would correctly be checked on secondary and nearest to filter out eligible server candidates.
 
