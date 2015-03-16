@@ -41,6 +41,38 @@ exports['Should Correctly Authenticate using kerberos with MongoClient'] = {
 /**
  * @ignore
  */
+exports['Should Correctly Authenticate using kerberos with MongoClient and authentication properties'] = {
+  metadata: { requires: { topology: 'kerberos', os: "!win32"  } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
+      , Server = configuration.require.Server;
+
+    // KDC Server
+    var server = "ldaptest.10gen.cc";
+    var principal = "drivers@LDAPTEST.10GEN.CC";
+    var urlEncodedPrincipal = encodeURIComponent(principal);
+
+    // Let's write the actual connection code
+    MongoClient.connect(format("mongodb://%s@%s/kerberos?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:true&maxPoolSize=1", urlEncodedPrincipal, server), function(err, db) {
+      console.dir(err)
+      test.equal(null, err);
+      test.ok(db != null);
+
+      db.collection('test').find().toArray(function(err, docs) {
+        test.equal(null, err);
+        test.ok(true, docs[0].kerberos);
+        test.done();
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
 exports['Should Correctly Authenticate using kerberos with MongoClient and then reconnect'] = {
   metadata: { requires: { topology: 'kerberos', os: "!win32"  } },
 
