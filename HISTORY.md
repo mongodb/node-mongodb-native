@@ -1,3 +1,7 @@
+1.1.17
+-----------------
+- NODE-377, fixed issue where tags would correctly be checked on secondary and nearest to filter out eligible server candidates.
+
 1.1.16 03-06-2015
 -----------------
 - rejectUnauthorized parameter is set to true for ssl certificates by default instead of false.
