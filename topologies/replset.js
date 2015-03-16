@@ -732,6 +732,31 @@ var clearCredentials = function(s, ns) {
 }
 
 //
+// Filter serves by tags
+var filterByTags = function(readPreference, servers) {
+  if(readPreference.tags == null) return servers;
+  var filteredServers = [];
+  var tags = readPreference.tags;
+
+  // Iterate over all the servers
+  for(var i = 0; i < servers.length; i++) {
+    var serverTag = servers[i].lastIsMaster().tags || {};
+    // Did we find the a matching server
+    var found = true;
+    // Check if the server is valid
+    for(var name in tags) {
+      if(serverTag[name] != tags[name]) found = false;
+    }
+
+    // Add to candidate list
+    if(found) filteredServers.push(servers[i]);
+  }
+
+  // Returned filtered servers
+  return filteredServers;
+}
+
+//
 // Pick a server based on readPreference
 var pickServer = function(self, s, readPreference) {
   // If no read Preference set to primary by default
@@ -761,15 +786,20 @@ var pickServer = function(self, s, readPreference) {
 
   // Secondary
   if(readPreference.equals(ReadPreference.secondary)) {
-    s.index = s.index + 1;
-    return s.replState.secondaries[s.index % s.replState.secondaries.length];
+    s.index = (s.index + 1) % s.replState.secondaries.length;
+    return s.replState.secondaries[s.index];
   }
 
   // Secondary preferred
   if(readPreference.equals(ReadPreference.secondaryPreferred)) {
     if(s.replState.secondaries.length > 0) {
-      s.index = s.index + 1;
-      return s.replState.secondaries[s.index % s.replState.secondaries.length];
+      // Apply tags if present
+      var servers = filterByTags(readPreference, s.replState.secondaries);
+      // If have a matching server pick one otherwise fall through to primary
+      if(servers.length > 0) {
+        s.index = (s.index + 1) % servers.length;
+        return servers[s.index];  
+      }
     }
 
     return s.replState.primary;
@@ -780,8 +810,16 @@ var pickServer = function(self, s, readPreference) {
     if(s.replState.primary) return s.replState.primary;
 
     if(s.replState.secondaries.length > 0) {
-      s.index = s.index + 1;
-      return s.replState.secondaries[s.index % s.replState.secondaries.length];
+      // Apply tags if present
+      var servers = filterByTags(readPreference, s.replState.secondaries);
+      // If have a matching server pick one otherwise fall through to primary
+      if(servers.length > 0) {
+        s.index = (s.index + 1) % servers.length;
+        return servers[s.index];  
+      }
+
+      // Throw error a we have not valid secondary or primary servers
+      throw new MongoError("no secondary or primary server available");
     }
   }
 
