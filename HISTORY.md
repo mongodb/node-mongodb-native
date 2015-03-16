@@ -1,3 +1,8 @@
+2.0.22 2015-03-16
+-----------------
+- NODE-377, fixed issue where tags would correctly be checked on secondary and nearest to filter out eligible server candidates.
+- Upgraded mongodb-core to 1.1.17.
+
 2.0.21 2015-03-06
 -----------------
 - Upgraded mongodb-core to 1.1.16 making sslValidate default to true to force validation on connection unless overriden by the user.
