@@ -15,6 +15,7 @@ exports.shouldFailInsertDueToUniqueIndex = {
           test.ok(err == null);
           
           collection.insert({a:2}, {w: 1}, function(err, r) {
+            test.ok(err.code != null);
             test.ok(err != null);
             db.close();
             test.done();

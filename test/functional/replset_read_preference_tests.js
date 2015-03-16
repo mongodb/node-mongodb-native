@@ -823,3 +823,52 @@ exports['Ensure tag read goes only to the correct server'] = {
     });
   }
 }
+
+/**
+ * @ignore
+ */
+exports['Ensure tag read goes only to the correct servers using nearest'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var mongo = configuration.require
+      , MongoClient = mongo.MongoClient
+      , ReadPreference = mongo.ReadPreference
+      , ReplSet = mongo.ReplSet
+      , Server = mongo.Server
+      , Db = mongo.Db;
+
+    // Replica configuration
+    var replSet = new ReplSet( [
+        new Server(configuration.host, configuration.port),
+        new Server(configuration.host, configuration.port + 1),
+        new Server(configuration.host, configuration.port + 2)
+      ],
+      {rs_name:configuration.replicasetName, debug:true}
+    );
+
+    // Open the database
+    var db = new Db('local', replSet, {w:0, readPreference: new ReadPreference(ReadPreference.NEAREST, {"loc":"ny"})});
+    var success = false;
+    // Trigger test once whole set is up
+    db.on("fullsetup", function() {
+      db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+        console.dir(server.lastIsMaster())
+        test.equal('ny', server.lastIsMaster().tags.loc);
+        // Mark success
+        success = true;
+      });
+
+      db.db('local').collection('system.replset').find().toArray(function(err, doc) {
+        test.ok(success);
+        db.close();
+        restartAndDone(configuration, test);
+      });
+    });
+
+    db.open(function(err, p_db) {
+      db = p_db;
+    });
+  }
+}
