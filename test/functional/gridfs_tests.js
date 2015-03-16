@@ -2737,3 +2737,37 @@ exports['should fail when seeking on a write enabled gridstore object'] = {
     });
   }
 }
+
+/**
+ * @ignore
+ */
+exports['should correctly handle filename as ObjectId'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var GridStore = configuration.require.GridStore
+      , ObjectID = configuration.require.ObjectID;
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      var id = new ObjectID();
+      var gridStore = new GridStore(db, id, id, "w");
+      gridStore.open(function(err, gridStore) {
+        gridStore.write("hello world!", function(err, gridStore) {
+          gridStore.close(function(err, result) {
+
+            // Check if file exists
+            GridStore.exist(db, {filename: id}, function(err, r) {
+              test.equal(true, r);
+
+              db.close();
+              test.done();
+            });
+          });
+        });
+      });
+    });
+  }
+}
+
