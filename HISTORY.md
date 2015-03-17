@@ -1,3 +1,7 @@
+2.0.23
+-----------------
+- NODE-380 Correctly return MongoError from toError method
+
 2.0.22 2015-03-16
 -----------------
 - NODE-377, fixed issue where tags would correctly be checked on secondary and nearest to filter out eligible server candidates.
