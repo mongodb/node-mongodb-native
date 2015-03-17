@@ -1,4 +1,4 @@
-1.1.18 
+1.1.18 03-17-2015
 -----------------
 - Added support for minHeartbeatFrequencyMS on server reconnect according to the SDAM specification.
 
