@@ -1,3 +1,7 @@
+1.1.18 
+-----------------
+- Added support for minHeartbeatFrequencyMS on server reconnect according to the SDAM specification.
+
 1.1.17 03-16-2015
 -----------------
 - NODE-377, fixed issue where tags would correctly be checked on secondary and nearest to filter out eligible server candidates.
