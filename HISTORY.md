@@ -1,6 +1,8 @@
 2.0.23
 -----------------
-- NODE-380 Correctly return MongoError from toError method
+- NODE-380 Correctly return MongoError from toError method.
+- Fixed issue where addCursorFlag was not correctly setting the flag on the command for mongodb-core.
+- Upgraded mongodb-core to 1.1.18.
 
 2.0.22 2015-03-16
 -----------------
