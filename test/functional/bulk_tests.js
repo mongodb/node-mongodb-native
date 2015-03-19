@@ -1128,14 +1128,14 @@ exports['should correctly return the number of operations in the bulk'] = {
       batch.find({}).upsert().update({$set: {b: 1}});
 
       // Check how many ops we have
-      test.equal(2, batch.length());
+      test.equal(2, batch.length);
 
       var batch = col.initializeUnorderedBulkOp();
       batch.insert({a:1});
       batch.find({}).upsert().update({$set: {b: 1}});
 
       // Check how many ops we have
-      test.equal(2, batch.length());
+      test.equal(2, batch.length);
 
       // Finish up test
       db.close();
