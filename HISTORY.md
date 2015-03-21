@@ -1,9 +1,9 @@
-2.0.23
+2.0.23 2015-03-21
 -----------------
 - NODE-380 Correctly return MongoError from toError method.
 - Fixed issue where addCursorFlag was not correctly setting the flag on the command for mongodb-core.
 - NODE-388 Changed length from method to property on order.js/unordered.js bulk operations.
-- Upgraded mongodb-core to 1.1.18.
+- Upgraded mongodb-core to 1.1.19.
 
 2.0.22 2015-03-16
 -----------------
