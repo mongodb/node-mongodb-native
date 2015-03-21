@@ -1,3 +1,7 @@
+1.1.19 03-21-2015
+-----------------
+- Made kerberos module ~0.0 to allow for quicker releases due to io.js of kerberos module.
+
 1.1.18 03-17-2015
 -----------------
 - Added support for minHeartbeatFrequencyMS on server reconnect according to the SDAM specification.
