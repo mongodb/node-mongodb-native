@@ -730,15 +730,6 @@ server.connect();
     </item>
     
     <item>
-      <title>API Documentation</title>
-      <link>/node-mongodb-native/core/api-docs/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
-      
-      <guid>/node-mongodb-native/core/api-docs/</guid>
-      <description></description>
-    </item>
-    
-    <item>
       <title>Installing The Driver</title>
       <link>/node-mongodb-native/core/overview/installing/</link>
       <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
