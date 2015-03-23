@@ -7,10 +7,10 @@ title = "MongoDB Core 1.0.0"
   group = "groups"
 
 [[menu.main]]
-    name = "api"
+    name = "API Docs"
     pre = "<i class='fa fa-file-text'></i>"
-    url = "api-docs/index.html"
-    weight = -90
+    url = "/api/index.html"
+    weight = -114
 [[menu.main]]
     name = "about driver"
     pre = "<i class='fa fa-gift'></i>"
