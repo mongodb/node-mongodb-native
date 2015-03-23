@@ -29,6 +29,11 @@ title = "MongoDB Core 1.0.0"
     pre = "<i class='fa fa-group'></i>"
     weight = -60
 [[menu.main]]
+    name = "Related"
+    identifier = "related"
+    pre = "<i class='fa fa-group'></i>"
+    weight = -10
+[[menu.main]]
     parent = "related"
     name = "1.1 Core Docs"
     pre = "<i class='fa fa-group'></i>"
