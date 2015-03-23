@@ -4,7 +4,7 @@ The MongodDB Node.js Core driver is a low level driver meant for people building
 
 ## What does the driver offer
 
-I offers connecting to all the available topologies in MongoDB as well as an extensible framework for cursors and hopefully simple to read code. All the plumbing including authentication is all in this driver and as it's much smaller than the legacy 1.X driver it should be much easier to understand.
+The MongoDB core driver offers an extensible library exposing a minimal API. All the plumbing including authentication is all in this driver and as it's much smaller than the legacy 1.X driver it should be much easier to understand.
 
 ## Next Steps
 
