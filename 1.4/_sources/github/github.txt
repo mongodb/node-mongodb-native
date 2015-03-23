@@ -111,7 +111,7 @@ Object Document Modeling Libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 1:57:42 on 23/2/2015
+           - 15:17:17 on 23/2/2015
          * - **Homepage**
            - http://http://mongoosejs.com
          * - **Url**
@@ -119,9 +119,9 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/LearnBoost/mongoose.git
          * - **Forks**
-           - 957
+           - 958
          * - **Watchers**
-           - 6451
+           - 6454
 
 .. topic:: mongo-model
 
@@ -279,9 +279,9 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          :header-rows: 0
 
          * - **Activity Level**
-           - .. image:: ../static/nonactive.png
+           - .. image:: ../static/active.png
          * - **Last push**
-           - 7:17:31 on 19/11/2011
+           - 12:21:15 on 23/2/2015
          * - **Homepage**
            - http://http://zzdhidden.github.com/mongoq
          * - **Url**
@@ -289,7 +289,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Clone Url**
            - https://github.com/zzdhidden/mongoq.git
          * - **Forks**
-           - 4
+           - 5
          * - **Watchers**
            - 68
 

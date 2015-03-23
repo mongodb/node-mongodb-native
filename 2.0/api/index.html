@@ -46,1236 +46,6 @@
 <div id="wrap" class="clearfix" style="width:100%;">
     <table style="height:100%;width:100%">
         <tr>
-            <td valign='top'>        
-                <div class="main">
-                    <h1 class="page-title" data-filename="index.html">Index</h1>
-                    
-
-
-    
-
-
-    <h3> </h3>
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
-<section>
-    
-<header>
-    <h2>
-    lib/admin.js
-    </h2>
-    
-</header>  
-
-<article>
-    <div class="container-overview">
-    
-    
-    
-        
-            <div class="description"><p>The <strong>Admin</strong> class is an internal class that allows convenient access to
-the admin functionality and commands for MongoDB.</p>
-<p><strong>ADMIN Cannot directly be instantiated</strong></p></div>
-        
-        
-        
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-        
-        
-            <h3>Example</h3>
-            
-
-    
-    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,
-  test = require('assert');
-// Connection url
-var url = 'mongodb://localhost:27017/test';
-// Connect using MongoClient
-MongoClient.connect(url, function(err, db) {
-  // Use the admin database for the operation
-  var adminDb = db.admin();</p>
-<p>  // List all the available databases
-  adminDb.listDatabases(function(err, dbs) {
-    test.equal(null, err);
-    test.ok(dbs.databases.length &gt; 0);
-    db.close();
-  });
-});</p></code></pre>
-    
-
-        
-    
-    </div>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</article>
-
-</section>  
-
-
-
-
-
-
-<section>
-    
-<header>
-    <h2>
-    lib/aggregation_cursor.js
-    </h2>
-    
-</header>  
-
-<article>
-    <div class="container-overview">
-    
-    
-    
-        
-            <div class="description"><p>The <strong>AggregationCursor</strong> class is an internal class that embodies an aggregation cursor on MongoDB
-allowing for iteration over the results returned from the underlying query. It supports
-one by one document iteration, conversion to an array or can be iterated as a Node 0.10.X 
-or higher stream</p>
-<p><strong>AGGREGATIONCURSOR Cannot directly be instantiated</strong></p></div>
-        
-        
-        
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-        
-        
-            <h3>Example</h3>
-            
-
-    
-    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,
-  test = require('assert');
-// Connection url
-var url = 'mongodb://localhost:27017/test';
-// Connect using MongoClient
-MongoClient.connect(url, function(err, db) {
-  // Create a collection we want to drop later
-  var col = db.collection('createIndexExample1');
-  // Insert a bunch of documents
-  col.insert([{a:1, b:1}
-    , {a:2, b:2}, {a:3, b:3}
-    , {a:4, b:4}], {w:1}, function(err, result) {
-    test.equal(null, err);</p>
-<pre class="prettyprint source"><code>// Show that duplicate records got dropped
-col.aggregation({}, {cursor: {}}).toArray(function(err, items) {
-  test.equal(null, err);
-  test.equal(4, items.length);
-  db.close();
-});</code></pre><p>  });
-});</p></code></pre>
-    
-
-        
-    
-    </div>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</article>
-
-</section>  
-
-
-
-
-
-
-<section>
-    
-<header>
-    <h2>
-    lib/collection.js
-    </h2>
-    
-</header>  
-
-<article>
-    <div class="container-overview">
-    
-    
-    
-        
-            <div class="description"><p>The <strong>Collection</strong> class is an internal class that embodies a MongoDB collection
-allowing for insert/update/remove/find and other command operation on that MongoDB collection.</p>
-<p><strong>COLLECTION Cannot directly be instantiated</strong></p></div>
-        
-        
-        
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-        
-        
-            <h3>Example</h3>
-            
-
-    
-    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,
-  test = require('assert');
-// Connection url
-var url = 'mongodb://localhost:27017/test';
-// Connect using MongoClient
-MongoClient.connect(url, function(err, db) {
-  // Create a collection we want to drop later
-  var col = db.collection('createIndexExample1');
-  // Show that duplicate records got dropped
-  col.find({}).toArray(function(err, items) {
-    test.equal(null, err);
-    test.equal(4, items.length);
-    db.close();
-  });
-});</p></code></pre>
-    
-
-        
-    
-    </div>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</article>
-
-</section>  
-
-
-
-
-
-
-<section>
-    
-<header>
-    <h2>
-    lib/command_cursor.js
-    </h2>
-    
-</header>  
-
-<article>
-    <div class="container-overview">
-    
-    
-    
-        
-            <div class="description"><p>The <strong>CommandCursor</strong> class is an internal class that embodies a 
-generalized cursor based on a MongoDB command allowing for iteration over the 
-results returned. It supports one by one document iteration, conversion to an 
-array or can be iterated as a Node 0.10.X or higher stream</p>
-<p><strong>CommandCursor Cannot directly be instantiated</strong></p></div>
-        
-        
-        
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-        
-        
-            <h3>Example</h3>
-            
-
-    
-    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,
-  test = require('assert');
-// Connection url
-var url = 'mongodb://localhost:27017/test';
-// Connect using MongoClient
-MongoClient.connect(url, function(err, db) {
-  // Create a collection we want to drop later
-  var col = db.collection('listCollectionsExample1');
-  // Insert a bunch of documents
-  col.insert([{a:1, b:1}
-    , {a:2, b:2}, {a:3, b:3}
-    , {a:4, b:4}], {w:1}, function(err, result) {
-    test.equal(null, err);</p>
-<pre class="prettyprint source"><code>// List the database collections available
-db.listCollections().toArray(function(err, items) {
-  test.equal(null, err);
-  db.close();
-});</code></pre><p>  });
-});</p></code></pre>
-    
-
-        
-    
-    </div>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</article>
-
-</section>  
-
-
-
-
-
-
-<section>
-    
-<header>
-    <h2>
-    lib/cursor.js
-    </h2>
-    
-</header>  
-
-<article>
-    <div class="container-overview">
-    
-    
-    
-        
-            <div class="description"><p>The <strong>Cursor</strong> class is an internal class that embodies a cursor on MongoDB
-allowing for iteration over the results returned from the underlying query. It supports
-one by one document iteration, conversion to an array or can be iterated as a Node 0.10.X
-or higher stream</p>
-<p><strong>CURSORS Cannot directly be instantiated</strong></p></div>
-        
-        
-        
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-        
-        
-            <h3>Example</h3>
-            
-
-    
-    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,
-  test = require('assert');
-// Connection url
-var url = 'mongodb://localhost:27017/test';
-// Connect using MongoClient
-MongoClient.connect(url, function(err, db) {
-  // Create a collection we want to drop later
-  var col = db.collection('createIndexExample1');
-  // Insert a bunch of documents
-  col.insert([{a:1, b:1}
-    , {a:2, b:2}, {a:3, b:3}
-    , {a:4, b:4}], {w:1}, function(err, result) {
-    test.equal(null, err);</p>
-<pre class="prettyprint source"><code>// Show that duplicate records got dropped
-col.find({}).toArray(function(err, items) {
-  test.equal(null, err);
-  test.equal(4, items.length);
-  db.close();
-});</code></pre><p>  });
-});</p></code></pre>
-    
-
-        
-    
-    </div>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</article>
-
-</section>  
-
-
-
-
-
-
-<section>
-    
-<header>
-    <h2>
-    lib/db.js
-    </h2>
-    
-</header>  
-
-<article>
-    <div class="container-overview">
-    
-    
-    
-        
-            <div class="description"><p>The <strong>Db</strong> class is a class that represents a MongoDB Database.</p></div>
-        
-        
-        
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-        
-        
-            <h3>Example</h3>
-            
-
-    
-    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,
-  test = require('assert');
-// Connection url
-var url = 'mongodb://localhost:27017/test';
-// Connect using MongoClient
-MongoClient.connect(url, function(err, db) {
-  // Get an additional db
-  var testDb = db.db('test');
-  db.close();
-});</p></code></pre>
-    
-
-        
-    
-    </div>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</article>
-
-</section>  
-
-
-
-
-
-
-<section>
-    
-<header>
-    <h2>
-    lib/gridfs/grid_store.js
-    </h2>
-    
-</header>  
-
-<article>
-    <div class="container-overview">
-    
-    
-    
-        
-            <div class="description"><p>GridFS is a tool for MongoDB to store files to the database.
-Because of the restrictions of the object size the database can hold, a
-facility to split a file into several chunks is needed. The <a href="GridStore.html"><code>GridStore</code></a>
-class offers a simplified api to interact with files while managing the
-chunks of split files behind the scenes. More information about GridFS can be
-found <a href="http://www.mongodb.org/display/DOCS/GridFS">here</a>.</p></div>
-        
-        
-        
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-        
-        
-            <h3>Example</h3>
-            
-
-    
-    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,
-  GridStore = require('mongodb').GridStore,
-  ObjectID = require('mongodb').ObjectID,
-  test = require('assert');</p>
-<p>// Connection url
-var url = 'mongodb://localhost:27017/test';
-// Connect using MongoClient
-MongoClient.connect(url, function(err, db) {
-  var gridStore = new GridStore(db, null, &quot;w&quot;);
-  gridStore.open(function(err, gridStore) {
-    gridStore.write(&quot;hello world!&quot;, function(err, gridStore) {
-      gridStore.close(function(err, result) {</p>
-<pre class="prettyprint source"><code>    // Let's read the file using object Id
-    GridStore.read(db, result._id, function(err, data) {
-      test.equal('hello world!', data);
-      db.close();
-      test.done();
-    });
-  });
-});</code></pre><p>  });
-});</p></code></pre>
-    
-
-        
-    
-    </div>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</article>
-
-</section>  
-
-
-
-
-
-
-<section>
-    
-<header>
-    <h2>
-    lib/mongo_client.js
-    </h2>
-    
-</header>  
-
-<article>
-    <div class="container-overview">
-    
-    
-    
-        
-            <div class="description"><p>The <strong>MongoClient</strong> class is a class that allows for making Connections to MongoDB.</p></div>
-        
-        
-        
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-        
-        
-            <h3>Example</h3>
-            
-
-    
-    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,
-  test = require('assert');
-// Connection url
-var url = 'mongodb://localhost:27017/test';
-// Connect using MongoClient
-MongoClient.connect(url, function(err, db) {
-  // Get an additional db
-  db.close();
-});</p></code></pre>
-    
-
-        
-    
-    </div>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</article>
-
-</section>  
-
-
-
-
-
-
-<section>
-    
-<header>
-    <h2>
-    lib/mongos.js
-    </h2>
-    
-</header>  
-
-<article>
-    <div class="container-overview">
-    
-    
-    
-        
-            <div class="description"><p>The <strong>Mongos</strong> class is a class that represents a Mongos Proxy topology and is
-used to construct connections.</p>
-<p><strong>Mongos Should not be used, use MongoClient.connect</strong></p></div>
-        
-        
-        
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-        
-        
-            <h3>Example</h3>
-            
-
-    
-    <pre class="prettyprint"><code><p>var Db = require('mongodb').Db,
-  Mongos = require('mongodb').Mongos,
-  Server = require('mongodb').Server,
-  test = require('assert');
-// Connect using Mongos
-var server = new Server('localhost', 27017);
-var db = new Db('test', new Mongos([server]));
-db.open(function(err, db) {
-  // Get an additional db
-  db.close();
-});</p></code></pre>
-    
-
-        
-    
-    </div>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</article>
-
-</section>  
-
-
-
-
-
-
-<section>
-    
-<header>
-    <h2>
-    lib/read_preference.js
-    </h2>
-    
-</header>  
-
-<article>
-    <div class="container-overview">
-    
-    
-    
-        
-            <div class="description"><p>The <strong>ReadPreference</strong> class is a class that represents a MongoDB ReadPreference and is
-used to construct connections.</p></div>
-        
-        
-        
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-        
-        
-            <h3>Example</h3>
-            
-
-    
-    <pre class="prettyprint"><code><p>var Db = require('mongodb').Db,
-  ReplSet = require('mongodb').ReplSet,
-  Server = require('mongodb').Server,
-  ReadPreference = require('mongodb').ReadPreference,
-  test = require('assert');
-// Connect using ReplSet
-var server = new Server('localhost', 27017);
-var db = new Db('test', new ReplSet([server]));
-db.open(function(err, db) {
-  test.equal(null, err);
-  // Perform a read
-  var cursor = db.collection('t').find({});
-  cursor.setReadPreference(ReadPreference.PRIMARY);
-  cursor.toArray(function(err, docs) {
-    test.equal(null, err);
-    db.close();
-  });
-});</p></code></pre>
-    
-
-        
-    
-    </div>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</article>
-
-</section>  
-
-
-
-
-
-
-<section>
-    
-<header>
-    <h2>
-    lib/replset.js
-    </h2>
-    
-</header>  
-
-<article>
-    <div class="container-overview">
-    
-    
-    
-        
-            <div class="description"><p>The <strong>ReplSet</strong> class is a class that represents a Replicaset topology and is
-used to construct connections.</p>
-<p><strong>ReplSet Should not be used, use MongoClient.connect</strong></p></div>
-        
-        
-        
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-        
-        
-            <h3>Example</h3>
-            
-
-    
-    <pre class="prettyprint"><code><p>var Db = require('mongodb').Db,
-  ReplSet = require('mongodb').ReplSet,
-  Server = require('mongodb').Server,
-  test = require('assert');
-// Connect using ReplSet
-var server = new Server('localhost', 27017);
-var db = new Db('test', new ReplSet([server]));
-db.open(function(err, db) {
-  // Get an additional db
-  db.close();
-});</p></code></pre>
-    
-
-        
-    
-    </div>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</article>
-
-</section>  
-
-
-
-
-
-
-<section>
-    
-<header>
-    <h2>
-    lib/server.js
-    </h2>
-    
-</header>  
-
-<article>
-    <div class="container-overview">
-    
-    
-    
-        
-            <div class="description"><p>The <strong>Server</strong> class is a class that represents a single server topology and is
-used to construct connections.</p>
-<p><strong>Server Should not be used, use MongoClient.connect</strong></p></div>
-        
-        
-        
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-        
-        
-            <h3>Example</h3>
-            
-
-    
-    <pre class="prettyprint"><code><p>var Db = require('mongodb').Db,
-  Server = require('mongodb').Server,
-  test = require('assert');
-// Connect using single Server
-var db = new Db('test', new Server('localhost', 27017););
-db.open(function(err, db) {
-  // Get an additional db
-  db.close();
-});</p></code></pre>
-    
-
-        
-    
-    </div>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</article>
-
-</section>  
-
-
-
-
-
-                    
-                    <!-- disqus code -->
-                    <div id="disqus_thread"></div>
-                    <script type="text/javascript">
-                        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-                        var disqus_shortname = 'nodejsmongodbdriver'; // required: replace example with your forum shortname
-
-                        /* * * DON'T EDIT BELOW THIS LINE * * */
-                        (function() {
-                            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-                            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-                            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-                        })();
-                    </script>
-                    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-                    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>                    
-                    <!-- // disqus code -->
-                    
-
-                    <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha13</a> on Mon Mar 23 2015 10:43:47 GMT+0100 (CET)
-                    </footer>
-                </div>
-            </td>
             <td valign='top'>
                 
 <div class="navigation">
@@ -2617,6 +1387,1236 @@ db.open(function(err, db) {
     
     </ul>
 </div>
+            </td>
+            <td valign='top'>        
+                <div class="main">
+                    <h1 class="page-title" data-filename="index.html">Index</h1>
+                    
+
+
+    
+
+
+    <h3> </h3>
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+<section>
+    
+<header>
+    <h2>
+    lib/admin.js
+    </h2>
+    
+</header>  
+
+<article>
+    <div class="container-overview">
+    
+    
+    
+        
+            <div class="description"><p>The <strong>Admin</strong> class is an internal class that allows convenient access to
+the admin functionality and commands for MongoDB.</p>
+<p><strong>ADMIN Cannot directly be instantiated</strong></p></div>
+        
+        
+        
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+        
+        
+            <h3>Example</h3>
+            
+
+    
+    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+// Connection url
+var url = 'mongodb://localhost:27017/test';
+// Connect using MongoClient
+MongoClient.connect(url, function(err, db) {
+  // Use the admin database for the operation
+  var adminDb = db.admin();</p>
+<p>  // List all the available databases
+  adminDb.listDatabases(function(err, dbs) {
+    test.equal(null, err);
+    test.ok(dbs.databases.length &gt; 0);
+    db.close();
+  });
+});</p></code></pre>
+    
+
+        
+    
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</article>
+
+</section>  
+
+
+
+
+
+
+<section>
+    
+<header>
+    <h2>
+    lib/aggregation_cursor.js
+    </h2>
+    
+</header>  
+
+<article>
+    <div class="container-overview">
+    
+    
+    
+        
+            <div class="description"><p>The <strong>AggregationCursor</strong> class is an internal class that embodies an aggregation cursor on MongoDB
+allowing for iteration over the results returned from the underlying query. It supports
+one by one document iteration, conversion to an array or can be iterated as a Node 0.10.X 
+or higher stream</p>
+<p><strong>AGGREGATIONCURSOR Cannot directly be instantiated</strong></p></div>
+        
+        
+        
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+        
+        
+            <h3>Example</h3>
+            
+
+    
+    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+// Connection url
+var url = 'mongodb://localhost:27017/test';
+// Connect using MongoClient
+MongoClient.connect(url, function(err, db) {
+  // Create a collection we want to drop later
+  var col = db.collection('createIndexExample1');
+  // Insert a bunch of documents
+  col.insert([{a:1, b:1}
+    , {a:2, b:2}, {a:3, b:3}
+    , {a:4, b:4}], {w:1}, function(err, result) {
+    test.equal(null, err);</p>
+<pre class="prettyprint source"><code>// Show that duplicate records got dropped
+col.aggregation({}, {cursor: {}}).toArray(function(err, items) {
+  test.equal(null, err);
+  test.equal(4, items.length);
+  db.close();
+});</code></pre><p>  });
+});</p></code></pre>
+    
+
+        
+    
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</article>
+
+</section>  
+
+
+
+
+
+
+<section>
+    
+<header>
+    <h2>
+    lib/collection.js
+    </h2>
+    
+</header>  
+
+<article>
+    <div class="container-overview">
+    
+    
+    
+        
+            <div class="description"><p>The <strong>Collection</strong> class is an internal class that embodies a MongoDB collection
+allowing for insert/update/remove/find and other command operation on that MongoDB collection.</p>
+<p><strong>COLLECTION Cannot directly be instantiated</strong></p></div>
+        
+        
+        
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+        
+        
+            <h3>Example</h3>
+            
+
+    
+    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+// Connection url
+var url = 'mongodb://localhost:27017/test';
+// Connect using MongoClient
+MongoClient.connect(url, function(err, db) {
+  // Create a collection we want to drop later
+  var col = db.collection('createIndexExample1');
+  // Show that duplicate records got dropped
+  col.find({}).toArray(function(err, items) {
+    test.equal(null, err);
+    test.equal(4, items.length);
+    db.close();
+  });
+});</p></code></pre>
+    
+
+        
+    
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</article>
+
+</section>  
+
+
+
+
+
+
+<section>
+    
+<header>
+    <h2>
+    lib/command_cursor.js
+    </h2>
+    
+</header>  
+
+<article>
+    <div class="container-overview">
+    
+    
+    
+        
+            <div class="description"><p>The <strong>CommandCursor</strong> class is an internal class that embodies a 
+generalized cursor based on a MongoDB command allowing for iteration over the 
+results returned. It supports one by one document iteration, conversion to an 
+array or can be iterated as a Node 0.10.X or higher stream</p>
+<p><strong>CommandCursor Cannot directly be instantiated</strong></p></div>
+        
+        
+        
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+        
+        
+            <h3>Example</h3>
+            
+
+    
+    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+// Connection url
+var url = 'mongodb://localhost:27017/test';
+// Connect using MongoClient
+MongoClient.connect(url, function(err, db) {
+  // Create a collection we want to drop later
+  var col = db.collection('listCollectionsExample1');
+  // Insert a bunch of documents
+  col.insert([{a:1, b:1}
+    , {a:2, b:2}, {a:3, b:3}
+    , {a:4, b:4}], {w:1}, function(err, result) {
+    test.equal(null, err);</p>
+<pre class="prettyprint source"><code>// List the database collections available
+db.listCollections().toArray(function(err, items) {
+  test.equal(null, err);
+  db.close();
+});</code></pre><p>  });
+});</p></code></pre>
+    
+
+        
+    
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</article>
+
+</section>  
+
+
+
+
+
+
+<section>
+    
+<header>
+    <h2>
+    lib/cursor.js
+    </h2>
+    
+</header>  
+
+<article>
+    <div class="container-overview">
+    
+    
+    
+        
+            <div class="description"><p>The <strong>Cursor</strong> class is an internal class that embodies a cursor on MongoDB
+allowing for iteration over the results returned from the underlying query. It supports
+one by one document iteration, conversion to an array or can be iterated as a Node 0.10.X
+or higher stream</p>
+<p><strong>CURSORS Cannot directly be instantiated</strong></p></div>
+        
+        
+        
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+        
+        
+            <h3>Example</h3>
+            
+
+    
+    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+// Connection url
+var url = 'mongodb://localhost:27017/test';
+// Connect using MongoClient
+MongoClient.connect(url, function(err, db) {
+  // Create a collection we want to drop later
+  var col = db.collection('createIndexExample1');
+  // Insert a bunch of documents
+  col.insert([{a:1, b:1}
+    , {a:2, b:2}, {a:3, b:3}
+    , {a:4, b:4}], {w:1}, function(err, result) {
+    test.equal(null, err);</p>
+<pre class="prettyprint source"><code>// Show that duplicate records got dropped
+col.find({}).toArray(function(err, items) {
+  test.equal(null, err);
+  test.equal(4, items.length);
+  db.close();
+});</code></pre><p>  });
+});</p></code></pre>
+    
+
+        
+    
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</article>
+
+</section>  
+
+
+
+
+
+
+<section>
+    
+<header>
+    <h2>
+    lib/db.js
+    </h2>
+    
+</header>  
+
+<article>
+    <div class="container-overview">
+    
+    
+    
+        
+            <div class="description"><p>The <strong>Db</strong> class is a class that represents a MongoDB Database.</p></div>
+        
+        
+        
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+        
+        
+            <h3>Example</h3>
+            
+
+    
+    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+// Connection url
+var url = 'mongodb://localhost:27017/test';
+// Connect using MongoClient
+MongoClient.connect(url, function(err, db) {
+  // Get an additional db
+  var testDb = db.db('test');
+  db.close();
+});</p></code></pre>
+    
+
+        
+    
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</article>
+
+</section>  
+
+
+
+
+
+
+<section>
+    
+<header>
+    <h2>
+    lib/gridfs/grid_store.js
+    </h2>
+    
+</header>  
+
+<article>
+    <div class="container-overview">
+    
+    
+    
+        
+            <div class="description"><p>GridFS is a tool for MongoDB to store files to the database.
+Because of the restrictions of the object size the database can hold, a
+facility to split a file into several chunks is needed. The <a href="GridStore.html"><code>GridStore</code></a>
+class offers a simplified api to interact with files while managing the
+chunks of split files behind the scenes. More information about GridFS can be
+found <a href="http://www.mongodb.org/display/DOCS/GridFS">here</a>.</p></div>
+        
+        
+        
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+        
+        
+            <h3>Example</h3>
+            
+
+    
+    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,
+  GridStore = require('mongodb').GridStore,
+  ObjectID = require('mongodb').ObjectID,
+  test = require('assert');</p>
+<p>// Connection url
+var url = 'mongodb://localhost:27017/test';
+// Connect using MongoClient
+MongoClient.connect(url, function(err, db) {
+  var gridStore = new GridStore(db, null, &quot;w&quot;);
+  gridStore.open(function(err, gridStore) {
+    gridStore.write(&quot;hello world!&quot;, function(err, gridStore) {
+      gridStore.close(function(err, result) {</p>
+<pre class="prettyprint source"><code>    // Let's read the file using object Id
+    GridStore.read(db, result._id, function(err, data) {
+      test.equal('hello world!', data);
+      db.close();
+      test.done();
+    });
+  });
+});</code></pre><p>  });
+});</p></code></pre>
+    
+
+        
+    
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</article>
+
+</section>  
+
+
+
+
+
+
+<section>
+    
+<header>
+    <h2>
+    lib/mongo_client.js
+    </h2>
+    
+</header>  
+
+<article>
+    <div class="container-overview">
+    
+    
+    
+        
+            <div class="description"><p>The <strong>MongoClient</strong> class is a class that allows for making Connections to MongoDB.</p></div>
+        
+        
+        
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+        
+        
+            <h3>Example</h3>
+            
+
+    
+    <pre class="prettyprint"><code><p>var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+// Connection url
+var url = 'mongodb://localhost:27017/test';
+// Connect using MongoClient
+MongoClient.connect(url, function(err, db) {
+  // Get an additional db
+  db.close();
+});</p></code></pre>
+    
+
+        
+    
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</article>
+
+</section>  
+
+
+
+
+
+
+<section>
+    
+<header>
+    <h2>
+    lib/mongos.js
+    </h2>
+    
+</header>  
+
+<article>
+    <div class="container-overview">
+    
+    
+    
+        
+            <div class="description"><p>The <strong>Mongos</strong> class is a class that represents a Mongos Proxy topology and is
+used to construct connections.</p>
+<p><strong>Mongos Should not be used, use MongoClient.connect</strong></p></div>
+        
+        
+        
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+        
+        
+            <h3>Example</h3>
+            
+
+    
+    <pre class="prettyprint"><code><p>var Db = require('mongodb').Db,
+  Mongos = require('mongodb').Mongos,
+  Server = require('mongodb').Server,
+  test = require('assert');
+// Connect using Mongos
+var server = new Server('localhost', 27017);
+var db = new Db('test', new Mongos([server]));
+db.open(function(err, db) {
+  // Get an additional db
+  db.close();
+});</p></code></pre>
+    
+
+        
+    
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</article>
+
+</section>  
+
+
+
+
+
+
+<section>
+    
+<header>
+    <h2>
+    lib/read_preference.js
+    </h2>
+    
+</header>  
+
+<article>
+    <div class="container-overview">
+    
+    
+    
+        
+            <div class="description"><p>The <strong>ReadPreference</strong> class is a class that represents a MongoDB ReadPreference and is
+used to construct connections.</p></div>
+        
+        
+        
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+        
+        
+            <h3>Example</h3>
+            
+
+    
+    <pre class="prettyprint"><code><p>var Db = require('mongodb').Db,
+  ReplSet = require('mongodb').ReplSet,
+  Server = require('mongodb').Server,
+  ReadPreference = require('mongodb').ReadPreference,
+  test = require('assert');
+// Connect using ReplSet
+var server = new Server('localhost', 27017);
+var db = new Db('test', new ReplSet([server]));
+db.open(function(err, db) {
+  test.equal(null, err);
+  // Perform a read
+  var cursor = db.collection('t').find({});
+  cursor.setReadPreference(ReadPreference.PRIMARY);
+  cursor.toArray(function(err, docs) {
+    test.equal(null, err);
+    db.close();
+  });
+});</p></code></pre>
+    
+
+        
+    
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</article>
+
+</section>  
+
+
+
+
+
+
+<section>
+    
+<header>
+    <h2>
+    lib/replset.js
+    </h2>
+    
+</header>  
+
+<article>
+    <div class="container-overview">
+    
+    
+    
+        
+            <div class="description"><p>The <strong>ReplSet</strong> class is a class that represents a Replicaset topology and is
+used to construct connections.</p>
+<p><strong>ReplSet Should not be used, use MongoClient.connect</strong></p></div>
+        
+        
+        
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+        
+        
+            <h3>Example</h3>
+            
+
+    
+    <pre class="prettyprint"><code><p>var Db = require('mongodb').Db,
+  ReplSet = require('mongodb').ReplSet,
+  Server = require('mongodb').Server,
+  test = require('assert');
+// Connect using ReplSet
+var server = new Server('localhost', 27017);
+var db = new Db('test', new ReplSet([server]));
+db.open(function(err, db) {
+  // Get an additional db
+  db.close();
+});</p></code></pre>
+    
+
+        
+    
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</article>
+
+</section>  
+
+
+
+
+
+
+<section>
+    
+<header>
+    <h2>
+    lib/server.js
+    </h2>
+    
+</header>  
+
+<article>
+    <div class="container-overview">
+    
+    
+    
+        
+            <div class="description"><p>The <strong>Server</strong> class is a class that represents a single server topology and is
+used to construct connections.</p>
+<p><strong>Server Should not be used, use MongoClient.connect</strong></p></div>
+        
+        
+        
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+        
+        
+            <h3>Example</h3>
+            
+
+    
+    <pre class="prettyprint"><code><p>var Db = require('mongodb').Db,
+  Server = require('mongodb').Server,
+  test = require('assert');
+// Connect using single Server
+var db = new Db('test', new Server('localhost', 27017););
+db.open(function(err, db) {
+  // Get an additional db
+  db.close();
+});</p></code></pre>
+    
+
+        
+    
+    </div>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</article>
+
+</section>  
+
+
+
+
+
+                    
+                    <!-- disqus code -->
+                    <div id="disqus_thread"></div>
+                    <script type="text/javascript">
+                        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+                        var disqus_shortname = 'nodejsmongodbdriver'; // required: replace example with your forum shortname
+
+                        /* * * DON'T EDIT BELOW THIS LINE * * */
+                        (function() {
+                            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+                            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+                            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+                        })();
+                    </script>
+                    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+                    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>                    
+                    <!-- // disqus code -->
+                    
+
+                    <footer>
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha13</a> on Mon Mar 23 2015 16:18:50 GMT+0100 (CET)
+                    </footer>
+                </div>
             </td>
         </tr>
     </table>

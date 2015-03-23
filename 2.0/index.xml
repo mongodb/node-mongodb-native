@@ -13,6 +13,210 @@
     <atom:link href="/node-mongodb-native/2.0/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
+      <title>Connection Failures</title>
+      <link>/node-mongodb-native/2.0/tutorials/connection_failures/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/tutorials/connection_failures/</guid>
+      <description>
+
+&lt;h1 id=&#34;connection-failures-and-retries:878abfdd112f1319523c821f1974dcfd&#34;&gt;Connection Failures and Retries&lt;/h1&gt;
+
+&lt;p&gt;This comes up a lot because there is some confusion about how the driver works when it comes to Socket timeouts and retries. This Tutorial attempts to clarify the driver&amp;rsquo;s behavior and explains why, for some legacy reasons as well as for some design reasons, the driver works the way it does.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s start off by looking at the Simple case of a single server connection and how it behaves when tweaking the options that control the driver behavior on server disconnects.&lt;/p&gt;
+
+&lt;p&gt;First let&amp;rsquo;s start with a simple script performing inserts and find, and running against a server on &lt;code&gt;localhost:27017&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , f = require(&#39;util&#39;).format;
+
+MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, function(err, db) {
+  var col = db.collection(&#39;t&#39;);
+
+  setInterval(function() {
+    col.insert({a:1}, function(err, r) {
+      console.log(&amp;quot;insert&amp;quot;)
+      console.log(err)
+
+      col.findOne({}, function(err, doc) {
+        console.log(&amp;quot;findOne&amp;quot;)
+        console.log(err)
+      });
+    })
+  }, 1000)
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Start the script and notice how it prints out &lt;code&gt;insert&lt;/code&gt; and &lt;code&gt;findOne&lt;/code&gt; every second. Now shut down the &lt;code&gt;mongod&lt;/code&gt; process and notice how you stop seeing the console printouts. What is happening is that the server is buffering operations until the &lt;code&gt;mongod&lt;/code&gt; returns because the two parameters controlling this behavior are set to the default value. These parameters are:&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;&lt;code&gt;Parameter&lt;/code&gt;&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;&lt;code&gt;Value&lt;/code&gt;&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;&lt;code&gt;Description&lt;/code&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;autoReconnect&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;true&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Driver will attempt to auto reconnect&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td&gt;bufferMaxEntries&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;-1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Max Number of operations buffered while waiting for server reconnect. Driver will error out all operations if the number of buffered operations goes over the limit set&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;By default the driver attempts to reconnect and buffers all operations until it can. This is due to backward compatibility.&lt;/p&gt;
+
+&lt;p&gt;Now let&amp;rsquo;s try to disable the &lt;code&gt;bufferMaxEntries&lt;/code&gt; by setting it to &lt;code&gt;0&lt;/code&gt; and see what happens.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , f = require(&#39;util&#39;).format;
+
+MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, {
+    db: { bufferMaxEntries: 0 }
+  }, function(err, db) {
+  var col = db.collection(&#39;t&#39;);
+
+  setInterval(function() {
+    col.insert({a:1}, function(err, r) {
+      console.log(&amp;quot;insert&amp;quot;)
+      console.log(err)
+
+      col.findOne({}, function(err, doc) {
+        console.log(&amp;quot;findOne&amp;quot;)
+        console.log(err)
+      });
+    })
+  }, 1000)
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Start the script running and then shut down the &lt;code&gt;mongod&lt;/code&gt; process. Notice how all operations are now erroring out instead of just being buffered? Now restart the &lt;code&gt;mongod&lt;/code&gt; service and you will see the the operations once again correctly being executed.&lt;/p&gt;
+
+&lt;p&gt;So what happens if we disable &lt;code&gt;autoReconnect&lt;/code&gt; by setting it to &lt;code&gt;false&lt;/code&gt;? Let&amp;rsquo;s take a look.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , f = require(&#39;util&#39;).format;
+
+MongoClient.connect(&#39;mongodb://localhost:27017/test?autoReconnect=false&#39;, function(err, db) {
+  var col = db.collection(&#39;t&#39;);
+
+  setInterval(function() {
+    col.insert({a:1}, function(err, r) {
+      console.log(&amp;quot;insert&amp;quot;)
+      console.log(err)
+
+      col.findOne({}, function(err, doc) {
+        console.log(&amp;quot;findOne&amp;quot;)
+        console.log(err)
+      });
+    })
+  }, 1000)
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;When you shut down the &lt;code&gt;mongod&lt;/code&gt; process, the driver stops processing operations and keeps buffering them due to &lt;code&gt;bufferMaxEntries&lt;/code&gt; being &lt;code&gt;-1&lt;/code&gt; by default meaning buffer all operations. When you bring the &lt;code&gt;mongod&lt;/code&gt; process back up you will notice how it does not change the fact that we are buffering. This is a legacy behavior and less than ideal. So you will want to set &lt;code&gt;bufferMaxEntries&lt;/code&gt; to 0 or a low number if you wish to turn off &lt;code&gt;autoReconnect&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h2 id=&#34;the-matrix-of-behavior:878abfdd112f1319523c821f1974dcfd&#34;&gt;The Matrix of Behavior&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s put all the possible values of &lt;code&gt;autoReconnect&lt;/code&gt; and &lt;code&gt;bufferMaxEntries&lt;/code&gt; in a table so we can more easily understand the behavior.&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;&lt;code&gt;autoReconnect&lt;/code&gt;&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;&lt;code&gt;bufferMaxEntries&lt;/code&gt;&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;&lt;code&gt;Description&lt;/code&gt;&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;true&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;0&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Auto reconnect but do not buffer operations, error out until server reconnect&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;true&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;-1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Auto reconnect, buffer all operations until memory run out&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;true&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&amp;gt; 0&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Auto reconnect, buffer all operations until the bufferMaxEntries is reached and then error out all buffered operations&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;false&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;0&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Auto reconnect is off, do not buffer operations, error out all operations&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;false&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;-1&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Auto reconnect is off, buffer all operations until memory run out&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;false&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&amp;gt; 0&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Auto reconnect is off, buffer all operations until the bufferMaxEntries is reached and then error out all buffered operations&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;So why is this the case? Well, the main reason is a combination of the asynchronous behavior of &lt;code&gt;node.js&lt;/code&gt; as well as &lt;code&gt;Replicasets&lt;/code&gt;. When you are using a single server the behavior might be a bit mystifying, but it makes sense in the context of the &lt;code&gt;Replicaset&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Say you have a &lt;code&gt;Replicaset&lt;/code&gt; where a new primary is elected. If the driver does not buffer the operations, it will have to error out all operations until there is a new primary available in the set. This complicates people&amp;rsquo;s code as every operation could potentially fail and thus the driver a long time ago took the decision to make this transparent to the user by buffering operations until the new &lt;code&gt;primary&lt;/code&gt; is available and then replaying them. &lt;code&gt;bufferMaxEntries&lt;/code&gt; was added later to allow developers to control this behavior themselves if they wished to be instantly notified about write errors f.ex instead of letting the driver handle it.&lt;/p&gt;
+
+&lt;h2 id=&#34;the-confusion:878abfdd112f1319523c821f1974dcfd&#34;&gt;The Confusion&lt;/h2&gt;
+
+&lt;p&gt;A lot of the confusion comes from mistaking &lt;code&gt;socketTimeoutMS&lt;/code&gt; with how the async driver works. &lt;code&gt;socketTimeoutMS&lt;/code&gt; only applies to sockets if they have successfully connected to the server, but have not been in use and they reach the &lt;code&gt;socketTimeoutMS&lt;/code&gt;. In contrast, &lt;code&gt;connectionTimeoutMS&lt;/code&gt; applies only to the &lt;em&gt;initial&lt;/em&gt; server connection process timeout.  The &amp;lsquo;connectionTimeoutMS&amp;rsquo; is independent of the &lt;code&gt;socketTimeoutMS&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;However, some people set &lt;code&gt;socketTimeoutMS&lt;/code&gt; expecting it to influence timeouts for operations. But as we have seen above the &lt;code&gt;autoReconnect&lt;/code&gt; and &lt;code&gt;bufferMaxEntries&lt;/code&gt; are the two settings that control that behavior.&lt;/p&gt;
+
+&lt;p&gt;It&amp;rsquo;s worth noting that you should ensure you have a reasonable &lt;code&gt;socketTimeoutMS&lt;/code&gt;. A lot of people set it way way too low and find themselves with timeouts happening all the time as operations are infrequent enough to cause constant connection closing and reconnect events.&lt;/p&gt;
+
+&lt;p&gt;The rule of thumb I always impart is:&lt;/p&gt;
+
+&lt;blockquote&gt;
+&lt;p&gt;Set &lt;em&gt;socketTimeoutMS&lt;/em&gt; to at least &lt;code&gt;2-3x&lt;/code&gt; the longest running operation in your application or the interval between operations, too ensure you don&amp;rsquo;t timeout long running operations or servers where there are big gaps of time between operations.&lt;/p&gt;
+&lt;/blockquote&gt;
+
+&lt;h2 id=&#34;what-you-are-probably-looking-for:878abfdd112f1319523c821f1974dcfd&#34;&gt;What You are Probably Looking For&lt;/h2&gt;
+
+&lt;p&gt;Most people who start changing &lt;code&gt;socketTimeoutMS&lt;/code&gt; are actually looking for the &lt;code&gt;maxTimeMS&lt;/code&gt; property to limit the time a query runs against the server before it gets aborted. Let&amp;rsquo;s look at how to apply this property on a query.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , f = require(&#39;util&#39;).format;
+
+MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, function(err, db) {
+  var cursor = db.collection(&#39;t&#39;).find({}).maxTimeMS(1000);
+  cursor.toArray(function(err, docs) {
+    console.dir(docs)
+    db.close();
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This executes a query and sets the &lt;code&gt;maxTimeMS&lt;/code&gt; property to &lt;code&gt;1000&lt;/code&gt; milliseconds. If the query runs for longer than that time it will be aborted by the server.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
       <title>Connecting To MongoDB</title>
       <link>/node-mongodb-native/2.0/tutorials/connecting/</link>
       <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
@@ -275,210 +479,6 @@ MongoClient.connect(url, {
 &lt;li&gt;&lt;code&gt;socketOptions.connectTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Connection timeout setting.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;socketOptions.socketTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Socket timeout setting.&lt;/li&gt;
 &lt;/ul&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Connection Failures</title>
-      <link>/node-mongodb-native/2.0/tutorials/connection_failures/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
-      
-      <guid>/node-mongodb-native/2.0/tutorials/connection_failures/</guid>
-      <description>
-
-&lt;h1 id=&#34;connection-failures-and-retries:878abfdd112f1319523c821f1974dcfd&#34;&gt;Connection Failures and Retries&lt;/h1&gt;
-
-&lt;p&gt;This comes up a lot because there is some confusion about how the driver works when it comes to Socket timeouts and retries. This Tutorial attempts to clarify the driver&amp;rsquo;s behavior and explains why, for some legacy reasons as well as for some design reasons, the driver works the way it does.&lt;/p&gt;
-
-&lt;p&gt;Let&amp;rsquo;s start off by looking at the Simple case of a single server connection and how it behaves when tweaking the options that control the driver behavior on server disconnects.&lt;/p&gt;
-
-&lt;p&gt;First let&amp;rsquo;s start with a simple script performing inserts and find, and running against a server on &lt;code&gt;localhost:27017&lt;/code&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
-  , f = require(&#39;util&#39;).format;
-
-MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, function(err, db) {
-  var col = db.collection(&#39;t&#39;);
-
-  setInterval(function() {
-    col.insert({a:1}, function(err, r) {
-      console.log(&amp;quot;insert&amp;quot;)
-      console.log(err)
-
-      col.findOne({}, function(err, doc) {
-        console.log(&amp;quot;findOne&amp;quot;)
-        console.log(err)
-      });
-    })
-  }, 1000)
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Start the script and notice how it prints out &lt;code&gt;insert&lt;/code&gt; and &lt;code&gt;findOne&lt;/code&gt; every second. Now shut down the &lt;code&gt;mongod&lt;/code&gt; process and notice how you stop seeing the console printouts. What is happening is that the server is buffering operations until the &lt;code&gt;mongod&lt;/code&gt; returns because the two parameters controlling this behavior are set to the default value. These parameters are:&lt;/p&gt;
-
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th&gt;&lt;code&gt;Parameter&lt;/code&gt;&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;&lt;code&gt;Value&lt;/code&gt;&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;&lt;code&gt;Description&lt;/code&gt;&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td&gt;autoReconnect&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;true&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Driver will attempt to auto reconnect&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td&gt;bufferMaxEntries&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;-1&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Max Number of operations buffered while waiting for server reconnect. Driver will error out all operations if the number of buffered operations goes over the limit set&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;p&gt;By default the driver attempts to reconnect and buffers all operations until it can. This is due to backward compatibility.&lt;/p&gt;
-
-&lt;p&gt;Now let&amp;rsquo;s try to disable the &lt;code&gt;bufferMaxEntries&lt;/code&gt; by setting it to &lt;code&gt;0&lt;/code&gt; and see what happens.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
-  , f = require(&#39;util&#39;).format;
-
-MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, {
-    db: { bufferMaxEntries: 0 }
-  }, function(err, db) {
-  var col = db.collection(&#39;t&#39;);
-
-  setInterval(function() {
-    col.insert({a:1}, function(err, r) {
-      console.log(&amp;quot;insert&amp;quot;)
-      console.log(err)
-
-      col.findOne({}, function(err, doc) {
-        console.log(&amp;quot;findOne&amp;quot;)
-        console.log(err)
-      });
-    })
-  }, 1000)
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Start the script running and then shut down the &lt;code&gt;mongod&lt;/code&gt; process. Notice how all operations are now erroring out instead of just being buffered? Now restart the &lt;code&gt;mongod&lt;/code&gt; service and you will see the the operations once again correctly being executed.&lt;/p&gt;
-
-&lt;p&gt;So what happens if we disable &lt;code&gt;autoReconnect&lt;/code&gt; by setting it to &lt;code&gt;false&lt;/code&gt;? Let&amp;rsquo;s take a look.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
-  , f = require(&#39;util&#39;).format;
-
-MongoClient.connect(&#39;mongodb://localhost:27017/test?autoReconnect=false&#39;, function(err, db) {
-  var col = db.collection(&#39;t&#39;);
-
-  setInterval(function() {
-    col.insert({a:1}, function(err, r) {
-      console.log(&amp;quot;insert&amp;quot;)
-      console.log(err)
-
-      col.findOne({}, function(err, doc) {
-        console.log(&amp;quot;findOne&amp;quot;)
-        console.log(err)
-      });
-    })
-  }, 1000)
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;When you shut down the &lt;code&gt;mongod&lt;/code&gt; process, the driver stops processing operations and keeps buffering them due to &lt;code&gt;bufferMaxEntries&lt;/code&gt; being &lt;code&gt;-1&lt;/code&gt; by default meaning buffer all operations. When you bring the &lt;code&gt;mongod&lt;/code&gt; process back up you will notice how it does not change the fact that we are buffering. This is a legacy behavior and less than ideal. So you will want to set &lt;code&gt;bufferMaxEntries&lt;/code&gt; to 0 or a low number if you wish to turn off &lt;code&gt;autoReconnect&lt;/code&gt;.&lt;/p&gt;
-
-&lt;h2 id=&#34;the-matrix-of-behavior:878abfdd112f1319523c821f1974dcfd&#34;&gt;The Matrix of Behavior&lt;/h2&gt;
-
-&lt;p&gt;Let&amp;rsquo;s put all the possible values of &lt;code&gt;autoReconnect&lt;/code&gt; and &lt;code&gt;bufferMaxEntries&lt;/code&gt; in a table so we can more easily understand the behavior.&lt;/p&gt;
-
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th align=&#34;left&#34;&gt;&lt;code&gt;autoReconnect&lt;/code&gt;&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;&lt;code&gt;bufferMaxEntries&lt;/code&gt;&lt;/th&gt;
-&lt;th align=&#34;left&#34;&gt;&lt;code&gt;Description&lt;/code&gt;&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;true&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;0&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Auto reconnect but do not buffer operations, error out until server reconnect&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;true&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;-1&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Auto reconnect, buffer all operations until memory run out&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;true&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;&amp;gt; 0&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Auto reconnect, buffer all operations until the bufferMaxEntries is reached and then error out all buffered operations&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;false&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;0&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Auto reconnect is off, do not buffer operations, error out all operations&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;false&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;-1&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Auto reconnect is off, buffer all operations until memory run out&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;false&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;&amp;gt; 0&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Auto reconnect is off, buffer all operations until the bufferMaxEntries is reached and then error out all buffered operations&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-
-&lt;p&gt;So why is this the case? Well, the main reason is a combination of the asynchronous behavior of &lt;code&gt;node.js&lt;/code&gt; as well as &lt;code&gt;Replicasets&lt;/code&gt;. When you are using a single server the behavior might be a bit mystifying, but it makes sense in the context of the &lt;code&gt;Replicaset&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;Say you have a &lt;code&gt;Replicaset&lt;/code&gt; where a new primary is elected. If the driver does not buffer the operations, it will have to error out all operations until there is a new primary available in the set. This complicates people&amp;rsquo;s code as every operation could potentially fail and thus the driver a long time ago took the decision to make this transparent to the user by buffering operations until the new &lt;code&gt;primary&lt;/code&gt; is available and then replaying them. &lt;code&gt;bufferMaxEntries&lt;/code&gt; was added later to allow developers to control this behavior themselves if they wished to be instantly notified about write errors f.ex instead of letting the driver handle it.&lt;/p&gt;
-
-&lt;h2 id=&#34;the-confusion:878abfdd112f1319523c821f1974dcfd&#34;&gt;The Confusion&lt;/h2&gt;
-
-&lt;p&gt;A lot of the confusion comes from mistaking &lt;code&gt;socketTimeoutMS&lt;/code&gt; with how the async driver works. &lt;code&gt;socketTimeoutMS&lt;/code&gt; only applies to sockets if they have successfully connected to the server, but have not been in use and they reach the &lt;code&gt;socketTimeoutMS&lt;/code&gt;. In contrast, &lt;code&gt;connectionTimeoutMS&lt;/code&gt; applies only to the &lt;em&gt;initial&lt;/em&gt; server connection process timeout.  The &amp;lsquo;connectionTimeoutMS&amp;rsquo; is independent of the &lt;code&gt;socketTimeoutMS&lt;/code&gt;.&lt;/p&gt;
-
-&lt;p&gt;However, some people set &lt;code&gt;socketTimeoutMS&lt;/code&gt; expecting it to influence timeouts for operations. But as we have seen above the &lt;code&gt;autoReconnect&lt;/code&gt; and &lt;code&gt;bufferMaxEntries&lt;/code&gt; are the two settings that control that behavior.&lt;/p&gt;
-
-&lt;p&gt;It&amp;rsquo;s worth noting that you should ensure you have a reasonable &lt;code&gt;socketTimeoutMS&lt;/code&gt;. A lot of people set it way way too low and find themselves with timeouts happening all the time as operations are infrequent enough to cause constant connection closing and reconnect events.&lt;/p&gt;
-
-&lt;p&gt;The rule of thumb I always impart is:&lt;/p&gt;
-
-&lt;blockquote&gt;
-&lt;p&gt;Set &lt;em&gt;socketTimeoutMS&lt;/em&gt; to at least &lt;code&gt;2-3x&lt;/code&gt; the longest running operation in your application or the interval between operations, too ensure you don&amp;rsquo;t timeout long running operations or servers where there are big gaps of time between operations.&lt;/p&gt;
-&lt;/blockquote&gt;
-
-&lt;h2 id=&#34;what-you-are-probably-looking-for:878abfdd112f1319523c821f1974dcfd&#34;&gt;What You are Probably Looking For&lt;/h2&gt;
-
-&lt;p&gt;Most people who start changing &lt;code&gt;socketTimeoutMS&lt;/code&gt; are actually looking for the &lt;code&gt;maxTimeMS&lt;/code&gt; property to limit the time a query runs against the server before it gets aborted. Let&amp;rsquo;s look at how to apply this property on a query.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-javascript&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
-  , f = require(&#39;util&#39;).format;
-
-MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, function(err, db) {
-  var cursor = db.collection(&#39;t&#39;).find({}).maxTimeMS(1000);
-  cursor.toArray(function(err, docs) {
-    console.dir(docs)
-    db.close();
-  });
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This executes a query and sets the &lt;code&gt;maxTimeMS&lt;/code&gt; property to &lt;code&gt;1000&lt;/code&gt; milliseconds. If the query runs for longer than that time it will be aborted by the server.&lt;/p&gt;
 </description>
     </item>
     
@@ -1562,141 +1562,6 @@ MongoClient.connect(url, function(err, db) {
     </item>
     
     <item>
-      <title>Logging</title>
-      <link>/node-mongodb-native/2.0/tutorials/logging/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
-      
-      <guid>/node-mongodb-native/2.0/tutorials/logging/</guid>
-      <description>
-
-&lt;h1 id=&#34;logging:3f3af53408cff75953b33723c0b061bb&#34;&gt;Logging&lt;/h1&gt;
-
-&lt;p&gt;The driver lets you log at 3 different levels. These are &lt;code&gt;debug&lt;/code&gt;, &lt;code&gt;info&lt;/code&gt; and &lt;code&gt;error&lt;/code&gt;. By default the log level is at &lt;code&gt;error&lt;/code&gt;. You can change the level, only allow specific classes to log and provide your own logger implementation. Let&amp;rsquo;s look at how we control the log level.&lt;/p&gt;
-
-&lt;h2 id=&#34;setting-log-level:3f3af53408cff75953b33723c0b061bb&#34;&gt;Setting Log level&lt;/h2&gt;
-
-&lt;p&gt;Setting the log level is pretty easy. Let&amp;rsquo;s look at example of adjusting it for our application only logging the Db class.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
-  , Logger = require(&#39;mongodb&#39;).Logger
-  , assert = require(&#39;assert&#39;);
-
-// Connection URL
-var url = &#39;mongodb://localhost:27017/myproject&#39;;
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log(&amp;quot;Connected correctly to server&amp;quot;);
-
-  // Set debug level
-  Logger.setLevel(&#39;debug&#39;);
-
-  // Insert a single document
-  db.command({ismaster:true}, function(err, d) {
-    assert.equal(null, err);
-    db.close();
-  });
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Setting the level is as easy as calling the method &lt;code&gt;setLevel&lt;/code&gt; with the string value &lt;code&gt;debug&lt;/code&gt;, &lt;code&gt;info&lt;/code&gt; or &lt;code&gt;error&lt;/code&gt;. Log level is set globally.&lt;/p&gt;
-
-&lt;h2 id=&#34;filtering-on-specific-classes:3f3af53408cff75953b33723c0b061bb&#34;&gt;Filtering On specific classes&lt;/h2&gt;
-
-&lt;p&gt;Say you are only interested in logging a specific class. You can tell the Logger to only log specific class names. Let&amp;rsquo;s take an example Where we only log the &lt;code&gt;Db&lt;/code&gt; class.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
-  , Logger = require(&#39;mongodb&#39;).Logger
-  , assert = require(&#39;assert&#39;);
-
-// Connection URL
-var url = &#39;mongodb://localhost:27017/myproject&#39;;
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log(&amp;quot;Connected correctly to server&amp;quot;);
-
-  // Set debug level
-  Logger.setLevel(&#39;debug&#39;);
-  Logger.filter(&#39;class&#39;, [&#39;Db&#39;]);
-
-  // Insert a single document
-  db.command({ismaster:true}, function(err, d) {
-    assert.equal(null, err);
-    db.close();
-  });
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This will only log statements on the &lt;code&gt;Db&lt;/code&gt; class. The available classes in the driver are.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;Db&lt;/code&gt;: The Db instance log statements&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;Server&lt;/code&gt;: A server instance (either standalone, a mongos or replicaset member)&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ReplSet&lt;/code&gt;: Replicaset related log statements&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;Mongos&lt;/code&gt;: Mongos related log statements&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;Cursor&lt;/code&gt;: Cursor log statements&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;Pool&lt;/code&gt;: Connection Pool specific log statements&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;Connection&lt;/code&gt;: Singular connection specific log statements&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;Ping&lt;/code&gt;: Replicaset ping inquiry log statements&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;You can add your own classes to the logger if you wish by creating your own logger instances. Let&amp;rsquo;s look at a simple example on how to add our custom class to the Logger.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var Logger = require(&#39;mongodb&#39;).Logger
-  , assert = require(&#39;assert&#39;);
-
-var A = function() {
-  var logger = Logger(&#39;A&#39;, options);
-
-  this.do = function() {
-    if(logger.isInfo()) logger.info(&#39;logging A&#39;, {});
-  }
-}
-
-// Execute A
-var a = new A();
-a.do();
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Pretty simple and straightforward.&lt;/p&gt;
-
-&lt;h2 id=&#34;custom-logger:3f3af53408cff75953b33723c0b061bb&#34;&gt;Custom logger&lt;/h2&gt;
-
-&lt;p&gt;Let&amp;rsquo;s say you don&amp;rsquo;t want the log statements to go to &lt;code&gt;console.log&lt;/code&gt; but want to send them to a new location or maybe transform them before you send them on. Let&amp;rsquo;s define our custom logger.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
-  , Logger = require(&#39;mongodb&#39;).Logger
-  , assert = require(&#39;assert&#39;);
-
-// Connection URL
-var url = &#39;mongodb://localhost:27017/myproject&#39;;
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log(&amp;quot;Connected correctly to server&amp;quot;);
-
-  // Set debug level
-  Logger.setLevel(&#39;debug&#39;);
-  
-  // Set our own logger
-  Logger.setCurrentLogger(function(msg, context) {
-    console.log(msg, context);
-  });
-
-  // Insert a single document
-  db.command({ismaster:true}, function(err, d) {
-    assert.equal(null, err);
-    db.close();
-  });
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;That wraps up the Logging support in the driver.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
       <title>GridFS</title>
       <link>/node-mongodb-native/2.0/tutorials/gridfs/</link>
       <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
@@ -1865,6 +1730,141 @@ MongoClient.connect(url, function(err, db) {
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;This function moves the internal pointer to the specified position.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Logging</title>
+      <link>/node-mongodb-native/2.0/tutorials/logging/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/tutorials/logging/</guid>
+      <description>
+
+&lt;h1 id=&#34;logging:3f3af53408cff75953b33723c0b061bb&#34;&gt;Logging&lt;/h1&gt;
+
+&lt;p&gt;The driver lets you log at 3 different levels. These are &lt;code&gt;debug&lt;/code&gt;, &lt;code&gt;info&lt;/code&gt; and &lt;code&gt;error&lt;/code&gt;. By default the log level is at &lt;code&gt;error&lt;/code&gt;. You can change the level, only allow specific classes to log and provide your own logger implementation. Let&amp;rsquo;s look at how we control the log level.&lt;/p&gt;
+
+&lt;h2 id=&#34;setting-log-level:3f3af53408cff75953b33723c0b061bb&#34;&gt;Setting Log level&lt;/h2&gt;
+
+&lt;p&gt;Setting the log level is pretty easy. Let&amp;rsquo;s look at example of adjusting it for our application only logging the Db class.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , Logger = require(&#39;mongodb&#39;).Logger
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Set debug level
+  Logger.setLevel(&#39;debug&#39;);
+
+  // Insert a single document
+  db.command({ismaster:true}, function(err, d) {
+    assert.equal(null, err);
+    db.close();
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Setting the level is as easy as calling the method &lt;code&gt;setLevel&lt;/code&gt; with the string value &lt;code&gt;debug&lt;/code&gt;, &lt;code&gt;info&lt;/code&gt; or &lt;code&gt;error&lt;/code&gt;. Log level is set globally.&lt;/p&gt;
+
+&lt;h2 id=&#34;filtering-on-specific-classes:3f3af53408cff75953b33723c0b061bb&#34;&gt;Filtering On specific classes&lt;/h2&gt;
+
+&lt;p&gt;Say you are only interested in logging a specific class. You can tell the Logger to only log specific class names. Let&amp;rsquo;s take an example Where we only log the &lt;code&gt;Db&lt;/code&gt; class.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , Logger = require(&#39;mongodb&#39;).Logger
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Set debug level
+  Logger.setLevel(&#39;debug&#39;);
+  Logger.filter(&#39;class&#39;, [&#39;Db&#39;]);
+
+  // Insert a single document
+  db.command({ismaster:true}, function(err, d) {
+    assert.equal(null, err);
+    db.close();
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will only log statements on the &lt;code&gt;Db&lt;/code&gt; class. The available classes in the driver are.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;Db&lt;/code&gt;: The Db instance log statements&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Server&lt;/code&gt;: A server instance (either standalone, a mongos or replicaset member)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ReplSet&lt;/code&gt;: Replicaset related log statements&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Mongos&lt;/code&gt;: Mongos related log statements&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Cursor&lt;/code&gt;: Cursor log statements&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Pool&lt;/code&gt;: Connection Pool specific log statements&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Connection&lt;/code&gt;: Singular connection specific log statements&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Ping&lt;/code&gt;: Replicaset ping inquiry log statements&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;You can add your own classes to the logger if you wish by creating your own logger instances. Let&amp;rsquo;s look at a simple example on how to add our custom class to the Logger.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var Logger = require(&#39;mongodb&#39;).Logger
+  , assert = require(&#39;assert&#39;);
+
+var A = function() {
+  var logger = Logger(&#39;A&#39;, options);
+
+  this.do = function() {
+    if(logger.isInfo()) logger.info(&#39;logging A&#39;, {});
+  }
+}
+
+// Execute A
+var a = new A();
+a.do();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Pretty simple and straightforward.&lt;/p&gt;
+
+&lt;h2 id=&#34;custom-logger:3f3af53408cff75953b33723c0b061bb&#34;&gt;Custom logger&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s say you don&amp;rsquo;t want the log statements to go to &lt;code&gt;console.log&lt;/code&gt; but want to send them to a new location or maybe transform them before you send them on. Let&amp;rsquo;s define our custom logger.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , Logger = require(&#39;mongodb&#39;).Logger
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Set debug level
+  Logger.setLevel(&#39;debug&#39;);
+  
+  // Set our own logger
+  Logger.setCurrentLogger(function(msg, context) {
+    console.log(msg, context);
+  });
+
+  // Insert a single document
+  db.command({ismaster:true}, function(err, d) {
+    assert.equal(null, err);
+    db.close();
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;That wraps up the Logging support in the driver.&lt;/p&gt;
 </description>
     </item>
     
@@ -2096,66 +2096,6 @@ MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, function(err, db) 
 &lt;h2 id=&#34;twitter:d3f5bfe80773e9cb94f62cf6b7642307&#34;&gt;Twitter&lt;/h2&gt;
 
 &lt;p&gt;The Node.js driver doesn&amp;rsquo;t have its own Twitter handle, but feel free to tweet it&amp;rsquo;s main developer at &lt;a href=&#34;http://twitter.com/christkv&#34;&gt;@christkv&lt;/a&gt;.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Contributing</title>
-      <link>/node-mongodb-native/2.0/community/contributing/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
-      
-      <guid>/node-mongodb-native/2.0/community/contributing/</guid>
-      <description>
-
-&lt;p&gt;To contribute to the project &lt;em&gt;we encourage pull requests allowing for discussion of code changes.&lt;/em&gt;&lt;/p&gt;
-
-&lt;h2 id=&#34;contributing:cc4aac3e9be04e0413c9520f223b493c&#34;&gt;Contributing&lt;/h2&gt;
-
-&lt;p&gt;When you are ready to send us a pull request make sure you perform the following steps first.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Ensure you have at least one test case that covers the new code. If you are wondering how to do this please feel free to ask in the pull request for help.&lt;/li&gt;
-&lt;li&gt;Ensure you run the tests. &lt;code&gt;node test/runner.js -t functional&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;Squash all your commits into a single commit. &lt;code&gt;git rebase -i&lt;/code&gt;. You can force update your pull request as history for it is not important for us to keep.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;contribution-steps:cc4aac3e9be04e0413c9520f223b493c&#34;&gt;Contribution Steps&lt;/h2&gt;
-
-&lt;ol&gt;
-&lt;li&gt;Fork the Node.js driver from &lt;a href=&#34;https://github.com/mongodb/node-mongodb-native&#34;&gt;https://github.com/mongodb/node-mongodb-native&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;Create a new feature branch (&lt;code&gt;git checkout -b feature&lt;/code&gt;)&lt;/li&gt;
-&lt;li&gt;Commit your changes using git (&lt;code&gt;git commit -a -m &#39;My changes&#39;&lt;/code&gt;)&lt;/li&gt;
-&lt;li&gt;Run tests suite (ensure mongodb is in path) (&lt;code&gt;node test/runner.js -t functional&lt;/code&gt;)&lt;/li&gt;
-&lt;li&gt;Squash the commits (&lt;code&gt;git rebase -i&lt;/code&gt;)&lt;/li&gt;
-&lt;li&gt;Push the new branch to your github fork (&lt;code&gt;git push origin feature&lt;/code&gt;)&lt;/li&gt;
-&lt;li&gt;Create a new Pull Request on github.&lt;/li&gt;
-&lt;/ol&gt;
-
-&lt;h1 id=&#34;running-tests:cc4aac3e9be04e0413c9520f223b493c&#34;&gt;Running Tests&lt;/h1&gt;
-
-&lt;h2 id=&#34;clone-repository-locally:cc4aac3e9be04e0413c9520f223b493c&#34;&gt;Clone repository locally&lt;/h2&gt;
-
-&lt;pre&gt;&lt;code&gt;git clone https://github.com/mongodb/node-mongodb-native
-cd node-mongodb-native
-npm install
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;running-the-test-suite:cc4aac3e9be04e0413c9520f223b493c&#34;&gt;Running The Test Suite&lt;/h2&gt;
-
-&lt;p&gt;Make sure the &lt;em&gt;mongod&lt;/em&gt; executable is in your shell or command line &lt;em&gt;path&lt;/em&gt;. Then run the functional test suite.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;node test/runner.js -t functional
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;To run the replicaset test suite do&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;node test/runner.js -t functional -e replicaset
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;To run the sharded test suite do&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;node test/runner.js -t functional -e sharded
-&lt;/code&gt;&lt;/pre&gt;
 </description>
     </item>
     
@@ -2483,6 +2423,66 @@ stream.on(&amp;quot;end&amp;quot;, function() {});
 &lt;li&gt;&lt;a href=&#34;http://www.mongodb.org/display/DOCS/Advanced+Queries&#34;&gt;The Mongo DB wiki pages such as the advanced query link&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;https://github.com/christkv/mongodb-presentation&#34;&gt;A silly simple location based application using Express JS and Mongo DB&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Contributing</title>
+      <link>/node-mongodb-native/2.0/community/contributing/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/community/contributing/</guid>
+      <description>
+
+&lt;p&gt;To contribute to the project &lt;em&gt;we encourage pull requests allowing for discussion of code changes.&lt;/em&gt;&lt;/p&gt;
+
+&lt;h2 id=&#34;contributing:cc4aac3e9be04e0413c9520f223b493c&#34;&gt;Contributing&lt;/h2&gt;
+
+&lt;p&gt;When you are ready to send us a pull request make sure you perform the following steps first.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Ensure you have at least one test case that covers the new code. If you are wondering how to do this please feel free to ask in the pull request for help.&lt;/li&gt;
+&lt;li&gt;Ensure you run the tests. &lt;code&gt;node test/runner.js -t functional&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Squash all your commits into a single commit. &lt;code&gt;git rebase -i&lt;/code&gt;. You can force update your pull request as history for it is not important for us to keep.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;contribution-steps:cc4aac3e9be04e0413c9520f223b493c&#34;&gt;Contribution Steps&lt;/h2&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Fork the Node.js driver from &lt;a href=&#34;https://github.com/mongodb/node-mongodb-native&#34;&gt;https://github.com/mongodb/node-mongodb-native&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Create a new feature branch (&lt;code&gt;git checkout -b feature&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Commit your changes using git (&lt;code&gt;git commit -a -m &#39;My changes&#39;&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Run tests suite (ensure mongodb is in path) (&lt;code&gt;node test/runner.js -t functional&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Squash the commits (&lt;code&gt;git rebase -i&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Push the new branch to your github fork (&lt;code&gt;git push origin feature&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;Create a new Pull Request on github.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h1 id=&#34;running-tests:cc4aac3e9be04e0413c9520f223b493c&#34;&gt;Running Tests&lt;/h1&gt;
+
+&lt;h2 id=&#34;clone-repository-locally:cc4aac3e9be04e0413c9520f223b493c&#34;&gt;Clone repository locally&lt;/h2&gt;
+
+&lt;pre&gt;&lt;code&gt;git clone https://github.com/mongodb/node-mongodb-native
+cd node-mongodb-native
+npm install
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;running-the-test-suite:cc4aac3e9be04e0413c9520f223b493c&#34;&gt;Running The Test Suite&lt;/h2&gt;
+
+&lt;p&gt;Make sure the &lt;em&gt;mongod&lt;/em&gt; executable is in your shell or command line &lt;em&gt;path&lt;/em&gt;. Then run the functional test suite.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;node test/runner.js -t functional
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To run the replicaset test suite do&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;node test/runner.js -t functional -e replicaset
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To run the sharded test suite do&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;node test/runner.js -t functional -e sharded
+&lt;/code&gt;&lt;/pre&gt;
 </description>
     </item>
     

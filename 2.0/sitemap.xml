@@ -8,12 +8,12 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/tutorials/connecting/</loc>
+    <loc>/node-mongodb-native/2.0/tutorials/connection_failures/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/tutorials/connection_failures/</loc>
+    <loc>/node-mongodb-native/2.0/tutorials/connecting/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
   
@@ -38,12 +38,12 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/tutorials/logging/</loc>
+    <loc>/node-mongodb-native/2.0/tutorials/gridfs/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/tutorials/gridfs/</loc>
+    <loc>/node-mongodb-native/2.0/tutorials/logging/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
   
@@ -63,12 +63,12 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/community/contributing/</loc>
+    <loc>/node-mongodb-native/2.0/articles/node_knockout_article_1/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/articles/node_knockout_article_1/</loc>
+    <loc>/node-mongodb-native/2.0/community/contributing/</loc>
     <lastmod>2013-07-01T00:00:00+00:00</lastmod>
   </url>
   
