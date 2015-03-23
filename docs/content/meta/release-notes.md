@@ -10,9 +10,40 @@ menu:
 title: Release Notes
 weight: 50
 ---
-2.0.17
+2.0.23 2015-03-21
+-----------------
+- NODE-380 Correctly return MongoError from toError method.
+- Fixed issue where addCursorFlag was not correctly setting the flag on the command for mongodb-core.
+- NODE-388 Changed length from method to property on order.js/unordered.js bulk operations.
+- Upgraded mongodb-core to 1.1.19.
+
+2.0.22 2015-03-16
+-----------------
+- NODE-377, fixed issue where tags would correctly be checked on secondary and nearest to filter out eligible server candidates.
+- Upgraded mongodb-core to 1.1.17.
+
+2.0.21 2015-03-06
+-----------------
+- Upgraded mongodb-core to 1.1.16 making sslValidate default to true to force validation on connection unless overriden by the user.
+
+2.0.20 2015-03-04
+-----------------
+- Updated mongodb-core 1.1.15 to relax pickserver method.
+
+2.0.19 2015-03-03
+-----------------
+- NODE-376 Fixes issue - Unordered batch incorrectly tracks batch size when switching batch types (Issue #1261, https://github.com/meirgottlieb)
+- NODE-379 Fixes bug in cursor.count() that causes the result to always be zero for dotted collection names (Issue #1262, https://github.com/vsivsi)
+- Expose MongoError from mongodb-core (Issue #1260, https://github.com/tjconcept)
+
+2.0.18 2015-02-27
+-----------------
+- Bumped mongodb-core 1.1.14 to ensure passives are correctly added as secondaries.
+
+2.0.17 2015-02-27
 -----------------
 - NODE-336 Added length function to ordered and unordered bulk operations to be able know the amount of current operations in bulk.
+- Bumped mongodb-core 1.1.13 to ensure passives are correctly added as secondaries.
 
 2.0.16 2015-02-16
 -----------------
