@@ -1,3 +1,7 @@
+1.1.20 03-24-2015
+-----------------
+- NODE-395 Socket Not Closing, db.close called before full set finished initalizing leading to server connections in progress not being closed properly.
+
 1.1.19 03-21-2015
 -----------------
 - Made kerberos module ~0.0 to allow for quicker releases due to io.js of kerberos module.
