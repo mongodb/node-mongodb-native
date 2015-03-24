@@ -1,3 +1,8 @@
+2.0.24 03-24-2015
+-----------------
+- NODE-395 Socket Not Closing, db.close called before full set finished initalizing leading to server connections in progress not being closed properly.
+- Upgraded mongodb-core to 1.1.20.
+
 2.0.23 2015-03-21
 -----------------
 - NODE-380 Correctly return MongoError from toError method.
