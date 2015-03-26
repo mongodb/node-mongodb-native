@@ -1,6 +1,6 @@
 {
   "name": "mongodb",
-  "version": "2.0.24",
+  "version": "2.0.25",
   "description": "MongoDB legacy driver emulation layer on top of mongodb-core",
   "main": "index.js",
   "repository": {
@@ -13,13 +13,13 @@
     "legacy"
   ],
   "dependencies": {
-      "mongodb-core": "1.1.20"
+      "mongodb-core": "1.1.21"
     , "readable-stream": "1.0.31"
   },
   "devDependencies": {
       "integra": "0.1.8"
     , "optimist": "0.6.1"
-    , "bson": "~0.2"
+    , "bson": "~0.3"
     , "jsdoc": "3.3.0-alpha9"
     , "semver": "4.1.0"
     , "rimraf": "2.2.6"

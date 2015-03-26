@@ -1,3 +1,7 @@
+2.0.25 03-26-2015
+-----------------
+- Upgraded mongodb-core to 1.1.21, making the C++ bson code an optional dependency to the bson module.
+
 2.0.24 03-24-2015
 -----------------
 - NODE-395 Socket Not Closing, db.close called before full set finished initalizing leading to server connections in progress not being closed properly.
