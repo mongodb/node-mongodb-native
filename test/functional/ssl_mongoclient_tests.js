@@ -549,3 +549,58 @@ exports['should correctly to replicaset using ssl connect with password'] = {
   }
 }
 
+/**
+ * @ignore
+ */
+exports['should correctly connect using ssl with sslValidation turned off'] = {
+  metadata: { requires: { topology: 'ssl' } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var ReplSetManager = require('mongodb-tools').ReplSetManager
+      , MongoClient = configuration.require.MongoClient;
+
+    // All inserted docs
+    var docs = [];
+    var errs = [];
+    var insertDocs = [];
+    
+    // Read the ca
+    var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
+    var cert = fs.readFileSync(__dirname + "/ssl/client.pem");
+    var key = fs.readFileSync(__dirname + "/ssl/client.pem");
+
+    var replicasetManager = new ReplSetManager({
+        host: "server"
+      , sslOnNormalPorts: null
+      , sslPEMKeyFile: __dirname + "/ssl/server.pem"
+      , secondaries:2
+      // EnsureUp options
+      , ssl: true
+      , rejectUnauthorized:false
+      , ca:ca
+    });
+
+    replicasetManager.start({kill: true, purge:true, signal: -9}, function(err, result) {      
+      if(err != null) throw err;
+      // Connect and validate the server certificate
+      MongoClient.connect("mongodb://server:31000/test?ssl=true&replicaSet=rs&maxPoolSize=1", {
+        replSet: {
+            ssl:true
+          , sslValidate:false
+        }        
+      }, function(err, db) {
+        test.equal(null, err);
+        test.ok(db != null);
+
+        db.close();
+
+        // replicasetManager.stop(function() {
+          test.done();
+        // });
+      });
+    });
+  }
+}
+
+
