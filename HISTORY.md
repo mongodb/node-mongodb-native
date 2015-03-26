@@ -1,3 +1,7 @@
+1.1.21 03-26-2015
+-----------------
+- Updated bson module to 0.3.0 that extracted the c++ parser into bson-ext and made it an optional dependency.
+
 1.1.20 03-24-2015
 -----------------
 - NODE-395 Socket Not Closing, db.close called before full set finished initalizing leading to server connections in progress not being closed properly.
