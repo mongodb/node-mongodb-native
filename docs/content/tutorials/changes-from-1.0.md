@@ -55,7 +55,7 @@ We've added the following new methods
 * `collection.deleteOne` Delete a single document.
 * `collection.deleteMany` Delete multiple documents in one go.
 * `collection.findOneAndUpdate` Use findAndModify to update a document.
-* `collection.findOneAndRemove` Use findAndModify to remove a specific document.
+* `collection.findOneAndDelete` Use findAndModify to remove a specific document.
 * `collection.findOneAndReplace` Use findAndModify to replace a specific document.
 
 The current `insert`, `update` and `remove` methods are marked for deprecation and will be removed in a future 3.0 driver. These 3 methods now also return the full `mongodb-core` results and have had their third return value removed to ensure less compatibility problems with orchestration libraries like `async`.
