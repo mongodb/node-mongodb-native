@@ -282,9 +282,9 @@ var findDocuments = function(db, callback) {
     assert.equal(err, null);
     assert.equal(2, docs.length);
     console.log("Found the following records");
-    console.dir(docs)
+    console.dir(docs);
     callback(docs);
-  });      
+  });
 }
 ```
 
