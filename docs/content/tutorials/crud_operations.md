@@ -49,7 +49,7 @@ The first insert inserts a single document into the *inserts* collection. Notice
 
 The *insertOne* and *insertMany* methods also accepts an second argument that can be an options object. This object can have the following fields.
 
-*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
+*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 returns an acknowledgment of the write with not results `{ok:1}` and w >= 1 or w = 'majority' acknowledges the write with full write results.
 *  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
 *  `j`, (Boolean, default:false) write waits for journal sync.
 *  `serializeFunctions`, (Boolean, default:false) serialize functions on an object to mongodb, by default the driver does not serialize any functions on the passed in documents.
@@ -136,7 +136,7 @@ MongoClient.connect(url, function(err, db) {
 
 The *update* method also accepts an second argument that can be an options object. This object can have the following fields.
 
-*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
+*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 returns an acknowledgment of the write with not results `{ok:1}` and w >= 1 or w = 'majority' acknowledges the write with full write results.
 *  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
 *  `j`, (Boolean, default:false) write waits for journal sync.
 *  `multi`, (Boolean, default:false) Update one/all documents with operation.
@@ -184,7 +184,7 @@ MongoClient.connect(url, function(err, db) {
 
 The *deleteOne* and *deleteMany* methods also accepts an second argument that can be an options object. This object can have the following fields.
 
-*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
+*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 returns an acknowledgment of the write with not results `{ok:1}` and w >= 1 or w = 'majority' acknowledges the write with full write results.
 *  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
 *  `j`, (Boolean, default:false) write waits for journal sync.
 *  `single`, (Boolean, default:false) Removes the first document found.
@@ -233,7 +233,7 @@ MongoClient.connect(url, function(err, db) {
 
 The *findOneAndUpdate* method also accepts an second argument that can be an options object. This object can have the following fields.
 
-*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
+*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 returns an acknowledgment of the write with not results `{ok:1}` and w >= 1 or w = 'majority' acknowledges the write with full write results.
 *  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
 *  `j`, (Boolean, default:false) write waits for journal sync.
 *  `upsert`, (Boolean, default:false) Perform an upsert operation.
@@ -275,7 +275,7 @@ MongoClient.connect(url, function(err, db) {
 
 Just as for *findOneAndUpdate* it allows for an object of options to be passed in that can have the following fields.
 
-*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
+*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 returns an acknowledgment of the write with not results `{ok:1}` and w >= 1 or w = 'majority' acknowledges the write with full write results.
 *  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
 *  `j`, (Boolean, default:false) write waits for journal sync.
 *  `sort`, (Object, default:null) Sort for find operation.
@@ -322,7 +322,7 @@ MongoClient.connect(url, function(err, db) {
 As we can see the *bulkWrite* function takes an array of operation that can be objects of either *insertOne*, *insertMany*, *updateOne*, *updateMany*, *deleteOne* or *deleteMany*. It also takes a second parameter that takes the following options.
 
 *  `ordered`, (Boolean, default:true) Execute in order or out of order.
-*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write.
+*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 returns an acknowledgment of the write with not results `{ok:1}` and w >= 1 or w = 'majority' acknowledges the write with full write results.
 *  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
 *  `j`, (Boolean, default:false) write waits for journal sync.
 

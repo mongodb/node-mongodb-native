@@ -1,3 +1,8 @@
+2.0.26 04-07-2015
+-----------------
+- Implements the Common Index specification Standard API at https://github.com/mongodb/specifications/blob/master/source/index-management.rst.
+- NODE-408 Expose GridStore.currentChunk.chunkNumber.
+
 2.0.25 03-26-2015
 -----------------
 - Upgraded mongodb-core to 1.1.21, making the C++ bson code an optional dependency to the bson module.

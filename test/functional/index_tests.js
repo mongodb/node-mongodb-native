@@ -695,3 +695,35 @@ exports['should correctly ensureIndex for nested style index name c.d'] = {
     });
   }
 }
+
+exports['should correctly execute createIndexes'] = {
+  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl', 'heap', 'wiredtiger'] } },  
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    db.open(function(err, db) {
+      db.collection('createIndexes').createIndexes([
+        { key: {a:1} }, { key: {b:1}, name: "hello1"}
+      ], function(err, r) {
+        test.equal(null, err);
+        test.equal(3, r.numIndexesAfter)
+
+        db.collection('createIndexes').listIndexes().toArray(function(err, docs) {
+          test.equal(null, err);
+          var keys = {};
+
+          for(var i = 0; i < docs.length; i++) {
+            keys[docs[i].name] = true;
+          }
+
+          test.ok(keys['a_1']);
+          test.ok(keys['hello1']);
+
+          db.close();
+          test.done();
+        });
+      });
+    });
+  }
+}
