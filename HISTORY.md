@@ -1,3 +1,7 @@
+2.0.27 04-07-2015
+-----------------
+- NODE-410 Correctly handle issue with pause/resume in Node 0.10.x that causes exceptions when using the Node 0.12.0 style streams.
+
 2.0.26 04-07-2015
 -----------------
 - Implements the Common Index specification Standard API at https://github.com/mongodb/specifications/blob/master/source/index-management.rst.

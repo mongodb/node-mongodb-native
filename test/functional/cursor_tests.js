@@ -1648,6 +1648,7 @@ exports['immediately destroying a stream prevents the query from executing'] = {
           stream.on('data', function () {
             i++;
           })
+          
           stream.on('close', done('close'));
           stream.on('error', done('error'));
 
@@ -1655,13 +1656,16 @@ exports['immediately destroying a stream prevents the query from executing'] = {
 
           function done (e) {
             return function(err) {
-              test.equal(++doneCalled, 1);
-              test.equal(undefined, err);
-              test.strictEqual(0, i);
-              test.strictEqual(true, stream.isClosed());
-              db.close();
-              test.done();
-            }
+              ++doneCalled;
+
+              if(doneCalled == 1) {
+                test.equal(undefined, err);
+                test.strictEqual(0, i);
+                test.strictEqual(true, stream.isClosed());
+                db.close();
+                test.done();
+              }
+            }              
           }
         });
       });
@@ -1700,7 +1704,6 @@ exports['destroying a stream stops it'] = {
           var stream = collection.find().stream();
 
           test.strictEqual(false, stream.isClosed());
-          // test.strictEqual(true, stream.readable);
 
           stream.on('data', function (doc) {
             if(++i === 5) {
@@ -1718,8 +1721,6 @@ exports['destroying a stream stops it'] = {
               test.strictEqual(5, i);
               test.strictEqual(1, finished);
               test.strictEqual(true, stream.isClosed());
-              // test.strictEqual(false, stream.readable);
-              // test.strictEqual(true, stream._cursor.isClosed());
               db.close();
               test.done();
             }, 150)
