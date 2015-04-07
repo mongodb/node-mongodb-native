@@ -220,3 +220,27 @@ exports.shouldStreamDocumentsAcrossGetMoreCommandAndCountCorrectly = {
     });
   }
 }
+
+exports['should correctly error out stream'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var ObjectID = configuration.require.ObjectID
+      , Binary = configuration.require.Binary;
+
+    // Should cause error
+    configuration.newDbInstance({w:1}, {poolSize:1}).open(function(err, db) {
+      var cursor = db.collection('myCollection').find({
+        timestamp: { $ltx: '1111' } // Error in query.
+      });
+
+      cursor.on('data', function() {})
+
+      cursor.on('error', function(err) {
+        db.close();
+        test.done();
+      });
+    });
+  }
+}

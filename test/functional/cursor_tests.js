@@ -1774,13 +1774,15 @@ exports['cursor stream errors'] = {
           function done (e) {
             return function(err) {
               ++finished;
-              setTimeout(function () {
-                test.equal(5, i);
-                test.equal(1, finished);
-                test.equal(true, stream.isClosed());
-                client.close();
-                test.done();
-              }, 150)
+
+              if(finished == 2) {
+                setTimeout(function () {
+                  test.equal(5, i);
+                  test.equal(true, stream.isClosed());
+                  client.close();
+                  test.done();
+                }, 150)                
+              }
             }
           }
         });
@@ -1826,19 +1828,24 @@ exports['cursor stream errors connection force closed'] = {
             }
           });
 
-          stream.on('close', done);
+          stream.on('close', done('close'));
 
-          stream.on('error', done);
+          stream.on('error', done('error'));
 
-          function done (err) {
-            ++finished;
-            setTimeout(function () {
-              test.equal(5, i);
-              test.equal(1, finished);
-              test.equal(true, stream.isClosed());
-              client.close();
-              test.done();
-            }, 150)
+          function done (e) {
+            return function(err) {
+              ++finished;
+
+              if(finished == 2) {
+                setTimeout(function () {
+                  test.equal(5, i);
+                  test.equal(2, finished);
+                  test.equal(true, stream.isClosed());
+                  client.close();
+                  test.done();
+                }, 150)
+              }
+            }
           }
         });
       });
@@ -1937,8 +1944,7 @@ exports.shouldCloseDeadTailableCursors = {
         stream.on('data', function (doc) {});
 
         stream.on('error', function (err) {
-          // shouldn't happen
-          test.equal(null, err);
+          test.ok(err != null);
         });
 
         stream.on('close', function () {
