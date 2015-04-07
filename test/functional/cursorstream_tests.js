@@ -235,12 +235,28 @@ exports['should correctly error out stream'] = {
         timestamp: { $ltx: '1111' } // Error in query.
       });
 
-      cursor.on('data', function() {})
+      var error;
 
       cursor.on('error', function(err) {
+        // console.log("------------------------- error")
+        error = err;
+      });
+
+      cursor.on('end', function() {
+        // console.log("------------------------- end")
+        test.ok(error !== undefined && error !== null);
+
         db.close();
         test.done();
-      });
+      })
+
+      cursor.pipe(process.stdout);
+      // cursor.on('data', function() {})
+
+      // cursor.on('error', function(err) {
+      //   db.close();
+      //   test.done();
+      // });
     });
   }
 }
