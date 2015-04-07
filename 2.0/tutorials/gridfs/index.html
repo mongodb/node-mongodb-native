@@ -335,14 +335,8 @@
 
 <p>You can stream data as it comes from the database using <code>stream</code></p>
 
-<pre><code class="language-js">gs.stream([autoclose=false])
+<pre><code class="language-js">gs.stream()
 </code></pre>
-
-<p>where</p>
-
-<ul>
-<li><code>autoclose</code> If true current GridStore will be closed when EOF and &lsquo;close&rsquo; event will be fired</li>
-</ul>
 
 <p>The function returns <a href="http://nodejs.org/docs/v0.4.12/api/streams.html#readable_Stream">read stream</a> based on this GridStore file. It supports the events &lsquo;read&rsquo;, &lsquo;error&rsquo;, &lsquo;close&rsquo; and &lsquo;end&rsquo;.</p>
 

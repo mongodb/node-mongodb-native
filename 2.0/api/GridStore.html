@@ -294,6 +294,8 @@
             
                 <li data-name="Collection#createIndex"><a href="Collection.html#createIndex">createIndex</a></li>
             
+                <li data-name="Collection#createIndexes"><a href="Collection.html#createIndexes">createIndexes</a></li>
+            
                 <li data-name="Collection#deleteMany"><a href="Collection.html#deleteMany">deleteMany</a></li>
             
                 <li data-name="Collection#deleteOne"><a href="Collection.html#deleteOne">deleteOne</a></li>
@@ -305,6 +307,8 @@
                 <li data-name="Collection#dropAllIndexes"><a href="Collection.html#dropAllIndexes">dropAllIndexes</a></li>
             
                 <li data-name="Collection#dropIndex"><a href="Collection.html#dropIndex">dropIndex</a></li>
+            
+                <li data-name="Collection#dropIndexes"><a href="Collection.html#dropIndexes">dropIndexes</a></li>
             
                 <li data-name="Collection#ensureIndex"><a href="Collection.html#ensureIndex">ensureIndex</a></li>
             
@@ -1419,7 +1423,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line82">line 82</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line83">line 83</a>
         </div>
         
     </div>
@@ -2064,6 +2068,29 @@
         </tr>
 	
 	
+	
+        <tr>
+            
+                <td class="name"><code>chunkNumber</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"><p>The current chunk number the gridstore has materialized into memory</p></td>
+        </tr>
+	
+	
 	</tbody>
 </table></dl>
         
@@ -2371,7 +2398,7 @@ GridStore instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1067">line 1067</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1074">line 1074</a>
         </div>
         
     </div>
@@ -2700,7 +2727,7 @@ GridStore instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1110">line 1110</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1117">line 1117</a>
         </div>
         
     </div>
@@ -2997,7 +3024,7 @@ GridStore instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1168">line 1168</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1175">line 1175</a>
         </div>
         
     </div>
@@ -3365,7 +3392,7 @@ GridStore instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1206">line 1206</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1213">line 1213</a>
         </div>
         
     </div>
@@ -3697,7 +3724,7 @@ GridStore instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1230">line 1230</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1237">line 1237</a>
         </div>
         
     </div>
@@ -3932,7 +3959,7 @@ GridStore instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line461">line 461</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line468">line 468</a>
         </div>
         
     </div>
@@ -4084,7 +4111,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line376">line 376</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line383">line 383</a>
         </div>
         
     </div>
@@ -4242,7 +4269,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line502">line 502</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line509">line 509</a>
         </div>
         
     </div>
@@ -4394,7 +4421,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line288">line 288</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line295">line 295</a>
         </div>
         
     </div>
@@ -4465,7 +4492,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line210">line 210</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line217">line 217</a>
         </div>
         
     </div>
@@ -4577,7 +4604,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line228">line 228</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line235">line 235</a>
         </div>
         
     </div>
@@ -4735,7 +4762,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line165">line 165</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line172">line 172</a>
         </div>
         
     </div>
@@ -4992,7 +5019,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line254">line 254</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line261">line 261</a>
         </div>
         
     </div>
@@ -5171,7 +5198,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line598">line 598</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line605">line 605</a>
         </div>
         
     </div>
@@ -5408,7 +5435,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line523">line 523</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line530">line 530</a>
         </div>
         
     </div>
@@ -5616,7 +5643,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line549">line 549</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line556">line 556</a>
         </div>
         
     </div>
@@ -5794,7 +5821,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line691">line 691</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line698">line 698</a>
         </div>
         
     </div>
@@ -6092,7 +6119,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line265">line 265</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line272">line 272</a>
         </div>
         
     </div>
@@ -6292,7 +6319,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line664">line 664</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line671">line 671</a>
         </div>
         
     </div>
@@ -6524,7 +6551,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line474">line 474</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line481">line 481</a>
         </div>
         
     </div>
@@ -6695,7 +6722,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line278">line 278</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line285">line 285</a>
         </div>
         
     </div>
@@ -6925,7 +6952,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line307">line 307</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line314">line 314</a>
         </div>
         
     </div>
@@ -7180,7 +7207,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha13</a> on Mon Mar 30 2015 10:38:39 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha13</a> on Tue Apr 07 2015 14:14:43 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

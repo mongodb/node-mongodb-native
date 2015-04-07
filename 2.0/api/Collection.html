@@ -294,6 +294,8 @@
             
                 <li data-name="Collection#createIndex"><a href="Collection.html#createIndex">createIndex</a></li>
             
+                <li data-name="Collection#createIndexes"><a href="Collection.html#createIndexes">createIndexes</a></li>
+            
                 <li data-name="Collection#deleteMany"><a href="Collection.html#deleteMany">deleteMany</a></li>
             
                 <li data-name="Collection#deleteOne"><a href="Collection.html#deleteOne">deleteOne</a></li>
@@ -305,6 +307,8 @@
                 <li data-name="Collection#dropAllIndexes"><a href="Collection.html#dropAllIndexes">dropAllIndexes</a></li>
             
                 <li data-name="Collection#dropIndex"><a href="Collection.html#dropIndex">dropIndex</a></li>
+            
+                <li data-name="Collection#dropIndexes"><a href="Collection.html#dropIndexes">dropIndexes</a></li>
             
                 <li data-name="Collection#ensureIndex"><a href="Collection.html#ensureIndex">ensureIndex</a></li>
             
@@ -1637,7 +1641,7 @@ Collection instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1442">line 1442</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1482">line 1482</a>
         </div>
         
     </div>
@@ -2659,7 +2663,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1145">line 1145</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1185">line 1185</a>
         </div>
         
     </div>
@@ -3826,6 +3830,152 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             
 <dt>
     <div class="nameContainer">
+        <h4 class="name" id="createIndexes">
+            
+            createIndexes<span class="signature">(indexSpecs, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line974">line 974</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Creates multiple indexes in the collection, this method is only supported for
+MongoDB 2.6 or higher. Earlier version of MongoDB will throw a command not supported
+error. Index specifications are defined at http://docs.mongodb.org/manual/reference/command/createIndexes/.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>indexSpecs</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>An array of index specifications to be created</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Collection.html#~resultCallback">Collection~resultCallback</a></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>The command result callback</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
         <h4 class="name" id="deleteMany">
             
             deleteMany<span class="signature">(filter, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
@@ -4503,7 +4653,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1186">line 1186</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1226">line 1226</a>
         </div>
         
     </div>
@@ -5016,7 +5166,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line998">line 998</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1042">line 1042</a>
         </div>
         
     </div>
@@ -5091,6 +5241,8 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
     
+        <dt class="important tag-deprecated">Deprecated</dt><dd><ul class="dummy"><li>since version 2.0</li><ul></dd>
+    
     
     
     
@@ -5161,7 +5313,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line976">line 976</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1006">line 1006</a>
         </div>
         
     </div>
@@ -5526,6 +5678,172 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             
 <dt>
     <div class="nameContainer">
+        <h4 class="name" id="dropIndexes">
+            
+            dropIndexes<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1028">line 1028</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Drops all indexes from this collection.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Collection.html#~resultCallback">Collection~resultCallback</a></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>The command result callback</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+
+
+    
+    
+    
+        <h5>Example</h5>
+        
+
+    
+    <pre class="prettyprint"><code>// An examples showing the creation and dropping of an index
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Create a collection we want to drop later
+  var collection = db.collection('shouldCorrectlyCreateAndDropAllIndex');
+  // Insert a bunch of documents for the index
+  collection.insert([{a:1, b:1}
+    , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {w:1}, function(err, result) {
+    test.equal(null, err);
+
+    // Create an index on the a field
+    collection.ensureIndex({a:1, b:1}
+      , {unique:true, background:true, w:1}, function(err, indexName) {
+
+      // Create an additional index
+      collection.ensureIndex({c:1}
+        , {unique:true, background:true, w:1}, function(err, indexName) {
+
+        // Drop the index
+        collection.dropAllIndexes(function(err, result) {
+          test.equal(null, err);
+
+          // Verify that the index is gone
+          collection.indexInformation(function(err, indexInformation) {
+            test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
+            test.equal(null, indexInformation.a_1_b_1);
+            test.equal(null, indexInformation.c_1);
+
+            db.close();
+          });
+        });
+      });
+    });
+  });
+});</code></pre>
+    
+
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
         <h4 class="name" id="ensureIndex">
             
             ensureIndex<span class="signature">(fieldOrSpec, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
@@ -5533,7 +5851,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1078">line 1078</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1118">line 1118</a>
         </div>
         
     </div>
@@ -6149,6 +6467,8 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
     
+        <dt class="important tag-deprecated">Deprecated</dt><dd><ul class="dummy"><li>since version 2.0</li><ul></dd>
+    
     
     
     
@@ -6486,7 +6806,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1356">line 1356</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1396">line 1396</a>
         </div>
         
     </div>
@@ -7084,7 +7404,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1417">line 1417</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1457">line 1457</a>
         </div>
         
     </div>
@@ -8468,7 +8788,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1262">line 1262</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1302">line 1302</a>
         </div>
         
     </div>
@@ -8829,7 +9149,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1291">line 1291</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1331">line 1331</a>
         </div>
         
     </div>
@@ -9301,7 +9621,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1322">line 1322</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1362">line 1362</a>
         </div>
         
     </div>
@@ -9773,7 +10093,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1663">line 1663</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1703">line 1703</a>
         </div>
         
     </div>
@@ -10206,7 +10526,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1611">line 1611</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1651">line 1651</a>
         </div>
         
     </div>
@@ -10820,7 +11140,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1738">line 1738</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1778">line 1778</a>
         </div>
         
     </div>
@@ -11370,7 +11690,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1216">line 1216</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1256">line 1256</a>
         </div>
         
     </div>
@@ -11524,7 +11844,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1091">line 1091</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1131">line 1131</a>
         </div>
         
     </div>
@@ -11706,7 +12026,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1117">line 1117</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1157">line 1157</a>
         </div>
         
     </div>
@@ -12012,7 +12332,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1991">line 1991</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2031">line 2031</a>
         </div>
         
     </div>
@@ -12315,7 +12635,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1976">line 1976</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2016">line 2016</a>
         </div>
         
     </div>
@@ -14143,7 +14463,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1035">line 1035</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1074">line 1074</a>
         </div>
         
     </div>
@@ -14339,7 +14659,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1875">line 1875</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1915">line 1915</a>
         </div>
         
     </div>
@@ -15336,7 +15656,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1549">line 1549</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1589">line 1589</a>
         </div>
         
     </div>
@@ -15727,7 +16047,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1012">line 1012</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1051">line 1051</a>
         </div>
         
     </div>
@@ -17471,7 +17791,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1229">line 1229</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1269">line 1269</a>
         </div>
         
     </div>
@@ -19675,7 +19995,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1126">line 1126</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1166">line 1166</a>
         </div>
         
     </div>
@@ -19814,7 +20134,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1530">line 1530</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1570">line 1570</a>
         </div>
         
     </div>
@@ -20390,7 +20710,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha13</a> on Mon Mar 30 2015 10:38:39 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-alpha13</a> on Tue Apr 07 2015 14:14:43 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

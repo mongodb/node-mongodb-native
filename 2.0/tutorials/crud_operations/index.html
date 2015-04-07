@@ -271,7 +271,7 @@ MongoClient.connect(url, function(err, db) {
 <p>The <em>insertOne</em> and <em>insertMany</em> methods also accepts an second argument that can be an options object. This object can have the following fields.</p>
 
 <ul>
-<li><code>w</code>, {Number/String, &gt; -1 || &lsquo;majority&rsquo;} the write concern for the operation where &lt; 1 is no acknowledgment of write and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write.</li>
+<li><code>w</code>, {Number/String, &gt; -1 || &lsquo;majority&rsquo;} the write concern for the operation where &lt; 1 returns an acknowledgment of the write with not results <code>{ok:1}</code> and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write with full write results.</li>
 <li><code>wtimeout</code>, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).</li>
 <li><code>j</code>, (Boolean, default:false) write waits for journal sync.</li>
 <li><code>serializeFunctions</code>, (Boolean, default:false) serialize functions on an object to mongodb, by default the driver does not serialize any functions on the passed in documents.</li>
@@ -359,7 +359,7 @@ MongoClient.connect(url, function(err, db) {
 <p>The <em>update</em> method also accepts an second argument that can be an options object. This object can have the following fields.</p>
 
 <ul>
-<li><code>w</code>, {Number/String, &gt; -1 || &lsquo;majority&rsquo;} the write concern for the operation where &lt; 1 is no acknowledgment of write and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write.</li>
+<li><code>w</code>, {Number/String, &gt; -1 || &lsquo;majority&rsquo;} the write concern for the operation where &lt; 1 returns an acknowledgment of the write with not results <code>{ok:1}</code> and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write with full write results.</li>
 <li><code>wtimeout</code>, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).</li>
 <li><code>j</code>, (Boolean, default:false) write waits for journal sync.</li>
 <li><code>multi</code>, (Boolean, default:false) Update one/all documents with operation.</li>
@@ -409,7 +409,7 @@ MongoClient.connect(url, function(err, db) {
 <p>The <em>deleteOne</em> and <em>deleteMany</em> methods also accepts an second argument that can be an options object. This object can have the following fields.</p>
 
 <ul>
-<li><code>w</code>, {Number/String, &gt; -1 || &lsquo;majority&rsquo;} the write concern for the operation where &lt; 1 is no acknowledgment of write and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write.</li>
+<li><code>w</code>, {Number/String, &gt; -1 || &lsquo;majority&rsquo;} the write concern for the operation where &lt; 1 returns an acknowledgment of the write with not results <code>{ok:1}</code> and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write with full write results.</li>
 <li><code>wtimeout</code>, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).</li>
 <li><code>j</code>, (Boolean, default:false) write waits for journal sync.</li>
 <li><code>single</code>, (Boolean, default:false) Removes the first document found.</li>
@@ -460,7 +460,7 @@ MongoClient.connect(url, function(err, db) {
 <p>The <em>findOneAndUpdate</em> method also accepts an second argument that can be an options object. This object can have the following fields.</p>
 
 <ul>
-<li><code>w</code>, {Number/String, &gt; -1 || &lsquo;majority&rsquo;} the write concern for the operation where &lt; 1 is no acknowledgment of write and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write.</li>
+<li><code>w</code>, {Number/String, &gt; -1 || &lsquo;majority&rsquo;} the write concern for the operation where &lt; 1 returns an acknowledgment of the write with not results <code>{ok:1}</code> and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write with full write results.</li>
 <li><code>wtimeout</code>, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).</li>
 <li><code>j</code>, (Boolean, default:false) write waits for journal sync.</li>
 <li><code>upsert</code>, (Boolean, default:false) Perform an upsert operation.</li>
@@ -503,7 +503,7 @@ MongoClient.connect(url, function(err, db) {
 <p>Just as for <em>findOneAndUpdate</em> it allows for an object of options to be passed in that can have the following fields.</p>
 
 <ul>
-<li><code>w</code>, {Number/String, &gt; -1 || &lsquo;majority&rsquo;} the write concern for the operation where &lt; 1 is no acknowledgment of write and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write.</li>
+<li><code>w</code>, {Number/String, &gt; -1 || &lsquo;majority&rsquo;} the write concern for the operation where &lt; 1 returns an acknowledgment of the write with not results <code>{ok:1}</code> and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write with full write results.</li>
 <li><code>wtimeout</code>, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).</li>
 <li><code>j</code>, (Boolean, default:false) write waits for journal sync.</li>
 <li><code>sort</code>, (Object, default:null) Sort for find operation.</li>
@@ -552,7 +552,7 @@ MongoClient.connect(url, function(err, db) {
 
 <ul>
 <li><code>ordered</code>, (Boolean, default:true) Execute in order or out of order.</li>
-<li><code>w</code>, {Number/String, &gt; -1 || &lsquo;majority&rsquo;} the write concern for the operation where &lt; 1 is no acknowledgment of write and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write.</li>
+<li><code>w</code>, {Number/String, &gt; -1 || &lsquo;majority&rsquo;} the write concern for the operation where &lt; 1 returns an acknowledgment of the write with not results <code>{ok:1}</code> and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write with full write results.</li>
 <li><code>wtimeout</code>, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).</li>
 <li><code>j</code>, (Boolean, default:false) write waits for journal sync.</li>
 </ul>

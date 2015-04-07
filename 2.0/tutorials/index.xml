@@ -699,7 +699,7 @@ MongoClient.connect(url, function(err, db) {
 &lt;p&gt;The &lt;em&gt;insertOne&lt;/em&gt; and &lt;em&gt;insertMany&lt;/em&gt; methods also accepts an second argument that can be an options object. This object can have the following fields.&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 is no acknowledgment of write and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;wtimeout&lt;/code&gt;, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;j&lt;/code&gt;, (Boolean, default:false) write waits for journal sync.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;serializeFunctions&lt;/code&gt;, (Boolean, default:false) serialize functions on an object to mongodb, by default the driver does not serialize any functions on the passed in documents.&lt;/li&gt;
@@ -787,7 +787,7 @@ MongoClient.connect(url, function(err, db) {
 &lt;p&gt;The &lt;em&gt;update&lt;/em&gt; method also accepts an second argument that can be an options object. This object can have the following fields.&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 is no acknowledgment of write and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;wtimeout&lt;/code&gt;, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;j&lt;/code&gt;, (Boolean, default:false) write waits for journal sync.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;multi&lt;/code&gt;, (Boolean, default:false) Update one/all documents with operation.&lt;/li&gt;
@@ -837,7 +837,7 @@ MongoClient.connect(url, function(err, db) {
 &lt;p&gt;The &lt;em&gt;deleteOne&lt;/em&gt; and &lt;em&gt;deleteMany&lt;/em&gt; methods also accepts an second argument that can be an options object. This object can have the following fields.&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 is no acknowledgment of write and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;wtimeout&lt;/code&gt;, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;j&lt;/code&gt;, (Boolean, default:false) write waits for journal sync.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;single&lt;/code&gt;, (Boolean, default:false) Removes the first document found.&lt;/li&gt;
@@ -888,7 +888,7 @@ MongoClient.connect(url, function(err, db) {
 &lt;p&gt;The &lt;em&gt;findOneAndUpdate&lt;/em&gt; method also accepts an second argument that can be an options object. This object can have the following fields.&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 is no acknowledgment of write and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;wtimeout&lt;/code&gt;, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;j&lt;/code&gt;, (Boolean, default:false) write waits for journal sync.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;upsert&lt;/code&gt;, (Boolean, default:false) Perform an upsert operation.&lt;/li&gt;
@@ -931,7 +931,7 @@ MongoClient.connect(url, function(err, db) {
 &lt;p&gt;Just as for &lt;em&gt;findOneAndUpdate&lt;/em&gt; it allows for an object of options to be passed in that can have the following fields.&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 is no acknowledgment of write and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;wtimeout&lt;/code&gt;, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;j&lt;/code&gt;, (Boolean, default:false) write waits for journal sync.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;sort&lt;/code&gt;, (Object, default:null) Sort for find operation.&lt;/li&gt;
@@ -980,7 +980,7 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;ordered&lt;/code&gt;, (Boolean, default:true) Execute in order or out of order.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 is no acknowledgment of write and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;wtimeout&lt;/code&gt;, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;j&lt;/code&gt;, (Boolean, default:false) write waits for journal sync.&lt;/li&gt;
 &lt;/ul&gt;
@@ -1674,14 +1674,8 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;You can stream data as it comes from the database using &lt;code&gt;stream&lt;/code&gt;&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;gs.stream([autoclose=false])
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;gs.stream()
 &lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;where&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;autoclose&lt;/code&gt; If true current GridStore will be closed when EOF and &amp;lsquo;close&amp;rsquo; event will be fired&lt;/li&gt;
-&lt;/ul&gt;
 
 &lt;p&gt;The function returns &lt;a href=&#34;http://nodejs.org/docs/v0.4.12/api/streams.html#readable_Stream&#34;&gt;read stream&lt;/a&gt; based on this GridStore file. It supports the events &amp;lsquo;read&amp;rsquo;, &amp;lsquo;error&amp;rsquo;, &amp;lsquo;close&amp;rsquo; and &amp;lsquo;end&amp;rsquo;.&lt;/p&gt;
 
@@ -2134,7 +2128,7 @@ MongoClient.connect(&#39;mongodb://localhost:27017/test&#39;, function(err, db) 
 &lt;li&gt;&lt;code&gt;collection.deleteOne&lt;/code&gt; Delete a single document.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;collection.deleteMany&lt;/code&gt; Delete multiple documents in one go.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;collection.findOneAndUpdate&lt;/code&gt; Use findAndModify to update a document.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;collection.findOneAndRemove&lt;/code&gt; Use findAndModify to remove a specific document.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;collection.findOneAndDelete&lt;/code&gt; Use findAndModify to remove a specific document.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;collection.findOneAndReplace&lt;/code&gt; Use findAndModify to replace a specific document.&lt;/li&gt;
 &lt;/ul&gt;
 
