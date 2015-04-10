@@ -443,7 +443,6 @@ var debugFields = ['reconnect', 'reconnectTries', 'reconnectInterval', 'emitErro
  * @param {boolean} [options.noDelay=true] TCP Connection no delay
  * @param {number} [options.connectionTimeout=0] TCP Connection timeout setting
  * @param {number} [options.socketTimeout=0] TCP Socket timeout setting
- * @param {boolean} [options.singleBufferSerializtion=true] Serialize into single buffer, trade of peak memory for serialization speed
  * @param {boolean} [options.ssl=false] Use SSL for connection
  * @param {Buffer} [options.ca] SSL Certificate store binary buffer
  * @param {Buffer} [options.cert] SSL Certificate binary buffer

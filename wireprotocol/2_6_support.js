@@ -43,7 +43,6 @@ var executeWrite = function(topology, type, opsField, ns, ops, options, callback
   if(type == 'insert') opts.checkKeys = true;
   // Ensure we support serialization of functions
   if(options.serializeFunctions) opts.serializeFunctions = options.serializeFunctions;
-
   // Execute command
   topology.command(f("%s.$cmd", d), writeCommand, opts, callback);    
 }
