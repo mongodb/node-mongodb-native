@@ -54,7 +54,7 @@ Let's break down the connection options available.
 * `cert` **{Buffer}** SSL Certificate binary buffer
 * `key` **{Buffer}** SSL Key file binary buffer
 * `passphrase` **{string}** SSL Certificate pass phrase
-* `rejectUnauthorized` **{boolean, default:false}** Reject unauthorized server certificates
+* `rejectUnauthorized` **{boolean, default:true}** Reject unauthorized server certificates
 * `promoteLongs` **{boolean, default:true}** Convert Long values from the db into Numbers if they fit into 53 bits
 
 ## Replicaset Connection
@@ -96,7 +96,7 @@ Let's break down the connection options available.
 * `cert` **{Buffer}** SSL Certificate binary buffer
 * `key` **{Buffer}** SSL Key file binary buffer
 * `passphrase` **{string}** SSL Certificate pass phrase
-* `rejectUnauthorized` **{boolean, default:false}** Reject unauthorized server certificates
+* `rejectUnauthorized` **{boolean, default:true}** Reject unauthorized server certificates
 * `promoteLongs` **{boolean, default:true}** Convert Long values from the db into Numbers if they fit into 53 bits
 
 ## Mongos Proxy Connection
@@ -137,7 +137,7 @@ Let's break down the connection options available.
 * `cert` **{Buffer}** SSL Certificate binary buffer
 * `key` **{Buffer}** SSL Key file binary buffer
 * `passphrase` **{string}** SSL Certificate pass phrase
-* `rejectUnauthorized` **{boolean, default:false}** Reject unauthorized server certificates
+* `rejectUnauthorized` **{boolean, default:true}** Reject unauthorized server certificates
 * `promoteLongs` **{boolean, default:true}** Convert Long values from the db into Numbers if they fit into 53 bits
 
 ## Authentication using the Core Driver

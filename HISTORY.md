@@ -1,3 +1,8 @@
+1.1.22 04-10-2015
+-----------------
+- Minor refactorings in cursor code to make extending the cursor simpler.
+- NODE-417 Resolution. Improving behavior of thrown errors using Error.captureStackTrace.
+
 1.1.21 03-26-2015
 -----------------
 - Updated bson module to 0.3.0 that extracted the c++ parser into bson-ext and made it an optional dependency.
