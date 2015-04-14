@@ -108,3 +108,55 @@ exports['Should iterate cursor but readBuffered'] = {
     });
   }
 }
+
+exports['Should callback exhausted cursor with error'] = {
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
+
+  test: function(configuration, test) {
+    configuration.newTopology(function(err, server) {
+      var ns = f("%s.cursor3", configuration.db);
+      // Add event listeners
+      server.on('connect', function(_server) {
+        // Execute the write
+        _server.insert(ns, [{a:1}], {
+          writeConcern: {w:1}, ordered:true
+        }, function(err, results) {
+          test.equal(null, err);
+          test.equal(1, results.result.n);
+
+          // Execute find
+          var cursor =
+            _server.cursor(ns, { find: ns, query: {}, batchSize: 5 });
+
+          // Execute next
+          cursor.next(function(err, d) {
+            test.equal(null, err);
+            test.equal(1, d.a);
+
+            // Get the next item
+            cursor.next(function(err, d) {
+              test.equal(null, err);
+              test.equal(null, d);
+
+              cursor.next(function(err, d) {
+                test.ok(err);
+                test.equal(null, d);
+                // Destroy the server connection        
+                _server.destroy();
+                // Finish the test
+                test.done();
+              });
+            });
+          });
+        });
+      })
+
+      // Start connection
+      server.connect();
+    });
+  }
+};
