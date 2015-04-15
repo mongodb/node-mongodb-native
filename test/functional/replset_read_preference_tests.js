@@ -87,7 +87,6 @@ exports['Should Correctly Pick lowest ping time'] = {
 
         // Attempt to perform a read
         db.collection('somecollection').findOne({}, {readPreference: new ReadPreference(ReadPreference.NEAREST)}, function(err, doc) {
-          console.dir(err)
           test.equal(null, err);          
 
           // Pick the server
@@ -854,7 +853,6 @@ exports['Ensure tag read goes only to the correct servers using nearest'] = {
     // Trigger test once whole set is up
     db.on("fullsetup", function() {
       db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
-        console.dir(server.lastIsMaster())
         test.equal('ny', server.lastIsMaster().tags.loc);
         // Mark success
         success = true;
