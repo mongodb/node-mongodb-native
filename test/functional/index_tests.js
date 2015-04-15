@@ -739,6 +739,8 @@ exports.shouldCorrectlyCreateTextIndex = {
     var db = configuration.newDbInstance({w:1}, {poolSize:1});
     db.open(function(err, db) {
       db.collection('text_index').createIndex({ "$**": "text" }, { name: "TextIndex" }, function(err, r) {
+        test.equal(null, err);
+        test.equal('TextIndex', r);
         // Let's close the db
         db.close();
         test.done();
