@@ -1,3 +1,12 @@
+1.1.23 04-15-2015
+-----------------
+- Standardizing mongoErrors and its API (Issue #14)
+- Creating a new connection is slow because of 100ms setTimeout() (Issue #17, https://github.com/vkarpov15)
+- remove mkdirp and rimraf dependencies (Issue #12)
+- Updated default value of param options.rejectUnauthorized to match documentation (Issue #16)
+- ISSUE: NODE-417 Resolution. Improving behavior of thrown errors (Issue #14, https://github.com/owenallenaz)
+- Fix cursor hanging when next() called on exhausted cursor (Issue #18, https://github.com/vkarpov15)
+
 1.1.22 04-10-2015
 -----------------
 - Minor refactorings in cursor code to make extending the cursor simpler.
