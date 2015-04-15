@@ -15,66 +15,66 @@ exports.beforeTests = function(configuration, callback) {
   });
 }
 
-// ../topology_test_descriptions/rs/new_primary.json
-exports['New primary'] = {
-  metadata: {
-    requires: {
-      topology: "replicaset"
-    }
-  },
+// // ../topology_test_descriptions/rs/new_primary.json
+// exports['New primary'] = {
+//   metadata: {
+//     requires: {
+//       topology: "replicaset"
+//     }
+//   },
 
-  test: function(configuration, test) {
-    var Server = configuration.require.Server
-      , ServerManager = require('mongodb-tools').ServerManager
-      , ReplSet = configuration.require.ReplSet
-      , manager = configuration.manager;
+//   test: function(configuration, test) {
+//     var Server = configuration.require.Server
+//       , ServerManager = require('mongodb-tools').ServerManager
+//       , ReplSet = configuration.require.ReplSet
+//       , manager = configuration.manager;
 
-    // State
-    var state = {'primary':[], 'secondary': [], 'arbiter': [], 'passive': []};
-    // Get the primary server
-    manager.getServerManagerByType('primary', function(err, primaryServerManager) {
-      test.equal(null, err);
+//     // State
+//     var state = {'primary':[], 'secondary': [], 'arbiter': [], 'passive': []};
+//     // Get the primary server
+//     manager.getServerManagerByType('primary', function(err, primaryServerManager) {
+//       test.equal(null, err);
 
-      var config = [{
-          host: primaryServerManager.host
-        , port: primaryServerManager.port
-      }];
+//       var config = [{
+//           host: primaryServerManager.host
+//         , port: primaryServerManager.port
+//       }];
 
-      var options = {
-        setName: configuration.setName
-      };
+//       var options = {
+//         setName: configuration.setName
+//       };
 
-      // Attempt to connect
-      var server = new ReplSet(config, options);
-      server.on('fullsetup', function(_server) {
-        var removedServer = null;
+//       // Attempt to connect
+//       var server = new ReplSet(config, options);
+//       server.on('fullsetup', function(_server) {
+//         var removedServer = null;
 
-        // Let's listen to changes
-        server.on('left', function(_t, _server) {
-          if(_t == 'primary') {
-            test.equal(f('%s:%s', primaryServerManager.host, primaryServerManager.port), _server.name);
-          }
-        });
+//         // Let's listen to changes
+//         server.on('left', function(_t, _server) {
+//           if(_t == 'primary') {
+//             test.equal(f('%s:%s', primaryServerManager.host, primaryServerManager.port), _server.name);
+//           }
+//         });
 
-        server.on('joined', function(_t, _server) {
-          if(_t == 'primary') {
-            test.ok(server.state.primary != null);
-            test.equal(3, server.state.secondaries.length);
-            test.equal(1, server.state.arbiters.length);
-            test.equal(1, server.state.passives.length);
-            server.destroy();
-            restartAndDone(configuration, test);
-          }
-        });
+//         server.on('joined', function(_t, _server) {
+//           if(_t == 'primary') {
+//             test.ok(server.state.primary != null);
+//             test.equal(3, server.state.secondaries.length);
+//             test.equal(1, server.state.arbiters.length);
+//             test.equal(1, server.state.passives.length);
+//             server.destroy();
+//             restartAndDone(configuration, test);
+//           }
+//         });
 
-        manager.stepDown(function(err) {});
-      });
+//         manager.stepDown(function(err) {});
+//       });
 
-      // Start connection
-      server.connect();
-    });
-  }
-}
+//       // Start connection
+//       server.connect();
+//     });
+//   }
+// }
 
 // ../topology_test_descriptions/rs/discover_arbiters.json
 exports['Discover arbiters'] = {
