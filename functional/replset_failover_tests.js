@@ -9,61 +9,6 @@ var restartAndDone = function(configuration, test) {
   });
 }
 
-exports['Should correctly recover from primary stepdown'] = {
-  metadata: {
-    requires: {
-      topology: "replicaset"
-    }
-  },
-
-  test: function(configuration, test) {
-    var ReplSet = configuration.require.ReplSet;
-    // Attempt to connect
-    var server = new ReplSet([{
-        host: configuration.host
-      , port: configuration.port
-    }], { 
-      setName: configuration.setName 
-    });
-
-    // The state
-    var state = 0;
-
-    // Add event listeners
-    server.on('fullsetup', function(_server) {
-      _server.on('ha', function(e, options) {});
-      // Wait for close event due to primary stepdown
-      _server.on('joined', function(t, s) {
-        if(t == 'primary') state++;
-      });
-
-      _server.on('left', function(t, s) {
-        if(t == 'primary') state++;
-      });
-
-      // Wait fo rthe test to be done
-      var interval = setInterval(function() {
-        if(state == 2) {
-          clearInterval(interval);
-          _server.destroy();
-          // test.done();
-          restartAndDone(configuration, test);
-        }
-      }, 500);
-
-      // Wait for a second and then step down primary
-      setTimeout(function() {
-        configuration.manager.stepDown({force: true}, function(err, result) {
-          test.ok(err != null);
-        });
-      }, 1000);
-    });
-
-    // Start connection
-    server.connect();
-  }
-}
-
 exports['Should correctly recover from secondary shutdowns'] = {
   metadata: {
     requires: {
@@ -99,6 +44,7 @@ exports['Should correctly recover from secondary shutdowns'] = {
           _server.removeAllListeners('left');
           // Wait for close event due to primary stepdown
           _server.on('joined', function(t, s) {
+            console.log("===== joined " + t + " :: " + s.name)
             if('secondary' == t && left[s.name]) {
               joined++;
             }
@@ -146,6 +92,61 @@ exports['Should correctly recover from secondary shutdowns'] = {
           configuration.manager.shutdown('secondary', {signal:-3}, function(err, result) {
             if(err) console.dir(err);
           });
+        });
+      }, 1000);
+    });
+
+    // Start connection
+    server.connect();
+  }
+}
+
+exports['Should correctly recover from primary stepdown'] = {
+  metadata: {
+    requires: {
+      topology: "replicaset"
+    }
+  },
+
+  test: function(configuration, test) {
+    var ReplSet = configuration.require.ReplSet;
+    // Attempt to connect
+    var server = new ReplSet([{
+        host: configuration.host
+      , port: configuration.port
+    }], { 
+      setName: configuration.setName 
+    });
+
+    // The state
+    var state = 0;
+
+    // Add event listeners
+    server.on('fullsetup', function(_server) {
+      _server.on('ha', function(e, options) {});
+      // Wait for close event due to primary stepdown
+      _server.on('joined', function(t, s) {
+        if(t == 'primary') state++;
+      });
+
+      _server.on('left', function(t, s) {
+        if(t == 'primary') state++;
+      });
+
+      // Wait fo rthe test to be done
+      var interval = setInterval(function() {
+        if(state == 2) {
+          clearInterval(interval);
+          _server.destroy();
+          // test.done();
+          restartAndDone(configuration, test);
+        }
+      }, 500);
+
+      // Wait for a second and then step down primary
+      setTimeout(function() {
+        configuration.manager.stepDown({force: true}, function(err, result) {
+          test.ok(err != null);
         });
       }, 1000);
     });
