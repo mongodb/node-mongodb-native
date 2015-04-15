@@ -77,17 +77,24 @@ var Configuration = function(options) {
       },
 
       stop: function(callback) {
+        // console.log("============================================== STOP")
         if(skipTermination) return callback();
-        manager.stop({signal: -15}, function() {
+        // manager.stop({signal: -9}, function() {
 
-          // Print any global leaks
-          detector.detect().forEach(function (name) {
-            console.warn('found global leak: %s', name);
-          });
+        //   // Print any global leaks
+        //   detector.detect().forEach(function (name) {
+        //     console.warn('found global leak: %s', name);
+        //   });
 
-          // Finish up the tests
-          callback();
-        });
+        //   // Finish up the tests
+        //   callback();
+        // });
+        var exec = require('child_process').exec;
+        exec(f("killall %d mongod", -9), function(err, stdout, stderr) {
+          setTimeout(function() {
+            callback();
+          }, 5000);
+        });        
       },
 
       restart: function(options, callback) {
@@ -155,7 +162,6 @@ var runner = new Runner({
 var testFiles =[
     '/test/tests/functional/server_tests.js'
   , '/test/tests/functional/operations_tests.js'
-  , '/test/tests/functional/replset_failover_tests.js'
   , '/test/tests/functional/basic_auth_tests.js'
   , '/test/tests/functional/extend_pick_strategy_tests.js'
   , '/test/tests/functional/mongos_tests.js'
@@ -165,10 +171,11 @@ var testFiles =[
   , '/test/tests/functional/rs_topology_tests.js'
   , '/test/tests/functional/rs_topology_state_tests.js'
   , '/test/tests/functional/single_topology_tests.js'
-  , '/test/tests/functional/operation_example_tests.js'
   , '/test/tests/functional/cursor_tests.js'
   , '/test/tests/functional/error_tests.js'
   , '/test/tests/functional/tailable_cursor_tests.js'
+  , '/test/tests/functional/operation_example_tests.js'
+  , '/test/tests/functional/replset_failover_tests.js'
 ]
 
 // Add all the tests to run
