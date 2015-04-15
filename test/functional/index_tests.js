@@ -727,3 +727,22 @@ exports['should correctly execute createIndexes'] = {
     });
   }
 }
+
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyCreateTextIndex = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    db.open(function(err, db) {
+      db.collection('text_index').createIndex({ "$**": "text" }, { name: "TextIndex" }, function(err, r) {
+        // Let's close the db
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
