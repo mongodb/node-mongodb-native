@@ -1,3 +1,7 @@
+2.0.28
+-----------------
+- Bumped mongodb-core to 1.2.23.
+
 2.0.27 04-07-2015
 -----------------
 - NODE-410 Correctly handle issue with pause/resume in Node 0.10.x that causes exceptions when using the Node 0.12.0 style streams.
