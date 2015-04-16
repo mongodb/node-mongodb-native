@@ -7865,8 +7865,8 @@ exports.shouldStreamDocumentsUsingTheReadStreamDestroyFunction = {
 /**
  * Example of a simple ordered insert/update/upsert/remove ordered collection
  *
- * @example-class OrderedBulkOperation
- * @example-method update
+ * @example-class Collection
+ * @example-method initializeOrderedBulkOp
  * @ignore
  */
 exports['Should correctly execute ordered batch with no errors using write commands'] = {
@@ -7924,8 +7924,8 @@ exports['Should correctly execute ordered batch with no errors using write comma
  * Example of a simple ordered insert/update/upsert/remove ordered collection
  *
  *
- * @example-class UnorderedBulkOperation
- * @example-method update
+ * @example-class Collection
+ * @example-method initializeUnorderedBulkOp
  * @ignore
  */
 exports['Should correctly execute unordered batch with no errors'] = {
