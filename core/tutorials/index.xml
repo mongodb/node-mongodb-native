@@ -63,7 +63,7 @@ server.connect();
 &lt;li&gt;&lt;code&gt;cert&lt;/code&gt; &lt;strong&gt;{Buffer}&lt;/strong&gt; SSL Certificate binary buffer&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;key&lt;/code&gt; &lt;strong&gt;{Buffer}&lt;/strong&gt; SSL Key file binary buffer&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;passphrase&lt;/code&gt; &lt;strong&gt;{string}&lt;/strong&gt; SSL Certificate pass phrase&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;rejectUnauthorized&lt;/code&gt; &lt;strong&gt;{boolean, default:false}&lt;/strong&gt; Reject unauthorized server certificates&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;rejectUnauthorized&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; Reject unauthorized server certificates&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;promoteLongs&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; Convert Long values from the db into Numbers if they fit into 53 bits&lt;/li&gt;
 &lt;/ul&gt;
 
@@ -106,7 +106,7 @@ server.connect();
 &lt;li&gt;&lt;code&gt;cert&lt;/code&gt; &lt;strong&gt;{Buffer}&lt;/strong&gt; SSL Certificate binary buffer&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;key&lt;/code&gt; &lt;strong&gt;{Buffer}&lt;/strong&gt; SSL Key file binary buffer&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;passphrase&lt;/code&gt; &lt;strong&gt;{string}&lt;/strong&gt; SSL Certificate pass phrase&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;rejectUnauthorized&lt;/code&gt; &lt;strong&gt;{boolean, default:false}&lt;/strong&gt; Reject unauthorized server certificates&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;rejectUnauthorized&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; Reject unauthorized server certificates&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;promoteLongs&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; Convert Long values from the db into Numbers if they fit into 53 bits&lt;/li&gt;
 &lt;/ul&gt;
 
@@ -148,7 +148,7 @@ server.connect();
 &lt;li&gt;&lt;code&gt;cert&lt;/code&gt; &lt;strong&gt;{Buffer}&lt;/strong&gt; SSL Certificate binary buffer&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;key&lt;/code&gt; &lt;strong&gt;{Buffer}&lt;/strong&gt; SSL Key file binary buffer&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;passphrase&lt;/code&gt; &lt;strong&gt;{string}&lt;/strong&gt; SSL Certificate pass phrase&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;rejectUnauthorized&lt;/code&gt; &lt;strong&gt;{boolean, default:false}&lt;/strong&gt; Reject unauthorized server certificates&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;rejectUnauthorized&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; Reject unauthorized server certificates&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;promoteLongs&lt;/code&gt; &lt;strong&gt;{boolean, default:true}&lt;/strong&gt; Convert Long values from the db into Numbers if they fit into 53 bits&lt;/li&gt;
 &lt;/ul&gt;
 

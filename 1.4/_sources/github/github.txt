@@ -191,9 +191,9 @@ Content Management Systems
          * - **Clone Url**
            - https://github.com/cliftonc/calipso.git
          * - **Forks**
-           - 287
+           - 286
          * - **Watchers**
-           - 1559
+           - 1560
 
 Grid FS libraries or tools
 --------------------------
@@ -291,7 +291,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 17
          * - **Watchers**
-           - 138
+           - 143
 
 .. topic:: node-mongodb-wrapper
 
@@ -386,7 +386,7 @@ REST api's around MongoDB or resource based libraries
          * - **Forks**
            - 112
          * - **Watchers**
-           - 341
+           - 342
 
 .. topic:: lazyBum
 
@@ -732,7 +732,7 @@ Libraries or Applications for analytics
          * - **Forks**
            - 402
          * - **Watchers**
-           - 3516
+           - 3520
 
 Libraries for the connect middleware
 ------------------------------------
@@ -779,9 +779,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 192
+           - 193
          * - **Watchers**
-           - 700
+           - 703
 
 Libraries or applications for continous integration
 ---------------------------------------------------
@@ -795,9 +795,9 @@ Libraries or applications for continous integration
          :header-rows: 0
 
          * - **Activity Level**
-           - .. image:: ../static/nonactive.png
+           - .. image:: ../static/active.png
          * - **Last push**
-           - 17:19:13 on 5/10/2014
+           - 13:37:8 on 14/3/2015
          * - **Homepage**
            - http://http://ryankee.github.com/concrete
          * - **Url**
@@ -805,9 +805,9 @@ Libraries or applications for continous integration
          * - **Clone Url**
            - https://github.com/ryankee/concrete.git
          * - **Forks**
-           - 68
+           - 70
          * - **Watchers**
-           - 472
+           - 473
 
 Exampe applications
 -------------------
@@ -831,9 +831,9 @@ Exampe applications
          * - **Clone Url**
            - https://github.com/gotik/nodejs-blackboard.git
          * - **Forks**
-           - 17
+           - 18
          * - **Watchers**
-           - 35
+           - 36
 
 .. topic:: node-mongo-cms
 
