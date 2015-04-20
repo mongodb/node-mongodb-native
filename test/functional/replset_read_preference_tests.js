@@ -21,7 +21,7 @@ exports.beforeTests = function(configuration, callback) {
 
 exports['Should Correctly Pick lowest ping time'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -87,7 +87,7 @@ exports['Should Correctly Pick lowest ping time'] = {
 
         // Attempt to perform a read
         db.collection('somecollection').findOne({}, {readPreference: new ReadPreference(ReadPreference.NEAREST)}, function(err, doc) {
-          test.equal(null, err);          
+          test.equal(null, err);
 
           // Pick the server
           db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
@@ -96,7 +96,7 @@ exports['Should Correctly Pick lowest ping time'] = {
 
           // Attempt to perform a read
           db.collection('somecollection').findOne({}, {readPreference: new ReadPreference(ReadPreference.SECONDARY)}, function(err, doc) {
-            test.equal(null, err);          
+            test.equal(null, err);
 
             // Pick the server
             db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
@@ -106,7 +106,7 @@ exports['Should Correctly Pick lowest ping time'] = {
 
             // Attempt to perform a read
             db.collection('somecollection').findOne({}, {readPreference: new ReadPreference(ReadPreference.SECONDARY_PREFERRED)}, function(err, doc) {
-              test.equal(null, err);          
+              test.equal(null, err);
 
               // Pick the server
               db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
@@ -115,12 +115,12 @@ exports['Should Correctly Pick lowest ping time'] = {
 
               // Attempt to perform a read
               db.collection('somecollection').findOne({}, {readPreference: new ReadPreference(ReadPreference.PRIMARY)}, function(err, doc) {
-                test.equal(null, err);          
+                test.equal(null, err);
 
                 // Close db
                 db.close();
-                restartAndDone(configuration, test);           
-              });                
+                restartAndDone(configuration, test);
+              });
             });
           });
         });
@@ -135,7 +135,7 @@ exports['Should Correctly Pick lowest ping time'] = {
 
 exports['Should Correctly vary read server when using readpreference NEAREST'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -207,7 +207,7 @@ exports['Should Correctly vary read server when using readpreference NEAREST'] =
  */
 exports.shouldCorrectlyReadFromGridstoreWithSecondaryReadPreference = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -253,7 +253,7 @@ exports.shouldCorrectlyReadFromGridstoreWithSecondaryReadPreference = {
           // Write the file using write
           gridStore.write(data, function(err, doc) {
             test.equal(null, err);
-        
+
             gridStore.close(function(err, doc) {
               test.equal(null, err);
 
@@ -293,7 +293,7 @@ exports.shouldCorrectlyReadFromGridstoreWithSecondaryReadPreference = {
  */
 exports['shouldStillQuerySecondaryWhenNoPrimaryAvailable'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -305,7 +305,7 @@ exports['shouldStillQuerySecondaryWhenNoPrimaryAvailable'] = {
       , configuration.port, configuration.port + 1, configuration.port + 1, configuration.replicasetName);
 
     // Connect using the MongoClient
-    MongoClient.connect(url, { 
+    MongoClient.connect(url, {
         replSet: {
           //set replset check interval to be much smaller than our querying interval
           haInterval: 50,
@@ -319,7 +319,7 @@ exports['shouldStillQuerySecondaryWhenNoPrimaryAvailable'] = {
 
         db.collection("replicaset_readpref_test").insert({testfield:123}, function(err, result) {
           test.equal(null, err);
-          
+
           db.collection("replicaset_readpref_test").findOne({}, function(err, result){
             test.equal(null, err);
             test.equal(result.testfield, 123);
@@ -361,7 +361,7 @@ exports['shouldStillQuerySecondaryWhenNoPrimaryAvailable'] = {
  */
 exports['Connection to replicaset with primary read preference'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -417,7 +417,7 @@ exports['Connection to replicaset with primary read preference'] = {
  */
 exports['Should Set read preference at collection level using collection method'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -479,7 +479,7 @@ exports['Should Set read preference at collection level using collection method'
  */
 exports['Should Set read preference at collection level using createCollection method'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -512,13 +512,13 @@ exports['Should Set read preference at collection level using createCollection m
 
         // Grab the collection
         db.createCollection("read_preferences_all_levels_0", {readPreference:ReadPreference.SECONDARY}, function(err, collection) {
-          test.equal(null, err);    
+          test.equal(null, err);
 
           // Pick the server
           db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
             test.ok(secondaries[server.name] != null);
           });
-          
+
           var cursor = collection.find();
           // Attempt to read (should fail due to the server not being a primary);
           cursor.toArray(function(err, items) {
@@ -543,7 +543,7 @@ exports['Should Set read preference at collection level using createCollection m
  */
 exports['Should Set read preference at cursor level'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -604,7 +604,7 @@ exports['Should Set read preference at cursor level'] = {
  */
 exports['Attempt to change read preference at cursor level after object read legacy'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -659,7 +659,7 @@ exports['Attempt to change read preference at cursor level after object read leg
  */
 exports['Set read preference at db level'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -723,7 +723,7 @@ exports['Set read preference at db level'] = {
  */
 exports['Set read preference at collection level using collection method'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -783,7 +783,7 @@ exports['Set read preference at collection level using collection method'] = {
  */
 exports['Ensure tag read goes only to the correct server'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -828,7 +828,7 @@ exports['Ensure tag read goes only to the correct server'] = {
  */
 exports['Ensure tag read goes only to the correct servers using nearest'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -860,6 +860,93 @@ exports['Ensure tag read goes only to the correct servers using nearest'] = {
 
       db.db('local').collection('system.replset').find().toArray(function(err, doc) {
         test.ok(success);
+        db.close();
+        restartAndDone(configuration, test);
+      });
+    });
+
+    db.open(function(err, p_db) {
+      db = p_db;
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['Ensure tag read goes only to the correct server'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var mongo = configuration.require
+      , MongoClient = mongo.MongoClient
+      , ReadPreference = mongo.ReadPreference
+      , ReplSet = mongo.ReplSet
+      , Server = mongo.Server
+      , Db = mongo.Db;
+
+    // Replica configuration
+    var replSet = new ReplSet( [
+        new Server(configuration.host, configuration.port),
+        new Server(configuration.host, configuration.port + 1),
+        new Server(configuration.host, configuration.port + 2)
+      ],
+      {rs_name:configuration.replicasetName, debug:true}
+    );
+
+    // Open the database
+    var db = new Db('local', replSet, {w:0, readPreference: new ReadPreference(ReadPreference.SECONDARY, {"loc":"ny"})});
+    // Trigger test once whole set is up
+    db.on("fullsetup", function() {
+      db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+        test.equal('secondary', readPreference.preference);
+        test.equal('ny', readPreference.tags['loc']);
+      });
+
+      db.db('local').collection('system.replset').find().toArray(function(err, doc) {
+        db.close();
+        restartAndDone(configuration, test);
+      });
+    });
+
+    db.open(function(err, p_db) {
+      db = p_db;
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['Always uses primary readPreference for findAndModify'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var mongo = configuration.require
+      , MongoClient = mongo.MongoClient
+      , ReadPreference = mongo.ReadPreference
+      , ReplSet = mongo.ReplSet
+      , Server = mongo.Server
+      , Db = mongo.Db;
+
+    // Replica configuration
+    var replSet = new ReplSet( [
+        new Server(configuration.host, configuration.port),
+        new Server(configuration.host, configuration.port + 1),
+        new Server(configuration.host, configuration.port + 2)
+      ],
+      {rs_name:configuration.replicasetName, debug:true}
+    );
+
+    // Open the database
+    var db = new Db('test', replSet, {w:0, readPreference: new ReadPreference(ReadPreference.SECONDARY_PREFERRED)});
+    var success = false;
+    // Trigger test once whole set is up
+    db.on("fullsetup", function() {
+      db.collection('test').findAndModify({}, {}, { upsert: false }, function(err) {
+        test.equal(null, err);
         db.close();
         restartAndDone(configuration, test);
       });
