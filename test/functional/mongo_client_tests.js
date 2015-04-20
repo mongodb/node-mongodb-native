@@ -287,3 +287,23 @@ exports['Should correctly set MaxPoolSize on sharded server'] = {
     });
   }
 }
+
+/**
+ * @ignore
+ */
+exports['Should fail due to wrong uri user:password@localhost'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+
+    try {
+      MongoClient.connect('user:password@localhost:27017/test', function(err, db) {
+        db.close();
+      });      
+    } catch(err) {
+      test.done();
+    }
+  }
+}
