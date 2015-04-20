@@ -12,5 +12,3 @@ generate_docs:
 	$(JSDOC) -c conf.json -t docs/jsdoc-template/ -d ./public/api
 	cp -R ./public/api/scripts ./public/.
 	cp -R ./public/api/styles ./public/.
-
-.PHONY: total
