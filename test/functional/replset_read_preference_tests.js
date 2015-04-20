@@ -874,51 +874,6 @@ exports['Ensure tag read goes only to the correct servers using nearest'] = {
 /**
  * @ignore
  */
-exports['Ensure tag read goes only to the correct server'] = {
-  metadata: { requires: { topology: 'replicaset' } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var mongo = configuration.require
-      , MongoClient = mongo.MongoClient
-      , ReadPreference = mongo.ReadPreference
-      , ReplSet = mongo.ReplSet
-      , Server = mongo.Server
-      , Db = mongo.Db;
-
-    // Replica configuration
-    var replSet = new ReplSet( [
-        new Server(configuration.host, configuration.port),
-        new Server(configuration.host, configuration.port + 1),
-        new Server(configuration.host, configuration.port + 2)
-      ],
-      {rs_name:configuration.replicasetName, debug:true}
-    );
-
-    // Open the database
-    var db = new Db('local', replSet, {w:0, readPreference: new ReadPreference(ReadPreference.SECONDARY, {"loc":"ny"})});
-    // Trigger test once whole set is up
-    db.on("fullsetup", function() {
-      db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
-        test.equal('secondary', readPreference.preference);
-        test.equal('ny', readPreference.tags['loc']);
-      });
-
-      db.db('local').collection('system.replset').find().toArray(function(err, doc) {
-        db.close();
-        restartAndDone(configuration, test);
-      });
-    });
-
-    db.open(function(err, p_db) {
-      db = p_db;
-    });
-  }
-}
-
-/**
- * @ignore
- */
 exports['Always uses primary readPreference for findAndModify'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
