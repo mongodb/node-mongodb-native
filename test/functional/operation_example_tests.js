@@ -42,7 +42,7 @@ exports.aggregationExample1 = {
       // Create a collection
       var collection = db.collection('aggregationExample1');
       // Insert the docs
-      collection.insert(docs, {w: 1}, function(err, result) {
+      collection.insertMany(docs, {w: 1}, function(err, result) {
 
         // Execute aggregate, notice the pipeline is expressed as an Array
         collection.aggregate([
@@ -105,7 +105,7 @@ exports.aggregationExample2 = {
       // Create a collection
       var collection = db.collection('aggregationExample2');
       // Insert the docs
-      collection.insert(docs, {w: 1}, function(err, result) {
+      collection.insertMany(docs, {w: 1}, function(err, result) {
 
         // Execute aggregate, notice the pipeline is expressed as an Array
         var cursor = collection.aggregate([
@@ -167,7 +167,7 @@ exports['Aggregation Cursor toArray Test'] = {
       // Create a collection
       var collection = db.collection('aggregation_toArray_example');
       // Insert the docs
-      collection.insert(docs, {w: 1}, function(err, result) {
+      collection.insertMany(docs, {w: 1}, function(err, result) {
 
         // Execute aggregate, notice the pipeline is expressed as an Array
         var cursor = collection.aggregate([
@@ -229,7 +229,7 @@ exports['Aggregation Cursor toArray Test'] = {
       // Create a collection
       var collection = db.collection('aggregation_next_example');
       // Insert the docs
-      collection.insert(docs, {w: 1}, function(err, result) {
+      collection.insertMany(docs, {w: 1}, function(err, result) {
 
         // Execute aggregate, notice the pipeline is expressed as an Array
         var cursor = collection.aggregate([
@@ -290,7 +290,7 @@ exports['Aggregation Cursor each Test'] = {
       // Create a collection
       var collection = db.collection('aggregation_each_example');
       // Insert the docs
-      collection.insert(docs, {w: 1}, function(err, result) {
+      collection.insertMany(docs, {w: 1}, function(err, result) {
 
         // Execute aggregate, notice the pipeline is expressed as an Array
         var cursor = collection.aggregate([
@@ -354,7 +354,7 @@ exports['Aggregation Cursor forEach Test'] = {
       // Create a collection
       var collection = db.collection('aggregation_forEach_example');
       // Insert the docs
-      collection.insert(docs, {w: 1}, function(err, result) {
+      collection.insertMany(docs, {w: 1}, function(err, result) {
 
         // Execute aggregate, notice the pipeline is expressed as an Array
         var cursor = collection.aggregate([
@@ -421,7 +421,7 @@ exports.aggregationExample3 = {
       // Create a collection
       var collection = db.collection('aggregationExample3');
       // Insert the docs
-      collection.insert(docs, {w: 1}, function(err, result) {
+      collection.insertMany(docs, {w: 1}, function(err, result) {
 
         // Execute aggregate, notice the pipeline is expressed as an Array
         var cursor = collection.aggregate([
@@ -477,7 +477,7 @@ exports.shouldCorrectlyDoSimpleCountExamples = {
       // Crete the collection for the distinct example
       var collection = db.collection('countExample1');
       // Insert documents to perform distinct against
-      collection.insert([{a:1}, {a:2}
+      collection.insertMany([{a:1}, {a:2}
         , {a:3}, {a:4, b:1}], {w: 1}, function(err, ids) {
 
         // Perform a total count command
@@ -524,7 +524,7 @@ exports.shouldCreateComplexIndexOnTwoFields = {
       // Create a collection we want to drop later
       var collection = db.collection('createIndexExample1');
       // Insert a bunch of documents for the index
-      collection.insert([{a:1, b:1}
+      collection.insertMany([{a:1, b:1}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
@@ -578,7 +578,7 @@ exports.shouldCreateASimpleIndexOnASingleField = {
       // Create a collection we want to drop later
       var collection = db.collection('createIndexExample2');
       // Insert a bunch of documents for the index
-      collection.insert([{a:1}, {a:2}, {a:3}, {a:4}], {w:1}, function(err, result) {
+      collection.insertMany([{a:1}, {a:2}, {a:3}, {a:4}], {w:1}, function(err, result) {
         test.equal(null, err);
 
         // Create an index on the a field
@@ -625,7 +625,7 @@ exports.createIndexExample3 = {
       // Create a collection we want to drop later
       var collection = db.collection('createIndexExample3');
       // Insert a bunch of documents for the index
-      collection.insert([{a:1, b:1}
+      collection.insertMany([{a:1, b:1}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
         test.equal(null, err);
 
@@ -681,7 +681,7 @@ exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilter = {
       var collection = db.collection('distinctExample1');
 
       // Insert documents to perform distinct against
-      collection.insert([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
+      collection.insertMany([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
         {a:2, b:{c:'a'}}, {a:3}, {a:3}], configuration.writeConcernMax(), function(err, ids) {
 
         // Peform a distinct query against the a field
@@ -728,7 +728,7 @@ exports.shouldCorrectlyHandleDistinctIndexes = {
       var collection = db.collection('distinctExample2');
 
       // Insert documents to perform distinct against
-      collection.insert([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
+      collection.insertMany([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
         {a:2, b:{c:'a'}}, {a:3}, {a:3}, {a:5, c:1}], configuration.writeConcernMax(), function(err, ids) {
 
         // Peform a distinct query with a filter against the documents
@@ -860,7 +860,7 @@ exports.shouldCorrectlyCreateAndDropIndex = {
     // BEGIN
       var collection = db.collection('dropIndexExample1');
       // Insert a bunch of documents for the index
-      collection.insert([{a:1, b:1}
+      collection.insertMany([{a:1, b:1}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
         test.equal(null, err);
 
@@ -911,7 +911,7 @@ exports.shouldCreateComplexEnsureIndex = {
     // BEGIN
       var collection = db.collection('ensureIndexExample1');
       // Insert a bunch of documents for the index
-      collection.insert([{a:1, b:1}
+      collection.insertMany([{a:1, b:1}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
@@ -963,7 +963,7 @@ exports.ensureIndexExampleWithCompountIndex = {
     // BEGIN
       var collection = db.collection('ensureIndexExample2');
       // Insert a bunch of documents for the index
-      collection.insert([{a:1, b:1}
+      collection.insertMany([{a:1, b:1}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
         test.equal(null, err);
 
@@ -1019,7 +1019,7 @@ exports.shouldPeformASimpleQuery = {
       var collection = db.collection('simple_query');
 
       // Insert a bunch of documents for the testing
-      collection.insert([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, result) {
+      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         // Peform a simple find and return all the documents
@@ -1061,7 +1061,7 @@ exports.shouldPeformASimpleExplainQuery = {
       // Create a collection we want to drop later
       var collection = db.collection('simple_explain_query');
       // Insert a bunch of documents for the testing
-      collection.insert([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, result) {
+      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         // Peform a simple find and return all the documents
@@ -1103,7 +1103,7 @@ exports.shouldPeformASimpleLimitSkipQuery = {
       // Create a collection we want to drop later
       var collection = db.collection('simple_limit_skip_query');
       // Insert a bunch of documents for the testing
-      collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], configuration.writeConcernMax(), function(err, result) {
+      collection.insertMany([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         // Peform a simple find and return all the documents
@@ -1151,7 +1151,7 @@ exports.shouldPerformSimpleFindAndModifyOperations = {
       var collection = db.collection('simple_find_and_modify_operations_');
 
       // Insert some test documentations
-      collection.insert([{a:1}, {b:1}, {c:1}], configuration.writeConcernMax(), function(err, result) {
+      collection.insertMany([{a:1}, {b:1}, {c:1}], configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         // Simple findAndModify command returning the new document
@@ -1215,7 +1215,7 @@ exports.shouldPerformSimpleFindAndRemove = {
       // Create a collection we want to drop later
       var collection = db.collection('simple_find_and_modify_operations_2');
       // Insert some test documentations
-      collection.insert([{a:1}, {b:1, d:1}, {c:1}], configuration.writeConcernMax(), function(err, result) {
+      collection.insertMany([{a:1}, {b:1, d:1}, {c:1}], configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         // Simple findAndModify command returning the old document and
@@ -1265,7 +1265,7 @@ exports.shouldPeformASimpleLimitSkipFindOneQuery = {
       // Create a collection we want to drop later
       var collection = db.collection('simple_limit_skip_find_one_query');
       // Insert a bunch of documents for the testing
-      collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], configuration.writeConcernMax(), function(err, result) {
+      collection.insertMany([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         // Peform a simple find and return all the documents
@@ -1312,7 +1312,7 @@ exports.shouldCorrectlyPerformSimpleGeoNearCommand = {
       collection.ensureIndex({loc:"2d"}, function(err, result) {
 
         // Save a new location tagged document
-        collection.insert([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], configuration.writeConcernMax(), function(err, result) {
+        collection.insertMany([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], configuration.writeConcernMax(), function(err, result) {
          
           // Use geoNear command to find document
           collection.geoNear(50, 50, {query:{a:1}, num:1}, function(err, docs) {
@@ -1357,7 +1357,7 @@ exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommand = {
       collection.ensureIndex({loc: "geoHaystack", type: 1}, {bucketSize: 1}, function(err, result) {
 
         // Save a new location tagged document
-        collection.insert([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], configuration.writeConcernMax(), function(err, result) {
+        collection.insertMany([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], configuration.writeConcernMax(), function(err, result) {
          
           // Use geoNear command to find document
           collection.geoHaystackSearch(50, 50, {search:{a:1}, limit:1, maxDistance:100}, function(err, docs) {
@@ -1404,7 +1404,7 @@ exports.shouldCorrectlyExecuteGroupFunction = {
         test.deepEqual([], results);
 
         // Trigger some inserts on the collection
-        collection.insert([{'a':2}, {'b':5}, {'a':1}], {w:1}, function(err, ids) {
+        collection.insertMany([{'a':2}, {'b':5}, {'a':1}], {w:1}, function(err, ids) {
 
           // Perform a group count
           collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
@@ -1425,7 +1425,7 @@ exports.shouldCorrectlyExecuteGroupFunction = {
                   test.equal(1, results[0].count);
 
                   // Insert some more test data
-                  collection.insert([{'a':2}, {'b':3}], {w:1}, function(err, ids) {
+                  collection.insertMany([{'a':2}, {'b':3}], {w:1}, function(err, ids) {
 
                     // Do a Group by field a
                     collection.group(['a'], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
@@ -1525,7 +1525,7 @@ exports.shouldPerformSimpleMapReduceFunctions = {
       var collection = db.collection('test_map_reduce_functions');
 
       // Insert some documents to perform map reduce over
-      collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
+      collection.insertMany([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
 
         // Map function
         var map = function() { emit(this.user_id, 1); };
@@ -1582,7 +1582,7 @@ exports.shouldPerformMapReduceFunctionInline = {
       var collection = db.collection('test_map_reduce_functions_inline');
 
       // Insert some test documents
-      collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
+      collection.insertMany([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
 
         // Map function
         var map = function() { emit(this.user_id, 1); };
@@ -1634,7 +1634,7 @@ exports.shouldPerformMapReduceWithContext = {
       var collection = db.collection('test_map_reduce_functions_scope');
 
       // Insert some test documents
-      collection.insert([{'user_id':1, 'timestamp':new Date()}
+      collection.insertMany([{'user_id':1, 'timestamp':new Date()}
         , {'user_id':2, 'timestamp':new Date()}], {w:1}, function(err, r) {
 
         // Map function
@@ -1719,7 +1719,7 @@ exports.shouldPerformMapReduceInContextObjects = {
       var collection = db.collection('test_map_reduce_functions_scope_objects');
 
       // Insert some test documents
-      collection.insert([{'user_id':1, 'timestamp':new Date()}
+      collection.insertMany([{'user_id':1, 'timestamp':new Date()}
         , {'user_id':2, 'timestamp':new Date()}], {w:1}, function(err, r) {
 
         // Map function
@@ -1898,7 +1898,7 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = {
       // Create a collection we want to drop later
       var collection = db.collection('more_index_information_test_2');
       // Insert a bunch of documents for the index
-      collection.insert([{a:1, b:1}
+      collection.insertMany([{a:1, b:1}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
@@ -1952,7 +1952,7 @@ exports.shouldCorrectlyShowAllTheResultsFromIndexInformation = {
       // Create a collection we want to drop later
       var collection = db.collection('more_index_information_test_3');
       // Insert a bunch of documents for the index
-      collection.insert([{a:1, b:1}
+      collection.insertMany([{a:1, b:1}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
         test.equal(null, err);
 
@@ -2005,7 +2005,7 @@ exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafe = {
     // BEGIN
       var collection = db.collection("simple_document_insert_collection_no_safe");
       // Insert a single document
-      collection.insert({hello:'world_no_safe'});
+      collection.insertOne({hello:'world_no_safe'});
 
       // Wait for a second before finishing up, to ensure we have written the item to disk
       setTimeout(function() {
@@ -2048,7 +2048,7 @@ exports.shouldCorrectlyPerformABatchDocumentInsertSafe = {
       // Fetch a collection to insert document into
       var collection = db.collection("batch_document_insert_collection_safe");
       // Insert a single document
-      collection.insert([{hello:'world_safe1'}
+      collection.insertMany([{hello:'world_safe1'}
         , {hello:'world_safe2'}], configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
@@ -2093,7 +2093,7 @@ exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafe = {
       var o = configuration.writeConcernMax();
       o.serializeFunctions = true;
       // Insert a single document
-      collection.insert({hello:'world'
+      collection.insertOne({hello:'world'
         , func:function() {}}, o, function(err, result) {
         test.equal(null, err);
 
@@ -2141,11 +2141,11 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
       collection.ensureIndex({title:1}, {unique:true}, function(err, indexName) {
 
         // Insert some intial data into the collection
-        collection.insert([{name:"Jim"}
+        collection.insertMany([{name:"Jim"}
           , {name:"Sarah", title:"Princess"}], configuration.writeConcernMax(), function(err, result) {
 
           // Force keep going flag, ignoring unique index issue
-          collection.insert([{name:"Jim"}
+          collection.insertMany([{name:"Jim"}
             , {name:"Sarah", title:"Princess"}
             , {name:'Gump', title:"Gump"}], {w:1, keepGoing:true}, function(err, result) {
 
@@ -2275,7 +2275,7 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors']
       // Get the collection
       var collection = db.collection('parallelCollectionScan');
       // Insert 1000 documents in a batch
-      collection.insert(docs, function(err, result) {
+      collection.insertMany(docs, function(err, result) {
         var results = [];
         var numCursors = 3;
 
@@ -2334,7 +2334,7 @@ exports.shouldCorrectlyIndexAndForceReindexOnCollection = {
       // Create a collection we want to drop later
       var collection = db.collection('shouldCorrectlyForceReindexOnCollection');
       // Insert a bunch of documents for the index
-      collection.insert([{a:1, b:1}
+      collection.insertMany([{a:1, b:1}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {w:1}, function(err, result) {
         test.equal(null, err);
 
@@ -2388,11 +2388,11 @@ exports.shouldRemoveAllDocumentsNoSafe = {
       // Fetch a collection to insert document into
       var collection = db.collection("remove_all_documents_no_safe");        
       // Insert a bunch of documents
-      collection.insert([{a:1}, {b:2}], {w:1}, function(err, result) {
+      collection.insertMany([{a:1}, {b:2}], {w:1}, function(err, result) {
         test.equal(null, err);
         
         // Remove all the document
-        collection.remove();
+        collection.removeMany();
         
         // Fetch all results
         collection.find().toArray(function(err, items) {
@@ -2433,11 +2433,11 @@ exports.shouldRemoveSubsetOfDocumentsSafeMode = {
       // Fetch a collection to insert document into
       var collection = db.collection("remove_subset_of_documents_safe");
       // Insert a bunch of documents
-      collection.insert([{a:1}, {b:2}], {w:1}, function(err, result) {
+      collection.insertMany([{a:1}, {b:2}], {w:1}, function(err, result) {
         test.equal(null, err);
         
         // Remove all the document
-        collection.remove({a:1}, {w:1}, function(err, r) {
+        collection.removeOne({a:1}, {w:1}, function(err, r) {
           test.equal(null, err);
           test.equal(1, r.result.n);
           db.close();
@@ -2521,7 +2521,7 @@ exports.shouldCorrectlyRenameCollection = {
           }
 
           // Insert a couple of documents
-          collection1.insert([{'x':1}, {'x':2}], configuration.writeConcernMax(), function(err, docs) {
+          collection1.insertMany([{'x':1}, {'x':2}], configuration.writeConcernMax(), function(err, docs) {
 
             // Attemp to rename the first collection to the second one, this will fail
             collection1.rename('test_rename_collection2', function(err, collection) {
@@ -2675,10 +2675,10 @@ exports.shouldCorrectlyUpdateASimpleDocument = {
       var collection = db.collection('update_a_simple_document');
 
       // Insert a document, then update it
-      collection.insert({a:1}, configuration.writeConcernMax(), function(err, doc) {
+      collection.insertOne({a:1}, configuration.writeConcernMax(), function(err, doc) {
 
         // Update the document with an atomic operator
-        collection.update({a:1}, {$set:{b:2}});
+        collection.updateOne({a:1}, {$set:{b:2}});
 
         // Wait for a second then fetch the document
         setTimeout(function() {
@@ -2723,7 +2723,7 @@ exports.shouldCorrectlyUpsertASimpleDocument = {
       // Get a collection
       var collection = db.collection('update_a_simple_document_upsert');
       // Update the document using an upsert operation, ensuring creation if it does not exist
-      collection.update({a:1}, {b:2, a:1}, {upsert:true, w: 1}, function(err, result) {
+      collection.updateOne({a:1}, {b:2, a:1}, {upsert:true, w: 1}, function(err, result) {
         test.equal(null, err);
         test.equal(1, result.result.n);
 
@@ -2767,12 +2767,12 @@ exports.shouldCorrectlyUpdateMultipleDocuments = {
       var collection = db.collection('update_a_simple_document_multi');
 
       // Insert a couple of documentations
-      collection.insert([{a:1, b:1}, {a:1, b:2}], configuration.writeConcernMax(), function(err, result) {
+      collection.insertMany([{a:1, b:1}, {a:1, b:2}], configuration.writeConcernMax(), function(err, result) {
 
         var o = configuration.writeConcernMax();
         o.multi = true
         // Update multiple documents using the multi option
-        collection.update({a:1}, {$set:{b:0}}, o, function(err, r) {
+        collection.updateMany({a:1}, {$set:{b:0}}, o, function(err, r) {
           test.equal(null, err);
           test.equal(2, r.result.n);
 
@@ -2820,7 +2820,7 @@ exports.shouldCorrectlyReturnACollectionsStats = {
       var collection = db.collection('collection_stats_test');
 
       // Insert some documents
-      collection.insert([{a:1}, {hello:'world'}], configuration.writeConcernMax(), function(err, result) {
+      collection.insertMany([{a:1}, {hello:'world'}], configuration.writeConcernMax(), function(err, result) {
 
         // Retrieve the statistics for the collection
         collection.stats(function(err, stats) {
@@ -2860,7 +2860,7 @@ exports.shouldCorrectlyCreateAndDropAllIndex = {
       // Create a collection we want to drop later
       var collection = db.collection('shouldCorrectlyCreateAndDropAllIndex');
       // Insert a bunch of documents for the index
-      collection.insert([{a:1, b:1}
+      collection.insertMany([{a:1, b:1}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {w:1}, function(err, result) {
         test.equal(null, err);
 
@@ -2958,13 +2958,13 @@ exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDb = {
       var collection = db.collection('shouldCorrectlyFailOnRetryDueToAppCloseOfDb');
 
       // Insert a document
-      collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
+      collection.insertOne({a:1}, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         // Force close the connection
         db.close(true, function(err, result) {
           // Attemp to insert should fail now with correct message 'db closed by application'
-          collection.insert({a:2}, configuration.writeConcernMax(), function(err, result) {
+          collection.insertOne({a:2}, configuration.writeConcernMax(), function(err, result) {
             test.equal('db closed by application', err.message);
             db.close();
             test.done();
@@ -3101,11 +3101,11 @@ exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunction = {
     // BEGIN
 
       // Clean out the collection
-      db.collection("system.js").remove({}, configuration.writeConcernMax(), function(err, result) {
+      db.collection("system.js").deleteMany({}, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         // Define a system level function
-        db.collection("system.js").insert({_id: "echo", value: new Code("function(x) { return x; }")}, configuration.writeConcernMax(), function(err, result) {
+        db.collection("system.js").insertOne({_id: "echo", value: new Code("function(x) { return x; }")}, configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
         
           db.eval("echo(5)", function(err, result) {
@@ -3216,7 +3216,7 @@ exports.shouldCorrectlyRetrievelistCollections = {
       // Create a collection
       var collection = db1.collection('shouldCorrectlyRetrievelistCollections');
       // Ensure the collection was created
-      collection.insert({a:1}, function(err, r) {
+      collection.insertOne({a:1}, function(err, r) {
         test.equal(null, err);
 
         // Return the information of a single collection name
@@ -3255,7 +3255,7 @@ exports.shouldCorrectlyRetrievelistCollectionsWiredTiger = {
       // Create a collection
       var collection = db1.collection('shouldCorrectlyRetrievelistCollections');
       // Ensure the collection was created
-      collection.insert({a:1}, function(err, r) {
+      collection.insertOne({a:1}, function(err, r) {
         test.equal(null, err);
 
         // Return the information of a single collection name
@@ -3582,7 +3582,7 @@ exports.shouldCorrectlyCreateACollection = {
         test.equal(null, err);
 
         // Insert a document in the capped collection
-        collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
+        collection.insertOne({a:1}, configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
 
           db.close();
@@ -3626,7 +3626,7 @@ exports.shouldCorrectlyExecuteACommandAgainstTheServer = {
           test.equal(null, err);
 
           // Insert a document in the capped collection
-          collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
+          collection.insertOne({a:1}, configuration.writeConcernMax(), function(err, result) {
             test.equal(null, err);
 
             // Drop the collection from this world
@@ -3712,7 +3712,7 @@ exports.shouldCorrectlyRenameACollection = {
         test.equal(null, err);
 
         // Insert a document in the collection
-        collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
+        collection.insertOne({a:1}, configuration.writeConcernMax(), function(err, result) {
           test.equal(null, err);
 
           // Retrieve the number of documents from the collection
@@ -3774,7 +3774,7 @@ exports.shouldCreateOnDbComplexIndexOnTwoFields = {
       // Create a collection we want to drop later
       var collection = db.collection('more_complex_index_test');
       // Insert a bunch of documents for the index
-      collection.insert([{a:1, b:1}
+      collection.insertMany([{a:1, b:1}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
@@ -3828,7 +3828,7 @@ exports.shouldCreateComplexEnsureIndexDb = {
       // Create a collection we want to drop later
       var collection = db.collection('more_complex_ensure_index_db_test');
       // Insert a bunch of documents for the index
-      collection.insert([{a:1, b:1}
+      collection.insertMany([{a:1, b:1}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
@@ -3882,7 +3882,7 @@ exports.shouldCorrectlyDropTheDatabase = {
       // Create a collection
       var collection = db.collection('more_index_information_test_1');
       // Insert a bunch of documents for the index
-      collection.insert([{a:1, b:1}, {a:1, b:1}
+      collection.insertMany([{a:1, b:1}, {a:1, b:1}
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
@@ -3985,8 +3985,8 @@ exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstances = {
       var multipleColl2 = secondDb.collection("multiple_db_instances");
       
       // Write a record into each and then count the records stored
-      multipleColl1.insert({a:1}, {w:1}, function(err, result) {      
-        multipleColl2.insert({a:1}, {w:1}, function(err, result) {
+      multipleColl1.insertOne({a:1}, {w:1}, function(err, result) {      
+        multipleColl2.insertOne({a:1}, {w:1}, function(err, result) {
           
           // Count over the results ensuring only on record in each collection
           multipleColl1.count(function(err, count) {
@@ -4080,7 +4080,7 @@ exports.shouldCorrectlyAuthenticate = {
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insert({'a':1}, {w:1}, function(err, doc) {
+      collection.insertOne({'a':1}, {w:1}, function(err, doc) {
 
         // Use the admin database for the operation
         var adminDb = db.admin();
@@ -4236,7 +4236,7 @@ exports.shouldCorrectlySetDefaultProfilingLevel = {
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insert({'a':1}, {w: 1}, function(err, doc) {
+      collection.insertOne({'a':1}, {w: 1}, function(err, doc) {
 
         // Use the admin database for the operation
         var adminDb = db.admin();
@@ -4294,7 +4294,7 @@ exports.shouldCorrectlyChangeProfilingLevel = {
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insert({'a':1}, {w: 1}, function(err, doc) {
+      collection.insertOne({'a':1}, {w: 1}, function(err, doc) {
 
         // Use the admin database for the operation
         var adminDb = db.admin();
@@ -4381,7 +4381,7 @@ exports.shouldCorrectlySetAndExtractProfilingInfo = {
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insert({'a':1}, {w: 1}, function(doc) {
+      collection.insertOne({'a':1}, {w: 1}, function(doc) {
 
         // Use the admin database for the operation
         var adminDb = db.admin();
@@ -4455,7 +4455,7 @@ exports.shouldCorrectlyCallValidateCollection = {
         
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insert({'a':1}, {w: 1}, function(err, doc) {
+      collection.insertOne({'a':1}, {w: 1}, function(err, doc) {
         
         // Use the admin database for the operation
         var adminDb = db.admin();
@@ -4759,7 +4759,7 @@ exports.shouldCorrectlyRetrieveServerInfo = {
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insert({'a':1}, {w: 1}, function(err, doc) {
+      collection.insertOne({'a':1}, {w: 1}, function(err, doc) {
 
         // Use the admin database for the operation
         var adminDb = db.admin();
@@ -4818,7 +4818,7 @@ exports.shouldCorrectlyRetrieveReplSetGetStatus = {
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insert({'a':1}, {w: 1}, function(err, doc) {
+      collection.insertOne({'a':1}, {w: 1}, function(err, doc) {
 
         // Use the admin database for the operation
         var adminDb = db.admin();
@@ -4889,7 +4889,7 @@ exports.shouldCorrectlyExecuteToArray = {
       var collection = db.collection('test_array');
 
       // Insert a test document
-      collection.insert({'b':[1, 2, 3]}, configuration.writeConcernMax(), function(err, ids) {
+      collection.insertOne({'b':[1, 2, 3]}, configuration.writeConcernMax(), function(err, ids) {
 
         // Retrieve all the documents in the collection
         collection.find().toArray(function(err, documents) {
@@ -4934,7 +4934,7 @@ exports.shouldCorrectlyFailToArrayDueToFinishedEachOperation = {
       var collection = db.collection('test_to_a_after_each');
 
       // Insert a document in the collection
-      collection.insert({'a':1}, configuration.writeConcernMax(), function(err, ids) {
+      collection.insertOne({'a':1}, configuration.writeConcernMax(), function(err, ids) {
 
         // Grab a cursor
         var cursor = collection.find();
@@ -4988,7 +4988,7 @@ exports['Should correctly iterate over cursor using forEach'] = {
       var collection = db.collection('test_to_a_after_for_each');
 
       // Insert a document in the collection
-      collection.insert({'a':1}, configuration.writeConcernMax(), function(err, ids) {
+      collection.insertOne({'a':1}, configuration.writeConcernMax(), function(err, ids) {
         // Count of documents returned
         var count = 0;
         // Grab a cursor
@@ -5045,7 +5045,7 @@ exports['Should correctly rewind and restart cursor'] = {
       var collection = db.collection('Should_correctly_rewind_and_restart_cursor');
 
       // insert all docs
-      collection.insert(docs, configuration.writeConcernMax(), function(err, result) {
+      collection.insertMany(docs, configuration.writeConcernMax(), function(err, result) {
         test.equal(null, err);
 
         // Grab a cursor using the find
@@ -5099,7 +5099,7 @@ exports.shouldCorrectlyUseCursorCountFunction = {
       var collection = db.collection('cursor_count_collection');
 
       // Insert some docs
-      collection.insert([{a:1}, {a:2}], configuration.writeConcernMax(), function(err, docs) {
+      collection.insertMany([{a:1}, {a:2}], configuration.writeConcernMax(), function(err, docs) {
         test.equal(null, err);
 
         // Do a find and get the cursor count
@@ -5145,7 +5145,7 @@ exports.shouldCorrectlyPeformSimpleSorts = {
       var collection = db.collection('simple_sort_collection');
 
       // Insert some documents we can sort on
-      collection.insert([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, docs) {
+      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, docs) {
         test.equal(null, err);
 
         // Do normal ascending sort
@@ -5197,7 +5197,7 @@ exports.shouldCorrectlyPeformLimitOnCursor = {
       var collection = db.collection('simple_limit_collection');
 
       // Insert some documents we can sort on
-      collection.insert([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, docs) {
+      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, docs) {
         test.equal(null, err);
 
         // Limit to only one document returned
@@ -5243,7 +5243,7 @@ exports.shouldCorrectlyPeformSkipOnCursor = {
       var collection = db.collection('simple_skip_collection');
 
       // Insert some documents we can sort on
-      collection.insert([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, docs) {
+      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, docs) {
         test.equal(null, err);
 
         // Skip one document
@@ -5290,7 +5290,7 @@ exports.shouldCorrectlyPeformBatchSizeOnCursor = {
       var collection = db.collection('simple_batch_size_collection');
 
       // Insert some documents we can sort on
-      collection.insert([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, docs) {
+      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, docs) {
         test.equal(null, err);
 
         // Do normal ascending sort
@@ -5336,7 +5336,7 @@ exports.shouldCorrectlyPeformNextObjectOnCursor = {
       var collection = db.collection('simple_next_object_collection');
 
       // Insert some documents we can sort on
-      collection.insert([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, docs) {
+      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, docs) {
         test.equal(null, err);
 
         // Do normal ascending sort
@@ -5382,7 +5382,7 @@ exports.shouldCorrectlyPeformSimpleExplainCursor = {
       var collection = db.collection('simple_explain_collection');
 
       // Insert some documents we can sort on
-      collection.insert([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, docs) {
+      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, docs) {
         test.equal(null, err);
 
         // Do normal ascending sort
@@ -5433,7 +5433,7 @@ exports.shouldStreamDocumentsUsingTheStreamFunction = {
       var collection = db.collection('test_stream_function');
 
       // Insert documents into collection
-      collection.insert(docs, configuration.writeConcernMax(), function(err, ids) {
+      collection.insertMany(docs, configuration.writeConcernMax(), function(err, ids) {
         // Peform a find to get a cursor
         var stream = collection.find().stream();
 
@@ -5487,7 +5487,7 @@ exports.shouldStreamDocumentsUsingTheIsCloseFunction = {
       var collection = db.collection('test_is_close_function_on_cursor');
 
       // Insert documents into collection
-      collection.insert(docs, configuration.writeConcernMax(), function(err, ids) {
+      collection.insertMany(docs, configuration.writeConcernMax(), function(err, ids) {
         // Peform a find to get a cursor
         var cursor = collection.find();
 
@@ -5545,7 +5545,7 @@ exports.shouldStreamDocumentsUsingTheCloseFunction = {
       var collection = db.collection('test_close_function_on_cursor');
 
       // Insert documents into collection
-      collection.insert(docs, configuration.writeConcernMax(), function(err, ids) {
+      collection.insertMany(docs, configuration.writeConcernMax(), function(err, ids) {
         // Peform a find to get a cursor
         var cursor = collection.find();
 
@@ -5601,7 +5601,7 @@ exports.shouldStreamDocumentsUsingTheCursorStreamPauseFunction = {
       var collection = db.collection('test_cursorstream_pause');
 
       // Insert documents into collection
-      collection.insert(docs, {w:1}, function(err, ids) {
+      collection.insertMany(docs, {w:1}, function(err, ids) {
         // Peform a find to get a cursor
         var stream = collection.find().stream();
 
@@ -5663,7 +5663,7 @@ exports.shouldStreamDocumentsUsingTheCursorStreamDestroyFunction = {
       var collection = db.collection('test_cursorstream_destroy');
 
       // Insert documents into collection
-      collection.insert(docs, {w:1}, function(err, ids) {
+      collection.insertMany(docs, {w:1}, function(err, ids) {
         // Peform a find to get a cursor
         var stream = collection.find().stream();
 
@@ -5724,7 +5724,7 @@ exports['Should correctly connect to a replicaset'] = {
       test.equal(null, err);
       test.ok(db != null);
 
-      db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
+      db.collection("replicaset_mongo_client_collection").updateOne({a:1}, {b:1}, {upsert:true}, function(err, result) {
         test.equal(null, err);
         test.equal(1, result.result.n);
 
@@ -5765,7 +5765,7 @@ exports['Should connect to mongos proxies using connectiong string'] = {
       test.equal(null, err);
       test.ok(db != null);
 
-      db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
+      db.collection("replicaset_mongo_client_collection").updateOne({a:1}, {b:1}, {upsert:true}, function(err, result) {
         test.equal(null, err);
         test.equal(1, result);
 
@@ -5805,7 +5805,7 @@ exports['Should correctly connect using MongoClient to a single server using con
     // BEGIN
       test.equal(null, err);
 
-      db.collection('mongoclient_test').update({a:1}, {b:1}, {upsert:true}, function(err, result) {
+      db.collection('mongoclient_test').updateOne({a:1}, {b:1}, {upsert:true}, function(err, result) {
         test.equal(null, err);
         test.equal(1, result.result.n);
 
@@ -8399,6 +8399,64 @@ exports['Should correctly execute findOneAndUpdate operation'] = {
 
             db.close();
             test.done();
+        });
+      });
+    });
+    // END
+  }
+}
+
+/**
+ * A simple example showing the listening to a capped collection
+ *
+ * @example-class Db
+ * @example-method createCollection
+ * @ignore
+ */
+exports['Should correctly add capped collection options to cursor'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+
+    db.open(function(err, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
+      test.equal(null, err);
+
+      // Create a capped collection with a maximum of 1000 documents
+      db.createCollection("a_simple_collection_2", {capped:true, size:10000, max:1000, w:1}, function(err, collection) {
+        test.equal(null, err);
+
+        var docs = [];
+        for(var i = 0; i < 1000; i++) docs.push({a:i});
+
+        // Insert a document in the capped collection
+        collection.insertMany(docs, configuration.writeConcernMax(), function(err, result) {
+
+          // Start date
+          var s = new Date();
+
+          // Get the cursor
+          var cursor = collection.find({})
+            .addCursorFlag('tailable', true)
+            .addCursorFlag('awaitData', true)
+            .setCursorOption('numberOfRetries', 5)
+            .setCursorOption('tailableRetryInterval', 100);
+
+          cursor.on('data', function() {});
+
+          cursor.on('end', function() {
+            test.ok((new Date().getTime() - s.getTime()) > 1000);
+
+            db.close();
+            test.done();
+          });
         });
       });
     });

@@ -1,6 +1,7 @@
 2.0.28
 -----------------
 - Bumped mongodb-core to 1.2.23.
+- Added Cursor.prototype.setCursorOption to allow for setting node specific cursor options for tailable cursors.
 
 2.0.27 04-07-2015
 -----------------

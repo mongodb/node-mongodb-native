@@ -2807,6 +2807,7 @@ exports['should correctly pipe through multiple pipelines'] = {
           console.log("--------------------------------------------")
           console.log(chunk)
           this.push(chunk);
+          done();
           // done();
           // var data = chunk.toString()
           // if (this._lastLineData) data = this._lastLineData + data 
