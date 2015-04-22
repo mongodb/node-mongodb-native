@@ -1,3 +1,6 @@
+1.1.24 04-15-2015
+-----------------
+
 1.1.23 04-15-2015
 -----------------
 - Standardizing mongoErrors and its API (Issue #14)
