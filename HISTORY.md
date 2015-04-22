@@ -1,5 +1,6 @@
-1.1.24 04-15-2015
+1.1.24 04-22-2015
 -----------------
+- Error out when topology has been destroyed either by connection retries being exhausted or destroy called on topology.
 
 1.1.23 04-15-2015
 -----------------
