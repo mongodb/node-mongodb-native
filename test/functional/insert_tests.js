@@ -1448,6 +1448,7 @@ exports.handleBSONTypeInsertsCorrectly = {
 
                     collection.findOne({"code": new Code("function () {}", {a: 77})}, function(err, doc) {            
                       test.equal(null, err);
+                      console.dir(doc)
                       test.ok(doc != null);
                       db.close();
                       test.done();
@@ -1483,7 +1484,7 @@ exports.handleBSONTypeInsertsCorrectlyFor28OrHigher = {
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
-      var collection = db.collection('bson_types_insert');
+      var collection = db.collection('bson_types_insert_1');
 
       var document = {
           "symbol": new Symbol("abcdefghijkl")

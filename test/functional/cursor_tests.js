@@ -1499,7 +1499,7 @@ exports['Should correctly execute count on cursor'] = {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       // Create collection
-      db.createCollection('Should_correctly_execute_count_on_cursor', function(err, collection) {
+      db.createCollection('Should_correctly_execute_count_on_cursor_1', function(err, collection) {
         test.equal(null, err);
 
         // insert all docs
@@ -2633,7 +2633,7 @@ exports['Should correctly execute count on cursor with maxTimeMS'] = {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       // Create collection
-      db.createCollection('Should_correctly_execute_count_on_cursor', function(err, collection) {
+      db.createCollection('Should_correctly_execute_count_on_cursor_2', function(err, collection) {
         test.equal(null, err);
 
         // insert all docs
@@ -2659,6 +2659,49 @@ exports['Should correctly execute count on cursor with maxTimeMS'] = {
               db.close();
               test.done();
             });
+          });
+        })
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ * @api private
+ */
+exports['Should correctly execute count on cursor with maxTimeMS set using legacy method'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var docs = [];
+
+    for(var i = 0; i < 1000; i++) {
+      var d = new Date().getTime() + i*1000;
+      docs[i] = {'a':i, createdAt:new Date(d)};
+    }
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      // Create collection
+      db.createCollection('Should_correctly_execute_count_on_cursor_3', function(err, collection) {
+        test.equal(null, err);
+
+        // insert all docs
+        collection.insert(docs, configuration.writeConcernMax(), function(err, result) {
+          test.equal(null, err);
+          var total = 0;
+
+          // Create a cursor for the content
+          var cursor = collection.find({}, {maxTimeMS: 100});
+          cursor.toArray(function(err, docs) {
+            test.equal(null, err);
+
+            db.close();
+            test.done();
           });
         })
       });

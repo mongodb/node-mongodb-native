@@ -34,6 +34,14 @@ var shallowClone = function(obj) {
 
 // Skipping parameters
 var startupOptions = {
+    skipStartup: true
+  , skipRestart: true
+  , skipShutdown: true
+  , skip: false
+}
+
+// Skipping parameters
+var startupOptions = {
     skipStartup: false
   , skipRestart: false
   , skipShutdown: false
@@ -472,6 +480,11 @@ if(argv.t == 'functional') {
 
   // Add travis filter
   runner.plugin(new TravisFilter());
+
+  // Skip startup
+  if(startupOptions.skipStartup) {
+    return runner.run(config);
+  }
 
   // Remove db directories
   try {
