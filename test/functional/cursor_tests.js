@@ -2708,3 +2708,106 @@ exports['Should correctly execute count on cursor with maxTimeMS set using legac
     });
   }
 }
+
+/**
+ * @ignore
+ * @api private
+ */
+exports['Should correctly apply map to toArray'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var docs = [];
+
+    for(var i = 0; i < 1000; i++) {
+      var d = new Date().getTime() + i*1000;
+      docs[i] = {'a':i, createdAt:new Date(d)};
+    }
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      var collection = db.collection('map_toArray');
+
+      // insert all docs
+      collection.insert(docs, configuration.writeConcernMax(), function(err, result) {
+        test.equal(null, err);
+        var total = 0;
+
+        // Create a cursor for the content
+        var cursor = collection.find({})
+          .map(function(x) { return {a:1}; })
+          .batchSize(5)
+          .limit(10);
+        cursor.toArray(function(err, docs) {          
+          test.equal(null, err);
+          test.equal(10, docs.length);
+
+          // Ensure all docs where mapped
+          docs.forEach(function(x) {
+            test.equal(1, x.a);
+          })
+
+          db.close();
+          test.done();
+        });
+      })
+    });
+  }
+}
+
+/**
+ * @ignore
+ * @api private
+ */
+exports['Should correctly apply map to next'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var docs = [];
+
+    for(var i = 0; i < 1000; i++) {
+      var d = new Date().getTime() + i*1000;
+      docs[i] = {'a':i, createdAt:new Date(d)};
+    }
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      var collection = db.collection('map_toArray');
+
+      // insert all docs
+      collection.insert(docs, configuration.writeConcernMax(), function(err, result) {
+        test.equal(null, err);
+        var total = 0;
+
+        // Create a cursor for the content
+        var cursor = collection.find({})
+          .map(function(x) { return {a:1}; })
+          .batchSize(5)
+          .limit(10);
+        cursor.next(function(err, doc) {          
+          test.equal(null, err);
+          console.dir(doc)
+          // test.equal(10, docs.length);
+
+          // // Ensure all docs where mapped
+          // docs.forEach(function(x) {
+          //   test.equal(1, x.a);
+          // })
+
+          db.close();
+          test.done();
+        });
+      })
+    });
+  }
+}
