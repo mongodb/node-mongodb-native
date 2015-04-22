@@ -586,6 +586,8 @@
             
                 <li data-name="Cursor#limit"><a href="Cursor.html#limit">limit</a></li>
             
+                <li data-name="Cursor#map"><a href="Cursor.html#map">map</a></li>
+            
                 <li data-name="Cursor#maxTimeMS"><a href="Cursor.html#maxTimeMS">maxTimeMS</a></li>
             
                 <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
@@ -607,6 +609,8 @@
                 <li data-name="Cursor#setBatchSize"><a href="Cursor.html#setBatchSize">setBatchSize</a></li>
             
                 <li data-name="Cursor#setCursorLimit"><a href="Cursor.html#setCursorLimit">setCursorLimit</a></li>
+            
+                <li data-name="Cursor#setCursorOption"><a href="Cursor.html#setCursorOption">setCursorOption</a></li>
             
                 <li data-name="Cursor#setCursorSkip"><a href="Cursor.html#setCursorSkip">setCursorSkip</a></li>
             
@@ -866,6 +870,22 @@
             
             </ul>
             <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="GridStore~collectionCallback"><a href="GridStore.html#~collectionCallback">collectionCallback</a></li>
+            
+                <li data-name="GridStore~gridStoreCallback"><a href="GridStore.html#~gridStoreCallback">gridStoreCallback</a></li>
+            
+                <li data-name="GridStore~openCallback"><a href="GridStore.html#~openCallback">openCallback</a></li>
+            
+                <li data-name="GridStore~readCallback"><a href="GridStore.html#~readCallback">readCallback</a></li>
+            
+                <li data-name="GridStore~readlinesCallback"><a href="GridStore.html#~readlinesCallback">readlinesCallback</a></li>
+            
+                <li data-name="GridStore~resultCallback"><a href="GridStore.html#~resultCallback">resultCallback</a></li>
+            
+                <li data-name="GridStore~tellCallback"><a href="GridStore.html#~tellCallback">tellCallback</a></li>
             
             </ul>
             <ul class="methods itemMembers">
@@ -1779,7 +1799,7 @@ var GridStore = function GridStore(db, id, filename, mode, options) {
 
 /**
  * The callback format for the Gridstore.open method
- * @callback Gridstore~openCallback
+ * @callback GridStore~openCallback
  * @param {MongoError} error An error instance representing the error during the execution.
  * @param {GridStore} gridStore The GridStore instance if the open method was successful.
  */
@@ -1789,7 +1809,7 @@ var GridStore = function GridStore(db, id, filename, mode, options) {
  * new one if file does not exist.
  *
  * @method
- * @param {Gridstore~openCallback} callback this will be called after executing this method
+ * @param {GridStore~openCallback} callback this will be called after executing this method
  * @return {null}
  */
 GridStore.prototype.open = function(callback) {
@@ -1843,7 +1863,7 @@ GridStore.prototype.eof = function() {
 
 /**
  * The callback result format.
- * @callback Gridstore~resultCallback
+ * @callback GridStore~resultCallback
  * @param {MongoError} error An error instance representing the error during the execution.
  * @param {object} result The result from the callback.
  */
@@ -1852,7 +1872,7 @@ GridStore.prototype.eof = function() {
  * Retrieves a single character from this file.
  *
  * @method
- * @param {Gridstore~resultCallback} callback this gets called after this method is executed. Passes null to the first parameter and the character read to the second or null to the second if the read/write head is at the end of the file.
+ * @param {GridStore~resultCallback} callback this gets called after this method is executed. Passes null to the first parameter and the character read to the second or null to the second if the read/write head is at the end of the file.
  * @return {null}
  */
 GridStore.prototype.getc = function(callback) {
@@ -1878,7 +1898,7 @@ GridStore.prototype.getc = function(callback) {
  *
  * @method
  * @param {string} string the string to write.
- * @param {Gridstore~resultCallback} callback this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
+ * @param {GridStore~resultCallback} callback this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
  * @return {null}
  */
 GridStore.prototype.puts = function(string, callback) {
@@ -1902,7 +1922,7 @@ GridStore.prototype.stream = function() {
  * @method
  * @param {(string|Buffer)} data the data to write.
  * @param {boolean} [close] closes this file after writing if set to true.
- * @param {Gridstore~resultCallback} callback this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
+ * @param {GridStore~resultCallback} callback this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
  * @return {null}
  */
 GridStore.prototype.write = function write(data, close, callback) {
@@ -1931,7 +1951,7 @@ GridStore.prototype.destroy = function destroy() {
  *
  * @method
  * @param {(string|Buffer|FileHandle)} file the file to store.
- * @param {Gridstore~resultCallback} callback this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
+ * @param {GridStore~resultCallback} callback this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
  * @return {null}
  */
 GridStore.prototype.writeFile = function (file, callback) {
@@ -2000,7 +2020,7 @@ GridStore.prototype.writeFile = function (file, callback) {
  * "w" or "w+".
  *
  * @method
- * @param {Gridstore~resultCallback} callback this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
+ * @param {GridStore~resultCallback} callback this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
  * @return {null}
  */
 GridStore.prototype.close = function(callback) {
@@ -2076,7 +2096,7 @@ GridStore.prototype.close = function(callback) {
 
 /**
  * The collection callback format.
- * @callback Gridstore~collectionCallback
+ * @callback GridStore~collectionCallback
  * @param {MongoError} error An error instance representing the error during the execution.
  * @param {Collection} collection The collection from the command execution.
  */
@@ -2085,7 +2105,7 @@ GridStore.prototype.close = function(callback) {
  * Retrieve this file's chunks collection.
  *
  * @method
- * @param {Gridstore~collectionCallback} callback the command callback.
+ * @param {GridStore~collectionCallback} callback the command callback.
  * @return {Collection}
  */
 GridStore.prototype.chunkCollection = function(callback) {
@@ -2098,7 +2118,7 @@ GridStore.prototype.chunkCollection = function(callback) {
  * Deletes all the chunks of this file in the database.
  *
  * @method
- * @param {Gridstore~resultCallback} callback the command callback.
+ * @param {GridStore~resultCallback} callback the command callback.
  * @return {null}
  */
 GridStore.prototype.unlink = function(callback) {
@@ -2126,7 +2146,7 @@ GridStore.prototype.unlink = function(callback) {
  * Retrieves the file collection associated with this object.
  *
  * @method
- * @param {Gridstore~collectionCallback} callback the command callback.
+ * @param {GridStore~collectionCallback} callback the command callback.
  * @return {Collection}
  */
 GridStore.prototype.collection = function(callback) {
@@ -2137,7 +2157,7 @@ GridStore.prototype.collection = function(callback) {
 
 /**
  * The readlines callback format.
- * @callback Gridstore~readlinesCallback
+ * @callback GridStore~readlinesCallback
  * @param {MongoError} error An error instance representing the error during the execution.
  * @param {string[]} strings The array of strings returned.
  */
@@ -2147,7 +2167,7 @@ GridStore.prototype.collection = function(callback) {
  *
  * @method
  * @param {string} [separator] The character to be recognized as the newline separator.
- * @param {Gridstore~readlinesCallback} callback the command callback.
+ * @param {GridStore~readlinesCallback} callback the command callback.
  * @return {null}
  */
 GridStore.prototype.readlines = function(separator, callback) {
@@ -2173,7 +2193,7 @@ GridStore.prototype.readlines = function(separator, callback) {
  * "w+" and resets the read/write head to the initial position.
  *
  * @method
- * @param {Gridstore~resultCallback} callback this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
+ * @param {GridStore~resultCallback} callback this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
  * @return {null}
  */
 GridStore.prototype.rewind = function(callback) {
@@ -2205,7 +2225,7 @@ GridStore.prototype.rewind = function(callback) {
 
 /**
  * The read callback format.
- * @callback Gridstore~readCallback
+ * @callback GridStore~readCallback
  * @param {MongoError} error An error instance representing the error during the execution.
  * @param {Buffer} data The data read from the GridStore object
  */
@@ -2222,7 +2242,7 @@ GridStore.prototype.rewind = function(callback) {
  * @method
  * @param {number} [length] the number of characters to read. Reads all the characters from the read/write head to the EOF if not specified.
  * @param {(string|Buffer)} [buffer] a string to hold temporary data. This is used for storing the string data read so far when recursively calling this method.
- * @param {Gridstore~readCallback} callback the command callback.
+ * @param {GridStore~readCallback} callback the command callback.
  * @return {null}
  */
 GridStore.prototype.read = function(length, buffer, callback) {
@@ -2277,7 +2297,7 @@ GridStore.prototype.read = function(length, buffer, callback) {
 
 /**
  * The tell callback format.
- * @callback Gridstore~tellCallback
+ * @callback GridStore~tellCallback
  * @param {MongoError} error An error instance representing the error during the execution.
  * @param {number} position The current read position in the GridStore.
  */
@@ -2288,7 +2308,7 @@ GridStore.prototype.read = function(length, buffer, callback) {
  * @method
  * @param {number} [length] the number of characters to read. Reads all the characters from the read/write head to the EOF if not specified.
  * @param {(string|Buffer)} [buffer] a string to hold temporary data. This is used for storing the string data read so far when recursively calling this method.
- * @param {Gridstore~tellCallback} callback the command callback.
+ * @param {GridStore~tellCallback} callback the command callback.
  * @return {null}
  */
 GridStore.prototype.tell = function(callback) {
@@ -2297,7 +2317,7 @@ GridStore.prototype.tell = function(callback) {
 
 /**
  * The tell callback format.
- * @callback Gridstore~gridStoreCallback
+ * @callback GridStore~gridStoreCallback
  * @param {MongoError} error An error instance representing the error during the execution.
  * @param {GridStore} gridStore The gridStore.
  */
@@ -2315,7 +2335,7 @@ GridStore.prototype.tell = function(callback) {
  * @method
  * @param {number} [position] the position to seek to
  * @param {number} [seekLocation] seek mode. Use one of the Seek Location modes.
- * @param {Gridstore~gridStoreCallback} callback the command callback.
+ * @param {GridStore~gridStoreCallback} callback the command callback.
  * @return {null}
  */
 GridStore.prototype.seek = function(position, seekLocation, callback) {
@@ -2791,7 +2811,7 @@ GridStore.list = function(db, rootCollection, options, callback) {
  * @param {number} [offset] The offset from the head of the file of which to start reading from.
  * @param {object} [options=null] Optional settings.
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
- * @param {Gridstore~readCallback} callback the command callback.
+ * @param {GridStore~readCallback} callback the command callback.
  * @return {null}
  */
 
@@ -2830,7 +2850,7 @@ GridStore.read = function(db, name, length, offset, options, callback) {
  * @param {string} [separator] The character to be recognized as the newline separator.
  * @param {object} [options=null] Optional settings.
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
- * @param {Gridstore~readlinesCallback} callback the command callback.
+ * @param {GridStore~readlinesCallback} callback the command callback.
  * @return {null}
  */
 GridStore.readlines = function(db, name, separator, options, callback) {
@@ -2854,7 +2874,7 @@ GridStore.readlines = function(db, name, separator, options, callback) {
  * @param {Db} db The database to query.
  * @param {(string|array)} names The name/names of the files to delete.
  * @param {object} [options=null] Optional settings.
- * @param {Gridstore~resultCallback} callback the command callback.
+ * @param {GridStore~resultCallback} callback the command callback.
  * @return {null}
  */
 GridStore.unlink = function(db, names, options, callback) {
@@ -3232,7 +3252,7 @@ module.exports = GridStore;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Apr 16 2015 17:49:34 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Wed Apr 22 2015 13:11:58 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

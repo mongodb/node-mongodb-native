@@ -586,6 +586,8 @@
             
                 <li data-name="Cursor#limit"><a href="Cursor.html#limit">limit</a></li>
             
+                <li data-name="Cursor#map"><a href="Cursor.html#map">map</a></li>
+            
                 <li data-name="Cursor#maxTimeMS"><a href="Cursor.html#maxTimeMS">maxTimeMS</a></li>
             
                 <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
@@ -607,6 +609,8 @@
                 <li data-name="Cursor#setBatchSize"><a href="Cursor.html#setBatchSize">setBatchSize</a></li>
             
                 <li data-name="Cursor#setCursorLimit"><a href="Cursor.html#setCursorLimit">setCursorLimit</a></li>
+            
+                <li data-name="Cursor#setCursorOption"><a href="Cursor.html#setCursorOption">setCursorOption</a></li>
             
                 <li data-name="Cursor#setCursorSkip"><a href="Cursor.html#setCursorSkip">setCursorSkip</a></li>
             
@@ -866,6 +870,22 @@
             
             </ul>
             <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="GridStore~collectionCallback"><a href="GridStore.html#~collectionCallback">collectionCallback</a></li>
+            
+                <li data-name="GridStore~gridStoreCallback"><a href="GridStore.html#~gridStoreCallback">gridStoreCallback</a></li>
+            
+                <li data-name="GridStore~openCallback"><a href="GridStore.html#~openCallback">openCallback</a></li>
+            
+                <li data-name="GridStore~readCallback"><a href="GridStore.html#~readCallback">readCallback</a></li>
+            
+                <li data-name="GridStore~readlinesCallback"><a href="GridStore.html#~readlinesCallback">readlinesCallback</a></li>
+            
+                <li data-name="GridStore~resultCallback"><a href="GridStore.html#~resultCallback">resultCallback</a></li>
+            
+                <li data-name="GridStore~tellCallback"><a href="GridStore.html#~tellCallback">tellCallback</a></li>
             
             </ul>
             <ul class="methods itemMembers">
@@ -1966,10 +1986,11 @@ Collection.prototype.insertOne = function(doc, options, callback) {
   if(typeof options == 'function') callback = options, options = {};
   if(Array.isArray(doc)) return callback(new MongoError('doc parameter must be an object'));
   insertDocuments(this, [doc], options, function(err, r) {
-    if(err) return callback(err);
+    if(callback == null) return;
+    if(err &amp;&amp; callback) return callback(err);
     r.insertedCount = r.result.n;
     r.insertedId = doc._id;
-    callback(null, r);
+    if(callback) callback(null, r);
   });
 }
 
@@ -1990,14 +2011,15 @@ Collection.prototype.insertMany = function(docs, options, callback) {
   if(typeof options == 'function') callback = options, options = {};
   if(!Array.isArray(docs)) return callback(new MongoError('docs parameter must be an array of documents'));    
   insertDocuments(this, docs, options, function(err, r) {
-    if(err) return callback(err);
+    if(callback == null) return;
+    if(err &amp;&amp; callback) return callback(err);
     r.insertedCount = r.result.n;
     var ids = [];
     for(var i = 0; i &lt; docs.length; i++) {
       if(docs[i]._id) ids.push(docs[i]._id);
     }
     r.insertedIds = ids;
-    callback(null, r);
+    if(callback) callback(null, r);
   });
 }
 
@@ -2026,12 +2048,16 @@ Collection.prototype.insertMany = function(docs, options, callback) {
  * Legal operation types are
  *
  *  { insertOne: { document: { a: 1 } } }
+ *
  *  { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+ *
  *  { updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+ *
  *  { deleteOne: { filter: {c:1} } }
+ *
  *  { deleteMany: { filter: {c:1} } }
- *  { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}]
- * 
+ *
+ *  { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}
  *
  * @method
  * @param {object[]} operations Bulk operations to perform.
@@ -2122,7 +2148,7 @@ var insertDocuments = function(self, docs, options, callback) {
 
 /**
  * @typedef {Object} Collection~WriteOpResult
- * @property {object[]} ops All the documents inserted with their new _id values if forceServerObjectId == false.
+ * @property {object[]} ops All the documents inserted using insertOne/insertMany/replaceOne. Documents contain the _id field if forceServerObjectId == false for insertOne/insertMany
  * @property {object} connection The connection object used for the operation.
  * @property {object} result The command result object.
  */
@@ -2146,7 +2172,7 @@ var insertDocuments = function(self, docs, options, callback) {
  * @param {boolean} [options.forceServerObjectId=false] Force server to assign _id values instead of driver.
  * @param {Collection~writeOpCallback} callback The command result callback   
  * @return {null}
- * @deprecated
+ * @deprecated Use insertOne, insertMany or bulkWrite
  */
 Collection.prototype.insert = function(docs, options, callback) {
   return insertDocuments(this, docs, options, callback);
@@ -2172,12 +2198,13 @@ Collection.prototype.updateOne = function(filter, update, options, callback) {
   options.multi = false;
   // Execute update
   updateDocuments(this, filter, update, options, function(err, r) {
-    if(err) return callback(err);
+    if(callback == null) return;
+    if(err &amp;&amp; callback) return callback(err);
     r.matchedCount = r.result.n;
     r.modifiedCount = r.result.nModified != null ? r.result.nModified : r.result.n;
     r.upsertedId = Array.isArray(r.result.upserted) &amp;&amp; r.result.upserted.length > 0 ? r.result.upserted[0] : null;
     r.upsertedCount = Array.isArray(r.result.upserted) &amp;&amp; r.result.upserted.length ? r.result.upserted.length : 0;
-    callback(null, r);      
+    if(callback) callback(null, r);
   });
 }
 
@@ -2201,12 +2228,14 @@ Collection.prototype.replaceOne = function(filter, update, options, callback) {
   options.multi = false;
   // Execute update
   updateDocuments(this, filter, update, options, function(err, r) {
-    if(err) return callback(err);
+    if(callback == null) return;
+    if(err &amp;&amp; callback) return callback(err);
     r.matchedCount = r.result.n;
     r.modifiedCount = r.result.nModified != null ? r.result.nModified : r.result.n;
     r.upsertedId = Array.isArray(r.result.upserted) &amp;&amp; r.result.upserted.length > 0 ? r.result.upserted[0] : null;
     r.upsertedCount = Array.isArray(r.result.upserted) &amp;&amp; r.result.upserted.length ? r.result.upserted.length : 0;
-    callback(null, r);      
+    r.ops = [update];
+    if(callback) callback(null, r);
   });
 }
 
@@ -2230,12 +2259,13 @@ Collection.prototype.updateMany = function(filter, update, options, callback) {
   options.multi = true;
   // Execute update
   updateDocuments(this, filter, update, options, function(err, r) {
-    if(err) return callback(err);
+    if(callback == null) return;
+    if(err &amp;&amp; callback) return callback(err);
     r.matchedCount = r.result.n;
     r.modifiedCount = r.result.nModified != null ? r.result.nModified : r.result.n;
     r.upsertedId = Array.isArray(r.result.upserted) &amp;&amp; r.result.upserted.length > 0 ? r.result.upserted[0] : null;
     r.upsertedCount = Array.isArray(r.result.upserted) &amp;&amp; r.result.upserted.length ? r.result.upserted.length : 0;
-    callback(null, r);      
+    if(callback) callback(null, r);
   });
 }
 
@@ -2287,7 +2317,7 @@ var updateDocuments = function(self, selector, document, options, callback) {
  * @param {Collection~writeOpCallback} callback The command result callback
  * @throws {MongoError}
  * @return {null}
- * @deprecated
+ * @deprecated use updateOne, updateMany or bulkWrite
  */
 Collection.prototype.update = function(selector, document, options, callback) {
   return updateDocuments(this, selector, document, options, callback);
@@ -2309,9 +2339,10 @@ Collection.prototype.deleteOne = function(filter, options, callback) {
   var options = shallowClone(options);    
   options.single = true;
   removeDocuments(this, filter, options, function(err, r) {
-    if(err) return callback(err);
+    if(callback == null) return;
+    if(err &amp;&amp; callback) return callback(err);
     r.deletedCount = r.result.n;
-    callback(null, r);
+    if(callback) callback(null, r);
   });
 }
 
@@ -2333,9 +2364,10 @@ Collection.prototype.deleteMany = function(filter, options, callback) {
   var options = shallowClone(options);    
   options.single = false;
   removeDocuments(this, filter, options, function(err, r) {
-    if(err) return callback(err);
+    if(callback == null) return;
+    if(err &amp;&amp; callback) return callback(err);
     r.deletedCount = r.result.n;
-    callback(null, r);
+    if(callback) callback(null, r);
   });
 }
 
@@ -2386,7 +2418,7 @@ var removeDocuments = function(self, selector, options, callback) {
  * @param {boolean} [options.single=false] Removes the first document found.
  * @param {Collection~writeOpCallback} callback The command result callback
  * @return {null}
- * @deprecated
+ * @deprecated use deleteOne, deleteMany or bulkWrite
  */
 Collection.prototype.remove = function(selector, options, callback) {
   return removeDocuments(this, selector, options, callback);
@@ -2658,7 +2690,7 @@ Collection.prototype.dropIndexes = function(callback) {
 /**
  * Drops all indexes from this collection.
  * @method
- * @deprecated since version 2.0
+ * @deprecated use dropIndexes
  * @param {Collection~resultCallback} callback The command result callback
  * @return {null}
  */
@@ -2720,7 +2752,7 @@ Collection.prototype.listIndexes = function(options) {
 /**
  * Ensures that an index exists, if it does not it creates it
  * @method
- * @deprecated since version 2.0
+ * @deprecated use createIndexes instead
  * @param {(string|object)} fieldOrSpec Defines the index.
  * @param {object} [options=null] Optional settings.
  * @param {(number|string)} [options.w=null] The write concern.
@@ -3014,7 +3046,7 @@ Collection.prototype.findOneAndUpdate = function(filter, update, options, callba
  * @param {object} [options.fields=null] Object containing the field projection for the result returned from the operation.
  * @param {Collection~resultCallback} callback The command result callback
  * @return {null}
- * @deprecated 
+ * @deprecated use findOneAndUpdate, findOneAndReplace or findOneAndDelete instead 
  */
 Collection.prototype.findAndModify = function(query, sort, doc, options, callback) {
   var args = Array.prototype.slice.call(arguments, 1);
@@ -3075,7 +3107,7 @@ Collection.prototype.findAndModify = function(query, sort, doc, options, callbac
  * @param {boolean} [options.j=false] Specify a journal write concern.
  * @param {Collection~resultCallback} callback The command result callback
  * @return {null}
- * @deprecated
+ * @deprecated use findOneAndDelete instead
  */
 Collection.prototype.findAndRemove = function(query, sort, options, callback) {
   var args = Array.prototype.slice.call(arguments, 1);
@@ -3729,7 +3761,7 @@ module.exports = Collection;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Apr 16 2015 17:49:34 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Wed Apr 22 2015 13:11:58 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

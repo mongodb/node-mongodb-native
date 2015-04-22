@@ -586,6 +586,8 @@
             
                 <li data-name="Cursor#limit"><a href="Cursor.html#limit">limit</a></li>
             
+                <li data-name="Cursor#map"><a href="Cursor.html#map">map</a></li>
+            
                 <li data-name="Cursor#maxTimeMS"><a href="Cursor.html#maxTimeMS">maxTimeMS</a></li>
             
                 <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
@@ -607,6 +609,8 @@
                 <li data-name="Cursor#setBatchSize"><a href="Cursor.html#setBatchSize">setBatchSize</a></li>
             
                 <li data-name="Cursor#setCursorLimit"><a href="Cursor.html#setCursorLimit">setCursorLimit</a></li>
+            
+                <li data-name="Cursor#setCursorOption"><a href="Cursor.html#setCursorOption">setCursorOption</a></li>
             
                 <li data-name="Cursor#setCursorSkip"><a href="Cursor.html#setCursorSkip">setCursorSkip</a></li>
             
@@ -866,6 +870,22 @@
             
             </ul>
             <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="GridStore~collectionCallback"><a href="GridStore.html#~collectionCallback">collectionCallback</a></li>
+            
+                <li data-name="GridStore~gridStoreCallback"><a href="GridStore.html#~gridStoreCallback">gridStoreCallback</a></li>
+            
+                <li data-name="GridStore~openCallback"><a href="GridStore.html#~openCallback">openCallback</a></li>
+            
+                <li data-name="GridStore~readCallback"><a href="GridStore.html#~readCallback">readCallback</a></li>
+            
+                <li data-name="GridStore~readlinesCallback"><a href="GridStore.html#~readlinesCallback">readlinesCallback</a></li>
+            
+                <li data-name="GridStore~resultCallback"><a href="GridStore.html#~resultCallback">resultCallback</a></li>
+            
+                <li data-name="GridStore~tellCallback"><a href="GridStore.html#~tellCallback">tellCallback</a></li>
             
             </ul>
             <ul class="methods itemMembers">
@@ -3651,13 +3671,13 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   var collection = db.collection('shouldCorrectlyFailOnRetryDueToAppCloseOfDb');
 
   // Insert a document
-  collection.insert({a:1}, {w:1}, function(err, result) {
+  collection.insertOne({a:1}, {w:1}, function(err, result) {
     test.equal(null, err);
 
     // Force close the connection
     db.close(true, function(err, result) {
       // Attemp to insert should fail now with correct message 'db closed by application'
-      collection.insert({a:2}, {w:1}, function(err, result) {
+      collection.insertOne({a:2}, {w:1}, function(err, result) {
         test.equal('db closed by application', err.message);
         db.close();
       });
@@ -5379,7 +5399,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
@@ -5395,10 +5415,51 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     test.equal(null, err);
 
     // Insert a document in the capped collection
-    collection.insert({a:1}, {w:1}, function(err, result) {
+    collection.insertOne({a:1}, {w:1}, function(err, result) {
       test.equal(null, err);
 
       db.close();
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// A simple example showing the listening to a capped collection
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  test.equal(null, err);
+
+  // Create a capped collection with a maximum of 1000 documents
+  db.createCollection("a_simple_collection_2", {capped:true, size:10000, max:1000, w:1}, function(err, collection) {
+    test.equal(null, err);
+
+    var docs = [];
+    for(var i = 0; i < 1000; i++) docs.push({a:i});
+
+    // Insert a document in the capped collection
+    collection.insertMany(docs, {w:1}, function(err, result) {
+
+      // Start date
+      var s = new Date();
+
+      // Get the cursor
+      var cursor = collection.find({})
+        .addCursorFlag('tailable', true)
+        .addCursorFlag('awaitData', true)
+        .setCursorOption('numberOfRetries', 5)
+        .setCursorOption('tailableRetryInterval', 100);
+
+      cursor.on('data', function() {});
+
+      cursor.on('end', function() {
+        test.ok((new Date().getTime() - s.getTime()) > 1000);
+
+        db.close();
+      });
     });
   });
 });</code></pre>
@@ -6112,7 +6173,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   // Create a collection we want to drop later
   var collection = db.collection('more_complex_index_test');
   // Insert a bunch of documents for the index
-  collection.insert([{a:1, b:1}
+  collection.insertMany([{a:1, b:1}
     , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
     test.equal(null, err);
 
@@ -6280,8 +6341,8 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   var multipleColl2 = secondDb.collection("multiple_db_instances");
   
   // Write a record into each and then count the records stored
-  multipleColl1.insert({a:1}, {w:1}, function(err, result) {      
-    multipleColl2.insert({a:1}, {w:1}, function(err, result) {
+  multipleColl1.insertOne({a:1}, {w:1}, function(err, result) {      
+    multipleColl2.insertOne({a:1}, {w:1}, function(err, result) {
       
       // Count over the results ensuring only on record in each collection
       multipleColl1.count(function(err, count) {
@@ -6463,7 +6524,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
       test.equal(null, err);
 
       // Insert a document in the capped collection
-      collection.insert({a:1}, {w:1}, function(err, result) {
+      collection.insertOne({a:1}, {w:1}, function(err, result) {
         test.equal(null, err);
 
         // Drop the collection from this world
@@ -6625,7 +6686,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   // Create a collection
   var collection = db.collection('more_index_information_test_1');
   // Insert a bunch of documents for the index
-  collection.insert([{a:1, b:1}, {a:1, b:1}
+  collection.insertMany([{a:1, b:1}, {a:1, b:1}
     , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
     test.equal(null, err);
 
@@ -7368,7 +7429,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   // Create a collection we want to drop later
   var collection = db.collection('more_complex_ensure_index_db_test');
   // Insert a bunch of documents for the index
-  collection.insert([{a:1, b:1}
+  collection.insertMany([{a:1, b:1}
     , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
     test.equal(null, err);
 
@@ -7782,11 +7843,11 @@ var MongoClient = require('mongodb').MongoClient,
 MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 
   // Clean out the collection
-  db.collection("system.js").remove({}, {w:1}, function(err, result) {
+  db.collection("system.js").deleteMany({}, {w:1}, function(err, result) {
     test.equal(null, err);
 
     // Define a system level function
-    db.collection("system.js").insert({_id: "echo", value: new Code("function(x) { return x; }")}, {w:1}, function(err, result) {
+    db.collection("system.js").insertOne({_id: "echo", value: new Code("function(x) { return x; }")}, {w:1}, function(err, result) {
       test.equal(null, err);
     
       db.eval("echo(5)", function(err, result) {
@@ -8643,7 +8704,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   // Create a collection
   var collection = db1.collection('shouldCorrectlyRetrievelistCollections');
   // Ensure the collection was created
-  collection.insert({a:1}, function(err, r) {
+  collection.insertOne({a:1}, function(err, r) {
     test.equal(null, err);
 
     // Return the information of a single collection name
@@ -9761,7 +9822,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     test.equal(null, err);
 
     // Insert a document in the collection
-    collection.insert({a:1}, {w:1}, function(err, result) {
+    collection.insertOne({a:1}, {w:1}, function(err, result) {
       test.equal(null, err);
 
       // Retrieve the number of documents from the collection
@@ -11351,7 +11412,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Apr 16 2015 17:49:34 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Wed Apr 22 2015 13:11:58 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

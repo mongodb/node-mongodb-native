@@ -586,6 +586,8 @@
             
                 <li data-name="Cursor#limit"><a href="Cursor.html#limit">limit</a></li>
             
+                <li data-name="Cursor#map"><a href="Cursor.html#map">map</a></li>
+            
                 <li data-name="Cursor#maxTimeMS"><a href="Cursor.html#maxTimeMS">maxTimeMS</a></li>
             
                 <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
@@ -607,6 +609,8 @@
                 <li data-name="Cursor#setBatchSize"><a href="Cursor.html#setBatchSize">setBatchSize</a></li>
             
                 <li data-name="Cursor#setCursorLimit"><a href="Cursor.html#setCursorLimit">setCursorLimit</a></li>
+            
+                <li data-name="Cursor#setCursorOption"><a href="Cursor.html#setCursorOption">setCursorOption</a></li>
             
                 <li data-name="Cursor#setCursorSkip"><a href="Cursor.html#setCursorSkip">setCursorSkip</a></li>
             
@@ -866,6 +870,22 @@
             
             </ul>
             <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="GridStore~collectionCallback"><a href="GridStore.html#~collectionCallback">collectionCallback</a></li>
+            
+                <li data-name="GridStore~gridStoreCallback"><a href="GridStore.html#~gridStoreCallback">gridStoreCallback</a></li>
+            
+                <li data-name="GridStore~openCallback"><a href="GridStore.html#~openCallback">openCallback</a></li>
+            
+                <li data-name="GridStore~readCallback"><a href="GridStore.html#~readCallback">readCallback</a></li>
+            
+                <li data-name="GridStore~readlinesCallback"><a href="GridStore.html#~readlinesCallback">readlinesCallback</a></li>
+            
+                <li data-name="GridStore~resultCallback"><a href="GridStore.html#~resultCallback">resultCallback</a></li>
+            
+                <li data-name="GridStore~tellCallback"><a href="GridStore.html#~tellCallback">tellCallback</a></li>
             
             </ul>
             <ul class="methods itemMembers">
@@ -1676,8 +1696,12 @@ var inherits = require('util').inherits
  * @external Readable
  */
 
+// // Map core cursor _next method so we can apply mapping
+// CoreCursor.prototype._next = CoreCursor.prototype.next;
+
 // Flags allowed for cursor
 var flags = ['tailable', 'oplogReplay', 'noCursorTimeout', 'awaitData', 'exhaust', 'partial'];
+var fields = ['numberOfRetries', 'tailableRetryInterval'];
 
 /**
  * Creates a new Cursor instance (INTERNAL TYPE, do not instantiate directly)
@@ -1705,18 +1729,14 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
   var numberOfRetries = options.numberOfRetries || 5;
   var tailableRetryInterval = options.tailableRetryInterval || 500;
   var currentNumberOfRetries = numberOfRetries;
-  // MaxTimeMS
-  var maxTimeMS = null;
 
   // Set up
   Readable.call(this, {objectMode: true});
 
   // Internal cursor state
   this.s = {
-    // MaxTimeMS
-      maxTimeMS: null
     // Tailable cursor options
-    , numberOfRetries: numberOfRetries
+      numberOfRetries: numberOfRetries
     , tailableRetryInterval: tailableRetryInterval
     , currentNumberOfRetries: currentNumberOfRetries
     // State
@@ -1774,9 +1794,14 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
 // Inherit from Readable
 inherits(Cursor, Readable);
 
+// Map core cursor _next method so we can apply mapping
+CoreCursor.prototype._next = CoreCursor.prototype.next;
+
 for(var name in CoreCursor.prototype) {
   Cursor.prototype[name] = CoreCursor.prototype[name];
 }
+
+Cursor.prototype.mister = function() {}
 
 /**
  * Set the cursor query
@@ -1791,6 +1816,23 @@ Cursor.prototype.filter = function(filter) {
 }
 
 /**
+ * Set a node.js specific cursor option
+ * @method
+ * @param {string} field The cursor option to set ['numberOfRetries', 'tailableRetryInterval'].
+ * @param {object} value The field value.
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Cursor.prototype.setCursorOption = function(field, value) {
+  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw new MongoError("Cursor is closed");
+  if(fields.indexOf(field) == -1) throw new MongoError(f("option %s not a supported option %s", field, fields));
+  this.s[field] = value;
+  if(field == 'numberOfRetries') 
+    this.s.currentNumberOfRetries = value;
+  return this;
+}
+
+/**
  * Add a cursor flag to the cursor
  * @method
  * @param {string} flag The flag to set, must be one of following ['tailable', 'oplogReplay', 'noCursorTimeout', 'awaitData', 'exhaust', 'partial'].
@@ -1800,8 +1842,8 @@ Cursor.prototype.filter = function(filter) {
  */
 Cursor.prototype.addCursorFlag = function(flag, value) {
   if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw new MongoError("Cursor is closed");
-  if(flags.indexOf(flag) == -1) throw new MongoError(f("flag % not a supported flag %s", flag, flags));
-  if(typeof value != 'boolean') throw new MongoError(f("flag % must be a boolean value", flag));
+  if(flags.indexOf(flag) == -1) throw new MongoError(f("flag %s not a supported flag %s", flag, flags));
+  if(typeof value != 'boolean') throw new MongoError(f("flag %s must be a boolean value", flag));
   this.s.cmd[flag] = value;
   return this;
 }
@@ -1849,7 +1891,6 @@ Cursor.prototype.comment = function(value) {
 Cursor.prototype.maxTimeMS = function(value) {
   if(typeof value != 'number') throw new MongoError("maxTimeMS must be a number");
   if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw new MongoError("Cursor is closed");
-  this.s.maxTimeMS = value;
   this.s.cmd.maxTimeMS = value;
   return this;
 }
@@ -2029,7 +2070,7 @@ Cursor.prototype.nextObject = function(callback) {
   }
 
   // Get the next object
-  self.next(function(err, doc) {
+  self._next(function(err, doc) {
     if(err &amp;&amp; err.tailable &amp;&amp; self.s.currentNumberOfRetries == 0) return callback(err);
     if(err &amp;&amp; err.tailable &amp;&amp; self.s.currentNumberOfRetries > 0) {
       self.s.currentNumberOfRetries = self.s.currentNumberOfRetries - 1;
@@ -2050,7 +2091,7 @@ var loop = function(self, callback) {
   // No more items we are done
   if(self.bufferedCount() == 0) return;
   // Get the next document
-  self.next(callback);
+  self._next(callback);
   // Loop
   return loop;
 }
@@ -2094,7 +2135,7 @@ var _each = function(self, callback) {
     while(fn = loop(self, callback)) fn(self, callback);
     _each(self, callback);
   } else {
-    self.next(function(err, item) {
+    self._next(function(err, item) {
       if(err) return handleCallback(callback, err);
       if(item == null) {
         self.s.state = Cursor.CLOSED;
@@ -2185,9 +2226,10 @@ Cursor.prototype.toArray = function(callback) {
   this.rewind();
   self.s.state = Cursor.INIT;
 
+
   // Fetch all the documents
   var fetchDocs = function() {
-    self.next(function(err, doc) {
+    self._next(function(err, doc) {
       if(err) return handleCallback(callback, err);
       if(doc == null) {
         self.s.state = Cursor.CLOSED;
@@ -2198,8 +2240,14 @@ Cursor.prototype.toArray = function(callback) {
       items.push(doc)
       // Get all buffered objects
       if(self.bufferedCount() > 0) {
-        var a = self.readBufferedDocuments(self.bufferedCount())
-        items = items.concat(a);
+        var docs = self.readBufferedDocuments(self.bufferedCount())
+
+        // Transform the doc if transform method added
+        if(self.s.transforms &amp;&amp; typeof self.s.transforms.doc == 'function') {
+          docs = docs.map(self.s.transforms.doc);
+        }
+
+        items = items.concat(docs);
       }
 
       // Attempt a fetch
@@ -2240,22 +2288,21 @@ Cursor.prototype.count = function(applySkipLimit, opts, callback) {
     applySkipLimit = true;
   }
 
-  var opts = {};
   if(applySkipLimit) {
     if(typeof this.cursorSkip() == 'number') opts.skip = this.cursorSkip();
     if(typeof this.cursorLimit() == 'number') opts.limit = this.cursorLimit();
   }
 
   // Command
-
   var delimiter = self.s.ns.indexOf('.');
 
   var command = {
     'count': self.s.ns.substr(delimiter+1), 'query': self.s.cmd.query
   }
 
-  // If maxTimeMS set
-  if(typeof maxTimeMS == 'number') {
+  if(typeof opts.maxTimeMS == 'number') {
+    command.maxTimeMS = opts.maxTimeMS;
+  } else if(typeof self.s.maxTimeMS == 'number') {
     command.maxTimeMS = self.s.maxTimeMS;
   }
 
@@ -2308,6 +2355,17 @@ Cursor.prototype.close = function(callback) {
 }
 
 /**
+ * Map all documents using the provided function
+ * @method
+ * @param {function} [transform] The mapping transformation method.
+ * @return {null}
+ */
+Cursor.prototype.map = function(transform) {
+  this.cursorState.transforms = { doc: transform };
+  return this;
+}
+
+/**
  * Is the cursor closed
  * @method
  * @return {boolean}
@@ -2342,7 +2400,7 @@ Cursor.prototype.stream = function(options) {
  */
 Cursor.prototype.explain = function(callback) {
   this.s.cmd.explain = true;
-  this.next(callback);
+  this._next(callback);
 }
 
 Cursor.prototype._read = function(n) {
@@ -2366,6 +2424,11 @@ Cursor.prototype._read = function(n) {
     // If we provided a transformation method
     if(typeof self.s.streamOptions.transform == 'function' &amp;&amp; result != null) {
       return self.push(self.s.streamOptions.transform(result));
+    }
+
+    // If we provided a map function
+    if(self.cursorState.transforms &amp;&amp; typeof self.cursorState.transforms.doc == 'function' &amp;&amp; result != null) {
+      return self.push(self.cursorState.transforms.doc(result));
     }
 
     // Return the result
@@ -2486,7 +2549,7 @@ module.exports = Cursor;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Apr 16 2015 17:49:34 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Wed Apr 22 2015 13:11:58 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

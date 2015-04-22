@@ -586,6 +586,8 @@
             
                 <li data-name="Cursor#limit"><a href="Cursor.html#limit">limit</a></li>
             
+                <li data-name="Cursor#map"><a href="Cursor.html#map">map</a></li>
+            
                 <li data-name="Cursor#maxTimeMS"><a href="Cursor.html#maxTimeMS">maxTimeMS</a></li>
             
                 <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
@@ -607,6 +609,8 @@
                 <li data-name="Cursor#setBatchSize"><a href="Cursor.html#setBatchSize">setBatchSize</a></li>
             
                 <li data-name="Cursor#setCursorLimit"><a href="Cursor.html#setCursorLimit">setCursorLimit</a></li>
+            
+                <li data-name="Cursor#setCursorOption"><a href="Cursor.html#setCursorOption">setCursorOption</a></li>
             
                 <li data-name="Cursor#setCursorSkip"><a href="Cursor.html#setCursorSkip">setCursorSkip</a></li>
             
@@ -866,6 +870,22 @@
             
             </ul>
             <ul class="typedefs itemMembers">
+            
+            <span class="subtitle">Typedefs</span>
+            
+                <li data-name="GridStore~collectionCallback"><a href="GridStore.html#~collectionCallback">collectionCallback</a></li>
+            
+                <li data-name="GridStore~gridStoreCallback"><a href="GridStore.html#~gridStoreCallback">gridStoreCallback</a></li>
+            
+                <li data-name="GridStore~openCallback"><a href="GridStore.html#~openCallback">openCallback</a></li>
+            
+                <li data-name="GridStore~readCallback"><a href="GridStore.html#~readCallback">readCallback</a></li>
+            
+                <li data-name="GridStore~readlinesCallback"><a href="GridStore.html#~readlinesCallback">readlinesCallback</a></li>
+            
+                <li data-name="GridStore~resultCallback"><a href="GridStore.html#~resultCallback">resultCallback</a></li>
+            
+                <li data-name="GridStore~tellCallback"><a href="GridStore.html#~tellCallback">tellCallback</a></li>
             
             </ul>
             <ul class="methods itemMembers">
@@ -1861,7 +1881,7 @@ Collection instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1482">line 1482</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1494">line 1494</a>
         </div>
         
     </div>
@@ -2335,7 +2355,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   // Create a collection
   var collection = db.collection('aggregationExample1');
   // Insert the docs
-  collection.insert(docs, {w: 1}, function(err, result) {
+  collection.insertMany(docs, {w: 1}, function(err, result) {
 
     // Execute aggregate, notice the pipeline is expressed as an Array
     collection.aggregate([
@@ -2379,7 +2399,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   // Create a collection
   var collection = db.collection('aggregationExample2');
   // Insert the docs
-  collection.insert(docs, {w: 1}, function(err, result) {
+  collection.insertMany(docs, {w: 1}, function(err, result) {
 
     // Execute aggregate, notice the pipeline is expressed as an Array
     var cursor = collection.aggregate([
@@ -2422,7 +2442,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   // Create a collection
   var collection = db.collection('aggregationExample3');
   // Insert the docs
-  collection.insert(docs, {w: 1}, function(err, result) {
+  collection.insertMany(docs, {w: 1}, function(err, result) {
 
     // Execute aggregate, notice the pipeline is expressed as an Array
     var cursor = collection.aggregate([
@@ -2465,7 +2485,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line423">line 423</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line429">line 429</a>
         </div>
         
     </div>
@@ -2478,12 +2498,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="description">
         <p>Perform a bulkWrite operation without a fluent API</p>
 <p>Legal operation types are</p>
-<p> { insertOne: { document: { a: 1 } } }
- { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
- { updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
- { deleteOne: { filter: {c:1} } }
- { deleteMany: { filter: {c:1} } }
- { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}]</p>
+<p> { insertOne: { document: { a: 1 } } }</p>
+<p> { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }</p>
+<p> { updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }</p>
+<p> { deleteOne: { filter: {c:1} } }</p>
+<p> { deleteMany: { filter: {c:1} } }</p>
+<p> { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}</p>
     </div>
     
 
@@ -2883,7 +2903,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1185">line 1185</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1197">line 1197</a>
         </div>
         
     </div>
@@ -3253,7 +3273,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   // Crete the collection for the distinct example
   var collection = db.collection('countExample1');
   // Insert documents to perform distinct against
-  collection.insert([{a:1}, {a:2}
+  collection.insertMany([{a:1}, {a:2}
     , {a:3}, {a:4, b:1}], {w: 1}, function(err, ids) {
 
     // Perform a total count command
@@ -3287,7 +3307,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line955">line 955</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line967">line 967</a>
         </div>
         
     </div>
@@ -3948,7 +3968,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   // Create a collection we want to drop later
   var collection = db.collection('createIndexExample1');
   // Insert a bunch of documents for the index
-  collection.insert([{a:1, b:1}
+  collection.insertMany([{a:1, b:1}
     , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
     test.equal(null, err);
 
@@ -3985,7 +4005,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   // Create a collection we want to drop later
   var collection = db.collection('createIndexExample2');
   // Insert a bunch of documents for the index
-  collection.insert([{a:1}, {a:2}, {a:3}, {a:4}], {w:1}, function(err, result) {
+  collection.insertMany([{a:1}, {a:2}, {a:3}, {a:4}], {w:1}, function(err, result) {
     test.equal(null, err);
 
     // Create an index on the a field
@@ -4015,7 +4035,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   // Create a collection we want to drop later
   var collection = db.collection('createIndexExample3');
   // Insert a bunch of documents for the index
-  collection.insert([{a:1, b:1}
+  collection.insertMany([{a:1, b:1}
     , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
     test.equal(null, err);
 
@@ -4057,7 +4077,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line974">line 974</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line986">line 986</a>
         </div>
         
     </div>
@@ -4203,7 +4223,7 @@ error. Index specifications are defined at http://docs.mongodb.org/manual/refere
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line708">line 708</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line719">line 719</a>
         </div>
         
     </div>
@@ -4538,7 +4558,7 @@ error. Index specifications are defined at http://docs.mongodb.org/manual/refere
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line684">line 684</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line694">line 694</a>
         </div>
         
     </div>
@@ -4873,7 +4893,7 @@ error. Index specifications are defined at http://docs.mongodb.org/manual/refere
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1226">line 1226</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1238">line 1238</a>
         </div>
         
     </div>
@@ -5168,7 +5188,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   var collection = db.collection('distinctExample1');
 
   // Insert documents to perform distinct against
-  collection.insert([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
+  collection.insertMany([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
     {a:2, b:{c:'a'}}, {a:3}, {a:3}], {w:1}, function(err, ids) {
 
     // Peform a distinct query against the a field
@@ -5198,7 +5218,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   var collection = db.collection('distinctExample2');
 
   // Insert documents to perform distinct against
-  collection.insert([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
+  collection.insertMany([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
     {a:2, b:{c:'a'}}, {a:3}, {a:3}, {a:5, c:1}], {w:1}, function(err, ids) {
 
     // Peform a distinct query with a filter against the documents
@@ -5225,7 +5245,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line901">line 901</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line913">line 913</a>
         </div>
         
     </div>
@@ -5386,7 +5406,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1042">line 1042</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1054">line 1054</a>
         </div>
         
     </div>
@@ -5461,7 +5481,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
     
-        <dt class="important tag-deprecated">Deprecated</dt><dd><ul class="dummy"><li>since version 2.0</li><ul></dd>
+        <dt class="important tag-deprecated">Deprecated</dt><dd><ul class="dummy"><li>use dropIndexes</li><ul></dd>
     
     
     
@@ -5533,7 +5553,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1006">line 1006</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1018">line 1018</a>
         </div>
         
     </div>
@@ -5866,7 +5886,7 @@ var MongoClient = require('mongodb').MongoClient,
 MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   var collection = db.collection('dropIndexExample1');
   // Insert a bunch of documents for the index
-  collection.insert([{a:1, b:1}
+  collection.insertMany([{a:1, b:1}
     , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
     test.equal(null, err);
 
@@ -5905,7 +5925,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1028">line 1028</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1040">line 1040</a>
         </div>
         
     </div>
@@ -6026,7 +6046,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   // Create a collection we want to drop later
   var collection = db.collection('shouldCorrectlyCreateAndDropAllIndex');
   // Insert a bunch of documents for the index
-  collection.insert([{a:1, b:1}
+  collection.insertMany([{a:1, b:1}
     , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {w:1}, function(err, result) {
     test.equal(null, err);
 
@@ -6071,7 +6091,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1118">line 1118</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1130">line 1130</a>
         </div>
         
     </div>
@@ -6687,7 +6707,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
     
-        <dt class="important tag-deprecated">Deprecated</dt><dd><ul class="dummy"><li>since version 2.0</li><ul></dd>
+        <dt class="important tag-deprecated">Deprecated</dt><dd><ul class="dummy"><li>use createIndexes instead</li><ul></dd>
     
     
     
@@ -6733,7 +6753,7 @@ var MongoClient = require('mongodb').MongoClient,
 MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   var collection = db.collection('ensureIndexExample1');
   // Insert a bunch of documents for the index
-  collection.insert([{a:1, b:1}
+  collection.insertMany([{a:1, b:1}
     , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
     test.equal(null, err);
 
@@ -6768,7 +6788,7 @@ var MongoClient = require('mongodb').MongoClient,
 MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   var collection = db.collection('ensureIndexExample2');
   // Insert a bunch of documents for the index
-  collection.insert([{a:1, b:1}
+  collection.insertMany([{a:1, b:1}
     , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
     test.equal(null, err);
 
@@ -6946,7 +6966,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   var collection = db.collection('simple_query');
 
   // Insert a bunch of documents for the testing
-  collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, result) {
+  collection.insertMany([{a:1}, {a:2}, {a:3}], {w:1}, function(err, result) {
     test.equal(null, err);
 
     // Peform a simple find and return all the documents
@@ -6971,7 +6991,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   // Create a collection we want to drop later
   var collection = db.collection('simple_explain_query');
   // Insert a bunch of documents for the testing
-  collection.insert([{a:1}, {a:2}, {a:3}], {w:1}, function(err, result) {
+  collection.insertMany([{a:1}, {a:2}, {a:3}], {w:1}, function(err, result) {
     test.equal(null, err);
 
     // Peform a simple find and return all the documents
@@ -6996,7 +7016,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   // Create a collection we want to drop later
   var collection = db.collection('simple_limit_skip_query');
   // Insert a bunch of documents for the testing
-  collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {w:1}, function(err, result) {
+  collection.insertMany([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {w:1}, function(err, result) {
     test.equal(null, err);
 
     // Peform a simple find and return all the documents
@@ -7026,7 +7046,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1396">line 1396</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1408">line 1408</a>
         </div>
         
     </div>
@@ -7523,7 +7543,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
     
-        <dt class="important tag-deprecated">Deprecated</dt><dd class="yes-def tag-deprecated"><ul class="dummy"><li>Yes</li></ul></dd>
+        <dt class="important tag-deprecated">Deprecated</dt><dd><ul class="dummy"><li>use findOneAndUpdate, findOneAndReplace or findOneAndDelete instead</li><ul></dd>
     
     
     
@@ -7574,7 +7594,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   var collection = db.collection('simple_find_and_modify_operations_');
 
   // Insert some test documentations
-  collection.insert([{a:1}, {b:1}, {c:1}], {w:1}, function(err, result) {
+  collection.insertMany([{a:1}, {b:1}, {c:1}], {w:1}, function(err, result) {
     test.equal(null, err);
 
     // Simple findAndModify command returning the new document
@@ -7624,7 +7644,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1457">line 1457</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1469">line 1469</a>
         </div>
         
     </div>
@@ -7945,7 +7965,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
     
-        <dt class="important tag-deprecated">Deprecated</dt><dd class="yes-def tag-deprecated"><ul class="dummy"><li>Yes</li></ul></dd>
+        <dt class="important tag-deprecated">Deprecated</dt><dd><ul class="dummy"><li>use findOneAndDelete instead</li><ul></dd>
     
     
     
@@ -7993,7 +8013,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   // Create a collection we want to drop later
   var collection = db.collection('simple_find_and_modify_operations_2');
   // Insert some test documentations
-  collection.insert([{a:1}, {b:1, d:1}, {c:1}], {w:1}, function(err, result) {
+  collection.insertMany([{a:1}, {b:1, d:1}, {c:1}], {w:1}, function(err, result) {
     test.equal(null, err);
 
     // Simple findAndModify command returning the old document and
@@ -8029,7 +8049,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line840">line 840</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line852">line 852</a>
         </div>
         
     </div>
@@ -8979,7 +8999,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   // Create a collection we want to drop later
   var collection = db.collection('simple_limit_skip_find_one_query');
   // Insert a bunch of documents for the testing
-  collection.insert([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {w:1}, function(err, result) {
+  collection.insertMany([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {w:1}, function(err, result) {
     test.equal(null, err);
 
     // Peform a simple find and return all the documents
@@ -9008,7 +9028,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1302">line 1302</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1314">line 1314</a>
         </div>
         
     </div>
@@ -9369,7 +9389,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1331">line 1331</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1343">line 1343</a>
         </div>
         
     </div>
@@ -9841,7 +9861,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1362">line 1362</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1374">line 1374</a>
         </div>
         
     </div>
@@ -10313,7 +10333,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1703">line 1703</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1715">line 1715</a>
         </div>
         
     </div>
@@ -10720,7 +10740,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   collection.ensureIndex({loc: "geoHaystack", type: 1}, {bucketSize: 1}, function(err, result) {
 
     // Save a new location tagged document
-    collection.insert([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], {w:1}, function(err, result) {
+    collection.insertMany([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], {w:1}, function(err, result) {
      
       // Use geoNear command to find document
       collection.geoHaystackSearch(50, 50, {search:{a:1}, limit:1, maxDistance:100}, function(err, docs) {
@@ -10746,7 +10766,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1651">line 1651</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1663">line 1663</a>
         </div>
         
     </div>
@@ -11333,7 +11353,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   collection.ensureIndex({loc:"2d"}, function(err, result) {
 
     // Save a new location tagged document
-    collection.insert([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], {w:1}, function(err, result) {
+    collection.insertMany([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], {w:1}, function(err, result) {
      
       // Use geoNear command to find document
       collection.geoNear(50, 50, {query:{a:1}, num:1}, function(err, docs) {
@@ -11360,7 +11380,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1778">line 1778</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1790">line 1790</a>
         </div>
         
     </div>
@@ -11804,7 +11824,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     test.deepEqual([], results);
 
     // Trigger some inserts on the collection
-    collection.insert([{'a':2}, {'b':5}, {'a':1}], {w:1}, function(err, ids) {
+    collection.insertMany([{'a':2}, {'b':5}, {'a':1}], {w:1}, function(err, ids) {
 
       // Perform a group count
       collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
@@ -11825,7 +11845,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
               test.equal(1, results[0].count);
 
               // Insert some more test data
-              collection.insert([{'a':2}, {'b':3}], {w:1}, function(err, ids) {
+              collection.insertMany([{'a':2}, {'b':3}], {w:1}, function(err, ids) {
 
                 // Do a Group by field a
                 collection.group(['a'], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
@@ -11910,7 +11930,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1256">line 1256</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1268">line 1268</a>
         </div>
         
     </div>
@@ -12064,7 +12084,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1131">line 1131</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1143">line 1143</a>
         </div>
         
     </div>
@@ -12246,7 +12266,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1157">line 1157</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1169">line 1169</a>
         </div>
         
     </div>
@@ -12474,7 +12494,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   // Create a collection we want to drop later
   var collection = db.collection('more_index_information_test_2');
   // Insert a bunch of documents for the index
-  collection.insert([{a:1, b:1}
+  collection.insertMany([{a:1, b:1}
     , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
     test.equal(null, err);
 
@@ -12511,7 +12531,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   // Create a collection we want to drop later
   var collection = db.collection('more_index_information_test_3');
   // Insert a bunch of documents for the index
-  collection.insert([{a:1, b:1}
+  collection.insertMany([{a:1, b:1}
     , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
     test.equal(null, err);
 
@@ -12552,7 +12572,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2031">line 2031</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2043">line 2043</a>
         </div>
         
     </div>
@@ -12900,7 +12920,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2016">line 2016</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2028">line 2028</a>
         </div>
         
     </div>
@@ -13249,7 +13269,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line528">line 528</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line534">line 534</a>
         </div>
         
     </div>
@@ -13613,7 +13633,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
     
-        <dt class="important tag-deprecated">Deprecated</dt><dd class="yes-def tag-deprecated"><ul class="dummy"><li>Yes</li></ul></dd>
+        <dt class="important tag-deprecated">Deprecated</dt><dd><ul class="dummy"><li>Use insertOne, insertMany or bulkWrite</li><ul></dd>
     
     
     
@@ -13659,7 +13679,7 @@ var MongoClient = require('mongodb').MongoClient,
 MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   var collection = db.collection("simple_document_insert_collection_no_safe");
   // Insert a single document
-  collection.insert({hello:'world_no_safe'});
+  collection.insertOne({hello:'world_no_safe'});
 
   // Wait for a second before finishing up, to ensure we have written the item to disk
   setTimeout(function() {
@@ -13684,7 +13704,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   // Fetch a collection to insert document into
   var collection = db.collection("batch_document_insert_collection_safe");
   // Insert a single document
-  collection.insert([{hello:'world_safe1'}
+  collection.insertMany([{hello:'world_safe1'}
     , {hello:'world_safe2'}], {w:1}, function(err, result) {
     test.equal(null, err);
 
@@ -13711,7 +13731,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   var o = {w:1};
   o.serializeFunctions = true;
   // Insert a single document
-  collection.insert({hello:'world'
+  collection.insertOne({hello:'world'
     , func:function() {}}, o, function(err, result) {
     test.equal(null, err);
 
@@ -13740,11 +13760,11 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   collection.ensureIndex({title:1}, {unique:true}, function(err, indexName) {
 
     // Insert some intial data into the collection
-    collection.insert([{name:"Jim"}
+    collection.insertMany([{name:"Jim"}
       , {name:"Sarah", title:"Princess"}], {w:1}, function(err, result) {
 
       // Force keep going flag, ignoring unique index issue
-      collection.insert([{name:"Jim"}
+      collection.insertMany([{name:"Jim"}
         , {name:"Sarah", title:"Princess"}
         , {name:'Gump', title:"Gump"}], {w:1, keepGoing:true}, function(err, result) {
 
@@ -13772,7 +13792,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line366">line 366</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line367">line 367</a>
         </div>
         
     </div>
@@ -14628,7 +14648,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line928">line 928</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line940">line 940</a>
         </div>
         
     </div>
@@ -14774,7 +14794,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1074">line 1074</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1086">line 1086</a>
         </div>
         
     </div>
@@ -14970,7 +14990,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1915">line 1915</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1927">line 1927</a>
         </div>
         
     </div>
@@ -15614,7 +15634,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   var collection = db.collection('test_map_reduce_functions');
 
   // Insert some documents to perform map reduce over
-  collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
+  collection.insertMany([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
 
     // Map function
     var map = function() { emit(this.user_id, 1); };
@@ -15652,7 +15672,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   var collection = db.collection('test_map_reduce_functions_inline');
 
   // Insert some test documents
-  collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
+  collection.insertMany([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
 
     // Map function
     var map = function() { emit(this.user_id, 1); };
@@ -15686,7 +15706,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   var collection = db.collection('test_map_reduce_functions_scope');
 
   // Insert some test documents
-  collection.insert([{'user_id':1, 'timestamp':new Date()}
+  collection.insertMany([{'user_id':1, 'timestamp':new Date()}
     , {'user_id':2, 'timestamp':new Date()}], {w:1}, function(err, r) {
 
     // Map function
@@ -15753,7 +15773,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   var collection = db.collection('test_map_reduce_functions_scope_objects');
 
   // Insert some test documents
-  collection.insert([{'user_id':1, 'timestamp':new Date()}
+  collection.insertMany([{'user_id':1, 'timestamp':new Date()}
     , {'user_id':2, 'timestamp':new Date()}], {w:1}, function(err, r) {
 
     // Map function
@@ -15820,7 +15840,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line912">line 912</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line924">line 924</a>
         </div>
         
     </div>
@@ -15967,7 +15987,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1589">line 1589</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1601">line 1601</a>
         </div>
         
     </div>
@@ -16313,7 +16333,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   // Get the collection
   var collection = db.collection('parallelCollectionScan');
   // Insert 1000 documents in a batch
-  collection.insert(docs, function(err, result) {
+  collection.insertMany(docs, function(err, result) {
     var results = [];
     var numCursors = 3;
 
@@ -16358,7 +16378,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1051">line 1051</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1063">line 1063</a>
         </div>
         
     </div>
@@ -16480,7 +16500,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   // Create a collection we want to drop later
   var collection = db.collection('shouldCorrectlyForceReindexOnCollection');
   // Insert a bunch of documents for the index
-  collection.insert([{a:1, b:1}
+  collection.insertMany([{a:1, b:1}
     , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {w:1}, function(err, result) {
     test.equal(null, err);
 
@@ -16520,7 +16540,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line768">line 768</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line780">line 780</a>
         </div>
         
     </div>
@@ -16845,7 +16865,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
     
-        <dt class="important tag-deprecated">Deprecated</dt><dd class="yes-def tag-deprecated"><ul class="dummy"><li>Yes</li></ul></dd>
+        <dt class="important tag-deprecated">Deprecated</dt><dd><ul class="dummy"><li>use deleteOne, deleteMany or bulkWrite</li><ul></dd>
     
     
     
@@ -16893,11 +16913,11 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   // Fetch a collection to insert document into
   var collection = db.collection("remove_all_documents_no_safe");        
   // Insert a bunch of documents
-  collection.insert([{a:1}, {b:2}], {w:1}, function(err, result) {
+  collection.insertMany([{a:1}, {b:2}], {w:1}, function(err, result) {
     test.equal(null, err);
     
     // Remove all the document
-    collection.remove();
+    collection.removeMany();
     
     // Fetch all results
     collection.find().toArray(function(err, items) {
@@ -16921,11 +16941,11 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   // Fetch a collection to insert document into
   var collection = db.collection("remove_subset_of_documents_safe");
   // Insert a bunch of documents
-  collection.insert([{a:1}, {b:2}], {w:1}, function(err, result) {
+  collection.insertMany([{a:1}, {b:2}], {w:1}, function(err, result) {
     test.equal(null, err);
     
     // Remove all the document
-    collection.remove({a:1}, {w:1}, function(err, r) {
+    collection.removeOne({a:1}, {w:1}, function(err, r) {
       test.equal(null, err);
       test.equal(1, r.result.n);
       db.close();
@@ -16948,7 +16968,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line870">line 870</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line882">line 882</a>
         </div>
         
     </div>
@@ -17255,7 +17275,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
       }
 
       // Insert a couple of documents
-      collection1.insert([{'x':1}, {'x':2}], {w:1}, function(err, docs) {
+      collection1.insertMany([{'x':1}, {'x':2}], {w:1}, function(err, docs) {
 
         // Attemp to rename the first collection to the second one, this will fail
         collection1.rename('test_rename_collection2', function(err, collection) {
@@ -17295,7 +17315,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line574">line 574</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line581">line 581</a>
         </div>
         
     </div>
@@ -17698,7 +17718,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line784">line 784</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line796">line 796</a>
         </div>
         
     </div>
@@ -18102,7 +18122,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1269">line 1269</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1281">line 1281</a>
         </div>
         
     </div>
@@ -18331,7 +18351,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   var collection = db.collection('collection_stats_test');
 
   // Insert some documents
-  collection.insert([{a:1}, {hello:'world'}], {w:1}, function(err, result) {
+  collection.insertMany([{a:1}, {hello:'world'}], {w:1}, function(err, result) {
 
     // Retrieve the statistics for the collection
     collection.stats(function(err, stats) {
@@ -18357,7 +18377,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line669">line 669</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line679">line 679</a>
         </div>
         
     </div>
@@ -18750,7 +18770,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
     
-        <dt class="important tag-deprecated">Deprecated</dt><dd class="yes-def tag-deprecated"><ul class="dummy"><li>Yes</li></ul></dd>
+        <dt class="important tag-deprecated">Deprecated</dt><dd><ul class="dummy"><li>use updateOne, updateMany or bulkWrite</li><ul></dd>
     
     
     
@@ -18814,10 +18834,10 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   var collection = db.collection('update_a_simple_document');
 
   // Insert a document, then update it
-  collection.insert({a:1}, {w:1}, function(err, doc) {
+  collection.insertOne({a:1}, {w:1}, function(err, doc) {
 
     // Update the document with an atomic operator
-    collection.update({a:1}, {$set:{b:2}});
+    collection.updateOne({a:1}, {$set:{b:2}});
 
     // Wait for a second then fetch the document
     setTimeout(function() {
@@ -18845,7 +18865,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   // Get a collection
   var collection = db.collection('update_a_simple_document_upsert');
   // Update the document using an upsert operation, ensuring creation if it does not exist
-  collection.update({a:1}, {b:2, a:1}, {upsert:true, w: 1}, function(err, result) {
+  collection.updateOne({a:1}, {b:2, a:1}, {upsert:true, w: 1}, function(err, result) {
     test.equal(null, err);
     test.equal(1, result.result.n);
 
@@ -18872,12 +18892,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   var collection = db.collection('update_a_simple_document_multi');
 
   // Insert a couple of documentations
-  collection.insert([{a:1, b:1}, {a:1, b:2}], {w:1}, function(err, result) {
+  collection.insertMany([{a:1, b:1}, {a:1, b:2}], {w:1}, function(err, result) {
 
     var o = {w:1};
     o.multi = true
     // Update multiple documents using the multi option
-    collection.update({a:1}, {$set:{b:0}}, o, function(err, r) {
+    collection.updateMany({a:1}, {$set:{b:0}}, o, function(err, r) {
       test.equal(null, err);
       test.equal(2, r.result.n);
 
@@ -18910,7 +18930,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line603">line 603</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line612">line 612</a>
         </div>
         
     </div>
@@ -19342,7 +19362,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line545">line 545</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line551">line 551</a>
         </div>
         
     </div>
@@ -19775,7 +19795,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line393">line 393</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line395">line 395</a>
         </div>
         
     </div>
@@ -20167,7 +20187,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line853">line 853</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line865">line 865</a>
         </div>
         
     </div>
@@ -20306,7 +20326,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1166">line 1166</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1178">line 1178</a>
         </div>
         
     </div>
@@ -20445,7 +20465,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1570">line 1570</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1582">line 1582</a>
         </div>
         
     </div>
@@ -20584,7 +20604,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line805">line 805</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line817">line 817</a>
         </div>
         
     </div>
@@ -20723,7 +20743,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line507">line 507</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line513">line 513</a>
         </div>
         
     </div>
@@ -20909,7 +20929,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             
             
             
-            <td class="description last"><p>All the documents inserted with their new _id values if forceServerObjectId == false.</p></td>
+            <td class="description last"><p>All the documents inserted using insertOne/insertMany/replaceOne. Documents contain the _id field if forceServerObjectId == false for insertOne/insertMany</p></td>
         </tr>
 	
 	
@@ -21021,7 +21041,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Apr 16 2015 17:49:34 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Wed Apr 22 2015 13:11:58 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>
