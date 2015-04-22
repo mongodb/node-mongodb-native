@@ -6,7 +6,6 @@ node_js:
   - iojs
 sudo: false
 env:
-  - MONGODB_VERSION=2.2.x
   - MONGODB_VERSION=2.4.x
   - MONGODB_VERSION=2.6.x
   - MONGODB_VERSION=3.0.x
