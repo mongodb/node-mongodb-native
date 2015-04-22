@@ -1,6 +1,6 @@
 2.0.28
 -----------------
-- Bumped mongodb-core to 1.2.23.
+- Bumped mongodb-core to 1.2.24
 - Added Cursor.prototype.setCursorOption to allow for setting node specific cursor options for tailable cursors.
 - NODE-430 Cursor.count() opts argument masked by var opts = {}
 - NODE-406 Implemented Cursor.prototype.map function tapping into MongoClient cursor transforms.

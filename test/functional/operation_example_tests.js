@@ -2965,7 +2965,8 @@ exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDb = {
         db.close(true, function(err, result) {
           // Attemp to insert should fail now with correct message 'db closed by application'
           collection.insertOne({a:2}, configuration.writeConcernMax(), function(err, result) {
-            test.equal('db closed by application', err.message);
+            test.ok(err != null);
+
             db.close();
             test.done();
           });
