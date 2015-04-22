@@ -4,6 +4,7 @@ var Runner = require('integra').Runner
   , Cover = require('integra').Cover
   , RCover = require('integra').RCover
   , f = require('util').format
+  , m = require('mongodb-version-manager')
   , path = require('path')
   , NodeVersionFilter = require('./filters/node_version_filter')
   , MongoDBVersionFilter = require('./filters/mongodb_version_filter')
@@ -14,8 +15,6 @@ var Runner = require('integra').Runner
   , ServerManager = require('mongodb-tools').ServerManager
   , ReplSetManager = require('mongodb-tools').ReplSetManager
   , ShardingManager = require('mongodb-tools').ShardingManager;
-
-console.dir(require('integra'))
 
 var detector = require('gleak')();
 var smokePlugin = require('../lib/tools/smoke_plugin.js');
@@ -311,6 +310,16 @@ if(argv.t == 'functional') {
   // Add travis filter
   runner.plugin(new TravisFilter());
 
-  // Run the configuration
-  runner.run(Configuration(config));
+  // Kill any running MongoDB processes and
+  // `install $MONGODB_VERSION` || `use existing installation` || `install stable`
+  m(function(err){
+    if(err) return console.error(err) && process.exit(1);
+
+    m.current(function(err, version){
+      if(err) return console.error(err) && process.exit(1);
+      console.log('Running tests against MongoDB version `%s`', version);
+      // Run the configuration
+      runner.run(Configuration(config));
+    });
+  });
 }
