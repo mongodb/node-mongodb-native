@@ -395,6 +395,15 @@ Mongos.prototype.isConnected = function() {
   return this.s.mongosState.isConnected();
 }
 
+/**
+ * Figure out if the server instance was destroyed by calling destroy
+ * @method
+ * @return {boolean}
+ */
+Mongos.prototype.isDestroyed = function() {
+  return this.s.state  == DESTROYED;
+}
+
 //
 // Operations
 //
