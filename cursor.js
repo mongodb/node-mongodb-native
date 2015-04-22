@@ -524,6 +524,9 @@ var nextFunction = function(self, callback) {
     // Check if connection is dead and return if not possible to
     // execute the query against the db
     if(isConnectionDead(self, callback)) return;
+
+    // Check if topology is destroyed
+    if(self.topology.isDestroyed()) return callback(new MongoError(f('connection destroyed, not possible to instantiate cursor')));
     
     // query, cmd, options, cursorState, callback
     execInitialQuery(self, self.query, self.cmd, self.options, self.cursorState, self.connection, self.logger, self.callbacks, function(err, r) {
@@ -541,6 +544,9 @@ var nextFunction = function(self, callback) {
       // Ensure an empty cursor state
       self.cursorState.documents = [];
       self.cursorState.cursorIndex = 0;
+
+      // Check if topology is destroyed
+      if(self.topology.isDestroyed()) return callback(new MongoError(f('connection destroyed, not possible to instantiate cursor')));
 
       // Check if connection is dead and return if not possible to
       // execute a getmore on this connection
@@ -605,7 +611,6 @@ var nextFunction = function(self, callback) {
  * @param {resultCallback} callback A callback function
  */
 Cursor.prototype.next = function(callback) {
-  if(this.topology.isDestroyed()) return callback(new MongoError(f('connection destroyed, not possible to instantiate cursor')));
   nextFunction(this, callback);
 }
 
