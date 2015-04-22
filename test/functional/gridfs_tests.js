@@ -1513,6 +1513,42 @@ exports.shouldCorrectlyStreamReadFromGridStoreObject = {
   }
 }
 
+/**
+ * @ignore
+ */
+exports.shouldCorrectlyStreamReadFromGridStoreObjectNoGridStoreOpenCalled = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var GridStore = configuration.require.GridStore
+      , ObjectID = configuration.require.ObjectID;
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.open(function(err, client) {      
+      // Set up gridStore
+      var gridStore = new GridStore(client, "test_stream_write_2", "w");
+      gridStore.writeFile("./test/functional/data/test_gs_working_field_read.pdf", function(err, result) {   
+        // Open a readable gridStore
+        gridStore = new GridStore(client, "test_stream_write_2", "r");    
+        var gotData = false;
+        
+        // Pipe out the data
+        var stream = gridStore.stream();
+        stream.on('data', function(data) {
+          gotData = true;
+        });
+
+        stream.on('end', function() {
+          test.ok(gotData);
+
+          client.close();
+          test.done();      
+        });
+      });
+    });
+  }
+}
+
 /** 
  * @ignore
  */

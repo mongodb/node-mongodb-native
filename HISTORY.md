@@ -5,6 +5,7 @@
 - NODE-430 Cursor.count() opts argument masked by var opts = {}
 - NODE-406 Implemented Cursor.prototype.map function tapping into MongoClient cursor transforms.
 - NODE-438 replaceOne is not returning the result.ops property as described in the docs.
+- NODE-433 _read, pipe and write all open gridstore automatically if not open.
 
 2.0.27 04-07-2015
 -----------------
