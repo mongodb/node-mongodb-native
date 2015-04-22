@@ -560,6 +560,7 @@ exports['should correctly execute update methods using crud api'] = {
           test.equal(null, err);
           test.equal(1, r.result.n);
           test.equal(1, r.matchedCount);
+          test.equal(1, r.ops.length);
           test.ok(r.upsertedId != null);
 
           db.collection('t3_3').replaceOne({ a: 2 }
@@ -568,6 +569,7 @@ exports['should correctly execute update methods using crud api'] = {
             test.equal(null, err);
             test.equal(1, r.result.n);
             test.ok(r.result.upserted == null);
+            test.equal(1, r.ops.length);
 
             test.equal(1, r.matchedCount);
             test.ok(r.upsertedId == null);

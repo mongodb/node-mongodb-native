@@ -3,6 +3,8 @@
 - Bumped mongodb-core to 1.2.23.
 - Added Cursor.prototype.setCursorOption to allow for setting node specific cursor options for tailable cursors.
 - NODE-430 Cursor.count() opts argument masked by var opts = {}
+- NODE-406 Implemented Cursor.prototype.map function tapping into MongoClient cursor transforms.
+- NODE-438 replaceOne is not returning the result.ops property as described in the docs.
 
 2.0.27 04-07-2015
 -----------------
