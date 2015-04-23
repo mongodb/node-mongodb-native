@@ -2815,51 +2815,87 @@ exports['should correctly pipe through multiple pipelines'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , stream = require('stream')
-      , ObjectID = configuration.require.ObjectID;
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    client.open(function(err, client) {      
+    var MongoClient = configuration.require.MongoClient
+      , GridStore = configuration.require.GridStore
+      , ObjectID = configuration.require.ObjectID
+      , fs = require('fs')
+      , assert = require('assert');
+
+    // Connection URL
+    var url = 'mongodb://localhost:27017/myproject';
+    // Use connect method to connect to the Server
+    MongoClient.connect(configuration.url(), function(err, db) {
+      assert.equal(null, err);
+      
       // Set up gridStore
-      var gridStore = new GridStore(client, "test_stream_write_2", "w");
-      gridStore.writeFile("./test/functional/data/test_gs_working_field_read.pdf", function(err, result) {   
-        // Open a readable gridStore
-        gridStore = new GridStore(client, "test_stream_write_2", "r");    
-        
-        // Create a file write stream
-        var fileStream = fs.createWriteStream("./test_stream_write_2.tmp");
-        fileStream.on("close", function(err) {     
-          console.log("-------------------------------------------- close")
-          // Read the temp file and compare
-          var compareData = fs.readFileSync("./test_stream_write_2.tmp");
-          var originalData = fs.readFileSync("./test/functional/data/test_gs_working_field_read.pdf");
-          test.deepEqual(originalData, compareData);      
-          client.close();
-          test.done();      
-        });
+      var stream = new GridStore(db, 'simple_100_document_toArray.png', 'w').stream();
+      // File we want to write to GridFS
+      var filename = './test/functional/data/test_gs_working_field_read.pdf';  
+      // Create a file reader stream to an object
+      var fileStream = fs.createReadStream(filename);
 
-        var liner = new stream.Transform( { objectMode: true } )
-        liner._transform = function (chunk, encoding, done) {
-          console.log("--------------------------------------------")
-          console.log(chunk)
-          this.push(chunk);
-          done();
-          // done();
-          // var data = chunk.toString()
-          // if (this._lastLineData) data = this._lastLineData + data 
+      // Finish up once the file has been all read
+      stream.on("end", function(err) {
 
-          // var lines = data.split('\n') 
-          // this._lastLineData = lines.splice(lines.length-1,1)[0] 
-
-          // lines.forEach(this.push.bind(this)) 
-          // done()
-        }
-        // var liner = new stream.PassThrough()
-
-        var s = gridStore.stream();
-        s.pipe(liner);
-        liner.pipe(fileStream);
+        // Just read the content and compare to the raw binary
+        GridStore.read(db, 'simple_100_document_toArray.png', function(err, gridData) {
+          test.equal(null, err);
+          var fileData = fs.readFileSync(filename);
+          test.equal(fileData.toString('hex'), gridData.toString('hex'));
+          db.close();
+          test.done();
+        })
       });
+
+      // Pipe it through to the gridStore
+      fileStream.pipe(stream);
     });
+    // var GridStore = configuration.require.GridStore
+    //   , stream = require('stream')
+    //   , ObjectID = configuration.require.ObjectID;
+    // var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    // client.open(function(err, client) {      
+    //   // Set up gridStore
+    //   var gridStore = new GridStore(client, "test_stream_write_2", "w");
+    //   gridStore.writeFile("./test/functional/data/test_gs_working_field_read.pdf", function(err, result) {   
+    //     // Open a readable gridStore
+    //     gridStore = new GridStore(client, "test_stream_write_2", "r");    
+        
+    //     // Create a file write stream
+    //     var fileStream = fs.createWriteStream("./test_stream_write_2.tmp");
+    //     fileStream.on("close", function(err) {     
+    //       console.log("-------------------------------------------- close")
+    //       // Read the temp file and compare
+    //       var compareData = fs.readFileSync("./test_stream_write_2.tmp");
+    //       var originalData = fs.readFileSync("./test/functional/data/test_gs_working_field_read.pdf");
+    //       test.deepEqual(originalData, compareData);      
+    //       client.close();
+    //       test.done();      
+    //     });
+
+    //     var liner = new stream.Transform( { objectMode: true } )
+    //     liner._transform = function (chunk, encoding, done) {
+    //       console.log("--------------------------------------------")
+    //       console.log(chunk)
+    //       this.push(chunk);
+    //       done();
+    //       // done();
+    //       // var data = chunk.toString()
+    //       // if (this._lastLineData) data = this._lastLineData + data 
+
+    //       // var lines = data.split('\n') 
+    //       // this._lastLineData = lines.splice(lines.length-1,1)[0] 
+
+    //       // lines.forEach(this.push.bind(this)) 
+    //       // done()
+    //     }
+    //     // var liner = new stream.PassThrough()
+
+    //     var s = gridStore.stream();
+    //     s.pipe(liner);
+    //     liner.pipe(fileStream);
+    //   });
+    // });
   }
 }
+
