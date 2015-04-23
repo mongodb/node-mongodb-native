@@ -1513,6 +1513,42 @@ exports.shouldCorrectlyStreamReadFromGridStoreObject = {
   }
 }
 
+exports.shouldCorrectlyStreamWriteFromGridStoreObject = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var GridStore = configuration.require.GridStore
+      , ObjectID = configuration.require.ObjectID;
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    client.open(function(err, client) {
+      var filename = "test_stream_write_2";
+      var filepath = "./test/functional/data/test_gs_working_field_read.pdf";
+      // Set up streams
+      var fileStream = fs.createReadStream(filepath);
+      var storeStream = new GridStore(client, filename, "w").stream();
+
+      // Finish up once the file has been all read
+      storeStream.on("end", function(err) {
+
+        // Just read the content and compare to the raw binary
+        GridStore.read(client, filename, function(err, gridData) {
+          test.equal(null, err);
+          var fileData = fs.readFileSync(filepath);
+          test.equal(fileData.toString('hex'), gridData.toString('hex'));
+          client.close();
+          test.done();
+        });
+
+      });
+
+      // Pipe it through to the gridStore
+      fileStream.pipe(storeStream);
+
+    });
+  }
+}
+
 /** 
  * @ignore
  */
