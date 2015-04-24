@@ -382,11 +382,8 @@ var executeWriteOperation = function(self, op, ns, ops, options, callback) {
  * @param {opResultCallback} callback A callback function
  */
 ReplSet.prototype.command = function(ns, cmd, options, callback) {
+  if(typeof options == 'function') callback = options, options = {};
   if(this.s.replState.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
-  if(typeof options == 'function') {
-    callback = options;
-    options = {};
-  }
 
   var server = null;
   var self = this;
@@ -457,6 +454,7 @@ ReplSet.prototype.command = function(ns, cmd, options, callback) {
  * @param {opResultCallback} callback A callback function
  */
 ReplSet.prototype.remove = function(ns, ops, options, callback) {
+  if(typeof options == 'function') callback = options, options = {};
   if(this.s.replState.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
   // Topology is not connected, save the call in the provided store to be
   // Executed at some point when the handler deems it's reconnected
@@ -478,6 +476,7 @@ ReplSet.prototype.remove = function(ns, ops, options, callback) {
  * @param {opResultCallback} callback A callback function
  */
 ReplSet.prototype.insert = function(ns, ops, options, callback) {
+  if(typeof options == 'function') callback = options, options = {};
   if(this.s.replState.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
   // Topology is not connected, save the call in the provided store to be
   // Executed at some point when the handler deems it's reconnected
@@ -499,6 +498,7 @@ ReplSet.prototype.insert = function(ns, ops, options, callback) {
  * @param {opResultCallback} callback A callback function
  */
 ReplSet.prototype.update = function(ns, ops, options, callback) {
+  if(typeof options == 'function') callback = options, options = {};
   if(this.s.replState.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
   // Topology is not connected, save the call in the provided store to be
   // Executed at some point when the handler deems it's reconnected

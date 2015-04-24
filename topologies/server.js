@@ -659,9 +659,9 @@ Server.prototype.isDestroyed = function() {
  * @param {opResultCallback} callback A callback function
  */
 Server.prototype.command = function(ns, cmd, options, callback) {
+  if(typeof options == 'function') callback = options, options = {};
   var self = this;
   if(this.s.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
-  if(typeof options == 'function') callback = options, options = {};
   // Ensure we have no options
   options = options || {};
   // Do we have a read Preference it need to be of type ReadPreference
@@ -792,6 +792,7 @@ Server.prototype.command = function(ns, cmd, options, callback) {
  * @param {opResultCallback} callback A callback function
  */
 Server.prototype.insert = function(ns, ops, options, callback) {
+  if(typeof options == 'function') callback = options, options = {};
   var self = this;
   if(this.s.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
   // Topology is not connected, save the call in the provided store to be
@@ -817,6 +818,7 @@ Server.prototype.insert = function(ns, ops, options, callback) {
  * @param {opResultCallback} callback A callback function
  */
 Server.prototype.update = function(ns, ops, options, callback) {
+  if(typeof options == 'function') callback = options, options = {};
   var self = this;
   if(this.s.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
   // Topology is not connected, save the call in the provided store to be
@@ -842,6 +844,7 @@ Server.prototype.update = function(ns, ops, options, callback) {
  * @param {opResultCallback} callback A callback function
  */
 Server.prototype.remove = function(ns, ops, options, callback) {
+  if(typeof options == 'function') callback = options, options = {};
   var self = this;
   if(this.s.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
   // Topology is not connected, save the call in the provided store to be
