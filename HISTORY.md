@@ -1,6 +1,6 @@
 2.0.28
 -----------------
-- Bumped mongodb-core to 1.2.24
+- Bumped mongodb-core to 1.2.25
 - Added Cursor.prototype.setCursorOption to allow for setting node specific cursor options for tailable cursors.
 - NODE-430 Cursor.count() opts argument masked by var opts = {}
 - NODE-406 Implemented Cursor.prototype.map function tapping into MongoClient cursor transforms.
@@ -8,6 +8,8 @@
 - NODE-433 _read, pipe and write all open gridstore automatically if not open.
 - NODE-426 ensure drain event is emitted after write function returns, fixes intermittent issues in writing files to gridstore.
 - NODE-440 GridStoreStream._read() doesn't check GridStore.read() error.
+- Always use readPreference = primary for findAndModify command (ignore passed in read preferences) (Issue #1274, https://github.com/vkarpov15).
+- Minor fix in GridStore.exists for dealing with regular expressions searches.
 
 2.0.27 04-07-2015
 -----------------
