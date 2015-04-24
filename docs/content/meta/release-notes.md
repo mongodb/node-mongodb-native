@@ -10,7 +10,7 @@ menu:
 title: Release Notes
 weight: 50
 ---
-2.0.28
+2.0.28 04-24-2015
 -----------------
 - Bumped mongodb-core to 1.2.25
 - Added Cursor.prototype.setCursorOption to allow for setting node specific cursor options for tailable cursors.
