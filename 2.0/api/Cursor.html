@@ -31,23 +31,22 @@
     
 
     
-    <script>
-      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-      ga('create', UA-29229787-1, 'auto');
-      ga('send', 'pageview');
-    </script>    
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', config.googleAnalytics]);
+      _gaq.push(['_trackPageview']);
+    
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
     
 </head>
 <body>
-<div id="wrap" class="clearfix" style="width:100%;">
-    <table style="height:100%;width:100%">
-        <tr>
-            <td valign='top'>
-                
+<div id="wrap" class="clearfix">
+    
 <div class="navigation">
     <h3 class="applicationName"><a href="index.html">Node.js MongoDB Driver API</a></h3>
 
@@ -1631,11 +1630,9 @@
     
     </ul>
 </div>
-            </td>
-            <td valign='top'>        
-                <div class="main">
-                    <h1 class="page-title" data-filename="Cursor.html">Class: Cursor</h1>
-                    
+    <div class="main">
+        <h1 class="page-title" data-filename="Cursor.html">Class: Cursor</h1>
+        
 
 
 
@@ -1663,7 +1660,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line79">line 79</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line60">line 60</a>
         </div>
         
     </div>
@@ -1827,13 +1824,33 @@
     
     
     
-    
+    <h5>Returns:</h5>
     
 
 
-<h5>Returns:</h5>
-Cursor instance.
-<br />
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="Cursor.html">Cursor</a>
+                        
+                    
+            </td>
+            <td class="description last">a Cursor instance.</td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -1885,7 +1902,7 @@ Cursor instance.
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line200">line 200</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line197">line 197</a>
         </div>
         
     </div>
@@ -2024,9 +2041,33 @@ Cursor instance.
         
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="Cursor.html">Cursor</a>
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -2044,7 +2085,7 @@ Cursor instance.
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line216">line 216</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line213">line 213</a>
         </div>
         
     </div>
@@ -2183,12 +2224,211 @@ Cursor instance.
         
     
     
-    
+    <h5>Returns:</h5>
     
 
 
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="Cursor.html">Cursor</a>
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
+
     
     
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="batchSize">
+            
+            batchSize<span class="signature">(value)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line360">line 360</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Get the batchSize of the cursor</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>The current batchSize for the cursor</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    <h5>Returns:</h5>
+    
+
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
+
+    
+    
+    
+        <h5>Example</h5>
+        
+
+    
+    <pre class="prettyprint"><code>// A simple example showing the use of batchSize on the cursor, batchSize only regulates how many
+// documents are returned for each batch using the getMoreCommand against the MongoDB server
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Create a collection
+  var collection = db.collection('simple_batch_size_collection');
+
+  // Insert some documents we can sort on
+  collection.insertMany([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
+    test.equal(null, err);
+
+    // Do normal ascending sort
+    collection.find().batchSize(1).nextObject(function(err, item) {
+      test.equal(null, err);
+      test.equal(1, item.a);
+
+      db.close();
+    });
+  });
+});</code></pre>
+    
+
     
 </dd>
 
@@ -2203,7 +2443,7 @@ Cursor instance.
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line299">line 299</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line296">line 296</a>
         </div>
         
     </div>
@@ -2319,160 +2559,33 @@ Cursor instance.
         
     
     
-    
-    
-
-
-    
-    
-    
-        <h5>Example</h5>
-        
-
-    
-    <pre class="prettyprint"><code>// A simple example showing the use of batchSize on the cursor, batchSize only regulates how many
-// documents are returned for each batch using the getMoreCommand against the MongoDB server
-
-var MongoClient = require('mongodb').MongoClient,
-  test = require('assert');
-MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-
-  // Create a collection
-  var collection = db.collection('simple_batch_size_collection');
-
-  // Insert some documents we can sort on
-  collection.insertMany([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
-    test.equal(null, err);
-
-    // Do normal ascending sort
-    collection.find().batchSize(1).nextObject(function(err, item) {
-      test.equal(null, err);
-      test.equal(1, item.a);
-
-      db.close();
-    });
-  });
-});</code></pre>
+    <h5>Returns:</h5>
     
 
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="batchSize">
-            
-            batchSize<span class="signature">(value)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line363">line 363</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Get the batchSize of the cursor</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
 
 <table class="params">
     <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
         <tr>
-            
-                <td class="name"><code>value</code></td>
-            
             
             <td class="type">
             
-                
-<span class="param-type">number</span>
-
-
-            
+                        <a href="Cursor.html">Cursor</a>
+                        
+                    
             </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>The current batchSize for the cursor</p></td>
+            <td class="description last"></td>
         </tr>
-	
-	
-	</tbody>
+    
+    </tbody>
 </table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
 
     
     
@@ -2522,7 +2635,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line398">line 398</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line395">line 395</a>
         </div>
         
     </div>
@@ -2578,9 +2691,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="Cursor.html">Cursor</a>
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -2598,7 +2735,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line704">line 704</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line701">line 701</a>
         </div>
         
     </div>
@@ -2706,9 +2843,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -2766,7 +2927,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line235">line 235</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line232">line 232</a>
         </div>
         
     </div>
@@ -2882,9 +3043,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
         
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="Cursor.html">Cursor</a>
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -2902,7 +3087,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line638">line 638</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line635">line 635</a>
         </div>
         
     </div>
@@ -3289,9 +3474,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -3338,7 +3547,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line391">line 391</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line388">line 388</a>
         </div>
         
     </div>
@@ -3439,9 +3648,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -3459,7 +3692,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line377">line 377</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line374">line 374</a>
         </div>
         
     </div>
@@ -3560,9 +3793,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -3580,7 +3837,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line469">line 469</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line466">line 466</a>
         </div>
         
     </div>
@@ -3703,9 +3960,33 @@ for making sure that the entire result can fit the memory.</p>
         
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -3760,7 +4041,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line758">line 758</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line755">line 755</a>
         </div>
         
     </div>
@@ -3868,9 +4149,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -3916,7 +4221,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line169">line 169</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line166">line 166</a>
         </div>
         
     </div>
@@ -4017,9 +4322,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="Cursor.html">Cursor</a>
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -4037,7 +4366,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line528">line 528</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line525">line 525</a>
         </div>
         
     </div>
@@ -4176,9 +4505,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
         
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -4229,7 +4582,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line730">line 730</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line727">line 727</a>
         </div>
         
     </div>
@@ -4285,9 +4638,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        boolean
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -4346,7 +4723,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line315">line 315</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line312">line 312</a>
         </div>
         
     </div>
@@ -4462,9 +4839,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
         
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="Cursor.html">Cursor</a>
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -4511,7 +4912,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line720">line 720</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line717">line 717</a>
         </div>
         
     </div>
@@ -4619,9 +5020,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -4639,7 +5064,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line248">line 248</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line245">line 245</a>
         </div>
         
     </div>
@@ -4755,9 +5180,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
         
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="Cursor.html">Cursor</a>
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -4777,7 +5226,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line348">line 348</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line345">line 345</a>
         </div>
         
     </div>
@@ -4893,9 +5342,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
         
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -4913,7 +5386,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line418">line 418</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line415">line 415</a>
         </div>
         
     </div>
@@ -5031,9 +5504,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
         
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -5082,7 +5579,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line839">line 839</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line836">line 836</a>
         </div>
         
     </div>
@@ -5138,9 +5635,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -5160,7 +5681,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line845">line 845</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line842">line 842</a>
         </div>
         
     </div>
@@ -5296,9 +5817,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -5316,7 +5861,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line264">line 264</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line261">line 261</a>
         </div>
         
     </div>
@@ -5432,9 +5977,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
         
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="Cursor.html">Cursor</a>
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -5454,7 +6023,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line819">line 819</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line816">line 816</a>
         </div>
         
     </div>
@@ -5555,9 +6124,39 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        String
+                         | 
+                    
+                        Buffer
+                         | 
+                    
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -5577,7 +6176,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line833">line 833</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line830">line 830</a>
         </div>
         
     </div>
@@ -5633,9 +6232,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -5655,7 +6278,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line404">line 404</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line401">line 401</a>
         </div>
         
     </div>
@@ -5711,9 +6334,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -5731,7 +6378,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line356">line 356</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line353">line 353</a>
         </div>
         
     </div>
@@ -5832,9 +6479,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -5852,7 +6523,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line384">line 384</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line381">line 381</a>
         </div>
         
     </div>
@@ -5953,9 +6624,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -5973,7 +6668,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line183">line 183</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line180">line 180</a>
         </div>
         
     </div>
@@ -6112,9 +6807,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
         
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="Cursor.html">Cursor</a>
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -6132,7 +6851,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line370">line 370</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line367">line 367</a>
         </div>
         
     </div>
@@ -6233,9 +6952,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -6255,7 +6998,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line826">line 826</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line823">line 823</a>
         </div>
         
     </div>
@@ -6356,9 +7099,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -6376,7 +7143,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line548">line 548</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line545">line 545</a>
         </div>
         
     </div>
@@ -6495,9 +7262,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
         
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="Cursor.html">Cursor</a>
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -6515,7 +7306,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line332">line 332</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line329">line 329</a>
         </div>
         
     </div>
@@ -6631,9 +7422,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
         
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="Cursor.html">Cursor</a>
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -6680,7 +7495,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line278">line 278</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line275">line 275</a>
         </div>
         
     </div>
@@ -6837,9 +7652,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
         
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="Cursor.html">Cursor</a>
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -6892,7 +7731,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line747">line 747</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line744">line 744</a>
         </div>
         
     </div>
@@ -7068,9 +7907,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="Cursor.html">Cursor</a>
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -7170,7 +8033,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line576">line 576</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line573">line 573</a>
         </div>
         
     </div>
@@ -7289,9 +8152,33 @@ cursor.rewind() can be used to reset the cursor.</p>
         
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -7339,7 +8226,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line853">line 853</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line850">line 850</a>
         </div>
         
     </div>
@@ -7447,9 +8334,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -7469,7 +8380,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line860">line 860</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line857">line 857</a>
         </div>
         
     </div>
@@ -7573,9 +8484,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -7595,7 +8530,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line867">line 867</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line864">line 864</a>
         </div>
         
     </div>
@@ -7696,9 +8631,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -7722,7 +8681,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line618">line 618</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line615">line 615</a>
         </div>
         
     </div>
@@ -7861,7 +8820,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line514">line 514</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line511">line 511</a>
         </div>
         
     </div>
@@ -7977,7 +8936,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line508">line 508</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line505">line 505</a>
         </div>
         
     </div>
@@ -8093,7 +9052,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line341">line 341</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line338">line 338</a>
         </div>
         
     </div>
@@ -8235,7 +9194,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line559">line 559</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line556">line 556</a>
         </div>
         
     </div>
@@ -8380,7 +9339,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line137">line 137</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line134">line 134</a>
         </div>
         
     </div>
@@ -8461,7 +9420,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line123">line 123</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line120">line 120</a>
         </div>
         
     </div>
@@ -8542,7 +9501,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line130">line 130</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line127">line 127</a>
         </div>
         
     </div>
@@ -8623,7 +9582,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line144">line 144</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line141">line 141</a>
         </div>
         
     </div>
@@ -8703,32 +9662,18 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 
 
 
-                    
-                    <!-- disqus code -->
-                    <div id="disqus_thread"></div>
-                    <script type="text/javascript">
-                        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-                        var disqus_shortname = 'nodejsmongodbdriver'; // required: replace example with your forum shortname
+        
+        <!-- disqus code -->
+        <div id="disqus_thread"></div>
+        <noscript>Please enable JavaScript to view the <a target="_blank" href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a target="_blank" href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <!-- // disqus code -->
+        
 
-                        /* * * DON'T EDIT BELOW THIS LINE * * */
-                        (function() {
-                            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-                            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-                            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-                        })();
-                    </script>
-                    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-                    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>                    
-                    <!-- // disqus code -->
-                    
-
-                    <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Wed Apr 22 2015 13:11:58 GMT+0200 (CEST)
-                    </footer>
-                </div>
-            </td>
-        </tr>
-    </table>
+        <footer>
+            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Fri Apr 24 2015 15:45:10 GMT+0200 (CEST)
+        </footer>
+    </div>
 </div>
 <script>prettyPrint();</script>
 <script src="scripts/linenumber.js"></script>

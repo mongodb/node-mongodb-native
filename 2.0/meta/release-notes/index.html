@@ -226,14 +226,19 @@
 
 
 
-<h2 id="2-0-28:066aa012c0230cd32faa0776e0a81250">2.0.28</h2>
+<h2 id="2-0-28-04-24-2015:066aa012c0230cd32faa0776e0a81250">2.0.28 04-24-2015</h2>
 
 <ul>
-<li>Bumped mongodb-core to 1.2.23.</li>
+<li>Bumped mongodb-core to 1.2.25</li>
 <li>Added Cursor.prototype.setCursorOption to allow for setting node specific cursor options for tailable cursors.</li>
 <li>NODE-430 Cursor.count() opts argument masked by var opts = {}</li>
 <li>NODE-406 Implemented Cursor.prototype.map function tapping into MongoClient cursor transforms.</li>
 <li>NODE-438 replaceOne is not returning the result.ops property as described in the docs.</li>
+<li>NODE-433 _read, pipe and write all open gridstore automatically if not open.</li>
+<li>NODE-426 ensure drain event is emitted after write function returns, fixes intermittent issues in writing files to gridstore.</li>
+<li>NODE-440 GridStoreStream._read() doesn&rsquo;t check GridStore.read() error.</li>
+<li>Always use readPreference = primary for findAndModify command (ignore passed in read preferences) (Issue #1274, <a href="https://github.com/vkarpov15">https://github.com/vkarpov15</a>).</li>
+<li>Minor fix in GridStore.exists for dealing with regular expressions searches.</li>
 </ul>
 
 <h2 id="2-0-27-04-07-2015:066aa012c0230cd32faa0776e0a81250">2.0.27 04-07-2015</h2>

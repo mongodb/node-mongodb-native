@@ -384,7 +384,7 @@ REST api's around MongoDB or resource based libraries
          * - **Clone Url**
            - https://github.com/tdegrunt/mongodb-rest.git
          * - **Forks**
-           - 113
+           - 114
          * - **Watchers**
            - 342
 
@@ -720,9 +720,9 @@ Libraries or Applications for analytics
          :header-rows: 0
 
          * - **Activity Level**
-           - .. image:: ../static/nonactive.png
+           - .. image:: ../static/active.png
          * - **Last push**
-           - 21:42:2 on 30/6/2014
+           - 20:46:53 on 23/3/2015
          * - **Homepage**
            - http://http://square.github.com/cube
          * - **Url**
@@ -730,9 +730,9 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 402
+           - 404
          * - **Watchers**
-           - 3522
+           - 3523
 
 Libraries for the connect middleware
 ------------------------------------
@@ -781,7 +781,7 @@ Libraries for the connect middleware
          * - **Forks**
            - 193
          * - **Watchers**
-           - 705
+           - 706
 
 Libraries or applications for continous integration
 ---------------------------------------------------

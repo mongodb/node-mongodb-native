@@ -31,23 +31,22 @@
     
 
     
-    <script>
-      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-      ga('create', UA-29229787-1, 'auto');
-      ga('send', 'pageview');
-    </script>    
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', config.googleAnalytics]);
+      _gaq.push(['_trackPageview']);
+    
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
     
 </head>
 <body>
-<div id="wrap" class="clearfix" style="width:100%;">
-    <table style="height:100%;width:100%">
-        <tr>
-            <td valign='top'>
-                
+<div id="wrap" class="clearfix">
+    
 <div class="navigation">
     <h3 class="applicationName"><a href="index.html">Node.js MongoDB Driver API</a></h3>
 
@@ -1631,11 +1630,9 @@
     
     </ul>
 </div>
-            </td>
-            <td valign='top'>        
-                <div class="main">
-                    <h1 class="page-title" data-filename="Collection.html">Class: Collection</h1>
-                    
+    <div class="main">
+        <h1 class="page-title" data-filename="Collection.html">Class: Collection</h1>
+        
 
 
 
@@ -1839,13 +1836,33 @@
     
     
     
-    
+    <h5>Returns:</h5>
     
 
 
-<h5>Returns:</h5>
-Collection instance.
-<br />
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="Collection.html">Collection</a>
+                        
+                    
+            </td>
+            <td class="description last">a Collection instance.</td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -1881,7 +1898,7 @@ Collection instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1494">line 1494</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1500">line 1500</a>
         </div>
         
     </div>
@@ -2328,9 +2345,36 @@ Collection instance.
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                         | 
+                    
+                        <a href="AggregationCursor.html">AggregationCursor</a>
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -2843,9 +2887,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -3254,9 +3322,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -3949,9 +4041,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -4203,9 +4319,33 @@ error. Index specifications are defined at http://docs.mongodb.org/manual/refere
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -4538,9 +4678,33 @@ error. Index specifications are defined at http://docs.mongodb.org/manual/refere
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -4873,9 +5037,33 @@ error. Index specifications are defined at http://docs.mongodb.org/manual/refere
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -5168,9 +5356,33 @@ error. Index specifications are defined at http://docs.mongodb.org/manual/refere
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -5346,9 +5558,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -5509,9 +5745,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -5868,9 +6128,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -6026,9 +6310,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -6735,9 +7043,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -6945,9 +7277,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
         
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="Cursor.html">Cursor</a>
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -7571,9 +7927,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -7644,7 +8024,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1469">line 1469</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1475">line 1475</a>
         </div>
         
     </div>
@@ -7993,9 +8373,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -8979,9 +9383,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -9340,9 +9768,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -9805,9 +10257,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -10277,9 +10753,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -10333,7 +10833,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1715">line 1715</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1721">line 1721</a>
         </div>
         
     </div>
@@ -10716,9 +11216,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -10766,7 +11290,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1663">line 1663</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1669">line 1669</a>
         </div>
         
     </div>
@@ -11329,9 +11853,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -11380,7 +11928,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1790">line 1790</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1796">line 1796</a>
         </div>
         
     </div>
@@ -11798,9 +12346,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -12031,9 +12603,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -12211,9 +12807,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -12474,9 +13094,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -12572,7 +13216,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2043">line 2043</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2049">line 2049</a>
         </div>
         
     </div>
@@ -12855,9 +13499,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -12920,7 +13588,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2028">line 2028</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2034">line 2034</a>
         </div>
         
     </div>
@@ -13203,9 +13871,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -13661,9 +14353,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -14179,9 +14895,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -14607,9 +15347,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -14749,9 +15513,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -14970,9 +15758,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="CommandCursor.html">CommandCursor</a>
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -14990,7 +15802,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1927">line 1927</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1933">line 1933</a>
         </div>
         
     </div>
@@ -15613,9 +16425,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
         
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -15941,9 +16777,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -15987,7 +16847,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1601">line 1601</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1607">line 1607</a>
         </div>
         
     </div>
@@ -16307,9 +17167,33 @@ no ordering guarantees for returned results.</p>
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -16480,9 +17364,33 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -16893,9 +17801,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -17208,9 +18140,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -17698,9 +18654,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -18034,9 +19014,33 @@ operators and update instead for more efficient operations.</p>
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -18330,9 +19334,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -18813,9 +19841,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
         
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -19313,9 +20365,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -19745,9 +20821,33 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -20465,7 +21565,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1582">line 1582</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1588">line 1588</a>
         </div>
         
     </div>
@@ -21021,32 +22121,18 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 
 
 
-                    
-                    <!-- disqus code -->
-                    <div id="disqus_thread"></div>
-                    <script type="text/javascript">
-                        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-                        var disqus_shortname = 'nodejsmongodbdriver'; // required: replace example with your forum shortname
+        
+        <!-- disqus code -->
+        <div id="disqus_thread"></div>
+        <noscript>Please enable JavaScript to view the <a target="_blank" href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a target="_blank" href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <!-- // disqus code -->
+        
 
-                        /* * * DON'T EDIT BELOW THIS LINE * * */
-                        (function() {
-                            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-                            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-                            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-                        })();
-                    </script>
-                    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-                    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>                    
-                    <!-- // disqus code -->
-                    
-
-                    <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Wed Apr 22 2015 13:11:58 GMT+0200 (CEST)
-                    </footer>
-                </div>
-            </td>
-        </tr>
-    </table>
+        <footer>
+            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Fri Apr 24 2015 15:45:10 GMT+0200 (CEST)
+        </footer>
+    </div>
 </div>
 <script>prettyPrint();</script>
 <script src="scripts/linenumber.js"></script>

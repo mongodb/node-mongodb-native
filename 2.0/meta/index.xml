@@ -38,14 +38,19 @@
       <guid>/node-mongodb-native/2.0/meta/release-notes/</guid>
       <description>
 
-&lt;h2 id=&#34;2-0-28:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.28&lt;/h2&gt;
+&lt;h2 id=&#34;2-0-28-04-24-2015:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.28 04-24-2015&lt;/h2&gt;
 
 &lt;ul&gt;
-&lt;li&gt;Bumped mongodb-core to 1.2.23.&lt;/li&gt;
+&lt;li&gt;Bumped mongodb-core to 1.2.25&lt;/li&gt;
 &lt;li&gt;Added Cursor.prototype.setCursorOption to allow for setting node specific cursor options for tailable cursors.&lt;/li&gt;
 &lt;li&gt;NODE-430 Cursor.count() opts argument masked by var opts = {}&lt;/li&gt;
 &lt;li&gt;NODE-406 Implemented Cursor.prototype.map function tapping into MongoClient cursor transforms.&lt;/li&gt;
 &lt;li&gt;NODE-438 replaceOne is not returning the result.ops property as described in the docs.&lt;/li&gt;
+&lt;li&gt;NODE-433 _read, pipe and write all open gridstore automatically if not open.&lt;/li&gt;
+&lt;li&gt;NODE-426 ensure drain event is emitted after write function returns, fixes intermittent issues in writing files to gridstore.&lt;/li&gt;
+&lt;li&gt;NODE-440 GridStoreStream._read() doesn&amp;rsquo;t check GridStore.read() error.&lt;/li&gt;
+&lt;li&gt;Always use readPreference = primary for findAndModify command (ignore passed in read preferences) (Issue #1274, &lt;a href=&#34;https://github.com/vkarpov15&#34;&gt;https://github.com/vkarpov15&lt;/a&gt;).&lt;/li&gt;
+&lt;li&gt;Minor fix in GridStore.exists for dealing with regular expressions searches.&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h2 id=&#34;2-0-27-04-07-2015:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.27 04-07-2015&lt;/h2&gt;

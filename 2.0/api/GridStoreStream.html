@@ -31,23 +31,22 @@
     
 
     
-    <script>
-      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-      ga('create', UA-29229787-1, 'auto');
-      ga('send', 'pageview');
-    </script>    
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', config.googleAnalytics]);
+      _gaq.push(['_trackPageview']);
+    
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
     
 </head>
 <body>
-<div id="wrap" class="clearfix" style="width:100%;">
-    <table style="height:100%;width:100%">
-        <tr>
-            <td valign='top'>
-                
+<div id="wrap" class="clearfix">
+    
 <div class="navigation">
     <h3 class="applicationName"><a href="index.html">Node.js MongoDB Driver API</a></h3>
 
@@ -1631,11 +1630,9 @@
     
     </ul>
 </div>
-            </td>
-            <td valign='top'>        
-                <div class="main">
-                    <h1 class="page-title" data-filename="GridStoreStream.html">Class: GridStoreStream</h1>
-                    
+    <div class="main">
+        <h1 class="page-title" data-filename="GridStoreStream.html">Class: GridStoreStream</h1>
+        
 
 
 
@@ -1663,7 +1660,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1336">line 1336</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1339">line 1339</a>
         </div>
         
     </div>
@@ -1719,13 +1716,33 @@
     
     
     
-    
+    <h5>Returns:</h5>
     
 
 
-<h5>Returns:</h5>
-GridStoreStream instance.
-<br />
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        <a href="GridStoreStream.html">GridStoreStream</a>
+                        
+                    
+            </td>
+            <td class="description last">a GridStoreStream instance.</td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -1769,7 +1786,7 @@ GridStoreStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1507">line 1507</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1533">line 1533</a>
         </div>
         
     </div>
@@ -1919,9 +1936,33 @@ GridStoreStream instance.
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -1941,7 +1982,7 @@ GridStoreStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1463">line 1463</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1489">line 1489</a>
         </div>
         
     </div>
@@ -1997,9 +2038,33 @@ GridStoreStream instance.
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -2019,7 +2084,7 @@ GridStoreStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1469">line 1469</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1495">line 1495</a>
         </div>
         
     </div>
@@ -2155,9 +2220,33 @@ GridStoreStream instance.
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -2177,7 +2266,7 @@ GridStoreStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1443">line 1443</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1469">line 1469</a>
         </div>
         
     </div>
@@ -2278,9 +2367,39 @@ GridStoreStream instance.
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        String
+                         | 
+                    
+                        Buffer
+                         | 
+                    
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -2300,7 +2419,7 @@ GridStoreStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1457">line 1457</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1483">line 1483</a>
         </div>
         
     </div>
@@ -2356,9 +2475,33 @@ GridStoreStream instance.
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -2378,7 +2521,7 @@ GridStoreStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1450">line 1450</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1476">line 1476</a>
         </div>
         
     </div>
@@ -2479,9 +2622,33 @@ GridStoreStream instance.
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -2501,7 +2668,7 @@ GridStoreStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1477">line 1477</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1503">line 1503</a>
         </div>
         
     </div>
@@ -2609,9 +2776,33 @@ GridStoreStream instance.
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -2631,7 +2822,7 @@ GridStoreStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1484">line 1484</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1510">line 1510</a>
         </div>
         
     </div>
@@ -2735,9 +2926,33 @@ GridStoreStream instance.
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -2757,7 +2972,7 @@ GridStoreStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1491">line 1491</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1517">line 1517</a>
         </div>
         
     </div>
@@ -2858,9 +3073,33 @@ GridStoreStream instance.
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        null
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -2880,7 +3119,7 @@ GridStoreStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1498">line 1498</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1524">line 1524</a>
         </div>
         
     </div>
@@ -3030,9 +3269,33 @@ GridStoreStream instance.
     
     
     
-    
+    <h5>Returns:</h5>
     
 
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Type</th>
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    
+        <tr>
+            
+            <td class="type">
+            
+                        boolean
+                        
+                    
+            </td>
+            <td class="description last"></td>
+        </tr>
+    
+    </tbody>
+</table>
 
     
     
@@ -3058,7 +3321,7 @@ GridStoreStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1530">line 1530</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1556">line 1556</a>
         </div>
         
     </div>
@@ -3139,7 +3402,7 @@ GridStoreStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1516">line 1516</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1542">line 1542</a>
         </div>
         
     </div>
@@ -3220,7 +3483,7 @@ GridStoreStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1544">line 1544</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1570">line 1570</a>
         </div>
         
     </div>
@@ -3301,7 +3564,7 @@ GridStoreStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1523">line 1523</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1549">line 1549</a>
         </div>
         
     </div>
@@ -3382,7 +3645,7 @@ GridStoreStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1572">line 1572</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1598">line 1598</a>
         </div>
         
     </div>
@@ -3463,7 +3726,7 @@ GridStoreStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1551">line 1551</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1577">line 1577</a>
         </div>
         
     </div>
@@ -3544,7 +3807,7 @@ GridStoreStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1558">line 1558</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1584">line 1584</a>
         </div>
         
     </div>
@@ -3625,7 +3888,7 @@ GridStoreStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1537">line 1537</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1563">line 1563</a>
         </div>
         
     </div>
@@ -3706,7 +3969,7 @@ GridStoreStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1565">line 1565</a>
+            <a href="lib_gridfs_grid_store.js.html">lib/gridfs/grid_store.js</a>, <a href="lib_gridfs_grid_store.js.html#line1591">line 1591</a>
         </div>
         
     </div>
@@ -3786,32 +4049,18 @@ GridStoreStream instance.
 
 
 
-                    
-                    <!-- disqus code -->
-                    <div id="disqus_thread"></div>
-                    <script type="text/javascript">
-                        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-                        var disqus_shortname = 'nodejsmongodbdriver'; // required: replace example with your forum shortname
+        
+        <!-- disqus code -->
+        <div id="disqus_thread"></div>
+        <noscript>Please enable JavaScript to view the <a target="_blank" href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+        <a target="_blank" href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+        <!-- // disqus code -->
+        
 
-                        /* * * DON'T EDIT BELOW THIS LINE * * */
-                        (function() {
-                            var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
-                            dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
-                            (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
-                        })();
-                    </script>
-                    <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-                    <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>                    
-                    <!-- // disqus code -->
-                    
-
-                    <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Wed Apr 22 2015 13:11:58 GMT+0200 (CEST)
-                    </footer>
-                </div>
-            </td>
-        </tr>
-    </table>
+        <footer>
+            Documentation generated by <a target="_blank" href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Fri Apr 24 2015 15:45:10 GMT+0200 (CEST)
+        </footer>
+    </div>
 </div>
 <script>prettyPrint();</script>
 <script src="scripts/linenumber.js"></script>
