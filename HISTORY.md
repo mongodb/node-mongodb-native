@@ -1,3 +1,7 @@
+1.1.25 04-24-2015
+-----------------
+- Handle lack of callback in crud operations when returning error on application closed.
+
 1.1.24 04-22-2015
 -----------------
 - Error out when topology has been destroyed either by connection retries being exhausted or destroy called on topology.
