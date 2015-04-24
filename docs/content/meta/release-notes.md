@@ -10,6 +10,37 @@ menu:
 title: Release Notes
 weight: 50
 ---
+2.0.28
+-----------------
+- Bumped mongodb-core to 1.2.25
+- Added Cursor.prototype.setCursorOption to allow for setting node specific cursor options for tailable cursors.
+- NODE-430 Cursor.count() opts argument masked by var opts = {}
+- NODE-406 Implemented Cursor.prototype.map function tapping into MongoClient cursor transforms.
+- NODE-438 replaceOne is not returning the result.ops property as described in the docs.
+- NODE-433 _read, pipe and write all open gridstore automatically if not open.
+- NODE-426 ensure drain event is emitted after write function returns, fixes intermittent issues in writing files to gridstore.
+- NODE-440 GridStoreStream._read() doesn't check GridStore.read() error.
+- Always use readPreference = primary for findAndModify command (ignore passed in read preferences) (Issue #1274, https://github.com/vkarpov15).
+- Minor fix in GridStore.exists for dealing with regular expressions searches.
+
+2.0.27 04-07-2015
+-----------------
+- NODE-410 Correctly handle issue with pause/resume in Node 0.10.x that causes exceptions when using the Node 0.12.0 style streams.
+
+2.0.26 04-07-2015
+-----------------
+- Implements the Common Index specification Standard API at https://github.com/mongodb/specifications/blob/master/source/index-management.rst.
+- NODE-408 Expose GridStore.currentChunk.chunkNumber.
+
+2.0.25 03-26-2015
+-----------------
+- Upgraded mongodb-core to 1.1.21, making the C++ bson code an optional dependency to the bson module.
+
+2.0.24 03-24-2015
+-----------------
+- NODE-395 Socket Not Closing, db.close called before full set finished initalizing leading to server connections in progress not being closed properly.
+- Upgraded mongodb-core to 1.1.20.
+
 2.0.23 2015-03-21
 -----------------
 - NODE-380 Correctly return MongoError from toError method.

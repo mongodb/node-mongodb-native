@@ -129,8 +129,11 @@ function generate(title, docs, filename, resolveLinks) {
     
     if (resolveLinks) {
         html = helper.resolveLinks(html); // turn {@link foo} into <a href="foodoc.html">foo</a>
+        
+        // Add a link target for external links @davidshimjs
+        html = html.toString().replace(/<a\s+([^>]*href\s*=\s*['"]*[^\s'"]*:\/\/)/ig, '<a target="_blank" $1');
     }
-    
+
     fs.writeFileSync(outpath, html, 'utf8');
 }
 
@@ -295,12 +298,12 @@ exports.publish = function(taffyData, opts, tutorials) {
         if (doclet.examples) {
             doclet.examples = doclet.examples.map(function(example) {
                 var caption, code;
-                
-                if (example.match(/^\s*<caption>([\s\S]+?)<\/caption>(\s*[\n\r])([\s\S]+)$/i)) {
+
+                if (example.match(/^\s*(?:<p>)?\s*<caption>([\s\S]+?)<\/caption>\s*(?:<\/p>)?[\s\r\n]*([\s\S]+)$/i)) {
                     caption = RegExp.$1;
-                    code    = RegExp.$3;
+                    code    = RegExp.$2;
                 }
-                
+
                 return {
                     caption: caption || '',
                     code: code || example
@@ -377,7 +380,7 @@ exports.publish = function(taffyData, opts, tutorials) {
         var docletPath;
         if (doclet.meta) {
             docletPath = getPathFromDoclet(doclet);
-            docletPath = sourceFiles[docletPath] ? sourceFiles[docletPath].shortened : null;
+            docletPath = sourceFiles[docletPath].shortened;
             if (docletPath) {
                 doclet.meta.filename = docletPath;
             }

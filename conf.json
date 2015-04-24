@@ -4,10 +4,10 @@
     "include": [
       "test/functional/operation_example_tests.js",
       "lib/admin.js", 
-      "lib/aggregation_cursor.js", 
-      "lib/command_cursor.js",
       "lib/collection.js",
       "lib/cursor.js",
+      "lib/aggregation_cursor.js", 
+      "lib/command_cursor.js",
       "lib/db.js",
       "lib/mongo_client.js", 
       "lib/mongos.js", 
