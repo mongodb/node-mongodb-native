@@ -1,8 +1,6 @@
 <?js
 var returns = obj;
 var parentReturn = null;
-var hasName = false;
-var hasType = false;
 
 returns.forEach(function (ret, i) {
     if (ret && (ret.description || ret.name)) {
@@ -10,7 +8,7 @@ returns.forEach(function (ret, i) {
 
         var isNamed = ret.name ? true : false;
         var name = ret.name || ret.description;
-        var startSpacePos = name.indexOf(' ');
+        var startSpacePos = name.indexOf(" ");
 
         if (parentReturn !== null && name.indexOf(parentReturn.name + '.') === 0) {
             ret.name = isNamed ? name.substr(parentReturn.name.length + 1) : name.substr(parentReturn.name.length + 1, startSpacePos - (parentReturn.name.length + 1));
@@ -18,12 +16,11 @@ returns.forEach(function (ret, i) {
             if (!isNamed) {
                 ret.description = ret.description.substr(startSpacePos + 1);
             }
-
-            ret.isSubReturns = true;
+            
             parentReturn.subReturns = parentReturn.subReturns || [];
             parentReturn.subReturns.push(ret);
             returns[i] = null;
-        } else if (returns.length > 1 || ret.isSubReturns) {
+        } else {
             if (!isNamed) {
                 ret.name = ret.description.substr(0, startSpacePos !== -1 ? startSpacePos : ret.description.length);
                 ret.description = startSpacePos !== -1 ? ret.description.substr(startSpacePos + 1) : '';
@@ -32,22 +29,16 @@ returns.forEach(function (ret, i) {
             parentReturn = ret;
         }
     }
-
-    if (ret.name) {
-        hasName = true;
-    }
-
-    if (ret.type) {
-        hasType = true;
-    }
 });
 ?>
 
-<?js if (hasType) { ?>
+<?js
+if (returns.length > 1) {
+?>
 <table class="params">
     <thead>
     <tr>
-        <?js if (hasName) { ?><th>Name</th><?js } ?>
+        <th>Name</th>
         <th>Type</th>
         <th class="last">Description</th>
     </tr>
@@ -61,7 +52,7 @@ returns.forEach(function (ret, i) {
             }
     ?>
         <tr>
-            <?js if (ret.name) { ?><td class="name"><code><?js= ret.name ?></code></td><?js } ?>
+            <td class="name"><code><?js= ret.name ?></code></td>
             <td class="type">
             <?js
                 if (ret.type && ret.type.names) {
@@ -79,8 +70,8 @@ returns.forEach(function (ret, i) {
     <?js }); ?>
     </tbody>
 </table>
-<?js } else { ?>
-<?js if (returns[0].description) { ?>
+<?js } else if (returns[0].description) { ?>
+<h5>Returns:</h5>
 <?js= returns[0].description ?>
-<?js } ?>
+<br />
 <?js } ?>
