@@ -23,8 +23,7 @@ li {
   border-radius: 4px;
 }
 .navigation {
-  position: fixed;
-  float: left;
+  float: right;
   width: 250px;
   height: 100%;
   background-color: #1a1a1a;
@@ -101,7 +100,6 @@ li {
 }
 .main {
   padding: 20px 20px;
-  margin-left: 250px;
 }
 .main .page-title {
   display: none;
@@ -139,6 +137,12 @@ li {
   color: #fff;
   font-size: 0.7em;
   padding: 2px 4px;
+}
+.main h4.name span.type-signature.type a {
+  color: #fff;
+}
+.main h4.name > span.type-signature:first-child {
+  margin-right: 8px;
 }
 .main h4.name span.type {
   margin-left: 5px;
@@ -187,21 +191,8 @@ li {
   margin-top: 10px;
   font-size: 13px;
 }
-.main .description ul,
-.main .description ol {
-  margin-bottom: 15px;
-}
 .main .description p {
   font-size: 13px;
-}
-.main .description h2 {
-  margin-top: 30px;
-  margin-bottom: 10px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #efefef;
-}
-.main .description pre {
-  margin: 10px 0;
 }
 .main .tag-source {
   font-size: 12px;
@@ -267,9 +258,6 @@ li {
   font-size: 13px;
   font-weight: normal;
   font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
-}
-.main .nameContainer h4 .type-signature.type a {
-  color: #fff;
 }
 .main pre {
   font-size: 11px;
