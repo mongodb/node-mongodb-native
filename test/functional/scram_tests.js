@@ -27,7 +27,7 @@ exports['Should correctly authenticate against scram'] = {
         db.close();
 
         // Attempt to reconnect authenticating against the admin database
-        MongoClient.connect('mongodb://test:test@localhost:27017/test?authMechanism=SCRAM-SHA-1&authSource=admin&maxPoolSize=5', function(err, db) {
+        MongoClient.connect('mongodb://test:test@localhost:27017/test?authMechanism=SCRAM-SHA-1&authSource=admin&maxPoolSize=1', function(err, db) {
           test.equal(null, err);
 
           db.collection('test').insert({a:1}, function(err, r) {

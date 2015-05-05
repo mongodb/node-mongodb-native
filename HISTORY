@@ -1,3 +1,7 @@
+1.4.36
+-----------------
+- Fixed issue working around breaking changes in crypto lib in 0.10.x vs 0.8.x of node, that broke scram for mongodb 3.0.x.
+
 1.4.35 2015-03-21
 -----------------
 - NODE-389 error out if server does not return a reply or error in connection handler.
