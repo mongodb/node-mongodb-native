@@ -1,3 +1,7 @@
+1.1.26
+-----------------
+- NODE-456 Allow mongodb-core to pipeline commands (ex findAndModify+GLE) along the same connection and handle the returned results.
+
 1.1.25 04-24-2015
 -----------------
 - Handle lack of callback in crud operations when returning error on application closed.
