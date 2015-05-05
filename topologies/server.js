@@ -649,57 +649,7 @@ Server.prototype.isDestroyed = function() {
   return this.s.state == DESTROYED;
 }
 
-/**
- * Execute a command
- * @method
- * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
- * @param {object} cmd The command hash
- * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
- * @param {Connection} [options.connection] Specify connection object to execute command against
- * @param {opResultCallback} callback A callback function
- */
-Server.prototype.command = function(ns, cmd, options, callback) {
-  if(typeof options == 'function') callback = options, options = {};
-  var self = this;
-  if(this.s.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
-  // Ensure we have no options
-  options = options || {};
-  // Do we have a read Preference it need to be of type ReadPreference
-  if(options.readPreference && !(options.readPreference instanceof ReadPreference)) {
-    throw new Error("readPreference must be an instance of ReadPreference");
-  }
-
-  // Debug log
-  if(self.s.logger.isDebug()) self.s.logger.debug(f('executing command [%s] against %s', JSON.stringify({
-    ns: ns, cmd: cmd, options: debugOptions(debugFields, options)
-  }), self.name));
-
-  // Topology is not connected, save the call in the provided store to be
-  // Executed at some point when the handler deems it's reconnected
-  if(!self.isConnected() && self.s.disconnectHandler != null) {
-    callback = bindToCurrentDomain(callback);
-    return self.s.disconnectHandler.add('command', ns, cmd, options, callback);
-  }
-
-  // If we have no connection error
-  if(!self.s.pool.isConnected()) return callback(new MongoError(f("no connection available to server %s", self.name)));
-
-  // Execute on all connections
-  var onAll = typeof options.onAll == 'boolean' ? options.onAll : false;
-
-  // Check keys
-  var checkKeys = typeof options.checkKeys == 'boolean' ? options.checkKeys: false;
-
-  // Serialize function
-  var serializeFunctions = typeof options.serializeFunctions == 'boolean' ? options.serializeFunctions : false;
-
-  // Query options
-  var queryOptions = {
-    numberToSkip: 0, numberToReturn: -1, checkKeys: checkKeys
-  };
-
-  if(serializeFunctions) queryOptions.serializeFunctions = serializeFunctions;
-
+var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAll, callback) {
   // Create a query instance
   var query = new Query(self.s.bson, ns, cmd, queryOptions);
 
@@ -779,7 +729,154 @@ Server.prototype.command = function(ns, cmd, options, callback) {
       // Execute callback, catch and rethrow if needed
       try { callback(null, new CommandResult(result.documents[0], connection)); }
       catch(err) { process.nextTick(function() { throw err}); }
-  });
+  });  
+}
+
+/**
+ * Execute a command
+ * @method
+ * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+ * @param {object} cmd The command hash
+ * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+ * @param {Connection} [options.connection] Specify connection object to execute command against
+ * @param {opResultCallback} callback A callback function
+ */
+Server.prototype.command = function(ns, cmd, options, callback) {
+  if(typeof options == 'function') callback = options, options = {};
+  var self = this;
+  if(this.s.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
+  // Ensure we have no options
+  options = options || {};
+  // Do we have a read Preference it need to be of type ReadPreference
+  if(options.readPreference && !(options.readPreference instanceof ReadPreference)) {
+    throw new Error("readPreference must be an instance of ReadPreference");
+  }
+
+  // Debug log
+  if(self.s.logger.isDebug()) self.s.logger.debug(f('executing command [%s] against %s', JSON.stringify({
+    ns: ns, cmd: cmd, options: debugOptions(debugFields, options)
+  }), self.name));
+
+  // Topology is not connected, save the call in the provided store to be
+  // Executed at some point when the handler deems it's reconnected
+  if(!self.isConnected() && self.s.disconnectHandler != null) {
+    callback = bindToCurrentDomain(callback);
+    return self.s.disconnectHandler.add('command', ns, cmd, options, callback);
+  }
+
+  // If we have no connection error
+  if(!self.s.pool.isConnected()) return callback(new MongoError(f("no connection available to server %s", self.name)));
+
+  // Execute on all connections
+  var onAll = typeof options.onAll == 'boolean' ? options.onAll : false;
+
+  // Check keys
+  var checkKeys = typeof options.checkKeys == 'boolean' ? options.checkKeys: false;
+
+  // Serialize function
+  var serializeFunctions = typeof options.serializeFunctions == 'boolean' ? options.serializeFunctions : false;
+
+  // Query options
+  var queryOptions = {
+    numberToSkip: 0, numberToReturn: -1, checkKeys: checkKeys
+  };
+
+  if(serializeFunctions) queryOptions.serializeFunctions = serializeFunctions;
+
+  // Single operation execution
+  if(!Array.isArray(cmd)) {
+    return executeSingleOperation(self, ns, cmd, queryOptions, options, onAll, callback);    
+  }
+
+  // Build commands for each of the instances
+  var queries = new Array(cmd.length);
+  for(var i = 0; i < cmd.length; i++) {
+    queries[i] = new Query(self.s.bson, ns, cmd[i], queryOptions);
+    queries[i].slaveOk = slaveOk(options.readPreference);
+  }
+
+  // Notify query start to any read Preference strategies
+  if(self.s.readPreferenceStrategies != null)
+    notifyStrategies(self, self.s, 'startOperation', [self, queries, new Date()]);
+
+  // Get a connection (either passed or from the pool)
+  var connection = options.connection || self.s.pool.get();
+
+  // Double check if we have a valid connection
+  if(!connection.isConnected()) {
+    return callback(new MongoError(f("no connection available to server %s", self.name)));
+  }
+
+  // Print cmd and execution connection if in debug mode for logging
+  if(self.s.logger.isDebug()) {
+    var json = connection.toJSON();
+    self.s.logger.debug(f('cmd [%s] about to be executed on connection with id %s at %s:%s', JSON.stringify(queries), json.id, json.host, json.port));
+  }
+
+  // Canceled operations
+  var canceled = false;
+  // Number of operations left
+  var operationsLeft = queries.length;
+  // Results
+  var results = [];
+
+  // We need to nest the callbacks
+  for(var i = 0; i < queries.length; i++) {
+    // Get the query object
+    var query = queries[i];
+    
+    // Execute a single command query
+    try {
+      connection.write(query.toBin());
+    } catch(err) {
+      return callback(MongoError.create(err));
+    }    
+
+    // Register the callback
+    self.s.callbacks.register(query.requestId, function(err, result) {
+      // If it's canceled ignore the operation
+      if(canceled) return;
+      // Update the current index
+      operationsLeft = operationsLeft - 1;
+      
+      // If we have an error cancel the operation
+      if(err) {
+        canceled = true;
+        return callback(err);
+      }
+
+      // Return the result
+      if(result.documents[0]['$err']
+        || result.documents[0]['errmsg']
+        || result.documents[0]['err']
+        || result.documents[0]['code']) {
+
+        // Set to canceled
+        canceled = true;
+        // Return the error
+        return callback(MongoError.create(result.documents[0]));
+      }
+
+      // Push results
+      results.push(result.documents[0]);
+
+      // We are done, return the result
+      if(operationsLeft == 0) {
+        // Notify end of command
+        notifyStrategies(self, self.s, 'endOperation', [self, err, result, new Date()]);
+
+        // Turn into command results
+        var commandResults = new Array(results.length);
+        for(var i = 0; i < results.length; i++) {
+          commandResults[i] = new CommandResult(results[i], connection); 
+        }
+
+        // Execute callback, catch and rethrow if needed
+        try { callback(null, commandResults); }
+        catch(err) { process.nextTick(function() { throw err}); }
+      }
+    });
+  }
 }
 
 /**
