@@ -491,7 +491,7 @@ exports['Should correctly pipeline operations with first failure'] = {
           }], function(err, result) {
             console.log("----------------------------------------------")
             console.dir(err)
-            console.dir(result)
+            console.log(JSON.stringify(result, null, 2))
             test.ok(err != null);
             // Destroy the server connection        
             _server.destroy();
