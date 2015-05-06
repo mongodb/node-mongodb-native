@@ -1,4 +1,4 @@
-1.1.26
+1.1.26 05-06-2015
 -----------------
 - NODE-456 Allow mongodb-core to pipeline commands (ex findAndModify+GLE) along the same connection and handle the returned results.
 - Fixes to make mongodb-core work for node 0.8.x when using scram and setImmediate.
