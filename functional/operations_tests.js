@@ -489,6 +489,9 @@ exports['Should correctly pipeline operations with first failure'] = {
           }, {
             getLastError: 1
           }], function(err, result) {
+            console.log("----------------------------------------------")
+            console.dir(err)
+            console.dir(result)
             test.ok(err != null);
             // Destroy the server connection        
             _server.destroy();
