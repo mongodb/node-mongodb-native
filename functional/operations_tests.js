@@ -481,7 +481,7 @@ exports['Should correctly pipeline operations with first failure'] = {
         // Chain findAndModify and GLE
         _server.command(f("%s.$cmd", configuration.db)
           , [{
-            findAndModify: 'pipeline_ops',
+            findAndModify: 'pipeline_ops_1',
             query: {a:1, '$set': {a:1}},
             update: {$set: {b:1}},
             new:true,
