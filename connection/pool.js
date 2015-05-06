@@ -147,6 +147,14 @@ Pool.prototype.destroy = function() {
   });
 }
 
+var execute = null;
+
+try {
+  execute = setImmediate;
+} catch(err) {
+  execute = process.nextTick;
+}
+
 /**
  * Connect pool
  * @method
@@ -159,7 +167,7 @@ Pool.prototype.connect = function(_options) {
   this.dead = false;
   // Connect all sockets
   for(var i = 0; i < this.size; i++) {
-    setImmediate(function() {
+    execute(function() {
       self.options.messageHandler = self.messageHandler;
       var connection = new Connection(self.options);
       
