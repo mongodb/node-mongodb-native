@@ -483,7 +483,7 @@ exports['Should correctly pipeline operations with first failure'] = {
           , [{
             findAndModify: 'pipeline_ops_1',
             query: {a:1, '$set': {a:1}},
-            update: {$set: {b:1}},
+            update: {$set: {b:1}, $failed: {b:1}},
             new:true,
             upsert:true
           }, {
