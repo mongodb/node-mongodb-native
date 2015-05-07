@@ -29,18 +29,16 @@ exports.shouldCorrectlyEmitErrorOnAllDbsOnPoolClose = {
 
           collection.insert({a:1}, {w:1}, function(err, result) {
             test.equal(null, err);
-
             // Open a second db
             var db2 = db.db('tests_2');
             // Add a close handler
             db2.on("close", function(err) {
               numberOfCloses = numberOfCloses + 1;
               test.equal(2, numberOfCloses)
-              // test.done();
             });
 
             // Open a second db
-            var db3 = db2.db('tests_2');
+            var db3 = db2.db('tests_3');
             // Add a close handler
             db3.on("close", function(err) {
               numberOfCloses = numberOfCloses + 1;
@@ -131,6 +129,26 @@ exports.shouldCorrectlyHandleMultipleDbsFindAndModifies = {
           test.done();
         });
       });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['should not leak listeners'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;     
+    MongoClient.connect(configuration.url(), function(err, db) {
+      for (var i = 0; i < 100; i++) {
+        db.db("test");
+      }
+
+      db.close();
+      test.done();
     });
   }
 }

@@ -1,3 +1,7 @@
+2.0.29 05-07-2015
+-----------------
+- NODE-444 Possible memory leak, too many listeners added.
+
 2.0.28 04-24-2015
 -----------------
 - Bumped mongodb-core to 1.2.25
