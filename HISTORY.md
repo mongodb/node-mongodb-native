@@ -1,6 +1,8 @@
 2.0.29 05-07-2015
 -----------------
 - NODE-444 Possible memory leak, too many listeners added.
+- NODE-459 Auth failure using Node 0.8.28, MongoDB 3.0.2 & mongodb-node-native 1.4.35.
+- Bumped mongodb-core to 1.2.26.
 
 2.0.28 04-24-2015
 -----------------
