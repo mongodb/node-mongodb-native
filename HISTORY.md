@@ -1,3 +1,7 @@
+2.0.30 05-07-2015
+-----------------
+- NODE-460 fix; don't set authMechanism for user in db.authenticate() to avoid mongoose authentication issue.
+
 2.0.29 05-07-2015
 -----------------
 - NODE-444 Possible memory leak, too many listeners added.
