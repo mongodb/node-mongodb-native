@@ -2891,3 +2891,153 @@ exports['should correctly pipe through multiple pipelines'] = {
   }
 }
 
+/**
+ * @ignore
+ */
+exports['should correctly seek on file where size of file is a multiple of the chunk size'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient
+      , GridStore = configuration.require.GridStore
+      , ObjectID = configuration.require.ObjectID
+      , fs = require('fs')
+      , assert = require('assert');
+
+    // Connection URL
+    var url = 'mongodb://localhost:27017/myproject';
+    // Use connect method to connect to the Server
+    MongoClient.connect(configuration.url(), function(err, db) {
+      assert.equal(null, err);
+
+      var gridStore = new GridStore(db, "test_gs_multi_chunk_exact_size", "w");
+      gridStore.open(function(err, gridStore) {
+        gridStore.chunkSize = 512;
+     
+        // Write multiple of chunk size
+        gridStore.write(new Buffer(gridStore.chunkSize * 4), function(err, r) {
+          test.equal(null, err);
+
+          gridStore.close(function(err) {
+            test.equal(null, err);
+
+            var gridStore = new GridStore(db, "test_gs_multi_chunk_exact_size", "r");
+            gridStore.open(function(err, store) {
+              test.equal(null, err);
+
+              store.seek(0, GridStore.IO_SEEK_END, function (err) {
+                test.equal(null, err);
+
+                store.tell(function (err, pos) {
+                  test.equal(null, err);
+                  test.equal(512 * 4, pos);
+    
+                  store.seek(0, GridStore.IO_SEEK_SET, function (err) {
+                    test.equal(null, err);
+
+                    store.tell(function (err, pos) {
+                      test.equal(null, err);
+                      test.equal(0, pos);
+            
+                      store.read(function(err, data) {
+                        test.equal(null, err);
+                        test.equal(512 * 4, data.length);
+
+                        db.close();
+                        test.done();
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          });
+        }); 
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['should correctly seek on file where size of file is a multiple of the chunk size and then stream'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient
+      , GridStore = configuration.require.GridStore
+      , ObjectID = configuration.require.ObjectID
+      , fs = require('fs')
+      , assert = require('assert');
+
+    // Connection URL
+    var url = 'mongodb://localhost:27017/myproject';
+    var id = new ObjectID();
+
+    // Use connect method to connect to the Server
+    MongoClient.connect(configuration.url(), function(err, db) {
+      assert.equal(null, err);
+
+      var gridStore = new GridStore(db, id, "w");
+      gridStore.open(function(err, gridStore) {
+        gridStore.chunkSize = 512;
+     
+        // Get the data
+        var data = new Buffer(gridStore.chunkSize * 2);
+        for(var i = 0; i < (gridStore.chunkSize) * 2; i++) {
+          data[i] = 0;
+        }
+
+        // Write multiple of chunk size
+        gridStore.write(data, function(err, r) {
+          test.equal(null, err);
+
+          gridStore.close(function(err) {
+            test.equal(null, err);
+
+            var gridStore = new GridStore(db, id, "r");
+            gridStore.open(function(err, store) {
+              test.equal(null, err);
+
+              store.seek(0, GridStore.IO_SEEK_END, function (err) {
+                test.equal(null, err);
+
+                store.tell(function (err, pos) {
+                  test.equal(null, err);
+                  test.equal(512 * 2, pos);
+
+                  store.seek(0, GridStore.IO_SEEK_SET, function (err) {
+                    test.equal(null, err);
+
+                    store.tell(function (err, pos) {
+                      test.equal(null, err);
+                      test.equal(0, pos);
+
+                      // Get the stream
+                      var stream = store.stream();
+                      var retrieved = '';
+
+                      stream.on('data', function(d) {
+                        retrieved += d.toString('hex');
+                      });
+            
+                      stream.on('end', function() {
+                        test.equal(data.toString('hex'), retrieved)
+
+                        db.close();
+                        test.done();
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          });
+        }); 
+      });
+    });
+  }
+}
