@@ -1,3 +1,7 @@
+2.0.31 05-08-2015
+-----------------
+- NODE-461 Tripping on error "no chunks found for file, possibly corrupt" when there is no error.
+
 2.0.30 05-07-2015
 -----------------
 - NODE-460 fix; don't set authMechanism for user in db.authenticate() to avoid mongoose authentication issue.
