@@ -1,3 +1,7 @@
+1.4.37 2015-05-08
+-----------------
+- NODE-461 Tripping on error "no chunks found for file, possibly corrupt" when there is no error.
+
 1.4.36 2015-05-07
 -----------------
 - NODE-459 Fixed issue working around breaking changes in crypto lib in 0.10.x vs 0.8.x of node, that broke scram for mongodb 3.0.x.
