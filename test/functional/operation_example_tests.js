@@ -1373,7 +1373,7 @@ exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommand = {
 }
 
 /**
- * A whole lot of different wayt to execute the group command
+ * A whole lot of different ways to execute the group command
  *
  * @example-class Collection
  * @example-method group

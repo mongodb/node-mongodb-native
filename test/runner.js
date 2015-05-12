@@ -245,37 +245,39 @@ var testFiles =[
   , '/test/functional/crud_api_tests.js'
   // , '/test/functional/reconnect_tests.js'
 
+  // Promise tests
+  , '/test/functional/promises_tests.js'
 
-  // Logging tests
-  , '/test/functional/logger_tests.js'
+  // // Logging tests
+  // , '/test/functional/logger_tests.js'
 
-  // Replicaset tests
-  , '/test/functional/replset_operations_tests.js'
-  , '/test/functional/replset_read_preference_tests.js'
-  , '/test/functional/replset_failover_tests.js'
-  , '/test/functional/replset_connection_tests.js'
+  // // Replicaset tests
+  // , '/test/functional/replset_operations_tests.js'
+  // , '/test/functional/replset_read_preference_tests.js'
+  // , '/test/functional/replset_failover_tests.js'
+  // , '/test/functional/replset_connection_tests.js'
 
-  // Sharding tests
-  , '/test/functional/sharding_failover_tests.js'
-  , '/test/functional/sharding_connection_tests.js'
-  , '/test/functional/sharding_read_preference_tests.js'
+  // // Sharding tests
+  // , '/test/functional/sharding_failover_tests.js'
+  // , '/test/functional/sharding_connection_tests.js'
+  // , '/test/functional/sharding_read_preference_tests.js'
 
-  // SSL tests
-  , '/test/functional/ssl_mongoclient_tests.js'
-  , '/test/functional/ssl_validation_tests.js'
-  , '/test/functional/ssl_x509_connect_tests.js'
+  // // SSL tests
+  // , '/test/functional/ssl_mongoclient_tests.js'
+  // , '/test/functional/ssl_validation_tests.js'
+  // , '/test/functional/ssl_x509_connect_tests.js'
 
-  // SCRAM tests
-  , '/test/functional/scram_tests.js'
+  // // SCRAM tests
+  // , '/test/functional/scram_tests.js'
 
-  // LDAP Tests
-  , '/test/functional/ldap_tests.js'
+  // // LDAP Tests
+  // , '/test/functional/ldap_tests.js'
 
-  // Kerberos Tests
-  , '/test/functional/kerberos_tests.js'
+  // // Kerberos Tests
+  // , '/test/functional/kerberos_tests.js'
 
-  // Authentication Tests
-  , '/test/functional/authentication_tests.js'
+  // // Authentication Tests
+  // , '/test/functional/authentication_tests.js'
 ]
 
 // Add all the tests to run

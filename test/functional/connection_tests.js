@@ -227,23 +227,6 @@ exports.testConnectBadAuth = {
 /**
  * @ignore
  */
-exports.testConnectThrowsNoCallbackProvided = {
-  metadata: { requires: { topology: 'single' } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var connect = configuration.require;
-
-    test.throws(function() {
-      var db = connect(configuration.url());
-    });
-    test.done();
-  }
-}
-
-/**
- * @ignore
- */
 exports.testConnectBadUrl = {
   metadata: { requires: { topology: 'single' } },
 
