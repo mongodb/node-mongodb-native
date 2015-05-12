@@ -99,6 +99,7 @@ exports['Should correctly reconnect to server with automatic reconnect disabled'
         process.nextTick(function() {
           // Attempt a proper command
           _server.command("system.$cmd", {ismaster: true}, {readPreference: new ReadPreference('primary')}, function(err, result) {
+            console.dir(err)
             test.ok(err != null);
           });
         });
