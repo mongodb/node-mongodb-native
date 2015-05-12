@@ -27,5 +27,5 @@
             ]
         }
     ], 
-    "uri": "mongodb://a/?connect=direct"
+    "uri": "mongodb://a"
 }

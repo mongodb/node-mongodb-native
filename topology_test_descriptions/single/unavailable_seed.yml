@@ -1,6 +1,6 @@
 description: "Unavailable seed"
 
-uri: "mongodb://a/?connect=direct"
+uri: "mongodb://a"
 
 phases: [
 

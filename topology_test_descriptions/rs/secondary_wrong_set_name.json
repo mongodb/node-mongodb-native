@@ -12,7 +12,7 @@
                     "a:27017", 
                     {
                         "hosts": [
-                            "a"
+                            "a:27017"
                         ], 
                         "ismaster": false, 
                         "ok": 1, 

@@ -1,0 +1,94 @@
+description: "Primary with no electionId, then a primary with electionId"
+
+uri: "mongodb://a/?replicaSet=rs"
+
+phases: [
+
+    # Primary A has no electionId.
+    {
+        responses: [
+            ["a:27017", {
+                ok: 1,
+                ismaster: true,
+                hosts: ["a:27017", "b:27017"],
+                setName: "rs"
+            }]
+        ],
+
+        outcome: {
+            servers: {
+                "a:27017": {
+                    type: "RSPrimary",
+                    setName: "rs",
+                    electionId:
+                },
+                "b:27017": {
+                    type: "Unknown",
+                    setName:,
+                    electionId:
+                }
+            },
+            topologyType: "ReplicaSetWithPrimary",
+            setName: "rs",
+        }
+    },
+
+    # B is elected, it has an electionId.
+    {
+        responses: [
+            ["b:27017", {
+                ok: 1,
+                ismaster: true,
+                hosts: ["a:27017", "b:27017"],
+                setName: "rs",
+                electionId: {"$oid": "000000000000000000000001"}
+            }]
+        ],
+
+        outcome: {
+            servers: {
+                "a:27017": {
+                    type: "Unknown",
+                    setName:,
+                    electionId:
+                },
+                "b:27017": {
+                    type: "RSPrimary",
+                    setName: "rs",
+                    electionId: {"$oid": "000000000000000000000001"}
+                }
+            },
+            topologyType: "ReplicaSetWithPrimary",
+            setName: "rs",
+        }
+    },
+
+    # A still claims to be primary, no electionId, we have to trust it.
+    {
+        responses: [
+            ["a:27017", {
+                ok: 1,
+                ismaster: true,
+                hosts: ["a:27017", "b:27017"],
+                setName: "rs"
+            }]
+        ],
+        outcome: {
+            servers: {
+                "a:27017": {
+                    type: "RSPrimary",
+                    setName: "rs",
+                    electionId:
+                },
+                "b:27017": {
+                    type: "Unknown",
+                    setName:,
+                    electionId:
+                }
+            },
+            topologyType: "ReplicaSetWithPrimary",
+            setName: "rs",
+            # But we remember old electionId.
+        }
+    }
+]

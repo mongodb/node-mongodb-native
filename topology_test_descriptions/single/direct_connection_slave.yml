@@ -1,6 +1,6 @@
 description: "Direct connection to slave"
 
-uri: "mongodb://a/?connect=direct"
+uri: "mongodb://a"
 
 phases: [
 
