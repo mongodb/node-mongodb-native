@@ -1,6 +1,6 @@
 description: "Connect to mongos"
 
-uri: "mongodb://a/?connect=direct"
+uri: "mongodb://a"
 
 phases: [
 

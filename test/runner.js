@@ -23,6 +23,22 @@ var argv = require('optimist')
     .demand(['t'])
     .argv;
 
+// Skipping parameters
+var startupOptions = {
+    skipStartup: true
+  , skipRestart: true
+  , skipShutdown: true
+  , skip: false
+}
+
+// Skipping parameters
+var startupOptions = {
+    skipStartup: false
+  , skipRestart: false
+  , skipShutdown: false
+  , skip: false
+}
+
 /**
  * Standalone MongoDB Configuration
  */
@@ -76,7 +92,6 @@ var Configuration = function(options) {
       },
 
       stop: function(callback) {
-        // console.log("============================================== STOP")
         if(skipTermination) return callback();
         // manager.stop({signal: -9}, function() {
 
@@ -98,6 +113,7 @@ var Configuration = function(options) {
 
       restart: function(options, callback) {
         if(typeof options == 'function') callback = options, options = {purge:true, kill:true};
+        if(skipTermination) return callback();
 
         manager.restart(options, function() {
           setTimeout(function() {
@@ -205,11 +221,11 @@ testFiles.forEach(function(t) {
 // }));
 
 // Add a Node version plugin
-runner.plugin(new NodeVersionFilter());
+runner.plugin(new NodeVersionFilter(startupOptions));
 // Add a MongoDB version plugin
-runner.plugin(new MongoDBVersionFilter());
+runner.plugin(new MongoDBVersionFilter(startupOptions));
 // Add a Topology filter plugin
-runner.plugin(new MongoDBTopologyFilter());
+runner.plugin(new MongoDBTopologyFilter(startupOptions));
 
 // Exit when done
 runner.on('exit', function(errors, results) {
@@ -243,8 +259,8 @@ if(argv.t == 'functional') {
     , port: 27017
     // , skipStart: false
     // , skipTermination: false
-    // , skipStart: true
-    // , skipTermination: true
+    , skipStart: startupOptions.skipStartup
+    , skipTermination: startupOptions.skipShutdown
     , manager: new ServerManager({
         dbpath: path.join(path.resolve('db'), f("data-%d", 27017))
       , logpath: path.join(path.resolve('db'), f("data-%d.log", 27017))
@@ -259,8 +275,8 @@ if(argv.t == 'functional') {
       , port: 31000
       , setName: 'rs'
       // , fork:null
-      // , skipStart: true
-      // , skipTermination: true
+      , skipStart: startupOptions.skipStartup
+      , skipTermination: startupOptions.skipShutdown
       , topology: function(self, _mongo) {
         return new _mongo.ReplSet([{
             host: 'localhost'
@@ -281,8 +297,8 @@ if(argv.t == 'functional') {
     config = {
         host: 'localhost'
       , port: 50000
-      // , skipStart: true
-      // , skipTermination: true
+      , skipStart: startupOptions.skipStartup
+      , skipTermination: startupOptions.skipShutdown
       , topology: function(self, _mongo) {
         return new _mongo.Mongos([{
             host: 'localhost'
@@ -309,6 +325,11 @@ if(argv.t == 'functional') {
 
   // Add travis filter
   runner.plugin(new TravisFilter());
+
+  // Skip startup
+  if(startupOptions.skipStartup) {
+    return runner.run(Configuration(config));
+  }
 
   // Kill any running MongoDB processes and
   // `install $MONGODB_VERSION` || `use existing installation` || `install stable`

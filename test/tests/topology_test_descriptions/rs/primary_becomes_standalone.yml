@@ -11,7 +11,7 @@ phases: [
 
                     ok: 1,
                     ismaster: true,
-                    hosts: ["a"],
+                    hosts: ["a:27017"],
                     setName: "rs"
                 }]
         ],

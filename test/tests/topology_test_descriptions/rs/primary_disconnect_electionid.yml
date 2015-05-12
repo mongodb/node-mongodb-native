@@ -1,0 +1,124 @@
+description: "Disconnected from primary, reject stale primary"
+
+uri: "mongodb://a/?replicaSet=rs"
+
+phases: [
+
+    # A is elected, then B.
+    {
+        responses: [
+            ["a:27017", {
+                ok: 1,
+                ismaster: true,
+                hosts: ["a:27017", "b:27017"],
+                setName: "rs",
+                electionId: {"$oid": "000000000000000000000001"}
+            }],
+            ["b:27017", {
+                ok: 1,
+                ismaster: true,
+                hosts: ["a:27017", "b:27017"],
+                setName: "rs",
+                electionId: {"$oid": "000000000000000000000002"}
+            }]
+        ],
+
+        outcome: {
+            servers: {
+                "a:27017": {
+                    type: "Unknown",
+                    setName:,
+                    electionId:
+                },
+                "b:27017": {
+                    type: "RSPrimary",
+                    setName: "rs",
+                    electionId: {"$oid": "000000000000000000000002"}
+                }
+            },
+            topologyType: "ReplicaSetWithPrimary",
+            setName: "rs",
+        }
+    },
+
+    # Disconnected from B.
+    {
+        responses: [
+            ["b:27017", {}]
+        ],
+        outcome: {
+            servers: {
+                "a:27017": {
+                    type: "Unknown",
+                    setName:,
+                    electionId:
+                },
+                "b:27017": {
+                    type: "Unknown",
+                    setName:,
+                    electionId:
+                }
+            },
+            topologyType: "ReplicaSetNoPrimary",
+            setName: "rs",
+        }
+    },
+
+    # A still claims to be primary but it's ignored.
+    {
+        responses: [
+            ["a:27017", {
+                ok: 1,
+                ismaster: true,
+                hosts: ["a:27017", "b:27017"],
+                setName: "rs",
+                electionId: {"$oid": "000000000000000000000001"}
+            }]
+        ],
+        outcome: {
+            servers: {
+                "a:27017": {
+                    type: "Unknown",
+                    setName:,
+                    electionId:
+                },
+                "b:27017": {
+                    type: "Unknown",
+                    setName:,
+                    electionId:
+                }
+            },
+            topologyType: "ReplicaSetNoPrimary",
+            setName: "rs",
+        }
+    },
+
+    # Now A is re-elected.
+    {
+        responses: [
+            ["a:27017", {
+                ok: 1,
+                ismaster: true,
+                hosts: ["a:27017", "b:27017"],
+                setName: "rs",
+                electionId: {"$oid": "000000000000000000000003"}
+            }]
+        ],
+        outcome: {
+            servers: {
+                "a:27017": {
+                    type: "RSPrimary",
+                    setName: "rs",
+                    electionId: {"$oid": "000000000000000000000003"}
+                },
+                "b:27017": {
+                    type: "Unknown",
+                    setName:,
+                    electionId:
+                }
+            },
+            topologyType: "ReplicaSetWithPrimary",
+            setName: "rs",
+        }
+    }
+]

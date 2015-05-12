@@ -4,11 +4,14 @@ var validVersion = require('./shared').validVersion
   , semver = require('semver')
   , f = require('util').format;
 
-var MongoDBVersionFilter = function() {
+var MongoDBVersionFilter = function(options) {
+  options = options || {};
+  // Get environmental variables that are known
   var mongodb_version_array = [];
   var version = null;
 
   this.beforeStart = function(object, callback) {
+    if(options.skip) return callback();
     // Get the first configuration
     var configuration = object.configurations[0];
     // Get the MongoDB version
@@ -26,6 +29,7 @@ var MongoDBVersionFilter = function() {
   }
 
 	this.filter = function(test) {
+    if(options.skip) return false;    
   	if(test.metadata == null) return false;
   	if(test.metadata.requires == null) return false;
   	if(test.metadata.requires.mongodb == null) return false;

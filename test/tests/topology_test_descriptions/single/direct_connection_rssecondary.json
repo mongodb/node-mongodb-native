@@ -17,7 +17,7 @@
                     "a:27017", 
                     {
                         "hosts": [
-                            "a"
+                            "a:27017"
                         ], 
                         "ismaster": false, 
                         "ok": 1, 
@@ -28,5 +28,5 @@
             ]
         }
     ], 
-    "uri": "mongodb://a/?connect=direct"
+    "uri": "mongodb://a"
 }

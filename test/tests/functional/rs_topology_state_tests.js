@@ -2,6 +2,7 @@
 
 var fs = require('fs')
   , f = require('util').format
+  , ObjectId = require('bson').ObjectId
   , State = require('../../../lib/topologies/replset_state');
 
 var parseTopologyTests = function(dir, excludes) {
@@ -45,6 +46,10 @@ var executeState = function(assert, test) {
 
       // Execute an update
       var update = function(_ismaster, _name) {
+        if(_ismaster.electionId) {
+          _ismaster.electionId = new ObjectId(_ismaster.electionId['$oid']);
+        }
+
         state.update(_ismaster, {name: _name, equals: function(s) {
           return s.name == _name;
         }, destroy: function() {}});
