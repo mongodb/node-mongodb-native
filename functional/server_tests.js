@@ -79,6 +79,7 @@ exports['Should correctly reconnect to server with automatic reconnect disabled'
         host: configuration.host
       , port: configuration.port
       , reconnect: false
+      , size: 1
     })
 
     // Test flags
@@ -96,13 +97,13 @@ exports['Should correctly reconnect to server with automatic reconnect disabled'
           result.connection.write(a);
         } catch(err) {}
 
-        setTimeout(function() {
+        process.nextTick(function() {
           // Attempt a proper command
           _server.command("system.$cmd", {ismaster: true}, {readPreference: new ReadPreference('primary')}, function(err, result) {
             console.dir(err)
             test.ok(err != null);
           });
-        }, 1);
+        });
       });
     });
 
