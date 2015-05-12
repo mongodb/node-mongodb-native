@@ -1,3 +1,7 @@
+1.1.27 05-12-2015
+-----------------
+- NODE-455 Update SDAM specification support to cover electionId and Mongos load balancing.
+
 1.1.26 05-06-2015
 -----------------
 - NODE-456 Allow mongodb-core to pipeline commands (ex findAndModify+GLE) along the same connection and handle the returned results.
