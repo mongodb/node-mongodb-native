@@ -1,3 +1,7 @@
+1.1.28 05-12-2015
+-----------------
+- Fixed buffer compare for electionId for < node 12.0.2
+
 1.1.27 05-12-2015
 -----------------
 - NODE-455 Update SDAM specification support to cover electionId and Mongos load balancing.
