@@ -331,9 +331,33 @@ State.prototype.addPassive = function(server) {
 }
 
 var compareObjectIds = function(id1, id2) {
-  var id1Buffer = new Buffer(id1.toHexString(), 'hex');
-  var id2Buffer = new Buffer(id2.toHexString(), 'hex');
-  return Buffer.compare(id1Buffer, id2Buffer);
+  var a = new Buffer(id1.toHexString(), 'hex');
+  var b = new Buffer(id2.toHexString(), 'hex');
+
+  if(a === b) {
+    return 0;
+  }
+
+  if(typeof Buffer.compare === 'function') {
+    return Buffer.compare(a, b);
+  }
+
+  var x = a.length;
+  var y = b.length;
+  var len = Math.min(x, y);
+
+  for (var i = 0; i < len; i++) {
+    if (a[i] !== b[i]) {
+      break;
+    }
+  }
+
+  if (i !== len) {
+    x = a[i];
+    y = b[i];
+  }
+
+  return x < y ? -1 : y < x ? 1 : 0;
 }
 
 /**
