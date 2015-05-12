@@ -7,7 +7,8 @@ exports['Should correctly reconnect to server with automatic reconnect enabled']
   metadata: {
     requires: {
       topology: "single"
-    }
+    }, 
+    ignore: { travis:true
   },
 
   test: function(configuration, test) {
@@ -67,7 +68,8 @@ exports['Should correctly reconnect to server with automatic reconnect disabled'
   metadata: {
     requires: {
       topology: "single"
-    }
+    }, 
+    ignore: { travis:true
   },
 
   test: function(configuration, test) {
