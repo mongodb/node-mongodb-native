@@ -245,8 +245,9 @@ var testFiles =[
   , '/test/functional/crud_api_tests.js'
   // , '/test/functional/reconnect_tests.js'
 
-  // Promise tests
-  , '/test/functional/promises_tests.js'
+  // // Promise tests
+  // , '/test/functional/promises_db_tests.js'
+  , '/test/functional/promises_collection_tests.js'
 
   // // Logging tests
   // , '/test/functional/logger_tests.js'
