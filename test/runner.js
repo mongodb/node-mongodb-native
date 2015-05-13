@@ -247,7 +247,8 @@ var testFiles =[
 
   // // Promise tests
   // , '/test/functional/promises_db_tests.js'
-  , '/test/functional/promises_collection_tests.js'
+  // , '/test/functional/promises_collection_tests.js'
+  // , '/test/functional/promises_cursor_tests.js'
 
   // // Logging tests
   // , '/test/functional/logger_tests.js'
