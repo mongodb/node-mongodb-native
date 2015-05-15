@@ -1,6 +1,7 @@
 2.0.32
 -----------------
 - NODE-463 db.close immediately executes its callback.
+- Don't only emit server close event once (Issue #1276, https://github.com/vkarpov15).
 
 2.0.31 05-08-2015
 -----------------
