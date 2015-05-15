@@ -70,7 +70,7 @@ var createConfiguration = function(options) {
     var writeConcernMax = options.writeConcernMax || {w:1};
 
     Logger.setCurrentLogger(function() {});
-    Logger.setLevel('debug');
+    Logger.setLevel('info');
 
     // Shallow clone the options
     var fOptions = shallowClone(options);
@@ -243,12 +243,13 @@ var testFiles =[
   , '/test/functional/bulk_tests.js'
   , '/test/functional/operation_example_tests.js'
   , '/test/functional/crud_api_tests.js'
-  // , '/test/functional/reconnect_tests.js'
+  , '/test/functional/reconnect_tests.js'
 
   // // Promise tests
   // , '/test/functional/promises_db_tests.js'
   // , '/test/functional/promises_collection_tests.js'
   // , '/test/functional/promises_cursor_tests.js'
+  , '/test/functional/operation_promises_example_tests.js'
 
   // // Logging tests
   // , '/test/functional/logger_tests.js'

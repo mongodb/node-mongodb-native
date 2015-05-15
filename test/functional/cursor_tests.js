@@ -357,49 +357,49 @@ exports.shouldCorrectlyExecuteSortOnCursor = {
   }
 }
 
-/**
- * @ignore
- * @api private
- */
-exports.shouldCorrectlyThrowErrorOnToArrayWhenMissingCallback = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+// /**
+//  * @ignore
+//  * @api private
+//  */
+// exports.shouldCorrectlyThrowErrorOnToArrayWhenMissingCallback = {
+//   // Add a tag that our runner can trigger on
+//   // in this case we are setting that node needs to be higher than 0.10.X to run
+//   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
-      db.createCollection('test_to_array', function(err, collection) {
-        function insert(callback) {
-          var total = 10;
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+//     db.open(function(err, db) {
+//       db.createCollection('test_to_array', function(err, collection) {
+//         function insert(callback) {
+//           var total = 10;
 
-          for(var i = 0; i < 10; i++) {
-            collection.insert({'x':i}, configuration.writeConcernMax(), function(e) {
-              total = total - 1;
-              if(total == 0) callback();
-            });
-          }
-        }
+//           for(var i = 0; i < 10; i++) {
+//             collection.insert({'x':i}, configuration.writeConcernMax(), function(e) {
+//               total = total - 1;
+//               if(total == 0) callback();
+//             });
+//           }
+//         }
 
-        function finished() {
-          collection.find(function(err, cursor) {
-            test.throws(function () {
-              cursor.toArray();
-            });
+//         function finished() {
+//           collection.find(function(err, cursor) {
+//             test.throws(function () {
+//               cursor.toArray();
+//             });
 
-            db.close();
-            test.done();
-          });
-        }
+//             db.close();
+//             test.done();
+//           });
+//         }
 
-        insert(function() {
-          finished();
-        });
-      });
-    });
-  }
-}
+//         insert(function() {
+//           finished();
+//         });
+//       });
+//     });
+//   }
+// }
 
 /**
  * @ignore

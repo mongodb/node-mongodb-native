@@ -9,13 +9,13 @@ var f = require('util').format;
  *************************************************************************/
 
 /**
- * Correctly call the aggregation framework using a pipeline in an Array.
+ * Correctly call the aggregation using a cursor toArray Promise
  *
  * @example-class Collection
  * @example-method aggregate
  * @ignore
  */
-exports.aggregationExample1 = {
+exports.aggregationExample2WithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
@@ -24,7 +24,7 @@ exports.aggregationExample1 = {
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -40,73 +40,9 @@ exports.aggregationExample1 = {
           ]}];
 
       // Create a collection
-      var collection = db.collection('aggregationExample1');
+      var collection = db.collection('aggregationExample2_with_promise');
       // Insert the docs
-      collection.insertMany(docs, {w: 1}, function(err, result) {
-
-        // Execute aggregate, notice the pipeline is expressed as an Array
-        collection.aggregate([
-            { $project : {
-              author : 1,
-              tags : 1
-            }},
-            { $unwind : "$tags" },
-            { $group : {
-              _id : {tags : "$tags"},
-              authors : { $addToSet : "$author" }
-            }}
-          ], function(err, result) {
-            test.equal(null, err);
-            test.equal('good', result[0]._id.tags);
-            test.deepEqual(['bob'], result[0].authors);
-            test.equal('fun', result[1]._id.tags);
-            test.deepEqual(['bob'], result[1].authors);
-
-            db.close();
-            test.done();
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
- * Correctly call the aggregation using a cursor
- *
- * @example-class Collection
- * @example-method aggregate
- * @ignore
- */
-exports.aggregationExample2 = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
-  
-  // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-
-    db.open(function(err, db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-      // Some docs for insertion
-      var docs = [{
-          title : "this is my title", author : "bob", posted : new Date() ,
-          pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
-          comments : [
-            { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
-          ]}];
-
-      // Create a collection
-      var collection = db.collection('aggregationExample2');
-      // Insert the docs
-      collection.insertMany(docs, {w: 1}, function(err, result) {
-
+      collection.insertMany(docs, {w: 1}).then(function(result) {
         // Execute aggregate, notice the pipeline is expressed as an Array
         var cursor = collection.aggregate([
             { $project : {
@@ -119,13 +55,13 @@ exports.aggregationExample2 = {
               authors : { $addToSet : "$author" }
             }}
           ], { cursor: { batchSize: 1 } });
-
         // Get all the aggregation results
-        cursor.toArray(function(err, docs) {
-          test.equal(null, err);
+        cursor.toArray().then(function(docs) {
           test.equal(2, docs.length);
           test.done();
           db.close();
+        }).catch(function(err) {
+          console.log(err.stack);
         });
       });
     });
@@ -134,13 +70,13 @@ exports.aggregationExample2 = {
 }
 
 /**
- * Correctly call the aggregation using a cursor and toArray
+ * Correctly call the aggregation using a cursor and toArray Promise
  *
  * @example-class AggregationCursor
  * @example-method toArray
  * @ignore
  */
-exports['Aggregation Cursor toArray Test'] = {
+exports['Aggregation Cursor toArray Test With Promises'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
@@ -149,7 +85,7 @@ exports['Aggregation Cursor toArray Test'] = {
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -165,9 +101,9 @@ exports['Aggregation Cursor toArray Test'] = {
           ]}];
 
       // Create a collection
-      var collection = db.collection('aggregation_toArray_example');
+      var collection = db.collection('aggregation_toArray_example_with_promise');
       // Insert the docs
-      collection.insertMany(docs, {w: 1}, function(err, result) {
+      collection.insertMany(docs, {w: 1}).then(function(result) {
 
         // Execute aggregate, notice the pipeline is expressed as an Array
         var cursor = collection.aggregate([
@@ -183,8 +119,7 @@ exports['Aggregation Cursor toArray Test'] = {
           ], { cursor: { batchSize: 1 } });
 
         // Get all the aggregation results
-        cursor.toArray(function(err, docs) {
-          test.equal(null, err);
+        cursor.toArray().then(function(docs) {
           test.equal(2, docs.length);
           test.done();
           db.close();
@@ -196,13 +131,13 @@ exports['Aggregation Cursor toArray Test'] = {
 }
 
 /**
- * Correctly call the aggregation using a cursor and next
+ * Correctly call the aggregation using a cursor and next Promise
  *
  * @example-class AggregationCursor
  * @example-method next
  * @ignore
  */
-exports['Aggregation Cursor toArray Test'] = {
+exports['Aggregation Cursor next Test With Promises'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
@@ -211,7 +146,7 @@ exports['Aggregation Cursor toArray Test'] = {
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -227,9 +162,9 @@ exports['Aggregation Cursor toArray Test'] = {
           ]}];
 
       // Create a collection
-      var collection = db.collection('aggregation_next_example');
+      var collection = db.collection('aggregation_next_example_with_promise');
       // Insert the docs
-      collection.insertMany(docs, {w: 1}, function(err, result) {
+      collection.insertMany(docs, {w: 1}).then(function(result) {
 
         // Execute aggregate, notice the pipeline is expressed as an Array
         var cursor = collection.aggregate([
@@ -243,10 +178,8 @@ exports['Aggregation Cursor toArray Test'] = {
               authors : { $addToSet : "$author" }
             }}
           ], { cursor: { batchSize: 1 } });
-
         // Get all the aggregation results
-        cursor.next(function(err, docs) {
-          test.equal(null, err);
+        cursor.next().then(function(docs) {
           test.done();
           db.close();
         });
@@ -257,217 +190,20 @@ exports['Aggregation Cursor toArray Test'] = {
 }
 
 /**
- * Correctly call the aggregation using a cursor and each
- *
- * @example-class AggregationCursor
- * @example-method each
- * @ignore
- */
-exports['Aggregation Cursor each Test'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
-  
-  // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-
-    db.open(function(err, db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-      // Some docs for insertion
-      var docs = [{
-          title : "this is my title", author : "bob", posted : new Date() ,
-          pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
-          comments : [
-            { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
-          ]}];
-
-      // Create a collection
-      var collection = db.collection('aggregation_each_example');
-      // Insert the docs
-      collection.insertMany(docs, {w: 1}, function(err, result) {
-
-        // Execute aggregate, notice the pipeline is expressed as an Array
-        var cursor = collection.aggregate([
-            { $project : {
-              author : 1,
-              tags : 1
-            }},
-            { $unwind : "$tags" },
-            { $group : {
-              _id : {tags : "$tags"},
-              authors : { $addToSet : "$author" }
-            }}
-          ], { cursor: { batchSize: 1 } });
-
-        // Get all the aggregation results
-        cursor.each(function(err, docs) {          
-          test.equal(null, err);
-
-          if(docs == null) {
-            test.done();
-            db.close();
-          }
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
- * Correctly call the aggregation using a cursor and forEach
- *
- * @example-class AggregationCursor
- * @example-method forEach
- * @ignore
- */
-exports['Aggregation Cursor forEach Test'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
-  
-  // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-
-    db.open(function(err, db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-      // Some docs for insertion
-      var docs = [{
-          title : "this is my title", author : "bob", posted : new Date() ,
-          pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
-          comments : [
-            { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
-          ]}];
-
-      // Create a collection
-      var collection = db.collection('aggregation_forEach_example');
-      // Insert the docs
-      collection.insertMany(docs, {w: 1}, function(err, result) {
-
-        // Execute aggregate, notice the pipeline is expressed as an Array
-        var cursor = collection.aggregate([
-            { $project : {
-              author : 1,
-              tags : 1
-            }},
-            { $unwind : "$tags" },
-            { $group : {
-              _id : {tags : "$tags"},
-              authors : { $addToSet : "$author" }
-            }}
-          ], { cursor: { batchSize: 1 } });
-
-        var count = 0;
-        // Get all the aggregation results
-        cursor.forEach(function(doc) {
-          test.ok(doc != null);
-          count = count + 1;
-        }, function(err) {
-          test.equal(null, err);
-          test.equal(2, count);
-
-          test.done();
-          db.close();
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
- * Correctly call the aggregation using a read stream
- *
- * @example-class Collection
- * @example-method aggregate
- * @ignore
- */
-exports.aggregationExample3 = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
-  
-  // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-
-    db.open(function(err, db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-      // Some docs for insertion
-      var docs = [{
-          title : "this is my title", author : "bob", posted : new Date() ,
-          pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
-          comments : [
-            { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
-          ]}];
-
-      // Create a collection
-      var collection = db.collection('aggregationExample3');
-      // Insert the docs
-      collection.insertMany(docs, {w: 1}, function(err, result) {
-
-        // Execute aggregate, notice the pipeline is expressed as an Array
-        var cursor = collection.aggregate([
-            { $project : {
-              author : 1,
-              tags : 1
-            }},
-            { $unwind : "$tags" },
-            { $group : {
-              _id : {tags : "$tags"},
-              authors : { $addToSet : "$author" }
-            }}
-          ], { cursor: { batchSize: 1 } });
-
-        var count = 0;
-        // Get all the aggregation results
-        cursor.on('data', function(doc) {
-          count = count + 1;
-        });
-
-        cursor.once('end', function() {
-          test.equal(2, count);
-          test.done();
-          db.close();
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
- * Example of running simple count commands against a collection.
+ * Example of running simple count commands against a collection using a Promise.
  *
  * @example-class Collection
  * @example-method count
  * @ignore
  */
-exports.shouldCorrectlyDoSimpleCountExamples = {
+exports.shouldCorrectlyDoSimpleCountExamplesWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -475,19 +211,16 @@ exports.shouldCorrectlyDoSimpleCountExamples = {
     // REMOVE-LINE test.done();
     // BEGIN
       // Crete the collection for the distinct example
-      var collection = db.collection('countExample1');
+      var collection = db.collection('countExample1_with_promise');
       // Insert documents to perform distinct against
       collection.insertMany([{a:1}, {a:2}
-        , {a:3}, {a:4, b:1}], {w: 1}, function(err, ids) {
-
+        , {a:3}, {a:4, b:1}], {w: 1}).then(function(ids) {
         // Perform a total count command
-        collection.count(function(err, count) {
-          test.equal(null, err);
+        collection.count().then(function(count) {
           test.equal(4, count);
 
           // Peform a partial account where b=1
-          collection.count({b:1}, function(err, count) {
-            test.equal(null, err);
+          collection.count({b:1}).then(function(count) {
             test.equal(1, count);
 
             db.close();
@@ -501,20 +234,20 @@ exports.shouldCorrectlyDoSimpleCountExamples = {
 }
 
 /**
- * A more complex createIndex using a compound unique index in the background and dropping duplicated documents
+ * A more complex createIndex using a Promise and a compound unique index in the background and dropping duplicated documents
  *
  * @example-class Collection
  * @example-method createIndex
  * @ignore
  */
-exports.shouldCreateComplexIndexOnTwoFields = {
+exports.shouldCreateComplexIndexOnTwoFieldsWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -522,24 +255,21 @@ exports.shouldCreateComplexIndexOnTwoFields = {
     // REMOVE-LINE test.done();
     // BEGIN
       // Create a collection we want to drop later
-      var collection = db.collection('createIndexExample1');
+      var collection = db.collection('createIndexExample1_with_promise');
       // Insert a bunch of documents for the index
       collection.insertMany([{a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax(), function(err, result) {
-        test.equal(null, err);
+        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax()).then(function(result) {
 
         // Create an index on the a field
-        db.createIndex('createIndexExample1', {a:1, b:1}
-          , {unique:true, background:true, w:1}, function(err, indexName) {
+        db.createIndex('createIndexExample1_with_promise', {a:1, b:1}
+          , {unique:true, background:true, w:1}).then(function(indexName) {
 
           // Show that duplicate records got dropped
-          collection.find({}).toArray(function(err, items) {
-            test.equal(null, err);
+          collection.find({}).toArray().then(function(items) {
             test.equal(4, items.length);
 
             // Peform a query, with explain to show we hit the query
-            collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
-              test.equal(null, err);
+            collection.find({a:2}, {explain:true}).toArray().then(function(explanation) {
               test.ok(explanation != null);
 
               db.close();
@@ -554,123 +284,20 @@ exports.shouldCreateComplexIndexOnTwoFields = {
 }
 
 /**
- * A simple createIndex using a simple single field index
- *
- * @example-class Collection
- * @example-method createIndex
- * @ignore
- */
-exports.shouldCreateASimpleIndexOnASingleField = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
-
-    db.open(function(err, db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-
-      // Create a collection we want to drop later
-      var collection = db.collection('createIndexExample2');
-      // Insert a bunch of documents for the index
-      collection.insertMany([{a:1}, {a:2}, {a:3}, {a:4}], {w:1}, function(err, result) {
-        test.equal(null, err);
-
-        // Create an index on the a field
-        collection.createIndex('a', {w:1}, function(err, indexName) {
-          test.equal("a_1", indexName);
-
-          // Peform a query, with explain to show we hit the query
-          collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
-            test.equal(null, err);
-            test.ok(explanation != null);
-
-            db.close();
-            test.done();
-          });
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
- * A more complex createIndex using a compound unique index in the background
- *
- * @example-class Collection
- * @example-method createIndex
- * @ignore
- */
-exports.createIndexExample3 = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
-
-    db.open(function(err, db) {1
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-
-      // Create a collection we want to drop later
-      var collection = db.collection('createIndexExample3');
-      // Insert a bunch of documents for the index
-      collection.insertMany([{a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
-        test.equal(null, err);
-
-        var options = {unique:true, background:true, w:1};
-        // Create an index on the a field
-        collection.createIndex({a:1, b:1}
-          , options, function(err, indexName) {
-
-          test.ok(!options.readPreference);
-          // Show that duplicate records got dropped
-          collection.find({}).toArray(function(err, items) {
-            test.equal(null, err);
-            test.equal(4, items.length);
-
-            // Peform a query, with explain to show we hit the query
-            collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
-              test.equal(null, err);
-              test.ok(explanation != null);
-
-              db.close();
-              test.done();
-            });
-          })
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
- * Example of running the distinct command against a collection
+ * Example of running the distinct command using a Promise against a collection
  *
  * @example-class Collection
  * @example-method distinct
  * @ignore
  */
-exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilter = {
+exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilterWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -678,18 +305,18 @@ exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilter = {
     // REMOVE-LINE test.done();
     // BEGIN
       // Crete the collection for the distinct example
-      var collection = db.collection('distinctExample1');
+      var collection = db.collection('distinctExample1_with_promise');
 
       // Insert documents to perform distinct against
       collection.insertMany([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
-        {a:2, b:{c:'a'}}, {a:3}, {a:3}], configuration.writeConcernMax(), function(err, ids) {
+        {a:2, b:{c:'a'}}, {a:3}, {a:3}], configuration.writeConcernMax()).then(function(ids) {
 
         // Peform a distinct query against the a field
-        collection.distinct('a', function(err, docs) {
+        collection.distinct('a').then(function(docs) {
           test.deepEqual([0, 1, 2, 3], docs.sort());
 
           // Perform a distinct query against the sub-field b.c
-          collection.distinct('b.c', function(err, docs) {
+          collection.distinct('b.c').then(function(docs) {
             test.deepEqual(['a', 'b', 'c'], docs.sort());
 
             db.close();
@@ -705,18 +332,16 @@ exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilter = {
 /**
  * Example of running the distinct command against a collection with a filter query
  *
- * @example-class Collection
- * @example-method distinct
  * @ignore
  */
-exports.shouldCorrectlyHandleDistinctIndexes = {
+exports.shouldCorrectlyHandleDistinctIndexesWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -725,14 +350,14 @@ exports.shouldCorrectlyHandleDistinctIndexes = {
     // BEGIN
 
       // Crete the collection for the distinct example
-      var collection = db.collection('distinctExample2');
+      var collection = db.collection('distinctExample2_with_promise');
 
       // Insert documents to perform distinct against
       collection.insertMany([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
         {a:2, b:{c:'a'}}, {a:3}, {a:3}, {a:5, c:1}], configuration.writeConcernMax(), function(err, ids) {
 
         // Peform a distinct query with a filter against the documents
-        collection.distinct('a', {c:1}, function(err, docs) {
+        collection.distinct('a', {c:1}).then(function(docs) {
           test.deepEqual([5], docs.sort());
 
           db.close();
@@ -745,20 +370,20 @@ exports.shouldCorrectlyHandleDistinctIndexes = {
 }
 
 /**
- * Example of a simple collection drop.
+ * Example of Collection.prototype.drop using a Promise
  *
  * @example-class Collection
  * @example-method drop
  * @ignore
  */
-exports.shouldCorrectlyDropCollectionWithDropFunction = {
+exports.shouldCorrectlyDropCollectionWithDropFunctionWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -767,30 +392,30 @@ exports.shouldCorrectlyDropCollectionWithDropFunction = {
     // BEGIN
 
       // Create a collection we want to drop later
-      var collection = db.collection('test_other_drop');
+      db.createCollection('test_other_drop_with_promise').then(function(collection) {
+        // Drop the collection
+        collection.drop().then(function(reply) {
 
-      // Drop the collection
-      collection.drop(function(err, reply) {
+          // Ensure we don't have the collection in the set of names
+          db.listCollections().toArray().then(function(replies) {
 
-        // Ensure we don't have the collection in the set of names
-        db.listCollections().toArray(function(err, replies) {
+            var found = false;
+            // For each collection in the list of collection names in this db look for the
+            // dropped collection
+            replies.forEach(function(document) {
+              if(document.name == "test_other_drop_with_promise") {
+                found = true;
+                return;
+              }
+            });
 
-          var found = false;
-          // For each collection in the list of collection names in this db look for the
-          // dropped collection
-          replies.forEach(function(document) {
-            if(document.name == "test_other_drop") {
-              found = true;
-              return;
-            }
+            // Ensure the collection is not found
+            test.equal(false, found);
+
+            // Let's close the db
+            db.close();
+            test.done();
           });
-
-          // Ensure the collection is not found
-          test.equal(false, found);
-
-          // Let's close the db
-          db.close();
-          test.done();
         });
       });
     });
@@ -800,33 +425,29 @@ exports.shouldCorrectlyDropCollectionWithDropFunction = {
 
 
 /**
- * Example of a how to drop all the indexes on a collection using dropAllIndexes
+ * Example of a how to drop all the indexes on a collection using dropAllIndexes with a Promise
  *
  * @example-class Collection
  * @example-method dropAllIndexes
  * @ignore
  */
-exports.dropAllIndexesExample1 = {
+exports.dropAllIndexesExample1WithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      db.createCollection('dropExample1', function(err, r) {
-        test.equal(null, err);
-
+      db.createCollection('dropExample1_with_promise').then(function(r) {
         // Drop the collection
-        db.collection('dropExample1').dropAllIndexes(function(err, reply) {
-          test.equal(null, err);
-
+        db.collection('dropExample1_with_promise').dropAllIndexes().then(function(reply) {
           // Let's close the db
           db.close();
           test.done();
@@ -844,36 +465,34 @@ exports.dropAllIndexesExample1 = {
  * @example-method dropIndex
  * @ignore
  */
-exports.shouldCorrectlyCreateAndDropIndex = {
+exports.shouldCorrectlyCreateAndDropIndexWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      var collection = db.collection('dropIndexExample1');
+      var collection = db.collection('dropIndexExample1_with_promise');
       // Insert a bunch of documents for the index
       collection.insertMany([{a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
-        test.equal(null, err);
+        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}).then(function(result) {
 
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, w:1}, function(err, indexName) {
+          , {unique:true, background:true, w:1}).then(function(indexName) {
 
           // Drop the index
-          collection.dropIndex("a_1_b_1", function(err, result) {
-            test.equal(null, err);
+          collection.dropIndex("a_1_b_1").then(function(result) {
 
             // Verify that the index is gone
-            collection.indexInformation(function(err, indexInformation) {
+            collection.indexInformation().then(function(indexInformation) {
               test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
               test.equal(null, indexInformation.a_1_b_1);
 
@@ -895,38 +514,35 @@ exports.shouldCorrectlyCreateAndDropIndex = {
  * @example-method ensureIndex
  * @ignore
  */
-exports.shouldCreateComplexEnsureIndex = {
+exports.shouldCreateComplexEnsureIndexWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      var collection = db.collection('ensureIndexExample1');
+      var collection = db.collection('ensureIndexExample1_with_promise');
       // Insert a bunch of documents for the index
       collection.insertMany([{a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax(), function(err, result) {
-        test.equal(null, err);
+        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax()).then(function(result) {
 
         // Create an index on the a field
-        db.ensureIndex('ensureIndexExample1', {a:1, b:1}
-          , {unique:true, background:true, w:1}, function(err, indexName) {
+        db.ensureIndex('ensureIndexExample1_with_promise', {a:1, b:1}
+          , {unique:true, background:true, w:1}).then(function(indexName) {
 
           // Show that duplicate records got dropped
-          collection.find({}).toArray(function(err, items) {
-            test.equal(null, err);
+          collection.find({}).toArray().then(function(items) {
             test.equal(4, items.length);
 
             // Peform a query, with explain to show we hit the query
-            collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
-              test.equal(null, err);
+            collection.find({a:2}, {explain:true}).toArray().then(function(explanation) {
               test.ok(explanation != null);
 
               db.close();
@@ -947,39 +563,35 @@ exports.shouldCreateComplexEnsureIndex = {
  * @example-method ensureIndex
  * @ignore
  */
-exports.ensureIndexExampleWithCompountIndex = {
+exports.ensureIndexExampleWithCompountIndexWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      var collection = db.collection('ensureIndexExample2');
+      var collection = db.collection('ensureIndexExample2_with_promise');
       // Insert a bunch of documents for the index
       collection.insertMany([{a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
-        test.equal(null, err);
+        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}).then(function(result) {
 
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, w:1}, function(err, indexName) {
-          test.equal(null, err);
+          , {unique:true, background:true, w:1}).then(function(indexName) {
 
           // Show that duplicate records got dropped
-          collection.find({}).toArray(function(err, items) {
-            test.equal(null, err);
+          collection.find({}).toArray().then(function(items) {
             test.equal(4, items.length);
 
             // Peform a query, with explain to show we hit the query
-            collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
-              test.equal(null, err);
+            collection.find({a:2}, {explain:true}).toArray().then(function(explanation) {
               test.ok(explanation != null);
 
               db.close();
@@ -1000,14 +612,14 @@ exports.ensureIndexExampleWithCompountIndex = {
  * @example-method find
  * @ignore
  */
-exports.shouldPeformASimpleQuery = {
+exports.shouldPeformASimpleQueryWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -1016,15 +628,13 @@ exports.shouldPeformASimpleQuery = {
     // BEGIN
 
       // Create a collection we want to drop later
-      var collection = db.collection('simple_query');
+      var collection = db.collection('simple_query_with_promise');
 
       // Insert a bunch of documents for the testing
-      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, result) {
-        test.equal(null, err);
+      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax()).then(function(result) {
 
         // Peform a simple find and return all the documents
-        collection.find().toArray(function(err, docs) {
-          test.equal(null, err);
+        collection.find().toArray().then(function(docs) {
           test.equal(3, docs.length);
 
           db.close();
@@ -1043,14 +653,14 @@ exports.shouldPeformASimpleQuery = {
  * @example-method find
  * @ignore
  */
-exports.shouldPeformASimpleExplainQuery = {
+exports.shouldPeformASimpleExplainQueryWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -1059,14 +669,12 @@ exports.shouldPeformASimpleExplainQuery = {
     // BEGIN
 
       // Create a collection we want to drop later
-      var collection = db.collection('simple_explain_query');
+      var collection = db.collection('simple_explain_query_with_promise');
       // Insert a bunch of documents for the testing
-      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, result) {
-        test.equal(null, err);
+      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax()).then(function(result) {
 
         // Peform a simple find and return all the documents
-        collection.find({}, {explain:true}).toArray(function(err, docs) {
-          test.equal(null, err);
+        collection.find({}, {explain:true}).toArray().then(function(docs) {
           test.equal(1, docs.length);
 
           db.close();
@@ -1085,14 +693,14 @@ exports.shouldPeformASimpleExplainQuery = {
  * @example-method find
  * @ignore
  */
-exports.shouldPeformASimpleLimitSkipQuery = {
+exports.shouldPeformASimpleLimitSkipQueryWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -1101,14 +709,12 @@ exports.shouldPeformASimpleLimitSkipQuery = {
     // BEGIN
 
       // Create a collection we want to drop later
-      var collection = db.collection('simple_limit_skip_query');
+      var collection = db.collection('simple_limit_skip_query_with_promise');
       // Insert a bunch of documents for the testing
-      collection.insertMany([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], configuration.writeConcernMax(), function(err, result) {
-        test.equal(null, err);
+      collection.insertMany([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], configuration.writeConcernMax()).then(function(result) {
 
         // Peform a simple find and return all the documents
-        collection.find({}, {skip:1, limit:1, fields:{b:1}}).toArray(function(err, docs) {
-          test.equal(null, err);
+        collection.find({}, {skip:1, limit:1, fields:{b:1}}).toArray().then(function(docs) {
           test.equal(1, docs.length);
           test.equal(null, docs[0].a);
           test.equal(2, docs[0].b);
@@ -1133,14 +739,14 @@ exports.shouldPeformASimpleLimitSkipQuery = {
  * @example-method findAndModify
  * @ignore
  */
-exports.shouldPerformSimpleFindAndModifyOperations = {
+exports.shouldPerformSimpleFindAndModifyOperationsWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -1148,33 +754,28 @@ exports.shouldPerformSimpleFindAndModifyOperations = {
     // REMOVE-LINE test.done();
     // BEGIN
       // Create a collection we want to drop later
-      var collection = db.collection('simple_find_and_modify_operations_');
-
+      var collection = db.collection('simple_find_and_modify_operations_with_promise');
       // Insert some test documentations
-      collection.insertMany([{a:1}, {b:1}, {c:1}], configuration.writeConcernMax(), function(err, result) {
-        test.equal(null, err);
+      collection.insertMany([{a:1}, {b:1}, {c:1}], configuration.writeConcernMax()).then(function(result) {
 
         // Simple findAndModify command returning the new document
-        collection.findAndModify({a:1}, [['a', 1]], {$set:{b1:1}}, {new:true}, function(err, doc) {
-          test.equal(null, err);
+        collection.findAndModify({a:1}, [['a', 1]], {$set:{b1:1}}, {new:true}).then(function(doc) {
           test.equal(1, doc.value.a);
           test.equal(1, doc.value.b1);
 
           // Simple findAndModify command returning the new document and
           // removing it at the same time
           collection.findAndModify({b:1}, [['b', 1]],
-            {$set:{b:2}}, {remove:true}, function(err, doc) {
+            {$set:{b:2}}, {remove:true}).then(function(doc) {
 
             // Verify that the document is gone
-            collection.findOne({b:1}, function(err, item) {
-              test.equal(null, err);
+            collection.findOne({b:1}).then(function(item) {
               test.equal(null, item);
 
               // Simple findAndModify command performing an upsert and returning the new document
               // executing the command safely
               collection.findAndModify({d:1}, [['b', 1]],
-                {d:1, f:1}, {new:true, upsert:true, w:1}, function(err, doc) {
-                  test.equal(null, err);
+                {d:1, f:1}, {new:true, upsert:true, w:1}).then(function(doc) {
                   test.equal(1, doc.value.d);
                   test.equal(1, doc.value.f);
 
@@ -1197,14 +798,14 @@ exports.shouldPerformSimpleFindAndModifyOperations = {
  * @example-method findAndRemove
  * @ignore
  */
-exports.shouldPerformSimpleFindAndRemove = {
+exports.shouldPerformSimpleFindAndRemoveWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -1213,21 +814,18 @@ exports.shouldPerformSimpleFindAndRemove = {
     // BEGIN
 
       // Create a collection we want to drop later
-      var collection = db.collection('simple_find_and_modify_operations_2');
+      var collection = db.collection('simple_find_and_modify_operations_2_with_promise');
       // Insert some test documentations
-      collection.insertMany([{a:1}, {b:1, d:1}, {c:1}], configuration.writeConcernMax(), function(err, result) {
-        test.equal(null, err);
+      collection.insertMany([{a:1}, {b:1, d:1}, {c:1}], configuration.writeConcernMax()).then(function(result) {
 
         // Simple findAndModify command returning the old document and
         // removing it at the same time
-        collection.findAndRemove({b:1}, [['b', 1]], function(err, doc) {
-          test.equal(null, err);
+        collection.findAndRemove({b:1}, [['b', 1]]).then(function(doc) {
           test.equal(1, doc.value.b);
           test.equal(1, doc.value.d);
 
           // Verify that the document is gone
-          collection.findOne({b:1}, function(err, item) {
-            test.equal(null, err);
+          collection.findOne({b:1}).then(function(item) {
             test.equal(null, item);
 
             db.close();
@@ -1247,14 +845,14 @@ exports.shouldPerformSimpleFindAndRemove = {
  * @example-method findOne
  * @ignore
  */
-exports.shouldPeformASimpleLimitSkipFindOneQuery = {
+exports.shouldPeformASimpleLimitSkipFindOneQueryWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -1263,14 +861,12 @@ exports.shouldPeformASimpleLimitSkipFindOneQuery = {
     // BEGIN
 
       // Create a collection we want to drop later
-      var collection = db.collection('simple_limit_skip_find_one_query');
+      var collection = db.collection('simple_limit_skip_find_one_query_with_promise');
       // Insert a bunch of documents for the testing
-      collection.insertMany([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], configuration.writeConcernMax(), function(err, result) {
-        test.equal(null, err);
+      collection.insertMany([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], configuration.writeConcernMax()).then(function(result) {
 
         // Peform a simple find and return all the documents
-        collection.findOne({a:2}, {fields:{b:1}}, function(err, doc) {
-          test.equal(null, err);
+        collection.findOne({a:2}, {fields:{b:1}}).then(function(doc) {
           test.equal(null, doc.a);
           test.equal(2, doc.b);
 
@@ -1290,14 +886,14 @@ exports.shouldPeformASimpleLimitSkipFindOneQuery = {
  * @example-method geoNear
  * @ignore
  */
-exports.shouldCorrectlyPerformSimpleGeoNearCommand = {
+exports.shouldCorrectlyPerformSimpleGeoNearCommandWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -1306,16 +902,16 @@ exports.shouldCorrectlyPerformSimpleGeoNearCommand = {
     // BEGIN
       
       // Fetch the collection
-      var collection = db.collection("simple_geo_near_command");
+      var collection = db.collection("simple_geo_near_command_with_promise");
         
       // Add a location based index
-      collection.ensureIndex({loc:"2d"}, function(err, result) {
+      collection.ensureIndex({loc:"2d"}).then(function(result) {
 
         // Save a new location tagged document
-        collection.insertMany([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], configuration.writeConcernMax(), function(err, result) {
+        collection.insertMany([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], configuration.writeConcernMax()).then(function(result) {
          
           // Use geoNear command to find document
-          collection.geoNear(50, 50, {query:{a:1}, num:1}, function(err, docs) {
+          collection.geoNear(50, 50, {query:{a:1}, num:1}).then(function(docs) {
             test.equal(1, docs.results.length);
             
             db.close();
@@ -1335,14 +931,14 @@ exports.shouldCorrectlyPerformSimpleGeoNearCommand = {
  * @example-method geoHaystackSearch
  * @ignore
  */
-exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommand = {
+exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommandWithPromises = {
   metadata: { requires: { topology: ["single", "replicaset"] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -1351,16 +947,16 @@ exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommand = {
     // BEGIN
       
       // Fetch the collection
-      var collection = db.collection("simple_geo_haystack_command");
+      var collection = db.collection("simple_geo_haystack_command_with_promise");
         
       // Add a location based index
-      collection.ensureIndex({loc: "geoHaystack", type: 1}, {bucketSize: 1}, function(err, result) {
+      collection.ensureIndex({loc: "geoHaystack", type: 1}, {bucketSize: 1}).then(function(result) {
 
         // Save a new location tagged document
-        collection.insertMany([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], configuration.writeConcernMax(), function(err, result) {
+        collection.insertMany([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], configuration.writeConcernMax()).then(function(result) {
          
           // Use geoNear command to find document
-          collection.geoHaystackSearch(50, 50, {search:{a:1}, limit:1, maxDistance:100}, function(err, docs) {
+          collection.geoHaystackSearch(50, 50, {search:{a:1}, limit:1, maxDistance:100}).then(function(docs) {
             test.equal(1, docs.results.length);
             db.close();
             test.done();
@@ -1379,7 +975,7 @@ exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommand = {
  * @example-method group
  * @ignore
  */
-exports.shouldCorrectlyExecuteGroupFunction = {
+exports.shouldCorrectlyExecuteGroupFunctionWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -1387,7 +983,7 @@ exports.shouldCorrectlyExecuteGroupFunction = {
     var Code = configuration.require.Code;
     var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   Code = require('mongodb').Code,
     // LINE   test = require('assert');
@@ -1397,38 +993,37 @@ exports.shouldCorrectlyExecuteGroupFunction = {
     // BEGIN
 
       // Create a test collection
-      var collection = db.collection('test_group');
+      var collection = db.collection('test_group_with_promise');
 
       // Peform a simple group by on an empty collection
-      collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
+      collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }").then(function(results) {
         test.deepEqual([], results);
 
         // Trigger some inserts on the collection
-        collection.insertMany([{'a':2}, {'b':5}, {'a':1}], {w:1}, function(err, ids) {
+        collection.insertMany([{'a':2}, {'b':5}, {'a':1}], {w:1}).then(function(ids) {
 
           // Perform a group count
-          collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
+          collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }").then(function(results) {
             test.equal(3, results[0].count);
 
             // Pefrom a group count using the eval method
-            collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", false, function(err, results) {
+            collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", false).then(function(results) {
               test.equal(3, results[0].count);
 
               // Group with a conditional
-              collection.group([], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
+              collection.group([], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }").then(function(results) {
                 // Results
                 test.equal(1, results[0].count);
 
                 // Group with a conditional using the EVAL method
-                collection.group([], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }" , false, function(err, results) {
+                collection.group([], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }" , false).then(function(results) {
                   // Results
                   test.equal(1, results[0].count);
-
                   // Insert some more test data
-                  collection.insertMany([{'a':2}, {'b':3}], {w:1}, function(err, ids) {
+                  collection.insertMany([{'a':2}, {'b':3}], {w:1}).then(function(ids) {
 
                     // Do a Group by field a
-                    collection.group(['a'], {}, {"count":0}, "function (obj, prev) { prev.count++; }", function(err, results) {
+                    collection.group(['a'], {}, {"count":0}, "function (obj, prev) { prev.count++; }").then(function(results) {
                       // Results
                       test.equal(2, results[0].a);
                       test.equal(2, results[0].count);
@@ -1438,7 +1033,7 @@ exports.shouldCorrectlyExecuteGroupFunction = {
                       test.equal(1, results[2].count);
 
                       // Do a Group by field a
-                      collection.group({'a':true}, {}, {"count":0}, function (obj, prev) { prev.count++; }, true, function(err, results) {
+                      collection.group({'a':true}, {}, {"count":0}, function (obj, prev) { prev.count++; }, true).then(function(results) {
                         // Results
                         test.equal(2, results[0].a);
                         test.equal(2, results[0].count);
@@ -1448,12 +1043,13 @@ exports.shouldCorrectlyExecuteGroupFunction = {
                         test.equal(1, results[2].count);
 
                         // Correctly handle illegal function
-                        collection.group([], {}, {}, "5 ++ 5", function(err, results) {
+                        collection.group([], {}, {}, "5 ++ 5").then(function(err, results) {
+                        }).catch(function(err) {
                           test.ok(err.message != null);
 
                           // Use a function to select the keys used to group by
                           var keyf = function(doc) { return {a: doc.a}; };
-                          collection.group(keyf, {a: {$gt: 0}}, {"count": 0, "value": 0}, function(obj, prev) { prev.count++; prev.value += obj.a; }, true, function(err, results) {
+                          collection.group(keyf, {a: {$gt: 0}}, {"count": 0, "value": 0}, function(obj, prev) { prev.count++; prev.value += obj.a; }, true).then(function(results) {
                             // Results
                             results.sort(function(a, b) { return b.count - a.count; });
                             test.equal(2, results[0].count);
@@ -1465,7 +1061,7 @@ exports.shouldCorrectlyExecuteGroupFunction = {
 
                             // Use a Code object to select the keys used to group by
                             var keyf = new Code(function(doc) { return {a: doc.a}; });
-                            collection.group(keyf, {a: {$gt: 0}}, {"count": 0, "value": 0}, function(obj, prev) { prev.count++; prev.value += obj.a; }, true, function(err, results) {
+                            collection.group(keyf, {a: {$gt: 0}}, {"count": 0, "value": 0}, function(obj, prev) { prev.count++; prev.value += obj.a; }, true).then(function(results) {
                               // Results
                               results.sort(function(a, b) { return b.count - a.count; });
                               test.equal(2, results[0].count);
@@ -1476,14 +1072,15 @@ exports.shouldCorrectlyExecuteGroupFunction = {
                               test.equal(1, results[1].value);
 
                               // Correctly handle illegal function when using the EVAL method
-                              collection.group([], {}, {}, "5 ++ 5", false, function(err, results) {
+                              collection.group([], {}, {}, "5 ++ 5", false).then(function(results) {
+                              }).catch(function(err) {
                                 test.ok(err.message != null);
 
                                 db.close();
-                                test.done();
+                                test.done();                                
                               });
                             });
-                          });
+                          });                          
                         });
                       });
                     });
@@ -1506,14 +1103,14 @@ exports.shouldCorrectlyExecuteGroupFunction = {
  * @example-method mapReduce
  * @ignore
  */
-exports.shouldPerformSimpleMapReduceFunctions = {
+exports.shouldPerformSimpleMapReduceFunctionsWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -1522,10 +1119,10 @@ exports.shouldPerformSimpleMapReduceFunctions = {
     // BEGIN
 
       // Create a test collection
-      var collection = db.collection('test_map_reduce_functions');
+      var collection = db.collection('test_map_reduce_functions_with_promise');
 
       // Insert some documents to perform map reduce over
-      collection.insertMany([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
+      collection.insertMany([{'user_id':1}, {'user_id':2}], {w:1}).then(function(r) {
 
         // Map function
         var map = function() { emit(this.user_id, 1); };
@@ -1533,14 +1130,13 @@ exports.shouldPerformSimpleMapReduceFunctions = {
         var reduce = function(k,vals) { return 1; };
 
         // Peform the map reduce
-        collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}}, function(err, collection) {
-          test.equal(null, err);
+        collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}}).then(function(collection) {
 
           // Mapreduce returns the temporary collection with the results
-          collection.findOne({'_id':1}, function(err, result) {
+          collection.findOne({'_id':1}).then(function(result) {
             test.equal(1, result.value);
 
-            collection.findOne({'_id':2}, function(err, result) {
+            collection.findOne({'_id':2}).then(function(result) {
               test.equal(1, result.value);
 
               db.close();
@@ -1561,7 +1157,7 @@ exports.shouldPerformSimpleMapReduceFunctions = {
  * @example-method mapReduce
  * @ignore
  */
-exports.shouldPerformMapReduceFunctionInline = {
+exports.shouldPerformMapReduceFunctionInlineWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { mongodb: '>1.7.6', topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -1570,7 +1166,7 @@ exports.shouldPerformMapReduceFunctionInline = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -1579,10 +1175,10 @@ exports.shouldPerformMapReduceFunctionInline = {
     // BEGIN
 
       // Create a test collection
-      var collection = db.collection('test_map_reduce_functions_inline');
+      var collection = db.collection('test_map_reduce_functions_inline_with_promise');
 
       // Insert some test documents
-      collection.insertMany([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
+      collection.insertMany([{'user_id':1}, {'user_id':2}], {w:1}).then(function(r) {
 
         // Map function
         var map = function() { emit(this.user_id, 1); };
@@ -1590,12 +1186,12 @@ exports.shouldPerformMapReduceFunctionInline = {
         var reduce = function(k,vals) { return 1; };
 
         // Execute map reduce and return results inline
-        collection.mapReduce(map, reduce, {out : {inline: 1}, verbose:true}, function(err, results, stats) {
-          test.equal(2, results.length);
-          test.ok(stats != null);
+        collection.mapReduce(map, reduce, {out : {inline: 1}, verbose:true}).then(function(result) {
+          test.equal(2, result.results.length);
+          test.ok(result.stats != null);
 
-          collection.mapReduce(map, reduce, {out : {replace: 'mapreduce_integration_test'}, verbose:true}, function(err, results, stats) {
-            test.ok(stats != null);
+          collection.mapReduce(map, reduce, {out : {replace: 'mapreduce_integration_test'}, verbose:true}).then(function(result) {
+            test.ok(result.stats != null);
             db.close();
             test.done();
           });
@@ -1613,7 +1209,7 @@ exports.shouldPerformMapReduceFunctionInline = {
  * @example-method mapReduce
  * @ignore
  */
-exports.shouldPerformMapReduceWithContext = {
+exports.shouldPerformMapReduceWithContextWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -1621,7 +1217,7 @@ exports.shouldPerformMapReduceWithContext = {
     var Code = configuration.require.Code;
     var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   Code = require('mongodb').Code,
     // LINE   test = require('assert');
@@ -1631,11 +1227,11 @@ exports.shouldPerformMapReduceWithContext = {
     // BEGIN
 
       // Create a test collection
-      var collection = db.collection('test_map_reduce_functions_scope');
+      var collection = db.collection('test_map_reduce_functions_scope_with_promise');
 
       // Insert some test documents
       collection.insertMany([{'user_id':1, 'timestamp':new Date()}
-        , {'user_id':2, 'timestamp':new Date()}], {w:1}, function(err, r) {
+        , {'user_id':2, 'timestamp':new Date()}], {w:1}).then(function(r) {
 
         // Map function
         var map = function(){
@@ -1659,12 +1255,10 @@ exports.shouldPerformMapReduceWithContext = {
         o.scope =  { fn: new Code(t.toString()) }
         o.out = { replace: 'replacethiscollection' }
 
-        collection.mapReduce(map, reduce, o, function(err, outCollection) {
-          test.equal(null, err);
+        collection.mapReduce(map, reduce, o).then(function(outCollection) {
 
           // Find all entries in the map-reduce collection
-          outCollection.find().toArray(function(err, results) {
-            test.equal(null, err);
+          outCollection.find().toArray().then(function(results) {
             test.equal(2, results[0].value)
 
             // mapReduce with scope containing plain function
@@ -1672,11 +1266,9 @@ exports.shouldPerformMapReduceWithContext = {
             o.scope =  { fn: t }
             o.out = { replace: 'replacethiscollection' }
 
-            collection.mapReduce(map, reduce, o, function(err, outCollection) {
-              test.equal(null, err);
-
+            collection.mapReduce(map, reduce, o).then(function(outCollection) {
               // Find all entries in the map-reduce collection
-              outCollection.find().toArray(function(err, results) {
+              outCollection.find().toArray().then(function(results) {
                 test.equal(2, results[0].value)
 
                 db.close();
@@ -1698,7 +1290,7 @@ exports.shouldPerformMapReduceWithContext = {
  * @example-method mapReduce
  * @ignore
  */
-exports.shouldPerformMapReduceInContextObjects = {
+exports.shouldPerformMapReduceInContextObjectsWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -1706,7 +1298,7 @@ exports.shouldPerformMapReduceInContextObjects = {
     var Code = configuration.require.Code;
     var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   Code = require('mongodb').Code,
     // LINE   test = require('assert');
@@ -1716,11 +1308,11 @@ exports.shouldPerformMapReduceInContextObjects = {
     // BEGIN
 
       // Create a test collection
-      var collection = db.collection('test_map_reduce_functions_scope_objects');
+      var collection = db.collection('test_map_reduce_functions_scope_objects_with_promise');
 
       // Insert some test documents
       collection.insertMany([{'user_id':1, 'timestamp':new Date()}
-        , {'user_id':2, 'timestamp':new Date()}], {w:1}, function(err, r) {
+        , {'user_id':2, 'timestamp':new Date()}], {w:1}).then(function(r) {
 
         // Map function
         var map = function(){
@@ -1744,12 +1336,10 @@ exports.shouldPerformMapReduceInContextObjects = {
         o.scope =  { obj: {fn: new Code(t.toString())} }
         o.out = { replace: 'replacethiscollection' }
 
-        collection.mapReduce(map, reduce, o, function(err, outCollection) {
-          test.equal(null, err);
+        collection.mapReduce(map, reduce, o).then(function(outCollection) {
 
           // Find all entries in the map-reduce collection
-          outCollection.find().toArray(function(err, results) {
-            test.equal(null, err);
+          outCollection.find().toArray().then(function(results) {
             test.equal(2, results[0].value)
 
             // mapReduce with scope containing plain function
@@ -1757,11 +1347,9 @@ exports.shouldPerformMapReduceInContextObjects = {
             o.scope =  { obj: {fn: t} }
             o.out = { replace: 'replacethiscollection' }
 
-            collection.mapReduce(map, reduce, o, function(err, outCollection) {
-              test.equal(null, err);
-
+            collection.mapReduce(map, reduce, o).then(function(outCollection) {
               // Find all entries in the map-reduce collection
-              outCollection.find().toArray(function(err, results) {
+              outCollection.find().toArray().then(function(results) {
                 test.equal(2, results[0].value)
                 db.close();
                 test.done();
@@ -1782,14 +1370,14 @@ exports.shouldPerformMapReduceInContextObjects = {
  * @example-method indexes
  * @ignore
  */
-exports.shouldCorrectlyRetriveACollectionsIndexes = {
+exports.shouldCorrectlyRetriveACollectionsIndexesWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -1797,18 +1385,17 @@ exports.shouldCorrectlyRetriveACollectionsIndexes = {
     // REMOVE-LINE test.done();
     // BEGIN
       // Crete the collection for the distinct example
-      var collection = db.collection('simple_key_based_distinct');
+      var collection = db.collection('simple_key_based_distinct_with_promise');
+
       // Create a geo 2d index
-      collection.ensureIndex({loc:"2d"}, configuration.writeConcernMax(), function(err, result) {
-        test.equal(null, err);
+      collection.ensureIndex({loc:"2d"}, configuration.writeConcernMax()).then(function(result) {
 
         // Create a simple single field index
-        collection.ensureIndex({a:1}, configuration.writeConcernMax(), function(err, result) {
-          test.equal(null, err);
+        collection.ensureIndex({a:1}, configuration.writeConcernMax()).then(function(result) {
 
           setTimeout(function() {
             // List all of the indexes on the collection
-            collection.indexes(function(err, indexes) {
+            collection.indexes().then(function(indexes) {
               test.equal(3, indexes.length);
 
               db.close();
@@ -1829,14 +1416,14 @@ exports.shouldCorrectlyRetriveACollectionsIndexes = {
  * @example-method indexExists
  * @ignore
  */
-exports.shouldCorrectlyExecuteIndexExists = {
+exports.shouldCorrectlyExecuteIndexExistsWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -1844,20 +1431,19 @@ exports.shouldCorrectlyExecuteIndexExists = {
     // REMOVE-LINE test.done();
     // BEGIN
       // Create a test collection that we are getting the options back from
-      var collection = db.collection('test_collection_index_exists', configuration.writeConcernMax());
-      test.equal(null, err);
+      var collection = db.collection('test_collection_index_exists_with_promise', configuration.writeConcernMax());
       // Create an index on the collection
-      collection.createIndex('a', configuration.writeConcernMax(), function(err, indexName) {
+      collection.createIndex('a', configuration.writeConcernMax()).then(function(indexName) {
         // Let's test to check if a single index exists
-        collection.indexExists("a_1", function(err, result) {
+        collection.indexExists("a_1").then(function(result) {
           test.equal(true, result);
 
           // Let's test to check if multiple indexes are available
-          collection.indexExists(["a_1", "_id_"], function(err, result) {
+          collection.indexExists(["a_1", "_id_"]).then(function(result) {
             test.equal(true, result);
 
             // Check if a non existing index exists
-            collection.indexExists("c_1", function(err, result) {
+            collection.indexExists("c_1").then(function(result) {
               test.equal(false, result);
 
               db.close();
@@ -1878,7 +1464,7 @@ exports.shouldCorrectlyExecuteIndexExists = {
  * @example-method indexInformation
  * @ignore
  */
-exports.shouldCorrectlyShowTheResultsFromIndexInformation = {
+exports.shouldCorrectlyShowTheResultsFromIndexInformationWithPromises = {
   metadata: {
     requires: { topology: ["single", "replicaset"] }
   },
@@ -1887,7 +1473,7 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:0, native_parser:false}, {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -1896,31 +1482,33 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = {
     // BEGIN
 
       // Create a collection we want to drop later
-      var collection = db.collection('more_index_information_test_2');
+      var collection = db.collection('more_index_information_test_2_with_promise');
       // Insert a bunch of documents for the index
       collection.insertMany([{a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax(), function(err, result) {
-        test.equal(null, err);
+        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax()).then(function(result) {
 
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, w:1}, function(err, indexName) {
-          test.equal(null, err);
+          , {unique:true, background:true, w:1}).then(function(indexName) {
           // Fetch basic indexInformation for collection
-          db.indexInformation('more_index_information_test_2', function(err, indexInformation) {
+          db.indexInformation('more_index_information_test_2_with_promise').then(function(indexInformation) {
             test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
             test.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
 
             // Fetch full index information
-            collection.indexInformation({full:true}, function(err, indexInformation) {
+            collection.indexInformation({full:true}).then(function(indexInformation) {
               test.deepEqual({ _id: 1 }, indexInformation[0].key);
               test.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
 
               db.close();
               test.done();
             });
+          }).catch(function(err) {
+            console.dir(err)
           });
         });
+      }).catch(function(err) {
+        console.dir(err)
       });
     });
     // END
@@ -1934,14 +1522,14 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformation = {
  * @example-method indexInformation
  * @ignore
  */
-exports.shouldCorrectlyShowAllTheResultsFromIndexInformation = {
+exports.shouldCorrectlyShowAllTheResultsFromIndexInformationWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -1950,24 +1538,22 @@ exports.shouldCorrectlyShowAllTheResultsFromIndexInformation = {
     // BEGIN
 
       // Create a collection we want to drop later
-      var collection = db.collection('more_index_information_test_3');
+      var collection = db.collection('more_index_information_test_3_with_promise');
       // Insert a bunch of documents for the index
       collection.insertMany([{a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}, function(err, result) {
-        test.equal(null, err);
+        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}).then(function(result) {
 
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, w:1}, function(err, indexName) {
-          test.equal(null, err);
+          , {unique:true, background:true, w:1}).then(function(indexName) {
 
           // Fetch basic indexInformation for collection
-          collection.indexInformation(function(err, indexInformation) {
+          collection.indexInformation().then(function(indexInformation) {
             test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
             test.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
 
             // Fetch full index information
-            collection.indexInformation({full:true}, function(err, indexInformation) {
+            collection.indexInformation({full:true}).then(function(indexInformation) {
               test.deepEqual({ _id: 1 }, indexInformation[0].key);
               test.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
 
@@ -1989,21 +1575,21 @@ exports.shouldCorrectlyShowAllTheResultsFromIndexInformation = {
  * @example-method insert
  * @ignore
  */
-exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafe = {
+exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafeWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      var collection = db.collection("simple_document_insert_collection_no_safe");
+      var collection = db.collection("simple_document_insert_collection_no_safe_with_promise");
       // Insert a single document
       collection.insertOne({hello:'world_no_safe'});
 
@@ -2011,8 +1597,7 @@ exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafe = {
       setTimeout(function() {
 
         // Fetch the document
-        collection.findOne({hello:'world_no_safe'}, function(err, item) {
-          test.equal(null, err);
+        collection.findOne({hello:'world_no_safe'}).then(function(item) {
           test.equal('world_no_safe', item.hello);
           db.close();
           test.done();
@@ -2030,7 +1615,7 @@ exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafe = {
  * @example-method insert
  * @ignore
  */
-exports.shouldCorrectlyPerformABatchDocumentInsertSafe = {
+exports.shouldCorrectlyPerformABatchDocumentInsertSafeWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -2038,7 +1623,7 @@ exports.shouldCorrectlyPerformABatchDocumentInsertSafe = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -2046,15 +1631,13 @@ exports.shouldCorrectlyPerformABatchDocumentInsertSafe = {
     // REMOVE-LINE test.done();
     // BEGIN
       // Fetch a collection to insert document into
-      var collection = db.collection("batch_document_insert_collection_safe");
+      var collection = db.collection("batch_document_insert_collection_safe_with_promise");
       // Insert a single document
       collection.insertMany([{hello:'world_safe1'}
-        , {hello:'world_safe2'}], configuration.writeConcernMax(), function(err, result) {
-        test.equal(null, err);
+        , {hello:'world_safe2'}], configuration.writeConcernMax()).then(function(result) {
 
         // Fetch the document
-        collection.findOne({hello:'world_safe2'}, function(err, item) {
-          test.equal(null, err);
+        collection.findOne({hello:'world_safe2'}).then(function(item) {
           test.equal('world_safe2', item.hello);
           db.close();
           test.done();
@@ -2072,7 +1655,7 @@ exports.shouldCorrectlyPerformABatchDocumentInsertSafe = {
  * @example-method insert
  * @ignore
  */
-exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafe = {
+exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafeWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -2080,7 +1663,7 @@ exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafe = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -2088,18 +1671,16 @@ exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafe = {
     // REMOVE-LINE test.done();
     // BEGIN
       // Fetch a collection to insert document into
-      var collection = db.collection("simple_document_insert_with_function_safe");
+      var collection = db.collection("simple_document_insert_with_function_safe_with_promise");
 
       var o = configuration.writeConcernMax();
       o.serializeFunctions = true;
       // Insert a single document
       collection.insertOne({hello:'world'
-        , func:function() {}}, o, function(err, result) {
-        test.equal(null, err);
+        , func:function() {}}, o).then(function(result) {
 
         // Fetch the document
-        collection.findOne({hello:'world'}, function(err, item) {
-          test.equal(null, err);
+        collection.findOne({hello:'world'}).then(function(item) {
           test.ok("function() {}", item.code);
           db.close();
           test.done();
@@ -2117,7 +1698,7 @@ exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafe = {
  * @example-method insert
  * @ignore
  */
-exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.1"] = {
+exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.1 With Promises"] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { mongodb:">1.9.1", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -2126,7 +1707,7 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -2135,22 +1716,21 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
     // BEGIN
 
       // Create a collection
-      var collection = db.collection('keepGoingExample');
-
+      var collection = db.collection('keepGoingExample_with_promise');
       // Add an unique index to title to force errors in the batch insert
-      collection.ensureIndex({title:1}, {unique:true}, function(err, indexName) {
+      collection.ensureIndex({title:1}, {unique:true}).then(function(indexName) {
 
         // Insert some intial data into the collection
         collection.insertMany([{name:"Jim"}
-          , {name:"Sarah", title:"Princess"}], configuration.writeConcernMax(), function(err, result) {
+          , {name:"Sarah", title:"Princess"}], configuration.writeConcernMax()).then(function(result) {
 
           // Force keep going flag, ignoring unique index issue
           collection.insertMany([{name:"Jim"}
             , {name:"Sarah", title:"Princess"}
-            , {name:'Gump', title:"Gump"}], {w:1, keepGoing:true}, function(err, result) {
-
+            , {name:'Gump', title:"Gump"}], {w:1, keepGoing:true}).then(function(result) {
+          }).catch(function(err) {
             // Count the number of documents left (should not include the duplicates)
-            collection.count(function(err, count) {
+            collection.count().then(function(count) {
               test.equal(3, count);
               test.done();
             })
@@ -2169,14 +1749,14 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
  * @example-method isCapped
  * @ignore
  */
-exports.shouldCorrectlyExecuteIsCapped = {
+exports.shouldCorrectlyExecuteIsCappedWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -2185,11 +1765,11 @@ exports.shouldCorrectlyExecuteIsCapped = {
     // BEGIN
 
       // Create a test collection that we are getting the options back from
-      db.createCollection('test_collection_is_capped', {'capped':true, 'size':1024}, function(err, collection) {
-        test.equal('test_collection_is_capped', collection.collectionName);
+      db.createCollection('test_collection_is_capped_with_promise', {'capped':true, 'size':1024}).then(function(collection) {
+        test.equal('test_collection_is_capped_with_promise', collection.collectionName);
 
         // Let's fetch the collection options
-        collection.isCapped(function(err, capped) {
+        collection.isCapped().then(function(capped) {
           test.equal(true, capped);
 
           db.close();
@@ -2208,7 +1788,7 @@ exports.shouldCorrectlyExecuteIsCapped = {
  * @example-method options
  * @ignore
  */
-exports.shouldCorrectlyRetriveCollectionOptions = {
+exports.shouldCorrectlyRetriveCollectionOptionsWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -2216,7 +1796,7 @@ exports.shouldCorrectlyRetriveCollectionOptions = {
     var Collection = configuration.require.Collection;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -2225,11 +1805,11 @@ exports.shouldCorrectlyRetriveCollectionOptions = {
     // BEGIN
 
       // Create a test collection that we are getting the options back from
-      db.createCollection('test_collection_options', {'capped':true, 'size':1024}, function(err, collection) {
-        test.equal('test_collection_options', collection.collectionName);
+      db.createCollection('test_collection_options_with_promise', {'capped':true, 'size':1024}).then(function(collection) {
+        test.equal('test_collection_options_with_promise', collection.collectionName);
 
         // Let's fetch the collection options
-        collection.options(function(err, options) {
+        collection.options().then(function(options) {
           test.equal(true, options.capped);
           test.ok(options.size >= 1024);
 
@@ -2249,7 +1829,7 @@ exports.shouldCorrectlyRetriveCollectionOptions = {
  * @example-method parallelCollectionScan
  * @ignore
  */
-exports['Should correctly execute parallelCollectionScan with multiple cursors'] = {
+exports['Should correctly execute parallelCollectionScan with multiple cursors With Promises'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { mongodb: ">2.5.5", topology: ["single", "replicaset"] } },
@@ -2258,7 +1838,7 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors']
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -2273,22 +1853,19 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors']
       }
 
       // Get the collection
-      var collection = db.collection('parallelCollectionScan');
+      var collection = db.collection('parallelCollectionScan_with_promise');
       // Insert 1000 documents in a batch
-      collection.insertMany(docs, function(err, result) {
+      collection.insertMany(docs).then(function(result) {
         var results = [];
         var numCursors = 3;
 
         // Execute parallelCollectionScan command
-        collection.parallelCollectionScan({numCursors:numCursors}, function(err, cursors) {
-          test.equal(null, err);
+        collection.parallelCollectionScan({numCursors:numCursors}).then(function(cursors) {
           test.ok(cursors != null);
           test.ok(cursors.length > 0);
 
           for(var i = 0; i < cursors.length; i++) {
-            cursors[i].toArray(function(err, items) {
-              test.equal(err, null);
-
+            cursors[i].toArray().then(function(items) {
               // Add docs to results array
               results = results.concat(items);
               numCursors = numCursors - 1;
@@ -2316,14 +1893,14 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors']
  * @example-method reIndex
  * @ignore
  */
-exports.shouldCorrectlyIndexAndForceReindexOnCollection = {
+exports.shouldCorrectlyIndexAndForceReindexOnCollectionWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -2332,23 +1909,21 @@ exports.shouldCorrectlyIndexAndForceReindexOnCollection = {
     // BEGIN
 
       // Create a collection we want to drop later
-      var collection = db.collection('shouldCorrectlyForceReindexOnCollection');
+      var collection = db.collection('shouldCorrectlyForceReindexOnCollection_with_promise');
       // Insert a bunch of documents for the index
       collection.insertMany([{a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {w:1}, function(err, result) {
-        test.equal(null, err);
+        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {w:1}).then(function(result) {
 
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, w:1}, function(err, indexName) {
+          , {unique:true, background:true, w:1}).then(function(indexName) {
 
           // Force a reindex of the collection
-          collection.reIndex(function(err, result) {
-            test.equal(null, err);
+          collection.reIndex().then(function(result) {
             test.equal(true, result);
 
             // Verify that the index is gone
-            collection.indexInformation(function(err, indexInformation) {
+            collection.indexInformation().then(function(indexInformation) {
               test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
               test.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
 
@@ -2370,14 +1945,14 @@ exports.shouldCorrectlyIndexAndForceReindexOnCollection = {
  * @example-method remove
  * @ignore
  */
-exports.shouldRemoveAllDocumentsNoSafe = {
+exports.shouldRemoveAllDocumentsNoSafeWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -2386,17 +1961,14 @@ exports.shouldRemoveAllDocumentsNoSafe = {
     // BEGIN
       
       // Fetch a collection to insert document into
-      var collection = db.collection("remove_all_documents_no_safe");        
+      var collection = db.collection("remove_all_documents_no_safe_with_promise");        
       // Insert a bunch of documents
-      collection.insertMany([{a:1}, {b:2}], {w:1}, function(err, result) {
-        test.equal(null, err);
-        
+      collection.insertMany([{a:1}, {b:2}], {w:1}).then(function(result) {
         // Remove all the document
         collection.removeMany();
         
         // Fetch all results
-        collection.find().toArray(function(err, items) {
-          test.equal(null, err);
+        collection.find().toArray().then(function(items) {
           test.equal(0, items.length);
           db.close();
           test.done();
@@ -2414,31 +1986,27 @@ exports.shouldRemoveAllDocumentsNoSafe = {
  * @example-method remove
  * @ignore
  */
-exports.shouldRemoveSubsetOfDocumentsSafeMode = {
+exports.shouldRemoveSubsetOfDocumentsSafeModeWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      test.equal(null, err);
-      
+
       // Fetch a collection to insert document into
-      var collection = db.collection("remove_subset_of_documents_safe");
+      var collection = db.collection("remove_subset_of_documents_safe_with_promise");
       // Insert a bunch of documents
-      collection.insertMany([{a:1}, {b:2}], {w:1}, function(err, result) {
-        test.equal(null, err);
-        
+      collection.insertMany([{a:1}, {b:2}], {w:1}).then(function(result) {
         // Remove all the document
-        collection.removeOne({a:1}, {w:1}, function(err, r) {
-          test.equal(null, err);
+        collection.removeOne({a:1}, {w:1}).then(function(r) {
           test.equal(1, r.result.n);
           db.close();
           test.done();
@@ -2456,14 +2024,14 @@ exports.shouldRemoveSubsetOfDocumentsSafeMode = {
  * @example-method rename
  * @ignore
  */
-exports.shouldCorrectlyRenameCollection = {
+exports.shouldCorrectlyRenameCollectionWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -2471,8 +2039,8 @@ exports.shouldCorrectlyRenameCollection = {
     // REMOVE-LINE test.done();
     // BEGIN
       // Open a couple of collections
-      db.createCollection('test_rename_collection', function(err, collection1) {
-        db.createCollection('test_rename_collection2', function(err, collection2) {
+      db.createCollection('test_rename_collection_with_promise').then(function(collection1) {
+        db.createCollection('test_rename_collection2_with_promise').then(function(collection2) {
           // Attemp to rename a collection to a number
           try {
             collection1.rename(5, function(err, collection) {});
@@ -2521,25 +2089,26 @@ exports.shouldCorrectlyRenameCollection = {
           }
 
           // Insert a couple of documents
-          collection1.insertMany([{'x':1}, {'x':2}], configuration.writeConcernMax(), function(err, docs) {
+          collection1.insertMany([{'x':1}, {'x':2}], configuration.writeConcernMax()).then(function(docs) {
 
             // Attemp to rename the first collection to the second one, this will fail
-            collection1.rename('test_rename_collection2', function(err, collection) {
+            collection1.rename('test_rename_collection2_with_promise').then(function(err, collection) {
+            }).catch(function(err) {
               test.ok(err instanceof Error);
               test.ok(err.message.length > 0);
 
               // Attemp to rename the first collection to a name that does not exist
               // this will be succesful
-              collection1.rename('test_rename_collection3', function(err, collection2) {
-                test.equal("test_rename_collection3", collection2.collectionName);
+              collection1.rename('test_rename_collection3_with_promise').then(function(collection2) {
+                test.equal("test_rename_collection3_with_promise", collection2.collectionName);
 
                 // Ensure that the collection is pointing to the new one
-                collection2.count(function(err, count) {
+                collection2.count().then(function(count) {
                   test.equal(2, count);
                   db.close();
                   test.done();
                 });
-              });
+              });              
             });
           });
 
@@ -2557,14 +2126,14 @@ exports.shouldCorrectlyRenameCollection = {
  * @example-method save
  * @ignore
  */
-exports.shouldCorrectlySaveASimpleDocument = {
+exports.shouldCorrectlySaveASimpleDocumentWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -2573,7 +2142,7 @@ exports.shouldCorrectlySaveASimpleDocument = {
     // BEGIN
 
       // Fetch the collection
-      var collection = db.collection("save_a_simple_document");
+      var collection = db.collection("save_a_simple_document_with_promise");
       // Save a document with no safe option
       collection.save({hello:'world'});
 
@@ -2581,8 +2150,7 @@ exports.shouldCorrectlySaveASimpleDocument = {
       setTimeout(function() {
 
         // Find the saved document
-        collection.findOne({hello:'world'}, function(err, item) {
-          test.equal(null, err);
+        collection.findOne({hello:'world'}).then(function(item) {
           test.equal('world', item.hello);
           db.close();
           test.done();
@@ -2600,14 +2168,14 @@ exports.shouldCorrectlySaveASimpleDocument = {
  * @example-method save
  * @ignore
  */
-exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveIt = {
+exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveItWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -2616,25 +2184,23 @@ exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveIt = {
     // BEGIN
 
       // Fetch the collection
-      var collection = db.collection("save_a_simple_document_modify_it_and_resave_it");
+      var collection = db.collection("save_a_simple_document_modify_it_and_resave_it_with_promise");
 
       // Save a document with no safe option
-      collection.save({hello:'world'}, configuration.writeConcernMax(), function(err, result) {
+      collection.save({hello:'world'}, configuration.writeConcernMax()).then(function(result) {
 
         // Find the saved document
-        collection.findOne({hello:'world'}, function(err, item) {
-          test.equal(null, err);
+        collection.findOne({hello:'world'}).then(function(item) {
           test.equal('world', item.hello);
 
           // Update the document
           item['hello2'] = 'world2';
 
           // Save the item with the additional field
-          collection.save(item, configuration.writeConcernMax(), function(err, result) {
+          collection.save(item, configuration.writeConcernMax()).then(function(result) {
 
             // Find the changed document
-            collection.findOne({hello:'world'}, function(err, item) {
-              test.equal(null, err);
+            collection.findOne({hello:'world'}).then(function(item) {
               test.equal('world', item.hello);
               test.equal('world2', item.hello2);
 
@@ -2656,14 +2222,14 @@ exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveIt = {
  * @example-method update
  * @ignore
  */
-exports.shouldCorrectlyUpdateASimpleDocument = {
+exports.shouldCorrectlyUpdateASimpleDocumentWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -2672,10 +2238,10 @@ exports.shouldCorrectlyUpdateASimpleDocument = {
     // BEGIN
 
       // Get a collection
-      var collection = db.collection('update_a_simple_document');
+      var collection = db.collection('update_a_simple_document_with_promise');
 
       // Insert a document, then update it
-      collection.insertOne({a:1}, configuration.writeConcernMax(), function(err, doc) {
+      collection.insertOne({a:1}, configuration.writeConcernMax()).then(function(doc) {
 
         // Update the document with an atomic operator
         collection.updateOne({a:1}, {$set:{b:2}});
@@ -2684,8 +2250,7 @@ exports.shouldCorrectlyUpdateASimpleDocument = {
         setTimeout(function() {
 
           // Fetch the document that we modified
-          collection.findOne({a:1}, function(err, item) {
-            test.equal(null, err);
+          collection.findOne({a:1}).then(function(item) {
             test.equal(1, item.a);
             test.equal(2, item.b);
             db.close();
@@ -2705,14 +2270,14 @@ exports.shouldCorrectlyUpdateASimpleDocument = {
  * @example-method update
  * @ignore
  */
-exports.shouldCorrectlyUpsertASimpleDocument = {
+exports.shouldCorrectlyUpsertASimpleDocumentWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -2721,15 +2286,13 @@ exports.shouldCorrectlyUpsertASimpleDocument = {
     // BEGIN
 
       // Get a collection
-      var collection = db.collection('update_a_simple_document_upsert');
+      var collection = db.collection('update_a_simple_document_upsert_with_promise');
       // Update the document using an upsert operation, ensuring creation if it does not exist
-      collection.updateOne({a:1}, {b:2, a:1}, {upsert:true, w: 1}, function(err, result) {
-        test.equal(null, err);
+      collection.updateOne({a:1}, {b:2, a:1}, {upsert:true, w: 1}).then(function(result) {
         test.equal(1, result.result.n);
 
         // Fetch the document that we modified and check if it got inserted correctly
-        collection.findOne({a:1}, function(err, item) {
-          test.equal(null, err);
+        collection.findOne({a:1}).then(function(item) {
           test.equal(1, item.a);
           test.equal(2, item.b);
           db.close();
@@ -2748,14 +2311,14 @@ exports.shouldCorrectlyUpsertASimpleDocument = {
  * @example-method update
  * @ignore
  */
-exports.shouldCorrectlyUpdateMultipleDocuments = {
+exports.shouldCorrectlyUpdateMultipleDocumentsWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -2764,21 +2327,19 @@ exports.shouldCorrectlyUpdateMultipleDocuments = {
     // BEGIN
 
       // Get a collection
-      var collection = db.collection('update_a_simple_document_multi');
+      var collection = db.collection('update_a_simple_document_multi_with_promise');
 
       // Insert a couple of documentations
-      collection.insertMany([{a:1, b:1}, {a:1, b:2}], configuration.writeConcernMax(), function(err, result) {
+      collection.insertMany([{a:1, b:1}, {a:1, b:2}], configuration.writeConcernMax()).then(function(result) {
 
         var o = configuration.writeConcernMax();
         o.multi = true
         // Update multiple documents using the multi option
-        collection.updateMany({a:1}, {$set:{b:0}}, o, function(err, r) {
-          test.equal(null, err);
+        collection.updateMany({a:1}, {$set:{b:0}}, o).then(function(r) {
           test.equal(2, r.result.n);
 
           // Fetch all the documents and verify that we have changed the b value
-          collection.find().toArray(function(err, items) {
-            test.equal(null, err);
+          collection.find().toArray().then(function(items) {
             test.equal(1, items[0].a);
             test.equal(0, items[0].b);
             test.equal(1, items[1].a);
@@ -2801,14 +2362,14 @@ exports.shouldCorrectlyUpdateMultipleDocuments = {
  * @example-method stats
  * @ignore
  */
-exports.shouldCorrectlyReturnACollectionsStats = {
+exports.shouldCorrectlyReturnACollectionsStatsWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -2817,13 +2378,13 @@ exports.shouldCorrectlyReturnACollectionsStats = {
     // BEGIN
 
       // Crete the collection for the distinct example
-      var collection = db.collection('collection_stats_test');
+      var collection = db.collection('collection_stats_test_with_promise');
 
       // Insert some documents
-      collection.insertMany([{a:1}, {hello:'world'}], configuration.writeConcernMax(), function(err, result) {
+      collection.insertMany([{a:1}, {hello:'world'}], configuration.writeConcernMax()).then(function(result) {
 
         // Retrieve the statistics for the collection
-        collection.stats(function(err, stats) {
+        collection.stats().then(function(stats) {
           test.equal(2, stats.count);
 
           db.close();
@@ -2842,14 +2403,14 @@ exports.shouldCorrectlyReturnACollectionsStats = {
  * @example-method dropIndexes
  * @ignore
  */
-exports.shouldCorrectlyCreateAndDropAllIndex = {
+exports.shouldCorrectlyCreateAndDropAllIndexWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:0}, {poolSize:1, auto_reconnect:true});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -2858,26 +2419,24 @@ exports.shouldCorrectlyCreateAndDropAllIndex = {
     // BEGIN
 
       // Create a collection we want to drop later
-      var collection = db.collection('shouldCorrectlyCreateAndDropAllIndex');
+      var collection = db.collection('shouldCorrectlyCreateAndDropAllIndex_with_promise');
       // Insert a bunch of documents for the index
       collection.insertMany([{a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {w:1}, function(err, result) {
-        test.equal(null, err);
+        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {w:1}).then(function(result) {
 
         // Create an index on the a field
         collection.ensureIndex({a:1, b:1}
-          , {unique:true, background:true, w:1}, function(err, indexName) {
+          , {unique:true, background:true, w:1}).then(function(indexName) {
 
           // Create an additional index
           collection.ensureIndex({c:1}
-            , {unique:true, background:true, w:1}, function(err, indexName) {
+            , {unique:true, background:true, sparse:true, w:1}).then(function(indexName) {
 
             // Drop the index
-            collection.dropAllIndexes(function(err, result) {
-              test.equal(null, err);
+            collection.dropAllIndexes().then(function(result) {
 
               // Verify that the index is gone
-              collection.indexInformation(function(err, indexInformation) {
+              collection.indexInformation().then(function(indexInformation) {
                 test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
                 test.equal(null, indexInformation.a_1_b_1);
                 test.equal(null, indexInformation.c_1);
@@ -2907,13 +2466,13 @@ exports.shouldCorrectlyCreateAndDropAllIndex = {
  * @example-method admin
  * @ignore
  */
-exports.accessAdminLevelOperations = {
+exports.accessAdminLevelOperationsWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -2939,14 +2498,14 @@ exports.accessAdminLevelOperations = {
  * @example-method close
  * @ignore
  */
-exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDb = {
+exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDbWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -2955,20 +2514,17 @@ exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDb = {
     // BEGIN
 
       // Fetch a collection
-      var collection = db.collection('shouldCorrectlyFailOnRetryDueToAppCloseOfDb');
-
+      var collection = db.collection('shouldCorrectlyFailOnRetryDueToAppCloseOfDb_with_promise');
       // Insert a document
-      collection.insertOne({a:1}, configuration.writeConcernMax(), function(err, result) {
-        test.equal(null, err);
+      collection.insertOne({a:1}, configuration.writeConcernMax()).then(function(result) {
 
         // Force close the connection
-        db.close(true, function(err, result) {
+        db.close(true).then(function() {
           // Attemp to insert should fail now with correct message 'db closed by application'
-          collection.insertOne({a:2}, configuration.writeConcernMax(), function(err, result) {
-            test.ok(err != null);
-
+          collection.insertOne({a:2}, configuration.writeConcernMax()).then(function(result) {
+          }).catch(function(err) {
             db.close();
-            test.done();
+            test.done();            
           });
         });
       });
@@ -2984,7 +2540,7 @@ exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDb = {
  * @example-method eval
  * @ignore
  */
-exports.shouldCorrectlyExecuteEvalFunctions = {
+exports.shouldCorrectlyExecuteEvalFunctionsWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -2993,7 +2549,7 @@ exports.shouldCorrectlyExecuteEvalFunctions = {
       , ReadPreference = configuration.require.ReadPreference;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -3012,55 +2568,53 @@ exports.shouldCorrectlyExecuteEvalFunctions = {
       }
 
       // Evaluate a function on the server with the parameter 3 passed in
-      db.eval('function (x) {return x;}', [3], function(err, result) {
+      db.eval('function (x) {return x;}', [3]).then(function(result) {
         test.equal(3, result); tests_done();
 
         // Evaluate a function on the server with the parameter 3 passed in no lock aquired for eval
         // on server
-        db.eval('function (x) {return x;}', [3], {nolock:true}, function(err, result) {
+        db.eval('function (x) {return x;}', [3], {nolock:true}).then(function(result) {
           test.equal(3, result); tests_done();
         });
 
         // Evaluate a function on the server that writes to a server collection
-        db.eval('function (x) {db.test_eval.save({y:x});}', [5], {readPreference: ReadPreference.PRIMARY}, function(err, result) {
+        db.eval('function (x) {db.test_eval_with_promise.save({y:x});}', [5], {readPreference: ReadPreference.PRIMARY}).then(function(result) {
           setTimeout(function() {
             // Locate the entry
-            db.collection('test_eval', function(err, collection) {
-              collection.findOne(function(err, item) {
+            db.collection('test_eval_with_promise', function(err, collection) {
+              collection.findOne().then(function(item) {
                 test.equal(5, item.y); tests_done();
 
                 // Evaluate a function with 2 parameters passed in
-                db.eval('function (x, y) {return x + y;}', [2, 3], function(err, result) {
+                db.eval('function (x, y) {return x + y;}', [2, 3]).then(function(result) {
                   test.equal(5, result); tests_done();
 
                   // Evaluate a function with no parameters passed in
-                  db.eval('function () {return 5;}', function(err, result) {
+                  db.eval('function () {return 5;}').then(function(result) {
                     test.equal(5, result); tests_done();
 
                     // Evaluate a statement
-                    db.eval('2 + 3;', function(err, result) {
+                    db.eval('2 + 3;').then(function(result) {
                       test.equal(5, result); tests_done();
 
                       // Evaluate a statement using the code object
-                      db.eval(new Code("2 + 3;"), function(err, result) {
+                      db.eval(new Code("2 + 3;")).then(function(result) {
                         test.equal(5, result); tests_done();
 
                         // Evaluate a statement using the code object including a scope
-                        db.eval(new Code("return i;", {'i':2}), function(err, result) {
+                        db.eval(new Code("return i;", {'i':2})).then(function(result) {
                           test.equal(2, result); tests_done();
 
                           // Evaluate a statement using the code object including a scope
-                          db.eval(new Code("i + 3;", {'i':2}), function(err, result) {
+                          db.eval(new Code("i + 3;", {'i':2})).then(function(result) {
                             test.equal(5, result); tests_done();
 
                             // Evaluate an illegal statement
-                            db.eval("5 ++ 5;", function(err, result) {
+                            db.eval("5 ++ 5;").then(function(result) {
+                            }).catch(function(err) {
                               test.ok(err instanceof Error);
                               test.ok(err.message != null);
                               tests_done();
-                              // Let's close the db
-                              // db.close();
-                              // test.done();
                             });
                           });
                         });
@@ -3085,7 +2639,7 @@ exports.shouldCorrectlyExecuteEvalFunctions = {
  * @example-method eval
  * @ignore
  */
-exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunction = {
+exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunctionWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -3093,7 +2647,7 @@ exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunction = {
     var Code = configuration.require.Code;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -3102,15 +2656,12 @@ exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunction = {
     // BEGIN
 
       // Clean out the collection
-      db.collection("system.js").deleteMany({}, configuration.writeConcernMax(), function(err, result) {
-        test.equal(null, err);
+      db.collection("system.js").deleteMany({}, configuration.writeConcernMax()).then(function(result) {
 
         // Define a system level function
-        db.collection("system.js").insertOne({_id: "echo", value: new Code("function(x) { return x; }")}, configuration.writeConcernMax(), function(err, result) {
-          test.equal(null, err);
+        db.collection("system.js").insertOne({_id: "echo", value: new Code("function(x) { return x; }")}, configuration.writeConcernMax()).then(function(result) {
         
-          db.eval("echo(5)", function(err, result) {
-            test.equal(null, err);
+          db.eval("echo(5)").then(function(result) {
             test.equal(5, result);
 
             db.close();
@@ -3130,20 +2681,19 @@ exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunction = {
  * @example-method open
  * @ignore
  */
-exports.shouldCorrectlyOpenASimpleDbSingleServerConnection = {
+exports.shouldCorrectlyOpenASimpleDbSingleServerConnectionWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      test.equal(null, err);
 
       db.on('close', function() {
         test.done();
@@ -3162,26 +2712,23 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnection = {
  * @example-method close
  * @ignore
  */
-exports.shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallback = {
+exports.shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallbackWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      test.equal(null, err);
 
       // Close the connection with a callback that is optional
-      db.close(function(err, result) {
-        test.equal(null, err);
-
+      db.close().then(function(result) {
         test.done();
       });
     });
@@ -3196,36 +2743,33 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallback =
  * @example-method listCollections
  * @ignore
  */
-exports.shouldCorrectlyRetrievelistCollections = {
+exports.shouldCorrectlyRetrievelistCollectionsWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      test.equal(null, err);
-
       // Get an empty db
-      var db1 = db.db('listCollectionTestDb');
+      var db1 = db.db('listCollectionTestDb2');
       // Create a collection
-      var collection = db1.collection('shouldCorrectlyRetrievelistCollections');
+      var collection = db1.collection('shouldCorrectlyRetrievelistCollections_with_promise');
       // Ensure the collection was created
-      collection.insertOne({a:1}, function(err, r) {
-        test.equal(null, err);
+      collection.insertOne({a:1}).then(function(r) {
 
         // Return the information of a single collection name
-        db1.listCollections({name: "shouldCorrectlyRetrievelistCollections"}).toArray(function(err, items) {
+        db1.listCollections({name: "shouldCorrectlyRetrievelistCollections_with_promise"}).toArray().then(function(items) {
           test.equal(1, items.length);
 
           // Return the information of a all collections, using the callback format
-          db1.listCollections().toArray(function(err, items) {
+          db1.listCollections().toArray().then(function(items) {
             test.equal(2, items.length);
 
             db.close();
@@ -3241,30 +2785,27 @@ exports.shouldCorrectlyRetrievelistCollections = {
 /**
  * @ignore
  */
-exports.shouldCorrectlyRetrievelistCollectionsWiredTiger = {
+exports.shouldCorrectlyRetrievelistCollectionsWiredTigerWithPromises = {
   metadata: { requires: { topology: ['wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
-      test.equal(null, err);
-
+    db.open().then(function(db) {
       // Get an empty db
       var db1 = db.db('listCollectionTestDb2');
       // Create a collection
-      var collection = db1.collection('shouldCorrectlyRetrievelistCollections');
+      var collection = db1.collection('shouldCorrectlyRetrievelistCollections_with_promise');
       // Ensure the collection was created
-      collection.insertOne({a:1}, function(err, r) {
-        test.equal(null, err);
+      collection.insertOne({a:1}).then(function(r) {
 
         // Return the information of a single collection name
-        db1.listCollections({name: "shouldCorrectlyRetrievelistCollections"}).toArray(function(err, items) {
+        db1.listCollections({name: "shouldCorrectlyRetrievelistCollections_with_promise"}).toArray().then(function(items) {
           test.equal(1, items.length);
 
           // Return the information of a all collections, using the callback format
-          db1.listCollections().toArray(function(err, items) {
+          db1.listCollections().toArray().then(function(items) {
             test.equal(1, items.length);
 
             db.close();
@@ -3283,40 +2824,32 @@ exports.shouldCorrectlyRetrievelistCollectionsWiredTiger = {
  * @example-method collection
  * @ignore
  */
-exports.shouldCorrectlyAccessACollection = {
+exports.shouldCorrectlyAccessACollectionWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      test.equal(null, err);
-
       // Grab a collection without a callback no safe mode
-      var col1 = db.collection('test_correctly_access_collections');
-
+      var col1 = db.collection('test_correctly_access_collections_with_promise');
       // Grab a collection with a callback but no safe operation
-      db.collection('test_correctly_access_collections', function(err, col2) {
-        test.equal(null, err);
+      db.collection('test_correctly_access_collections_with_promise', function(err, col2) {
 
         // Grab a collection with a callback in safe mode, ensuring it exists (should fail as it's not created)
-        db.collection('test_correctly_access_collections', {strict:true}, function(err, col3) {
-          test.ok(err != null);
-
+        db.collection('test_correctly_access_collections_with_promise', {strict:true}, function(err, col3) {
           // Create the collection
-          db.createCollection('test_correctly_access_collections', function(err, result) {
+          db.createCollection('test_correctly_access_collections_with_promise').then(function(err, result) {
 
             // Retry to get the collection, should work as it's now created
-            db.collection('test_correctly_access_collections', {strict:true}, function(err, col3) {
-              test.equal(null, err);
-
+            db.collection('test_correctly_access_collections_with_promise', {strict:true}, function(err, col3) {
               db.close();
               test.done();
             });
@@ -3335,27 +2868,24 @@ exports.shouldCorrectlyAccessACollection = {
  * @example-method collections
  * @ignore
  */
-exports.shouldCorrectlyRetrieveAllCollections = {
+exports.shouldCorrectlyRetrieveAllCollectionsWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      test.equal(null, err);
-
       // Create the collection
-      var collection = db.collection('test_correctly_access_collections2');
+      var collection = db.collection('test_correctly_access_collections2_with_promise');
       // Retry to get the collection, should work as it's now created
-      db.collections(function(err, collections) {
-        test.equal(null, err);
+      db.collections().then(function(collections) {
         test.ok(collections.length > 0);
 
         db.close();
@@ -3373,40 +2903,39 @@ exports.shouldCorrectlyRetrieveAllCollections = {
  * @example-method logout
  * @ignore
  */
-exports.shouldCorrectlyLogoutFromTheDatabase = {
+exports.shouldCorrectlyLogoutFromTheDatabaseWithPromises = {
   metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      test.equal(null, err);
-
       // Add a user to the database
-      db.addUser('user3', 'name', function(err, result) {
-        test.equal(null, err);
+      db.addUser('user3', 'name').then(function(result) {
 
         // Authenticate
-        db.authenticate('user3', 'name', function(err, result) {
+        db.authenticate('user3', 'name').then(function(result) {
           test.equal(true, result);
 
           // Logout the db
-          db.logout(function(err, result) {
+          db.logout().then(function(result) {
             test.equal(true, result);
 
             // Remove the user
-            db.removeUser('user3', function(err, result) {
+            db.removeUser('user3').then(function(result) {
               test.equal(true, result);
   
               db.close();
               test.done();
+            }).catch(function(err) {
+              console.dir(err)
             });
           });
         });
@@ -3423,34 +2952,29 @@ exports.shouldCorrectlyLogoutFromTheDatabase = {
  * @example-method authenticate
  * @ignore
  */
-exports.shouldCorrectlyAuthenticateAgainstTheDatabase = {
+exports.shouldCorrectlyAuthenticateAgainstTheDatabaseWithPromises = {
   metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      test.equal(null, err);
-
       // Add a user to the database
-      db.addUser('user2', 'name', function(err, result) {
-        test.equal(null, err);
+      db.addUser('user2', 'name').then(function(result) {
 
         // Authenticate
-        db.authenticate('user2', 'name', function(err, result) {
+        db.authenticate('user2', 'name').then(function(result) {
           test.equal(true, result);
 
           // Remove the user from the db
-          db.removeUser('user2', function(err, result) {
-            test.equal(null, err);
-
+          db.removeUser('user2').then(function(result) {
             db.close();
             test.done();
           });
@@ -3468,30 +2992,25 @@ exports.shouldCorrectlyAuthenticateAgainstTheDatabase = {
  * @example-method addUser
  * @ignore
  */
-exports.shouldCorrectlyAddUserToDb = {
+exports.shouldCorrectlyAddUserToDbWithPromises = {
   metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      test.equal(null, err);
-
       // Add a user to the database
-      db.addUser('user', 'name', function(err, result) {
-        test.equal(null, err);
+      db.addUser('user', 'name').then(function(result) {
 
         // Remove the user from the db
-        db.removeUser('user', function(err, result) {
-          test.equal(null, err);
-
+        db.removeUser('user').then(function(result) {
           db.close();
           test.done();
         });
@@ -3508,43 +3027,44 @@ exports.shouldCorrectlyAddUserToDb = {
  * @example-method removeUser
  * @ignore
  */
-exports.shouldCorrectlyAddAndRemoveUser = {
+exports.shouldCorrectlyAddAndRemoveUserWithPromises = {
   metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      test.equal(null, err);
 
       // Add a user to the database
-      db.addUser('user', 'name', function(err, result) {
-        test.equal(null, err);
+      db.addUser('user', 'name').then(function(result) {
 
         // Authenticate
-        db.authenticate('user', 'name', function(err, result) {
+        db.authenticate('user', 'name').then(function(result) {
           test.equal(true, result);
 
           // Logout the db
-          db.logout(function(err, result) {
+          db.logout().then(function(result) {
             test.equal(true, result);
 
             // Remove the user from the db
-            db.removeUser('user', function(err, result) {
+            db.removeUser('user').then(function(result) {
 
               // Authenticate
-              db.authenticate('user', 'name', function(err, result) {
+              db.authenticate('user', 'name').then(function(result) {
                 test.equal(false, result);
 
                 db.close();
                 test.done();
+              }).catch(function(err) {
+                db.close();
+                test.done();                
               });
             });
           });
@@ -3562,30 +3082,25 @@ exports.shouldCorrectlyAddAndRemoveUser = {
  * @example-method createCollection
  * @ignore
  */
-exports.shouldCorrectlyCreateACollection = {
+exports.shouldCorrectlyCreateACollectionWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      test.equal(null, err);
-
       // Create a capped collection with a maximum of 1000 documents
-      db.createCollection("a_simple_collection", {capped:true, size:10000, max:1000, w:1}, function(err, collection) {
-        test.equal(null, err);
+      db.createCollection("a_simple_collection_with_promise", {capped:true, size:10000, max:1000, w:1}).then(function(collection) {
 
         // Insert a document in the capped collection
-        collection.insertOne({a:1}, configuration.writeConcernMax(), function(err, result) {
-          test.equal(null, err);
-
+        collection.insertOne({a:1}, configuration.writeConcernMax()).then(function(result) {
           db.close();
           test.done();
         });
@@ -3602,40 +3117,34 @@ exports.shouldCorrectlyCreateACollection = {
  * @example-method dropCollection
  * @ignore
  */
-exports.shouldCorrectlyExecuteACommandAgainstTheServer = {
+exports.shouldCorrectlyExecuteACommandAgainstTheServerWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      test.equal(null, err);
-
       // Execute ping against the server
-      db.command({ping:1}, function(err, result) {
-        test.equal(null, err);
+      db.command({ping:1}).then(function(result) {
 
         // Create a capped collection with a maximum of 1000 documents
-        db.createCollection("a_simple_create_drop_collection", {capped:true, size:10000, max:1000, w:1}, function(err, collection) {
-          test.equal(null, err);
+        db.createCollection("a_simple_create_drop_collection_with_promise", {capped:true, size:10000, max:1000, w:1}).then(function(collection) {
 
           // Insert a document in the capped collection
-          collection.insertOne({a:1}, configuration.writeConcernMax(), function(err, result) {
-            test.equal(null, err);
+          collection.insertOne({a:1}, configuration.writeConcernMax()).then(function(result) {
 
             // Drop the collection from this world
-            db.dropCollection("a_simple_create_drop_collection", function(err, result) {
-              test.equal(null, err);
+            db.dropCollection("a_simple_create_drop_collection_with_promise").then(function(result) {
 
               // Verify that the collection is gone
-              db.listCollections({name:"a_simple_create_drop_collection"}).toArray(function(err, names) {
+              db.listCollections({name:"a_simple_create_drop_collection_with_promise"}).toArray().then(function(names) {
                 test.equal(0, names.length);
 
                 db.close();
@@ -3657,26 +3166,22 @@ exports.shouldCorrectlyExecuteACommandAgainstTheServer = {
  * @example-method command
  * @ignore
  */
-exports.shouldCorrectlyCreateDropAndVerifyThatCollectionIsGone = {
+exports.shouldCorrectlyCreateDropAndVerifyThatCollectionIsGoneWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      test.equal(null, err);
-
       // Execute ping against the server
-      db.command({ping:1}, function(err, result) {
-        test.equal(null, err);
-
+      db.command({ping:1}).then(function(result) {
         db.close();
         test.done();
       });
@@ -3692,48 +3197,43 @@ exports.shouldCorrectlyCreateDropAndVerifyThatCollectionIsGone = {
  * @example-method renameCollection
  * @ignore
  */
-exports.shouldCorrectlyRenameACollection = {
+exports.shouldCorrectlyRenameACollectionWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      test.equal(null, err);
-
       // Create a collection
-      db.createCollection("simple_rename_collection", configuration.writeConcernMax(), function(err, collection) {
-        test.equal(null, err);
+      db.createCollection("simple_rename_collection_with_promise", configuration.writeConcernMax()).then(function(collection) {
 
         // Insert a document in the collection
-        collection.insertOne({a:1}, configuration.writeConcernMax(), function(err, result) {
-          test.equal(null, err);
+        collection.insertOne({a:1}, configuration.writeConcernMax()).then(function(result) {
 
           // Retrieve the number of documents from the collection
-          collection.count(function(err, count) {
+          collection.count().then(function(count) {
             test.equal(1, count);
 
             // Rename the collection
-            db.renameCollection("simple_rename_collection", "simple_rename_collection_2", function(err, collection2) {
-              test.equal(null, err);
+            db.renameCollection("simple_rename_collection_with_promise", "simple_rename_collection_2_with_promise").then(function(collection2) {
 
               // Retrieve the number of documents from the collection
-              collection2.count(function(err, count) {
+              collection2.count().then(function(count) {
                 test.equal(1, count);
 
                 // Verify that the collection is gone
-                db.listCollections({name:"simple_rename_collection"}).toArray(function(err, names) {
+                db.listCollections({name:"simple_rename_collection_with_promise"}).toArray().then(function(names) {
                   test.equal(0, names.length);
 
                   // Verify that the new collection exists
-                  db.listCollections({name:"simple_rename_collection_2"}).toArray(function(err, names) {
+                  db.listCollections({name:"simple_rename_collection_2_with_promise"}).toArray().then(function(names) {
                     test.equal(1, names.length);
 
                     db.close();
@@ -3757,14 +3257,14 @@ exports.shouldCorrectlyRenameACollection = {
  * @example-method createIndex
  * @ignore
  */
-exports.shouldCreateOnDbComplexIndexOnTwoFields = {
+exports.shouldCreateOnDbComplexIndexOnTwoFieldsWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -3773,24 +3273,21 @@ exports.shouldCreateOnDbComplexIndexOnTwoFields = {
     // BEGIN
 
       // Create a collection we want to drop later
-      var collection = db.collection('more_complex_index_test');
+      var collection = db.collection('more_complex_index_test_with_promise');
       // Insert a bunch of documents for the index
       collection.insertMany([{a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax(), function(err, result) {
-        test.equal(null, err);
+        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax()).then(function(result) {
 
         // Create an index on the a field
-        db.createIndex('more_complex_index_test', {a:1, b:1}
-          , {unique:true, background:true, w:1}, function(err, indexName) {
+        db.createIndex('more_complex_index_test_with_promise', {a:1, b:1}
+          , {unique:true, background:true, w:1}).then(function(indexName) {
 
           // Show that duplicate records got dropped
-          collection.find({}).toArray(function(err, items) {
-            test.equal(null, err);
+          collection.find({}).toArray().then(function(items) {
             test.equal(4, items.length);
 
             // Peform a query, with explain to show we hit the query
-            collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
-              test.equal(null, err);
+            collection.find({a:2}, {explain:true}).toArray().then(function(explanation) {
               test.ok(explanation != null);
 
               db.close();
@@ -3811,14 +3308,14 @@ exports.shouldCreateOnDbComplexIndexOnTwoFields = {
  * @example-method ensureIndex
  * @ignore
  */
-exports.shouldCreateComplexEnsureIndexDb = {
+exports.shouldCreateComplexEnsureIndexDbWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -3827,24 +3324,21 @@ exports.shouldCreateComplexEnsureIndexDb = {
     // BEGIN
 
       // Create a collection we want to drop later
-      var collection = db.collection('more_complex_ensure_index_db_test');
+      var collection = db.collection('more_complex_ensure_index_db_test_with_promise');
       // Insert a bunch of documents for the index
       collection.insertMany([{a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax(), function(err, result) {
-        test.equal(null, err);
+        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax()).then(function(result) {
 
         // Create an index on the a field
-        db.ensureIndex('more_complex_ensure_index_db_test', {a:1, b:1}
-          , {unique:true, background:true, w:1}, function(err, indexName) {
+        db.ensureIndex('more_complex_ensure_index_db_test_with_promise', {a:1, b:1}
+          , {unique:true, background:true, w:1}).then(function(indexName) {
 
           // Show that duplicate records got dropped
-          collection.find({}).toArray(function(err, items) {
-            test.equal(null, err);
+          collection.find({}).toArray().then(function(items) {
             test.equal(4, items.length);
 
             // Peform a query, with explain to show we hit the query
-            collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
-              test.equal(null, err);
+            collection.find({a:2}, {explain:true}).toArray().then(function(explanation) {
               test.ok(explanation != null);
 
               db.close();
@@ -3865,14 +3359,14 @@ exports.shouldCreateComplexEnsureIndexDb = {
  * @example-method dropDatabase
  * @ignore
  */
-exports.shouldCorrectlyDropTheDatabase = {
+exports.shouldCorrectlyDropTheDatabaseWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -3881,20 +3375,18 @@ exports.shouldCorrectlyDropTheDatabase = {
     // BEGIN
 
       // Create a collection
-      var collection = db.collection('more_index_information_test_1');
+      var collection = db.collection('more_index_information_test_1_with_promise');
       // Insert a bunch of documents for the index
       collection.insertMany([{a:1, b:1}, {a:1, b:1}
-        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax(), function(err, result) {
-        test.equal(null, err);
+        , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax()).then(function(result) {
 
         // Let's drop the database
-        db.dropDatabase(function(err, result) {
-          test.equal(null, err);
+        db.dropDatabase().then(function(result) {
 
           // Wait to seconds to let it replicate across
           setTimeout(function() {
             // Get the admin database
-            db.admin().listDatabases(function(err, dbs) {
+            db.admin().listDatabases().then(function(dbs) {
               // Grab the databases
               dbs = dbs.databases;
               // Did we find the db
@@ -3926,24 +3418,21 @@ exports.shouldCorrectlyDropTheDatabase = {
  * @example-method stats
  * @ignore
  */
-exports.shouldCorrectlyRetrieveDbStats = {
+exports.shouldCorrectlyRetrieveDbStatsWithPromisesWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      test.equal(null, err);
-
-      db.stats(function(err, stats) {
-        test.equal(null, err);
+      db.stats().then(function(stats) {
         test.ok(stats != null);
 
         db.close();
@@ -3961,39 +3450,37 @@ exports.shouldCorrectlyRetrieveDbStats = {
  * @example-method db
  * @ignore
  */
-exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstances = {
+exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstancesWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      test.equal(null, err);
-      
       // Reference a different database sharing the same connections
       // for the data transfer
       var secondDb = db.db("integration_tests_2");
       
       // Fetch the collections
-      var multipleColl1 = db.collection("multiple_db_instances");
-      var multipleColl2 = secondDb.collection("multiple_db_instances");
+      var multipleColl1 = db.collection("multiple_db_instances_with_promise");
+      var multipleColl2 = secondDb.collection("multiple_db_instances_with_promise");
       
       // Write a record into each and then count the records stored
-      multipleColl1.insertOne({a:1}, {w:1}, function(err, result) {      
-        multipleColl2.insertOne({a:1}, {w:1}, function(err, result) {
+      multipleColl1.insertOne({a:1}, {w:1}).then(function(result) {      
+        multipleColl2.insertOne({a:1}, {w:1}).then(function(result) {
           
           // Count over the results ensuring only on record in each collection
-          multipleColl1.count(function(err, count) {
+          multipleColl1.count().then(function(count) {
             test.equal(1, count);
 
-            multipleColl2.count(function(err, count) {
+            multipleColl2.count().then(function(count) {
               test.equal(1, count);
 
               db.close();
@@ -4014,7 +3501,7 @@ exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstances = {
  * @example-method open
  * @ignore
  */
-exports['Should correctly connect with default replicasetNoOption'] = {
+exports['Should correctly connect with default replicasetNoOption With Promises'] = {
   metadata: { requires: { topology: 'replicaset' } },
   
   // The actual test we wish to run
@@ -4041,7 +3528,6 @@ exports['Should correctly connect with default replicasetNoOption'] = {
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
     // BEGIN
-      test.equal(null, err);
       p_db.close();
       test.done();
     });
@@ -4062,13 +3548,13 @@ exports['Should correctly connect with default replicasetNoOption'] = {
  * @example-method authenticate
  * @ignore
  */
-exports.shouldCorrectlyAuthenticate = {
+exports.shouldCorrectlyAuthenticateWithPromises = {
   metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -4077,23 +3563,23 @@ exports.shouldCorrectlyAuthenticate = {
     // REMOVE-LINE test.done();
     // BEGIN
       // Grab a collection object
-      var collection = db.collection('test');
+      var collection = db.collection('test_with_promise');
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insertOne({'a':1}, {w:1}, function(err, doc) {
+      collection.insertOne({'a':1}, {w:1}).then(function(doc) {
 
         // Use the admin database for the operation
         var adminDb = db.admin();
 
         // Add the new user to the admin database
-        adminDb.addUser('admin2', 'admin2', function(err, result) {
+        adminDb.addUser('admin2', 'admin2').then(function(result) {
 
           // Authenticate using the newly added user
-          adminDb.authenticate('admin2', 'admin2', function(err, result) {
+          adminDb.authenticate('admin2', 'admin2').then(function(result) {
             test.ok(result);
 
-            adminDb.removeUser('admin2', function(err, result) {
+            adminDb.removeUser('admin2').then(function(result) {
               test.ok(result);
 
               db.close();
@@ -4114,14 +3600,14 @@ exports.shouldCorrectlyAuthenticate = {
  * @example-method buildInfo
  * @ignore
  */
-exports.shouldCorrectlyRetrieveBuildInfo = {
+exports.shouldCorrectlyRetrieveBuildInfoWithPromises = {
   metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -4134,17 +3620,16 @@ exports.shouldCorrectlyRetrieveBuildInfo = {
       var adminDb = db.admin();
 
       // Add the new user to the admin database
-      adminDb.addUser('admin3', 'admin3', function(err, result) {
+      adminDb.addUser('admin3', 'admin3').then(function(result) {
 
         // Authenticate using the newly added user
-        adminDb.authenticate('admin3', 'admin3', function(err, result) {
+        adminDb.authenticate('admin3', 'admin3').then(function(result) {
           test.ok(result);
           
           // Retrive the build information for the MongoDB instance
-          adminDb.buildInfo(function(err, info) {
-            test.ok(err == null);
+          adminDb.buildInfo().then(function(info) {
             
-            adminDb.removeUser('admin3', function(err, result) {
+            adminDb.removeUser('admin3').then(function(result) {
               test.ok(result);
 
               db.close();
@@ -4165,14 +3650,14 @@ exports.shouldCorrectlyRetrieveBuildInfo = {
  * @example-method command
  * @ignore
  */
-exports.shouldCorrectlyRetrieveBuildInfoUsingCommand = {
+exports.shouldCorrectlyRetrieveBuildInfoUsingCommandWithPromises = {
   metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -4185,17 +3670,16 @@ exports.shouldCorrectlyRetrieveBuildInfoUsingCommand = {
       var adminDb = db.admin();
 
       // Add the new user to the admin database
-      adminDb.addUser('admin4', 'admin4', function(err, result) {
+      adminDb.addUser('admin4', 'admin4').then(function(result) {
 
         // Authenticate using the newly added user
-        adminDb.authenticate('admin4', 'admin4', function(err, result) {
+        adminDb.authenticate('admin4', 'admin4').then(function(result) {
           test.ok(result);
           
           // Retrive the build information using the admin command
-          adminDb.command({buildInfo:1}, function(err, info) {
-            test.ok(err == null);
+          adminDb.command({buildInfo:1}).then(function(info) {
 
-            adminDb.removeUser('admin4', function(err, result) {
+            adminDb.removeUser('admin4').then(function(result) {
               test.ok(result);
 
               db.close();
@@ -4216,14 +3700,14 @@ exports.shouldCorrectlyRetrieveBuildInfoUsingCommand = {
  * @example-method profilingLevel
  * @ignore
  */
-exports.shouldCorrectlySetDefaultProfilingLevel = {
+exports.shouldCorrectlySetDefaultProfilingLevelWithPromises = {
   metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -4233,25 +3717,25 @@ exports.shouldCorrectlySetDefaultProfilingLevel = {
     // BEGIN
       
       // Grab a collection object
-      var collection = db.collection('test');
+      var collection = db.collection('test_with_promise');
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insertOne({'a':1}, {w: 1}, function(err, doc) {
+      collection.insertOne({'a':1}, {w: 1}).then(function(doc) {
 
         // Use the admin database for the operation
         var adminDb = db.admin();
 
         // Add the new user to the admin database
-        adminDb.addUser('admin5', 'admin5', function(err, result) {
+        adminDb.addUser('admin5', 'admin5').then(function(result) {
 
           // Authenticate using the newly added user
-          adminDb.authenticate('admin5', 'admin5', function(err, replies) {
+          adminDb.authenticate('admin5', 'admin5').then(function(replies) {
 
             // Retrive the profiling level
-            adminDb.profilingLevel(function(err, level) {
+            adminDb.profilingLevel().then(function(level) {
 
-              adminDb.removeUser('admin5', function(err, result) {
+              adminDb.removeUser('admin5').then(function(result) {
                 test.ok(result);
 
                 db.close();
@@ -4274,14 +3758,14 @@ exports.shouldCorrectlySetDefaultProfilingLevel = {
  * @example-method setProfilingLevel
  * @ignore
  */ 
-exports.shouldCorrectlyChangeProfilingLevel = {
+exports.shouldCorrectlyChangeProfilingLevelWithPromises = {
   metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -4291,53 +3775,54 @@ exports.shouldCorrectlyChangeProfilingLevel = {
     // BEGIN
       
       // Grab a collection object
-      var collection = db.collection('test');
+      var collection = db.collection('test_with_promise');
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insertOne({'a':1}, {w: 1}, function(err, doc) {
+      collection.insertOne({'a':1}, {w: 1}).then(function(doc) {
 
         // Use the admin database for the operation
         var adminDb = db.admin();
 
         // Add the new user to the admin database
-        adminDb.addUser('admin6', 'admin6', function(err, result) {
+        adminDb.addUser('admin6', 'admin6').then(function(result) {
 
           // Authenticate using the newly added user
-          adminDb.authenticate('admin6', 'admin6', function(err, replies) {                                
+          adminDb.authenticate('admin6', 'admin6').then(function(replies) {                                
             
             // Set the profiling level to only profile slow queries
-            adminDb.setProfilingLevel('slow_only', function(err, level) {
+            adminDb.setProfilingLevel('slow_only').then(function(level) {
               
               // Retrive the profiling level and verify that it's set to slow_only
-              adminDb.profilingLevel(function(err, level) {
+              adminDb.profilingLevel().then(function(level) {
                 test.equal('slow_only', level);
 
                 // Turn profiling off
-                adminDb.setProfilingLevel('off', function(err, level) {
+                adminDb.setProfilingLevel('off').then(function(level) {
                   
                   // Retrive the profiling level and verify that it's set to off
-                  adminDb.profilingLevel(function(err, level) {
+                  adminDb.profilingLevel().then(function(level) {
                     test.equal('off', level);
 
                     // Set the profiling level to log all queries
-                    adminDb.setProfilingLevel('all', function(err, level) {
+                    adminDb.setProfilingLevel('all').then(function(level) {
 
                       // Retrive the profiling level and verify that it's set to all
-                      adminDb.profilingLevel(function(err, level) {
+                      adminDb.profilingLevel().then(function(level) {
                         test.equal('all', level);
 
                         // Attempt to set an illegal profiling level
-                        adminDb.setProfilingLevel('medium', function(err, level) {
+                        adminDb.setProfilingLevel('medium').then(function(level) {
+                        }).catch(function(err) {
                           test.ok(err instanceof Error);
                           test.equal("Error: illegal profiling level value medium", err.message);
                         
-                          adminDb.removeUser('admin6', function(err, result) {
+                          adminDb.removeUser('admin6').then(function(result) {
                             test.ok(result);
 
                             db.close();
                             test.done();
-                          });
+                          });                          
                         });
                       })
                     });
@@ -4361,14 +3846,14 @@ exports.shouldCorrectlyChangeProfilingLevel = {
  * @example-method profilingInfo
  * @ignore
  */ 
-exports.shouldCorrectlySetAndExtractProfilingInfo = {
+exports.shouldCorrectlySetAndExtractProfilingInfoWithPromises = {
   metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -4378,38 +3863,38 @@ exports.shouldCorrectlySetAndExtractProfilingInfo = {
     // BEGIN
 
       // Grab a collection object
-      var collection = db.collection('test');
+      var collection = db.collection('test_with_promise');
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insertOne({'a':1}, {w: 1}, function(doc) {
+      collection.insertOne({'a':1}, {w: 1}).then(function(doc) {
 
         // Use the admin database for the operation
         var adminDb = db.admin();
 
         // Add the new user to the admin database
-        adminDb.addUser('admin7', 'admin7', function(err, result) {
+        adminDb.addUser('admin7', 'admin7').then(function(result) {
 
           // Authenticate using the newly added user
-          adminDb.authenticate('admin7', 'admin7', function(err, replies) {
+          adminDb.authenticate('admin7', 'admin7').then(function(replies) {
             
             // Set the profiling level to all
-            adminDb.setProfilingLevel('all', function(err, level) {
+            adminDb.setProfilingLevel('all').then(function(level) {
               
               // Execute a query command
-              collection.find().toArray(function(err, items) {
+              collection.find().toArray().then(function(items) {
 
                 // Turn off profiling
-                adminDb.setProfilingLevel('off', function(err, level) {
+                adminDb.setProfilingLevel('off').then(function(level) {
                   
                   // Retrive the profiling information
-                  adminDb.profilingInfo(function(err, infos) {
+                  adminDb.profilingInfo().then(function(infos) {
                     test.ok(infos.constructor == Array);
                     test.ok(infos.length >= 1);
                     test.ok(infos[0].ts.constructor == Date);
                     test.ok(infos[0].millis.constructor == Number);
                   
-                    adminDb.removeUser('admin7', function(err, result) {
+                    adminDb.removeUser('admin7').then(function(result) {
                       test.ok(result);
 
                       db.close();
@@ -4435,14 +3920,14 @@ exports.shouldCorrectlySetAndExtractProfilingInfo = {
  * @example-method validateCollection
  * @ignore
  */
-exports.shouldCorrectlyCallValidateCollection = {
+exports.shouldCorrectlyCallValidateCollectionWithPromises = {
   metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
     
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -4452,23 +3937,23 @@ exports.shouldCorrectlyCallValidateCollection = {
     // BEGIN
 
       // Grab a collection object
-      var collection = db.collection('test');
+      var collection = db.collection('test_with_promise');
         
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insertOne({'a':1}, {w: 1}, function(err, doc) {
+      collection.insertOne({'a':1}, {w: 1}).then(function(doc) {
         
         // Use the admin database for the operation
         var adminDb = db.admin();
           
         // Add the new user to the admin database
-        adminDb.addUser('admin8', 'admin8', function(err, result) {
+        adminDb.addUser('admin8', 'admin8').then(function(result) {
           
           // Authenticate using the newly added user
-          adminDb.authenticate('admin8', 'admin8', function(err, replies) {
+          adminDb.authenticate('admin8', 'admin8').then(function(replies) {
             
             // Validate the 'test' collection
-            adminDb.validateCollection('test', function(err, doc) {
+            adminDb.validateCollection('test_with_promise').then(function(doc) {
 
               // Pre 1.9.1 servers
               if(doc.result != null) {
@@ -4478,7 +3963,7 @@ exports.shouldCorrectlyCallValidateCollection = {
                 test.ok(doc.firstExtent != null);
               }
 
-              adminDb.removeUser('admin8', function(err, result) {
+              adminDb.removeUser('admin8').then(function(result) {
                 test.ok(result);
 
                 db.close();
@@ -4499,14 +3984,14 @@ exports.shouldCorrectlyCallValidateCollection = {
  * @example-method ping
  * @ignore
  */
-exports.shouldCorrectlyPingTheMongoDbInstance = {
+exports.shouldCorrectlyPingTheMongoDbInstanceWithPromises = {
   metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -4519,17 +4004,16 @@ exports.shouldCorrectlyPingTheMongoDbInstance = {
       var adminDb = db.admin();
         
       // Add the new user to the admin database
-      adminDb.addUser('admin9', 'admin9', function(err, result) {
+      adminDb.addUser('admin9', 'admin9').then(function(result) {
         
         // Authenticate using the newly added user
-        adminDb.authenticate('admin9', 'admin9', function(err, result) {
+        adminDb.authenticate('admin9', 'admin9').then(function(result) {
           test.ok(result);
           
           // Ping the server
-          adminDb.ping(function(err, pingResult) {
-            test.equal(null, err);
+          adminDb.ping().then(function(pingResult) {
 
-            adminDb.removeUser('admin9', function(err, result) {
+            adminDb.removeUser('admin9').then(function(result) {
               test.ok(result);
 
               db.close();
@@ -4550,14 +4034,14 @@ exports.shouldCorrectlyPingTheMongoDbInstance = {
  * @example-method logout
  * @ignore
  */
-exports.shouldCorrectlyUseLogoutFunction = {
+exports.shouldCorrectlyUseLogoutFunctionWithPromises = {
   metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {  
     var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -4570,17 +4054,17 @@ exports.shouldCorrectlyUseLogoutFunction = {
       var adminDb = db.admin();
         
       // Add the new user to the admin database
-      adminDb.addUser('admin10', 'admin10', function(err, result) {
+      adminDb.addUser('admin10', 'admin10').then(function(result) {
         
         // Authenticate using the newly added user
-        adminDb.authenticate('admin10', 'admin10', function(err, result) {
+        adminDb.authenticate('admin10', 'admin10').then(function(result) {
           test.ok(result);
           
           // Logout the user
-          adminDb.logout(function(err, result) {
+          adminDb.logout().then(function(result) {
             test.equal(true, result);
             
-            adminDb.removeUser('admin10', function(err, result) {
+            adminDb.removeUser('admin10').then(function(result) {
               test.ok(result);
 
               db.close();
@@ -4601,14 +4085,14 @@ exports.shouldCorrectlyUseLogoutFunction = {
  * @example-method addUser
  * @ignore
  */
-exports.shouldCorrectlyAddAUserToAdminDb = {
+exports.shouldCorrectlyAddAUserToAdminDbWithPromises = {
   metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {  
     var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -4621,13 +4105,13 @@ exports.shouldCorrectlyAddAUserToAdminDb = {
       var adminDb = db.admin();
         
       // Add the new user to the admin database
-      adminDb.addUser('admin11', 'admin11', function(err, result) {
+      adminDb.addUser('admin11', 'admin11').then(function(result) {
         
         // Authenticate using the newly added user
-        adminDb.authenticate('admin11', 'admin11', function(err, result) {
+        adminDb.authenticate('admin11', 'admin11').then(function(result) {
           test.ok(result);
           
-          adminDb.removeUser('admin11', function(err, result) {
+          adminDb.removeUser('admin11').then(function(result) {
             test.ok(result);
 
             db.close();
@@ -4646,14 +4130,14 @@ exports.shouldCorrectlyAddAUserToAdminDb = {
  * @example-method removeUser
  * @ignore
  */
-exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDb = {
+exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDbWithPromises = {
   metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {  
     var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -4666,24 +4150,21 @@ exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDb = {
       var adminDb = db.admin();
         
       // Add the new user to the admin database
-      adminDb.addUser('admin12', 'admin12', function(err, result) {
+      adminDb.addUser('admin12', 'admin12').then(function(result) {
         
         // Authenticate using the newly added user
-        adminDb.authenticate('admin12', 'admin12', function(err, result) {
+        adminDb.authenticate('admin12', 'admin12').then(function(result) {
           test.ok(result);
           
           // Remove the user
-          adminDb.removeUser('admin12', function(err, result) {              
-            test.equal(null, err);
+          adminDb.removeUser('admin12').then(function(result) {              
             test.equal(true, result);
             
             // Authenticate using the removed user should fail
-            adminDb.authenticate('admin12', 'admin12', function(err, result) {
-              test.ok(err != null);
-              test.ok(!result);
-
+            adminDb.authenticate('admin12', 'admin12').then(function(result) {
+            }).catch(function(err) {
               db.close();
-              test.done();
+              test.done();              
             });
           })            
         });                
@@ -4700,14 +4181,14 @@ exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDb = {
  * @example-method listDatabases
  * @ignore
  */
-exports.shouldCorrectlyListAllAvailableDatabases = {
+exports.shouldCorrectlyListAllAvailableDatabasesWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {  
     var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -4720,8 +4201,7 @@ exports.shouldCorrectlyListAllAvailableDatabases = {
       var adminDb = db.admin();
         
       // List all the available databases
-      adminDb.listDatabases(function(err, dbs) {
-        test.equal(null, err);
+      adminDb.listDatabases().then(function(dbs) {
         test.ok(dbs.databases.length > 0);
         
         db.close();
@@ -4739,14 +4219,14 @@ exports.shouldCorrectlyListAllAvailableDatabases = {
  * @example-method serverStatus
  * @ignore
  */
-exports.shouldCorrectlyRetrieveServerInfo = {
+exports.shouldCorrectlyRetrieveServerInfoWithPromises = {
   metadata: { requires: { topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -4756,27 +4236,26 @@ exports.shouldCorrectlyRetrieveServerInfo = {
     // BEGIN
 
       // Grab a collection object
-      var collection = db.collection('test');
+      var collection = db.collection('test_with_promise');
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insertOne({'a':1}, {w: 1}, function(err, doc) {
+      collection.insertOne({'a':1}, {w: 1}).then(function(doc) {
 
         // Use the admin database for the operation
         var adminDb = db.admin();
 
         // Add the new user to the admin database
-        adminDb.addUser('admin13', 'admin13', function(err, result) {
+        adminDb.addUser('admin13', 'admin13').then(function(result) {
 
           // Authenticate using the newly added user
-          adminDb.authenticate('admin13', 'admin13', function(err, result) {
+          adminDb.authenticate('admin13', 'admin13').then(function(result) {
            
             // Retrive the server Info
-            adminDb.serverStatus(function(err, info) {
-              test.equal(null, err);
+            adminDb.serverStatus().then(function(info) {
               test.ok(info != null);
              
-              adminDb.removeUser('admin13', function(err, result) {
+              adminDb.removeUser('admin13').then(function(result) {
                 test.ok(result);
 
                 db.close();
@@ -4798,14 +4277,14 @@ exports.shouldCorrectlyRetrieveServerInfo = {
  * @example-method replSetGetStatus
  * @ignore
  */
-exports.shouldCorrectlyRetrieveReplSetGetStatus = {
-  metadata: { requires: { topology: 'single' } },
+exports.shouldCorrectlyRetrieveReplSetGetStatusWithPromises = {
+  metadata: { requires: { topology: 'replicaset' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -4815,31 +4294,28 @@ exports.shouldCorrectlyRetrieveReplSetGetStatus = {
     // BEGIN
 
       // Grab a collection object
-      var collection = db.collection('test');
+      var collection = db.collection('test_with_promise');
 
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
-      collection.insertOne({'a':1}, {w: 1}, function(err, doc) {
+      collection.insertOne({'a':1}, {w: 1}).then(function(doc) {
 
         // Use the admin database for the operation
         var adminDb = db.admin();
 
         // Add the new user to the admin database
-        adminDb.addUser('admin14', 'admin14', function(err, result) {
-          test.equal(null, err);
+        adminDb.addUser('admin14', 'admin14').then(function(result) {
           test.ok(result != null);
 
           // Authenticate using the newly added user
-          adminDb.authenticate('admin14', 'admin14', function(err, result) {
-            test.equal(null, err); 
+          adminDb.authenticate('admin14', 'admin14').then(function(result) {
             test.equal(true, result);
-           
+
             // Retrive the server Info, returns error if we are not
             // running a replicaset
-            adminDb.replSetGetStatus(function(err, info) {
+            adminDb.replSetGetStatus().then(function(info) {
 
-              adminDb.removeUser('admin14', function(err, result) {
-                test.equal(null, err);
+              adminDb.removeUser('admin14').then(function(result) {
                 test.ok(result);
 
                 db.close();
@@ -4868,7 +4344,7 @@ var fs = require('fs');
  * @example-method toArray
  * @ignore
  */
-exports.shouldCorrectlyExecuteToArray = {
+exports.shouldCorrectlyExecuteToArrayWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -4877,7 +4353,7 @@ exports.shouldCorrectlyExecuteToArray = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -4887,13 +4363,13 @@ exports.shouldCorrectlyExecuteToArray = {
     // BEGIN
 
       // Create a collection to hold our documents
-      var collection = db.collection('test_array');
+      var collection = db.collection('test_array_with_promise');
 
       // Insert a test document
-      collection.insertOne({'b':[1, 2, 3]}, configuration.writeConcernMax(), function(err, ids) {
+      collection.insertOne({'b':[1, 2, 3]}, configuration.writeConcernMax()).then(function(ids) {
 
         // Retrieve all the documents in the collection
-        collection.find().toArray(function(err, documents) {
+        collection.find().toArray().then(function(documents) {
           test.equal(1, documents.length);
           test.deepEqual([1, 2, 3], documents[0].b);
 
@@ -4913,7 +4389,7 @@ exports.shouldCorrectlyExecuteToArray = {
  * @example-method each
  * @ignore
  */
-exports.shouldCorrectlyFailToArrayDueToFinishedEachOperation = {
+exports.shouldCorrectlyFailToArrayDueToFinishedEachOperationWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -4922,7 +4398,7 @@ exports.shouldCorrectlyFailToArrayDueToFinishedEachOperation = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -4932,10 +4408,10 @@ exports.shouldCorrectlyFailToArrayDueToFinishedEachOperation = {
     // BEGIN
 
       // Create a collection
-      var collection = db.collection('test_to_a_after_each');
+      var collection = db.collection('test_to_a_after_each_with_promise');
 
       // Insert a document in the collection
-      collection.insertOne({'a':1}, configuration.writeConcernMax(), function(err, ids) {
+      collection.insertOne({'a':1}, configuration.writeConcernMax()).then(function(ids) {
 
         // Grab a cursor
         var cursor = collection.find();
@@ -4945,9 +4421,7 @@ exports.shouldCorrectlyFailToArrayDueToFinishedEachOperation = {
           // If the item is null then the cursor is exhausted/empty and closed
           if(item == null) {
             // Show that the cursor is closed
-            cursor.toArray(function(err, items) {
-              test.equal(null, err);
-
+            cursor.toArray().then(function(items) {
               // Let's close the db
               db.close();
               test.done();
@@ -4967,7 +4441,7 @@ exports.shouldCorrectlyFailToArrayDueToFinishedEachOperation = {
  * @example-method forEach
  * @ignore
  */
-exports['Should correctly iterate over cursor using forEach'] = {
+exports['Should correctly iterate over cursor using forEach With Promises'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -4976,7 +4450,7 @@ exports['Should correctly iterate over cursor using forEach'] = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -4986,10 +4460,10 @@ exports['Should correctly iterate over cursor using forEach'] = {
     // BEGIN
 
       // Create a collection
-      var collection = db.collection('test_to_a_after_for_each');
+      var collection = db.collection('test_to_a_after_for_each_with_promise');
 
       // Insert a document in the collection
-      collection.insertOne({'a':1}, configuration.writeConcernMax(), function(err, ids) {
+      collection.insertOne({'a':1}, configuration.writeConcernMax()).then(function(ids) {
         // Count of documents returned
         var count = 0;
         // Grab a cursor
@@ -4999,7 +4473,6 @@ exports['Should correctly iterate over cursor using forEach'] = {
           test.ok(doc != null);
           count = count + 1;
         }, function(err) {
-          test.equal(null, err);
           test.equal(1, count);
           db.close();
           test.done();
@@ -5017,7 +4490,7 @@ exports['Should correctly iterate over cursor using forEach'] = {
  * @example-method rewind
  * @ignore
  */
-exports['Should correctly rewind and restart cursor'] = {
+exports['Should correctly rewind and restart cursor With Promises'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -5026,7 +4499,7 @@ exports['Should correctly rewind and restart cursor'] = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -5043,22 +4516,21 @@ exports['Should correctly rewind and restart cursor'] = {
       }
 
       // Create collection
-      var collection = db.collection('Should_correctly_rewind_and_restart_cursor');
+      var collection = db.collection('Should_correctly_rewind_and_restart_cursor_with_promise');
 
       // insert all docs
-      collection.insertMany(docs, configuration.writeConcernMax(), function(err, result) {
-        test.equal(null, err);
+      collection.insertMany(docs, configuration.writeConcernMax()).then(function(result) {
 
         // Grab a cursor using the find
         var cursor = collection.find({});
         // Fetch the first object off the cursor
-        cursor.nextObject(function(err, item) {
+        cursor.nextObject().then(function(item) {
           test.equal(0, item.a)
           // Rewind the cursor, resetting it to point to the start of the query
           cursor.rewind();
 
           // Grab the first object again
-          cursor.nextObject(function(err, item) {
+          cursor.nextObject().then(function(item) {
             test.equal(0, item.a)
 
             db.close();
@@ -5078,7 +4550,7 @@ exports['Should correctly rewind and restart cursor'] = {
  * @example-method count
  * @ignore
  */
-exports.shouldCorrectlyUseCursorCountFunction = {
+exports.shouldCorrectlyUseCursorCountFunctionWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -5087,7 +4559,7 @@ exports.shouldCorrectlyUseCursorCountFunction = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -5097,15 +4569,13 @@ exports.shouldCorrectlyUseCursorCountFunction = {
     // BEGIN
 
       // Creat collection
-      var collection = db.collection('cursor_count_collection');
+      var collection = db.collection('cursor_count_collection_with_promise');
 
       // Insert some docs
-      collection.insertMany([{a:1}, {a:2}], configuration.writeConcernMax(), function(err, docs) {
-        test.equal(null, err);
+      collection.insertMany([{a:1}, {a:2}], configuration.writeConcernMax()).then(function(docs) {
 
         // Do a find and get the cursor count
-        collection.find().count(function(err, count) {
-          test.equal(null, err);
+        collection.find().count().then(function(count) {
           test.equal(2, count);
 
           db.close();
@@ -5124,7 +4594,7 @@ exports.shouldCorrectlyUseCursorCountFunction = {
  * @example-method sort
  * @ignore
  */
-exports.shouldCorrectlyPeformSimpleSorts = {
+exports.shouldCorrectlyPeformSimpleSortsWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -5133,7 +4603,7 @@ exports.shouldCorrectlyPeformSimpleSorts = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -5143,20 +4613,17 @@ exports.shouldCorrectlyPeformSimpleSorts = {
     // BEGIN
 
       // Create a collection
-      var collection = db.collection('simple_sort_collection');
+      var collection = db.collection('simple_sort_collection_with_promise');
 
       // Insert some documents we can sort on
-      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, docs) {
-        test.equal(null, err);
+      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax()).then(function(docs) {
 
         // Do normal ascending sort
-        collection.find().sort([['a', 1]]).nextObject(function(err, item) {
-          test.equal(null, err);
+        collection.find().sort([['a', 1]]).nextObject().then(function(item) {
           test.equal(1, item.a);
 
           // Do normal descending sort
-          collection.find().sort([['a', -1]]).nextObject(function(err, item) {
-            test.equal(null, err);
+          collection.find().sort([['a', -1]]).nextObject().then(function(item) {
             test.equal(3, item.a);
 
             db.close();
@@ -5176,7 +4643,7 @@ exports.shouldCorrectlyPeformSimpleSorts = {
  * @example-method limit
  * @ignore
  */
-exports.shouldCorrectlyPeformLimitOnCursor = {
+exports.shouldCorrectlyPeformLimitOnCursorWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -5185,7 +4652,7 @@ exports.shouldCorrectlyPeformLimitOnCursor = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -5195,15 +4662,13 @@ exports.shouldCorrectlyPeformLimitOnCursor = {
     // BEGIN
 
       // Create a collection
-      var collection = db.collection('simple_limit_collection');
+      var collection = db.collection('simple_limit_collection_with_promise');
 
       // Insert some documents we can sort on
-      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, docs) {
-        test.equal(null, err);
+      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax()).then(function(docs) {
 
         // Limit to only one document returned
-        collection.find().limit(1).toArray(function(err, items) {
-          test.equal(null, err);
+        collection.find().limit(1).toArray().then(function(items) {
           test.equal(1, items.length);
 
           db.close();
@@ -5222,7 +4687,7 @@ exports.shouldCorrectlyPeformLimitOnCursor = {
  * @example-method skip
  * @ignore
  */
-exports.shouldCorrectlyPeformSkipOnCursor = {
+exports.shouldCorrectlyPeformSkipOnCursorWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -5231,7 +4696,7 @@ exports.shouldCorrectlyPeformSkipOnCursor = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -5241,15 +4706,13 @@ exports.shouldCorrectlyPeformSkipOnCursor = {
     // BEGIN
 
       // Create a collection
-      var collection = db.collection('simple_skip_collection');
+      var collection = db.collection('simple_skip_collection_with_promise');
 
       // Insert some documents we can sort on
-      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, docs) {
-        test.equal(null, err);
+      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax()).then(function(docs) {
 
         // Skip one document
-        collection.find().skip(1).nextObject(function(err, item) {
-          test.equal(null, err);
+        collection.find().skip(1).nextObject().then(function(item) {
           test.equal(2, item.a);
 
           db.close();
@@ -5269,7 +4732,7 @@ exports.shouldCorrectlyPeformSkipOnCursor = {
  * @example-method batchSize
  * @ignore
  */
-exports.shouldCorrectlyPeformBatchSizeOnCursor = {
+exports.shouldCorrectlyPeformBatchSizeOnCursorWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -5278,7 +4741,7 @@ exports.shouldCorrectlyPeformBatchSizeOnCursor = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -5288,15 +4751,13 @@ exports.shouldCorrectlyPeformBatchSizeOnCursor = {
     // BEGIN
 
       // Create a collection
-      var collection = db.collection('simple_batch_size_collection');
+      var collection = db.collection('simple_batch_size_collection_with_promise');
 
       // Insert some documents we can sort on
-      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, docs) {
-        test.equal(null, err);
+      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax()).then(function(docs) {
 
         // Do normal ascending sort
-        collection.find().batchSize(1).nextObject(function(err, item) {
-          test.equal(null, err);
+        collection.find().batchSize(1).nextObject().then(function(item) {
           test.equal(1, item.a);
 
           db.close();
@@ -5315,7 +4776,7 @@ exports.shouldCorrectlyPeformBatchSizeOnCursor = {
  * @example-method nextObject
  * @ignore
  */
-exports.shouldCorrectlyPeformNextObjectOnCursor = {
+exports.shouldCorrectlyPeformNextObjectOnCursorWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -5324,7 +4785,7 @@ exports.shouldCorrectlyPeformNextObjectOnCursor = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -5334,15 +4795,13 @@ exports.shouldCorrectlyPeformNextObjectOnCursor = {
     // BEGIN
 
       // Create a collection
-      var collection = db.collection('simple_next_object_collection');
+      var collection = db.collection('simple_next_object_collection_with_promise');
 
       // Insert some documents we can sort on
-      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, docs) {
-        test.equal(null, err);
+      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax()).then(function(docs) {
 
         // Do normal ascending sort
-        collection.find().nextObject(function(err, item) {
-          test.equal(null, err);
+        collection.find().nextObject().then(function(item) {
           test.equal(1, item.a);
 
           db.close();
@@ -5361,7 +4820,7 @@ exports.shouldCorrectlyPeformNextObjectOnCursor = {
  * @example-method explain
  * @ignore
  */
-exports.shouldCorrectlyPeformSimpleExplainCursor = {
+exports.shouldCorrectlyPeformSimpleExplainCursorWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -5370,7 +4829,7 @@ exports.shouldCorrectlyPeformSimpleExplainCursor = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -5380,16 +4839,13 @@ exports.shouldCorrectlyPeformSimpleExplainCursor = {
     // BEGIN
 
       // Create a collection
-      var collection = db.collection('simple_explain_collection');
+      var collection = db.collection('simple_explain_collection_with_promise');
 
       // Insert some documents we can sort on
-      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, docs) {
-        test.equal(null, err);
+      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax()).then(function(docs) {
 
         // Do normal ascending sort
-        collection.find().explain(function(err, explaination) {
-          test.equal(null, err);
-
+        collection.find().explain().then(function(explaination) {
           db.close();
           test.done();
         });
@@ -5406,7 +4862,7 @@ exports.shouldCorrectlyPeformSimpleExplainCursor = {
  * @example-method stream
  * @ignore
  */
-exports.shouldStreamDocumentsUsingTheStreamFunction = {
+exports.shouldStreamDocumentsUsingTheStreamFunctionWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -5415,7 +4871,7 @@ exports.shouldStreamDocumentsUsingTheStreamFunction = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -5431,10 +4887,10 @@ exports.shouldStreamDocumentsUsingTheStreamFunction = {
       }
 
       // Create a collection
-      var collection = db.collection('test_stream_function');
+      var collection = db.collection('test_stream_function_with_promise');
 
       // Insert documents into collection
-      collection.insertMany(docs, configuration.writeConcernMax(), function(err, ids) {
+      collection.insertMany(docs, configuration.writeConcernMax()).then(function(ids) {
         // Peform a find to get a cursor
         var stream = collection.find().stream();
 
@@ -5460,7 +4916,7 @@ exports.shouldStreamDocumentsUsingTheStreamFunction = {
  * @example-method isClosed
  * @ignore
  */
-exports.shouldStreamDocumentsUsingTheIsCloseFunction = {
+exports.shouldStreamDocumentsUsingTheIsCloseFunctionWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -5469,7 +4925,7 @@ exports.shouldStreamDocumentsUsingTheIsCloseFunction = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -5485,20 +4941,18 @@ exports.shouldStreamDocumentsUsingTheIsCloseFunction = {
       }
 
       // Create a collection
-      var collection = db.collection('test_is_close_function_on_cursor');
+      var collection = db.collection('test_is_close_function_on_cursor_with_promise');
 
       // Insert documents into collection
-      collection.insertMany(docs, configuration.writeConcernMax(), function(err, ids) {
+      collection.insertMany(docs, configuration.writeConcernMax()).then(function(ids) {
         // Peform a find to get a cursor
         var cursor = collection.find();
 
         // Fetch the first object
-        cursor.nextObject(function(err, object) {
-          test.equal(null, err);
+        cursor.nextObject().then(function(object) {
 
           // Close the cursor, this is the same as reseting the query
-          cursor.close(function(err, result) {
-            test.equal(null, err);
+          cursor.close().then(function(result) {
             test.equal(true, cursor.isClosed());
 
             db.close();
@@ -5518,7 +4972,7 @@ exports.shouldStreamDocumentsUsingTheIsCloseFunction = {
  * @example-method close
  * @ignore
  */
-exports.shouldStreamDocumentsUsingTheCloseFunction = {
+exports.shouldStreamDocumentsUsingTheCloseFunctionWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -5527,7 +4981,7 @@ exports.shouldStreamDocumentsUsingTheCloseFunction = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -5543,21 +4997,18 @@ exports.shouldStreamDocumentsUsingTheCloseFunction = {
       }
 
       // Create a collection
-      var collection = db.collection('test_close_function_on_cursor');
+      var collection = db.collection('test_close_function_on_cursor_with_promise');
 
       // Insert documents into collection
-      collection.insertMany(docs, configuration.writeConcernMax(), function(err, ids) {
+      collection.insertMany(docs, configuration.writeConcernMax()).then(function(ids) {
         // Peform a find to get a cursor
         var cursor = collection.find();
 
         // Fetch the first object
-        cursor.nextObject(function(err, object) {
-          test.equal(null, err);
+        cursor.nextObject().then(function(object) {
 
           // Close the cursor, this is the same as reseting the query
-          cursor.close(function(err, result) {
-            test.equal(null, err);
-
+          cursor.close().then(function(result) {
             db.close();
             test.done();
           });
@@ -5575,14 +5026,14 @@ exports.shouldStreamDocumentsUsingTheCloseFunction = {
  * @example-method stream
  * @ignore
  */
-exports.shouldStreamDocumentsUsingTheCursorStreamPauseFunction = {
+exports.shouldStreamDocumentsUsingTheCursorStreamPauseFunctionWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -5599,10 +5050,10 @@ exports.shouldStreamDocumentsUsingTheCursorStreamPauseFunction = {
       }
 
       // Create a collection
-      var collection = db.collection('test_cursorstream_pause');
+      var collection = db.collection('test_cursorstream_pause_with_promise');
 
       // Insert documents into collection
-      collection.insertMany(docs, {w:1}, function(err, ids) {
+      collection.insertMany(docs, {w:1}).then(function(ids) {
         // Peform a find to get a cursor
         var stream = collection.find().stream();
 
@@ -5638,14 +5089,14 @@ exports.shouldStreamDocumentsUsingTheCursorStreamPauseFunction = {
  * @example-method destroy
  * @ignore
  */
-exports.shouldStreamDocumentsUsingTheCursorStreamDestroyFunction = {
+exports.shouldStreamDocumentsUsingTheCursorStreamDestroyFunctionWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:0}, {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -5661,10 +5112,10 @@ exports.shouldStreamDocumentsUsingTheCursorStreamDestroyFunction = {
       }
 
       // Create a collection
-      var collection = db.collection('test_cursorstream_destroy');
+      var collection = db.collection('test_cursorstream_destroy_with_promise');
 
       // Insert documents into collection
-      collection.insertMany(docs, {w:1}, function(err, ids) {
+      collection.insertMany(docs, {w:1}).then(function(ids) {
         // Peform a find to get a cursor
         var stream = collection.find().stream();
 
@@ -5698,7 +5149,7 @@ exports.shouldStreamDocumentsUsingTheCursorStreamDestroyFunction = {
  * @example-method MongoClient.connect
  * @ignore
  */
-exports['Should correctly connect to a replicaset'] = {
+exports['Should correctly connect to a replicaset With Promises'] = {
   metadata: { requires: { topology: 'replicaset' } },
   
   // The actual test we wish to run
@@ -5722,11 +5173,9 @@ exports['Should correctly connect to a replicaset'] = {
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
     // BEGIN
-      test.equal(null, err);
       test.ok(db != null);
 
-      db.collection("replicaset_mongo_client_collection").updateOne({a:1}, {b:1}, {upsert:true}, function(err, result) {
-        test.equal(null, err);
+      db.collection("replicaset_mongo_client_collection_with_promise").updateOne({a:1}, {b:1}, {upsert:true}).then(function(result) {
         test.equal(1, result.result.n);
 
         db.close();
@@ -5744,7 +5193,7 @@ exports['Should correctly connect to a replicaset'] = {
  * @example-method MongoClient.connect
  * @ignore
  */
-exports['Should connect to mongos proxies using connectiong string'] = {
+exports['Should connect to mongos proxies using connectiong string With Promises'] = {
   metadata: { requires: { topology: 'mongos' } },
   
   // The actual test we wish to run
@@ -5763,11 +5212,9 @@ exports['Should connect to mongos proxies using connectiong string'] = {
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
     // BEGIN
-      test.equal(null, err);
       test.ok(db != null);
 
-      db.collection("replicaset_mongo_client_collection").updateOne({a:1}, {b:1}, {upsert:true}, function(err, result) {
-        test.equal(null, err);
+      db.collection("replicaset_mongo_client_collection_with_promise").updateOne({a:1}, {b:1}, {upsert:true}).then(function(result) {
         test.equal(1, result);
 
         db.close();
@@ -5785,7 +5232,7 @@ exports['Should connect to mongos proxies using connectiong string'] = {
  * @example-method MongoClient.connect
  * @ignore
  */
-exports['Should correctly connect using MongoClient to a single server using connect'] = {
+exports['Should correctly connect using MongoClient to a single server using connect With Promises'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: 'single'} },
@@ -5804,210 +5251,13 @@ exports['Should correctly connect using MongoClient to a single server using con
     // REMOVE-LINE restartAndDone
     // REMOVE-LINE test.done();
     // BEGIN
-      test.equal(null, err);
-
-      db.collection('mongoclient_test').updateOne({a:1}, {b:1}, {upsert:true}, function(err, result) {
-        test.equal(null, err);
+      db.collection('mongoclient_test_with_promise').updateOne({a:1}, {b:1}, {upsert:true}).then(function(result) {
         test.equal(1, result.result.n);
 
         db.close();
         test.done();
       });
     });
-    // END
-  }
-}
-
-/**************************************************************************
- *
- * OBJECTID TESTS
- *
- *************************************************************************/
-
-/**
- * Generate 12 byte binary string representation using a second based timestamp or
- * default value
- *
- * @example-class ObjectID
- * @example-method getTimestamp
- * @ignore
- */
-exports.shouldCorrectlyGenerate12ByteStringFromTimestamp = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var ObjectID = configuration.require.ObjectID;
-    // LINE var ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-    // Get a timestamp in seconds
-    var timestamp = Math.floor(new Date().getTime()/1000);
-    // Create a date with the timestamp
-    var timestampDate = new Date(timestamp*1000);
-    
-    // Create a new ObjectID with a specific timestamp
-    var objectId = new ObjectID(timestamp);
-    
-    // Get the timestamp and validate correctness
-    test.equal(timestampDate.toString(), objectId.getTimestamp().toString());
-    test.done();
-    // END
-  }
-}
-
-/**
- * Generate a 24 character hex string representation of the ObjectID
- *
- * @example-class ObjectID
- * @example-method toHexString
- * @ignore
- */
-exports.shouldCorrectlyRetrieve24CharacterHexStringFromToHexString = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var ObjectID = configuration.require.ObjectID;
-    // LINE var ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-    // Create a new ObjectID
-    var objectId = new ObjectID();  
-    // Verify that the hex string is 24 characters long
-    test.equal(24, objectId.toHexString().length);
-    test.done();
-    // END
-  }
-}
-
-/**
- * Get and set the generation time for an ObjectID
- *
- * @example-class ObjectID
- * @example-method generationTime
- * @ignore
- */
-exports.shouldCorrectlyGetAndSetObjectIDUsingGenerationTimeProperty = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var ObjectID = configuration.require.ObjectID;
-    // LINE var ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-    // Create a new ObjectID
-    var objectId = new ObjectID();  
-    // Get the generation time
-    var generationTime = objectId.generationTime;
-    // Add 1000 miliseconds to the generation time
-    objectId.generationTime = generationTime + 1000;
-
-    // Create a timestamp
-    var timestampDate = new Date();
-    timestampDate.setTime((generationTime + 1000) * 1000);
-    
-    // Get the timestamp and validate correctness
-    test.equal(timestampDate.toString(), objectId.getTimestamp().toString());
-    test.done();
-    // END
-  }
-}
-
-/**
- * Convert a ObjectID into a hex string representation and then back to an ObjectID
- *
- * @example-class ObjectID
- * @example-method createFromHexString
- * @ignore
- */
-exports.shouldCorrectlyTransformObjectIDToHexAndObjectId = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var ObjectID = configuration.require.ObjectID;
-    // LINE var ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-    // Create a new ObjectID
-    var objectId = new ObjectID();
-    // Convert the object id to a hex string
-    var originalHex = objectId.toHexString();
-    // Create a new ObjectID using the createFromHexString function
-    var newObjectId = new ObjectID.createFromHexString(originalHex)
-    // Convert the new ObjectID back into a hex string using the toHexString function
-    var newHex = newObjectId.toHexString();
-    // Compare the two hex strings
-    test.equal(originalHex, newHex);
-    test.done();
-    // END
-  }
-}
-
-/**
- * Compare two different ObjectID's using the equals method
- *
- * @example-class ObjectID
- * @example-method equals
- * @ignore
- */
-exports.shouldCorrectlyDifferentiateBetweenObjectIdInstances = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var ObjectID = configuration.require.ObjectID;
-    // LINE var ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-    // Create a new ObjectID
-    var objectId = new ObjectID();
-    // Create a new ObjectID Based on the first ObjectID
-    var objectId2 = new ObjectID(objectId.id);
-    // Create another ObjectID
-    var objectId3 = new ObjectID();
-    // objectId and objectId2 should be the same
-    test.ok(objectId.equals(objectId2));
-    // objectId and objectId2 should be different
-    test.ok(!objectId.equals(objectId3));
-    test.done();
-    // END
-  }
-}
-
-/**
- * Show the usage of the Objectid createFromTime function
- *
- * @example-class ObjectID
- * @example-method ObjectID.createFromTime
- * @ignore
- */
-exports.shouldCorrectlyUseCreateFromTime = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var ObjectID = configuration.require.ObjectID;
-    // LINE var ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-    var objectId = ObjectID.createFromTime(1);
-    test.equal("000000010000000000000000", objectId.toHexString());
-    test.done();
     // END
   }
 }
@@ -6025,7 +5275,7 @@ exports.shouldCorrectlyUseCreateFromTime = {
  * @example-method GridStore.exist
  * @ignore
  */
-exports.shouldCorrectlyExecuteGridStoreExistsByObjectId = {
+exports.shouldCorrectlyExecuteGridStoreExistsByObjectIdWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -6034,7 +5284,7 @@ exports.shouldCorrectlyExecuteGridStoreExistsByObjectId = {
       , ObjectID = configuration.require.ObjectID;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   GridStore = require('mongodb').GridStore,
     // LINE   ObjectID = require('mongodb').ObjectID,
@@ -6046,32 +5296,26 @@ exports.shouldCorrectlyExecuteGridStoreExistsByObjectId = {
 
       // Open a file for writing
       var gridStore = new GridStore(db, null, "w");
-      gridStore.open(function(err, gridStore) {
-        test.equal(null, err);
+      gridStore.open().then(function(gridStore) {
 
         // Writing some content to the file
-        gridStore.write("hello world!", function(err, gridStore) {
-          test.equal(null, err);
+        gridStore.write("hello world!").then(function(gridStore) {
 
           // Flush the file to GridFS
-          gridStore.close(function(err, result) {
-            test.equal(null, err);
+          gridStore.close().then(function(result) {
 
             // Check if the file exists using the id returned from the close function
-            GridStore.exist(db, result._id, function(err, result) {
-              test.equal(null, err);
+            GridStore.exist(db, result._id).then(function(result) {
               test.equal(true, result);
             })
 
             // Show that the file does not exist for a random ObjectID
-            GridStore.exist(db, new ObjectID(), function(err, result) {
-              test.equal(null, err);
+            GridStore.exist(db, new ObjectID()).then(function(result) {
               test.equal(false, result);
             });
 
             // Show that the file does not exist for a different file root
-            GridStore.exist(db, result._id, 'another_root', function(err, result) {
-              test.equal(null, err);
+            GridStore.exist(db, result._id, 'another_root').then(function(result) {
               test.equal(false, result);
 
               db.close();
@@ -6092,7 +5336,7 @@ exports.shouldCorrectlyExecuteGridStoreExistsByObjectId = {
  * @example-method GridStore.list
  * @ignore
  */
-exports.shouldCorrectlyExecuteGridStoreList = {
+exports.shouldCorrectlyExecuteGridStoreListWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -6101,7 +5345,7 @@ exports.shouldCorrectlyExecuteGridStoreList = {
       , ObjectID = configuration.require.ObjectID;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   GridStore = require('mongodb').GridStore,
     // LINE   ObjectID = require('mongodb').ObjectID,
@@ -6115,15 +5359,15 @@ exports.shouldCorrectlyExecuteGridStoreList = {
 
       // Open a file for writing
       var gridStore = new GridStore(db, fileId, "foobar2", "w");
-      gridStore.open(function(err, gridStore) {
+      gridStore.open().then(function(gridStore) {
 
         // Write some content to the file
-        gridStore.write("hello world!", function(err, gridStore) {
+        gridStore.write("hello world!").then(function(gridStore) {
           // Flush to GridFS
-          gridStore.close(function(err, result) {
+          gridStore.close().then(function(result) {
 
             // List the existing files
-            GridStore.list(db, function(err, items) {
+            GridStore.list(db).then(function(items) {
               var found = false;
               items.forEach(function(filename) {
                 if(filename == 'foobar2') found = true;
@@ -6134,7 +5378,7 @@ exports.shouldCorrectlyExecuteGridStoreList = {
             });
 
             // List the existing files but return only the file ids
-            GridStore.list(db, {id:true}, function(err, items) {
+            GridStore.list(db, {id:true}).then(function(items) {
               var found = false;
               items.forEach(function(id) {
                 test.ok(typeof id == 'object');
@@ -6144,7 +5388,7 @@ exports.shouldCorrectlyExecuteGridStoreList = {
             });
 
             // List the existing files in a specific root collection
-            GridStore.list(db, 'fs', function(err, items) {
+            GridStore.list(db, 'fs').then(function(items) {
               var found = false;
               items.forEach(function(filename) {
                 if(filename == 'foobar2') found = true;
@@ -6155,7 +5399,7 @@ exports.shouldCorrectlyExecuteGridStoreList = {
             });
 
             // List the existing files in a different root collection where the file is not located
-            GridStore.list(db, 'my_fs', function(err, items) {
+            GridStore.list(db, 'my_fs').then(function(items) {
               var found = false;
               items.forEach(function(filename) {
                 if(filename == 'foobar2') found = true;
@@ -6168,14 +5412,14 @@ exports.shouldCorrectlyExecuteGridStoreList = {
               var fileId2 = new ObjectID();
               // Write another file to GridFS
               var gridStore2 = new GridStore(db, fileId2, "foobar3", "w");
-              gridStore2.open(function(err, gridStore) {
+              gridStore2.open().then(function(gridStore) {
                 // Write the content
-                gridStore2.write('my file', function(err, gridStore) {
+                gridStore2.write('my file').then(function(gridStore) {
                   // Flush to GridFS
-                  gridStore.close(function(err, result) {
+                  gridStore.close().then(function(result) {
 
                     // List all the available files and verify that our files are there
-                    GridStore.list(db, function(err, items) {
+                    GridStore.list(db).then(function(items) {
                       var found = false;
                       var found2 = false;
 
@@ -6210,7 +5454,7 @@ exports.shouldCorrectlyExecuteGridStoreList = {
  * @example-method puts
  * @ignore
  */
-exports.shouldCorrectlyReadlinesAndPutLines = {
+exports.shouldCorrectlyReadlinesAndPutLinesWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -6218,7 +5462,7 @@ exports.shouldCorrectlyReadlinesAndPutLines = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   GridStore = require('mongodb').GridStore,
     // LINE   ObjectID = require('mongodb').ObjectID,
@@ -6229,16 +5473,16 @@ exports.shouldCorrectlyReadlinesAndPutLines = {
     // BEGIN
       // Open a file for writing
       var gridStore = new GridStore(db, "test_gs_puts_and_readlines", "w");
-      gridStore.open(function(err, gridStore) {
+      gridStore.open().then(function(gridStore) {
 
         // Write a line to the file using the puts method
-        gridStore.puts("line one", function(err, gridStore) {
+        gridStore.puts("line one").then(function(gridStore) {
 
           // Flush the file to GridFS
-          gridStore.close(function(err, result) {
+          gridStore.close().then(function(result) {
 
             // Read in the entire contents
-            GridStore.read(db, 'test_gs_puts_and_readlines', function(err, data) {
+            GridStore.read(db, 'test_gs_puts_and_readlines').then(function(data) {
               test.equal("line one\n", data.toString());
 
               db.close();
@@ -6259,7 +5503,7 @@ exports.shouldCorrectlyReadlinesAndPutLines = {
  * @example-method GridStore.unlink
  * @ignore
  */
-exports.shouldCorrectlyUnlink = {
+exports.shouldCorrectlyUnlinkWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -6267,7 +5511,7 @@ exports.shouldCorrectlyUnlink = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   GridStore = require('mongodb').GridStore,
     // LINE   ObjectID = require('mongodb').ObjectID,
@@ -6279,42 +5523,41 @@ exports.shouldCorrectlyUnlink = {
 
       // Open a new file for writing
       var gridStore = new GridStore(db, "test_gs_unlink", "w");
-      db.dropDatabase(function(err, r) {
-        test.equal(null, err);
+      db.dropDatabase().then(function(r) {
 
-        gridStore.open(function(err, gridStore) {
+        gridStore.open().then(function(gridStore) {
 
           // Write some content
-          gridStore.write("hello, world!", function(err, gridStore) {
+          gridStore.write("hello, world!").then(function(gridStore) {
 
             // Flush file to GridFS
-            gridStore.close(function(err, result) {
+            gridStore.close().then(function(result) {
 
               // Verify the existance of the fs.files document
               db.collection('fs.files', function(err, collection) {
-                collection.count(function(err, count) {
+                collection.count().then(function(count) {
                   test.equal(1, count);
                 })
               });
 
               // Verify the existance of the fs.chunks chunk document
               db.collection('fs.chunks', function(err, collection) {
-                collection.count(function(err, count) {
+                collection.count().then(function(count) {
                   test.equal(1, count);
 
                   // Unlink the file (removing it)
-                  GridStore.unlink(db, 'test_gs_unlink', function(err, gridStore) {
+                  GridStore.unlink(db, 'test_gs_unlink').then(function(gridStore) {
 
                     // Verify that fs.files document is gone
                     db.collection('fs.files', function(err, collection) {
-                      collection.count(function(err, count) {
+                      collection.count().then(function(count) {
                         test.equal(0, count);
                       })
                     });
 
                     // Verify that fs.chunks chunk documents are gone
                     db.collection('fs.chunks', function(err, collection) {
-                      collection.count(function(err, count) {
+                      collection.count().then(function(count) {
                         test.equal(0, count);
 
                         db.close();
@@ -6340,7 +5583,7 @@ exports.shouldCorrectlyUnlink = {
  * @example-method read
  * @ignore
  */
-exports.shouldCorrectlyWriteAndReadJpgImage = {
+exports.shouldCorrectlyWriteAndReadJpgImageWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -6348,7 +5591,7 @@ exports.shouldCorrectlyWriteAndReadJpgImage = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   GridStore = require('mongodb').GridStore,
     // LINE   ObjectID = require('mongodb').ObjectID,
@@ -6362,20 +5605,20 @@ exports.shouldCorrectlyWriteAndReadJpgImage = {
       // Create a new file
       var gs = new GridStore(db, "test", "w");
       // Open the file
-      gs.open(function(err, gs) {
+      gs.open().then(function(gs) {
         // Write the file to GridFS
-        gs.write(data, function(err, gs) {
+        gs.write(data).then(function(gs) {
           // Flush to the GridFS
-          gs.close(function(err, gs) {
+          gs.close().then(function(gs) {
 
             // Define the file we wish to read
             var gs2 = new GridStore(db, "test", "r");
             // Open the file
-            gs2.open(function(err, gs) {
+            gs2.open().then(function(gs) {
               // Set the pointer of the read head to the start of the gridstored file
-              gs2.seek(0, function() {
+              gs2.seek(0).then(function() {
                 // Read the entire file
-                gs2.read(function(err, data2) {
+                gs2.read().then(function(data2) {
                   // Compare the file content against the orgiinal
                   test.equal(data.toString('base64'), data2.toString('base64'));
 
@@ -6399,7 +5642,7 @@ exports.shouldCorrectlyWriteAndReadJpgImage = {
  * @example-method open
  * @ignore
  */
-exports.shouldCorrectlySaveSimpleFileToGridStoreUsingFilename = {
+exports.shouldCorrectlySaveSimpleFileToGridStoreUsingFilenameWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -6407,7 +5650,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingFilename = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   GridStore = require('mongodb').GridStore,
     // LINE   ObjectID = require('mongodb').ObjectID,
@@ -6420,19 +5663,16 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingFilename = {
       var gridStore = new GridStore(db, 'ourexamplefiletowrite.txt', 'w');
 
       // Open the file
-      gridStore.open(function(err, gridStore) {
+      gridStore.open().then(function(gridStore) {
 
         // Write some data to the file
-        gridStore.write('bar', function(err, gridStore) {
-          test.equal(null, err);
+        gridStore.write('bar').then(function(gridStore) {
 
           // Close (Flushes the data to MongoDB)
-          gridStore.close(function(err, result) {
-            test.equal(null, err);
+          gridStore.close().then(function(result) {
 
             // Verify that the file exists
-            GridStore.exist(db, 'ourexamplefiletowrite.txt', function(err, result) {
-              test.equal(null, err);
+            GridStore.exist(db, 'ourexamplefiletowrite.txt').then(function(result) {
               test.equal(true, result);
 
               db.close();
@@ -6453,7 +5693,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingFilename = {
  * @example-method open
  * @ignore
  */
-exports.shouldCorrectlySaveSimpleFileToGridStoreUsingObjectID = {
+exports.shouldCorrectlySaveSimpleFileToGridStoreUsingObjectIDWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -6461,7 +5701,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingObjectID = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   GridStore = require('mongodb').GridStore,
     // LINE   ObjectID = require('mongodb').ObjectID,
@@ -6477,19 +5717,16 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingObjectID = {
       var gridStore = new GridStore(db, fileId, 'w');
 
       // Open the file
-      gridStore.open(function(err, gridStore) {
+      gridStore.open().then(function(gridStore) {
 
         // Write some data to the file
-        gridStore.write('bar', function(err, gridStore) {
-          test.equal(null, err);
+        gridStore.write('bar').then(function(gridStore) {
 
           // Close (Flushes the data to MongoDB)
-          gridStore.close(function(err, result) {
-            test.equal(null, err);
+          gridStore.close().then(function(result) {
 
             // Verify that the file exists
-            GridStore.exist(db, fileId, function(err, result) {
-              test.equal(null, err);
+            GridStore.exist(db, fileId).then(function(result) {
               test.equal(true, result);
 
               db.close();
@@ -6510,7 +5747,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingObjectID = {
  * @example-method writeFile
  * @ignore
  */
-exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFile = {
+exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -6518,7 +5755,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFile = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   GridStore = require('mongodb').GridStore,
     // LINE   ObjectID = require('mongodb').ObjectID,
@@ -6539,13 +5776,13 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFile = {
       var data = fs.readFileSync('./test/functional/data/test_gs_weird_bug.png');
 
       // Open the new file
-      gridStore.open(function(err, gridStore) {
+      gridStore.open().then(function(gridStore) {
 
         // Write the file to gridFS
-        gridStore.writeFile('./test/functional/data/test_gs_weird_bug.png', function(err, doc) {
+        gridStore.writeFile('./test/functional/data/test_gs_weird_bug.png').then(function(doc) {
 
           // Read back all the written content and verify the correctness
-          GridStore.read(db, fileId, function(err, fileData) {
+          GridStore.read(db, fileId).then(function(fileData) {
             test.equal(data.toString('base64'), fileData.toString('base64'))
             test.equal(fileSize, fileData.length);
 
@@ -6566,7 +5803,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFile = {
  * @example-method writeFile
  * @ignore
  */
-exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandle = {
+exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandleWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -6574,7 +5811,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandle = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   GridStore = require('mongodb').GridStore,
     // LINE   ObjectID = require('mongodb').ObjectID,
@@ -6598,13 +5835,13 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandle = {
       var fd = fs.openSync('./test/functional/data/test_gs_weird_bug.png', 'r', parseInt('0666',8));
 
       // Open the new file
-      gridStore.open(function(err, gridStore) {
+      gridStore.open().then(function(gridStore) {
 
         // Write the file to gridFS using the file handle
-        gridStore.writeFile(fd, function(err, doc) {
+        gridStore.writeFile(fd).then(function(doc) {
 
           // Read back all the written content and verify the correctness
-          GridStore.read(db, fileId, function(err, fileData) {
+          GridStore.read(db, fileId).then(function(fileData) {
             test.equal(data.toString('base64'), fileData.toString('base64'));
             test.equal(fileSize, fileData.length);
 
@@ -6625,7 +5862,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandle = {
  * @example-method write
  * @ignore
  */
-exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffers = {
+exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffersWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -6633,7 +5870,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffers 
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   GridStore = require('mongodb').GridStore,
     // LINE   ObjectID = require('mongodb').ObjectID,
@@ -6649,19 +5886,19 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffers 
       var gridStore = new GridStore(db, fileId, 'w');
 
       // Open the new file
-      gridStore.open(function(err, gridStore) {
+      gridStore.open().then(function(gridStore) {
 
         // Write a text string
-        gridStore.write('Hello world', function(err, gridStore) {
+        gridStore.write('Hello world').then(function(gridStore) {
 
           // Write a buffer
-          gridStore.write(new Buffer('Buffer Hello world'), function(err, gridStore) {
+          gridStore.write(new Buffer('Buffer Hello world')).then(function(gridStore) {
 
             // Close the
-            gridStore.close(function(err, result) {
+            gridStore.close().then(function(result) {
 
               // Read back all the written content and verify the correctness
-              GridStore.read(db, fileId, function(err, fileData) {
+              GridStore.read(db, fileId).then(function(fileData) {
                 test.equal('Hello worldBuffer Hello world', fileData.toString());
 
                 db.close();
@@ -6683,7 +5920,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffers 
  * @example-method close
  * @ignore
  */
-exports.shouldCorrectlySaveSimpleFileToGridStoreUsingClose = {
+exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -6691,7 +5928,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingClose = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   GridStore = require('mongodb').GridStore,
     // LINE   ObjectID = require('mongodb').ObjectID,
@@ -6707,14 +5944,13 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingClose = {
       var gridStore = new GridStore(db, fileId, 'w');
 
       // Open the new file
-      gridStore.open(function(err, gridStore) {
+      gridStore.open().then(function(gridStore) {
 
         // Write a text string
-        gridStore.write('Hello world', function(err, gridStore) {
+        gridStore.write('Hello world').then(function(gridStore) {
 
           // Close the
-          gridStore.close(function(err, result) {
-            test.equal(err, null);
+          gridStore.close().then(function(result) {
 
             db.close();
             test.done();
@@ -6733,7 +5969,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingClose = {
  * @example-method chunkCollection
  * @ignore
  */
-exports.shouldCorrectlyAccessChunkCollection = {
+exports.shouldCorrectlyAccessChunkCollectionWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -6741,7 +5977,7 @@ exports.shouldCorrectlyAccessChunkCollection = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   GridStore = require('mongodb').GridStore,
     // LINE   ObjectID = require('mongodb').ObjectID,
@@ -6757,7 +5993,7 @@ exports.shouldCorrectlyAccessChunkCollection = {
       var gridStore = new GridStore(db, fileId, 'w');
 
       // Open the new file
-      gridStore.open(function(err, gridStore) {
+      gridStore.open().then(function(gridStore) {
 
         // Access the Chunk collection
         gridStore.chunkCollection(function(err, collection) {
@@ -6779,7 +6015,7 @@ exports.shouldCorrectlyAccessChunkCollection = {
  * @example-method unlink
  * @ignore
  */
-exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkIt = {
+exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkItWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -6787,7 +6023,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkIt = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   GridStore = require('mongodb').GridStore,
     // LINE   ObjectID = require('mongodb').ObjectID,
@@ -6803,25 +6039,22 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkIt = {
       var gridStore = new GridStore(db, fileId, 'w');
 
       // Open the new file
-      gridStore.open(function(err, gridStore) {
+      gridStore.open().then(function(gridStore) {
 
         // Write a text string
-        gridStore.write('Hello world', function(err, gridStore) {
+        gridStore.write('Hello world').then(function(gridStore) {
 
           // Close the
-          gridStore.close(function(err, result) {
-            test.equal(err, null);
+          gridStore.close().then(function(result) {
 
             // Open the file again and unlin it
-            new GridStore(db, fileId, 'r').open(function(err, gridStore) {
+            new GridStore(db, fileId, 'r').open().then(function(gridStore) {
 
               // Unlink the file
-              gridStore.unlink(function(err, result) {
-                test.equal(null, err);
+              gridStore.unlink().then(function(result) {
 
                 // Verify that the file no longer exists
-                GridStore.exist(db, fileId, function(err, result) {
-                  test.equal(null, err);
+                GridStore.exist(db, fileId).then(function(result) {
                   test.equal(false, result);
 
                   db.close();
@@ -6844,7 +6077,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkIt = {
  * @example-method collection
  * @ignore
  */
-exports.shouldCorrectlyAccessFilesCollection = {
+exports.shouldCorrectlyAccessFilesCollectionWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -6852,7 +6085,7 @@ exports.shouldCorrectlyAccessFilesCollection = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   GridStore = require('mongodb').GridStore,
     // LINE   ObjectID = require('mongodb').ObjectID,
@@ -6868,7 +6101,7 @@ exports.shouldCorrectlyAccessFilesCollection = {
       var gridStore = new GridStore(db, fileId, 'w');
 
       // Open the new file
-      gridStore.open(function(err, gridStore) {
+      gridStore.open().then(function(gridStore) {
 
         // Access the Chunk collection
         gridStore.collection(function(err, collection) {
@@ -6890,7 +6123,7 @@ exports.shouldCorrectlyAccessFilesCollection = {
  * @example-method GridStore.readlines
  * @ignore
  */
-exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlines = {
+exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlinesWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -6898,7 +6131,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlines = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   GridStore = require('mongodb').GridStore,
     // LINE   ObjectID = require('mongodb').ObjectID,
@@ -6914,22 +6147,22 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlines = {
       var gridStore = new GridStore(db, fileId, 'w');
 
       // Open the new file
-      gridStore.open(function(err, gridStore) {
+      gridStore.open().then(function(gridStore) {
 
         // Write one line to gridStore
-        gridStore.puts("line one", function(err, gridStore) {
+        gridStore.puts("line one").then(function(gridStore) {
 
           // Write second line to gridStore
-          gridStore.puts("line two", function(err, gridStore) {
+          gridStore.puts("line two").then(function(gridStore) {
 
             // Write third line to gridStore
-            gridStore.puts("line three", function(err, gridStore) {
+            gridStore.puts("line three").then(function(gridStore) {
 
               // Flush file to disk
-              gridStore.close(function(err, result) {
+              gridStore.close().then(function(result) {
 
                 // Read back all the lines
-                GridStore.readlines(db, fileId, function(err, lines) {
+                GridStore.readlines(db, fileId).then(function(lines) {
                   test.deepEqual(["line one\n", "line two\n", "line three\n"], lines);
 
                   db.close();
@@ -6952,7 +6185,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlines = {
  * @example-method readlines
  * @ignore
  */
-exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlines = {
+exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlinesWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -6960,7 +6193,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlines = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   GridStore = require('mongodb').GridStore,
     // LINE   ObjectID = require('mongodb').ObjectID,
@@ -6976,26 +6209,26 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlines = {
       var gridStore = new GridStore(db, fileId, 'w');
 
       // Open the new file
-      gridStore.open(function(err, gridStore) {
+      gridStore.open().then(function(gridStore) {
 
         // Write one line to gridStore
-        gridStore.puts("line one", function(err, gridStore) {
+        gridStore.puts("line one").then(function(gridStore) {
 
           // Write second line to gridStore
-          gridStore.puts("line two", function(err, gridStore) {
+          gridStore.puts("line two").then(function(gridStore) {
 
             // Write third line to gridStore
-            gridStore.puts("line three", function(err, gridStore) {
+            gridStore.puts("line three").then(function(gridStore) {
 
               // Flush file to disk
-              gridStore.close(function(err, result) {
+              gridStore.close().then(function(result) {
 
                 // Open file for reading
                 gridStore = new GridStore(db, fileId, 'r');
-                gridStore.open(function(err, gridStore) {
+                gridStore.open().then(function(gridStore) {
 
                   // Read all the lines and verify correctness
-                  gridStore.readlines(function(err, lines) {
+                  gridStore.readlines().then(function(lines) {
                     test.deepEqual(["line one\n", "line two\n", "line three\n"], lines);
 
                     db.close();
@@ -7019,7 +6252,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlines = {
  * @example-method GridStore.read
  * @ignore
  */
-exports.shouldCorrectlyPutACoupleOfLinesInGridStoreRead = {
+exports.shouldCorrectlyPutACoupleOfLinesInGridStoreReadWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -7027,7 +6260,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreRead = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   GridStore = require('mongodb').GridStore,
     // LINE   ObjectID = require('mongodb').ObjectID,
@@ -7042,14 +6275,14 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreRead = {
       var data = fs.readFileSync("./test/functional/data/test_gs_weird_bug.png");
 
       // Open the file
-      gridStore.open(function(err, gridStore) {
+      gridStore.open().then(function(gridStore) {
         // Write the binary file data to GridFS
-        gridStore.write(data, function(err, gridStore) {
+        gridStore.write(data).then(function(gridStore) {
           // Flush the remaining data to GridFS
-          gridStore.close(function(err, result) {
+          gridStore.close().then(function(result) {
 
             // Read in the whole file and check that it's the same content
-            GridStore.read(db, result._id, function(err, fileData) {
+            GridStore.read(db, result._id).then(function(fileData) {
               test.equal(data.length, fileData.length);
 
               db.close();
@@ -7070,7 +6303,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreRead = {
  * @example-method stream
  * @ignore
  */
-exports.shouldCorrectlyReadFileUsingStream = {
+exports.shouldCorrectlyReadFileUsingStreamWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -7078,7 +6311,7 @@ exports.shouldCorrectlyReadFileUsingStream = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   GridStore = require('mongodb').GridStore,
     // LINE   ObjectID = require('mongodb').ObjectID,
@@ -7098,14 +6331,14 @@ exports.shouldCorrectlyReadFileUsingStream = {
       var gotEnd = 0;
       
       // Open the file we are writting to
-      gridStoreW.open(function(err, gs) {
+      gridStoreW.open().then(function(gs) {
         // Write the file content
-        gs.write(data, function(err, gs) {
+        gs.write(data).then(function(gs) {
           // Flush the file to GridFS
-          gs.close(function(err, result) {
+          gs.close().then(function(result) {
             
             // Open the read file
-            gridStoreR.open(function(err, gs) {
+            gridStoreR.open().then(function(gs) {
               // Create a stream to the file
               var stream = gs.stream();
               
@@ -7137,7 +6370,7 @@ exports.shouldCorrectlyReadFileUsingStream = {
  * @example-method stream
  * @ignore
  */
-exports.shouldCorrectlyStreamWriteToGridStoreObject = {
+exports.shouldCorrectlyStreamWriteToGridStoreObjectWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -7161,7 +6394,7 @@ exports.shouldCorrectlyStreamWriteToGridStoreObject = {
       var fileStream = fs.createReadStream("./test/functional/data/test_gs_working_field_read.pdf");
       stream.on("end", function(err) {
         // Just read the content and compare to the raw binary
-        GridStore.read(client, "test_stream_write", function(err, gridData) {
+        GridStore.read(client, "test_stream_write").then(function(gridData) {
           var fileData = fs.readFileSync("./test/functional/data/test_gs_working_field_read.pdf");
           test.equal(fileData.toString('hex'), gridData.toString('hex'));
           client.close();
@@ -7190,7 +6423,7 @@ exports.shouldCorrectlyPipeAGridFsToAfile = {
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;    
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   GridStore = require('mongodb').GridStore,
     // LINE   ObjectID = require('mongodb').ObjectID,
@@ -7201,12 +6434,11 @@ exports.shouldCorrectlyPipeAGridFsToAfile = {
     // BEGIN
       // Open a file for writing
       var gridStoreWrite = new GridStore(db, "test_gs_read_stream_pipe", "w", {chunkSize:1024});
-      gridStoreWrite.writeFile("./test/functional/data/test_gs_weird_bug.png", function(err, result) {
-        test.equal(null, err);
+      gridStoreWrite.writeFile("./test/functional/data/test_gs_weird_bug.png").then(function(result) {
         test.ok(result != null);        
         // Open the gridStore for reading and pipe to a file
         var gridStore = new GridStore(db, "test_gs_read_stream_pipe", "r");
-        gridStore.open(function(err, gridStore) {
+        gridStore.open().then(function(gridStore) {
           // Create a file write stream
           var fileStream = fs.createWriteStream("./test_gs_weird_bug_streamed.tmp");
           // Grab the read stream
@@ -7244,14 +6476,14 @@ exports.shouldCorrectlyPipeAGridFsToAfile = {
  * @example-method seek
  * @ignore
  */
-exports.shouldCorrectlySeekWithBuffer = {
+exports.shouldCorrectlySeekWithBufferWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   GridStore = require('mongodb').GridStore,
     // LINE   ObjectID = require('mongodb').ObjectID,
@@ -7262,19 +6494,19 @@ exports.shouldCorrectlySeekWithBuffer = {
     // BEGIN
       // Create a file and open it
       var gridStore = new GridStore(db, "test_gs_seek_with_buffer", "w");
-      gridStore.open(function(err, gridStore) {
+      gridStore.open().then(function(gridStore) {
         // Write some content to the file
-        gridStore.write(new Buffer("hello, world!", "utf8"), function(err, gridStore) {
+        gridStore.write(new Buffer("hello, world!", "utf8")).then(function(gridStore) {
           // Flush the file to GridFS
-          gridStore.close(function(result) {
+          gridStore.close().then(function(result) {
 
             // Open the file in read mode
             var gridStore2 = new GridStore(db, "test_gs_seek_with_buffer", "r");
-            gridStore2.open(function(err, gridStore) {
+            gridStore2.open().then(function(gridStore) {
               // Seek to start
-              gridStore.seek(0, function(err, gridStore) {
+              gridStore.seek(0).then(function(gridStore) {
                 // Read first character and verify
-                gridStore.getc(function(err, chr) {
+                gridStore.getc().then(function(chr) {
                   test.equal('h', chr);
                 });
               });
@@ -7282,10 +6514,10 @@ exports.shouldCorrectlySeekWithBuffer = {
 
             // Open the file in read mode
             var gridStore3 = new GridStore(db, "test_gs_seek_with_buffer", "r");
-            gridStore3.open(function(err, gridStore) {
+            gridStore3.open().then(function(gridStore) {
               // Seek to 7 characters from the beginning off the file and verify
-              gridStore.seek(7, function(err, gridStore) {
-                gridStore.getc(function(err, chr) {
+              gridStore.seek(7).then(function(gridStore) {
+                gridStore.getc().then(function(chr) {
                   test.equal('w', chr);
                 });
               });
@@ -7293,10 +6525,10 @@ exports.shouldCorrectlySeekWithBuffer = {
 
             // Open the file in read mode
             var gridStore5 = new GridStore(db, "test_gs_seek_with_buffer", "r");
-            gridStore5.open(function(err, gridStore) {
+            gridStore5.open().then(function(gridStore) {
               // Seek to -1 characters from the end off the file and verify
-              gridStore.seek(-1, GridStore.IO_SEEK_END, function(err, gridStore) {
-                gridStore.getc(function(err, chr) {
+              gridStore.seek(-1, GridStore.IO_SEEK_END).then(function(gridStore) {
+                gridStore.getc().then(function(chr) {
                   test.equal('!', chr);
                 });
               });
@@ -7304,10 +6536,10 @@ exports.shouldCorrectlySeekWithBuffer = {
 
             // Open the file in read mode
             var gridStore6 = new GridStore(db, "test_gs_seek_with_buffer", "r");
-            gridStore6.open(function(err, gridStore) {
+            gridStore6.open().then(function(gridStore) {
               // Seek to -6 characters from the end off the file and verify
-              gridStore.seek(-6, GridStore.IO_SEEK_END, function(err, gridStore) {
-                gridStore.getc(function(err, chr) {
+              gridStore.seek(-6, GridStore.IO_SEEK_END).then(function(gridStore) {
+                gridStore.getc().then(function(chr) {
                   test.equal('w', chr);
                 });
               });
@@ -7315,26 +6547,26 @@ exports.shouldCorrectlySeekWithBuffer = {
 
             // Open the file in read mode
             var gridStore7 = new GridStore(db, "test_gs_seek_with_buffer", "r");
-            gridStore7.open(function(err, gridStore) {
+            gridStore7.open().then(function(gridStore) {
 
               // Seek forward 7 characters from the current read position and verify
-              gridStore.seek(7, GridStore.IO_SEEK_CUR, function(err, gridStore) {
-                gridStore.getc(function(err, chr) {
+              gridStore.seek(7, GridStore.IO_SEEK_CUR).then(function(gridStore) {
+                gridStore.getc().then(function(chr) {
                   test.equal('w', chr);
 
                   // Seek forward -1 characters from the current read position and verify
-                  gridStore.seek(-1, GridStore.IO_SEEK_CUR, function(err, gridStore) {
-                    gridStore.getc(function(err, chr) {
+                  gridStore.seek(-1, GridStore.IO_SEEK_CUR).then(function(gridStore) {
+                    gridStore.getc().then(function(chr) {
                       test.equal('w', chr);
 
                       // Seek forward -4 characters from the current read position and verify
-                      gridStore.seek(-4, GridStore.IO_SEEK_CUR, function(err, gridStore) {
-                        gridStore.getc(function(err, chr) {
+                      gridStore.seek(-4, GridStore.IO_SEEK_CUR).then(function(gridStore) {
+                        gridStore.getc().then(function(chr) {
                           test.equal('o', chr);
 
                           // Seek forward 3 characters from the current read position and verify
-                          gridStore.seek(3, GridStore.IO_SEEK_CUR, function(err, gridStore) {
-                            gridStore.getc(function(err, chr) {
+                          gridStore.seek(3, GridStore.IO_SEEK_CUR).then(function(gridStore) {
+                            gridStore.getc().then(function(chr) {
                               test.equal('o', chr);
 
                               db.close();
@@ -7363,7 +6595,7 @@ exports.shouldCorrectlySeekWithBuffer = {
  * @example-method rewind
  * @ignore
  */
-exports.shouldCorrectlyRewingAndTruncateOnWrite = {
+exports.shouldCorrectlyRewingAndTruncateOnWriteWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -7371,7 +6603,7 @@ exports.shouldCorrectlyRewingAndTruncateOnWrite = {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   GridStore = require('mongodb').GridStore,
     // LINE   ObjectID = require('mongodb').ObjectID,
@@ -7386,29 +6618,29 @@ exports.shouldCorrectlyRewingAndTruncateOnWrite = {
       // Create a new file
       var gridStore = new GridStore(db, fileId, "w");
       // Open the file
-      gridStore.open(function(err, gridStore) {
+      gridStore.open().then(function(gridStore) {
         // Write to the file
-        gridStore.write("hello, world!", function(err, gridStore) {
+        gridStore.write("hello, world!").then(function(gridStore) {
           // Flush the file to disk
-          gridStore.close(function(err, result) {
+          gridStore.close().then(function(result) {
 
             // Reopen the file
             gridStore = new GridStore(db, fileId, "w");
-            gridStore.open(function(err, gridStore) {
+            gridStore.open().then(function(gridStore) {
               // Write some more text to the file
-              gridStore.write('some text is inserted here', function(err, gridStore) {
+              gridStore.write('some text is inserted here').then(function(gridStore) {
 
                 // Let's rewind to truncate the file
-                gridStore.rewind(function(err, gridStore) {
+                gridStore.rewind().then(function(gridStore) {
 
                   // Write something from the start
-                  gridStore.write('abc', function(err, gridStore) {
+                  gridStore.write('abc').then(function(gridStore) {
 
                     // Flush the data to mongodb
-                    gridStore.close(function(err, result) {
+                    gridStore.close().then(function(result) {
 
                       // Verify that the new data was written
-                      GridStore.read(db, fileId, function(err, data) {
+                      GridStore.read(db, fileId).then(function(data) {
                         test.equal("abc", data);
 
                         db.close();
@@ -7434,14 +6666,14 @@ exports.shouldCorrectlyRewingAndTruncateOnWrite = {
  * @example-method eof
  * @ignore
  */
-exports.shouldCorrectlyDetectEOF = {
+exports.shouldCorrectlyDetectEOFWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   GridStore = require('mongodb').GridStore,
     // LINE   ObjectID = require('mongodb').ObjectID,
@@ -7453,13 +6685,13 @@ exports.shouldCorrectlyDetectEOF = {
 
       // Open the file in write mode
       var gridStore = new GridStore(db, 'test_gs_empty_file_eof', "w");
-      gridStore.open(function(err, gridStore) {
+      gridStore.open().then(function(gridStore) {
         // Flush the empty file to GridFS
-        gridStore.close(function(err, gridStore) {
+        gridStore.close().then(function(gridStore) {
 
           // Open the file in read mode
           var gridStore2 = new GridStore(db, 'test_gs_empty_file_eof', "r");
-          gridStore2.open(function(err, gridStore) {
+          gridStore2.open().then(function(gridStore) {
             // Verify that we are at the end of the file
             test.equal(true, gridStore.eof());
 
@@ -7480,14 +6712,14 @@ exports.shouldCorrectlyDetectEOF = {
  * @example-method tell
  * @ignore
  */
-exports.shouldCorrectlyExecuteGridstoreTell = {
+exports.shouldCorrectlyExecuteGridstoreTellWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   GridStore = require('mongodb').GridStore,
     // LINE   ObjectID = require('mongodb').ObjectID,
@@ -7499,22 +6731,22 @@ exports.shouldCorrectlyExecuteGridstoreTell = {
       // Create a new file
       var gridStore = new GridStore(db, "test_gs_tell", "w");
       // Open the file
-      gridStore.open(function(err, gridStore) {
+      gridStore.open().then(function(gridStore) {
         // Write a string to the file
-        gridStore.write("hello, world!", function(err, gridStore) {
+        gridStore.write("hello, world!").then(function(gridStore) {
           // Flush the file to GridFS
-          gridStore.close(function(err, result) {
+          gridStore.close().then(function(result) {
 
             // Open the file in read only mode
             var gridStore2 = new GridStore(db, "test_gs_tell", "r");
-            gridStore2.open(function(err, gridStore) {
+            gridStore2.open().then(function(gridStore) {
 
               // Read the first 5 characters
-              gridStore.read(5, function(err, data) {
+              gridStore.read(5).then(function(data) {
                 test.equal("hello", data);
 
                 // Get the current position of the read head
-                gridStore.tell(function(err, position) {
+                gridStore.tell().then(function(position) {
                   test.equal(5, position);
 
                   db.close();
@@ -7537,14 +6769,14 @@ exports.shouldCorrectlyExecuteGridstoreTell = {
  * @example-method getc
  * @ignore
  */
-exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = {
+exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   GridStore = require('mongodb').GridStore,
     // LINE   ObjectID = require('mongodb').ObjectID,
@@ -7555,18 +6787,18 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = {
     // BEGIN
       // Create a file and open it
       var gridStore = new GridStore(db, "test_gs_getc_file", "w");
-      gridStore.open(function(err, gridStore) {
+      gridStore.open().then(function(gridStore) {
         // Write some content to the file
-        gridStore.write(new Buffer("hello, world!", "utf8"), function(err, gridStore) {
+        gridStore.write(new Buffer("hello, world!", "utf8")).then(function(gridStore) {
           // Flush the file to GridFS
-          gridStore.close(function(result) {
+          gridStore.close().then(function(result) {
 
             // Open the file in read mode
             var gridStore2 = new GridStore(db, "test_gs_getc_file", "r");
-            gridStore2.open(function(err, gridStore) {
+            gridStore2.open().then(function(gridStore) {
 
               // Read first character and verify
-              gridStore.getc(function(err, chr) {
+              gridStore.getc().then(function(chr) {
                 test.equal('h', chr);
 
                 db.close();
@@ -7588,7 +6820,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = {
  * @example-method open
  * @ignore
  */
-exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = {
+exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -7597,7 +6829,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = {
       , ObjectID = configuration.require.ObjectID;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   GridStore = require('mongodb').GridStore,
     // LINE   ObjectID = require('mongodb').ObjectID,
@@ -7608,36 +6840,34 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = {
     // BEGIN
       // Create a file and open it
       var gridStore = new GridStore(db, new ObjectID(), "test_gs_getc_file", "w");
-      gridStore.open(function(err, gridStore) {
+      gridStore.open().then(function(gridStore) {
         // Write some content to the file
-        gridStore.write(new Buffer("hello, world!", "utf8"), function(err, gridStore) {
+        gridStore.write(new Buffer("hello, world!", "utf8")).then(function(gridStore) {
           // Flush the file to GridFS
-          gridStore.close(function(err, fileData) {
-            test.equal(null, err);
+          gridStore.close().then(function(fileData) {
 
             // Create another file with same name and and save content to it
             gridStore = new GridStore(db, new ObjectID(), "test_gs_getc_file", "w");
-            gridStore.open(function(err, gridStore) {
+            gridStore.open().then(function(gridStore) {
               // Write some content to the file
-              gridStore.write(new Buffer("hello, world!", "utf8"), function(err, gridStore) {
+              gridStore.write(new Buffer("hello, world!", "utf8")).then(function(gridStore) {
                 // Flush the file to GridFS
-                gridStore.close(function(err, fileData) {
-                  test.equal(null, err);
+                gridStore.close().then(function(fileData) {
 
                   // Open the file in read mode using the filename
                   var gridStore2 = new GridStore(db, "test_gs_getc_file", "r");
-                  gridStore2.open(function(err, gridStore) {
+                  gridStore2.open().then(function(gridStore) {
 
                     // Read first character and verify
-                    gridStore.getc(function(err, chr) {
+                    gridStore.getc().then(function(chr) {
                       test.equal('h', chr);
 
                       // Open the file using an object id
                       gridStore2 = new GridStore(db, fileData._id, "r");
-                      gridStore2.open(function(err, gridStore) {
+                      gridStore2.open().then(function(gridStore) {
 
                         // Read first character and verify
-                        gridStore.getc(function(err, chr) {
+                        gridStore.getc().then(function(chr) {
                           test.equal('h', chr);
 
                           db.close();
@@ -7664,7 +6894,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetC = {
  * @example-method pause
  * @ignore
  */
-exports.shouldStreamDocumentsUsingTheReadStreamPauseFunction = {
+exports.shouldStreamDocumentsUsingTheReadStreamPauseFunctionWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -7673,7 +6903,7 @@ exports.shouldStreamDocumentsUsingTheReadStreamPauseFunction = {
       , ObjectID = configuration.require.ObjectID;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -7684,15 +6914,15 @@ exports.shouldStreamDocumentsUsingTheReadStreamPauseFunction = {
       var fileId = new ObjectID();
       // Create a file
       var file = new GridStore(db, fileId, "w", {chunk_size:5});
-      file.open(function(err, file) {      
+      file.open().then(function(file) {      
         // Write some content and flush to disk
-        file.write('Hello world', function(err, file) {        
-          file.close(function(err, result) {
+        file.write('Hello world').then(function(file) {        
+          file.close().then(function(result) {
             
             // Let's create a read file
             file = new GridStore(db, fileId, "r");
             // Open the file
-            file.open(function(err, file) {            
+            file.open().then(function(file) {            
               // Peform a find to get a cursor
               var stream = file.stream();
 
@@ -7727,7 +6957,7 @@ exports.shouldStreamDocumentsUsingTheReadStreamPauseFunction = {
  * @example-method resume
  * @ignore
  */
-exports.shouldStreamDocumentsUsingTheReadStreamResumeFunction = {
+exports.shouldStreamDocumentsUsingTheReadStreamResumeFunctionWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -7736,7 +6966,7 @@ exports.shouldStreamDocumentsUsingTheReadStreamResumeFunction = {
       , ObjectID = configuration.require.ObjectID;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -7747,16 +6977,16 @@ exports.shouldStreamDocumentsUsingTheReadStreamResumeFunction = {
       var fileId = new ObjectID();
       // Create a file
       var file = new GridStore(db, fileId, "w", {chunk_size:5});
-      file.open(function(err, file) {      
+      file.open().then(function(file) {      
         // Write some content and flush to disk
         var fileBody = 'Hello world';
-        file.write(fileBody, function(err, file) {        
-          file.close(function(err, result) {
+        file.write(fileBody).then(function(file) {        
+          file.close().then(function(result) {
             // Let's create a read file
             file = new GridStore(db, fileId, "r");
 
             // Open the file
-            file.open(function(err, file) {            
+            file.open().then(function(file) {            
               // Peform a find to get a cursor
               var stream = file.stream(true);
 
@@ -7805,7 +7035,7 @@ exports.shouldStreamDocumentsUsingTheReadStreamResumeFunction = {
  * @example-method destroy
  * @ignore
  */
-exports.shouldStreamDocumentsUsingTheReadStreamDestroyFunction = {
+exports.shouldStreamDocumentsUsingTheReadStreamDestroyFunctionWithPromises = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
@@ -7814,7 +7044,7 @@ exports.shouldStreamDocumentsUsingTheReadStreamDestroyFunction = {
       , ObjectID = configuration.require.ObjectID;
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -7825,15 +7055,15 @@ exports.shouldStreamDocumentsUsingTheReadStreamDestroyFunction = {
       var fileId = new ObjectID();
       // Create a file
       var file = new GridStore(db, fileId, "w");
-      file.open(function(err, file) {      
+      file.open().then(function(file) {      
         // Write some content and flush to disk
-        file.write('Hello world', function(err, file) {        
-          file.close(function(err, result) {
+        file.write('Hello world').then(function(file) {        
+          file.close().then(function(result) {
             
             // Let's create a read file
             file = new GridStore(db, fileId, "r");
             // Open the file
-            file.open(function(err, file) {            
+            file.open().then(function(file) {            
               // Peform a find to get a cursor
               var stream = file.stream();
 
@@ -7870,13 +7100,13 @@ exports.shouldStreamDocumentsUsingTheReadStreamDestroyFunction = {
  * @example-method initializeOrderedBulkOp
  * @ignore
  */
-exports['Should correctly execute ordered batch with no errors using write commands'] = {
+exports['Should correctly execute ordered batch with no errors using write commands With Promises'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -7884,7 +7114,7 @@ exports['Should correctly execute ordered batch with no errors using write comma
     // REMOVE-LINE test.done();
     // BEGIN
       // Get the collection
-      var col = db.collection('batch_write_ordered_ops_0');
+      var col = db.collection('batch_write_ordered_ops_0_with_promise');
       // Initialize the Ordered Batch
       var batch = col.initializeOrderedBulkOp();
       // Add some operations to be executed in order
@@ -7895,7 +7125,7 @@ exports['Should correctly execute ordered batch with no errors using write comma
       batch.find({a:3}).remove({a:3});
 
       // Execute the operations
-      batch.execute(function(err, result) {
+      batch.execute().then(function(result) {
         // Check state of result
         test.equal(2, result.nInserted);
         test.equal(1, result.nUpserted);
@@ -7929,13 +7159,13 @@ exports['Should correctly execute ordered batch with no errors using write comma
  * @example-method initializeUnorderedBulkOp
  * @ignore
  */
-exports['Should correctly execute unordered batch with no errors'] = {
+exports['Should correctly execute unordered batch with no errors With Promises'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -7943,7 +7173,7 @@ exports['Should correctly execute unordered batch with no errors'] = {
     // REMOVE-LINE test.done();
     // BEGIN
       // Get the collection
-      var col = db.collection('batch_write_unordered_ops_legacy_0');
+      var col = db.collection('batch_write_unordered_ops_legacy_0_with_promise');
       // Initialize the unordered Batch
       var batch = col.initializeUnorderedBulkOp({useLegacyOps: true});
 
@@ -7955,7 +7185,7 @@ exports['Should correctly execute unordered batch with no errors'] = {
       batch.find({a:3}).remove({a:3});
 
       // Execute the operations
-      batch.execute(function(err, result) {
+      batch.execute().then(function(result) {
         // Check state of result
         test.equal(2, result.nInserted);
         test.equal(1, result.nUpserted);
@@ -7994,13 +7224,13 @@ exports['Should correctly execute unordered batch with no errors'] = {
  * @example-method insertOne
  * @ignore
  */
-exports['Should correctly execute insertOne operation'] = {
+exports['Should correctly execute insertOne operation With Promises'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -8008,9 +7238,8 @@ exports['Should correctly execute insertOne operation'] = {
     // REMOVE-LINE test.done();
     // BEGIN
       // Get the collection
-      var col = db.collection('insert_one');
-      col.insertOne({a:1}, function(err, r) {
-        test.equal(null, err);
+      var col = db.collection('insert_one_with_promise');
+      col.insertOne({a:1}).then(function(r) {
         test.equal(1, r.insertedCount);
         // Finish up test
         db.close();
@@ -8028,13 +7257,13 @@ exports['Should correctly execute insertOne operation'] = {
  * @example-method insertMany
  * @ignore
  */
-exports['Should correctly execute insertMany operation'] = {
+exports['Should correctly execute insertMany operation With Promises'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -8042,9 +7271,8 @@ exports['Should correctly execute insertMany operation'] = {
     // REMOVE-LINE test.done();
     // BEGIN
       // Get the collection
-      var col = db.collection('insert_many');
-      col.insertMany([{a:1}, {a:2}], function(err, r) {
-        test.equal(null, err);
+      var col = db.collection('insert_many_with_promise');
+      col.insertMany([{a:1}, {a:2}]).then(function(r) {
         test.equal(2, r.insertedCount);
         // Finish up test
         db.close();
@@ -8062,13 +7290,13 @@ exports['Should correctly execute insertMany operation'] = {
  * @example-method updateOne
  * @ignore
  */
-exports['Should correctly execute updateOne operation'] = {
+exports['Should correctly execute updateOne operation With Promises'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -8076,11 +7304,10 @@ exports['Should correctly execute updateOne operation'] = {
     // REMOVE-LINE test.done();
     // BEGIN
       // Get the collection
-      var col = db.collection('update_one');
+      var col = db.collection('update_one_with_promise');
       col.updateOne({a:1}
         , {$set: {a:2}}
-        , {upsert:true}, function(err, r) {
-        test.equal(null, err);
+        , {upsert:true}).then(function(r) {
         test.equal(1, r.matchedCount);
         test.equal(1, r.upsertedCount);
         // Finish up test
@@ -8099,13 +7326,13 @@ exports['Should correctly execute updateOne operation'] = {
  * @example-method updateMany
  * @ignore
  */
-exports['Should correctly execute updateMany operation'] = {
+exports['Should correctly execute updateMany operation With Promises'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -8113,14 +7340,12 @@ exports['Should correctly execute updateMany operation'] = {
     // REMOVE-LINE test.done();
     // BEGIN
       // Get the collection
-      var col = db.collection('update_many');
-      col.insertMany([{a:1}, {a:1}], function(err, r) {
-        test.equal(null, err);
+      var col = db.collection('update_many_with_promise');
+      col.insertMany([{a:1}, {a:1}]).then(function(r) {
         test.equal(2, r.insertedCount);
 
         // Update all documents
-        col.updateMany({a:1}, {$set: {b: 1}}, function(err, r) {
-          test.equal(null, err);
+        col.updateMany({a:1}, {$set: {b: 1}}).then(function(r) {
           test.equal(2, r.matchedCount);
           test.equal(2, r.modifiedCount);
 
@@ -8141,13 +7366,13 @@ exports['Should correctly execute updateMany operation'] = {
  * @example-method removeOne
  * @ignore
  */
-exports['Should correctly execute removeOne operation'] = {
+exports['Should correctly execute removeOne operation With Promises'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -8155,13 +7380,11 @@ exports['Should correctly execute removeOne operation'] = {
     // REMOVE-LINE test.done();
     // BEGIN
       // Get the collection
-      var col = db.collection('remove_one');
-      col.insertMany([{a:1}, {a:1}], function(err, r) {
-        test.equal(null, err);
+      var col = db.collection('remove_one_with_promise');
+      col.insertMany([{a:1}, {a:1}]).then(function(r) {
         test.equal(2, r.insertedCount);
 
-        col.removeOne({a:1}, function(err, r) {
-          test.equal(null, err);
+        col.removeOne({a:1}).then(function(r) {
           test.equal(1, r.deletedCount);
           // Finish up test
           db.close();
@@ -8180,13 +7403,13 @@ exports['Should correctly execute removeOne operation'] = {
  * @example-method removeMany
  * @ignore
  */
-exports['Should correctly execute removeMany operation'] = {
+exports['Should correctly execute removeMany operation With Promises'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -8194,14 +7417,12 @@ exports['Should correctly execute removeMany operation'] = {
     // REMOVE-LINE test.done();
     // BEGIN
       // Get the collection
-      var col = db.collection('remove_many');
-      col.insertMany([{a:1}, {a:1}], function(err, r) {
-        test.equal(null, err);
+      var col = db.collection('remove_many_with_promise');
+      col.insertMany([{a:1}, {a:1}]).then(function(r) {
         test.equal(2, r.insertedCount);
 
         // Update all documents
-        col.removeMany({a:1}, function(err, r) {
-          test.equal(null, err);
+        col.removeMany({a:1}).then(function(r) {
           test.equal(2, r.deletedCount);
 
           // Finish up test
@@ -8221,13 +7442,13 @@ exports['Should correctly execute removeMany operation'] = {
  * @example-method bulkWrite
  * @ignore
  */
-exports['Should correctly execute bulkWrite operation'] = {
+exports['Should correctly execute bulkWrite operation With Promises'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -8235,7 +7456,7 @@ exports['Should correctly execute bulkWrite operation'] = {
     // REMOVE-LINE test.done();
     // BEGIN
       // Get the collection
-      var col = db.collection('bulk_write');
+      var col = db.collection('bulk_write_with_promise');
       col.bulkWrite([
           { insertOne: { document: { a: 1 } } }
         , { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
@@ -8243,8 +7464,7 @@ exports['Should correctly execute bulkWrite operation'] = {
         , { deleteOne: { filter: {c:1} } }
         , { deleteMany: { filter: {c:1} } }
         , { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}]
-      , {ordered:true, w:1}, function(err, r) {
-        test.equal(null, err);
+      , {ordered:true, w:1}).then(function(r) {
         test.equal(1, r.nInserted);
         test.equal(2, r.nUpserted);
         test.equal(0, r.nRemoved);
@@ -8274,13 +7494,13 @@ exports['Should correctly execute bulkWrite operation'] = {
  * @example-method findOneAndDelete
  * @ignore
  */
-exports['Should correctly execute findOneAndDelete operation'] = {
+exports['Should correctly execute findOneAndDelete operation With Promises'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -8288,15 +7508,13 @@ exports['Should correctly execute findOneAndDelete operation'] = {
     // REMOVE-LINE test.done();
     // BEGIN
       // Get the collection
-      var col = db.collection('find_one_and_delete');
-      col.insertMany([{a:1, b:1}], {w:1}, function(err, r) {
-        test.equal(null, err);
+      var col = db.collection('find_one_and_delete_with_promise');
+      col.insertMany([{a:1, b:1}], {w:1}).then(function(r) {
         test.equal(1, r.result.n);
         
         col.findOneAndDelete({a:1}
           , { projection: {b:1}, sort: {a:1} }
-          , function(err, r) {
-            test.equal(null, err);
+          ).then(function(r) {
             test.equal(1, r.lastErrorObject.n);
             test.equal(1, r.value.b);
 
@@ -8316,13 +7534,13 @@ exports['Should correctly execute findOneAndDelete operation'] = {
  * @example-method findOneAndReplace
  * @ignore
  */
-exports['Should correctly execute findOneAndReplace operation'] = {
+exports['Should correctly execute findOneAndReplace operation With Promises'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -8330,9 +7548,8 @@ exports['Should correctly execute findOneAndReplace operation'] = {
     // REMOVE-LINE test.done();
     // BEGIN
       // Get the collection
-      var col = db.collection('find_one_and_replace');
-      col.insertMany([{a:1, b:1}], {w:1}, function(err, r) {
-        test.equal(null, err);
+      var col = db.collection('find_one_and_replace_with_promise');
+      col.insertMany([{a:1, b:1}], {w:1}).then(function(r) {
         test.equal(1, r.result.n);
         
         col.findOneAndReplace({a:1}
@@ -8343,8 +7560,7 @@ exports['Should correctly execute findOneAndReplace operation'] = {
               , returnOriginal: false
               , upsert: true 
             }
-          , function(err, r) {
-            test.equal(null, err);
+          ).then(function(r) {
             test.equal(1, r.lastErrorObject.n);
             test.equal(1, r.value.b);
             test.equal(1, r.value.c);
@@ -8365,13 +7581,13 @@ exports['Should correctly execute findOneAndReplace operation'] = {
  * @example-method findOneAndUpdate
  * @ignore
  */
-exports['Should correctly execute findOneAndUpdate operation'] = {
+exports['Should correctly execute findOneAndUpdate operation With Promises'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -8379,9 +7595,8 @@ exports['Should correctly execute findOneAndUpdate operation'] = {
     // REMOVE-LINE test.done();
     // BEGIN
       // Get the collection
-      var col = db.collection('find_one_and_update');
-      col.insertMany([{a:1, b:1}], {w:1}, function(err, r) {
-        test.equal(null, err);
+      var col = db.collection('find_one_and_update_with_promise');
+      col.insertMany([{a:1, b:1}], {w:1}).then(function(r) {
         test.equal(1, r.result.n);
         
         col.findOneAndUpdate({a:1}
@@ -8392,8 +7607,7 @@ exports['Should correctly execute findOneAndUpdate operation'] = {
               , returnOriginal: false
               , upsert: true
             }
-          , function(err, r) {
-            test.equal(null, err);
+          ).then(function(r) {
             test.equal(1, r.lastErrorObject.n);
             test.equal(1, r.value.b);
             test.equal(1, r.value.d);
@@ -8414,31 +7628,27 @@ exports['Should correctly execute findOneAndUpdate operation'] = {
  * @example-method createCollection
  * @ignore
  */
-exports['Should correctly add capped collection options to cursor'] = {
+exports['Should correctly add capped collection options to cursor With Promises'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
 
-    db.open(function(err, db) {
+    db.open().then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      test.equal(null, err);
-
       // Create a capped collection with a maximum of 1000 documents
-      db.createCollection("a_simple_collection_2", {capped:true, size:10000, max:1000, w:1}, function(err, collection) {
-        test.equal(null, err);
-
+      db.createCollection("a_simple_collection_2_with_promise", {capped:true, size:10000, max:1000, w:1}).then(function(collection) {
         var docs = [];
         for(var i = 0; i < 1000; i++) docs.push({a:i});
 
         // Insert a document in the capped collection
-        collection.insertMany(docs, configuration.writeConcernMax(), function(err, result) {
+        collection.insertMany(docs, configuration.writeConcernMax()).then(function(result) {
 
           // Start date
           var s = new Date();
