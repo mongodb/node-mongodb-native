@@ -501,3 +501,33 @@ exports['should correctly list collection names with batchSize 1 for 2.8 or high
     });
   }
 }
+
+/**
+ * @ignore
+ */
+exports['should correctly execute close function in order'] = {
+  metadata: { requires: { 
+      topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] 
+    , mongodb: ">= 2.8.0"
+  } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Db = configuration.require.Db
+      , Server = configuration.require.Server;
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    // Establish connection to db
+    db.open(function(err, db) {
+      test.equal(null, err);
+      var items = [];
+
+      items.push(1);
+      db.close(function(){ 
+        test.equal(2, items.length);
+        test.done(); 
+      });
+      items.push(2);
+    });
+  }
+}
