@@ -3502,7 +3502,7 @@ exports.shouldCorrectlyAddUserToDb = {
 }
 
 /**
- * An example of dereferencing values.
+ * An example of removing a user.
  *
  * @example-class Db
  * @example-method removeUser
@@ -3596,7 +3596,7 @@ exports.shouldCorrectlyCreateACollection = {
 }
 
 /**
- * A simple example executing a command against the server.
+ * A simple example creating, dropping a collection and then verifying that the collection is gone.
  *
  * @example-class Db
  * @example-method dropCollection
@@ -3651,7 +3651,7 @@ exports.shouldCorrectlyExecuteACommandAgainstTheServer = {
 }
 
 /**
- * A simple example creating, dropping a collection and then verifying that the collection is gone.
+ * A simple example executing a command against the server.
  *
  * @example-class Db
  * @example-method command

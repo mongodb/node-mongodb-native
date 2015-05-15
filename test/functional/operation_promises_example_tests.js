@@ -9,7 +9,7 @@ var f = require('util').format;
  *************************************************************************/
 
 /**
- * Correctly call the aggregation using a cursor toArray Promise
+ * Call toArray on an aggregation cursor using a Promise
  *
  * @example-class Collection
  * @example-method aggregate
@@ -70,68 +70,7 @@ exports.aggregationExample2WithPromises = {
 }
 
 /**
- * Correctly call the aggregation using a cursor and toArray Promise
- *
- * @example-class AggregationCursor
- * @example-method toArray
- * @ignore
- */
-exports['Aggregation Cursor toArray Test With Promises'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
-  
-  // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-
-    db.open().then(function(db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-      // Some docs for insertion
-      var docs = [{
-          title : "this is my title", author : "bob", posted : new Date() ,
-          pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
-          comments : [
-            { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
-          ]}];
-
-      // Create a collection
-      var collection = db.collection('aggregation_toArray_example_with_promise');
-      // Insert the docs
-      collection.insertMany(docs, {w: 1}).then(function(result) {
-
-        // Execute aggregate, notice the pipeline is expressed as an Array
-        var cursor = collection.aggregate([
-            { $project : {
-              author : 1,
-              tags : 1
-            }},
-            { $unwind : "$tags" },
-            { $group : {
-              _id : {tags : "$tags"},
-              authors : { $addToSet : "$author" }
-            }}
-          ], { cursor: { batchSize: 1 } });
-
-        // Get all the aggregation results
-        cursor.toArray().then(function(docs) {
-          test.equal(2, docs.length);
-          test.done();
-          db.close();
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
- * Correctly call the aggregation using a cursor and next Promise
+ * Call next on an aggregation cursor using a Promise
  *
  * @example-class AggregationCursor
  * @example-method next
@@ -330,7 +269,7 @@ exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilterWithPromises = {
 }
 
 /**
- * Example of running the distinct command against a collection with a filter query
+ * Example of running the distinct command against a collection using a Promise with a filter query
  *
  * @ignore
  */
@@ -459,7 +398,7 @@ exports.dropAllIndexesExample1WithPromises = {
 }
 
 /**
- * An examples showing the creation and dropping of an index
+ * An examples showing the creation and dropping of an index using a Promise
  *
  * @example-class Collection
  * @example-method dropIndex
@@ -508,7 +447,7 @@ exports.shouldCorrectlyCreateAndDropIndexWithPromises = {
 }
 
 /**
- * A more complex ensureIndex using a compound unique index in the background and dropping duplicated documents.
+ * A more complex ensureIndex using a compound unique index in the background and dropping duplicated documents using a Promise.
  *
  * @example-class Collection
  * @example-method ensureIndex
@@ -557,7 +496,7 @@ exports.shouldCreateComplexEnsureIndexWithPromises = {
 }
 
 /**
- * A more complex ensureIndex using a compound unique index in the background.
+ * A more complex ensureIndex using a compound unique index in the background using a Promise.
  *
  * @example-class Collection
  * @example-method ensureIndex
@@ -606,7 +545,7 @@ exports.ensureIndexExampleWithCompountIndexWithPromises = {
 }
 
 /**
- * A simple query using the find method on the collection.
+ * A simple query using the find method and toArray method with a Promise.
  *
  * @example-class Collection
  * @example-method find
@@ -647,7 +586,7 @@ exports.shouldPeformASimpleQueryWithPromises = {
 }
 
 /**
- * A simple query showing the explain for a query
+ * A simple query showing the explain for a query using a Promise.
  *
  * @example-class Collection
  * @example-method find
@@ -687,7 +626,7 @@ exports.shouldPeformASimpleExplainQueryWithPromises = {
 }
 
 /**
- * A simple query showing skip and limit
+ * A simple query showing skip and limit using a Promise.
  *
  * @example-class Collection
  * @example-method find
@@ -729,7 +668,7 @@ exports.shouldPeformASimpleLimitSkipQueryWithPromises = {
 }
 
 /**
- * A whole set of different ways to use the findAndModify command.
+ * A whole set of different ways to use the findAndModify command with a Promise..
  *
  * The first findAndModify command modifies a document and returns the modified document back.
  * The second findAndModify command removes the document.
@@ -792,7 +731,7 @@ exports.shouldPerformSimpleFindAndModifyOperationsWithPromises = {
 }
 
 /**
- * An example of using findAndRemove
+ * An example of using findAndRemove using a Promise.
  *
  * @example-class Collection
  * @example-method findAndRemove
@@ -839,7 +778,7 @@ exports.shouldPerformSimpleFindAndRemoveWithPromises = {
 }
 
 /**
- * A simple query using findOne
+ * A simple query using findOne with a Promise.
  *
  * @example-class Collection
  * @example-method findOne
@@ -880,7 +819,7 @@ exports.shouldPeformASimpleLimitSkipFindOneQueryWithPromises = {
 }
 
 /**
- * Example of a simple geoNear query across some documents
+ * Example of a simple geoNear query across some documents using a Promise.
  *
  * @example-class Collection
  * @example-method geoNear
@@ -925,7 +864,7 @@ exports.shouldCorrectlyPerformSimpleGeoNearCommandWithPromises = {
 }
 
 /**
- * Example of a simple geoHaystackSearch query across some documents
+ * Example of a simple geoHaystackSearch query across some documents using a Promise.
  *
  * @example-class Collection
  * @example-method geoHaystackSearch
@@ -969,7 +908,7 @@ exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommandWithPromises = {
 }
 
 /**
- * A whole lot of different ways to execute the group command
+ * A whole lot of different ways to execute the group command using a Promise.
  *
  * @example-class Collection
  * @example-method group
@@ -1097,7 +1036,7 @@ exports.shouldCorrectlyExecuteGroupFunctionWithPromises = {
 }
 
 /**
- * A simple map reduce example
+ * A simple map reduce example using a Promise.
  *
  * @example-class Collection
  * @example-method mapReduce
@@ -1151,7 +1090,7 @@ exports.shouldPerformSimpleMapReduceFunctionsWithPromises = {
 }
 
 /**
- * A simple map reduce example using the inline output type on MongoDB > 1.7.6 returning the statistics
+ * A simple map reduce example using the inline output type on MongoDB > 1.7.6 returning the statistics using a Promise.
  *
  * @example-class Collection
  * @example-method mapReduce
@@ -1203,7 +1142,7 @@ exports.shouldPerformMapReduceFunctionInlineWithPromises = {
 }
 
 /**
- * Mapreduce different test with a provided scope containing a javascript function.
+ * Mapreduce using a provided scope containing a javascript function executed using a Promise.
  *
  * @example-class Collection
  * @example-method mapReduce
@@ -1284,7 +1223,7 @@ exports.shouldPerformMapReduceWithContextWithPromises = {
 }
 
 /**
- * Mapreduce different test with a provided scope containing javascript objects with functions.
+ * Mapreduce using a scope containing javascript objects with functions using a Promise.
  *
  * @example-class Collection
  * @example-method mapReduce
@@ -1364,7 +1303,7 @@ exports.shouldPerformMapReduceInContextObjectsWithPromises = {
 }
 
 /**
- * Example of retrieving a collections indexes
+ * Example of retrieving a collections indexes using a Promise.
  *
  * @example-class Collection
  * @example-method indexes
@@ -1410,7 +1349,7 @@ exports.shouldCorrectlyRetriveACollectionsIndexesWithPromises = {
 }
 
 /**
- * An example showing the use of the indexExists function for a single index name and a list of index names.
+ * An example showing the use of the indexExists function using a Promise for a single index name and a list of index names.
  *
  * @example-class Collection
  * @example-method indexExists
@@ -1458,7 +1397,7 @@ exports.shouldCorrectlyExecuteIndexExistsWithPromises = {
 }
 
 /**
- * An example showing the information returned by indexInformation
+ * An example showing the information returned by indexInformation using a Promise.
  *
  * @example-class Collection
  * @example-method indexInformation
@@ -1516,7 +1455,7 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformationWithPromises = {
 }
 
 /**
- * An examples showing the information returned by indexInformation
+ * An examples showing the information returned by indexInformation using a Promise.
  *
  * @example-class Collection
  * @example-method indexInformation
@@ -1569,7 +1508,7 @@ exports.shouldCorrectlyShowAllTheResultsFromIndexInformationWithPromises = {
 }
 
 /**
- * A simple document insert example, not using safe mode to ensure document persistance on MongoDB
+ * A simple document insert using a Promise example, not using safe mode to ensure document persistance on MongoDB
  *
  * @example-class Collection
  * @example-method insert
@@ -1609,7 +1548,7 @@ exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafeWithPro
 }
 
 /**
- * A batch document insert example, using safe mode to ensure document persistance on MongoDB
+ * A batch document insert using a Promise example, using safe mode to ensure document persistance on MongoDB
  *
  * @example-class Collection
  * @example-method insert
@@ -1649,7 +1588,7 @@ exports.shouldCorrectlyPerformABatchDocumentInsertSafeWithPromises = {
 }
 
 /**
- * Example of inserting a document containing functions
+ * Example of inserting a document containing functions using a Promise.
  *
  * @example-class Collection
  * @example-method insert
@@ -1692,7 +1631,7 @@ exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafeWithPromises 
 }
 
 /**
- * Example of using keepGoing to allow batch insert to complete even when there are illegal documents in the batch
+ * Example of using keepGoing to allow batch insert using a Promise to complete even when there are illegal documents in the batch
  *
  * @example-class Collection
  * @example-method insert
@@ -1743,7 +1682,7 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
 }
 
 /**
- * An example showing how to establish if it's a capped collection
+ * An example showing how to establish if it's a capped collection using a Promise.
  *
  * @example-class Collection
  * @example-method isCapped
@@ -1782,7 +1721,7 @@ exports.shouldCorrectlyExecuteIsCappedWithPromises = {
 }
 
 /**
- * An example returning the options for a collection.
+ * An example returning the options for a collection using a Promise.
  *
  * @example-class Collection
  * @example-method options
@@ -1823,7 +1762,7 @@ exports.shouldCorrectlyRetriveCollectionOptionsWithPromises = {
 }
 
 /**
- * A parallelCollectionScan example
+ * A parallelCollectionScan example using a Promise.
  *
  * @example-class Collection
  * @example-method parallelCollectionScan
@@ -1887,7 +1826,7 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors W
 }
 
 /**
- * An example showing how to force a reindex of a collection.
+ * An example showing how to force a reindex of a collection using a Promise.
  *
  * @example-class Collection
  * @example-method reIndex
@@ -1939,7 +1878,7 @@ exports.shouldCorrectlyIndexAndForceReindexOnCollectionWithPromises = {
 }
 
 /**
- * An example removing all documents in a collection not using safe mode
+ * An example removing all documents in a collection not using safe mode using a Promise.
  *
  * @example-class Collection
  * @example-method remove
@@ -1980,7 +1919,7 @@ exports.shouldRemoveAllDocumentsNoSafeWithPromises = {
 }
 
 /**
- * An example removing a subset of documents using safe mode to ensure removal of documents
+ * An example removing a subset of documents using safe mode to ensure removal of documents using a Promise.
  *
  * @example-class Collection
  * @example-method remove
@@ -2018,7 +1957,7 @@ exports.shouldRemoveSubsetOfDocumentsSafeModeWithPromises = {
 }
 
 /**
- * An example of illegal and legal renaming of a collection
+ * An example of illegal and legal renaming of a collection using a Promise.
  *
  * @example-class Collection
  * @example-method rename
@@ -2120,7 +2059,7 @@ exports.shouldCorrectlyRenameCollectionWithPromises = {
 }
 
 /**
- * Example of a simple document save with safe set to false
+ * Example of a simple document save with safe set to false using a Promise.
  *
  * @example-class Collection
  * @example-method save
@@ -2162,7 +2101,7 @@ exports.shouldCorrectlySaveASimpleDocumentWithPromises = {
 }
 
 /**
- * Example of a simple document save and then resave with safe set to true
+ * Example of a simple document save and then resave with safe set to true using a Promise.
  *
  * @example-class Collection
  * @example-method save
@@ -2216,7 +2155,7 @@ exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveItWithPromises = {
 }
 
 /**
- * Example of a simple document update with safe set to false on an existing document
+ * Example of a simple document update with safe set to false on an existing document using a Promise.
  *
  * @example-class Collection
  * @example-method update
@@ -2264,7 +2203,7 @@ exports.shouldCorrectlyUpdateASimpleDocumentWithPromises = {
 }
 
 /**
- * Example of a simple document update using upsert (the document will be inserted if it does not exist)
+ * Example of a simple document update using upsert (the document will be inserted if it does not exist) using a Promise.
  *
  * @example-class Collection
  * @example-method update
@@ -2305,7 +2244,7 @@ exports.shouldCorrectlyUpsertASimpleDocumentWithPromises = {
 }
 
 /**
- * Example of an update across multiple documents using the multi option.
+ * Example of an update across multiple documents using the multi option and using a Promise.
  *
  * @example-class Collection
  * @example-method update
@@ -2356,7 +2295,7 @@ exports.shouldCorrectlyUpdateMultipleDocumentsWithPromises = {
 }
 
 /**
- * Example of retrieving a collections stats
+ * Example of retrieving a collections stats using a Promise.
  *
  * @example-class Collection
  * @example-method stats
@@ -2397,7 +2336,7 @@ exports.shouldCorrectlyReturnACollectionsStatsWithPromises = {
 }
 
 /**
- * An examples showing the creation and dropping of an index
+ * An examples showing the creation and dropping of an index using Promises.
  *
  * @example-class Collection
  * @example-method dropIndexes
@@ -2460,39 +2399,7 @@ exports.shouldCorrectlyCreateAndDropAllIndexWithPromises = {
  *************************************************************************/
 
 /**
- * Example showing how to access the Admin database for admin level operations.
- *
- * @example-class Db
- * @example-method admin
- * @ignore
- */
-exports.accessAdminLevelOperationsWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
-    db.open().then(function(db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-
-      // Use the admin database for the operation
-      var adminDb = db.admin()
-      test.ok(adminDb != null);
-      
-      db.close();
-      test.done();
-    });
-    // END
-  }
-}
-
-/**
- * An example that shows how to force close a db connection so it cannot be reused.
+ * An example that shows how to force close a db connection so it cannot be reused using a Promise..
  *
  * @example-class Db
  * @example-method close
@@ -2534,7 +2441,7 @@ exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDbWithPromises = {
 }
 
 /**
- * A whole bunch of examples on how to use eval on the server.
+ * A whole bunch of examples on how to use eval on the server with a Promise.
  *
  * @example-class Db
  * @example-method eval
@@ -2633,7 +2540,7 @@ exports.shouldCorrectlyExecuteEvalFunctionsWithPromises = {
 }
 
 /**
- * Defining and calling a system level javascript function (NOT recommended, http://www.mongodb.org/display/DOCS/Server-side+Code+Execution)
+ * Defining and calling a system level javascript function (NOT recommended, http://www.mongodb.org/display/DOCS/Server-side+Code+Execution) using a Promise.
  *
  * @example-class Db
  * @example-method eval
@@ -2675,38 +2582,7 @@ exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunctionWithPromises =
 }
 
 /**
- * An example of a simple single server db connection
- *
- * @example-class Db
- * @example-method open
- * @ignore
- */
-exports.shouldCorrectlyOpenASimpleDbSingleServerConnectionWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-    db.open().then(function(db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-
-      db.on('close', function() {
-        test.done();
-      })
-
-      db.close();
-    });
-    // END
-  }
-}
-
-/**
- * An example of a simple single server db connection and close function
+ * An example of a simple single server db connection and close function using a Promise.
  *
  * @example-class Db
  * @example-method close
@@ -2737,7 +2613,7 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallbackWi
 }
 
 /**
- * An example of retrieving the collections list for a database.
+ * An example of retrieving the collections list for a database using a Promise.
  *
  * @example-class Db
  * @example-method listCollections
@@ -2818,7 +2694,7 @@ exports.shouldCorrectlyRetrievelistCollectionsWiredTigerWithPromises = {
 }
 
 /**
- * An example of retrieving a collection from a db using the collection function.
+ * An example of retrieving a collection from a db using the collection function with a Promise.
  *
  * @example-class Db
  * @example-method collection
@@ -2862,7 +2738,7 @@ exports.shouldCorrectlyAccessACollectionWithPromises = {
 }
 
 /**
- * An example of retrieving all collections for a db as Collection objects
+ * An example of retrieving all collections for a db as Collection objects using a Promise.
  *
  * @example-class Db
  * @example-method collections
@@ -2897,7 +2773,7 @@ exports.shouldCorrectlyRetrieveAllCollectionsWithPromises = {
 }
 
 /**
- * An example of using the logout command for the database.
+ * An example of using the logout command for the database with a Promise.
  *
  * @example-class Db
  * @example-method logout
@@ -2946,7 +2822,7 @@ exports.shouldCorrectlyLogoutFromTheDatabaseWithPromises = {
 }
 
 /**
- * An example of using the authenticate command.
+ * An example of using the authenticate command with a Promise.
  *
  * @example-class Db
  * @example-method authenticate
@@ -2986,7 +2862,7 @@ exports.shouldCorrectlyAuthenticateAgainstTheDatabaseWithPromises = {
 }
 
 /**
- * An example of adding a user to the database.
+ * An example of adding a user to the database using a Promise.
  *
  * @example-class Db
  * @example-method addUser
@@ -3021,7 +2897,7 @@ exports.shouldCorrectlyAddUserToDbWithPromises = {
 }
 
 /**
- * An example of dereferencing values.
+ * An example of removing a user using a Promise.
  *
  * @example-class Db
  * @example-method removeUser
@@ -3076,7 +2952,7 @@ exports.shouldCorrectlyAddAndRemoveUserWithPromises = {
 }
 
 /**
- * A simple example showing the creation of a collection.
+ * A simple example showing the creation of a collection using a Promise.
  *
  * @example-class Db
  * @example-method createCollection
@@ -3111,7 +2987,7 @@ exports.shouldCorrectlyCreateACollectionWithPromises = {
 }
 
 /**
- * A simple example executing a command against the server.
+ * A simple example creating, dropping a collection and then verifying that the collection is gone using a Promise.
  *
  * @example-class Db
  * @example-method dropCollection
@@ -3160,7 +3036,7 @@ exports.shouldCorrectlyExecuteACommandAgainstTheServerWithPromises = {
 }
 
 /**
- * A simple example creating, dropping a collection and then verifying that the collection is gone.
+ * A simple example executing a command against the server using a Promise.
  *
  * @example-class Db
  * @example-method command
@@ -3251,7 +3127,7 @@ exports.shouldCorrectlyRenameACollectionWithPromises = {
 }
 
 /**
- * A more complex createIndex using a compound unique index in the background and dropping duplicated documents
+ * A more complex createIndex using a compound unique index in the background and dropping duplicated documents using a Promise.
  *
  * @example-class Db
  * @example-method createIndex
@@ -3302,7 +3178,7 @@ exports.shouldCreateOnDbComplexIndexOnTwoFieldsWithPromises = {
 }
 
 /**
- * A more complex ensureIndex using a compound unique index in the background and dropping duplicated documents.
+ * A more complex ensureIndex using a compound unique index in the background and dropping duplicated documents using a Promise.
  *
  * @example-class Db
  * @example-method ensureIndex
@@ -3353,7 +3229,7 @@ exports.shouldCreateComplexEnsureIndexDbWithPromises = {
 }
 
 /**
- * An examples showing the dropping of a database
+ * An examples showing the dropping of a database using a Promise.
  *
  * @example-class Db
  * @example-method dropDatabase
@@ -3412,7 +3288,7 @@ exports.shouldCorrectlyDropTheDatabaseWithPromises = {
 }
 
 /**
- * An example showing how to retrieve the db statistics
+ * An example showing how to retrieve the db statistics using a Promise.
  *
  * @example-class Db
  * @example-method stats
@@ -3444,7 +3320,7 @@ exports.shouldCorrectlyRetrieveDbStatsWithPromisesWithPromises = {
 }
 
 /**
- * Simple example connecting to two different databases sharing the socket connections below.
+ * Simple example connecting to two different databases sharing the socket connections below using a Promise.
  *
  * @example-class Db
  * @example-method db
@@ -3495,7 +3371,7 @@ exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstancesWithPromises
 }
 
 /**
- * Simple replicaset connection setup, requires a running replicaset on the correct ports
+ * Simple replicaset connection setup, requires a running replicaset on the correct ports using a Promise.
  *
  * @example-class Db
  * @example-method open
@@ -3542,7 +3418,7 @@ exports['Should correctly connect with default replicasetNoOption With Promises'
  *************************************************************************/
 
 /**
- * Authenticate against MongoDB Admin user
+ * Authenticate against MongoDB Admin user using a Promise.
  *
  * @example-class Admin
  * @example-method authenticate
@@ -3594,7 +3470,7 @@ exports.shouldCorrectlyAuthenticateWithPromises = {
 }
 
 /**
- * Retrieve the buildInfo for the current MongoDB instance
+ * Retrieve the buildInfo for the current MongoDB instance using a Promise.
  *
  * @example-class Admin
  * @example-method buildInfo
@@ -3644,7 +3520,7 @@ exports.shouldCorrectlyRetrieveBuildInfoWithPromises = {
 }
 
 /**
- * Retrieve the buildInfo using the command function
+ * Retrieve the buildInfo using the command function using a Promise.
  *
  * @example-class Admin
  * @example-method command
@@ -3694,7 +3570,7 @@ exports.shouldCorrectlyRetrieveBuildInfoUsingCommandWithPromises = {
 }
 
 /**
- * Retrieve the current profiling level set for the MongoDB instance
+ * Retrieve the current profiling level set for the MongoDB instance using a Promise.
  *
  * @example-class Admin
  * @example-method profilingLevel
@@ -3751,7 +3627,7 @@ exports.shouldCorrectlySetDefaultProfilingLevelWithPromises = {
 }
 
 /**
- * An example of how to use the setProfilingInfo
+ * An example of how to use the setProfilingInfo using a Promise.
  * Use this command to set the Profiling level on the MongoDB server
  * 
  * @example-class Admin
@@ -3839,7 +3715,7 @@ exports.shouldCorrectlyChangeProfilingLevelWithPromises = {
 }
 
 /**
- * An example of how to use the profilingInfo
+ * An example of how to use the profilingInfo using a Promise.
  * Use this command to pull back the profiling information currently set for Mongodb
  * 
  * @example-class Admin
@@ -3913,7 +3789,7 @@ exports.shouldCorrectlySetAndExtractProfilingInfoWithPromises = {
 }
 
 /**
- * An example of how to use the validateCollection command
+ * An example of how to use the validateCollection command using a Promise.
  * Use this command to check that a collection is valid (not corrupt) and to get various statistics.
  * 
  * @example-class Admin
@@ -3978,7 +3854,7 @@ exports.shouldCorrectlyCallValidateCollectionWithPromises = {
 }
 
 /**
- * An example of how to add a user to the admin database
+ * An example of how to add a user to the admin database using a Promise.
  * 
  * @example-class Admin
  * @example-method ping
@@ -4028,7 +3904,7 @@ exports.shouldCorrectlyPingTheMongoDbInstanceWithPromises = {
 }
 
 /**
- * An example of how add a user, authenticate and logout
+ * An example of how add a user, authenticate and logout using a Promise.
  * 
  * @example-class Admin
  * @example-method logout
@@ -4079,7 +3955,7 @@ exports.shouldCorrectlyUseLogoutFunctionWithPromises = {
 }
 
 /**
- * An example of how to add a user to the admin database
+ * An example of how to add a user to the admin database using a Promise.
  * 
  * @example-class Admin
  * @example-method addUser
@@ -4124,7 +4000,7 @@ exports.shouldCorrectlyAddAUserToAdminDbWithPromises = {
 }
 
 /**
- * An example of how to remove a user from the admin database
+ * An example of how to remove a user from the admin database using a Promise.
  * 
  * @example-class Admin
  * @example-method removeUser
@@ -4175,7 +4051,7 @@ exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDbWithPromises = {
 }
 
 /**
- * An example of listing all available databases.
+ * An example of listing all available databases. using a Promise.
  * 
  * @example-class Admin
  * @example-method listDatabases
@@ -4213,7 +4089,7 @@ exports.shouldCorrectlyListAllAvailableDatabasesWithPromises = {
 }
 
 /**
- * Retrieve the current server Info
+ * Retrieve the current server Info using a Promise.
  *
  * @example-class Admin
  * @example-method serverStatus
@@ -4271,7 +4147,7 @@ exports.shouldCorrectlyRetrieveServerInfoWithPromises = {
 }
 
 /**
- * Retrieve the current replicaset status if the server is running as part of a replicaset
+ * Retrieve the current replicaset status if the server is running as part of a replicaset using a Promise.
  *
  * @example-class Admin
  * @example-method replSetGetStatus
@@ -4338,7 +4214,7 @@ exports.shouldCorrectlyRetrieveReplSetGetStatusWithPromises = {
 var fs = require('fs');
 
 /**
- * An example showing the information returned by indexInformation
+ * An example showing the information returned by indexInformation using a Promise.
  *
  * @example-class Cursor
  * @example-method toArray
@@ -4383,168 +4259,7 @@ exports.shouldCorrectlyExecuteToArrayWithPromises = {
 }
 
 /**
- * A simple example iterating over a query using the each function of the cursor.
- *
- * @example-class Cursor
- * @example-method each
- * @ignore
- */
-exports.shouldCorrectlyFailToArrayDueToFinishedEachOperationWithPromises = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open().then(function(db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
-
-      // Create a collection
-      var collection = db.collection('test_to_a_after_each_with_promise');
-
-      // Insert a document in the collection
-      collection.insertOne({'a':1}, configuration.writeConcernMax()).then(function(ids) {
-
-        // Grab a cursor
-        var cursor = collection.find();
-        // Execute the each command, triggers for each document
-        cursor.each(function(err, item) {
-
-          // If the item is null then the cursor is exhausted/empty and closed
-          if(item == null) {
-            // Show that the cursor is closed
-            cursor.toArray().then(function(items) {
-              // Let's close the db
-              db.close();
-              test.done();
-            });
-          };
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
- * A simple example iterating over a query using the forEach function of the cursor.
- *
- * @example-class Cursor
- * @example-method forEach
- * @ignore
- */
-exports['Should correctly iterate over cursor using forEach With Promises'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open().then(function(db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
-
-      // Create a collection
-      var collection = db.collection('test_to_a_after_for_each_with_promise');
-
-      // Insert a document in the collection
-      collection.insertOne({'a':1}, configuration.writeConcernMax()).then(function(ids) {
-        // Count of documents returned
-        var count = 0;
-        // Grab a cursor
-        var cursor = collection.find();
-        // Execute the each command, triggers for each document
-        cursor.forEach(function(doc) {
-          test.ok(doc != null);
-          count = count + 1;
-        }, function(err) {
-          test.equal(1, count);
-          db.close();
-          test.done();
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
- * An example showing the information returned by indexInformation
- *
- * @example-class Cursor
- * @example-method rewind
- * @ignore
- */
-exports['Should correctly rewind and restart cursor With Promises'] = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open().then(function(db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
-      var docs = [];
-
-      // Insert 100 documents with some data
-      for(var i = 0; i < 100; i++) {
-        var d = new Date().getTime() + i*1000;
-        docs[i] = {'a':i, createdAt:new Date(d)};
-      }
-
-      // Create collection
-      var collection = db.collection('Should_correctly_rewind_and_restart_cursor_with_promise');
-
-      // insert all docs
-      collection.insertMany(docs, configuration.writeConcernMax()).then(function(result) {
-
-        // Grab a cursor using the find
-        var cursor = collection.find({});
-        // Fetch the first object off the cursor
-        cursor.nextObject().then(function(item) {
-          test.equal(0, item.a)
-          // Rewind the cursor, resetting it to point to the start of the query
-          cursor.rewind();
-
-          // Grab the first object again
-          cursor.nextObject().then(function(item) {
-            test.equal(0, item.a)
-
-            db.close();
-            test.done();
-          });
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
- * A simple example showing the count function of the cursor.
+ * A simple example showing the count function of the cursor using a Promise.
  *
  * @example-class Cursor
  * @example-method count
@@ -4588,189 +4303,7 @@ exports.shouldCorrectlyUseCursorCountFunctionWithPromises = {
 }
 
 /**
- * A simple example showing the use of sort on the cursor.
- *
- * @example-class Cursor
- * @example-method sort
- * @ignore
- */
-exports.shouldCorrectlyPeformSimpleSortsWithPromises = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open().then(function(db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
-
-      // Create a collection
-      var collection = db.collection('simple_sort_collection_with_promise');
-
-      // Insert some documents we can sort on
-      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax()).then(function(docs) {
-
-        // Do normal ascending sort
-        collection.find().sort([['a', 1]]).nextObject().then(function(item) {
-          test.equal(1, item.a);
-
-          // Do normal descending sort
-          collection.find().sort([['a', -1]]).nextObject().then(function(item) {
-            test.equal(3, item.a);
-
-            db.close();
-            test.done();
-          });
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
- * A simple example showing the use of limit on the cursor
- *
- * @example-class Cursor
- * @example-method limit
- * @ignore
- */
-exports.shouldCorrectlyPeformLimitOnCursorWithPromises = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open().then(function(db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
-
-      // Create a collection
-      var collection = db.collection('simple_limit_collection_with_promise');
-
-      // Insert some documents we can sort on
-      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax()).then(function(docs) {
-
-        // Limit to only one document returned
-        collection.find().limit(1).toArray().then(function(items) {
-          test.equal(1, items.length);
-
-          db.close();
-          test.done();
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
- * A simple example showing the use of skip on the cursor
- *
- * @example-class Cursor
- * @example-method skip
- * @ignore
- */
-exports.shouldCorrectlyPeformSkipOnCursorWithPromises = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open().then(function(db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
-
-      // Create a collection
-      var collection = db.collection('simple_skip_collection_with_promise');
-
-      // Insert some documents we can sort on
-      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax()).then(function(docs) {
-
-        // Skip one document
-        collection.find().skip(1).nextObject().then(function(item) {
-          test.equal(2, item.a);
-
-          db.close();
-          test.done();
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
- * A simple example showing the use of batchSize on the cursor, batchSize only regulates how many
- * documents are returned for each batch using the getMoreCommand against the MongoDB server
- *
- * @example-class Cursor
- * @example-method batchSize
- * @ignore
- */
-exports.shouldCorrectlyPeformBatchSizeOnCursorWithPromises = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open().then(function(db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
-
-      // Create a collection
-      var collection = db.collection('simple_batch_size_collection_with_promise');
-
-      // Insert some documents we can sort on
-      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax()).then(function(docs) {
-
-        // Do normal ascending sort
-        collection.find().batchSize(1).nextObject().then(function(item) {
-          test.equal(1, item.a);
-
-          db.close();
-          test.done();
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
- * A simple example showing the use of nextObject.
+ * A simple example showing the use of nextObject using a Promise.
  *
  * @example-class Cursor
  * @example-method nextObject
@@ -4814,7 +4347,7 @@ exports.shouldCorrectlyPeformNextObjectOnCursorWithPromises = {
 }
 
 /**
- * A simple example showing the use of the cursor explain function.
+ * A simple example showing the use of the cursor explain function using a Promise.
  *
  * @example-class Cursor
  * @example-method explain
@@ -4856,117 +4389,7 @@ exports.shouldCorrectlyPeformSimpleExplainCursorWithPromises = {
 }
 
 /**
- * A simple example showing the use of the cursor stream function.
- *
- * @example-class Cursor
- * @example-method stream
- * @ignore
- */
-exports.shouldStreamDocumentsUsingTheStreamFunctionWithPromises = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open().then(function(db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
-
-      // Create a lot of documents to insert
-      var docs = []
-      for(var i = 0; i < 100; i++) {
-        docs.push({'a':i})
-      }
-
-      // Create a collection
-      var collection = db.collection('test_stream_function_with_promise');
-
-      // Insert documents into collection
-      collection.insertMany(docs, configuration.writeConcernMax()).then(function(ids) {
-        // Peform a find to get a cursor
-        var stream = collection.find().stream();
-
-        // Execute find on all the documents
-        stream.on('end', function() {
-          db.close();
-          test.done();
-        });
-
-        stream.on('data', function(data) {
-          test.ok(data != null);
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
- * A simple example showing the use of the cursor close function.
- *
- * @example-class Cursor
- * @example-method isClosed
- * @ignore
- */
-exports.shouldStreamDocumentsUsingTheIsCloseFunctionWithPromises = {
-  // Add a tag that our runner can trigger on
-  // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    db.open().then(function(db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
-
-      // Create a lot of documents to insert
-      var docs = []
-      for(var i = 0; i < 100; i++) {
-        docs.push({'a':i})
-      }
-
-      // Create a collection
-      var collection = db.collection('test_is_close_function_on_cursor_with_promise');
-
-      // Insert documents into collection
-      collection.insertMany(docs, configuration.writeConcernMax()).then(function(ids) {
-        // Peform a find to get a cursor
-        var cursor = collection.find();
-
-        // Fetch the first object
-        cursor.nextObject().then(function(object) {
-
-          // Close the cursor, this is the same as reseting the query
-          cursor.close().then(function(result) {
-            test.equal(true, cursor.isClosed());
-
-            db.close();
-            test.done();
-          });
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
- * A simple example showing the use of the cursor close function.
+ * A simple example showing the use of the cursor close function using a Promise.
  *
  * @example-class Cursor
  * @example-method close
@@ -5019,123 +4442,6 @@ exports.shouldStreamDocumentsUsingTheCloseFunctionWithPromises = {
   }
 }
 
-/**
- * A simple example showing the use of the cursorstream pause function.
- *
- * @example-class Cursor
- * @example-method stream
- * @ignore
- */
-exports.shouldStreamDocumentsUsingTheCursorStreamPauseFunctionWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
-
-    db.open().then(function(db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
-
-      // Create a lot of documents to insert
-      var docs = []
-      var fetchedDocs = [];
-      for(var i = 0; i < 2; i++) {
-        docs.push({'a':i})
-      }
-
-      // Create a collection
-      var collection = db.collection('test_cursorstream_pause_with_promise');
-
-      // Insert documents into collection
-      collection.insertMany(docs, {w:1}).then(function(ids) {
-        // Peform a find to get a cursor
-        var stream = collection.find().stream();
-
-        // For each data item
-        stream.on("data", function(item) {
-          fetchedDocs.push(item)
-          // Pause stream
-          stream.pause();
-
-          // Restart the stream after 1 miliscecond
-          setTimeout(function() {
-            fetchedDocs.push(null);
-            stream.resume();
-          }, 1);
-        });
-
-        // When the stream is done
-        stream.on("end", function() {
-          test.equal(null, fetchedDocs[1]);
-          db.close();
-          test.done();
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
- * A simple example showing the use of the cursorstream resume function.
- *
- * @example-class Cursor
- * @example-method destroy
- * @ignore
- */
-exports.shouldStreamDocumentsUsingTheCursorStreamDestroyFunctionWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
-
-    db.open().then(function(db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
-
-      // Create a lot of documents to insert
-      var docs = []
-      for(var i = 0; i < 1; i++) {
-        docs.push({'a':i})
-      }
-
-      // Create a collection
-      var collection = db.collection('test_cursorstream_destroy_with_promise');
-
-      // Insert documents into collection
-      collection.insertMany(docs, {w:1}).then(function(ids) {
-        // Peform a find to get a cursor
-        var stream = collection.find().stream();
-
-        // For each data item
-        stream.on("data", function(item) {
-          // Destroy stream
-          stream.destroy();
-        });
-
-        // When the stream is done
-        stream.on("close", function() {
-          db.close();
-          test.done();
-        });
-      });
-    });
-    // END
-  }
-}
-
 /**************************************************************************
  *
  * MONGOCLIENT TESTS
@@ -5143,7 +4449,7 @@ exports.shouldStreamDocumentsUsingTheCursorStreamDestroyFunctionWithPromises = {
  *************************************************************************/
 
 /**
- * Example of a simple url connection string to a replicaset, with acknowledgement of writes.
+ * Example of a simple url connection string to a replicaset, with acknowledgement of writes using a Promise.
  *
  * @example-class MongoClient
  * @example-method MongoClient.connect
@@ -5165,7 +4471,7 @@ exports['Should correctly connect to a replicaset With Promises'] = {
       , configuration.replicasetName
       , "primary");
 
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url).then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:30000,localhost:30001,localhost:30002/test?replicaSet=rs', function(err, db) {
@@ -5187,7 +4493,7 @@ exports['Should correctly connect to a replicaset With Promises'] = {
 }
 
 /**
- * Example of a simple url connection string to a shard, with acknowledgement of writes.
+ * Example of a simple url connection string to a shard, with acknowledgement of writes using a Promise.
  *
  * @example-class MongoClient
  * @example-method MongoClient.connect
@@ -5204,7 +4510,7 @@ exports['Should connect to mongos proxies using connectiong string With Promises
       , configuration.host, configuration.port
       , configuration.host, configuration.port + 1);
 
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url).then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:50000,localhost:50001/test', function(err, db) {
@@ -5243,7 +4549,7 @@ exports['Should correctly connect using MongoClient to a single server using con
       , Server = configuration.require.Server;
     // DOC_START
     // Connect using the connection string  
-    MongoClient.connect("mongodb://localhost:27017/integration_tests", {native_parser:true}, function(err, db) {
+    MongoClient.connect("mongodb://localhost:27017/integration_tests", {native_parser:true}).then(function(db) {
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -5269,7 +4575,7 @@ exports['Should correctly connect using MongoClient to a single server using con
  *************************************************************************/
 
 /**
- * A simple example showing the usage of the Gridstore.exist method.
+ * A simple example showing the usage of the Gridstore.exist method using a Promise.
  *
  * @example-class GridStore
  * @example-method GridStore.exist
@@ -5330,7 +4636,7 @@ exports.shouldCorrectlyExecuteGridStoreExistsByObjectIdWithPromises = {
 }
 
 /**
- * A simple example showing the usage of the eof method.
+ * A simple example showing the usage of the eof method using a Promise.
  *
  * @example-class GridStore
  * @example-method GridStore.list
@@ -5448,7 +4754,7 @@ exports.shouldCorrectlyExecuteGridStoreListWithPromises = {
 }
 
 /**
- * A simple example showing the usage of the puts method.
+ * A simple example showing the usage of the puts method using a Promise.
  *
  * @example-class GridStore
  * @example-method puts
@@ -5497,7 +4803,7 @@ exports.shouldCorrectlyReadlinesAndPutLinesWithPromises = {
 }
 
 /**
- * A simple example showing the usage of the GridStore.unlink method.
+ * A simple example showing the usage of the GridStore.unlink method using a Promise.
  *
  * @example-class GridStore
  * @example-method GridStore.unlink
@@ -5577,7 +4883,7 @@ exports.shouldCorrectlyUnlinkWithPromises = {
 }
 
 /**
- * A simple example showing the usage of the read method.
+ * A simple example showing the usage of the read method using a Promise.
  *
  * @example-class GridStore
  * @example-method read
@@ -5636,7 +4942,7 @@ exports.shouldCorrectlyWriteAndReadJpgImageWithPromises = {
 }
 
 /**
- * A simple example showing opening a file using a filename, writing to it and saving it.
+ * A simple example showing opening a file using a filename, writing to it and saving it using a Promise.
  *
  * @example-class GridStore
  * @example-method open
@@ -5687,7 +4993,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingFilenameWithPromises = {
 }
 
 /**
- * A simple example showing opening a file using an ObjectID, writing to it and saving it.
+ * A simple example showing opening a file using an ObjectID, writing to it and saving it using a Promise.
  *
  * @example-class GridStore
  * @example-method open
@@ -5741,7 +5047,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingObjectIDWithPromises = {
 }
 
 /**
- * A simple example showing how to write a file to Gridstore using file location path.
+ * A simple example showing how to write a file to Gridstore using file location path using a Promise.
  *
  * @example-class GridStore
  * @example-method writeFile
@@ -5797,7 +5103,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithPromises = {
 }
 
 /**
- * A simple example showing how to write a file to Gridstore using a file handle.
+ * A simple example showing how to write a file to Gridstore using a file handle using a Promise.
  *
  * @example-class GridStore
  * @example-method writeFile
@@ -5856,7 +5162,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandleWithProm
 }
 
 /**
- * A simple example showing how to use the write command with strings and Buffers.
+ * A simple example showing how to use the write command with strings and Buffers using a Promise.
  *
  * @example-class GridStore
  * @example-method write
@@ -5914,7 +5220,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffersW
 }
 
 /**
- * A simple example showing how to use the write command with strings and Buffers.
+ * A simple example showing how to use the write command with strings and Buffers using a Promise.
  *
  * @example-class GridStore
  * @example-method close
@@ -5963,53 +5269,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseWithPromises = {
 }
 
 /**
- * A simple example showing how to access the chunks collection object.
- *
- * @example-class GridStore
- * @example-method chunkCollection
- * @ignore
- */
-exports.shouldCorrectlyAccessChunkCollectionWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open().then(function(db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-      // Our file ID
-      var fileId = new ObjectID();
-
-      // Open a new file
-      var gridStore = new GridStore(db, fileId, 'w');
-
-      // Open the new file
-      gridStore.open().then(function(gridStore) {
-
-        // Access the Chunk collection
-        gridStore.chunkCollection(function(err, collection) {
-          test.equal(err, null);
-
-          db.close();
-          test.done();
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
- * A simple example showing how to use the instance level unlink command to delete a gridstore item.
+ * A simple example showing how to use the instance level unlink command to delete a gridstore item using a Promise.
  *
  * @example-class GridStore
  * @example-method unlink
@@ -6071,53 +5331,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkItWithPro
 }
 
 /**
- * A simple example showing how to access the files collection object.
- *
- * @example-class GridStore
- * @example-method collection
- * @ignore
- */
-exports.shouldCorrectlyAccessFilesCollectionWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open().then(function(db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-      // Our file ID
-      var fileId = new ObjectID();
-
-      // Open a new file
-      var gridStore = new GridStore(db, fileId, 'w');
-
-      // Open the new file
-      gridStore.open().then(function(gridStore) {
-
-        // Access the Chunk collection
-        gridStore.collection(function(err, collection) {
-          test.equal(err, null);
-
-          db.close();
-          test.done();
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
- * A simple example showing reading back using readlines to split the text into lines by the seperator provided.
+ * A simple example showing reading back using readlines to split the text into lines by the separator provided using a Promise.
  *
  * @example-class GridStore
  * @example-method GridStore.readlines
@@ -6179,7 +5393,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlinesWithPromises =
 }
 
 /**
- * A simple example showing reading back using readlines to split the text into lines by the seperator provided.
+ * A simple example showing reading back using readlines to split the text into lines by the separator provided using a Promise.
  *
  * @example-class GridStore
  * @example-method readlines
@@ -6246,7 +5460,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlinesWithPr
 }
 
 /**
- * A simple example showing the usage of the read method.
+ * A simple example showing the usage of the read method using a Promise.
  *
  * @example-class GridStore
  * @example-method GridStore.read
@@ -6296,181 +5510,8 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreReadWithPromises = {
   }
 }
 
-/**
- * A simple example showing the usage of the stream method.
- *
- * @example-class GridStore
- * @example-method stream
- * @ignore
- */
-exports.shouldCorrectlyReadFileUsingStreamWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open().then(function(db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-      // Open a file for reading
-      var gridStoreR = new GridStore(db, "test_gs_read_stream", "r");
-      // Open a file for writing
-      var gridStoreW = new GridStore(db, "test_gs_read_stream", "w");
-      // Read in the data of a file
-      var data = fs.readFileSync("./test/functional/data/test_gs_weird_bug.png");
-
-      var readLen = 0;
-      var gotEnd = 0;
-      
-      // Open the file we are writting to
-      gridStoreW.open().then(function(gs) {
-        // Write the file content
-        gs.write(data).then(function(gs) {
-          // Flush the file to GridFS
-          gs.close().then(function(result) {
-            
-            // Open the read file
-            gridStoreR.open().then(function(gs) {
-              // Create a stream to the file
-              var stream = gs.stream();
-              
-              // Register events
-              stream.on("data", function(chunk) {
-                // Record the length of the file
-                readLen += chunk.length;
-              });
-
-              stream.on("end", function() {              
-                // Verify the correctness of the read data
-                test.equal(data.length, readLen);              
-                db.close();
-                test.done();
-              });
-            });
-          });
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
- * A simple example showing how to pipe a to a gridstore object
- *
- * @example-class GridStore
- * @example-method stream
- * @ignore
- */
-exports.shouldCorrectlyStreamWriteToGridStoreObjectWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , ObjectID = configuration.require.ObjectID;
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    client.open(function(err, client) {      
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-      // Set up gridStore
-      var gridStore = new GridStore(client, "test_stream_write", "w");
-      var stream = gridStore.stream();
-      // Create a file reader stream to an object
-      var fileStream = fs.createReadStream("./test/functional/data/test_gs_working_field_read.pdf");
-      stream.on("end", function(err) {
-        // Just read the content and compare to the raw binary
-        GridStore.read(client, "test_stream_write").then(function(gridData) {
-          var fileData = fs.readFileSync("./test/functional/data/test_gs_working_field_read.pdf");
-          test.equal(fileData.toString('hex'), gridData.toString('hex'));
-          client.close();
-          test.done();
-        })
-      });
-
-      // Pipe it through to the gridStore
-      fileStream.pipe(stream);
-    });
-    // END
-  }
-}
-
-/**
- * A simple example showing how to pipe a file stream through from gridfs to a file
- *
- * @example-class GridStore
- * @example-method stream
- * @ignore
- */
-exports.shouldCorrectlyPipeAGridFsToAfile = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore;    
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open().then(function(db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-      // Open a file for writing
-      var gridStoreWrite = new GridStore(db, "test_gs_read_stream_pipe", "w", {chunkSize:1024});
-      gridStoreWrite.writeFile("./test/functional/data/test_gs_weird_bug.png").then(function(result) {
-        test.ok(result != null);        
-        // Open the gridStore for reading and pipe to a file
-        var gridStore = new GridStore(db, "test_gs_read_stream_pipe", "r");
-        gridStore.open().then(function(gridStore) {
-          // Create a file write stream
-          var fileStream = fs.createWriteStream("./test_gs_weird_bug_streamed.tmp");
-          // Grab the read stream
-          var stream = gridStore.stream();
-          // When the stream is finished close the database
-          fileStream.on("close", function(err) {
-            // Read the original content
-            var originalData = fs.readFileSync("./test/functional/data/test_gs_weird_bug.png");
-            // Ensure we are doing writing before attempting to open the file
-            fs.readFile("./test_gs_weird_bug_streamed.tmp", function(err, streamedData) {                      
-              // Compare the data
-              for(var i = 0; i < originalData.length; i++) {
-                test.equal(originalData[i], streamedData[i])
-              }
-              
-              // Close the database
-              db.close();
-              test.done();          
-            });
-          });
-
-          // Pipe out the data
-          stream.pipe(fileStream);
-        })
-      })
-    });
-    // END
-  }
-}
-
-/**
- * A simple example showing the usage of the seek method.
+/*
+ * A simple example showing the usage of the seek method using a Promise.
  *
  * @example-class GridStore
  * @example-method seek
@@ -6589,7 +5630,7 @@ exports.shouldCorrectlySeekWithBufferWithPromises = {
 }
 
 /**
- * A simple example showing how to rewind and overwrite the file.
+ * A simple example showing how to rewind and overwrite the file using a Promise.
  *
  * @example-class GridStore
  * @example-method rewind
@@ -6660,53 +5701,7 @@ exports.shouldCorrectlyRewingAndTruncateOnWriteWithPromises = {
 }
 
 /**
- * A simple example showing the usage of the eof method.
- *
- * @example-class GridStore
- * @example-method eof
- * @ignore
- */
-exports.shouldCorrectlyDetectEOFWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open().then(function(db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   GridStore = require('mongodb').GridStore,
-    // LINE   ObjectID = require('mongodb').ObjectID,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-
-      // Open the file in write mode
-      var gridStore = new GridStore(db, 'test_gs_empty_file_eof', "w");
-      gridStore.open().then(function(gridStore) {
-        // Flush the empty file to GridFS
-        gridStore.close().then(function(gridStore) {
-
-          // Open the file in read mode
-          var gridStore2 = new GridStore(db, 'test_gs_empty_file_eof', "r");
-          gridStore2.open().then(function(gridStore) {
-            // Verify that we are at the end of the file
-            test.equal(true, gridStore.eof());
-
-            db.close();
-            test.done();
-          })
-        });
-      });
-    });
-    // END
-  }
-}
-
-/**
- * A simple example showing the usage of the tell method.
+ * A simple example showing the usage of the tell method using a Promise.
  *
  * @example-class GridStore
  * @example-method tell
@@ -6763,7 +5758,7 @@ exports.shouldCorrectlyExecuteGridstoreTellWithPromises = {
 }
 
 /**
- * A simple example showing the usage of the seek method.
+ * A simple example showing the usage of the seek method using a Promise.
  *
  * @example-class GridStore
  * @example-method getc
@@ -6814,7 +5809,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithPromises = {
 }
 
 /**
- * A simple example showing how to save a file with a filename allowing for multiple files with the same name
+ * A simple example showing how to save a file with a filename allowing for multiple files with the same name using a Promise.
  *
  * @example-class GridStore
  * @example-method open
@@ -6887,206 +5882,6 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithPromises = {
   }
 }
 
-/**
- * A simple example showing the use of the readstream pause function.
- *
- * @example-class GridStoreStream
- * @example-method pause
- * @ignore
- */
-exports.shouldStreamDocumentsUsingTheReadStreamPauseFunctionWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-
-    db.open().then(function(db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-      // File id
-      var fileId = new ObjectID();
-      // Create a file
-      var file = new GridStore(db, fileId, "w", {chunk_size:5});
-      file.open().then(function(file) {      
-        // Write some content and flush to disk
-        file.write('Hello world').then(function(file) {        
-          file.close().then(function(result) {
-            
-            // Let's create a read file
-            file = new GridStore(db, fileId, "r");
-            // Open the file
-            file.open().then(function(file) {            
-              // Peform a find to get a cursor
-              var stream = file.stream();
-
-              // For each data item
-              stream.on("data", function(item) {
-                // Pause stream
-                stream.pause();
-                // Restart the stream after 1 miliscecond
-                setTimeout(function() {
-                  stream.resume();
-                }, 100);          
-              });
-
-              // For each data item
-              stream.on("end", function(item) {
-                db.close();
-                test.done();          
-              });
-            });
-          });        
-        });      
-      });
-    });
-    // END
-  }
-}
-
-/**
- * A simple example showing the use of the readstream resume function.
- *
- * @example-class GridStoreStream
- * @example-method resume
- * @ignore
- */
-exports.shouldStreamDocumentsUsingTheReadStreamResumeFunctionWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-
-    db.open().then(function(db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-      // File id
-      var fileId = new ObjectID();
-      // Create a file
-      var file = new GridStore(db, fileId, "w", {chunk_size:5});
-      file.open().then(function(file) {      
-        // Write some content and flush to disk
-        var fileBody = 'Hello world';
-        file.write(fileBody).then(function(file) {        
-          file.close().then(function(result) {
-            // Let's create a read file
-            file = new GridStore(db, fileId, "r");
-
-            // Open the file
-            file.open().then(function(file) {            
-              // Peform a find to get a cursor
-              var stream = file.stream(true);
-
-              // Pause the stream initially
-              stream.pause();
-
-              // Save read content here
-              var fileBuffer = '';
-
-              // For each data item
-              stream.on("data", function(item) {
-                // Pause stream
-                stream.pause();
-
-                fileBuffer += item.toString('utf8');
-
-                // Restart the stream after 1 miliscecond
-                setTimeout(function() {
-                  stream.resume();
-                }, 100);
-              });
-
-              // For each data item
-              stream.on("end", function(item) {
-                // Have we received the same file back?
-                test.equal(fileBuffer, fileBody);
-                db.close();
-                test.done();          
-              });
-
-              // Resume the stream
-              stream.resume();
-            });
-          });        
-        });      
-      });
-    });
-    // END
-  }
-}
-
-/**
- * A simple example showing the use of the readstream destroy function.
- *
- * @example-class GridStoreStream
- * @example-method destroy
- * @ignore
- */
-exports.shouldStreamDocumentsUsingTheReadStreamDestroyFunctionWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var GridStore = configuration.require.GridStore
-      , ObjectID = configuration.require.ObjectID;
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-
-    db.open().then(function(db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-      // File id
-      var fileId = new ObjectID();
-      // Create a file
-      var file = new GridStore(db, fileId, "w");
-      file.open().then(function(file) {      
-        // Write some content and flush to disk
-        file.write('Hello world').then(function(file) {        
-          file.close().then(function(result) {
-            
-            // Let's create a read file
-            file = new GridStore(db, fileId, "r");
-            // Open the file
-            file.open().then(function(file) {            
-              // Peform a find to get a cursor
-              var stream = file.stream();
-
-              // For each data item
-              stream.on("data", function(item) {
-                // Destroy the stream
-                stream.destroy();
-              });
-
-              // When the stream is done
-              stream.on("end", function() {
-                db.close();
-                test.done();          
-              });        
-            });
-          });        
-        });      
-      });
-    });
-    // END
-  }
-}
-
 /**************************************************************************
  *
  * BULK TESTS
@@ -7094,7 +5889,7 @@ exports.shouldStreamDocumentsUsingTheReadStreamDestroyFunctionWithPromises = {
  *************************************************************************/
 
 /**
- * Example of a simple ordered insert/update/upsert/remove ordered collection
+ * Example of a simple ordered insert/update/upsert/remove ordered collection using a Promise.
  *
  * @example-class Collection
  * @example-method initializeOrderedBulkOp
@@ -7152,7 +5947,7 @@ exports['Should correctly execute ordered batch with no errors using write comma
 }
 
 /**
- * Example of a simple ordered insert/update/upsert/remove ordered collection
+ * Example of a simple ordered insert/update/upsert/remove ordered collection using a Promise.
  *
  *
  * @example-class Collection
@@ -7218,7 +6013,7 @@ exports['Should correctly execute unordered batch with no errors With Promises']
  *************************************************************************/
 
 /**
- * Example of a simple insertOne operation
+ * Example of a simple insertOne operation using a Promise.
  *
  * @example-class Collection
  * @example-method insertOne
@@ -7251,7 +6046,7 @@ exports['Should correctly execute insertOne operation With Promises'] = {
 }
 
 /**
- * Example of a simple insertMany operation
+ * Example of a simple insertMany operation using a Promise.
  *
  * @example-class Collection
  * @example-method insertMany
@@ -7284,7 +6079,7 @@ exports['Should correctly execute insertMany operation With Promises'] = {
 }
 
 /**
- * Example of a simple updateOne operation
+ * Example of a simple updateOne operation using a Promise.
  *
  * @example-class Collection
  * @example-method updateOne
@@ -7320,7 +6115,7 @@ exports['Should correctly execute updateOne operation With Promises'] = {
 }
 
 /**
- * Example of a simple updateMany operation
+ * Example of a simple updateMany operation using a Promise.
  *
  * @example-class Collection
  * @example-method updateMany
@@ -7360,7 +6155,7 @@ exports['Should correctly execute updateMany operation With Promises'] = {
 }
 
 /**
- * Example of a simple removeOne operation
+ * Example of a simple removeOne operation using a Promise.
  *
  * @example-class Collection
  * @example-method removeOne
@@ -7397,7 +6192,7 @@ exports['Should correctly execute removeOne operation With Promises'] = {
 }
 
 /**
- * Example of a simple removeMany operation
+ * Example of a simple removeMany operation using a Promise.
  *
  * @example-class Collection
  * @example-method removeMany
@@ -7436,7 +6231,7 @@ exports['Should correctly execute removeMany operation With Promises'] = {
 }
 
 /**
- * Example of a simple bulkWrite operation
+ * Example of a simple bulkWrite operation using a Promise.
  *
  * @example-class Collection
  * @example-method bulkWrite
@@ -7488,7 +6283,7 @@ exports['Should correctly execute bulkWrite operation With Promises'] = {
 }
 
 /**
- * Example of a simple findOneAndDelete operation
+ * Example of a simple findOneAndDelete operation using a Promise.
  *
  * @example-class Collection
  * @example-method findOneAndDelete
@@ -7528,7 +6323,7 @@ exports['Should correctly execute findOneAndDelete operation With Promises'] = {
 }
 
 /**
- * Example of a simple findOneAndReplace operation
+ * Example of a simple findOneAndReplace operation using a Promise.
  *
  * @example-class Collection
  * @example-method findOneAndReplace
@@ -7575,7 +6370,7 @@ exports['Should correctly execute findOneAndReplace operation With Promises'] = 
 }
 
 /**
- * Example of a simple findOneAndUpdate operation
+ * Example of a simple findOneAndUpdate operation using a Promise.
  *
  * @example-class Collection
  * @example-method findOneAndUpdate
@@ -7622,7 +6417,7 @@ exports['Should correctly execute findOneAndUpdate operation With Promises'] = {
 }
 
 /**
- * A simple example showing the listening to a capped collection
+ * A simple example showing the listening to a capped collection using a Promise.
  *
  * @example-class Db
  * @example-method createCollection
