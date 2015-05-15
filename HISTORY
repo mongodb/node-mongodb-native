@@ -1,3 +1,7 @@
+1.4.38
+-----------------
+- NODE-463 db.close immediately executes its callback.
+
 1.4.37 2015-05-08
 -----------------
 - NODE-461 Tripping on error "no chunks found for file, possibly corrupt" when there is no error.

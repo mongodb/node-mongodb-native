@@ -37,7 +37,7 @@ exports['Should fail due to w:5 and wtimeout:1 with ordered batch api'] = {
     // Create url
     var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
       , format("%s:%s", configuration.host, configuration.port)
-      , format("%s:%s", configuration.host, configuration.host + 1)
+      , format("%s:%s", configuration.host, configuration.port + 1)
       , "integration_test_"
       , configuration.replicasetName
       , "primary");
@@ -349,7 +349,7 @@ exports['Should Correctly group using replicaset'] = {
     // Create url
     var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
       , format("%s:%s", configuration.host, configuration.port)
-      , format("%s:%s", configuration.host, configuration.host + 1)
+      , format("%s:%s", configuration.host, configuration.port + 1)
       , "integration_test_"
       , configuration.replicasetName
       , "primary");
@@ -394,7 +394,7 @@ exports['Should fail to do map reduce to out collection'] = {
     // Create url
     var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
       , format("%s:%s", configuration.host, configuration.port)
-      , format("%s:%s", configuration.host, configuration.host + 1)
+      , format("%s:%s", configuration.host, configuration.port + 1)
       , "integration_test_"
       , configuration.replicasetName
       , "primary");
