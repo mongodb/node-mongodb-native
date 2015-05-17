@@ -801,13 +801,19 @@ var pickServer = function(self, s, readPreference) {
     return server;
   }
 
+  // Filter out any hidden secondaries
+  var secondaries = s.replState.secondaries.filter(function(server) {
+    if(server.lastIsMaster().hidden) return false;
+    return true;
+  });
+
   // Check if we can satisfy and of the basic read Preferences
   if(readPreference.equals(ReadPreference.secondary)
-    && s.replState.secondaries.length == 0)
+    && secondaries.length == 0)
       throw new MongoError("no secondary server available");
 
   if(readPreference.equals(ReadPreference.secondaryPreferred)
-      && s.replState.secondaries.length == 0
+      && secondaries.length == 0
       && s.replState.primary == null)
     throw new MongoError("no secondary or primary server available");
 
@@ -817,15 +823,15 @@ var pickServer = function(self, s, readPreference) {
 
   // Secondary
   if(readPreference.equals(ReadPreference.secondary)) {
-    s.index = (s.index + 1) % s.replState.secondaries.length;
-    return s.replState.secondaries[s.index];
+    s.index = (s.index + 1) % secondaries.length;
+    return secondaries[s.index];
   }
 
   // Secondary preferred
   if(readPreference.equals(ReadPreference.secondaryPreferred)) {
-    if(s.replState.secondaries.length > 0) {
+    if(secondaries.length > 0) {
       // Apply tags if present
-      var servers = filterByTags(readPreference, s.replState.secondaries);
+      var servers = filterByTags(readPreference, secondaries);
       // If have a matching server pick one otherwise fall through to primary
       if(servers.length > 0) {
         s.index = (s.index + 1) % servers.length;
@@ -840,9 +846,9 @@ var pickServer = function(self, s, readPreference) {
   if(readPreference.equals(ReadPreference.primaryPreferred)) {
     if(s.replState.primary) return s.replState.primary;
 
-    if(s.replState.secondaries.length > 0) {
+    if(secondaries.length > 0) {
       // Apply tags if present
-      var servers = filterByTags(readPreference, s.replState.secondaries);
+      var servers = filterByTags(readPreference, secondaries);
       // If have a matching server pick one otherwise fall through to primary
       if(servers.length > 0) {
         s.index = (s.index + 1) % servers.length;
