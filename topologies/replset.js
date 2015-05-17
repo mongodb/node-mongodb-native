@@ -576,6 +576,20 @@ ReplSet.prototype.auth = function(mechanism, db) {
 ReplSet.prototype.state = function() {
   return this.s.replState.state;
 }
+  
+/**
+ * Ensure single socket connections to arbiters and hidden servers
+ * @method
+ */
+var handleIsmaster = function(self) {
+  return function(ismaster, _server) {
+    if(ismaster.arbiterOnly) {
+      _server.s.options.size = 1;
+    } else if(ismaster.hidden) {
+      _server.s.options.size = 1;
+    }
+  }
+}
 
 /**
  * Initiate server connect
@@ -609,6 +623,8 @@ ReplSet.prototype.connect = function(_options) {
     opts.authProviders = self.s.authProviders;
     // Create a new Server
     var server = new Server(opts);
+    // Handle the ismaster
+    server.on('ismaster', handleIsmaster(self));
     // Add to list of disconnected servers
     self.s.disconnectedServers.push(server);
     // Add to list of inflight Connections
@@ -1184,6 +1200,8 @@ var connectToServer = function(self, state, host, port) {
   opts.emitError = true;
   // Create a new server instance
   var server = new Server(opts);
+  // Handle the ismaster
+  server.on('ismaster', handleIsmaster(self));
   // Set up the event handlers
   server.once('error', errorHandlerTemp(self, state, 'error'));
   server.once('close', errorHandlerTemp(self, state, 'close'));
