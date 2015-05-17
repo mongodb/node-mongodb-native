@@ -4,16 +4,18 @@ var fs = require('fs')
   , f = require('util').format;
 
 var restartAndDone = function(configuration, test) {
-  configuration.manager.restart(function() {
-    test.done();
-  });
+  // configuration.manager.stop({purge:false, kill:true, signal:9}, function() {
+    configuration.manager.restart(function() {
+      test.done();      
+    });
+  // });
 }
 
-exports.beforeTests = function(configuration, callback) {
-  configuration.restart({purge:false, kill:true}, function() {
-    callback();
-  });
-}
+// exports.beforeTests = function(configuration, callback) {
+//   configuration.restart({purge:false, kill:true}, function() {
+//     callback();
+//   });
+// }
 
 // // ../topology_test_descriptions/rs/new_primary.json
 // exports['New primary'] = {
@@ -424,100 +426,6 @@ exports['Host list differs from seeds'] = {
   }
 }
 
-// ../topology_test_descriptions/rs/primary_becomes_standalone.json
-exports['Primary becomes standalone'] = {
-  metadata: {
-    requires: {
-      topology: "replicaset"
-    }
-  },
-
-  test: function(configuration, test) {
-    var Server = configuration.require.Server
-      , ServerManager = require('mongodb-tools').ServerManager
-      , ReplSet = configuration.require.ReplSet
-      , manager = configuration.manager;
-
-    // State
-    var joined = {'primary':[], 'secondary': [], 'arbiter': [], 'passive': []};
-    var left = {'primary':[], 'secondary': [], 'arbiter': [], 'passive': []};
-    // Get the primary server
-    manager.getServerManagerByType('primary', function(err, primaryServerManager) {
-      test.equal(null, err);
-
-      // Get the secondary server
-      manager.getServerManagerByType('secondary', function(err, serverManager) {
-        test.equal(null, err);
-
-        // Start a new server manager
-        var nonReplSetMember = new ServerManager({
-            host: primaryServerManager.host
-          , port: primaryServerManager.port
-          , dbpath: primaryServerManager.dbpath
-          , logpath: primaryServerManager.logpath
-        });
-
-        var config = [{
-            host: serverManager.host
-          , port: serverManager.port
-        }];
-
-        var options = {
-          setName: configuration.setName
-        };
-
-        // Attempt to connect
-        var server = new ReplSet(config, options);
-        server.on('fullsetup', function(_server) {
-          server.on('joined', function(_type, _server) {
-            joined[_type].push(_server);
-
-            if(_type == 'primary') {
-              server.destroy();
-              restartAndDone(configuration, test);
-            }
-          });
-
-          server.on('left', function(_type, _server) {
-            left[_type].push(_server);
-          });
-
-          // Stop the primary
-          primaryServerManager.stop(function(err, r) {
-
-            // Start a non replset member
-            nonReplSetMember.start(function() {
-
-              // Wait for primary
-              waitForPrimary(ReplSet, 30, config, options, function(err, r) {
-                test.equal(null, err);
-
-                // Stop the normal server
-                nonReplSetMember.stop(function() {
-
-                  // Restart the primary server
-                  primaryServerManager.start(function() {
-
-                    // Wait for primary
-                    waitForPrimary(ReplSet, 30, config, options, function(err, r) {
-                      test.equal(null, err);
-                      test.equal(1, left.primary.length);
-                      test.equal(1, left.secondary.length);
-                    });
-                  });
-                });
-              });
-            });
-          });
-        });
-
-        // Start connection
-        server.connect();
-      });
-    });
-  }
-}
-
 // ../topology_test_descriptions/rs/member_reconfig.json
 exports['Member removed by reconfig'] = {
   metadata: {
@@ -569,7 +477,7 @@ exports['Member removed by reconfig'] = {
           server.on('joined', function(_t, _server) {
             if(_t == 'primary') {
               test.ok(server.state.primary != null);
-              test.ok(numberOfSecondaries != server.state.secondaries.length);
+              test.ok(numberOfSecondaries <= server.state.secondaries.length);
               test.equal(1, server.state.arbiters.length);
               test.equal(1, server.state.passives.length);
               server.destroy();
@@ -589,6 +497,93 @@ exports['Member removed by reconfig'] = {
 
             // Force new election
             manager.stepDown({force:true}, function(err) {});
+          });
+        });
+
+        // Start connection
+        server.connect();
+      });
+    });
+  }
+}
+
+// ../topology_test_descriptions/rs/primary_becomes_standalone.json
+exports['Primary becomes standalone'] = {
+  metadata: {
+    requires: {
+      topology: "replicaset"
+    }
+  },
+
+  test: function(configuration, test) {
+    var Server = configuration.require.Server
+      , ServerManager = require('mongodb-tools').ServerManager
+      , ReplSet = configuration.require.ReplSet
+      , manager = configuration.manager;
+
+    // State
+    var joined = {'primary':[], 'secondary': [], 'arbiter': [], 'passive': []};
+    var left = {'primary':[], 'secondary': [], 'arbiter': [], 'passive': []};
+    // Get the primary server
+    manager.getServerManagerByType('primary', function(err, primaryServerManager) {
+      test.equal(null, err);
+
+      // Get the secondary server
+      manager.getServerManagerByType('secondary', function(err, serverManager) {
+        test.equal(null, err);
+
+        // Start a new server manager
+        var nonReplSetMember = new ServerManager({
+            host: primaryServerManager.host
+          , port: primaryServerManager.port
+          , dbpath: primaryServerManager.dbpath
+          , logpath: primaryServerManager.logpath
+        });
+
+        var config = [{
+            host: serverManager.host
+          , port: serverManager.port
+        }];
+
+        var options = {
+          setName: configuration.setName
+        };
+
+        // Attempt to connect
+        var server = new ReplSet(config, options);
+        server.on('fullsetup', function(_server) {
+          server.on('joined', function(_type, _server) {
+            joined[_type].push(_server);
+
+            if(_type == 'primary') {
+              _server.destroy();
+              restartAndDone(configuration, test);
+            }
+          });
+
+          server.on('left', function(_type, _server) {
+            left[_type].push(_server);
+          });
+
+          // Stop the primary
+          primaryServerManager.stop(function(err, r) {
+
+            // Start a non replset member
+            nonReplSetMember.start(function() {
+
+              // Wait for primary
+              waitForPrimary(ReplSet, 90, config, options, function(err, r) {
+                test.equal(null, err);
+
+                // Stop the normal server
+                nonReplSetMember.stop(function() {
+
+                  // Restart the primary server
+                  primaryServerManager.start(function() {
+                  });
+                });
+              });
+            });
           });
         });
 
