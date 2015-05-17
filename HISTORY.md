@@ -1,3 +1,8 @@
+1.1.29 05-17-2015
+-----------------
+- NODE-464 Only use a single socket against arbiters and hidden servers.
+- Ensure we filter out hidden servers from any server queries.
+
 1.1.28 05-12-2015
 -----------------
 - Fixed buffer compare for electionId for < node 12.0.2
