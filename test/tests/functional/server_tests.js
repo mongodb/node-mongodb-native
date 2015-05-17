@@ -86,6 +86,7 @@ exports['Should correctly reconnect to server with automatic reconnect disabled'
 
     // Test flags
     var emittedClose = false;
+    var emittedError = false;
 
     // Add event listeners
     server.on('connect', function(_server) {
@@ -94,15 +95,12 @@ exports['Should correctly reconnect to server with automatic reconnect disabled'
         test.equal(null, err)
         // Write garbage, force socket closure
         try {
-          var a = new Buffer(1000);
-          for(var i = 0; i < 100; i++) a[i] = i;
-          result.connection.write(a);
+          result.connection.destroy();
         } catch(err) {}
 
         process.nextTick(function() {
           // Attempt a proper command
           _server.command("system.$cmd", {ismaster: true}, {readPreference: new ReadPreference('primary')}, function(err, result) {
-            console.dir(err)
             test.ok(err != null);
           });
         });
@@ -111,6 +109,10 @@ exports['Should correctly reconnect to server with automatic reconnect disabled'
 
     server.on('close', function() {
       emittedClose = true;
+    });
+
+    server.on('error', function() {
+      emittedError = true;
     });
 
     setTimeout(function() {
