@@ -2,6 +2,7 @@
 -----------------
 - NODE-463 db.close immediately executes its callback.
 - Don't only emit server close event once (Issue #1276, https://github.com/vkarpov15).
+- NODE-464 Updated mongodb-core to 1.1.29 that uses a single socket connection to arbiters and hidden servers.
 
 2.0.31 05-08-2015
 -----------------
