@@ -1,4 +1,4 @@
-1.4.38
+1.4.38 05-19-2015
 -----------------
 - NODE-463 db.close immediately executes its callback.
 
