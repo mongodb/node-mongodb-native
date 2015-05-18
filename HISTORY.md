@@ -1,3 +1,7 @@
+1.1.31 05-19-2015
+-----------------
+- Minor fixes for issues with re-authentication of mongos.
+
 1.1.30 05-18-2015
 -----------------
 - Correctly emit 'all' event when primary + all secondaries have connected.
