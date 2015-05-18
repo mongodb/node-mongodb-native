@@ -252,6 +252,10 @@ var Mongos = function(seedlist, options) {
     , authProviders: {}
     // Unique instance id
     , id: mongosId++
+    // Authentication in progress
+    , authInProgress: false
+    // Servers added while auth in progress
+    , authInProgressServers: []
     // Current retries left
     , retriesLeft: options.reconnectTries || 30
     // Do we have a not connected handler
@@ -563,37 +567,55 @@ Mongos.prototype.cursor = function(ns, cmd, cursorOptions) {
  * @param {authResultCallback} callback A callback function
  */
 Mongos.prototype.auth = function(mechanism, db) {
+  var allArgs = Array.prototype.slice.call(arguments, 0).slice(0);
   var self = this;
   var args = Array.prototype.slice.call(arguments, 2);
   var callback = args.pop();
+
   // If we don't have the mechanism fail
-  if(self.s.authProviders[mechanism] == null && mechanism != 'default') 
+  if(this.s.authProviders[mechanism] == null && mechanism != 'default')
     throw new MongoError(f("auth provider %s does not exist", mechanism));
 
   // Authenticate against all the servers
-  var servers = self.s.mongosState.connectedServers();
+  var servers = this.s.mongosState.getAll().slice(0);
   var count = servers.length;
   // Correct authentication
   var authenticated = true;
   var authErr = null;
+  // Set auth in progress
+  this.s.authInProgress = true;
 
   // Authenticate against all servers
   while(servers.length > 0) {
     var server = servers.shift();
-    
+
+    // Arguments without a callback
+    var argsWithoutCallback = [mechanism, db].concat(args.slice(0));
     // Create arguments
-    var finalArguments = [mechanism, db].concat(args.slice(0)).concat([function(err, r) {
+    var finalArguments = argsWithoutCallback.concat([function(err, r) {
       count = count - 1;
       if(err) authErr = err;
       if(!r) authenticated = false;
 
       // We are done
       if(count == 0) {
+        // We have more servers that are not authenticated, let's authenticate
+        if(self.s.authInProgressServers.length > 0) {
+          self.s.authInProgressServers = [];
+          return self.auth.apply(self, [mechanism, db].concat(args).concat([callback]));
+        }
+
+        // Auth is done
+        self.s.authInProgress = false;
+        // Add successful credentials
+        if(authErr == null) addCredentials(self.s, db, argsWithoutCallback);
+        // Return the auth error
         if(authErr) return callback(authErr, false);
+        // Successfully authenticated session
         callback(null, new Session({}, self));
       }
     }]);
-    
+
     // Execute the auth
     server.auth.apply(server, finalArguments);
   }
@@ -814,11 +836,20 @@ var connectHandler = function(self, state, e) {
         self.emit('reconnect', _server);
       }
 
+      // Full setup
       if(state.mongosState.disconnectedServers().length == 0 && 
         state.mongosState.connectedServers().length > 0 &&
         !state.fullsetup) {
         state.fullsetup = true;
         self.emit('fullsetup');
+      }
+
+      // all connected
+      if(state.mongosState.disconnectedServers().length == 0 && 
+        state.mongosState.connectedServers().length == state.seedlist.length &&
+        !state.all) {
+        state.all = true;
+        self.emit('all');
       }
 
       // Set connected
