@@ -1,3 +1,7 @@
+1.1.30 05-18-2015
+-----------------
+- Correctly emit 'all' event when primary + all secondaries have connected.
+
 1.1.29 05-17-2015
 -----------------
 - NODE-464 Only use a single socket against arbiters and hidden servers.
