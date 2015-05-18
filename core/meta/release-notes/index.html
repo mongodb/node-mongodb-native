@@ -210,6 +210,44 @@
 
 
 
+<h2 id="1-1-31-05-19-2015:066aa012c0230cd32faa0776e0a81250">1.1.31 05-19-2015</h2>
+
+<ul>
+<li>Minor fixes for issues with re-authentication of mongos.</li>
+</ul>
+
+<h2 id="1-1-30-05-18-2015:066aa012c0230cd32faa0776e0a81250">1.1.30 05-18-2015</h2>
+
+<ul>
+<li>Correctly emit &lsquo;all&rsquo; event when primary + all secondaries have connected.</li>
+</ul>
+
+<h2 id="1-1-29-05-17-2015:066aa012c0230cd32faa0776e0a81250">1.1.29 05-17-2015</h2>
+
+<ul>
+<li>NODE-464 Only use a single socket against arbiters and hidden servers.</li>
+<li>Ensure we filter out hidden servers from any server queries.</li>
+</ul>
+
+<h2 id="1-1-28-05-12-2015:066aa012c0230cd32faa0776e0a81250">1.1.28 05-12-2015</h2>
+
+<ul>
+<li>Fixed buffer compare for electionId for &lt; node 12.0.2</li>
+</ul>
+
+<h2 id="1-1-27-05-12-2015:066aa012c0230cd32faa0776e0a81250">1.1.27 05-12-2015</h2>
+
+<ul>
+<li>NODE-455 Update SDAM specification support to cover electionId and Mongos load balancing.</li>
+</ul>
+
+<h2 id="1-1-26-05-06-2015:066aa012c0230cd32faa0776e0a81250">1.1.26 05-06-2015</h2>
+
+<ul>
+<li>NODE-456 Allow mongodb-core to pipeline commands (ex findAndModify+GLE) along the same connection and handle the returned results.</li>
+<li>Fixes to make mongodb-core work for node 0.8.x when using scram and setImmediate.</li>
+</ul>
+
 <h2 id="1-1-25-04-24-2015:066aa012c0230cd32faa0776e0a81250">1.1.25 04-24-2015</h2>
 
 <ul>
