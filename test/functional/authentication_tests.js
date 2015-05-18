@@ -270,21 +270,21 @@ exports['Unordered bulk operation should fail correctly when not authenticated']
   }
 }
 
-/**********************************************************************************************
+// /**********************************************************************************************
                                                                                                
-  ReplsetRep    ReplsetRepl  tReplsetRe   etRepl          Repl  t  plsetReplse  eplsetReplse   
-  setReplsetR   setReplsetRe  setReplset  plsetR        plsetRepls tReplsetRepl etReplsetRep   
-   pls    pls   epls    plse  epls    pls   epl        etRep  etRe lset    setR pls  Rep  et   
-   tReplsetRe    tRe          etReplsetRe   et         plset        epl              set       
-   lsetRepls     lsetRe       plsetRepls    pl          Repls       etRepl           epl       
-   ReplsetR      Replset      tReplsetR     tR             Repls    plsetRe          et        
-   setReplse     setRepl      lse           lse             etRe    tReplse          pls       
-   epl   Rep  e  epl          Rep          tRep    Re        lset   lse              tRe       
-   etR   setRep  etRe    tRe  set           set    se  epls  Repl   Repl    epl      lse       
-  eplse  eplset eplsetR plse Replse       tReplsetRep  etReplsetR  lsetRep setR    etRepls     
-  etRep   tRep  etReplsetRep setRep       lsetReplset  plsetRepl   ReplsetRepls    plsetRe     
+//   ReplsetRep    ReplsetRepl  tReplsetRe   etRepl          Repl  t  plsetReplse  eplsetReplse   
+//   setReplsetR   setReplsetRe  setReplset  plsetR        plsetRepls tReplsetRepl etReplsetRep   
+//    pls    pls   epls    plse  epls    pls   epl        etRep  etRe lset    setR pls  Rep  et   
+//    tReplsetRe    tRe          etReplsetRe   et         plset        epl              set       
+//    lsetRepls     lsetRe       plsetRepls    pl          Repls       etRepl           epl       
+//    ReplsetR      Replset      tReplsetR     tR             Repls    plsetRe          et        
+//    setReplse     setRepl      lse           lse             etRe    tReplse          pls       
+//    epl   Rep  e  epl          Rep          tRep    Re        lset   lse              tRe       
+//    etR   setRep  etRe    tRe  set           set    se  epls  Repl   Repl    epl      lse       
+//   eplse  eplset eplsetR plse Replse       tReplsetRep  etReplsetR  lsetRep setR    etRepls     
+//   etRep   tRep  etReplsetRep setRep       lsetReplset  plsetRepl   ReplsetRepls    plsetRe     
                                                                                                                                                                                               
-**********************************************************************************************/
+// **********************************************************************************************/
                                                                                                                                     
 var replSetManager;
 
@@ -342,7 +342,7 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
       // Connect
       new Db('replicaset_test_auth', replSet, {w:1}).open(function(err, db) {    
         // Just set auths for the manager to handle it correctly
-        replSetManager.setCredentials("mongocr", "admin", "root", "root");
+        replSetManager.setCredentials("default", "admin", "root", "root");
         // Add a user
         db.admin().addUser("root", "root", {w:4, wtimeout: 25000}, function(err, result) {
           // test.equal(null, err);
@@ -408,7 +408,7 @@ exports.shouldCorrectlyAuthenticateUsingPrimary = {
               // test.equal(null, err);
 
               // Just set auths for the manager to handle it correctly
-              replSetManager.setCredentials("mongocr", "node-native-test", "me", "secret");
+              replSetManager.setCredentials("default", "node-native-test", "me", "secret");
 
               // Close the connection
               db.close();
@@ -473,7 +473,7 @@ exports.shouldCorrectlyAuthenticateWithTwoSeeds = {
 
             db.addUser("me", "secret", {w:4, wtimeout: 25000}, function(err, result) {
               // Just set auths for the manager to handle it correctly
-              replSetManager.setCredentials("mongocr", "node-native-test", "me", "secret");
+              replSetManager.setCredentials("default", "node-native-test", "me", "secret");
 
               // Close the connection
               db.close();
@@ -541,7 +541,7 @@ exports.shouldCorrectlyAuthenticateWithOnlySecondarySeed = {
               p_db.close();
 
               // Just set auths for the manager to handle it correctly
-              replSetManager.setCredentials("mongocr", "admin", "me", "secret");
+              replSetManager.setCredentials("default", "admin", "me", "secret");
 
               // connection string
               var config = f("mongodb://me:secret@localhost:%s/node-native-test?authSource=admin&readPreference=secondary&replicaSet=%s&maxPoolSize=1"
@@ -639,7 +639,7 @@ exports.shouldCorrectlyAuthenticateWithMultipleLoginsAndLogouts = {
           // test.ok(result != null);
 
           // Just set auths for the manager to handle it correctly
-          replSetManager.setCredentials("mongocr", "admin", "me", "secret");
+          replSetManager.setCredentials("default", "admin", "me", "secret");
 
           db.collection("stuff", function(err, collection) {
             collection.insert({a:2}, {w: 3}, authenticate1);
@@ -774,7 +774,7 @@ exports.shouldCorrectlyAuthenticateAndEnsureIndex = {
 
         db_p.admin().addUser("me", "secret", {w:4}, function runWhatever(err, result) {
           // Just set auths for the manager to handle it correctly
-          replSetManager.setCredentials("mongocr", "admin", "me", "secret");
+          replSetManager.setCredentials("default", "admin", "me", "secret");
 
           db_p.admin().authenticate("me", "secret", function(err, result) {
             test.equal(null, err);
@@ -782,7 +782,7 @@ exports.shouldCorrectlyAuthenticateAndEnsureIndex = {
             db_p.addUser('test', 'test', {w:4, wtimeout:25000}, function(err, result) {
 
               // Just set auths for the manager to handle it correctly
-              replSetManager.setCredentials("mongocr", "admin", "test", "test");
+              replSetManager.setCredentials("default", "admin", "test", "test");
 
               db_p.authenticate('test', 'test', function(err, replies) {
 
@@ -847,7 +847,7 @@ exports.shouldCorrectlyAuthenticateAndUseReadPreference = {
 
         db_p.admin().addUser("me", "secret", {w:4, wtimeout:25000}, function runWhatever(err, result) {
           // Just set auths for the manager to handle it correctly
-          replSetManager.setCredentials("mongocr", "admin", "me", "secret");
+          replSetManager.setCredentials("default", "admin", "me", "secret");
 
           db_p.admin().authenticate("me", "secret", function(err, result) {
             test.equal(null, err);
@@ -855,7 +855,7 @@ exports.shouldCorrectlyAuthenticateAndUseReadPreference = {
             db_p.addUser('test', 'test', {w:4, wtimeout:25000}, function(err, result) {
 
               // Just set auths for the manager to handle it correctly
-              replSetManager.setCredentials("mongocr", "admin", "test", "test");
+              replSetManager.setCredentials("default", "admin", "test", "test");
 
               db_p.authenticate('test', 'test', function(err, replies) {
                 test.equal(null, err);
@@ -910,7 +910,7 @@ exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary =
         test.ok(db_p != null);
         db_p.admin().addUser("me", "secret", {w:4, wtimeout:25000}, function runWhatever(err, result) {
           // Just set auths for the manager to handle it correctly
-          replSetManager.setCredentials("mongocr", "admin", "me", "secret");
+          replSetManager.setCredentials("default", "admin", "me", "secret");
 
           db_p.admin().authenticate("me", "secret", function(err, result) {
             test.equal(null, err);
@@ -922,7 +922,7 @@ exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary =
                 test.equal(null, err);                
                 test.ok(result != null);
 
-                  db.serverConfig.on('joined', function(t) {
+                  db.serverConfig.on('joined', function(t, s) {
                     if(t == 'primary') {
                       var counter = 1000;
                       var errors = 0;
@@ -948,7 +948,7 @@ exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary =
                       }                        
                     }
                   });
-                  db.serverConfig.on('left', function(t) {
+                  db.serverConfig.on('left', function(t, s) {
                   });
                 // Step down the primary
                 replSetManager.stepDown({force:true}, function(err, result) {
@@ -996,7 +996,7 @@ exports.shouldCorrectlyAuthWithSecondaryAfterKillPrimary = {
             test.equal(null, err);
 
             // Just set auths for the manager to handle it correctly
-            replSetManager.setCredentials("mongocr", "test", "me", "secret");
+            replSetManager.setCredentials("default", "test", "me", "secret");
 
             db_p.collection('test').insert({a:1}, {w:1}, function(err, result) {
               test.equal(null, err);
@@ -1073,7 +1073,7 @@ exports.shouldCorrectlyAuthAgainstReplicaSetAdminDbUsingMongoClient = {
 
         db_p.admin().addUser("me", "secret", {w:4, wtimeout:25000}, function runWhatever(err, result) {
           // Just set auths for the manager to handle it correctly
-          replSetManager.setCredentials("mongocr", "admin", "me", "secret");
+          replSetManager.setCredentials("default", "admin", "me", "secret");
 
           db_p.close();
 
@@ -1142,7 +1142,7 @@ exports.shouldCorrectlyAuthAgainstNormalDbUsingMongoClient = {
 
               db_p.addUser("me", "secret", {w:4, wtimeout: 25000}, function runWhatever(err, result) {
                 // Just set auths for the manager to handle it correctly
-                replSetManager.setCredentials("mongocr", "admin", "me", "secret");
+                replSetManager.setCredentials("default", "admin", "me", "secret");
                 
                 db_p.close();
 
@@ -1275,7 +1275,7 @@ exports['should correctly connect and authenticate against admin database using 
 
             db.addUser("me", "secret", {w:'majority'}, function(err, result) {
               // Just set auths for the manager to handle it correctly
-              shardedManager.setCredentials("mongocr", "node-native-test", "me", "secret");
+              shardedManager.setCredentials("default", "node-native-test", "me", "secret");
 
               // Close the connection
               db.close();
@@ -1340,7 +1340,7 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
             db.addUser("me", "secret", {w:'majority'}, function(err, result) {
 
               // Just set auths for the manager to handle it correctly
-              shardedManager.setCredentials("mongocr", "admin", "me", "secret");
+              shardedManager.setCredentials("default", "admin", "me", "secret");
 
               // Close the connection
               db.close();

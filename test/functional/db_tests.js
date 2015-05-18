@@ -137,10 +137,8 @@ exports.shouldCorrectlyHandleFailedConnection = {
   test: function(configuration, test) {
     var Db = configuration.require.Db
       , Server = configuration.require.Server;
-      console.log("-------------------------------------------- 0")
     var fs_client = new Db(configuration.database, new Server("127.0.0.1", 25117, {auto_reconnect: false}), configuration.writeConcernMax());
     fs_client.open(function(err, fs_client) {
-      console.log("-------------------------------------------- 1")
       test.ok(err != null)
       test.done();
     })
