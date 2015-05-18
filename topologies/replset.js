@@ -1029,7 +1029,8 @@ var replicasetInquirer = function(self, state, norepeat) {
     if(state.replState.primary != null && self.lastIsMaster()
       && Array.isArray(self.lastIsMaster().hosts) && !state.all) {
       var length = 1 + state.replState.secondaries.length;
-      if(length == self.lastIsMaster().hosts.length) {
+      // If we have all secondaries + primary
+      if(length == self.lastIsMaster().hosts.length + 1) {
         state.all = true;
         self.emit('all', self);
       }
