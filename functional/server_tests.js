@@ -31,6 +31,8 @@ exports['Should correctly reconnect to server with automatic reconnect enabled']
       // Execute the command
       _server.command("system.$cmd", {ismaster: true}, {readPreference: new ReadPreference('primary')}, function(err, result) {
         test.equal(null, err)
+        _server.s.currentReconnectRetry = 10;
+
         // Write garbage, force socket closure
         try {
           var a = new Buffer(100);
@@ -55,6 +57,7 @@ exports['Should correctly reconnect to server with automatic reconnect enabled']
     server.once('reconnect', function() {
       test.equal(true, emittedClose);
       test.equal(true, server.isConnected());
+      test.equal(30, server.s.currentReconnectRetry);
       server.destroy();
       test.done();
     });
