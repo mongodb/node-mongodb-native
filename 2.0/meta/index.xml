@@ -38,12 +38,18 @@
       <guid>/node-mongodb-native/2.0/meta/release-notes/</guid>
       <description>
 
-&lt;h2 id=&#34;2-0-32:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.32&lt;/h2&gt;
+&lt;h2 id=&#34;2-0-33-05-20-2015:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.33 05-20-2015&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Bumped mongodb-core to 1.1.32.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;2-0-32-05-19-2015:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.32 05-19-2015&lt;/h2&gt;
 
 &lt;ul&gt;
 &lt;li&gt;NODE-463 db.close immediately executes its callback.&lt;/li&gt;
 &lt;li&gt;Don&amp;rsquo;t only emit server close event once (Issue #1276, &lt;a href=&#34;https://github.com/vkarpov15&#34;&gt;https://github.com/vkarpov15&lt;/a&gt;).&lt;/li&gt;
-&lt;li&gt;NODE-464 Updated mongodb-core to 1.1.29 that uses a single socket connection to arbiters and hidden servers.&lt;/li&gt;
+&lt;li&gt;NODE-464 Updated mongodb-core to 1.1.31 that uses a single socket connection to arbiters and hidden servers as well as emitting all event correctly.&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h2 id=&#34;2-0-31-05-08-2015:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.31 05-08-2015&lt;/h2&gt;
@@ -63,13 +69,13 @@
 &lt;ul&gt;
 &lt;li&gt;NODE-444 Possible memory leak, too many listeners added.&lt;/li&gt;
 &lt;li&gt;NODE-459 Auth failure using Node 0.8.28, MongoDB 3.0.2 &amp;amp; mongodb-node-native 1.4.35.&lt;/li&gt;
-&lt;li&gt;Bumped mongodb-core to 1.2.26.&lt;/li&gt;
+&lt;li&gt;Bumped mongodb-core to 1.1.26.&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h2 id=&#34;2-0-28-04-24-2015:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.28 04-24-2015&lt;/h2&gt;
 
 &lt;ul&gt;
-&lt;li&gt;Bumped mongodb-core to 1.2.25&lt;/li&gt;
+&lt;li&gt;Bumped mongodb-core to 1.1.25&lt;/li&gt;
 &lt;li&gt;Added Cursor.prototype.setCursorOption to allow for setting node specific cursor options for tailable cursors.&lt;/li&gt;
 &lt;li&gt;NODE-430 Cursor.count() opts argument masked by var opts = {}&lt;/li&gt;
 &lt;li&gt;NODE-406 Implemented Cursor.prototype.map function tapping into MongoClient cursor transforms.&lt;/li&gt;
