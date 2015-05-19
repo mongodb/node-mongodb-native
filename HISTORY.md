@@ -1,3 +1,7 @@
+2.0.33 05-20-2015
+-----------------
+- Bumped mongodb-core to 1.1.32.
+
 2.0.32 05-19-2015
 -----------------
 - NODE-463 db.close immediately executes its callback.
@@ -16,11 +20,11 @@
 -----------------
 - NODE-444 Possible memory leak, too many listeners added.
 - NODE-459 Auth failure using Node 0.8.28, MongoDB 3.0.2 & mongodb-node-native 1.4.35.
-- Bumped mongodb-core to 1.2.26.
+- Bumped mongodb-core to 1.1.26.
 
 2.0.28 04-24-2015
 -----------------
-- Bumped mongodb-core to 1.2.25
+- Bumped mongodb-core to 1.1.25
 - Added Cursor.prototype.setCursorOption to allow for setting node specific cursor options for tailable cursors.
 - NODE-430 Cursor.count() opts argument masked by var opts = {}
 - NODE-406 Implemented Cursor.prototype.map function tapping into MongoClient cursor transforms.
