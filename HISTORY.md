@@ -1,3 +1,7 @@
+1.1.32 05-20-2015
+-----------------
+- After reconnect, it updates the allowable reconnect retries to the option settings (Issue #23, https://github.com/owenallenaz)
+
 1.1.31 05-19-2015
 -----------------
 - Minor fixes for issues with re-authentication of mongos.
