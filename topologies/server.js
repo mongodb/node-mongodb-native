@@ -328,8 +328,6 @@ var closeHandler = function(self, state) {
 }
 
 var connectHandler = function(self, state) {
-  // Reset retries
-  state.currentReconnectRetry = state.reconnectTries;
   // Apply all stored authentications
   var applyAuthentications = function(callback) {
     // We need to ensure we have re-authenticated
