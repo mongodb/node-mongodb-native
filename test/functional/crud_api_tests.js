@@ -800,7 +800,7 @@ exports['should correctly execute removeMany with no selector'] = {
   }
 }
 
-exports['should correctly execute insertOne with w:0'] = {
+exports['should correctly execute crud operations with w:0'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -818,8 +818,33 @@ exports['should correctly execute insertOne with w:0'] = {
         test.equal(null, err);
         test.equal(1, result.result.ok);
 
-        db.close();
-        test.done();
+        col.insertMany([{a:1}], {w:0}, function(err,result) {
+          test.equal(null, err);
+          test.equal(1, result.result.ok);
+
+          col.updateOne({a:1}, {$set: {b:1}}, {w:0}, function(err,result) {
+            test.equal(null, err);
+            test.equal(1, result.result.ok);
+
+            col.updateMany({a:1}, {$set: {b:1}}, {w:0}, function(err,result) {
+              test.equal(null, err);
+              test.equal(1, result.result.ok);
+
+              col.deleteOne({a:1}, {w:0}, function(err,result) {
+                test.equal(null, err);
+                test.equal(1, result.result.ok);
+
+                col.deleteMany({a:1}, {w:0}, function(err,result) {
+                  test.equal(null, err);
+                  test.equal(1, result.result.ok);
+
+                  db.close();
+                  test.done();
+                });
+              });
+            });
+          });
+        });
       });
     });
   }
