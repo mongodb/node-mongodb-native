@@ -253,9 +253,6 @@ var testFiles =[
   , '/test/functional/promises_cursor_tests.js'
   , '/test/functional/operation_promises_example_tests.js'
 
-  // Generator tests
-  , '/test/functional/operation_generators_example_tests.js'
-
   // Logging tests
   , '/test/functional/logger_tests.js'
 
@@ -287,6 +284,13 @@ var testFiles =[
   // Authentication Tests
   , '/test/functional/authentication_tests.js'
 ]
+
+// Check if we support es6 generators
+try {
+  eval("(function *(){})");
+  // Generator tests
+  testFiles.push('/test/functional/operation_generators_example_tests.js');
+} catch(err) {}
 
 // Add all the tests to run
 testFiles.forEach(function(t) {
