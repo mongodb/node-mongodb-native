@@ -2575,7 +2575,6 @@ exports['Should correctly handle batchSize of 2'] = {
             db.close();
 
             cursor.nextObject(function(err, obj) {
-              console.dir(err)
               test.equal(null, err);
 
               cursor.nextObject(function(err, obj) {

@@ -799,3 +799,53 @@ exports['should correctly execute removeMany with no selector'] = {
     });
   }
 }
+
+exports['should correctly execute crud operations with w:0'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    // Establish connection to db
+    db.open(function(err, db) {
+      test.equal(null, err);
+      
+      var col = db.collection('shouldCorrectlyExecuteInsertOneWithW0');
+      
+      col.insertOne({a:1}, {w:0}, function(err,result) {
+        test.equal(null, err);
+        test.equal(1, result.result.ok);
+
+        col.insertMany([{a:1}], {w:0}, function(err,result) {
+          test.equal(null, err);
+          test.equal(1, result.result.ok);
+
+          col.updateOne({a:1}, {$set: {b:1}}, {w:0}, function(err,result) {
+            test.equal(null, err);
+            test.equal(1, result.result.ok);
+
+            col.updateMany({a:1}, {$set: {b:1}}, {w:0}, function(err,result) {
+              test.equal(null, err);
+              test.equal(1, result.result.ok);
+
+              col.deleteOne({a:1}, {w:0}, function(err,result) {
+                test.equal(null, err);
+                test.equal(1, result.result.ok);
+
+                col.deleteMany({a:1}, {w:0}, function(err,result) {
+                  test.equal(null, err);
+                  test.equal(1, result.result.ok);
+
+                  db.close();
+                  test.done();
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  }
+}

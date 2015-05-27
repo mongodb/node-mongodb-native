@@ -1,6 +1,6 @@
 {
   "name": "mongodb",
-  "version": "2.0.31",
+  "version": "2.1.0-alpha",
   "description": "MongoDB legacy driver emulation layer on top of mongodb-core",
   "main": "index.js",
   "repository": {
@@ -13,7 +13,7 @@
     "legacy"
   ],
   "dependencies": {
-      "mongodb-core": "1.1.28"
+      "mongodb-core": "1.1.32"
     , "readable-stream": "1.0.31"
     , "es6-promise": "2.1.1"
   },
@@ -29,7 +29,7 @@
     , "mongodb-tools": "~1.0"
   },
   "author": "Christian Kvalheim",
-  "license": "Apache 2.0",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/mongodb/node-mongodb-native/issues"
   },
