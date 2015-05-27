@@ -46,7 +46,7 @@ exports.aggregationExample2WithGenerators = {
           ]}];
 
       // Create a collection
-      var collection = db.collection('aggregationExample2_with_generators');
+      var collection = db.collection('aggregationExample2_with_generatorsGenerator');
       
       // Insert the docs
       yield collection.insertMany(docs, {w: 1});
@@ -111,7 +111,7 @@ exports['Aggregation Cursor next Test with Generators'] = {
           ]}];
 
       // Create a collection
-      var collection = db.collection('aggregation_next_example_with_generators');
+      var collection = db.collection('aggregation_next_example_with_generatorsGenerator');
 
       // Insert the docs
       yield collection.insertMany(docs, {w: 1});
@@ -2704,41 +2704,6 @@ exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunctionWithGenerators
 }
 
 /**
- * An example of a simple single server db connection and close function using a Generator and the co module.
- *
- * @example-class Db
- * @example-method close
- * @ignore
- */
-exports.shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallbackWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var co = require('co');
-
-    co(function*() {
-      // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   co = require('co');
-    // LINE   test = require('assert');
-    // LINE
-    // LINE co(function*() {
-    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
-
-      // Close the connection with a callback that is optional
-      var result = yield db.close();
-      test.done();
-    });
-    // END
-  }
-}
-
-/**
  * An example of retrieving the collections list for a database using a Generator and the co module.
  *
  * @example-class Db
@@ -2765,7 +2730,7 @@ exports.shouldCorrectlyRetrievelistCollectionsWithGenerators = {
     // REMOVE-LINE test.done();
     // BEGIN
       // Get an empty db
-      var db1 = db.db('listCollectionTestDb2');
+      var db1 = db.db('listCollectionTestDb2Generator');
       // Create a collection
       var collection = db1.collection('shouldCorrectlyRetrievelistCollections_with_generators');
       // Ensure the collection was created
