@@ -18,7 +18,7 @@ var f = require('util').format;
 exports.aggregationExample2WithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
+  metadata: { requires: { promises:true, mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -79,7 +79,7 @@ exports.aggregationExample2WithPromises = {
 exports['Aggregation Cursor next Test With Promises'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
+  metadata: { requires: { promises:true, mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -136,7 +136,7 @@ exports['Aggregation Cursor next Test With Promises'] = {
  * @ignore
  */
 exports.shouldCorrectlyDoSimpleCountExamplesWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -180,7 +180,7 @@ exports.shouldCorrectlyDoSimpleCountExamplesWithPromises = {
  * @ignore
  */
 exports.shouldCreateComplexIndexOnTwoFieldsWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -230,7 +230,7 @@ exports.shouldCreateComplexIndexOnTwoFieldsWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilterWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -274,7 +274,7 @@ exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilterWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyHandleDistinctIndexesWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -316,7 +316,7 @@ exports.shouldCorrectlyHandleDistinctIndexesWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyDropCollectionWithDropFunctionWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -371,7 +371,7 @@ exports.shouldCorrectlyDropCollectionWithDropFunctionWithPromises = {
  * @ignore
  */
 exports.dropAllIndexesExample1WithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -405,7 +405,7 @@ exports.dropAllIndexesExample1WithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyCreateAndDropIndexWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -454,7 +454,7 @@ exports.shouldCorrectlyCreateAndDropIndexWithPromises = {
  * @ignore
  */
 exports.shouldCreateComplexEnsureIndexWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -503,7 +503,7 @@ exports.shouldCreateComplexEnsureIndexWithPromises = {
  * @ignore
  */
 exports.ensureIndexExampleWithCompountIndexWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -552,7 +552,7 @@ exports.ensureIndexExampleWithCompountIndexWithPromises = {
  * @ignore
  */
 exports.shouldPeformASimpleQueryWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -593,7 +593,7 @@ exports.shouldPeformASimpleQueryWithPromises = {
  * @ignore
  */
 exports.shouldPeformASimpleExplainQueryWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -633,7 +633,7 @@ exports.shouldPeformASimpleExplainQueryWithPromises = {
  * @ignore
  */
 exports.shouldPeformASimpleLimitSkipQueryWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -679,7 +679,7 @@ exports.shouldPeformASimpleLimitSkipQueryWithPromises = {
  * @ignore
  */
 exports.shouldPerformSimpleFindAndModifyOperationsWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -738,7 +738,7 @@ exports.shouldPerformSimpleFindAndModifyOperationsWithPromises = {
  * @ignore
  */
 exports.shouldPerformSimpleFindAndRemoveWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -785,7 +785,7 @@ exports.shouldPerformSimpleFindAndRemoveWithPromises = {
  * @ignore
  */
 exports.shouldPeformASimpleLimitSkipFindOneQueryWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -826,7 +826,7 @@ exports.shouldPeformASimpleLimitSkipFindOneQueryWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyPerformSimpleGeoNearCommandWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -871,7 +871,7 @@ exports.shouldCorrectlyPerformSimpleGeoNearCommandWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommandWithPromises = {
-  metadata: { requires: { topology: ["single", "replicaset"] } },
+  metadata: { requires: { promises:true, topology: ["single", "replicaset"] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -915,7 +915,7 @@ exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommandWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteGroupFunctionWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1043,7 +1043,7 @@ exports.shouldCorrectlyExecuteGroupFunctionWithPromises = {
  * @ignore
  */
 exports.shouldPerformSimpleMapReduceFunctionsWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1099,7 +1099,7 @@ exports.shouldPerformSimpleMapReduceFunctionsWithPromises = {
 exports.shouldPerformMapReduceFunctionInlineWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { mongodb: '>1.7.6', topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, mongodb: '>1.7.6', topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1149,7 +1149,7 @@ exports.shouldPerformMapReduceFunctionInlineWithPromises = {
  * @ignore
  */
 exports.shouldPerformMapReduceWithContextWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1230,7 +1230,7 @@ exports.shouldPerformMapReduceWithContextWithPromises = {
  * @ignore
  */
 exports.shouldPerformMapReduceInContextObjectsWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1310,7 +1310,7 @@ exports.shouldPerformMapReduceInContextObjectsWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyRetriveACollectionsIndexesWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1356,7 +1356,7 @@ exports.shouldCorrectlyRetriveACollectionsIndexesWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteIndexExistsWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1405,7 +1405,7 @@ exports.shouldCorrectlyExecuteIndexExistsWithPromises = {
  */
 exports.shouldCorrectlyShowTheResultsFromIndexInformationWithPromises = {
   metadata: {
-    requires: { topology: ["single", "replicaset"] }
+    requires: { promises:true, topology: ["single", "replicaset"] }
   },
   
   // The actual test we wish to run
@@ -1462,7 +1462,7 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformationWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyShowAllTheResultsFromIndexInformationWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1517,7 +1517,7 @@ exports.shouldCorrectlyShowAllTheResultsFromIndexInformationWithPromises = {
 exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafeWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -1557,7 +1557,7 @@ exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafeWithPro
 exports.shouldCorrectlyPerformABatchDocumentInsertSafeWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1597,7 +1597,7 @@ exports.shouldCorrectlyPerformABatchDocumentInsertSafeWithPromises = {
 exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafeWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1640,7 +1640,7 @@ exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafeWithPromises 
 exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.1 With Promises"] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { mongodb:">1.9.1", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, mongodb:">1.9.1", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1689,7 +1689,7 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
  * @ignore
  */
 exports.shouldCorrectlyExecuteIsCappedWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1728,7 +1728,7 @@ exports.shouldCorrectlyExecuteIsCappedWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyRetriveCollectionOptionsWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1771,7 +1771,7 @@ exports.shouldCorrectlyRetriveCollectionOptionsWithPromises = {
 exports['Should correctly execute parallelCollectionScan with multiple cursors With Promises'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { mongodb: ">2.5.5", topology: ["single", "replicaset"] } },
+  metadata: { requires: { promises:true, mongodb: ">2.5.5", topology: ["single", "replicaset"] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1833,7 +1833,7 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors W
  * @ignore
  */
 exports.shouldCorrectlyIndexAndForceReindexOnCollectionWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1885,7 +1885,7 @@ exports.shouldCorrectlyIndexAndForceReindexOnCollectionWithPromises = {
  * @ignore
  */
 exports.shouldRemoveAllDocumentsNoSafeWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1926,7 +1926,7 @@ exports.shouldRemoveAllDocumentsNoSafeWithPromises = {
  * @ignore
  */
 exports.shouldRemoveSubsetOfDocumentsSafeModeWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1964,7 +1964,7 @@ exports.shouldRemoveSubsetOfDocumentsSafeModeWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyRenameCollectionWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2066,7 +2066,7 @@ exports.shouldCorrectlyRenameCollectionWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlySaveASimpleDocumentWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2108,7 +2108,7 @@ exports.shouldCorrectlySaveASimpleDocumentWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveItWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2162,7 +2162,7 @@ exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveItWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyUpdateASimpleDocumentWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2210,7 +2210,7 @@ exports.shouldCorrectlyUpdateASimpleDocumentWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyUpsertASimpleDocumentWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2251,7 +2251,7 @@ exports.shouldCorrectlyUpsertASimpleDocumentWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyUpdateMultipleDocumentsWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2302,7 +2302,7 @@ exports.shouldCorrectlyUpdateMultipleDocumentsWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyReturnACollectionsStatsWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2343,7 +2343,7 @@ exports.shouldCorrectlyReturnACollectionsStatsWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyCreateAndDropAllIndexWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2406,7 +2406,7 @@ exports.shouldCorrectlyCreateAndDropAllIndexWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDbWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2448,7 +2448,7 @@ exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDbWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteEvalFunctionsWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2547,7 +2547,7 @@ exports.shouldCorrectlyExecuteEvalFunctionsWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunctionWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2589,7 +2589,7 @@ exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunctionWithPromises =
  * @ignore
  */
 exports.shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallbackWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2620,7 +2620,7 @@ exports.shouldCorrectlyOpenASimpleDbSingleServerConnectionAndCloseWithCallbackWi
  * @ignore
  */
 exports.shouldCorrectlyRetrievelistCollectionsWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2662,7 +2662,7 @@ exports.shouldCorrectlyRetrievelistCollectionsWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyRetrievelistCollectionsWiredTigerWithPromises = {
-  metadata: { requires: { topology: ['wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2701,7 +2701,7 @@ exports.shouldCorrectlyRetrievelistCollectionsWiredTigerWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyAccessACollectionWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2745,7 +2745,7 @@ exports.shouldCorrectlyAccessACollectionWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveAllCollectionsWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2780,7 +2780,7 @@ exports.shouldCorrectlyRetrieveAllCollectionsWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyLogoutFromTheDatabaseWithPromises = {
-  metadata: { requires: { topology: 'single' } },
+  metadata: { requires: { promises:true, topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2829,7 +2829,7 @@ exports.shouldCorrectlyLogoutFromTheDatabaseWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyAuthenticateAgainstTheDatabaseWithPromises = {
-  metadata: { requires: { topology: 'single' } },
+  metadata: { requires: { promises:true, topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2869,7 +2869,7 @@ exports.shouldCorrectlyAuthenticateAgainstTheDatabaseWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyAddUserToDbWithPromises = {
-  metadata: { requires: { topology: 'single' } },
+  metadata: { requires: { promises:true, topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2904,7 +2904,7 @@ exports.shouldCorrectlyAddUserToDbWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyAddAndRemoveUserWithPromises = {
-  metadata: { requires: { topology: 'single' } },
+  metadata: { requires: { promises:true, topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2959,7 +2959,7 @@ exports.shouldCorrectlyAddAndRemoveUserWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyCreateACollectionWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2994,7 +2994,7 @@ exports.shouldCorrectlyCreateACollectionWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteACommandAgainstTheServerWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -3043,7 +3043,7 @@ exports.shouldCorrectlyExecuteACommandAgainstTheServerWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyCreateDropAndVerifyThatCollectionIsGoneWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -3074,7 +3074,7 @@ exports.shouldCorrectlyCreateDropAndVerifyThatCollectionIsGoneWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyRenameACollectionWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -3134,7 +3134,7 @@ exports.shouldCorrectlyRenameACollectionWithPromises = {
  * @ignore
  */
 exports.shouldCreateOnDbComplexIndexOnTwoFieldsWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -3185,7 +3185,7 @@ exports.shouldCreateOnDbComplexIndexOnTwoFieldsWithPromises = {
  * @ignore
  */
 exports.shouldCreateComplexEnsureIndexDbWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -3236,7 +3236,7 @@ exports.shouldCreateComplexEnsureIndexDbWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyDropTheDatabaseWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -3295,7 +3295,7 @@ exports.shouldCorrectlyDropTheDatabaseWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveDbStatsWithPromisesWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -3327,7 +3327,7 @@ exports.shouldCorrectlyRetrieveDbStatsWithPromisesWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstancesWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -3378,7 +3378,7 @@ exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstancesWithPromises
  * @ignore
  */
 exports['Should correctly connect with default replicasetNoOption With Promises'] = {
-  metadata: { requires: { topology: 'replicaset' } },
+  metadata: { requires: { promises:true, topology: 'replicaset' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -3425,7 +3425,7 @@ exports['Should correctly connect with default replicasetNoOption With Promises'
  * @ignore
  */
 exports.shouldCorrectlyAuthenticateWithPromises = {
-  metadata: { requires: { topology: 'single' } },
+  metadata: { requires: { promises:true, topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -3477,7 +3477,7 @@ exports.shouldCorrectlyAuthenticateWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveBuildInfoWithPromises = {
-  metadata: { requires: { topology: 'single' } },
+  metadata: { requires: { promises:true, topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -3527,7 +3527,7 @@ exports.shouldCorrectlyRetrieveBuildInfoWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveBuildInfoUsingCommandWithPromises = {
-  metadata: { requires: { topology: 'single' } },
+  metadata: { requires: { promises:true, topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -3577,7 +3577,7 @@ exports.shouldCorrectlyRetrieveBuildInfoUsingCommandWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlySetDefaultProfilingLevelWithPromises = {
-  metadata: { requires: { topology: 'single' } },
+  metadata: { requires: { promises:true, topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -3635,7 +3635,7 @@ exports.shouldCorrectlySetDefaultProfilingLevelWithPromises = {
  * @ignore
  */ 
 exports.shouldCorrectlyChangeProfilingLevelWithPromises = {
-  metadata: { requires: { topology: 'single' } },
+  metadata: { requires: { promises:true, topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -3723,7 +3723,7 @@ exports.shouldCorrectlyChangeProfilingLevelWithPromises = {
  * @ignore
  */ 
 exports.shouldCorrectlySetAndExtractProfilingInfoWithPromises = {
-  metadata: { requires: { topology: 'single' } },
+  metadata: { requires: { promises:true, topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -3797,7 +3797,7 @@ exports.shouldCorrectlySetAndExtractProfilingInfoWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyCallValidateCollectionWithPromises = {
-  metadata: { requires: { topology: 'single' } },
+  metadata: { requires: { promises:true, topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -3861,7 +3861,7 @@ exports.shouldCorrectlyCallValidateCollectionWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyPingTheMongoDbInstanceWithPromises = {
-  metadata: { requires: { topology: 'single' } },
+  metadata: { requires: { promises:true, topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -3911,7 +3911,7 @@ exports.shouldCorrectlyPingTheMongoDbInstanceWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyUseLogoutFunctionWithPromises = {
-  metadata: { requires: { topology: 'single' } },
+  metadata: { requires: { promises:true, topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {  
@@ -3962,7 +3962,7 @@ exports.shouldCorrectlyUseLogoutFunctionWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyAddAUserToAdminDbWithPromises = {
-  metadata: { requires: { topology: 'single' } },
+  metadata: { requires: { promises:true, topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {  
@@ -4007,7 +4007,7 @@ exports.shouldCorrectlyAddAUserToAdminDbWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDbWithPromises = {
-  metadata: { requires: { topology: 'single' } },
+  metadata: { requires: { promises:true, topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {  
@@ -4058,7 +4058,7 @@ exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDbWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyListAllAvailableDatabasesWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configure, test) {  
@@ -4096,7 +4096,7 @@ exports.shouldCorrectlyListAllAvailableDatabasesWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveServerInfoWithPromises = {
-  metadata: { requires: { topology: 'single' } },
+  metadata: { requires: { promises:true, topology: 'single' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -4154,7 +4154,7 @@ exports.shouldCorrectlyRetrieveServerInfoWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveReplSetGetStatusWithPromises = {
-  metadata: { requires: { topology: 'replicaset' } },
+  metadata: { requires: { promises:true, topology: 'replicaset' } },
   
   // The actual test we wish to run
   test: function(configure, test) {
@@ -4223,7 +4223,7 @@ var fs = require('fs');
 exports.shouldCorrectlyExecuteToArrayWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4268,7 +4268,7 @@ exports.shouldCorrectlyExecuteToArrayWithPromises = {
 exports.shouldCorrectlyUseCursorCountFunctionWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4312,7 +4312,7 @@ exports.shouldCorrectlyUseCursorCountFunctionWithPromises = {
 exports.shouldCorrectlyPeformNextObjectOnCursorWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4356,7 +4356,7 @@ exports.shouldCorrectlyPeformNextObjectOnCursorWithPromises = {
 exports.shouldCorrectlyPeformSimpleExplainCursorWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4398,7 +4398,7 @@ exports.shouldCorrectlyPeformSimpleExplainCursorWithPromises = {
 exports.shouldStreamDocumentsUsingTheCloseFunctionWithPromises = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4456,7 +4456,7 @@ exports.shouldStreamDocumentsUsingTheCloseFunctionWithPromises = {
  * @ignore
  */
 exports['Should correctly connect to a replicaset With Promises'] = {
-  metadata: { requires: { topology: 'replicaset' } },
+  metadata: { requires: { promises:true, topology: 'replicaset' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4500,7 +4500,7 @@ exports['Should correctly connect to a replicaset With Promises'] = {
  * @ignore
  */
 exports['Should connect to mongos proxies using connectiong string With Promises'] = {
-  metadata: { requires: { topology: 'mongos' } },
+  metadata: { requires: { promises:true, topology: 'mongos' } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4541,7 +4541,7 @@ exports['Should connect to mongos proxies using connectiong string With Promises
 exports['Should correctly connect using MongoClient to a single server using connect With Promises'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: 'single'} },
+  metadata: { requires: { promises:true, topology: 'single'} },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4582,7 +4582,7 @@ exports['Should correctly connect using MongoClient to a single server using con
  * @ignore
  */
 exports.shouldCorrectlyExecuteGridStoreExistsByObjectIdWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4643,7 +4643,7 @@ exports.shouldCorrectlyExecuteGridStoreExistsByObjectIdWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteGridStoreListWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4761,7 +4761,7 @@ exports.shouldCorrectlyExecuteGridStoreListWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyReadlinesAndPutLinesWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4810,7 +4810,7 @@ exports.shouldCorrectlyReadlinesAndPutLinesWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyUnlinkWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4890,7 +4890,7 @@ exports.shouldCorrectlyUnlinkWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyWriteAndReadJpgImageWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4949,7 +4949,7 @@ exports.shouldCorrectlyWriteAndReadJpgImageWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlySaveSimpleFileToGridStoreUsingFilenameWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5000,7 +5000,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingFilenameWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlySaveSimpleFileToGridStoreUsingObjectIDWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5054,7 +5054,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingObjectIDWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5110,7 +5110,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandleWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5169,7 +5169,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandleWithProm
  * @ignore
  */
 exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffersWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5227,7 +5227,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffersW
  * @ignore
  */
 exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5276,7 +5276,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkItWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5338,7 +5338,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkItWithPro
  * @ignore
  */
 exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlinesWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5400,7 +5400,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlinesWithPromises =
  * @ignore
  */
 exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlinesWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5467,7 +5467,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlinesWithPr
  * @ignore
  */
 exports.shouldCorrectlyPutACoupleOfLinesInGridStoreReadWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5518,7 +5518,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreReadWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlySeekWithBufferWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5637,7 +5637,7 @@ exports.shouldCorrectlySeekWithBufferWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyRewingAndTruncateOnWriteWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5708,7 +5708,7 @@ exports.shouldCorrectlyRewingAndTruncateOnWriteWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteGridstoreTellWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5765,7 +5765,7 @@ exports.shouldCorrectlyExecuteGridstoreTellWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5816,7 +5816,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithPromises = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5896,7 +5896,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithPromises = {
  * @ignore
  */
 exports['Should correctly execute ordered batch with no errors using write commands With Promises'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5955,7 +5955,7 @@ exports['Should correctly execute ordered batch with no errors using write comma
  * @ignore
  */
 exports['Should correctly execute unordered batch with no errors With Promises'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -6020,7 +6020,7 @@ exports['Should correctly execute unordered batch with no errors With Promises']
  * @ignore
  */
 exports['Should correctly execute insertOne operation With Promises'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -6053,7 +6053,7 @@ exports['Should correctly execute insertOne operation With Promises'] = {
  * @ignore
  */
 exports['Should correctly execute insertMany operation With Promises'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -6086,7 +6086,7 @@ exports['Should correctly execute insertMany operation With Promises'] = {
  * @ignore
  */
 exports['Should correctly execute updateOne operation With Promises'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -6122,7 +6122,7 @@ exports['Should correctly execute updateOne operation With Promises'] = {
  * @ignore
  */
 exports['Should correctly execute updateMany operation With Promises'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -6162,7 +6162,7 @@ exports['Should correctly execute updateMany operation With Promises'] = {
  * @ignore
  */
 exports['Should correctly execute removeOne operation With Promises'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -6199,7 +6199,7 @@ exports['Should correctly execute removeOne operation With Promises'] = {
  * @ignore
  */
 exports['Should correctly execute removeMany operation With Promises'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -6238,7 +6238,7 @@ exports['Should correctly execute removeMany operation With Promises'] = {
  * @ignore
  */
 exports['Should correctly execute bulkWrite operation With Promises'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -6290,7 +6290,7 @@ exports['Should correctly execute bulkWrite operation With Promises'] = {
  * @ignore
  */
 exports['Should correctly execute findOneAndDelete operation With Promises'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -6330,7 +6330,7 @@ exports['Should correctly execute findOneAndDelete operation With Promises'] = {
  * @ignore
  */
 exports['Should correctly execute findOneAndReplace operation With Promises'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -6377,7 +6377,7 @@ exports['Should correctly execute findOneAndReplace operation With Promises'] = 
  * @ignore
  */
 exports['Should correctly execute findOneAndUpdate operation With Promises'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -6424,7 +6424,7 @@ exports['Should correctly execute findOneAndUpdate operation With Promises'] = {
  * @ignore
  */
 exports['Should correctly add capped collection options to cursor With Promises'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
   
   // The actual test we wish to run
   test: function(configuration, test) {

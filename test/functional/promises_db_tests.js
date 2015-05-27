@@ -5,6 +5,7 @@ var f = require('util').format;
 exports['Should correctly connect with MongoClient.connect using Promise'] = {
   metadata: {
     requires: {
+      promises: true,
       node: ">0.8.0",
       topology: ['single']
     }
@@ -30,6 +31,7 @@ exports['Should correctly connect with MongoClient.connect using Promise'] = {
 exports['Should correctly connect using Db.open and promise'] = {
   metadata: {
     requires: {
+      promises: true,
       node: ">0.8.0",
       topology: ['single']
     }
@@ -48,6 +50,7 @@ exports['Should correctly connect using Db.open and promise'] = {
 exports['Should correctly execute ismaster using Promise'] = {
   metadata: {
     requires: {
+      promises: true,
       node: ">0.8.0",
       topology: ['single']
     }
@@ -76,6 +79,7 @@ exports['Should correctly execute ismaster using Promise'] = {
 exports['Should correctly catch command error using Promise'] = {
   metadata: {
     requires: {
+      promises: true,
       node: ">0.8.0",
       topology: ['single']
     }
@@ -106,6 +110,7 @@ exports['Should correctly catch command error using Promise'] = {
 exports['Should correctly createCollecton using Promise'] = {
   metadata: {
     requires: {
+      promises: true,
       node: ">0.8.0",
       topology: ['single']
     }
@@ -135,6 +140,7 @@ exports['Should correctly createCollecton using Promise'] = {
 exports['Should correctly execute stats using Promise'] = {
   metadata: {
     requires: {
+      promises: true,
       node: ">0.8.0",
       topology: ['single']
     }
@@ -162,6 +168,7 @@ exports['Should correctly execute stats using Promise'] = {
 exports['Should correctly execute eval using Promise'] = {
   metadata: {
     requires: {
+      promises: true,
       node: ">0.8.0",
       topology: ['single']
     }
@@ -189,6 +196,7 @@ exports['Should correctly execute eval using Promise'] = {
 exports['Should correctly rename and drop collection using Promise'] = {
   metadata: {
     requires: {
+      promises: true,
       node: ">0.8.0",
       topology: ['single']
     }
@@ -224,6 +232,7 @@ exports['Should correctly rename and drop collection using Promise'] = {
 exports['Should correctly drop database using Promise'] = {
   metadata: {
     requires: {
+      promises: true,
       node: ">0.8.0",
       topology: ['single']
     }
@@ -251,6 +260,7 @@ exports['Should correctly drop database using Promise'] = {
 exports['Should correctly createCollections and call collections with Promise'] = {
   metadata: {
     requires: {
+      promises: true,
       node: ">0.8.0",
       topology: ['single']
     }
@@ -286,6 +296,7 @@ exports['Should correctly createCollections and call collections with Promise'] 
 exports['Should correctly execute executeDbAdminCommand using Promise'] = {
   metadata: {
     requires: {
+      promises: true,
       node: ">0.8.0",
       topology: ['single']
     }
@@ -313,6 +324,7 @@ exports['Should correctly execute executeDbAdminCommand using Promise'] = {
 exports['Should correctly execute creatIndex using Promise'] = {
   metadata: {
     requires: {
+      promises: true,
       node: ">0.8.0",
       topology: ['single']
     }
@@ -341,6 +353,7 @@ exports['Should correctly execute creatIndex using Promise'] = {
 exports['Should correctly execute ensureIndex using Promise'] = {
   metadata: {
     requires: {
+      promises: true,
       node: ">0.8.0",
       topology: ['single']
     }

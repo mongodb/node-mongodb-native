@@ -5,6 +5,7 @@ var f = require('util').format;
 exports['Should correctly execute Collection.prototype.insertOne'] = {
   metadata: {
     requires: {
+      promises: true,
       node: ">0.8.0",
       topology: ['single']
     }
@@ -18,12 +19,8 @@ exports['Should correctly execute Collection.prototype.insertOne'] = {
       ? f('%s&%s', url, 'maxPoolSize=100')
       : f('%s?%s', url, 'maxPoolSize=100');
 
-      console.log("========================================================= 0")
-
     MongoClient.connect(url).then(function(db) {
       test.equal(100, db.serverConfig.connections().length);
-
-      console.log("=========================================================")
 
       db.collection('insertOne').insertOne({a:1}).then(function(r) {
 

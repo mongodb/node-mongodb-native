@@ -7,6 +7,8 @@ var Runner = require('integra').Runner
   , NodeVersionFilter = require('./filters/node_version_filter')
   , MongoDBVersionFilter = require('./filters/mongodb_version_filter')
   , MongoDBTopologyFilter = require('./filters/mongodb_topology_filter')
+  , ES6PromisesSupportedFilter = require('./filters/es6_promises_supported_filter')
+  , ES6GeneratorsSupportedFilter = require('./filters/es6_generators_supported_filter')
   , OSFilter = require('./filters/os_filter')
   , TravisFilter = require('./filters/travis_filter')
   , DisabledFilter = require('./filters/disabled_filter')
@@ -245,42 +247,42 @@ var testFiles =[
   , '/test/functional/crud_api_tests.js'
   , '/test/functional/reconnect_tests.js'
 
-  // // Promise tests
-  // , '/test/functional/promises_db_tests.js'
-  // , '/test/functional/promises_collection_tests.js'
-  // , '/test/functional/promises_cursor_tests.js'
+  // Promise tests
+  , '/test/functional/promises_db_tests.js'
+  , '/test/functional/promises_collection_tests.js'
+  , '/test/functional/promises_cursor_tests.js'
   , '/test/functional/operation_promises_example_tests.js'
 
-  // // Logging tests
-  // , '/test/functional/logger_tests.js'
+  // Logging tests
+  , '/test/functional/logger_tests.js'
 
-  // // Replicaset tests
-  // , '/test/functional/replset_operations_tests.js'
-  // , '/test/functional/replset_read_preference_tests.js'
-  // , '/test/functional/replset_failover_tests.js'
-  // , '/test/functional/replset_connection_tests.js'
+  // Replicaset tests
+  , '/test/functional/replset_operations_tests.js'
+  , '/test/functional/replset_read_preference_tests.js'
+  , '/test/functional/replset_failover_tests.js'
+  , '/test/functional/replset_connection_tests.js'
 
-  // // Sharding tests
-  // , '/test/functional/sharding_failover_tests.js'
-  // , '/test/functional/sharding_connection_tests.js'
-  // , '/test/functional/sharding_read_preference_tests.js'
+  // Sharding tests
+  , '/test/functional/sharding_failover_tests.js'
+  , '/test/functional/sharding_connection_tests.js'
+  , '/test/functional/sharding_read_preference_tests.js'
 
-  // // SSL tests
-  // , '/test/functional/ssl_mongoclient_tests.js'
-  // , '/test/functional/ssl_validation_tests.js'
-  // , '/test/functional/ssl_x509_connect_tests.js'
+  // SSL tests
+  , '/test/functional/ssl_mongoclient_tests.js'
+  , '/test/functional/ssl_validation_tests.js'
+  , '/test/functional/ssl_x509_connect_tests.js'
 
-  // // SCRAM tests
-  // , '/test/functional/scram_tests.js'
+  // SCRAM tests
+  , '/test/functional/scram_tests.js'
 
-  // // LDAP Tests
-  // , '/test/functional/ldap_tests.js'
+  // LDAP Tests
+  , '/test/functional/ldap_tests.js'
 
-  // // Kerberos Tests
-  // , '/test/functional/kerberos_tests.js'
+  // Kerberos Tests
+  , '/test/functional/kerberos_tests.js'
 
-  // // Authentication Tests
-  // , '/test/functional/authentication_tests.js'
+  // Authentication Tests
+  , '/test/functional/authentication_tests.js'
 ]
 
 // Add all the tests to run
@@ -320,6 +322,10 @@ runner.plugin(new MongoDBTopologyFilter(startupOptions));
 runner.plugin(new OSFilter(startupOptions))
 // Add a Disable filter plugin
 runner.plugin(new DisabledFilter(startupOptions))
+// Add a Filter allowing us to specify that a function requires Promises
+runner.plugin(new ES6PromisesSupportedFilter())
+// Add a Filter allowing us to validate if generators are available
+runner.plugin(new ES6GeneratorsSupportedFilter())
 
 // Exit when done
 runner.on('exit', function(errors, results) {

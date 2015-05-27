@@ -814,27 +814,27 @@ exports['should correctly execute crud operations with w:0'] = {
       
       var col = db.collection('shouldCorrectlyExecuteInsertOneWithW0');
       
-      col.insertOne({a:1}, {w:0}, function(err,result) {
+      col.insertOne({a:1}, {w:0}, function(err, result) {
         test.equal(null, err);
         test.equal(1, result.result.ok);
 
-        col.insertMany([{a:1}], {w:0}, function(err,result) {
+        col.insertMany([{a:1}], {w:0}, function(err, result) {
           test.equal(null, err);
           test.equal(1, result.result.ok);
 
-          col.updateOne({a:1}, {$set: {b:1}}, {w:0}, function(err,result) {
+          col.updateOne({a:1}, {$set: {b:1}}, {w:0}, function(err, result) {
             test.equal(null, err);
             test.equal(1, result.result.ok);
 
-            col.updateMany({a:1}, {$set: {b:1}}, {w:0}, function(err,result) {
+            col.updateMany({a:1}, {$set: {b:1}}, {w:0}, function(err, result) {
               test.equal(null, err);
               test.equal(1, result.result.ok);
 
-              col.deleteOne({a:1}, {w:0}, function(err,result) {
+              col.deleteOne({a:1}, {w:0}, function(err, result) {
                 test.equal(null, err);
                 test.equal(1, result.result.ok);
 
-                col.deleteMany({a:1}, {w:0}, function(err,result) {
+                col.deleteMany({a:1}, {w:0}, function(err, result) {
                   test.equal(null, err);
                   test.equal(1, result.result.ok);
 
