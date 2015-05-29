@@ -4345,6 +4345,61 @@ exports.shouldCorrectlyPeformNextObjectOnCursorWithGenerators = {
 }
 
 /**
+ * A simple example showing the use of next and co module to iterate over cursor
+ *
+ * @example-class Cursor
+ * @example-method nextObject
+ * @ignore
+ */
+exports.shouldCorrectlyPeformNextOnCursorWithGenerators = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var co = require('co');
+
+    co(function*() {
+      // Connect
+      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   co = require('co');
+    // LINE   test = require('assert');
+    // LINE
+    // LINE co(function*() {
+    // LINE   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
+
+      // Create a collection
+      var collection = db.collection('simple_next_object_collection_next_with_generators');
+
+      // Insert some documents we can sort on
+      yield collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax());
+
+      // Get a cursor
+      var cursor = collection.find({});
+
+      // Get the document
+      var doc = null;
+      var docs = [];
+
+      // Iterate over all the cursor items
+      while((doc = yield cursor.next()) != null) {
+        docs.push(doc);
+      }
+
+      test.equal(3, docs.length);
+      db.close();
+      test.done();
+    });
+    // END
+  }
+}
+
+/**
  * A simple example showing the use of the cursor explain function using a Generator and the co module.
  *
  * @example-class Cursor
