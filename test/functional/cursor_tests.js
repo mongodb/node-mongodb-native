@@ -19,7 +19,9 @@ exports.cursorShouldBeAbleToResetOnToArrayRunningQueryAgain = {
 
         collection.insert({'a':1}, configuration.writeConcernMax(), function(err, ids) {
           var cursor = collection.find({});
+          console.log("--------------------------------- TOARRAY 0")
           cursor.toArray(function(err, items) {
+          console.log("--------------------------------- TOARRAY 1")
             // Should fail if called again (cursor should be closed)
             cursor.toArray(function(err, items) {
               test.equal(null, err);
