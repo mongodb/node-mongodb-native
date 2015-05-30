@@ -5355,6 +5355,84 @@ exports.shouldCorrectlyPeformNextObjectOnCursor = {
 }
 
 /**
+ * A simple example showing the use of next.
+ *
+ * @example-class Cursor
+ * @example-method next
+ * @ignore
+ */
+exports.shouldCorrectlyPeformNextOnCursorWithCallbacks = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+
+    db.open(function(err, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE restartAndDone
+    // REMOVE-LINE test.done();
+    // BEGIN
+
+      // Create a collection
+      var collection = db.collection('simple_next_object_collection_with_next');
+
+      // Insert some documents we can sort on
+      collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax(), function(err, docs) {
+        test.equal(null, err);
+
+        // Do normal ascending sort
+        var cursor = collection.find();
+        // Perform hasNext check
+        cursor.hasNext(function(err, r) {
+          test.equal(null, err);
+          test.ok(r);
+
+          cursor.next(function(err, r) {
+            test.equal(null, err);
+            test.equal(1, r.a);
+
+            cursor.hasNext(function(err, r) {
+              test.equal(null, err);
+              test.ok(r);
+
+              cursor.next(function(err, r) {
+                test.equal(null, err);
+                test.equal(2, r.a);
+
+                cursor.hasNext(function(err, r) {
+                  test.equal(null, err);
+                  test.ok(r);
+
+                  cursor.next(function(err, r) {
+                    test.equal(null, err);
+                    test.equal(3, r.a);
+
+                    cursor.hasNext(function(err, r) {
+                      test.equal(null, err);
+                      test.ok(!r);
+
+                      db.close();
+                      test.done();
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+    // END
+  }
+}
+
+/**
  * A simple example showing the use of the cursor explain function.
  *
  * @example-class Cursor

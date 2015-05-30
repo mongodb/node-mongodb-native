@@ -4348,7 +4348,7 @@ exports.shouldCorrectlyPeformNextObjectOnCursorWithGenerators = {
  * A simple example showing the use of next and co module to iterate over cursor
  *
  * @example-class Cursor
- * @example-method nextObject
+ * @example-method next
  * @ignore
  */
 exports.shouldCorrectlyPeformNextOnCursorWithGenerators = {
@@ -4386,11 +4386,12 @@ exports.shouldCorrectlyPeformNextOnCursorWithGenerators = {
       var doc = null;
       var docs = [];
 
-      // Iterate over all the cursor items
-      while((doc = yield cursor.next()) != null) {
-        docs.push(doc);
+      // Iterate over the cursor
+      while(yield cursor.hasNext()) {
+        docs.push(yield cursor.next());
       }
 
+      // Validate the correct number of elements
       test.equal(3, docs.length);
       db.close();
       test.done();
