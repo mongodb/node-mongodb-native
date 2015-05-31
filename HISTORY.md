@@ -1,4 +1,4 @@
-1.1.33
+1.1.33 05-31-2015
 -----------------
 - NODE-478 Work around authentication race condition in mongos authentication due to multi step authentication methods like SCRAM.
 
