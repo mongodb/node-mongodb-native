@@ -252,6 +252,7 @@ var testFiles =[
   , '/test/functional/promises_collection_tests.js'
   , '/test/functional/promises_cursor_tests.js'
   , '/test/functional/operation_promises_example_tests.js'
+  , '/test/functional/byo_promises_tests.js'
 
   // Logging tests
   , '/test/functional/logger_tests.js'
