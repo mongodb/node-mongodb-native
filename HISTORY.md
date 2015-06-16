@@ -1,3 +1,8 @@
+1.2.0
+-----------------
+- Switching to using the 0.4.0 pure JS serializer, removing dependency on C++ parser.
+- Refactoring wire protocol messages to avoid expensive size calculations of documents in favor of writing out an array of buffers to the sockets.
+
 1.1.33 05-31-2015
 -----------------
 - NODE-478 Work around authentication race condition in mongos authentication due to multi step authentication methods like SCRAM.
