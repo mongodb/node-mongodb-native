@@ -108,7 +108,7 @@ var Configuration = function(options) {
           setTimeout(function() {
             callback();
           }, 5000);
-        });        
+        });
       },
 
       restart: function(options, callback) {
