@@ -9,7 +9,10 @@ exports['Should correctly connect to single server'] = {
 
   test: function(configuration, test) {
     var Connection = require('../../../lib/connection/connection')
-      , bson = require('bson').BSONPure.BSON;
+      , BSON = require('bson').BSONPure.BSON;
+
+    // Create BSON parser
+    var bson = new BSON();
 
     // Attempt to connect
     var connection = new Connection({
@@ -39,7 +42,10 @@ exports['Should fail connect to single server'] = {
 
   test: function(configuration, test) {
     var Connection = require('../../../lib/connection/connection')
-      , bson = require('bson').BSONPure.BSON;
+      , BSON = require('bson').BSONPure.BSON;
+
+    // Create BSON parser
+    var bson = new BSON();
 
     // Attempt to connect
     var connection = new Connection({
@@ -71,7 +77,10 @@ exports['Should correctly execute ismaster on single server'] = {
   test: function(configuration, test) {
     var Connection = require('../../../lib/connection/connection')
       , Query = require('../../../lib/connection/commands').Query
-      , bson = require('bson').BSONPure.BSON;
+      , BSON = require('bson').BSONPure.BSON;
+
+    // Create BSON parser
+    var bson = new BSON();
 
     // Attempt to connect
     var connection = new Connection({
@@ -82,7 +91,7 @@ exports['Should correctly execute ismaster on single server'] = {
       , messageHandler: function(message) {
         message.parse();
         test.equal(true, message.documents[0].ismaster);
-        connection.destroy();        
+        connection.destroy();
       }
     })
 
