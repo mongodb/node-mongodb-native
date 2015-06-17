@@ -1,3 +1,7 @@
+1.2.1 06-17-2015
+-----------------
+- Ensure serializeFunctions passed down correctly to wire protocol.
+
 1.2.0 06-17-2015
 -----------------
 - Switching to using the 0.4.x pure JS serializer, removing dependency on C++ parser.
