@@ -864,7 +864,7 @@ exports['should correctly execute updateOne operations with w:0 and upsert'] = {
 
       db.collection('try').updateOne({_id:1}, {$set:{x:1}}, {upsert:true, w:0}, function(err, r) {
         test.equal(null, err);
-        test.equal(0, r.upsertedCount);
+        test.ok(r != null);
 
         db.close();
         test.done();

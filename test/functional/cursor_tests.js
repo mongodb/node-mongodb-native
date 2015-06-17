@@ -1504,6 +1504,7 @@ exports['Should correctly execute count on cursor'] = {
 
         // insert all docs
         collection.insert(docs, configuration.writeConcernMax(), function(err, result) {
+          console.dir(err)
           test.equal(null, err);
           var total = 0;
           // Create a cursor for the content

@@ -48,6 +48,18 @@ var startupOptions = {
   , skip: false
 }
 
+// var memwatch = require('memwatch');
+// memwatch.on('stats', function(stats) {
+//   // do something with post-gc memory usage stats
+//   console.log("====================== memwatch stats")
+//   console.log(stats)
+// });
+// memwatch.on('leak', function(info) {
+//   // do something with post-gc memory usage stats
+//   console.log("====================== memwatch leak")
+//   console.log(info)
+// })
+
 /**
  * Standalone MongoDB Configuration
  */

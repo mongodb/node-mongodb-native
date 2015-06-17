@@ -1,6 +1,6 @@
 {
   "name": "mongodb",
-  "version": "2.0.33",
+  "version": "2.0.34",
   "description": "MongoDB legacy driver emulation layer on top of mongodb-core",
   "main": "index.js",
   "repository": {
@@ -13,18 +13,18 @@
     "legacy"
   ],
   "dependencies": {
-      "mongodb-core": "1.1.33"
+      "mongodb-core": "1.2.0"
     , "readable-stream": "1.0.31"
   },
   "devDependencies": {
       "integra": "0.1.8"
     , "optimist": "0.6.1"
-    , "bson": "~0.3"
+    , "bson": "~0.4"
     , "jsdoc": "3.3.0-beta3"
     , "semver": "4.1.0"
     , "rimraf": "2.2.6"
     , "gleak": "0.5.0"
-    , "mongodb-version-manager": "^0.5.0"
+    , "mongodb-version-manager": "^0.7.1"
     , "mongodb-tools": "~1.0"
   },
   "author": "Christian Kvalheim",

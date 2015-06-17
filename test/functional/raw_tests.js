@@ -5,7 +5,7 @@
  */
 exports.shouldCorrectlySaveDocumentsAndReturnAsRaw = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Buffer = require('buffer').Buffer
@@ -23,22 +23,22 @@ exports.shouldCorrectlySaveDocumentsAndReturnAsRaw = {
 
             for(var i = 0; i < items.length; i++) {
               test.ok(Buffer.isBuffer(items[i]));
-              objects.push(BSON.deserialize(items[i]));
+              objects.push(new BSON().deserialize(items[i]));
             }
-            
+
             test.equal(1, objects[0].a);
             test.equal(2000, objects[1].b);
             test.equal(2.3, objects[2].c);
-            
+
             // Execute findOne
             collection.findOne({a:1}, {raw:true}, function(err, item) {
               test.ok(Buffer.isBuffer(item));
-              var object = BSON.deserialize(item);
-              test.equal(1, object.a)            
+              var object = new BSON().deserialize(item);
+              test.equal(1, object.a)
               db.close();
               test.done();
-            })          
-          })        
+            })
+          })
         })
       });
     });
@@ -50,7 +50,7 @@ exports.shouldCorrectlySaveDocumentsAndReturnAsRaw = {
  */
 exports.shouldCorrectlySaveDocumentsAndReturnAsRawWithRawSetAtCollectionLevel = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Buffer = require('buffer').Buffer
@@ -67,22 +67,22 @@ exports.shouldCorrectlySaveDocumentsAndReturnAsRawWithRawSetAtCollectionLevel = 
             var objects = [];
             for(var i = 0; i < items.length; i++) {
               test.ok(Buffer.isBuffer(items[i]));
-              objects.push(BSON.deserialize(items[i]));
+              objects.push(new BSON().deserialize(items[i]));
             }
-            
+
             test.equal(1, objects[0].a);
             test.equal(2000, objects[1].b);
             test.equal(2.3, objects[2].c);
-            
+
             // Execute findOne
             collection.findOne({a:1}, {raw:true}, function(err, item) {
               test.ok(Buffer.isBuffer(item));
-              var object = BSON.deserialize(item);
-              test.equal(1, object.a)            
+              var object = new BSON().deserialize(item);
+              test.equal(1, object.a)
               db.close();
               test.done();
-            })          
-          })        
+            })
+          })
         })
       });
     });

@@ -538,7 +538,6 @@ exports.shouldThrowErrorIfSerializingFunction = {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('test_should_throw_error_if_serializing_function');
-
       var func = function() { return 1};
       // Insert the update
       collection.insert({i:1, z:func }, {w:1, serializeFunctions:true}, function(err, result) {

@@ -1,3 +1,11 @@
+2.0.34 06-17-2015
+-----------------
+- Upgraded to mongodb-core 1.2.0 speeding up serialization and removing the need for the c++ bson extension.
+- NODE-486 fixed issue related to limit and skip when calling toArray in 2.0 driver.
+- NODE-483 throw error if capabilities of topology is queries before topology has performed connection setup.
+- NODE-482 fixed issue where MongoClient.connect would incorrectly identify a replset seed list server as a non replicaset member.
+- NODE-487 fixed issue where killcursor command was not being sent correctly on limit and skip queries.
+
 2.0.33 05-20-2015
 -----------------
 - Bumped mongodb-core to 1.1.32.
