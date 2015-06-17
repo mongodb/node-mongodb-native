@@ -5,11 +5,11 @@
  */
 exports.shouldCorrectExecuteBasicCollectionMethods = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, client) {    
+    db.open(function(err, client) {
       var collection = client.createCollection('test_collection_methods', function(err, collection) {
         // Verify that all the result are correct coming back (should contain the value ok)
         test.equal('test_collection_methods', collection.collectionName);
@@ -33,11 +33,11 @@ exports.shouldCorrectExecuteBasicCollectionMethods = {
           db.createCollection('test_collection_methods3', function(err, collection) {
             // Verify that all the result are correct coming back (should contain the value ok)
             test.equal('test_collection_methods3', collection.collectionName);
-          
+
             db.createCollection('test_collection_methods4', function(err, collection) {
               // Verify that all the result are correct coming back (should contain the value ok)
               test.equal('test_collection_methods4', collection.collectionName);
-          
+
               // Rename the collection and with the dropTarget boolean, and check to make sure only onen exists.
               db.renameCollection("test_collection_methods4", "test_collection_methods3", {dropTarget:true}, function(err, reply) {
                 test.equal(null, err);
@@ -61,7 +61,7 @@ exports.shouldCorrectExecuteBasicCollectionMethods = {
  */
 exports.shouldAccessToCollections = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -86,6 +86,8 @@ exports.shouldAccessToCollections = {
                       if(collection.collectionName == "does_not_exist") found_does_not_exist = true;
                     });
 
+                    console.dir(collections)
+
                     test.ok(found_spiderman);
                     test.ok(found_mario);
                     test.ok(!found_does_not_exist);
@@ -107,7 +109,7 @@ exports.shouldAccessToCollections = {
  */
 exports.shouldCorrectlyRetrivelistCollections = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open(function(err, db) {
@@ -117,12 +119,12 @@ exports.shouldCorrectlyRetrivelistCollections = {
         db.listCollections().toArray(function(err, documents) {
           var found = false;
           var found2 = false;
-    
+
           documents.forEach(function(document) {
-            if(document.name == configuration.database + '.test_collection_names' 
+            if(document.name == configuration.database + '.test_collection_names'
               ||  document.name == "test_collection_names") found = true;
           });
-    
+
           test.ok(found);
           // Insert a document in an non-existing collection should create the collection
           var collection = db.collection('test_collection_names2');
@@ -131,7 +133,7 @@ exports.shouldCorrectlyRetrivelistCollections = {
 
             db.listCollections().toArray(function(err, documents) {
               documents.forEach(function(document) {
-                if(document.name == configuration.database + '.test_collection_names2' 
+                if(document.name == configuration.database + '.test_collection_names2'
                   || document.name == 'test_collection_names2') found = true;
                 if(document.name == configuration.database + '.test_collection_names'
                   || document.name == 'test_collection_names') found2 = true;
@@ -139,7 +141,7 @@ exports.shouldCorrectlyRetrivelistCollections = {
 
               test.ok(found);
               test.ok(found2);
-              
+
               // Let's close the db
               db.close();
               test.done();
@@ -156,11 +158,11 @@ exports.shouldCorrectlyRetrivelistCollections = {
  */
 exports.shouldEnsureStrictAccessCollection = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Collection = configuration.require.Collection;
-    
+
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.collection('does-not-exist', {strict: true}, function(err, collection) {
@@ -186,7 +188,7 @@ exports.shouldEnsureStrictAccessCollection = {
  */
 exports.shouldPerformStrictCreateCollection = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Collection = configuration.require.Collection;
@@ -222,7 +224,7 @@ exports.shouldPerformStrictCreateCollection = {
  */
 exports.shouldFailToInsertDueToIllegalKeys = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -282,7 +284,7 @@ exports.shouldFailToInsertDueToIllegalKeys = {
  */
 exports.shouldFailDueToIllegallistCollections = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -321,7 +323,7 @@ exports.shouldFailDueToIllegallistCollections = {
  */
 exports.shouldCorrectlyCountOnNonExistingCollection = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -343,11 +345,11 @@ exports.shouldCorrectlyCountOnNonExistingCollection = {
  */
 exports.shouldCorrectlyExecuteSave = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
-    
+
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_save', function(err, collection) {
@@ -402,7 +404,7 @@ exports.shouldCorrectlyExecuteSave = {
  */
 exports.shouldCorrectlySaveDocumentWithLongValue = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Long = configuration.require.Long;
@@ -428,7 +430,7 @@ exports.shouldCorrectlySaveDocumentWithLongValue = {
  */
 exports.shouldSaveObjectThatHasIdButDoesNotExistInCollection = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -468,11 +470,11 @@ exports.shouldSaveObjectThatHasIdButDoesNotExistInCollection = {
  */
 exports.shouldCorrectlyUpdateWithNoDocs = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
-    
+
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_should_correctly_do_update_with_no_docs', function(err, collection) {
@@ -482,7 +484,7 @@ exports.shouldCorrectlyUpdateWithNoDocs = {
         collection.update({"_id":id}, doc, configuration.writeConcernMax(), function(err, r) {
           test.equal(null, err);
           test.equal(0, r.result.n);
-          
+
           db.close();
           test.done();
         });
@@ -496,7 +498,7 @@ exports.shouldCorrectlyUpdateWithNoDocs = {
  */
 exports.shouldCorrectlyExecuteInsertUpdateDeleteSafeMode = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -532,7 +534,7 @@ exports.shouldCorrectlyExecuteInsertUpdateDeleteSafeMode = {
  */
 exports.shouldPerformMultipleSaves = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -574,7 +576,7 @@ exports.shouldPerformMultipleSaves = {
  */
 exports.shouldCorrectlySaveDocumentWithNestedArray = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
@@ -629,7 +631,7 @@ exports.shouldCorrectlySaveDocumentWithNestedArray = {
  */
 exports.shouldPeformCollectionRemoveWithNoCallback = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -660,7 +662,7 @@ exports.shouldPeformCollectionRemoveWithNoCallback = {
  */
 exports.shouldCorrectlyCreateTTLCollectionWithIndexUsingEnsureIndex = {
   metadata: { requires: { mongodb: ">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -698,7 +700,7 @@ exports.shouldCorrectlyCreateTTLCollectionWithIndexUsingEnsureIndex = {
  */
 exports.shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex = {
   metadata: { requires: { mongodb: ">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -736,7 +738,7 @@ exports.shouldCorrectlyCreateTTLCollectionWithIndexCreateIndex = {
  */
 exports.shouldCorrectlyReadBackDocumentWithNull = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -763,7 +765,7 @@ exports.shouldCorrectlyReadBackDocumentWithNull = {
  */
 exports.shouldThrowErrorDueToIllegalUpdate = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -773,16 +775,16 @@ exports.shouldThrowErrorDueToIllegalUpdate = {
           coll.update({}, null, function (err, res) {});
         } catch (err) {
           test.equal("document must be a valid JavaScript object", err.message)
-        }    
+        }
 
         try {
           coll.update(null, null, function (err, res) {});
         } catch (err) {
           test.equal("selector must be a valid JavaScript object", err.message)
-        }    
+        }
 
         db.close();
-        test.done()    
+        test.done()
       });
     });
   }
@@ -793,7 +795,7 @@ exports.shouldThrowErrorDueToIllegalUpdate = {
  */
 exports.shouldCorrectlyHandle0asIdForSave = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -816,7 +818,7 @@ exports.shouldCorrectlyHandle0asIdForSave = {
  */
 exports['Should correctly execute update with . field in selector'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
@@ -838,7 +840,7 @@ exports['Should correctly execute update with . field in selector'] = {
  */
 exports['Should correctly execute update with elemMatch field in selector'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
@@ -860,7 +862,7 @@ exports['Should correctly execute update with elemMatch field in selector'] = {
  */
 exports['Should correctly execute find with elemMatch field in selector'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
@@ -882,7 +884,7 @@ exports['Should correctly execute find with elemMatch field in selector'] = {
  */
 exports['Should correctly execute remove with elemMatch field in selector'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
@@ -904,7 +906,7 @@ exports['Should correctly execute remove with elemMatch field in selector'] = {
  */
 exports['Should fail due to exiting collection'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
@@ -974,7 +976,7 @@ exports.shouldFilterCorrectlyWithIndexDuringList = {
       // Create a collection
       db.createCollection(testCollection, function(err, r) {
         test.equal(null, err);
-        
+
         // Index name happens to be the same as collection name
         db.createIndex(testCollection, 'collection_124', {w:1}, function(err, indexName) {
           test.equal(null, err);
@@ -984,11 +986,11 @@ exports.shouldFilterCorrectlyWithIndexDuringList = {
             test.equal(null, err);
             test.ok(documents.length > 1);
             var found = false;
-            
+
             documents.forEach(function(document) {
               if(document.name == testCollection) found = true;
             });
-            
+
             test.ok(found);
             db.close();
             test.done();

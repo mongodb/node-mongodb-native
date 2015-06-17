@@ -19,9 +19,7 @@ exports.cursorShouldBeAbleToResetOnToArrayRunningQueryAgain = {
 
         collection.insert({'a':1}, configuration.writeConcernMax(), function(err, ids) {
           var cursor = collection.find({});
-          console.log("--------------------------------- TOARRAY 0")
           cursor.toArray(function(err, items) {
-          console.log("--------------------------------- TOARRAY 1")
             // Should fail if called again (cursor should be closed)
             cursor.toArray(function(err, items) {
               test.equal(null, err);
@@ -1650,7 +1648,7 @@ exports['immediately destroying a stream prevents the query from executing'] = {
           stream.on('data', function () {
             i++;
           })
-          
+
           stream.on('close', done('close'));
           stream.on('error', done('error'));
 
@@ -1667,7 +1665,7 @@ exports['immediately destroying a stream prevents the query from executing'] = {
                 db.close();
                 test.done();
               }
-            }              
+            }
           }
         });
       });
@@ -1784,7 +1782,7 @@ exports['cursor stream errors'] = {
                   test.equal(true, stream.isClosed());
                   client.close();
                   test.done();
-                }, 150)                
+                }, 150)
               }
             }
           }
@@ -2351,7 +2349,7 @@ exports.shouldFailToTailANormalCollection = {
         collection.find({}, {tailable:true}).each(function(err, doc) {
           test.ok(err instanceof Error);
           test.ok(typeof(err.code) === 'number');
-          
+
           db.close();
           test.done();
         });
@@ -2745,7 +2743,7 @@ exports['Should correctly apply map to toArray'] = {
           .map(function(x) { return {a:1}; })
           .batchSize(5)
           .limit(10);
-        cursor.toArray(function(err, docs) {          
+        cursor.toArray(function(err, docs) {
           test.equal(null, err);
           test.equal(10, docs.length);
 
@@ -2796,7 +2794,7 @@ exports['Should correctly apply map to next'] = {
           .map(function(x) { return {a:1}; })
           .batchSize(5)
           .limit(10);
-        cursor.next(function(err, doc) {          
+        cursor.next(function(err, doc) {
           test.equal(null, err);
           test.equal(1, doc.a);
 
@@ -2842,7 +2840,7 @@ exports['Should correctly apply map to nextObject'] = {
           .map(function(x) { return {a:1}; })
           .batchSize(5)
           .limit(10);
-        cursor.nextObject(function(err, doc) {          
+        cursor.nextObject(function(err, doc) {
           test.equal(null, err);
           test.equal(1, doc.a);
 
@@ -2895,7 +2893,7 @@ exports['Should correctly apply map to each'] = {
             test.equal(1, doc.a);
           } else {
             db.close();
-            test.done();            
+            test.done();
           }
         });
       })
@@ -2942,9 +2940,79 @@ exports['Should correctly apply map to forEach'] = {
         }, function(err, doc) {
           test.equal(null, err);
           db.close();
-          test.done();            
+          test.done();
         });
       })
+    });
+  }
+}
+
+/**
+ * @ignore
+ * @api private
+ */
+exports['Should correctly apply skip and limit to large set of documents'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    // var docs = [];
+    //
+    // for(var i = 0; i < 4000) {
+    //
+    // }
+
+    // for(var i = 0; i < 1000; i++) {
+    //   var d = new Date().getTime() + i*1000;
+    //   docs[i] = {'a':i, createdAt:new Date(d)};
+    // }
+    //
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      var collection = db.collection('cursor_limit_skip_correctly');
+
+      // Insert x number of docs
+      var ordered = collection.initializeUnorderedBulkOp();
+
+      for(var i = 0; i < 6000; i++) {
+        ordered.insert({a:i});
+      }
+
+      ordered.execute({w:1}, function(err, r) {
+        test.equal(null, err);
+
+        // Let's attempt to skip and limit
+        collection.find({}).limit(2016).skip(2016).toArray(function(err, docs) {
+          test.equal(null, err);
+          test.equal(2016, docs.length);
+
+          db.close();
+          test.done();
+        });
+      });
+
+      // // insert all docs
+      // collection.insert(docs, configuration.writeConcernMax(), function(err, result) {
+      //   test.equal(null, err);
+      //   var total = 0;
+      //
+      //   // Create a cursor for the content
+      //   var cursor = collection.find({})
+      //     .map(function(x) { return {a:1}; })
+      //     .batchSize(5)
+      //     .limit(10);
+      //   cursor.forEach(function(doc) {
+      //     test.equal(1, doc.a);
+      //   }, function(err, doc) {
+      //     test.equal(null, err);
+      //     db.close();
+      //     test.done();
+      //   });
+      // })
     });
   }
 }

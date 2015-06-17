@@ -47,7 +47,7 @@ exports.shouldCorrectlyPerformSingleInsert = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -71,7 +71,7 @@ exports.shouldCorrectlyHandleMultipleDocumentInsert = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
@@ -110,7 +110,7 @@ exports.shouldCorrectlyExecuteSaveInsertUpdate = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -145,7 +145,7 @@ exports.shouldCorrectlyInsertAndRetrieveLargeIntegratedArrayDocument = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -176,7 +176,7 @@ exports.shouldCorrectlyInsertAndRetrieveDocumentWithAllTypes = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID
@@ -251,7 +251,7 @@ exports.shouldCorrectlyInsertAndUpdateDocumentWithNewScriptContext = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -308,7 +308,7 @@ exports.shouldCorrectlySerializeDocumentWithAllTypesInNewContext = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID
@@ -394,7 +394,7 @@ exports.shouldCorrectlyDoToJsonForLongValue = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Long = configuration.require.Long;
@@ -421,7 +421,7 @@ exports.shouldCorrectlyInsertAndUpdateWithNoCallback = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -453,7 +453,7 @@ exports.shouldInsertAndQueryTimestamp = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Timestamp = configuration.require.Timestamp
@@ -485,7 +485,7 @@ exports.shouldCorrectlyInsertAndQueryUndefined = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -513,7 +513,7 @@ exports.shouldCorrectlySerializeDBRefToJSON = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var DBRef = configuration.require.DBRef
@@ -532,7 +532,7 @@ exports.shouldThrowErrorIfSerializingFunction = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -562,7 +562,7 @@ exports.shouldCorrectlyInsertDocumentWithUUID = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Binary = configuration.require.Binary;
@@ -603,7 +603,7 @@ exports.shouldCorrectlyCallCallbackWithDbDriverInStrictMode = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -631,7 +631,7 @@ exports.shouldCorrectlyInsertDBRefWithDbNotDefined = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var DBRef = configuration.require.DBRef
@@ -644,14 +644,14 @@ exports.shouldCorrectlyInsertDBRefWithDbNotDefined = {
       var doc = {_id: new ObjectID()};
       var doc2 = {_id: new ObjectID()};
       var doc3 = {_id: new ObjectID()};
-      
+
       collection.insert(doc, configuration.writeConcernMax(), function(err, result) {
         // Create object with dbref
         doc2.ref = new DBRef('shouldCorrectlyInsertDBRefWithDbNotDefined', doc._id);
         doc3.ref = new DBRef('shouldCorrectlyInsertDBRefWithDbNotDefined', doc._id, configuration.db_name);
 
         collection.insert([doc2, doc3], configuration.writeConcernMax(), function(err, result) {
-          
+
           // Get all items
           collection.find().toArray(function(err, items) {
             test.equal("shouldCorrectlyInsertDBRefWithDbNotDefined", items[1].ref.namespace);
@@ -678,7 +678,7 @@ exports.shouldCorrectlyInsertUpdateRemoveWithNoOptions = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -713,7 +713,7 @@ exports.shouldCorrectlyExecuteMultipleFetches = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     // Search parameter
@@ -742,7 +742,7 @@ exports.shouldCorrectlyFailWhenNoObjectToUpdate = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
@@ -769,7 +769,7 @@ exports['Should correctly insert object and retrieve it when containing array an
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
@@ -809,7 +809,7 @@ exports['Should correctly insert object with timestamps'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID
@@ -851,7 +851,7 @@ exports['Should fail on insert due to key starting with $'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
@@ -880,7 +880,7 @@ exports['Should Correctly allow for control of serialization of functions on com
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Code = configuration.require.Code;
@@ -921,7 +921,7 @@ exports['Should Correctly allow for control of serialization of functions on col
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Code = configuration.require.Code;
@@ -954,7 +954,7 @@ exports['Should Correctly allow for using a Date object as _id'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var doc = {
@@ -985,7 +985,7 @@ exports['Should Correctly fail to update returning 0 results'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -1007,7 +1007,7 @@ exports['Should Correctly update two fields including a sub field'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
@@ -1054,7 +1054,7 @@ exports['Should correctly fail due to duplicate key for _id'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -1081,7 +1081,7 @@ exports.shouldCorrectlyInsertDocWithCustomId = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -1109,7 +1109,7 @@ exports.shouldCorrectlyPerformUpsertAgainstNewDocumentAndExistingOne = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -1124,7 +1124,7 @@ exports.shouldCorrectlyPerformUpsertAgainstNewDocumentAndExistingOne = {
 
         // Upsert an existing doc
         collection.update({a:1}, {a:1}, {upsert:true, w:1, fullResult:true}, function(err, result) {
-          if(result.updatedExisting) test.equal(true, result.updatedExisting);          
+          if(result.updatedExisting) test.equal(true, result.updatedExisting);
           test.equal(1, result.result.n);
           db.close();
           test.done();
@@ -1141,7 +1141,7 @@ exports.shouldCorrectlyPerformLargeTextInsert = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -1176,7 +1176,7 @@ exports.shouldCorrectlyPerformInsertOfObjectsUsingToBSON = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -1210,7 +1210,7 @@ exports.shouldAttempToForceBsonSize = {
   metadata: {
     requires: {topology: 'single'}
   },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Binary = configuration.require.Binary;
@@ -1249,7 +1249,7 @@ exports.shouldCorrectlyUseCustomObjectToUpdateDocument = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -1285,7 +1285,7 @@ exports.shouldExecuteInsertWithNoCallbackAndWriteConcern = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -1305,7 +1305,7 @@ exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcern = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     function cb (err) {
@@ -1318,7 +1318,7 @@ exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcern = {
     db.open(function(err, db) {
       var collection = db.collection('gh-completely');
       collection.insert({ a: 1 }, { w: 0 }, cb);
-      
+
       setTimeout(function(){
         db.close();
         test.done();
@@ -1334,7 +1334,7 @@ exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithUpdate = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     function cb (err) {
@@ -1348,7 +1348,7 @@ exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithUpdate = {
     db.open(function(err, db) {
       var collection = db.collection('gh-completely');
       collection.update({ a: 1 }, {a:2}, { upsert:true, w: 0 }, cb);
-      
+
       setTimeout(function(){
         db.close();
         test.done();
@@ -1364,7 +1364,7 @@ exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithRemove = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     function cb (err) {
@@ -1378,7 +1378,7 @@ exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithRemove = {
     db.open(function(err, db) {
       var collection = db.collection('gh-completely');
       collection.remove({ a: 1 }, { w: 0 }, cb);
-      
+
       setTimeout(function(){
         db.close();
         test.done();
@@ -1394,7 +1394,7 @@ exports.handleBSONTypeInsertsCorrectly = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'], mongodb: "<2.8.0" } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID
@@ -1426,27 +1426,27 @@ exports.handleBSONTypeInsertsCorrectly = {
           test.equal(null, err);
           test.equal("abcdefghijkl", doc.symbol.toString());
 
-          collection.findOne({"objid": new ObjectID("abcdefghijkl")}, function(err, doc) {            
+          collection.findOne({"objid": new ObjectID("abcdefghijkl")}, function(err, doc) {
             test.equal(null, err);
             test.equal("6162636465666768696a6b6c", doc.objid.toString());
 
-            collection.findOne({"double": new Double(1)}, function(err, doc) {            
+            collection.findOne({"double": new Double(1)}, function(err, doc) {
               test.equal(null, err);
               test.equal(1, doc.double);
 
-              collection.findOne({"binary": new Binary(new Buffer("hello world"))}, function(err, doc) {            
+              collection.findOne({"binary": new Binary(new Buffer("hello world"))}, function(err, doc) {
                 test.equal(null, err);
                 test.equal("hello world", doc.binary.toString());
 
-                collection.findOne({"minkey": new MinKey()}, function(err, doc) {            
+                collection.findOne({"minkey": new MinKey()}, function(err, doc) {
                   test.equal(null, err);
                   test.ok(doc.minkey instanceof MinKey);
 
-                  collection.findOne({"maxkey": new MaxKey()}, function(err, doc) {            
+                  collection.findOne({"maxkey": new MaxKey()}, function(err, doc) {
                     test.equal(null, err);
                     test.ok(doc.maxkey instanceof MaxKey);
 
-                    collection.findOne({"code": new Code("function () {}", {a: 77})}, function(err, doc) {            
+                    collection.findOne({"code": new Code("function () {}", {a: 77})}, function(err, doc) {
                       test.equal(null, err);
                       console.dir(doc)
                       test.ok(doc != null);
@@ -1471,7 +1471,7 @@ exports.handleBSONTypeInsertsCorrectlyFor28OrHigher = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'], mongodb: ">=2.8.0" } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID
@@ -1503,27 +1503,27 @@ exports.handleBSONTypeInsertsCorrectlyFor28OrHigher = {
           test.equal(null, err);
           test.equal("abcdefghijkl", doc.symbol.toString());
 
-          collection.findOne({"objid": new ObjectID("abcdefghijkl")}, function(err, doc) {            
+          collection.findOne({"objid": new ObjectID("abcdefghijkl")}, function(err, doc) {
             test.equal(null, err);
             test.equal("6162636465666768696a6b6c", doc.objid.toString());
 
-            collection.findOne({"double": new Double(1)}, function(err, doc) {            
+            collection.findOne({"double": new Double(1)}, function(err, doc) {
               test.equal(null, err);
               test.equal(1, doc.double);
 
-              collection.findOne({"binary": new Binary(new Buffer("hello world"))}, function(err, doc) {            
+              collection.findOne({"binary": new Binary(new Buffer("hello world"))}, function(err, doc) {
                 test.equal(null, err);
                 test.equal("hello world", doc.binary.toString());
 
-                collection.findOne({"minkey": new MinKey()}, function(err, doc) {            
+                collection.findOne({"minkey": new MinKey()}, function(err, doc) {
                   test.equal(null, err);
                   test.ok(doc.minkey instanceof MinKey);
 
-                  collection.findOne({"maxkey": new MaxKey()}, function(err, doc) {            
+                  collection.findOne({"maxkey": new MaxKey()}, function(err, doc) {
                     test.equal(null, err);
                     test.ok(doc.maxkey instanceof MaxKey);
 
-                    collection.findOne({"code": new Code("function () {}", {a: 55})}, function(err, doc) {            
+                    collection.findOne({"code": new Code("function () {}", {a: 55})}, function(err, doc) {
                       test.equal(null, err);
                       test.ok(doc != null);
                       db.close();
@@ -1547,7 +1547,7 @@ exports.mixedTimestampAndDateQuery = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Timestamp = configuration.require.Timestamp;
@@ -1568,7 +1568,7 @@ exports.mixedTimestampAndDateQuery = {
           test.equal(null, err);
           test.ok(doc != null);
 
-          collection.findOne({"x": d}, function(err, doc) {            
+          collection.findOne({"x": d}, function(err, doc) {
             test.equal(null, err);
             test.ok(doc != null);
             db.close();
@@ -1587,7 +1587,7 @@ exports.positiveAndNegativeInfinity = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -1619,7 +1619,7 @@ exports.shouldCorrectlyInsertSimpleRegExpDocument = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var regexp = /foobar/i;
@@ -1644,7 +1644,7 @@ exports.shouldCorrectlyInsertSimpleUTF8Regexp = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var regexp = /foobaré/;
@@ -1672,7 +1672,7 @@ exports.shouldCorrectlyThrowDueToIllegalCollectionName = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -1701,7 +1701,7 @@ exports.shouldCorrectlyHonorPromoteLongFalseNativeBSON = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Long = configuration.require.Long;
@@ -1716,7 +1716,7 @@ exports.shouldCorrectlyHonorPromoteLongFalseNativeBSON = {
         }, function(err, doc) {
           test.equal(null, err);
 
-          db.collection('shouldCorrectlyHonorPromoteLong').findOne(function(err, doc) {      
+          db.collection('shouldCorrectlyHonorPromoteLong').findOne(function(err, doc) {
             test.equal(null, err);
             test.ok(doc.doc instanceof Long);
             test.ok(doc.array[0][0] instanceof Long);
@@ -1732,7 +1732,7 @@ exports.shouldCorrectlyHonorPromoteLongTrueNativeBSON = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Long = configuration.require.Long;
@@ -1761,7 +1761,7 @@ exports.shouldCorrectlyHonorPromoteLongFalseJSBSON = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Long = configuration.require.Long;
@@ -1774,7 +1774,7 @@ exports.shouldCorrectlyHonorPromoteLongFalseJSBSON = {
         }, function(err, doc) {
           test.equal(null, err);
 
-          db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').findOne(function(err, doc) {      
+          db.collection('shouldCorrectlyHonorPromoteLongFalseJSBSON').findOne(function(err, doc) {
             test.equal(null, err);
             test.equal(null, err);
             test.ok(doc.doc instanceof Long);
@@ -1791,7 +1791,7 @@ exports.shouldCorrectlyHonorPromoteLongTrueJSBSON = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Long = configuration.require.Long;
@@ -1820,7 +1820,7 @@ exports.shouldCorrectlyWorkWithCheckKeys = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Long = configuration.require.Long;
@@ -1842,7 +1842,7 @@ exports.shouldCorrectlyApplyBitOperator = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:false})
@@ -1873,16 +1873,16 @@ exports.shouldCorrectlyPerformInsertAndUpdateWithFunctionSerialization = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:false})
     db.open(function(err, db) {
       var col = db.collection('shouldCorrectlyPerformInsertAndUpdateWithFunctionSerialization', {serializeFunctions:true});
-      
+
       col.insert({a:1, f: function(x) {return x;}},function(err,doc){
         test.equal(null,err);
-        
+
         col.update({a:1},{$set:{f: function(y){return y;}}},function(err,doc){
           test.equal(null,err);
 
