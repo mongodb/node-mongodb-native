@@ -1,7 +1,9 @@
-1.2.0
+1.2.0 06-17-2015
 -----------------
-- Switching to using the 0.4.0 pure JS serializer, removing dependency on C++ parser.
+- Switching to using the 0.4.x pure JS serializer, removing dependency on C++ parser.
 - Refactoring wire protocol messages to avoid expensive size calculations of documents in favor of writing out an array of buffers to the sockets.
+- NODE-486 fixed issue related to limit and skip when calling toArray in 2.0 driver.
+- NODE-483 throw error if capabilities of topology is queries before topology has performed connection setup.
 
 1.1.33 05-31-2015
 -----------------
