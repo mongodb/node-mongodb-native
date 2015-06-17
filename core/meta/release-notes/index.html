@@ -210,6 +210,28 @@
 
 
 
+<h2 id="1-2-1-06-17-2015:066aa012c0230cd32faa0776e0a81250">1.2.1 06-17-2015</h2>
+
+<ul>
+<li>Ensure serializeFunctions passed down correctly to wire protocol.</li>
+</ul>
+
+<h2 id="1-2-0-06-17-2015:066aa012c0230cd32faa0776e0a81250">1.2.0 06-17-2015</h2>
+
+<ul>
+<li>Switching to using the 0.4.x pure JS serializer, removing dependency on C++ parser.</li>
+<li>Refactoring wire protocol messages to avoid expensive size calculations of documents in favor of writing out an array of buffers to the sockets.</li>
+<li>NODE-486 fixed issue related to limit and skip when calling toArray in 2.0 driver.</li>
+<li>NODE-483 throw error if capabilities of topology is queries before topology has performed connection setup.</li>
+<li>NODE-487 fixed issue where killcursor command was not being sent correctly on limit and skip queries.</li>
+</ul>
+
+<h2 id="1-1-33-05-31-2015:066aa012c0230cd32faa0776e0a81250">1.1.33 05-31-2015</h2>
+
+<ul>
+<li>NODE-478 Work around authentication race condition in mongos authentication due to multi step authentication methods like SCRAM.</li>
+</ul>
+
 <h2 id="1-1-32-05-20-2015:066aa012c0230cd32faa0776e0a81250">1.1.32 05-20-2015</h2>
 
 <ul>

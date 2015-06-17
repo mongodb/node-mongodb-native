@@ -1662,7 +1662,7 @@ var EventEmitter = require('events').EventEmitter
 /**
  * @fileOverview The **ReplSet** class is a class that represents a Replicaset topology and is
  * used to construct connections.
- * 
+ *
  * **ReplSet Should not be used, use MongoClient.connect**
  * @example
  * var Db = require('mongodb').Db,
@@ -1687,20 +1687,20 @@ var EventEmitter = require('events').EventEmitter
  * @param {booelan} [options.ha=true] Turn on high availability monitoring.
  * @param {number} [options.haInterval=5000] Time between each replicaset status check.
  * @param {string} options.replicaSet The name of the replicaset to connect to.
- * @param {number} [options.secondaryAcceptableLatencyMS=15] Sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms) 
+ * @param {number} [options.secondaryAcceptableLatencyMS=15] Sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)
  * @param {boolean} [options.connectWithNoPrimary=false] Sets if the driver should connect even if no primary is available
  * @param {number} [options.poolSize=5] Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.
- * @param {boolean} [options.ssl=false] Use ssl connection (needs to have a mongod server with ssl support) 
+ * @param {boolean} [options.ssl=false] Use ssl connection (needs to have a mongod server with ssl support)
  * @param {object} [options.sslValidate=true] Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher)
  * @param {array} [options.sslCA=null] Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher)
  * @param {(Buffer|string)} [options.sslCert=null] String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher)
  * @param {(Buffer|string)} [options.sslKey=null] String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher)
  * @param {(Buffer|string)} [options.sslPass=null] String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher)
- * @param {object} [options.socketOptions=null] Socket options 
- * @param {boolean} [options.socketOptions.noDelay=true] TCP Socket NoDelay option. 
- * @param {number} [options.socketOptions.keepAlive=0] TCP KeepAlive on the socket with a X ms delay before start. 
- * @param {number} [options.socketOptions.connectTimeoutMS=0] TCP Connection timeout setting 
- * @param {number} [options.socketOptions.socketTimeoutMS=0] TCP Socket timeout setting 
+ * @param {object} [options.socketOptions=null] Socket options
+ * @param {boolean} [options.socketOptions.noDelay=true] TCP Socket NoDelay option.
+ * @param {number} [options.socketOptions.keepAlive=0] TCP KeepAlive on the socket with a X ms delay before start.
+ * @param {number} [options.socketOptions.connectTimeoutMS=0] TCP Connection timeout setting
+ * @param {number} [options.socketOptions.socketTimeoutMS=0] TCP Socket timeout setting
  * @fires ReplSet#connect
  * @fires ReplSet#ha
  * @fires ReplSet#joined
@@ -1713,7 +1713,7 @@ var EventEmitter = require('events').EventEmitter
  * @fires ReplSet#parseError
  * @return {ReplSet} a ReplSet instance.
  */
-var ReplSet = function(servers, options) {  
+var ReplSet = function(servers, options) {
   if(!(this instanceof ReplSet)) return new ReplSet(servers, options);
   options = options || {};
   var self = this;
@@ -1748,7 +1748,7 @@ var ReplSet = function(servers, options) {
   // Final options
   var finalOptions = shallowClone(options);
 
-  // Default values  
+  // Default values
   finalOptions.size = typeof options.poolSize == 'number' ? options.poolSize : 5;
   finalOptions.reconnect = typeof options.auto_reconnect == 'boolean' ? options.auto_reconnect : true;
   finalOptions.emitError = typeof options.emitError == 'boolean' ? options.emitError : true;
@@ -1763,11 +1763,11 @@ var ReplSet = function(servers, options) {
       this.connectTimeoutMS = options.socketOptions.connectTimeoutMS;
       finalOptions.connectionTimeout = options.socketOptions.connectTimeoutMS;
     }
-    
+
     if(options.socketOptions.socketTimeoutMS) {
       finalOptions.socketTimeout = options.socketOptions.socketTimeoutMS;
     }
-  } 
+  }
 
   // Get the name
   var replicaSet = options.replicaSet || options.rs_name;
@@ -1852,13 +1852,13 @@ var ReplSet = function(servers, options) {
     // Options
     , options: options
   }
-  
+
   // Debug
   if(debug) {
     // Last ismaster
     Object.defineProperty(this, 'replset', {
       enumerable:true, get: function() { return replset; }
-    });    
+    });
   }
 
   // Last ismaster
@@ -1867,9 +1867,9 @@ var ReplSet = function(servers, options) {
   });
 
   // BSON property
-  Object.defineProperty(this, 'bson', { 
-    enumerable: true, get: function() { 
-      return replset.bson; 
+  Object.defineProperty(this, 'bson', {
+    enumerable: true, get: function() {
+      return replset.bson;
     }
   });
 
@@ -1892,7 +1892,7 @@ var translateReadPreference = function(options) {
       , options.readPreference.tags);
   }
 
-  return options;  
+  return options;
 }
 
 ReplSet.prototype.parserType = function() {
@@ -1947,12 +1947,12 @@ ReplSet.prototype.connect = function(db, _options, callback) {
 
     // Relay ha
     var relayHa = function(t, state) {
-      self.emit('ha', t, state);          
+      self.emit('ha', t, state);
 
       if(t == 'start') {
-        self.emit('ha_connect', t, state);          
+        self.emit('ha_connect', t, state);
       } else if(t == 'end') {
-        self.emit('ha_ismaster', t, state);          
+        self.emit('ha_ismaster', t, state);
       }
     }
 
@@ -1961,24 +1961,24 @@ ReplSet.prototype.connect = function(db, _options, callback) {
     self.s.replset.on('left', relay('left'));
     self.s.replset.on('ping', relay('ping'));
     self.s.replset.on('ha', relayHa);
-    
+
     self.s.replset.on('fullsetup', function(topology) {
       self.emit('fullsetup', null, self);
     });
-    
+
     self.s.replset.on('all', function(topology) {
       self.emit('all', null, self);
     });
 
     // Emit open event
-    self.emit('open', null, self);      
+    self.emit('open', null, self);
 
     // Return correctly
     try {
       callback(null, self);
-    } catch(err) { 
+    } catch(err) {
       process.nextTick(function() { throw err; })
-    }      
+    }
   }
 
   // Error handler
@@ -1995,12 +1995,12 @@ ReplSet.prototype.connect = function(db, _options, callback) {
       // Try to callback
       try {
         callback(err);
-      } catch(err) { 
+      } catch(err) {
         if(!self.s.replset.isConnected())
           process.nextTick(function() { throw err; })
       }
     }
-  }    
+  }
 
   // Set up listeners
   self.s.replset.once('timeout', connectErrorHandler('timeout'));
@@ -2010,11 +2010,12 @@ ReplSet.prototype.connect = function(db, _options, callback) {
 
   // Start connection
   self.s.replset.connect(_options);
-}  
+}
 
 // Server capabilities
 ReplSet.prototype.capabilities = function() {
   if(this.s.sCapabilities) return this.s.sCapabilities;
+  if(this.s.replset.lastIsMaster() == null) throw new MongoError('cannot establish topology capabilities as driver is still in process of connecting');
   this.s.sCapabilities = new ServerCapabilities(this.s.replset.lastIsMaster());
   return this.s.sCapabilities;
 }
@@ -2047,7 +2048,7 @@ ReplSet.prototype.isConnected = function() {
 
 ReplSet.prototype.setBSONParserType = function(type) {
   return this.s.replset.setBSONParserType(type);
-}  
+}
 
 // Insert
 ReplSet.prototype.cursor = function(ns, cmd, options) {
@@ -2072,7 +2073,7 @@ ReplSet.prototype.close = function(forceClosed) {
   var events = ['timeout', 'error', 'close', 'joined', 'left'];
   events.forEach(function(e) {
     self.removeAllListeners(e);
-  });        
+  });
 }
 
 ReplSet.prototype.auth = function() {
@@ -2087,7 +2088,7 @@ ReplSet.prototype.auth = function() {
  */
 ReplSet.prototype.connections = function() {
   return this.s.replset.connections();
-}    
+}
 
 /**
  * A replset connect event, used to verify that the connection is up and running
@@ -2167,7 +2168,8 @@ ReplSet.prototype.connections = function() {
  * @type {object}
  */
 
-module.exports = ReplSet;</code></pre>
+module.exports = ReplSet;
+</code></pre>
         </article>
     </section>
 
@@ -2196,7 +2198,7 @@ module.exports = ReplSet;</code></pre>
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue May 19 2015 10:37:36 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Wed Jun 17 2015 18:26:24 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

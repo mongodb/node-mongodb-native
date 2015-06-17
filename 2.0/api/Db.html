@@ -2637,7 +2637,7 @@ Db instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line924">line 924</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line932">line 932</a>
         </div>
         
     </div>
@@ -3182,7 +3182,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   // Use the admin database for the operation
   var adminDb = db.admin()
   test.ok(adminDb != null);
-  
+
   db.close();
 });</code></pre>
     
@@ -3201,7 +3201,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1061">line 1061</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1069">line 1069</a>
         </div>
         
     </div>
@@ -3394,7 +3394,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
                         
                     
                 
-                <p>The authentication mechanism to use, GSSAPI, MONGODB-CR, MONGODB-X509, PLAIN</p></td>
+                <p>The authentication mechanism to use, GSSAPI, MONGODB-CR, MONGODB-X509, SCRAM-SHA-1, PLAIN</p></td>
         </tr>
 	
 	
@@ -6194,7 +6194,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 
           db.close();
         });
-      })              
+      })
     });
   });
 });</code></pre>
@@ -6214,7 +6214,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line803">line 803</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line811">line 811</a>
         </div>
         
     </div>
@@ -6332,19 +6332,19 @@ var MongoClient = require('mongodb').MongoClient,
   test = require('assert');
 MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   test.equal(null, err);
-  
+
   // Reference a different database sharing the same connections
   // for the data transfer
   var secondDb = db.db("integration_tests_2");
-  
+
   // Fetch the collections
   var multipleColl1 = db.collection("multiple_db_instances");
   var multipleColl2 = secondDb.collection("multiple_db_instances");
-  
+
   // Write a record into each and then count the records stored
-  multipleColl1.insertOne({a:1}, {w:1}, function(err, result) {      
+  multipleColl1.insertOne({a:1}, {w:1}, function(err, result) {
     multipleColl2.insertOne({a:1}, {w:1}, function(err, result) {
-      
+
       // Count over the results ensuring only on record in each collection
       multipleColl1.count(function(err, count) {
         test.equal(1, count);
@@ -6734,7 +6734,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line767">line 767</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line771">line 771</a>
         </div>
         
     </div>
@@ -7850,7 +7850,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // Define a system level function
     db.collection("system.js").insertOne({_id: "echo", value: new Code("function(x) { return x; }")}, {w:1}, function(err, result) {
       test.equal(null, err);
-    
+
       db.eval("echo(5)", function(err, result) {
         test.equal(null, err);
         test.equal(5, result);
@@ -8175,7 +8175,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1187">line 1187</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1195">line 1195</a>
         </div>
         
     </div>
@@ -8737,7 +8737,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1149">line 1149</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1157">line 1157</a>
         </div>
         
     </div>
@@ -9153,7 +9153,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1018">line 1018</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1026">line 1026</a>
         </div>
         
     </div>
@@ -10827,7 +10827,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1350">line 1350</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1358">line 1358</a>
         </div>
         
     </div>
@@ -10908,7 +10908,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1343">line 1343</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1351">line 1351</a>
         </div>
         
     </div>
@@ -10989,7 +10989,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1364">line 1364</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1372">line 1372</a>
         </div>
         
     </div>
@@ -11070,7 +11070,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1385">line 1385</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1393">line 1393</a>
         </div>
         
     </div>
@@ -11151,7 +11151,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1378">line 1378</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1386">line 1386</a>
         </div>
         
     </div>
@@ -11232,7 +11232,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1357">line 1357</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1365">line 1365</a>
         </div>
         
     </div>
@@ -11313,7 +11313,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1371">line 1371</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1379">line 1379</a>
         </div>
         
     </div>
@@ -11413,7 +11413,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue May 19 2015 10:37:36 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Wed Jun 17 2015 18:26:24 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

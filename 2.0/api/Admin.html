@@ -2235,20 +2235,20 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 
   // Use the admin database for the operation
   var adminDb = db.admin();
-    
+
   // Add the new user to the admin database
   adminDb.addUser('admin11', 'admin11', function(err, result) {
-    
+
     // Authenticate using the newly added user
     adminDb.authenticate('admin11', 'admin11', function(err, result) {
       test.ok(result);
-      
+
       adminDb.removeUser('admin11', function(err, result) {
         test.ok(result);
 
         db.close();
       });
-    });                
+    });
   });
 });
 
@@ -2265,7 +2265,7 @@ rts.shouldCorrectlyAddAUserAndRemoveItFromAdminDb = {
 tadata: { requires: { topology: 'single' } },
 
  The actual test we wish to run
-st: function(configure, test) {  
+st: function(configure, test) {
 var db = configure.newDbInstance({w:1}, {poolSize:1});
 
 db.open(function(err, db) {
@@ -2275,19 +2275,19 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 
   // Use the admin database for the operation
   var adminDb = db.admin();
-    
+
   // Add the new user to the admin database
   adminDb.addUser('admin12', 'admin12', function(err, result) {
-    
+
     // Authenticate using the newly added user
     adminDb.authenticate('admin12', 'admin12', function(err, result) {
       test.ok(result);
-      
+
       // Remove the user
-      adminDb.removeUser('admin12', function(err, result) {              
+      adminDb.removeUser('admin12', function(err, result) {
         test.equal(null, err);
         test.equal(true, result);
-        
+
         // Authenticate using the removed user should fail
         adminDb.authenticate('admin12', 'admin12', function(err, result) {
           test.ok(err != null);
@@ -2295,8 +2295,8 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 
           db.close();
         });
-      })            
-    });                
+      })
+    });
   });
 });</code></pre>
     
@@ -2665,11 +2665,11 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // Authenticate using the newly added user
     adminDb.authenticate('admin3', 'admin3', function(err, result) {
       test.ok(result);
-      
+
       // Retrive the build information for the MongoDB instance
       adminDb.buildInfo(function(err, info) {
         test.ok(err == null);
-        
+
         adminDb.removeUser('admin3', function(err, result) {
           test.ok(result);
 
@@ -2678,7 +2678,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
       });
     });
   });
-});            </code></pre>
+});</code></pre>
     
 
     
@@ -3000,7 +3000,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     // Authenticate using the newly added user
     adminDb.authenticate('admin4', 'admin4', function(err, result) {
       test.ok(result);
-      
+
       // Retrive the build information using the admin command
       adminDb.command({buildInfo:1}, function(err, info) {
         test.ok(err == null);
@@ -3150,12 +3150,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 
   // Use the admin database for the operation
   var adminDb = db.admin();
-    
+
   // List all the available databases
   adminDb.listDatabases(function(err, dbs) {
     test.equal(null, err);
     test.ok(dbs.databases.length > 0);
-    
+
     db.close();
   });
 });</code></pre>
@@ -3295,25 +3295,25 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 
   // Use the admin database for the operation
   var adminDb = db.admin();
-    
+
   // Add the new user to the admin database
   adminDb.addUser('admin10', 'admin10', function(err, result) {
-    
+
     // Authenticate using the newly added user
     adminDb.authenticate('admin10', 'admin10', function(err, result) {
       test.ok(result);
-      
+
       // Logout the user
       adminDb.logout(function(err, result) {
         test.equal(true, result);
-        
+
         adminDb.removeUser('admin10', function(err, result) {
           test.ok(result);
 
           db.close();
         });
       });
-    });                
+    });
   });
 });</code></pre>
     
@@ -3452,14 +3452,14 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 
   // Use the admin database for the operation
   var adminDb = db.admin();
-    
+
   // Add the new user to the admin database
   adminDb.addUser('admin9', 'admin9', function(err, result) {
-    
+
     // Authenticate using the newly added user
     adminDb.authenticate('admin9', 'admin9', function(err, result) {
       test.ok(result);
-      
+
       // Ping the server
       adminDb.ping(function(err, pingResult) {
         test.equal(null, err);
@@ -3623,23 +3623,23 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 
       // Authenticate using the newly added user
       adminDb.authenticate('admin7', 'admin7', function(err, replies) {
-        
+
         // Set the profiling level to all
         adminDb.setProfilingLevel('all', function(err, level) {
-          
+
           // Execute a query command
           collection.find().toArray(function(err, items) {
 
             // Turn off profiling
             adminDb.setProfilingLevel('off', function(err, level) {
-              
+
               // Retrive the profiling information
               adminDb.profilingInfo(function(err, infos) {
                 test.ok(infos.constructor == Array);
                 test.ok(infos.length >= 1);
                 test.ok(infos[0].ts.constructor == Date);
                 test.ok(infos[0].millis.constructor == Number);
-              
+
                 adminDb.removeUser('admin7', function(err, result) {
                   test.ok(result);
 
@@ -3786,7 +3786,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 var MongoClient = require('mongodb').MongoClient,
   test = require('assert');
 MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-  
+
   // Grab a collection object
   var collection = db.collection('test');
 
@@ -4202,19 +4202,19 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 
   // Use the admin database for the operation
   var adminDb = db.admin();
-    
+
   // Add the new user to the admin database
   adminDb.addUser('admin12', 'admin12', function(err, result) {
-    
+
     // Authenticate using the newly added user
     adminDb.authenticate('admin12', 'admin12', function(err, result) {
       test.ok(result);
-      
+
       // Remove the user
-      adminDb.removeUser('admin12', function(err, result) {              
+      adminDb.removeUser('admin12', function(err, result) {
         test.equal(null, err);
         test.equal(true, result);
-        
+
         // Authenticate using the removed user should fail
         adminDb.authenticate('admin12', 'admin12', function(err, result) {
           test.ok(err != null);
@@ -4222,8 +4222,8 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 
           db.close();
         });
-      })            
-    });                
+      })
+    });
   });
 });</code></pre>
     
@@ -4377,9 +4377,9 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 
       // Authenticate using the newly added user
       adminDb.authenticate('admin14', 'admin14', function(err, result) {
-        test.equal(null, err); 
+        test.equal(null, err);
         test.equal(true, result);
-       
+
         // Retrive the server Info, returns error if we are not
         // running a replicaset
         adminDb.replSetGetStatus(function(err, info) {
@@ -4666,12 +4666,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 
       // Authenticate using the newly added user
       adminDb.authenticate('admin13', 'admin13', function(err, result) {
-       
+
         // Retrive the server Info
         adminDb.serverStatus(function(err, info) {
           test.equal(null, err);
           test.ok(info != null);
-         
+
           adminDb.removeUser('admin13', function(err, result) {
             test.ok(result);
 
@@ -4839,7 +4839,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 var MongoClient = require('mongodb').MongoClient,
   test = require('assert');
 MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-  
+
   // Grab a collection object
   var collection = db.collection('test');
 
@@ -4854,18 +4854,18 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     adminDb.addUser('admin6', 'admin6', function(err, result) {
 
       // Authenticate using the newly added user
-      adminDb.authenticate('admin6', 'admin6', function(err, replies) {                                
-        
+      adminDb.authenticate('admin6', 'admin6', function(err, replies) {
+
         // Set the profiling level to only profile slow queries
         adminDb.setProfilingLevel('slow_only', function(err, level) {
-          
+
           // Retrive the profiling level and verify that it's set to slow_only
           adminDb.profilingLevel(function(err, level) {
             test.equal('slow_only', level);
 
             // Turn profiling off
             adminDb.setProfilingLevel('off', function(err, level) {
-              
+
               // Retrive the profiling level and verify that it's set to off
               adminDb.profilingLevel(function(err, level) {
                 test.equal('off', level);
@@ -4881,7 +4881,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
                     adminDb.setProfilingLevel('medium', function(err, level) {
                       test.ok(err instanceof Error);
                       test.equal("Error: illegal profiling level value medium", err.message);
-                    
+
                       adminDb.removeUser('admin6', function(err, result) {
                         test.ok(result);
 
@@ -5114,27 +5114,27 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 
   // Grab a collection object
   var collection = db.collection('test');
-    
+
   // Force the creation of the collection by inserting a document
   // Collections are not created until the first document is inserted
   collection.insertOne({'a':1}, {w: 1}, function(err, doc) {
-    
+
     // Use the admin database for the operation
     var adminDb = db.admin();
-      
+
     // Add the new user to the admin database
     adminDb.addUser('admin8', 'admin8', function(err, result) {
-      
+
       // Authenticate using the newly added user
       adminDb.authenticate('admin8', 'admin8', function(err, replies) {
-        
+
         // Validate the 'test' collection
         adminDb.validateCollection('test', function(err, doc) {
 
           // Pre 1.9.1 servers
           if(doc.result != null) {
             test.ok(doc.result != null);
-            test.ok(doc.result.match(/firstExtent/) != null);                    
+            test.ok(doc.result.match(/firstExtent/) != null);
           } else {
             test.ok(doc.firstExtent != null);
           }
@@ -5145,7 +5145,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             db.close();
           });
         });
-      });                
+      });
     });
   });
 });
@@ -5173,14 +5173,14 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 
   // Use the admin database for the operation
   var adminDb = db.admin();
-    
+
   // Add the new user to the admin database
   adminDb.addUser('admin9', 'admin9', function(err, result) {
-    
+
     // Authenticate using the newly added user
     adminDb.authenticate('admin9', 'admin9', function(err, result) {
       test.ok(result);
-      
+
       // Ping the server
       adminDb.ping(function(err, pingResult) {
         test.equal(null, err);
@@ -5376,7 +5376,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue May 19 2015 10:37:36 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Wed Jun 17 2015 18:26:24 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>
