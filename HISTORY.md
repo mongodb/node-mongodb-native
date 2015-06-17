@@ -4,6 +4,7 @@
 - Refactoring wire protocol messages to avoid expensive size calculations of documents in favor of writing out an array of buffers to the sockets.
 - NODE-486 fixed issue related to limit and skip when calling toArray in 2.0 driver.
 - NODE-483 throw error if capabilities of topology is queries before topology has performed connection setup.
+- NODE-487 fixed issue where killcursor command was not being sent correctly on limit and skip queries.
 
 1.1.33 05-31-2015
 -----------------
