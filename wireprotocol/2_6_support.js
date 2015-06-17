@@ -36,7 +36,7 @@ var executeWrite = function(topology, type, opsField, ns, ops, options, callback
   writeCommand[type] = p.join('.');
   writeCommand[opsField] = ops;
   writeCommand.ordered = ordered;
-  writeCommand.writeConcern = writeConcern;    
+  writeCommand.writeConcern = writeConcern;
 
   // Options object
   var opts = {};
@@ -44,7 +44,7 @@ var executeWrite = function(topology, type, opsField, ns, ops, options, callback
   // Ensure we support serialization of functions
   if(options.serializeFunctions) opts.serializeFunctions = options.serializeFunctions;
   // Execute command
-  topology.command(f("%s.$cmd", d), writeCommand, opts, callback);    
+  topology.command(f("%s.$cmd", d), writeCommand, opts, callback);
 }
 
 //
@@ -55,9 +55,9 @@ LegacySupport.prototype.insert = function(topology, ismaster, ns, bson, pool, ca
   executeWrite(topology, 'insert', 'documents', ns, ops, options, callback);
 }
 
-LegacySupport.prototype.update = function(topology, ismaster, ns, bson, pool, callbacks, ops, options, callback) {    
+LegacySupport.prototype.update = function(topology, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
   executeWrite(topology, 'update', 'updates', ns, ops, options, callback);
-}  
+}
 
 LegacySupport.prototype.remove = function(topology, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
   executeWrite(topology, 'delete', 'deletes', ns, ops, options, callback);
@@ -98,7 +98,7 @@ LegacySupport.prototype.getMore = function(bson, ns, cursorState, batchSize, raw
   if(raw) {
     queryCallback.raw = raw;
   }
-  
+
   // Register a callback
   callbacks.register(getMore.requestId, queryCallback);
   // Write out the getMore command
@@ -129,7 +129,7 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
   // Set the optional batchSize
   cursorState.batchSize = cmd.batchSize || cursorState.batchSize;
   var numberToReturn = 0;
-  
+
   // Unpack the limit and batchSize values
   if(cursorState.limit == 0) {
     numberToReturn = cursorState.batchSize;
@@ -171,16 +171,21 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
   }
 
   // If we have a special modifier
-  if(usesSpecialModifier) {      
+  if(usesSpecialModifier) {
     findCmd['$query'] = cmd.query;
   } else {
     findCmd = cmd.query;
   }
 
+  // Serialize functions
+  var serializeFunctions = typeof options.serializeFunctions == 'boolean'
+    ? options.serializeFunctions : false;
+
   // Build Query object
   var query = new Query(bson, ns, findCmd, {
       numberToSkip: numberToSkip, numberToReturn: numberToReturn
     , checkKeys: false, returnFieldSelector: cmd.fields
+    , serializeFunctions: serializeFunctions
   });
 
   // Set query flags
@@ -195,7 +200,7 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
   if(typeof cmd.partial == 'boolean') query.partial = cmd.partial;
   // Return the query
   return query;
-}  
+}
 
 //
 // Set up a command cursor
@@ -221,10 +226,14 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
     finalCmd['$readPreference'] = readPreference.toJSON();
   }
 
+  // Serialize functions
+  var serializeFunctions = typeof options.serializeFunctions == 'boolean'
+    ? options.serializeFunctions : false;
+
   // Build Query object
   var query = new Query(bson, f('%s.$cmd', parts.shift()), finalCmd, {
       numberToSkip: 0, numberToReturn: -1
-    , checkKeys: false
+    , checkKeys: false, serializeFunctions: serializeFunctions
   });
 
   // Set query flags
