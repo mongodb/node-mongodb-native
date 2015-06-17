@@ -9,7 +9,7 @@ var fs = require('fs')
  */
 exports.shouldCreateNewGridStoreObject = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -41,7 +41,7 @@ exports.shouldCreateNewGridStoreObject = {
  */
 exports.shouldCreateNewGridStoreObjectWithIntId = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -74,7 +74,7 @@ exports.shouldCreateNewGridStoreObjectWithIntId = {
  */
 exports.shouldCreateNewGridStoreObjectWithStringId = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -107,7 +107,7 @@ exports.shouldCreateNewGridStoreObjectWithStringId = {
  */
 exports.shouldCorrectlySafeFileAndReadFileByObjectId = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -138,7 +138,7 @@ exports.shouldCorrectlySafeFileAndReadFileByObjectId = {
  */
 exports.shouldCorrectlyExecuteGridStoreExists = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -175,7 +175,7 @@ exports.shouldCorrectlyExecuteGridStoreExists = {
  */
 exports.shouldCorrectlyPeformGridStoreReadLength = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -205,7 +205,7 @@ exports.shouldCorrectlyPeformGridStoreReadLength = {
  */
 exports.shouldCorrectlyReadFromFileWithOffset = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -239,7 +239,7 @@ exports.shouldCorrectlyReadFromFileWithOffset = {
  */
 exports.shouldCorrectlyHandleMultipleChunkGridStore = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -287,7 +287,7 @@ exports.shouldCorrectlyHandleMultipleChunkGridStore = {
  */
 exports.shouldCorrectlyHandleUnlinkingWeirdName = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -342,7 +342,7 @@ exports.shouldCorrectlyHandleUnlinkingWeirdName = {
  */
 exports.shouldCorrectlyUnlinkAnArrayOfFiles = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -399,7 +399,7 @@ exports.shouldCorrectlyUnlinkAnArrayOfFiles = {
  */
 exports.shouldCorrectlyWriteFileToGridStore = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -436,7 +436,7 @@ exports.shouldCorrectlyWriteFileToGridStore = {
  */
 exports.shouldCorrectlyWriteFileToGridStoreUsingObjectId = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -474,7 +474,7 @@ exports.shouldCorrectlyWriteFileToGridStoreUsingObjectId = {
  */
 exports.shouldCorrectlyPerformWorkingFiledRead = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -506,7 +506,7 @@ exports.shouldCorrectlyPerformWorkingFiledRead = {
  */
 exports.shouldCorrectlyPerformWorkingFiledReadWithChunkSizeLessThanFileSize = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -558,7 +558,7 @@ exports.shouldCorrectlyPerformWorkingFiledReadWithChunkSizeLessThanFileSize = {
  */
 exports.shouldCorrectlyPerformWorkingFiledWithBigFile = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -620,7 +620,7 @@ exports.shouldCorrectlyPerformWorkingFiledWithBigFile = {
  */
 exports.shouldCorrectlyPerformWorkingFiledWriteWithDifferentChunkSizes = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -701,7 +701,7 @@ exports.shouldCorrectlyPerformWorkingFiledWriteWithDifferentChunkSizes = {
  */
 exports.shouldCorrectlyReadAndWriteFile = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -733,7 +733,7 @@ exports.shouldCorrectlyReadAndWriteFile = {
  */
 exports.shouldCorrectlyReadAndWriteBuffersMultipleChunks = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -773,7 +773,7 @@ exports.shouldCorrectlyReadAndWriteBuffersMultipleChunks = {
  */
 exports.shouldCorrectlyReadAndWriteBuffersSingleChunks = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -812,7 +812,7 @@ exports.shouldCorrectlyReadAndWriteBuffersSingleChunks = {
  */
 exports.shouldCorrectlyReadAndWriteBuffersUsingNormalWriteWithMultipleChunks = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -852,7 +852,7 @@ exports.shouldCorrectlyReadAndWriteBuffersUsingNormalWriteWithMultipleChunks = {
  */
 exports.shouldCorrectlyReadAndWriteBuffersSingleChunksAndVerifyExistance = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -891,7 +891,7 @@ exports.shouldCorrectlyReadAndWriteBuffersSingleChunksAndVerifyExistance = {
  */
 exports.shouldCorrectlySaveDataByObjectID = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -925,7 +925,7 @@ exports.shouldCorrectlySaveDataByObjectID = {
  */
 exports.shouldCheckExistsByUsingRegexp = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -958,7 +958,7 @@ exports.shouldCheckExistsByUsingRegexp = {
  */
 exports.shouldCorrectlyOpenGridStoreWithDifferentRoot = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -984,7 +984,7 @@ exports.shouldCorrectlyOpenGridStoreWithDifferentRoot = {
  */
 exports.shouldCorrectlySetFilenameForGridstoreOpen = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -1017,7 +1017,7 @@ exports.shouldCorrectlySetFilenameForGridstoreOpen = {
  */
 exports.shouldCorrectlySaveFileAndThenOpenChangeContentTypeAndSaveAgain = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -1060,7 +1060,7 @@ exports.shouldCorrectlySaveFileAndThenOpenChangeContentTypeAndSaveAgain = {
  */
 exports.shouldCorrectlySaveFileWithoutFilenameAndThenOpenAddFilenameAndSaveAgain = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -1105,7 +1105,7 @@ exports.shouldCorrectlySaveFileWithoutFilenameAndThenOpenAddFilenameAndSaveAgain
  */
 exports.shouldCorrectlySaveFileAndThenOpenChangeFilenameAndSaveAgain = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -1150,7 +1150,7 @@ exports.shouldCorrectlySaveFileAndThenOpenChangeFilenameAndSaveAgain = {
  */
 exports.shouldCorrectlySaveFileAndThenAppendChangeFilenameAndSaveAgain = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -1193,7 +1193,7 @@ exports.shouldCorrectlySaveFileAndThenAppendChangeFilenameAndSaveAgain = {
  */
 exports.shouldCorrectlyHandleSeekWithStream = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -1240,7 +1240,7 @@ exports.shouldCorrectlyHandleSeekWithStream = {
  */
 exports.shouldCorrectlyHandleSeekIntoSecondChunkWithStream = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -1286,7 +1286,7 @@ exports.shouldCorrectlyHandleSeekIntoSecondChunkWithStream = {
  */
 exports['Should correctly handle multiple seeks'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -1300,15 +1300,15 @@ exports['Should correctly handle multiple seeks'] = {
           gridStore.close(function(result) {
             var gridStore2 = new GridStore(db, "test_gs_seek_with_buffer", "r");
             gridStore2.open(function(err, gridStore2) {
-              
+
               gridStore2.read( 5, function(err, data) {
                 test.equal("01234", data.toString());
-                
+
                 gridStore2.seek(-2, GridStore.IO_SEEK_CUR, function(err, gridStore2) {
-                  
+
                   gridStore2.read( 5, function(err, data) {
                     test.equal("34567", data.toString());
-                    
+
                     gridStore2.seek(-2, GridStore.IO_SEEK_CUR, function(err, gridStore2) {
 
                       gridStore2.read( 5, function(err, data) {
@@ -1333,7 +1333,7 @@ exports['Should correctly handle multiple seeks'] = {
  */
 exports['Should correctly handle multiple seeks over several chunks'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -1347,15 +1347,15 @@ exports['Should correctly handle multiple seeks over several chunks'] = {
           gridStore.close(function(result) {
             var gridStore2 = new GridStore(db, "test_gs_seek_with_buffer", "r");
             gridStore2.open(function(err, gridStore2) {
-              
+
               gridStore2.read( 5, function(err, data) {
                 test.equal("01234", data.toString());
-                
+
                 gridStore2.seek(-2, GridStore.IO_SEEK_CUR, function(err, gridStore2) {
-                  
+
                   gridStore2.read( 5, function(err, data) {
                     test.equal("34567", data.toString());
-                    
+
                     gridStore2.seek(-2, GridStore.IO_SEEK_CUR, function(err, gridStore2) {
 
                       gridStore2.read( 5, function(err, data) {
@@ -1380,7 +1380,7 @@ exports['Should correctly handle multiple seeks over several chunks'] = {
  */
 exports.shouldWriteFileWithMongofilesAndReadWithNodeJS = {
   metadata: { requires: { topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -1423,7 +1423,7 @@ exports.shouldWriteFileWithMongofilesAndReadWithNodeJS = {
  */
 exports['Should fail when attempting to append to a file'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -1444,7 +1444,7 @@ exports['Should fail when attempting to append to a file'] = {
         test.equal(null, err);
 
         // Create a chunkSize Buffer
-        var buffer = new Buffer(chunkSize); 
+        var buffer = new Buffer(chunkSize);
 
         // Write the buffer
         gridStore.write(buffer, function(err, gridStore) {
@@ -1482,30 +1482,30 @@ exports['Should fail when attempting to append to a file'] = {
  */
 exports.shouldCorrectlyStreamReadFromGridStoreObject = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    client.open(function(err, client) {      
+    client.open(function(err, client) {
       // Set up gridStore
       var gridStore = new GridStore(client, "test_stream_write_2", "w");
-      gridStore.writeFile("./test/functional/data/test_gs_working_field_read.pdf", function(err, result) {   
+      gridStore.writeFile("./test/functional/data/test_gs_working_field_read.pdf", function(err, result) {
         // Open a readable gridStore
-        gridStore = new GridStore(client, "test_stream_write_2", "r");    
-        
+        gridStore = new GridStore(client, "test_stream_write_2", "r");
+
         // Create a file write stream
         var fileStream = fs.createWriteStream("./test_stream_write_2.tmp");
-        fileStream.on("close", function(err) {     
+        fileStream.on("close", function(err) {
           // Read the temp file and compare
           var compareData = fs.readFileSync("./test_stream_write_2.tmp");
           var originalData = fs.readFileSync("./test/functional/data/test_gs_working_field_read.pdf");
-          test.deepEqual(originalData, compareData);      
+          test.deepEqual(originalData, compareData);
           client.close();
-          test.done();      
+          test.done();
         })
-        
+
         // Pipe out the data
         var pipeResult = gridStore.stream().pipe(fileStream);
       });
@@ -1524,14 +1524,14 @@ exports.shouldCorrectlyStreamReadFromGridStoreObjectNoGridStoreOpenCalled = {
       , ObjectID = configuration.require.ObjectID;
 
     var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    client.open(function(err, client) {      
+    client.open(function(err, client) {
       // Set up gridStore
       var gridStore = new GridStore(client, "test_stream_write_2", "w");
-      gridStore.writeFile("./test/functional/data/test_gs_working_field_read.pdf", function(err, result) {   
+      gridStore.writeFile("./test/functional/data/test_gs_working_field_read.pdf", function(err, result) {
         // Open a readable gridStore
-        gridStore = new GridStore(client, "test_stream_write_2", "r");    
+        gridStore = new GridStore(client, "test_stream_write_2", "r");
         var gotData = false;
-        
+
         // Pipe out the data
         var stream = gridStore.stream();
         stream.on('data', function(data) {
@@ -1542,7 +1542,7 @@ exports.shouldCorrectlyStreamReadFromGridStoreObjectNoGridStoreOpenCalled = {
           test.ok(gotData);
 
           client.close();
-          test.done();      
+          test.done();
         });
       });
     });
@@ -1587,19 +1587,19 @@ exports.shouldCorrectlyStreamWriteFromGridStoreObject = {
   }
 }
 
-/** 
+/**
  * @ignore
  */
 exports.shouldCorrectlyWriteLargeFileStringAndReadBack = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {  
+    db.open(function(err, db) {
       var fileId = new ObjectID();
       var gridStore = new GridStore(db, fileId, "w", {root:'fs'});
       gridStore.chunkSize = 5000;
@@ -1618,7 +1618,7 @@ exports.shouldCorrectlyWriteLargeFileStringAndReadBack = {
 
             if(done == 0) {
               gridStore.close(function(err, result) {
-                var gotEnd = false;           
+                var gotEnd = false;
                 var endLen = 0;
 
                 var gridStore = new GridStore(db, fileId, "r");
@@ -1638,7 +1638,7 @@ exports.shouldCorrectlyWriteLargeFileStringAndReadBack = {
                     db.close();
                     test.done();
                   });
-                });           
+                });
               });
             }
           });
@@ -1648,19 +1648,19 @@ exports.shouldCorrectlyWriteLargeFileStringAndReadBack = {
   }
 }
 
-/** 
+/**
  * @ignore
  */
 exports.shouldCorrectlyWriteLargeFileBufferAndReadBack = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
       , ObjectID = configuration.require.ObjectID;
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {  
+    db.open(function(err, db) {
       var fileId = new ObjectID();
       var gridStore = new GridStore(db, fileId, "w", {root:'fs'});
       gridStore.chunkSize = 5000;
@@ -1679,7 +1679,7 @@ exports.shouldCorrectlyWriteLargeFileBufferAndReadBack = {
 
             if(done == 0) {
               gridStore.close(function(err, result) {
-                var gotEnd = false;           
+                var gotEnd = false;
                 var endLen = 0;
 
                 var gridStore = new GridStore(db, fileId, "r");
@@ -1699,7 +1699,7 @@ exports.shouldCorrectlyWriteLargeFileBufferAndReadBack = {
                     db.close();
                     test.done();
                   });
-                });           
+                });
               });
             }
           });
@@ -1708,13 +1708,13 @@ exports.shouldCorrectlyWriteLargeFileBufferAndReadBack = {
     });
   }
 }
-  
-/** 
+
+/**
  * @ignore
  */
 exports['Should return same data for streaming as for direct read'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
@@ -1737,7 +1737,7 @@ exports['Should return same data for streaming as for direct read'] = {
           gs.close(function(err, result) {
             gridStoreR.open(function(err, gs) {
               var chunks = [];
-              
+
               var stream = gs.stream();
               stream.on("data", function(chunk) {
                 readLen += chunk.length;
@@ -1758,16 +1758,16 @@ exports['Should return same data for streaming as for direct read'] = {
                       chunks[i].copy(streamData, index, 0);
                       index = index + chunks[i].length;
                     }
-                    
+
                     // Compare data
                     for(var i = 0; i < data.length; i++) {
                       test.equal(data2[i], data[i])
                       test.equal(streamData[i], data[i])
                     }
-                    
+
                     db.close();
                     test.done();
-                  })                
+                  })
                 })
               });
             });
@@ -1783,7 +1783,7 @@ exports['Should return same data for streaming as for direct read'] = {
  */
 exports.shouldCorrectlyFailDueToMissingChunks = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
@@ -1819,7 +1819,7 @@ exports.shouldCorrectlyFailDueToMissingChunks = {
  */
 exports.shouldCorrectlyWriteASmallPayload = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -1864,7 +1864,7 @@ exports.shouldCorrectlyWriteASmallPayload = {
  */
 exports.shouldCorrectlyWriteSmallFileUsingABuffer = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
@@ -1903,7 +1903,7 @@ exports.shouldCorrectlyWriteSmallFileUsingABuffer = {
  */
 exports.shouldSaveSmallFileToGridStore = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
@@ -1939,7 +1939,7 @@ exports.shouldSaveSmallFileToGridStore = {
  */
 exports.shouldCorrectlyOverwriteFile = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
@@ -1976,7 +1976,7 @@ exports.shouldCorrectlyOverwriteFile = {
  */
 exports.shouldCorrectlySeekWithString = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
@@ -2072,7 +2072,7 @@ exports.shouldCorrectlySeekWithString = {
  */
 exports.shouldCorrectlySeekAcrossChunks = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
@@ -2123,7 +2123,7 @@ exports.shouldCorrectlySeekAcrossChunks = {
  */
 exports.shouldCorrectlySaveEmptyFile = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
@@ -2162,11 +2162,11 @@ exports.shouldCorrectlySaveEmptyFile = {
  */
 exports.shouldEnsureThatChunkSizeCannotBeChangedDuringRead = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
-      , Chunk = configuration.require.Chunk;  
+      , Chunk = configuration.require.Chunk;
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
@@ -2194,7 +2194,7 @@ exports.shouldEnsureThatChunkSizeCannotBeChangedDuringRead = {
  */
 exports.shouldEnsureChunkSizeCannotChangeAfterDataHasBeenWritten = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -2222,7 +2222,7 @@ exports.shouldEnsureChunkSizeCannotChangeAfterDataHasBeenWritten = {
  */
 exports.shouldCorrectlyStore8bitValues = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
@@ -2259,7 +2259,7 @@ exports.shouldCorrectlyStore8bitValues = {
  */
 exports.shouldAllowChangingChunkSize = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
@@ -2290,7 +2290,7 @@ exports.shouldAllowChangingChunkSize = {
  */
 exports.shouldAllowChangingChunkSizeAtCreationOfGridStore = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
@@ -2319,7 +2319,7 @@ exports.shouldAllowChangingChunkSizeAtCreationOfGridStore = {
  */
 exports.shouldCorrectlyCalculateMD5 = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
@@ -2364,7 +2364,7 @@ exports.shouldCorrectlyCalculateMD5 = {
  */
 exports.shouldCorrectlyUpdateUploadDate = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
@@ -2414,7 +2414,7 @@ exports.shouldCorrectlyUpdateUploadDate = {
  */
 exports.shouldCorrectlySaveContentType = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
@@ -2458,7 +2458,7 @@ exports.shouldCorrectlySaveContentType = {
  */
 exports.shouldCorrectlySaveContentTypeWhenPassedInAtGridStoreCreation = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
@@ -2488,7 +2488,7 @@ exports.shouldCorrectlySaveContentTypeWhenPassedInAtGridStoreCreation = {
  */
 exports.shouldCorrectlyReportIllegalMode = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
@@ -2511,7 +2511,7 @@ exports.shouldCorrectlyReportIllegalMode = {
  */
 exports.shouldCorrectlySaveAndRetrieveFileMetadata = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
@@ -2553,7 +2553,7 @@ exports.shouldCorrectlySaveAndRetrieveFileMetadata = {
  */
 exports.shouldNotThrowErrorOnClosingOfGridObject = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
@@ -2586,7 +2586,7 @@ exports.shouldNotThrowErrorOnClosingOfGridObject = {
  */
 exports.shouldNotThrowErrorOnClose = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -2612,7 +2612,7 @@ exports.shouldNotThrowErrorOnClose = {
           gridStore.close(function(err, result) {
             db.close();
             test.done();
-          });              
+          });
         });
       });
     });
@@ -2624,7 +2624,7 @@ exports.shouldNotThrowErrorOnClose = {
  */
 exports.shouldCorrectlySafeFileUsingIntAsIdKey = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
@@ -2682,7 +2682,7 @@ exports.shouldCorrectlySafeFileUsingIntAsIdKey = {
  */
 exports.shouldCorrectlyReadWithPositionOffset = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -2725,7 +2725,7 @@ exports.shouldCorrectlyReadWithPositionOffset = {
  */
 exports.shouldCorrectlyWrite = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
@@ -2740,7 +2740,7 @@ exports.shouldCorrectlyWrite = {
 
       var fname = 'test_large_str';
       var my_chunkSize = 1024*10
-      GridStore.unlink(db, fname, function(err, gs) {    
+      GridStore.unlink(db, fname, function(err, gs) {
         var gs = new GridStore(db, fname, "w");
         gs.chunkSize = my_chunkSize;
         gs.open(function(err, gs) {
@@ -2771,7 +2771,7 @@ exports.shouldCorrectlyWrite = {
  */
 exports.shouldCorrectlyReturnErrorMessageOnNoFileExisting = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
@@ -2793,7 +2793,7 @@ exports.shouldCorrectlyReturnErrorMessageOnNoFileExisting = {
  */
 exports['should fail when seeking on a write enabled gridstore object'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore;
@@ -2817,7 +2817,7 @@ exports['should fail when seeking on a write enabled gridstore object'] = {
  */
 exports['should correctly handle filename as ObjectId'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var GridStore = configuration.require.GridStore
@@ -2850,7 +2850,7 @@ exports['should correctly handle filename as ObjectId'] = {
  */
 exports['should correctly pipe through multiple pipelines'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient
@@ -2864,11 +2864,11 @@ exports['should correctly pipe through multiple pipelines'] = {
     // Use connect method to connect to the Server
     MongoClient.connect(configuration.url(), function(err, db) {
       assert.equal(null, err);
-      
+
       // Set up gridStore
       var stream = new GridStore(db, 'simple_100_document_toArray.png', 'w').stream();
       // File we want to write to GridFS
-      var filename = './test/functional/data/test_gs_working_field_read.pdf';  
+      var filename = './test/functional/data/test_gs_working_field_read.pdf';
       // Create a file reader stream to an object
       var fileStream = fs.createReadStream(filename);
 
@@ -2896,7 +2896,7 @@ exports['should correctly pipe through multiple pipelines'] = {
  */
 exports['should correctly seek on file where size of file is a multiple of the chunk size'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient
@@ -2914,7 +2914,7 @@ exports['should correctly seek on file where size of file is a multiple of the c
       var gridStore = new GridStore(db, "test_gs_multi_chunk_exact_size", "w");
       gridStore.open(function(err, gridStore) {
         gridStore.chunkSize = 512;
-     
+
         // Write multiple of chunk size
         gridStore.write(new Buffer(gridStore.chunkSize * 4), function(err, r) {
           test.equal(null, err);
@@ -2932,14 +2932,14 @@ exports['should correctly seek on file where size of file is a multiple of the c
                 store.tell(function (err, pos) {
                   test.equal(null, err);
                   test.equal(512 * 4, pos);
-    
+
                   store.seek(0, GridStore.IO_SEEK_SET, function (err) {
                     test.equal(null, err);
 
                     store.tell(function (err, pos) {
                       test.equal(null, err);
                       test.equal(0, pos);
-            
+
                       store.read(function(err, data) {
                         test.equal(null, err);
                         test.equal(512 * 4, data.length);
@@ -2953,7 +2953,7 @@ exports['should correctly seek on file where size of file is a multiple of the c
               });
             });
           });
-        }); 
+        });
       });
     });
   }
@@ -2964,7 +2964,7 @@ exports['should correctly seek on file where size of file is a multiple of the c
  */
 exports['should correctly seek on file where size of file is a multiple of the chunk size and then stream'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient
@@ -2984,7 +2984,7 @@ exports['should correctly seek on file where size of file is a multiple of the c
       var gridStore = new GridStore(db, id, "w");
       gridStore.open(function(err, gridStore) {
         gridStore.chunkSize = 512;
-     
+
         // Get the data
         var data = new Buffer(gridStore.chunkSize * 2);
         for(var i = 0; i < (gridStore.chunkSize) * 2; i++) {
@@ -3023,7 +3023,7 @@ exports['should correctly seek on file where size of file is a multiple of the c
                       stream.on('data', function(d) {
                         retrieved += d.toString('hex');
                       });
-            
+
                       stream.on('end', function() {
                         test.equal(data.toString('hex'), retrieved)
 
@@ -3036,7 +3036,7 @@ exports['should correctly seek on file where size of file is a multiple of the c
               });
             });
           });
-        }); 
+        });
       });
     });
   }

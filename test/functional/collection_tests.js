@@ -86,8 +86,6 @@ exports.shouldAccessToCollections = {
                       if(collection.collectionName == "does_not_exist") found_does_not_exist = true;
                     });
 
-                    console.dir(collections)
-
                     test.ok(found_spiderman);
                     test.ok(found_mario);
                     test.ok(!found_does_not_exist);
