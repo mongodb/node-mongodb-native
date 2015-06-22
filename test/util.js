@@ -11,7 +11,7 @@ var read_all_tests = function(directory) {
 }
 
 var run_test = function(url, file, number_of_times, warm_up_iterations, concurrent, concurrent_batch_size, options, callback) {
-  var final_results = {};  
+  var final_results = {};
   var number_of_test_to_run = 0;
   // Set the options
   if(typeof options == 'function') {
@@ -27,7 +27,7 @@ var run_test = function(url, file, number_of_times, warm_up_iterations, concurre
   // Load the file
   var _module = require(file);
   var test_name = options.test_name;
-  
+
   // No test set run all the available tests and store the results
   run_file_tests(_module, Object.keys(_module), {
       url: url
@@ -44,7 +44,7 @@ var run_test = function(url, file, number_of_times, warm_up_iterations, concurre
 }
 
 var run_file_tests = function(module, keys, options, callback) {
-  if(keys.length == 0) return callback();  
+  if(keys.length == 0) return callback();
 
   // Get the next key
   var _key = keys.shift();
@@ -65,7 +65,7 @@ var run_file_tests = function(module, keys, options, callback) {
     , options.warm_up_iterations
     , options.concurrent
     , options.concurrent_batch_size
-    , function(err, results) { 
+    , function(err, results) {
       // Final results
       final_results[_key] = { results: results};
       if(err) { final_results[_key].err = err; }
@@ -92,7 +92,7 @@ var run_single_test = function(url, func_name, func, number_of_times, warm_up_it
           callback(err, test_results);
         })
       });
-    } else {      
+    } else {
       // Number of batches to run
       var number_of_batches = number_of_times / concurrent_batch_size;
       // Number of items in each batch
@@ -123,23 +123,23 @@ var execute_test_batches = function(func_name, test, number_left_to_run_batch, n
     new function() {
       // Set start function
       var start = new Date();
-      
+
       // Execute function
       test.test(function(err, result) {
         var end = new Date();
         var time = end.getTime() - start.getTime();
         results.push({start: start, end: end, time: time});
-        
+
         // Adjust the number of tests to run
         number_left_to_run = number_left_to_run - 1;
         // Callback
         if(number_left_to_run == 0) {
           process.nextTick(function() {
-            execute_test_batches(func_name, test, number_left_to_run_batch, number_of_batches - 1, results, callback);          
+            execute_test_batches(func_name, test, number_left_to_run_batch, number_of_batches - 1, results, callback);
           });
         }
-      });          
-    }();    
+      });
+    }();
   }
 }
 
@@ -154,7 +154,7 @@ var exceute_test_serially = function(func_name, test, number_of_times, results, 
     var end = new Date();
     var time = end.getTime() - start.getTime();
     results.push({start: start, end: end, time: time});
-    
+
     // Execute the next tick
     process.nextTick(function() {
       exceute_test_serially(func_name, test, number_of_times - 1, results, callback);
@@ -207,7 +207,7 @@ var RunningStats = function() {
 RunningStats.prototype.push = function(x) {
   // Update the number of samples
   this.m_n = this.m_n + 1;
-  
+
   // See Knuth TAOCP vol 2, 3rd edition, page 232
   if(this.m_n == 1) {
     this.m_oldM = this.m_newM = x;

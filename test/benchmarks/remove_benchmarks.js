@@ -19,7 +19,7 @@ var single_doc_remove = function(connection_string) {
         MongoClient.connect(connection_string, function(err, db) {
           if(err) return callback(err);
           self.db = db;
-          var bulk = self.db.collection('single_doc_remove').initializeUnorderedBulkOp();          
+          var bulk = self.db.collection('single_doc_remove').initializeUnorderedBulkOp();
 
           for(var i = 0; i < 10000; i++) {
             bulk.insert({a:i});

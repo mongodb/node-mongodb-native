@@ -1,6 +1,10 @@
+2.0.35 06-17-2015
+-----------------
+- Upgraded to mongodb-core 1.2.2 including removing warnings when C++ bson parser is not available and a fix for SCRAM authentication.
+
 2.0.34 06-17-2015
 -----------------
-- Upgraded to mongodb-core 1.2.0 speeding up serialization and removing the need for the c++ bson extension.
+- Upgraded to mongodb-core 1.2.1 speeding up serialization and removing the need for the c++ bson extension.
 - NODE-486 fixed issue related to limit and skip when calling toArray in 2.0 driver.
 - NODE-483 throw error if capabilities of topology is queries before topology has performed connection setup.
 - NODE-482 fixed issue where MongoClient.connect would incorrectly identify a replset seed list server as a non replicaset member.

@@ -65,8 +65,8 @@ var run_tests = function(_tests) {
 
         // console.dir(result)
         // Result file used for gnuplot
-        var resultfile = result.results.map(function(x, i) { 
-          return (i + 1) + " " + x.time; 
+        var resultfile = result.results.map(function(x, i) {
+          return (i + 1) + " " + x.time;
         }).join("\n");
 
         // Iterate over all the items
@@ -118,7 +118,7 @@ var executeGnuPlot = function(key, dataFileName) {
 
   gnuplot.on('close', function (code) {
     // console.log('child process exited with code ' + code);
-  });  
+  });
 }
 
 // Run all the tests

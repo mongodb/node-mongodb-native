@@ -103,4 +103,4 @@ var single_100_simple_insert = function(connection_string) {
 
 exports.single_doc_insert = single_doc_insert;
 exports.single_100_simple_insert = single_100_simple_insert;
-exports.single_doc_insert_journal = single_doc_insert_journal;
+// exports.single_doc_insert_journal = single_doc_insert_journal;
