@@ -1,3 +1,7 @@
+1.2.2 06-22-2015
+-----------------
+- Fix issue with SCRAM authentication causing authentication to return true on failed authentication (Issue 26, https://github.com/cglass17)
+
 1.2.1 06-17-2015
 -----------------
 - Ensure serializeFunctions passed down correctly to wire protocol.
