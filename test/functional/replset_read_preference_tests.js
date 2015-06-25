@@ -22,7 +22,7 @@ var format = require('util').format;
  */
 exports['Connection to replicaset with primary read preference'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -95,7 +95,7 @@ var identifyServers = function(mongo, manager, dbname, callback) {
   manager.getIsMaster(function(err, ismaster) {
     // get primary
     primary = {host: ismaster.primary.split(':')[0], port: parseInt(ismaster.primary.split(':')[1], 10)};
-    
+
     // map all other values
     secondaries = ismaster.hosts.map(function(x) {
       return {host: x.split(':')[0], port: parseInt(x.split(':')[1], 10)};
@@ -118,7 +118,7 @@ var identifyServers = function(mongo, manager, dbname, callback) {
  */
 exports['Connection to replicaset with secondary read preference with no secondaries should return primary'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -179,7 +179,7 @@ exports['Connection to replicaset with secondary read preference with no seconda
  */
 exports['Connection to replicaset with secondary only read preference should return secondary server'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -241,7 +241,7 @@ exports['Connection to replicaset with secondary only read preference should ret
  */
 exports['Connection to replicaset with secondary read preference should return secondary server'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -304,7 +304,7 @@ exports['Connection to replicaset with secondary read preference should return s
  */
 exports['Should Set read preference at collection level using collection method'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -359,7 +359,7 @@ exports['Should Set read preference at collection level using collection method'
  */
 exports['Should Set read preference at collection level using createCollection method'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -396,8 +396,8 @@ exports['Should Set read preference at collection level using createCollection m
 
       // Grab the collection
       db.createCollection("read_preferences_all_levels_0", {readPreference:Server.READ_SECONDARY_ONLY}, function(err, collection) {
-        test.equal(null, err);    
-        
+        test.equal(null, err);
+
         var cursor = collection.find();
         // Attempt to read (should fail due to the server not being a primary);
         cursor.toArray(function(err, items) {
@@ -417,7 +417,7 @@ exports['Should Set read preference at collection level using createCollection m
  */
 exports['Should Set read preference at cursor level'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -471,7 +471,7 @@ exports['Should Set read preference at cursor level'] = {
  */
 exports['Attempt to change read preference at cursor level after object read legacy'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -545,7 +545,7 @@ exports['Attempt to change read preference at cursor level after object read leg
  */
 exports['Set read preference at db level'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -600,7 +600,7 @@ exports['Set read preference at db level'] = {
  */
 exports['Set read preference at collection level using collection method'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -655,7 +655,7 @@ exports['Set read preference at collection level using collection method'] = {
  */
 exports['Set read preference at collection level using createCollection method'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -711,7 +711,7 @@ exports['Set read preference at collection level using createCollection method']
  */
 exports['Set read preference at cursor level'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -765,7 +765,7 @@ exports['Set read preference at cursor level'] = {
  */
 exports['Attempt to change read preference at cursor level after object read'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -820,7 +820,7 @@ exports['Attempt to change read preference at cursor level after object read'] =
               cursor.setReadPreference(new ReadPreference(ReadPreference.PRIMARY));
               test.ok(false);
             } catch(err) {}
-            
+
             // With callback
             cursor.setReadPreference(new ReadPreference(ReadPreference.PRIMARY), function(err) {
               test.ok(err != null)
@@ -840,7 +840,7 @@ exports['Attempt to change read preference at cursor level after object read'] =
  */
 exports['Connection to a arbiter host with primary preference should give error'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -881,7 +881,7 @@ exports['Connection to a arbiter host with primary preference should give error'
  */
 exports['Connection to a single primary host with different read preferences'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -953,7 +953,7 @@ exports['Connection to a single primary host with different read preferences'] =
  */
 exports['Connection to a single secondary host with different read preferences'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -1024,7 +1024,7 @@ exports['Connection to a single secondary host with different read preferences']
  */
 exports['Ensure tag read goes only to the correct server'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -1055,7 +1055,7 @@ exports['Ensure tag read goes only to the correct server'] = {
       var _connections = [];
       var backup = replSet.checkoutReader;
       var _member;
-      
+
       replSet.checkoutReader = function(readPreference, tags) {
         _readPreference = readPreference;
         _tags = tags;
@@ -1099,7 +1099,7 @@ exports['Ensure tag read goes only to the correct server'] = {
  */
 exports['should select correct connection using statistics strategy'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -1131,7 +1131,7 @@ exports['should select correct connection using statistics strategy'] = {
 
       var collection = db.collection("statistics_strategy");
       var keys = Object.keys(replSet._state.secondaries);
-      test.equal(2, keys.length);
+      test.equal(3, keys.length);
       test.equal(replSet._state.secondaries[keys[0]].runtimeStats.queryStats.sScore, 0);
       test.equal(replSet._state.secondaries[keys[1]].runtimeStats.queryStats.sScore, 0);
 
@@ -1156,7 +1156,7 @@ exports['should select correct connection using statistics strategy'] = {
             test.ok(readerReturnValues[0].connection !== readerReturnValues[1].connection);
 
             keys = Object.keys(replSet._state.secondaries);
-            test.equal(2, keys.length);
+            test.equal(3, keys.length);
 
             test.ok(replSet._state.secondaries[keys[0]].runtimeStats.queryStats.sScore >= 0);
             test.ok(replSet._state.secondaries[keys[1]].runtimeStats.queryStats.sScore >= 0);

@@ -42,7 +42,7 @@ exports['Should correctly read from secondary even if primary is down'] = {
 
       // Insert a document
       collection.insert({a:1}, {w:2, wtimeout:10000}, function(err, result) {
-        
+
         // Run a simple query
         collection.findOne(function (err, doc) {
           test.ok(err == null);
@@ -62,7 +62,7 @@ exports['Should correctly read from secondary even if primary is down'] = {
             });
           });
         });
-      });  
+      });
     });
 
     db.open(function(err, p_db) {
@@ -101,7 +101,7 @@ exports['Should correctly remove and re-add secondary and detect removal and re-
           // Shutdown the second secondary
           configuration.manager.add(serverDetails, function(err, result) {});
         }, 10000)
-      });      
+      });
     });
 
     db.open(function(err, db) {
@@ -115,7 +115,7 @@ exports['Should correctly remove and re-add secondary and detect removal and re-
  */
 exports['Should correctly handle primary stepDown'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     // The state
@@ -123,7 +123,7 @@ exports['Should correctly handle primary stepDown'] = {
 
     var db = configuration.newDbInstance({w:0}, {poolSize:1});
     db.once('fullsetup', function() {
-      configuration.manager.stepDown({force: true}, function(err, result) {});        
+      configuration.manager.stepDown({force: true}, function(err, result) {});
     });
 
     db.serverConfig.on('ha', function(e, options) {});
@@ -169,7 +169,7 @@ exports['Should correctly recover from secondary shutdowns'] = {
         });
       });
     });
-    
+
     // The state
     var left = {};
     var joined = 0;
@@ -247,11 +247,11 @@ exports['Should correctly remove and re-add secondary with new priority and dete
 
         setTimeout(function() {
           // Shutdown the second secondary
-          configuration.manager.add(serverDetails, function(err, result) {});          
+          configuration.manager.add(serverDetails, function(err, result) {});
         }, 10000)
       });
     });
-    
+
     db.open(function(err, db) {
       test.equal(null, err);
     });
@@ -304,18 +304,20 @@ exports['Should work correctly with inserts after bringing master back'] = {
                 var totalCount = 5;
 
                 for(var i = 0; i < 5; i++) {
-                  collection.insert({a:a}, {w:2, wtimeout: 10000}, function(err) {
+                  collection.insert({a:a}, {w:'majority', wtimeout: 10000}, function(err) {
                     totalCount = totalCount - 1;
 
                     if(totalCount == 0) {
-                      callback();
+                      setTimeout(function() {
+                        callback();
+                      }, 5000);
                     }
                   });
                   a = a + 10;
                 }
               }
 
-              inserts(function(err) {                
+              inserts(function(err) {
                 // Restart the old master and wait for the sync to happen
                 manager.restart({purge:true, kill:true}, function(err, result) {
                   // Contains the results
