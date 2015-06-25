@@ -14,4 +14,5 @@ module.exports = {
   , X509: require('./lib/auth/x509')
   , Plain: require('./lib/auth/plain')
   , GSSAPI: require('./lib/auth/gssapi')
+  , ScramSHA1: require('./lib/auth/scram')
 }
