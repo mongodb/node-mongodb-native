@@ -1,3 +1,7 @@
+2.0.36
+-----------------
+- Fully promisified allowing the use of ES6 generators and libraries like co. Also allows for BYOP (Bring your own promises).
+
 2.0.35 06-17-2015
 -----------------
 - Upgraded to mongodb-core 1.2.2 including removing warnings when C++ bson parser is not available and a fix for SCRAM authentication.
