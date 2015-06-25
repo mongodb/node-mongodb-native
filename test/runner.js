@@ -7,6 +7,8 @@ var Runner = require('integra').Runner
   , NodeVersionFilter = require('./filters/node_version_filter')
   , MongoDBVersionFilter = require('./filters/mongodb_version_filter')
   , MongoDBTopologyFilter = require('./filters/mongodb_topology_filter')
+  , ES6PromisesSupportedFilter = require('./filters/es6_promises_supported_filter')
+  , ES6GeneratorsSupportedFilter = require('./filters/es6_generators_supported_filter')
   , OSFilter = require('./filters/os_filter')
   , TravisFilter = require('./filters/travis_filter')
   , DisabledFilter = require('./filters/disabled_filter')
@@ -48,18 +50,6 @@ var startupOptions = {
   , skip: false
 }
 
-// var memwatch = require('memwatch');
-// memwatch.on('stats', function(stats) {
-//   // do something with post-gc memory usage stats
-//   console.log("====================== memwatch stats")
-//   console.log(stats)
-// });
-// memwatch.on('leak', function(info) {
-//   // do something with post-gc memory usage stats
-//   console.log("====================== memwatch leak")
-//   console.log(info)
-// })
-
 /**
  * Standalone MongoDB Configuration
  */
@@ -82,7 +72,7 @@ var createConfiguration = function(options) {
     var writeConcernMax = options.writeConcernMax || {w:1};
 
     Logger.setCurrentLogger(function() {});
-    Logger.setLevel('debug');
+    Logger.setLevel('info');
 
     // Shallow clone the options
     var fOptions = shallowClone(options);
@@ -255,8 +245,14 @@ var testFiles =[
   , '/test/functional/bulk_tests.js'
   , '/test/functional/operation_example_tests.js'
   , '/test/functional/crud_api_tests.js'
-  // , '/test/functional/reconnect_tests.js'
+  , '/test/functional/reconnect_tests.js'
 
+  // Promise tests
+  , '/test/functional/promises_db_tests.js'
+  , '/test/functional/promises_collection_tests.js'
+  , '/test/functional/promises_cursor_tests.js'
+  , '/test/functional/operation_promises_example_tests.js'
+  , '/test/functional/byo_promises_tests.js'
 
   // Logging tests
   , '/test/functional/logger_tests.js'
@@ -289,6 +285,13 @@ var testFiles =[
   // Authentication Tests
   , '/test/functional/authentication_tests.js'
 ]
+
+// Check if we support es6 generators
+try {
+  eval("(function *(){})");
+  // Generator tests
+  testFiles.push('/test/functional/operation_generators_example_tests.js');
+} catch(err) {}
 
 // Add all the tests to run
 testFiles.forEach(function(t) {
@@ -327,6 +330,10 @@ runner.plugin(new MongoDBTopologyFilter(startupOptions));
 runner.plugin(new OSFilter(startupOptions))
 // Add a Disable filter plugin
 runner.plugin(new DisabledFilter(startupOptions))
+// Add a Filter allowing us to specify that a function requires Promises
+runner.plugin(new ES6PromisesSupportedFilter())
+// Add a Filter allowing us to validate if generators are available
+runner.plugin(new ES6GeneratorsSupportedFilter())
 
 // Exit when done
 runner.on('exit', function(errors, results) {

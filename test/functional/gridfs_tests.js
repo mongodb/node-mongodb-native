@@ -119,7 +119,6 @@ exports.shouldCorrectlySafeFileAndReadFileByObjectId = {
       gridStore.open(function(err, gridStore) {
         gridStore.write("hello world!", function(err, gridStore) {
           gridStore.close(function(err, result) {
-
             // Let's read the file using object Id
             GridStore.read(db, result._id, function(err, data) {
               test.equal('hello world!', data);
@@ -2496,12 +2495,14 @@ exports.shouldCorrectlyReportIllegalMode = {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var gridStore = new GridStore(db, "test_gs_unknown_mode", "x");
-      gridStore.open(function(err, gridStore) {
+      try {
+        gridStore.open(function(err, gridStore) {});        
+      } catch(err) {
         test.ok(err instanceof Error);
         test.equal("Illegal mode x", err.message);
         db.close();
-        test.done();
-      });
+        test.done();        
+      }
     });
   }
 }

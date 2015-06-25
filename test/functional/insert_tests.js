@@ -1447,7 +1447,6 @@ exports.handleBSONTypeInsertsCorrectly = {
 
                     collection.findOne({"code": new Code("function () {}", {a: 77})}, function(err, doc) {
                       test.equal(null, err);
-                      console.dir(doc)
                       test.ok(doc != null);
                       db.close();
                       test.done();
