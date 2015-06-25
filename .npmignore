@@ -1,6 +1,7 @@
 .npmignore
 .gitignore
 .buildinfo
+.travis.yml
 .mongodb
 .DS_Store
 *.tmp
@@ -30,4 +31,3 @@ docs/public/
 
 external-libs/bson/build/
 external-libs/bson/build/.wafpickle-7
-
