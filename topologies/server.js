@@ -17,6 +17,7 @@ var inherits = require('util').inherits
   , BSON = require('bson').native().BSON
   , PreTwoSixWireProtocolSupport = require('../wireprotocol/2_4_support')
   , TwoSixWireProtocolSupport = require('../wireprotocol/2_6_support')
+  , ThreeTwoWireProtocolSupport = require('../wireprotocol/3_2_support')
   , Session = require('./session')
   , Logger = require('../connection/logger')
   , MongoCR = require('../auth/mongocr')
@@ -99,6 +100,11 @@ Callbacks.prototype.raw = function(id) {
   return this.callbacks[id].raw == true ? true : false
 }
 
+Callbacks.prototype.documentsReturnedIn = function(id) {
+  if(this.callbacks[id] == null) return false;
+  return typeof this.callbacks[id].documentsReturnedIn == 'string' ? this.callbacks[id].documentsReturnedIn : null;
+}
+
 Callbacks.prototype.unregister = function(id) {
   delete this.callbacks[id];
 }
@@ -129,6 +135,11 @@ var supportsServer = function(_s) {
 //
 // createWireProtocolHandler
 var createWireProtocolHandler = function(result) {
+  // 3.2 wire protocol handler
+  if(result && result.maxWireVersion >= 4) {
+    return new ThreeTwoWireProtocolSupport(new TwoSixWireProtocolSupport());
+  }
+
   // 2.6 wire protocol handler
   if(result && result.maxWireVersion >= 2) {
     return new TwoSixWireProtocolSupport();
@@ -230,7 +241,7 @@ var messageHandler = function(self, state) {
   return function(response, connection) {
     try {
       // Parse the message
-      response.parse({raw: state.callbacks.raw(response.responseTo)});
+      response.parse({raw: state.callbacks.raw(response.responseTo), documentsReturnedIn: state.callbacks.documentsReturnedIn(response.responseTo)});
       if(state.logger.isDebug()) state.logger.debug(f('message [%s] received from %s', response.raw.toString('hex'), self.name));
       state.callbacks.emit(response.responseTo, null, response);
     } catch (err) {

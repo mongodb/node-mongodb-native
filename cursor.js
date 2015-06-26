@@ -91,6 +91,7 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
   // All internal state
   this.cursorState = {
       cursorId: null
+    , cmd: cmd
     , documents: options.documents || []
     , cursorIndex: 0
     , dead: false
@@ -166,17 +167,25 @@ var execInitialQuery = function(self, query, cmd, options, cursorState, connecti
   var queryCallback = function(err, result) {
     if(err) return callback(err);
 
-    if (result.queryFailure) {
+    if(result.queryFailure) {
       return callback(MongoError.create(result.documents[0]), null);
     }
 
     // Check if we have a command cursor
-    if(Array.isArray(result.documents) && result.documents.length == 1 && !cmd.find) {
+    if(Array.isArray(result.documents) && result.documents.length == 1// && !cmd.find
+      && (result.documents[0].cursor != 'string'
+        || result.documents[0]['$err']
+        || result.documents[0]['errmsg']
+        || Array.isArray(result.documents[0].result))
+      ) {
+
+      // We have a an error document return the error
       if(result.documents[0]['$err']
         || result.documents[0]['errmsg']) {
         return callback(MongoError.create(result.documents[0]), null);
       }
 
+      // We have a cursor document
       if(result.documents[0].cursor != null
         && typeof result.documents[0].cursor != 'string') {
           var id = result.documents[0].cursor.id;
@@ -218,6 +227,11 @@ var execInitialQuery = function(self, query, cmd, options, cursorState, connecti
   // If we have a raw query decorate the function
   if(options.raw || cmd.raw) {
     queryCallback.raw = options.raw || cmd.raw;
+  }
+
+  // Do we have documentsReturnedIn set on the query
+  if(typeof query.documentsReturnedIn == 'string') {
+    queryCallback.documentsReturnedIn = query.documentsReturnedIn;
   }
 
   // Set up callback
@@ -478,6 +492,7 @@ var nextFunction = function(self, callback) {
 
     // Set as init
     self.cursorState.init = true;
+
     // Get the right wire protocol command
     self.query = self.server.wireProtocolHandler.command(self.bson, self.ns, self.cmd, self.cursorState, self.topology, self.options);
   }
@@ -567,7 +582,10 @@ var nextFunction = function(self, callback) {
       // Execute the next get more
       execGetMore(self, function(err, doc) {
         if(err) return handleCallback(callback, err);
-        if(self.cursorState.documents.length == 0 && Long.ZERO.equals(self.cursorState.cursorId)) self.cursorState.dead = true;
+        if(self.cursorState.documents.length == 0
+          && Long.ZERO.equals(self.cursorState.cursorId)) {
+            self.cursorState.dead = true;
+          }
 
         // Tailable cursor getMore result, notify owner about it
         // No attempt is made here to retry, this is left to the user of the

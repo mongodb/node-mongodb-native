@@ -14,7 +14,7 @@ var Insert = require('./commands').Insert
   , MongoError = require('../error')
   , Long = require('bson').Long;
 
-var LegacySupport = function() {}
+var WireProtocol = function() {}
 
 //
 // Execute a write operation
@@ -51,19 +51,19 @@ var executeWrite = function(topology, type, opsField, ns, ops, options, callback
 // Needs to support legacy mass insert as well as ordered/unordered legacy
 // emulation
 //
-LegacySupport.prototype.insert = function(topology, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
+WireProtocol.prototype.insert = function(topology, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
   executeWrite(topology, 'insert', 'documents', ns, ops, options, callback);
 }
 
-LegacySupport.prototype.update = function(topology, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
+WireProtocol.prototype.update = function(topology, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
   executeWrite(topology, 'update', 'updates', ns, ops, options, callback);
 }
 
-LegacySupport.prototype.remove = function(topology, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
+WireProtocol.prototype.remove = function(topology, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
   executeWrite(topology, 'delete', 'deletes', ns, ops, options, callback);
 }
 
-LegacySupport.prototype.killCursor = function(bson, cursorId, connection, callback) {
+WireProtocol.prototype.killCursor = function(bson, cursorId, connection, callback) {
   // Create a kill cursor command
   var killCursor = new KillCursor(bson, [cursorId]);
   // Execute the kill cursor command
@@ -74,7 +74,7 @@ LegacySupport.prototype.killCursor = function(bson, cursorId, connection, callba
   if(callback) callback(null, null);
 }
 
-LegacySupport.prototype.getMore = function(bson, ns, cursorState, batchSize, raw, connection, callbacks, options, callback) {
+WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw, connection, callbacks, options, callback) {
   // Create getMore command
   var getMore = new GetMore(bson, ns, cursorState.cursorId, {numberToReturn: batchSize});
 
@@ -87,9 +87,15 @@ LegacySupport.prototype.getMore = function(bson, ns, cursorState, batchSize, raw
       return callback(new MongoError("cursor killed or timed out"), null);
     }
 
+    // Ensure we have a Long valie cursor id
+    var cursorId = typeof r.cursorId == 'number'
+      ? Long.fromNumber(r.cursorId)
+      : r.cursorId;
+
     // Set all the values
     cursorState.documents = r.documents;
-    cursorState.cursorId = r.cursorId;
+    cursorState.cursorId = cursorId;
+
     // Return
     callback(null);
   }
@@ -105,7 +111,7 @@ LegacySupport.prototype.getMore = function(bson, ns, cursorState, batchSize, raw
   connection.write(getMore.toBin());
 }
 
-LegacySupport.prototype.command = function(bson, ns, cmd, cursorState, topology, options) {
+WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, options) {
   // Establish type of command
   if(cmd.find) {
     return setupClassicFind(bson, ns, cmd, cursorState, topology, options)
@@ -255,4 +261,4 @@ var bindToCurrentDomain = function(callback) {
   }
 }
 
-module.exports = LegacySupport;
+module.exports = WireProtocol;
