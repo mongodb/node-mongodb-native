@@ -169,7 +169,7 @@ var Configuration = function(options) {
 
 // Set up the runner
 var runner = new Runner({
-    logLevel:'debug'
+    logLevel:'info'
   , runners: 1
   , failFast: true
 });
@@ -242,7 +242,7 @@ Logger.setLevel('error');
 //Logger.filter('class', ['Mongos', 'Server']);
 //Logger.filter('class', ['Mongos', 'Server']);
 // Logger.filter('class', ['Mongos']);
-Logger.filter('class', ['ReplSet']);
+// Logger.filter('class', ['ReplSet']);
 
 // We want to export a smoke.py style json file
 if(argv.r) {
