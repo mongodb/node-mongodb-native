@@ -65,15 +65,57 @@ WireProtocol.prototype.remove = function(topology, ismaster, ns, bson, pool, cal
   executeWrite(topology, 'delete', 'deletes', ns, ops, options, callback);
 }
 
-WireProtocol.prototype.killCursor = function(bson, cursorId, connection, callback) {
-  // Create a kill cursor command
-  var killCursor = new KillCursor(bson, [cursorId]);
+WireProtocol.prototype.killCursor = function(bson, ns, cursorId, connection, callbacks, callback) {
+  // Build command namespace
+  var parts = ns.split(/\./);
+  // Command namespace
+  var commandns = f('%s.$cmd', parts.shift());
+  // Create getMore command
+  var killcursorCmd = {
+    killCursors: parts.join('.'),
+    cursors: [cursorId]
+  }
+
+  // Build Query object
+  var query = new Query(bson, commandns, killcursorCmd, {
+      numberToSkip: 0, numberToReturn: -1
+    , checkKeys: false, returnFieldSelector: null
+  });
+
+  // Set query flags
+  query.slaveOk = true;
+
   // Execute the kill cursor command
-  if(connection && connection.isConnected()) connection.write(killCursor.toBin());
-  // Set cursor to 0
-  cursorId = Long.ZERO;
-  // Return to caller
-  if(callback) callback(null, null);
+  if(connection && connection.isConnected()) {
+    connection.write(query.toBin());
+  }
+
+  // Kill cursor callback
+  var killCursorCallback = function(err, r) {
+    if(err) {
+      if(typeof callback != 'function') return;
+      return callback(err);
+    }
+
+    // If we have a timed out query or a cursor that was killed
+    if((r.responseFlags & (1 << 0)) != 0) {
+      if(typeof callback != 'function') return;
+      return callback(new MongoError("cursor killed or timed out"), null);
+    }
+
+    if(!Array.isArray(r.documents) || r.documents.length == 0) {
+      if(typeof callback != 'function') return;
+      return callback(new MongoError(f('invalid getMore result returned for cursor id %s', cursorState.cursorId)));
+    }
+
+    // Return the result
+    if(typeof callback == 'function') {
+      callback(null, r.documents[0]);
+    }
+  }
+
+  // Register a callback
+  callbacks.register(query.requestId, killCursorCallback);
 }
 
 WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw, connection, callbacks, options, callback) {

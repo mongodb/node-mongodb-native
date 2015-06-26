@@ -350,7 +350,7 @@ Cursor.prototype.kill = function(callback) {
   }
 
   // Execute command
-  this.server.wireProtocolHandler.killCursor(this.bson, this.cursorState.cursorId, this.connection, callback);
+  this.server.wireProtocolHandler.killCursor(this.bson, this.ns, this.cursorState.cursorId, this.connection, this.callbacks, callback);
 }
 
 /**
