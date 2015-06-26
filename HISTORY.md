@@ -1,6 +1,10 @@
+1.2.3 06-26-2015
+-----------------
+- Minor bug fixes.
+
 1.2.2 06-22-2015
 -----------------
-- Fix issue with SCRAM authentication causing authentication to return true on failed authentication (Issue 26, https://github.com/cglass17)
+- Fix issue with SCRAM authentication causing authentication to return true on failed authentication (Issue 26, https://github.com/cglass17).
 
 1.2.1 06-17-2015
 -----------------
