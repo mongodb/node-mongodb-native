@@ -4147,7 +4147,7 @@ exports.shouldCorrectlyRetrieveServerInfoWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveReplSetGetStatusWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['replicaset'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {

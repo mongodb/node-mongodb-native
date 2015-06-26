@@ -858,50 +858,6 @@ exports['Should correctly execute update with elemMatch field in selector'] = {
 /**
  * @ignore
  */
-exports['Should correctly execute find with elemMatch field in selector'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var ObjectID = configuration.require.ObjectID;
-
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
-      db.collection('executeUpdateWithElemMatch').findOne({item: {$elemMatch: {name: 'my_name'}}}, function(err, result, full) {
-        test.equal(null, err);
-
-        db.close();
-        test.done();
-      });
-    });
-  }
-}
-
-/**
- * @ignore
- */
-exports['Should correctly execute remove with elemMatch field in selector'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var ObjectID = configuration.require.ObjectID;
-
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
-      db.collection('executeUpdateWithElemMatch').remove({item: {$elemMatch: {name: 'my_name'}}}, function(err, result, full) {
-        test.equal(null, err);
-
-        db.close();
-        test.done();
-      });
-    });
-  }
-}
-
-/**
- * @ignore
- */
 exports['Should fail due to exiting collection'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
@@ -1033,7 +989,6 @@ exports['Should correctly list multipleCollections'] = {
               test.ok(names['test1'] != null);
               test.ok(names['test2'] != null);
               test.ok(names['test3'] != null);
-              test.ok(names['system.indexes'] != null);
 
               db.close();
               test.done();

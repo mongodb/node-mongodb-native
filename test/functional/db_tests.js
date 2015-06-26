@@ -5,7 +5,7 @@
  */
 exports.shouldCorrectlyHandleIllegalDbNames = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Db = configuration.require.Db;
@@ -64,7 +64,7 @@ exports.shouldCorrectlyHandleIllegalDbNames = {
  */
 exports.shouldCorrectlyPerformAutomaticConnect = {
   metadata: { requires: { topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var automatic_connect_client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:true});
@@ -100,7 +100,7 @@ exports.shouldCorrectlyPerformAutomaticConnect = {
  */
 exports.shouldCorrectlyPerformAutomaticConnectWithMaxBufferSize0 = {
   metadata: { requires: { topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var automatic_connect_client = configuration.newDbInstance({w:1, bufferMaxEntries:0}, {poolSize:1, auto_reconnect:true});
@@ -132,7 +132,7 @@ exports.shouldCorrectlyPerformAutomaticConnectWithMaxBufferSize0 = {
  */
 exports.shouldCorrectlyHandleFailedConnection = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Db = configuration.require.Db
@@ -150,7 +150,7 @@ exports.shouldCorrectlyHandleFailedConnection = {
  */
 exports.shouldCorrectlyResaveDBRef = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var DBRef = configuration.require.DBRef;
@@ -203,7 +203,7 @@ exports.shouldCorrectlyForceReindexOnCollection = {
   metadata: {
     requires: { topology: ["single", "replicaset"] }
   },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -253,7 +253,7 @@ exports.shouldCorrectlyForceReindexOnCollection = {
  */
 exports.shouldCorrectlyGetErrorDroppingNonExistingDb = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -278,7 +278,7 @@ exports.shouldCorrectlyGetErrorDroppingNonExistingDb = {
  */
 exports.shouldCorrectlyThrowWhenTryingToReOpenConnection = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -302,7 +302,7 @@ exports.shouldCorrectlyThrowWhenTryingToReOpenConnection = {
  */
 exports.shouldCorrectlyReconnectWhenError = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Db = configuration.require.Db
@@ -328,7 +328,7 @@ exports.shouldCorrectlyReconnectWhenError = {
  */
 exports.shouldCorrectlyUseCursorWithListCollectionsCommand = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Db = configuration.require.Db
@@ -349,7 +349,7 @@ exports.shouldCorrectlyUseCursorWithListCollectionsCommand = {
         // Create a collection
         db1.collection('test1').insertOne({a:1}, function() {
           test.equal(null, err);
-          
+
           // Get listCollections filtering out the name
           var cursor = db1.listCollections({name: 'test1'});
           cursor.toArray(function(err, names) {
@@ -370,7 +370,7 @@ exports.shouldCorrectlyUseCursorWithListCollectionsCommand = {
  */
 exports.shouldCorrectlyUseCursorWithListCollectionsCommandAndBatchSize = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Db = configuration.require.Db
@@ -391,7 +391,7 @@ exports.shouldCorrectlyUseCursorWithListCollectionsCommandAndBatchSize = {
         // Create a collection
         db1.collection('test1').insertOne({a:1}, function() {
           test.equal(null, err);
-          
+
           // Get listCollections filtering out the name
           var cursor = db1.listCollections({name: 'test'}, {batchSize:1});
           cursor.toArray(function(err, names) {
@@ -412,7 +412,7 @@ exports.shouldCorrectlyUseCursorWithListCollectionsCommandAndBatchSize = {
  */
 exports['should correctly list collection names with . in the middle'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Db = configuration.require.Db
@@ -433,7 +433,7 @@ exports['should correctly list collection names with . in the middle'] = {
         // Create a collection
         db1.collection('test.collection2').insertOne({a:1}, function() {
           test.equal(null, err);
-          
+
           // Get listCollections filtering out the name
           var cursor = db1.listCollections({name: /test.collection/});
           cursor.toArray(function(err, names) {
@@ -460,11 +460,11 @@ exports['should correctly list collection names with . in the middle'] = {
  * @ignore
  */
 exports['should correctly list collection names with batchSize 1 for 2.8 or higher'] = {
-  metadata: { requires: { 
-      topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] 
+  metadata: { requires: {
+      topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
     , mongodb: ">= 2.8.0"
   } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Db = configuration.require.Db
@@ -485,7 +485,7 @@ exports['should correctly list collection names with batchSize 1 for 2.8 or high
         // Create a collection
         db1.collection('test.collection2').insertOne({a:1}, function() {
           test.equal(null, err);
-          
+
           // Get listCollections filtering out the name
           var cursor = db1.listCollections({name: /test.collection/}, {batchSize:1});
           cursor.toArray(function(err, names) {
@@ -505,11 +505,11 @@ exports['should correctly list collection names with batchSize 1 for 2.8 or high
  * @ignore
  */
 exports['should correctly execute close function in order'] = {
-  metadata: { requires: { 
-      topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] 
+  metadata: { requires: {
+      topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger']
     , mongodb: ">= 2.8.0"
   } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Db = configuration.require.Db
@@ -522,9 +522,9 @@ exports['should correctly execute close function in order'] = {
       var items = [];
 
       items.push(1);
-      db.close(function(){ 
+      db.close(function(){
         test.equal(2, items.length);
-        test.done(); 
+        test.done();
       });
       items.push(2);
     });

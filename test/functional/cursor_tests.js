@@ -989,7 +989,7 @@ exports.shouldHandleWhenLimitBiggerThanBatchSize = {
 
                 //4th
                 cursor.nextObject(function(err, items) {
-                  test.equal(2, cursor.bufferedCount());
+                  test.equal(null, err);
 
                   //No more
                   cursor.nextObject(function(err, items) {
@@ -1466,7 +1466,7 @@ exports.shouldCorrectlyExecuteEnsureIndexWithNoCallback = {
 
             // Find with sort
             collection.find().sort(['createdAt', 'asc']).toArray(function(err, items) {
-              if (err) logger.error("error in collection_info.find: " + err);
+              test.equal(null, err);
               test.equal(1, items.length);
               db.close();
               test.done();
@@ -1504,7 +1504,6 @@ exports['Should correctly execute count on cursor'] = {
 
         // insert all docs
         collection.insert(docs, configuration.writeConcernMax(), function(err, result) {
-          console.dir(err)
           test.equal(null, err);
           var total = 0;
           // Create a cursor for the content
@@ -1932,7 +1931,7 @@ exports.shouldCloseDeadTailableCursors = {
 
     db.open(function(err, db) {
 
-      var options = { capped: true, size: 8 };
+      var options = { capped: true, size: 10000000 };
       db.createCollection('test_if_dead_tailable_cursors_close', options, function(err, collection) {
         test.equal(null, err);
         var closed = false;
@@ -1943,7 +1942,8 @@ exports.shouldCloseDeadTailableCursors = {
           collection.insert({id: i});
         }
 
-        stream.on('data', function (doc) {});
+        stream.on('data', function (doc) {
+        });
 
         stream.on('error', function (err) {
           test.ok(err != null);

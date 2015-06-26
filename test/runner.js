@@ -211,9 +211,9 @@ var createConfiguration = function(options) {
 
 // Set up the runner
 var runner = new Runner({
-    // logLevel:'debug'
-  runners: 1
-  , failFast: true
+  logLevel:'info',
+  runners: 1,
+  failFast: true
 });
 
 var testFiles =[

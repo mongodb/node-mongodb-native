@@ -2,7 +2,7 @@
 
 exports.shouldFailInsertDueToUniqueIndex = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1});
@@ -13,7 +13,7 @@ exports.shouldFailInsertDueToUniqueIndex = {
 
         collection.insert({a:2}, {w: 1}, function(err, r) {
           test.ok(err == null);
-          
+
           collection.insert({a:2}, {w: 1}, function(err, r) {
             test.ok(err.code != null);
             test.ok(err != null);
@@ -29,7 +29,7 @@ exports.shouldFailInsertDueToUniqueIndex = {
 // Test the error reporting functionality
 exports.shouldFailInsertDueToUniqueIndexStrict = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1});
@@ -40,7 +40,7 @@ exports.shouldFailInsertDueToUniqueIndexStrict = {
             collection.ensureIndex([['a', 1 ]], {unique:true, w:1}, function(err, indexName) {
               collection.insert({a:2}, {w:1}, function(err, r) {
                 test.ok(err == null);
-                
+
                 collection.insert({a:2}, {w:1}, function(err, r) {
                   test.ok(err != null);
                   db.close();
@@ -57,7 +57,7 @@ exports.shouldFailInsertDueToUniqueIndexStrict = {
 
 exports['mixing included and excluded fields should return an error object with message'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1});
@@ -65,7 +65,7 @@ exports['mixing included and excluded fields should return an error object with 
       var c = db.collection('test_error_object_should_include_message');
       c.insert({a:2, b: 5}, {w:1}, function(err, r) {
         test.equal(err, null);
-        
+
         c.findOne({a:2}, {fields: {a:1, b:0}}, function(err) {
           test.ok(err != null);
           db.close();
@@ -78,7 +78,7 @@ exports['mixing included and excluded fields should return an error object with 
 
 exports['should handle error throw in user callback'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1});
@@ -98,7 +98,7 @@ exports['should handle error throw in user callback'] = {
 
 exports['Should handle uncaught error correctly'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1});
@@ -116,7 +116,7 @@ exports['Should handle uncaught error correctly'] = {
 
 exports['Should handle throw error in db operation correctly'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1});
@@ -136,8 +136,8 @@ exports['Should handle throw error in db operation correctly'] = {
 exports['Should handle MongoClient uncaught error correctly'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { node: ">0.10.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },    
-  
+  metadata: { requires: { node: ">0.10.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
@@ -159,7 +159,7 @@ exports['Should handle MongoClient uncaught error correctly'] = {
 
 exports['Should handle MongoClient throw error in db operation correctly'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
@@ -179,8 +179,8 @@ exports['Should handle MongoClient throw error in db operation correctly'] = {
 exports['Should handle Error thrown during operation'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { node: ">0.10.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
-  
+  metadata: { requires: { node: ">0.10.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = null;
@@ -216,7 +216,7 @@ exports['Should handle Error thrown during operation'] = {
  */
 exports.shouldCorrectlyHandleThrownError = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1});
@@ -225,11 +225,11 @@ exports.shouldCorrectlyHandleThrownError = {
         try {
           db.collection('shouldCorrectlyHandleThrownError', function(err, collection) {
             debug(someUndefinedVariable);
-          });        
+          });
         } catch (err) {
           test.ok(err != null);
           db.close();
-          test.done();        
+          test.done();
         }
       });
     });
@@ -242,8 +242,8 @@ exports.shouldCorrectlyHandleThrownError = {
 exports.shouldCorrectlyHandleThrownErrorInRename = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { node: ">0.10.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
-  
+  metadata: { requires: { node: ">0.10.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1});
@@ -257,12 +257,12 @@ exports.shouldCorrectlyHandleThrownErrorInRename = {
     d.run(function() {
       db.open(function(err, db) {
         // Execute code
-        db.createCollection('shouldCorrectlyHandleThrownErrorInRename', function(err, r) {      
+        db.createCollection('shouldCorrectlyHandleThrownErrorInRename', function(err, r) {
           db.collection('shouldCorrectlyHandleThrownError', function(err, collection) {
             collection.rename("shouldCorrectlyHandleThrownErrorInRename2", function(err, result) {
-              debug(someUndefinedVariable);            
+              debug(someUndefinedVariable);
             })
-          });        
+          });
         });
       });
     })
@@ -274,7 +274,7 @@ exports.shouldCorrectlyHandleThrownErrorInRename = {
  */
 exports.shouldCorrectlyHandleExceptionsInCursorNext = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1});
@@ -301,7 +301,7 @@ exports.shouldCorrectlyHandleExceptionsInCursorNext = {
  */
 exports.shouldCorrectlyHandleExceptionsInCursorEach = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1});

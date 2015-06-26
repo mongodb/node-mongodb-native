@@ -2249,7 +2249,7 @@ exports.shouldCorrectlyRetriveCollectionOptions = {
  * @example-method parallelCollectionScan
  * @ignore
  */
-exports['Should correctly execute parallelCollectionScan with multiple cursors'] = {
+exports['Should correctly execute parallelCollectionScan with multiple cursors using toArray'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { mongodb: ">2.5.5", topology: ["single", "replicaset"] } },
@@ -2284,6 +2284,7 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors']
           test.equal(null, err);
           test.ok(cursors != null);
           test.ok(cursors.length > 0);
+          var left = cursors.length;
 
           for(var i = 0; i < cursors.length; i++) {
             cursors[i].toArray(function(err, items) {
@@ -2291,10 +2292,10 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors']
 
               // Add docs to results array
               results = results.concat(items);
-              numCursors = numCursors - 1;
+              left = left - 1;
 
               // No more cursors let's ensure we got all results
-              if(numCursors == 0) {
+              if(left == 0) {
                 test.equal(docs.length, results.length);
 
                 db.close();
@@ -3226,7 +3227,7 @@ exports.shouldCorrectlyRetrievelistCollections = {
 
           // Return the information of a all collections, using the callback format
           db1.listCollections().toArray(function(err, items) {
-            test.equal(2, items.length);
+            test.ok(items.length >= 1);
 
             db.close();
             test.done();
@@ -4469,14 +4470,7 @@ exports.shouldCorrectlyCallValidateCollection = {
 
             // Validate the 'test' collection
             adminDb.validateCollection('test', function(err, doc) {
-
-              // Pre 1.9.1 servers
-              if(doc.result != null) {
-                test.ok(doc.result != null);
-                test.ok(doc.result.match(/firstExtent/) != null);
-              } else {
-                test.ok(doc.firstExtent != null);
-              }
+              test.equal(null, err);
 
               adminDb.removeUser('admin8', function(err, result) {
                 test.ok(result);
@@ -5365,7 +5359,7 @@ exports.shouldCorrectlyPeformNextOnCursorWithCallbacks = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
