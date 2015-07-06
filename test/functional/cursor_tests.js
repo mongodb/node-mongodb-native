@@ -1949,8 +1949,11 @@ exports.shouldCloseDeadTailableCursors = {
           test.ok(err != null);
         });
 
+        stream.on('end', function () {
+          closed = true;
+        });
+
         stream.on('close', function () {
-          // this is what we need
           closed = true;
         });
 
@@ -1963,9 +1966,11 @@ exports.shouldCloseDeadTailableCursors = {
 
         setTimeout(function () {
           db.close();
-          test.equal(true, closed);
-          db.close();
-          test.done();
+
+          setTimeout(function() {
+            test.equal(true, closed);
+            test.done();
+          }, 1000)
         }, 800);
       });
     });
