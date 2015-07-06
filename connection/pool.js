@@ -46,7 +46,7 @@ var Pool = function(options) {
   EventEmitter.call(this);
   // Set empty if no options passed
   this.options = options || {};
-  this.size = typeof options.size == 'number' ? options.size : 5;  
+  this.size = typeof options.size == 'number' ? options.size : 5;
   // Message handler
   this.messageHandler = options.messageHandler;
   // No bson parser passed in
@@ -165,22 +165,31 @@ Pool.prototype.connect = function(_options) {
   this.state = CONNECTING
   // No dead
   this.dead = false;
+
+  // Ensure we allow for a little time to setup connections
+  var wait = 1;
+
   // Connect all sockets
   for(var i = 0; i < this.size; i++) {
-    execute(function() {
-      self.options.messageHandler = self.messageHandler;
-      var connection = new Connection(self.options);
-      
-      // Add all handlers
-      connection.once('close', closeHandler(self));
-      connection.once('error', errorHandler(self));
-      connection.once('timeout', timeoutHandler(self));
-      connection.once('parseError', parseErrorHandler(self));
-      connection.on('connect', connectHandler(self));
+    setTimeout(function() {
+      execute(function() {
+        self.options.messageHandler = self.messageHandler;
+        var connection = new Connection(self.options);
 
-      // Start connection
-      connection.connect(_options);
-    });
+        // Add all handlers
+        connection.once('close', closeHandler(self));
+        connection.once('error', errorHandler(self));
+        connection.once('timeout', timeoutHandler(self));
+        connection.once('parseError', parseErrorHandler(self));
+        connection.on('connect', connectHandler(self));
+
+        // Start connection
+        connection.connect(_options);
+      });
+    }, wait);
+
+    // wait for 3 miliseconds before attempting to connect, spacing out connections
+    wait = wait + 3;
   }
 }
 
@@ -225,7 +234,7 @@ Pool.prototype.isConnected = function() {
  */
 Pool.prototype.isDestroyed = function() {
   return this.state == DESTROYED;
-}  
+}
 
 
 /**
