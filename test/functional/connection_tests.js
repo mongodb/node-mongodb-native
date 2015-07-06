@@ -53,7 +53,7 @@ exports['Should correctly connect to server using big connection pool'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:500, auto_reconnect:true});
+    var db = configuration.newDbInstance({w:1}, {poolSize:2000, auto_reconnect:true});
     db.on('open', function() {
       db.close();
       test.done();
