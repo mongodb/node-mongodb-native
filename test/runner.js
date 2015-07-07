@@ -217,13 +217,20 @@ var runner = new Runner({
 });
 
 var testFiles =[
-    '/test/functional/mongo_client_tests.js'
+  // Promise tests
+    '/test/functional/promises_db_tests.js'
+  , '/test/functional/promises_collection_tests.js'
+  , '/test/functional/promises_cursor_tests.js'
+  , '/test/functional/operation_promises_example_tests.js'
+  , '/test/functional/byo_promises_tests.js'
+
+  // Functionality tests
+  , '/test/functional/mongo_client_tests.js'
   , '/test/functional/collection_tests.js'
   , '/test/functional/db_tests.js'
   , '/test/functional/cursor_tests.js'
   , '/test/functional/insert_tests.js'
   , '/test/functional/aggregation_tests.js'
-  , '/test/functional/admin_tests.js'
   , '/test/functional/connection_tests.js'
   , '/test/functional/cursorstream_tests.js'
   , '/test/functional/custom_pk_tests.js'
@@ -246,13 +253,6 @@ var testFiles =[
   , '/test/functional/operation_example_tests.js'
   , '/test/functional/crud_api_tests.js'
   , '/test/functional/reconnect_tests.js'
-
-  // Promise tests
-  , '/test/functional/promises_db_tests.js'
-  , '/test/functional/promises_collection_tests.js'
-  , '/test/functional/promises_cursor_tests.js'
-  , '/test/functional/operation_promises_example_tests.js'
-  , '/test/functional/byo_promises_tests.js'
 
   // Logging tests
   , '/test/functional/logger_tests.js'

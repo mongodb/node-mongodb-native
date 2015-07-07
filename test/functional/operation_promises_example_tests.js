@@ -4148,7 +4148,7 @@ exports.shouldCorrectlyRetrieveServerInfoWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveReplSetGetStatusWithPromises = {
-  metadata: { requires: { promises:true, topology: 'replicaset' } },
+  metadata: { requires: { promises:true, topology: 'single' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {

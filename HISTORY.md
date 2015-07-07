@@ -1,6 +1,7 @@
-2.0.36
+2.0.36 07-07-2015
 -----------------
 - Fully promisified allowing the use of ES6 generators and libraries like co. Also allows for BYOP (Bring your own promises).
+- NODE-493 updated mongodb-core to 1.2.4 to ensure we cannot DDOS the mongod or mongos process on large connection pool sizes.
 
 2.0.35 06-17-2015
 -----------------

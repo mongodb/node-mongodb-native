@@ -18,7 +18,7 @@ var f = require('util').format;
 exports.aggregationExample2WithGenerators = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, mongodb:">2.1.0", topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -84,7 +84,7 @@ exports.aggregationExample2WithGenerators = {
 exports['Aggregation Cursor next Test with Generators'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, mongodb:">2.1.0", topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -145,7 +145,7 @@ exports['Aggregation Cursor next Test with Generators'] = {
  * @ignore
  */
 exports.shouldCorrectlyDoSimpleCountExamplesWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -192,7 +192,7 @@ exports.shouldCorrectlyDoSimpleCountExamplesWithGenerators = {
  * @ignore
  */
 exports.shouldCreateComplexIndexOnTwoFieldsWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -243,7 +243,7 @@ exports.shouldCreateComplexIndexOnTwoFieldsWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilterWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -289,7 +289,7 @@ exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilterWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyHandleDistinctIndexesWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -334,7 +334,7 @@ exports.shouldCorrectlyHandleDistinctIndexesWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyDropCollectionWithDropFunctionWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -393,7 +393,7 @@ exports.shouldCorrectlyDropCollectionWithDropFunctionWithGenerators = {
  * @ignore
  */
 exports.dropAllIndexesExample1WithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -430,7 +430,7 @@ exports.dropAllIndexesExample1WithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyCreateAndDropIndexWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -481,7 +481,7 @@ exports.shouldCorrectlyCreateAndDropIndexWithGenerators = {
  * @ignore
  */
 exports.shouldCreateComplexEnsureIndexWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -531,7 +531,7 @@ exports.shouldCreateComplexEnsureIndexWithGenerators = {
  * @ignore
  */
 exports.ensureIndexExampleWithCompountIndexWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -582,7 +582,7 @@ exports.ensureIndexExampleWithCompountIndexWithGenerators = {
  * @ignore
  */
 exports.shouldPeformASimpleQueryWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -627,7 +627,7 @@ exports.shouldPeformASimpleQueryWithGenerators = {
  * @ignore
  */
 exports.shouldPeformASimpleExplainQueryWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -670,7 +670,7 @@ exports.shouldPeformASimpleExplainQueryWithGenerators = {
  * @ignore
  */
 exports.shouldPeformASimpleLimitSkipQueryWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -720,7 +720,7 @@ exports.shouldPeformASimpleLimitSkipQueryWithGenerators = {
  * @ignore
  */
 exports.shouldPerformSimpleFindAndModifyOperationsWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -780,7 +780,7 @@ exports.shouldPerformSimpleFindAndModifyOperationsWithGenerators = {
  * @ignore
  */
 exports.shouldPerformSimpleFindAndRemoveWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -830,7 +830,7 @@ exports.shouldPerformSimpleFindAndRemoveWithGenerators = {
  * @ignore
  */
 exports.shouldPeformASimpleLimitSkipFindOneQueryWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -876,7 +876,7 @@ exports.shouldPeformASimpleLimitSkipFindOneQueryWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyPerformSimpleGeoNearCommandWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -970,7 +970,7 @@ exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommandWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteGroupFunctionWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1094,7 +1094,7 @@ exports.shouldCorrectlyExecuteGroupFunctionWithGenerators = {
  * @ignore
  */
 exports.shouldPerformSimpleMapReduceFunctionsWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1151,7 +1151,7 @@ exports.shouldPerformSimpleMapReduceFunctionsWithGenerators = {
 exports.shouldPerformMapReduceFunctionInlineWithGenerators = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, mongodb: '>1.7.6', topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, mongodb: '>1.7.6', topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1203,7 +1203,7 @@ exports.shouldPerformMapReduceFunctionInlineWithGenerators = {
  * @ignore
  */
 exports.shouldPerformMapReduceWithContextWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1284,7 +1284,7 @@ exports.shouldPerformMapReduceWithContextWithGenerators = {
  * @ignore
  */
 exports.shouldPerformMapReduceInContextObjectsWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1365,7 +1365,7 @@ exports.shouldPerformMapReduceInContextObjectsWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyRetriveACollectionsIndexesWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1415,7 +1415,7 @@ exports.shouldCorrectlyRetriveACollectionsIndexesWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteIndexExistsWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1522,7 +1522,7 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformationWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyShowAllTheResultsFromIndexInformationWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1578,7 +1578,7 @@ exports.shouldCorrectlyShowAllTheResultsFromIndexInformationWithGenerators = {
 exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafeWithGenerators = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
@@ -1624,7 +1624,7 @@ exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafeWithGen
 exports.shouldCorrectlyPerformABatchDocumentInsertSafeWithGenerators = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1669,7 +1669,7 @@ exports.shouldCorrectlyPerformABatchDocumentInsertSafeWithGenerators = {
 exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafeWithGenerators = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1717,7 +1717,7 @@ exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafeWithGenerator
 exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.1 with Generators"] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, mongodb:">1.9.1", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, mongodb:">1.9.1", topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1771,7 +1771,7 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
  * @ignore
  */
 exports.shouldCorrectlyExecuteIsCappedWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1813,7 +1813,7 @@ exports.shouldCorrectlyExecuteIsCappedWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyRetriveCollectionOptionsWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1922,7 +1922,7 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors w
  * @ignore
  */
 exports.shouldCorrectlyIndexAndForceReindexOnCollectionWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1975,7 +1975,7 @@ exports.shouldCorrectlyIndexAndForceReindexOnCollectionWithGenerators = {
  * @ignore
  */
 exports.shouldRemoveAllDocumentsNoSafeWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2021,7 +2021,7 @@ exports.shouldRemoveAllDocumentsNoSafeWithGenerators = {
  * @ignore
  */
 exports.shouldRemoveSubsetOfDocumentsSafeModeWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2062,7 +2062,7 @@ exports.shouldRemoveSubsetOfDocumentsSafeModeWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyRenameCollectionWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2164,7 +2164,7 @@ exports.shouldCorrectlyRenameCollectionWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlySaveASimpleDocumentWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2211,7 +2211,7 @@ exports.shouldCorrectlySaveASimpleDocumentWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveItWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2266,7 +2266,7 @@ exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveItWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyUpdateASimpleDocumentWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2319,7 +2319,7 @@ exports.shouldCorrectlyUpdateASimpleDocumentWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyUpsertASimpleDocumentWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2363,7 +2363,7 @@ exports.shouldCorrectlyUpsertASimpleDocumentWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyUpdateMultipleDocumentsWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2417,7 +2417,7 @@ exports.shouldCorrectlyUpdateMultipleDocumentsWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyReturnACollectionsStatsWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2461,7 +2461,7 @@ exports.shouldCorrectlyReturnACollectionsStatsWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyCreateAndDropAllIndexWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2524,7 +2524,7 @@ exports.shouldCorrectlyCreateAndDropAllIndexWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDbWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2571,7 +2571,7 @@ exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDbWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteEvalFunctionsWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2667,7 +2667,7 @@ exports.shouldCorrectlyExecuteEvalFunctionsWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunctionWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2759,7 +2759,7 @@ exports.shouldCorrectlyRetrievelistCollectionsWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveAllCollectionsWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -2982,7 +2982,7 @@ exports.shouldCorrectlyAddAndRemoveUserWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyCreateACollectionWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -3020,7 +3020,7 @@ exports.shouldCorrectlyCreateACollectionWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteACommandAgainstTheServerWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -3069,7 +3069,7 @@ exports.shouldCorrectlyExecuteACommandAgainstTheServerWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyCreateDropAndVerifyThatCollectionIsGoneWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -3104,7 +3104,7 @@ exports.shouldCorrectlyCreateDropAndVerifyThatCollectionIsGoneWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyRenameACollectionWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -3162,7 +3162,7 @@ exports.shouldCorrectlyRenameACollectionWithGenerators = {
  * @ignore
  */
 exports.shouldCreateOnDbComplexIndexOnTwoFieldsWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -3214,7 +3214,7 @@ exports.shouldCreateOnDbComplexIndexOnTwoFieldsWithGenerators = {
  * @ignore
  */
 exports.shouldCreateComplexEnsureIndexDbWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -3266,7 +3266,7 @@ exports.shouldCreateComplexEnsureIndexDbWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyDropTheDatabaseWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -3329,7 +3329,7 @@ exports.shouldCorrectlyDropTheDatabaseWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveDbStatsWithGeneratorsWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -3365,7 +3365,7 @@ exports.shouldCorrectlyRetrieveDbStatsWithGeneratorsWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstancesWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4049,7 +4049,7 @@ exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDbWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyListAllAvailableDatabasesWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4090,7 +4090,7 @@ exports.shouldCorrectlyListAllAvailableDatabasesWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveServerInfoWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4215,7 +4215,7 @@ var fs = require('fs');
 exports.shouldCorrectlyExecuteToArrayWithGenerators = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4262,7 +4262,7 @@ exports.shouldCorrectlyExecuteToArrayWithGenerators = {
 exports.shouldCorrectlyUseCursorCountFunctionWithGenerators = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4308,7 +4308,7 @@ exports.shouldCorrectlyUseCursorCountFunctionWithGenerators = {
 exports.shouldCorrectlyPeformNextObjectOnCursorWithGenerators = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4354,7 +4354,7 @@ exports.shouldCorrectlyPeformNextObjectOnCursorWithGenerators = {
 exports.shouldCorrectlyPeformNextOnCursorWithGenerators = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4410,7 +4410,7 @@ exports.shouldCorrectlyPeformNextOnCursorWithGenerators = {
 exports.shouldCorrectlyPeformSimpleExplainCursorWithGenerators = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4454,7 +4454,7 @@ exports.shouldCorrectlyPeformSimpleExplainCursorWithGenerators = {
 exports.shouldStreamDocumentsUsingTheCloseFunctionWithGenerators = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4513,7 +4513,7 @@ exports.shouldStreamDocumentsUsingTheCloseFunctionWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteGridStoreExistsByObjectIdWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4570,7 +4570,7 @@ exports.shouldCorrectlyExecuteGridStoreExistsByObjectIdWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteGridStoreListWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4683,7 +4683,7 @@ exports.shouldCorrectlyExecuteGridStoreListWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyReadlinesAndPutLinesWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4732,7 +4732,7 @@ exports.shouldCorrectlyReadlinesAndPutLinesWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyUnlinkWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4803,7 +4803,7 @@ exports.shouldCorrectlyUnlinkWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyWriteAndReadJpgImageWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4860,7 +4860,7 @@ exports.shouldCorrectlyWriteAndReadJpgImageWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlySaveSimpleFileToGridStoreUsingFilenameWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4911,7 +4911,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingFilenameWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlySaveSimpleFileToGridStoreUsingObjectIDWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -4965,7 +4965,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingObjectIDWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5022,7 +5022,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandleWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5082,7 +5082,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandleWithGene
  * @ignore
  */
 exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffersWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5139,7 +5139,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffersW
  * @ignore
  */
 exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5189,7 +5189,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkItWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5249,7 +5249,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkItWithGen
  * @ignore
  */
 exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlinesWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5309,7 +5309,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlinesWithGenerators
  * @ignore
  */
 exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlinesWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5373,7 +5373,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlinesWithGe
  * @ignore
  */
 exports.shouldCorrectlyPutACoupleOfLinesInGridStoreReadWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5423,7 +5423,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreReadWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlySeekWithBufferWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5523,7 +5523,7 @@ exports.shouldCorrectlySeekWithBufferWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyRewingAndTruncateOnWriteWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5589,7 +5589,7 @@ exports.shouldCorrectlyRewingAndTruncateOnWriteWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteGridstoreTellWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5645,7 +5645,7 @@ exports.shouldCorrectlyExecuteGridstoreTellWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5695,7 +5695,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithGenerators2 = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5768,7 +5768,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithGenerators2 = {
  * @ignore
  */
 exports['Should correctly execute ordered batch with no errors using write commands with Generators'] = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5832,7 +5832,7 @@ exports['Should correctly execute ordered batch with no errors using write comma
  * @ignore
  */
 exports['Should correctly execute unordered batch with no errors with Generators'] = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5902,7 +5902,7 @@ exports['Should correctly execute unordered batch with no errors with Generators
  * @ignore
  */
 exports['Should correctly execute insertOne operation with Generators'] = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5940,7 +5940,7 @@ exports['Should correctly execute insertOne operation with Generators'] = {
  * @ignore
  */
 exports['Should correctly execute insertMany operation with Generators'] = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -5978,7 +5978,7 @@ exports['Should correctly execute insertMany operation with Generators'] = {
  * @ignore
  */
 exports['Should correctly execute updateOne operation with Generators'] = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -6019,7 +6019,7 @@ exports['Should correctly execute updateOne operation with Generators'] = {
  * @ignore
  */
 exports['Should correctly execute updateMany operation with Generators'] = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -6063,7 +6063,7 @@ exports['Should correctly execute updateMany operation with Generators'] = {
  * @ignore
  */
 exports['Should correctly execute removeOne operation with Generators'] = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -6104,7 +6104,7 @@ exports['Should correctly execute removeOne operation with Generators'] = {
  * @ignore
  */
 exports['Should correctly execute removeMany operation with Generators'] = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -6147,7 +6147,7 @@ exports['Should correctly execute removeMany operation with Generators'] = {
  * @ignore
  */
 exports['Should correctly execute bulkWrite operation with Generators'] = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -6204,7 +6204,7 @@ exports['Should correctly execute bulkWrite operation with Generators'] = {
  * @ignore
  */
 exports['Should correctly execute findOneAndDelete operation with Generators'] = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -6248,7 +6248,7 @@ exports['Should correctly execute findOneAndDelete operation with Generators'] =
  * @ignore
  */
 exports['Should correctly execute findOneAndReplace operation with Generators'] = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -6299,7 +6299,7 @@ exports['Should correctly execute findOneAndReplace operation with Generators'] 
  * @ignore
  */
 exports['Should correctly execute findOneAndUpdate operation with Generators'] = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -6350,7 +6350,7 @@ exports['Should correctly execute findOneAndUpdate operation with Generators'] =
  * @ignore
  */
 exports['Should correctly add capped collection options to cursor with Generators'] = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { generators:true, topology: ['single'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {

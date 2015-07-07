@@ -2,9 +2,96 @@
 
 var f = require('util').format;
 
+/**
+ * Retrieve the server information for the current
+ * instance of the db client
+ *
+ * @ignore
+ */
+exports.shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configure, test) {
+    var db = configure.newDbInstance({}, {poolSize:1});
+    db.open(function(err, db) {
+      var collection = db.collection('shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode');
+      collection.insert({'a':1}, {w: 1}, function(err, doc) {
+        var adminDb = db.admin();
+        adminDb.addUser('admin', 'admin', configure.writeConcernMax(), function(err, result) {
+          test.equal(null, err);
+
+          adminDb.authenticate('admin', 'admin', function(err, replies) {
+            test.equal(null, err);
+            test.equal(true, replies);
+
+            adminDb.validateCollection('shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode', function(err, doc) {
+              test.equal(null, err);
+              test.ok(doc != null);
+
+              adminDb.removeUser('admin', function(err) {
+                test.equal(null, err);
+
+                db.close();
+                test.done();
+              })
+            });
+          });
+        });
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['Should correctly issue authenticated event on successful authentication'] = {
+  metadata: { requires: { topology: 'single' } },
+
+  // The actual test we wish to run
+  test: function(configure, test) {
+    var db = configure.newDbInstance({w:1}, {poolSize:1});
+
+    db.once('authenticated', function() {
+      test.done();
+    });
+
+    // DOC_LINE var db = new Db('test', new Server('localhost', 27017));
+    // DOC_START
+    // Establish connection to db
+    db.open(function(err, db) {
+      // Grab a collection object
+      var collection = db.collection('test');
+
+      // Force the creation of the collection by inserting a document
+      // Collections are not created until the first document is inserted
+      collection.insert({'a':1}, {w: 1}, function(err, doc) {
+
+        // Use the admin database for the operation
+        var adminDb = db.admin();
+
+        // Add the new user to the admin database
+        adminDb.addUser('admin15', 'admin15', function(err, result) {
+          test.equal(null, err);
+          test.ok(result != null);
+
+          // Authenticate using the newly added user
+          adminDb.authenticate('admin15', 'admin15', function(err, result) {
+            test.equal(null, err);
+            test.equal(true, result);
+            db.close();
+          });
+        });
+      });
+    });
+    // DOC_END
+  }
+}
+
 exports['Should correctly authenticate against admin db'] = {
   metadata: { requires: { topology: ['auth'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Db = configuration.require.Db
@@ -58,7 +145,7 @@ exports['Should correctly authenticate against admin db'] = {
 
 exports['Should correctly authenticate against normal db'] = {
   metadata: { requires: { topology: ['auth'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Db = configuration.require.Db
@@ -124,7 +211,7 @@ exports['Should correctly authenticate against normal db'] = {
 
 exports['Should correctly reapply the authentications'] = {
   metadata: { requires: { topology: ['auth'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Db = configuration.require.Db
@@ -180,7 +267,7 @@ exports['Should correctly reapply the authentications'] = {
 
 exports['Ordered bulk operation should fail correctly when not authenticated'] = {
   metadata: { requires: { topology: ['auth'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Db = configuration.require.Db
@@ -226,7 +313,7 @@ exports['Ordered bulk operation should fail correctly when not authenticated'] =
 
 exports['Unordered bulk operation should fail correctly when not authenticated'] = {
   metadata: { requires: { topology: ['auth'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Db = configuration.require.Db
@@ -271,21 +358,21 @@ exports['Unordered bulk operation should fail correctly when not authenticated']
 }
 
 // /**********************************************************************************************
-                                                                                               
-//   ReplsetRep    ReplsetRepl  tReplsetRe   etRepl          Repl  t  plsetReplse  eplsetReplse   
-//   setReplsetR   setReplsetRe  setReplset  plsetR        plsetRepls tReplsetRepl etReplsetRep   
-//    pls    pls   epls    plse  epls    pls   epl        etRep  etRe lset    setR pls  Rep  et   
-//    tReplsetRe    tRe          etReplsetRe   et         plset        epl              set       
-//    lsetRepls     lsetRe       plsetRepls    pl          Repls       etRepl           epl       
-//    ReplsetR      Replset      tReplsetR     tR             Repls    plsetRe          et        
-//    setReplse     setRepl      lse           lse             etRe    tReplse          pls       
-//    epl   Rep  e  epl          Rep          tRep    Re        lset   lse              tRe       
-//    etR   setRep  etRe    tRe  set           set    se  epls  Repl   Repl    epl      lse       
-//   eplse  eplset eplsetR plse Replse       tReplsetRep  etReplsetR  lsetRep setR    etRepls     
-//   etRep   tRep  etReplsetRep setRep       lsetReplset  plsetRepl   ReplsetRepls    plsetRe     
-                                                                                                                                                                                              
+
+//   ReplsetRep    ReplsetRepl  tReplsetRe   etRepl          Repl  t  plsetReplse  eplsetReplse
+//   setReplsetR   setReplsetRe  setReplset  plsetR        plsetRepls tReplsetRepl etReplsetRep
+//    pls    pls   epls    plse  epls    pls   epl        etRep  etRe lset    setR pls  Rep  et
+//    tReplsetRe    tRe          etReplsetRe   et         plset        epl              set
+//    lsetRepls     lsetRe       plsetRepls    pl          Repls       etRepl           epl
+//    ReplsetR      Replset      tReplsetR     tR             Repls    plsetRe          et
+//    setReplse     setRepl      lse           lse             etRe    tReplse          pls
+//    epl   Rep  e  epl          Rep          tRep    Re        lset   lse              tRe
+//    etR   setRep  etRe    tRe  set           set    se  epls  Repl   Repl    epl      lse
+//   eplse  eplset eplsetR plse Replse       tReplsetRep  etReplsetR  lsetRep setR    etRepls
+//   etRep   tRep  etReplsetRep setRep       lsetReplset  plsetRepl   ReplsetRepls    plsetRe
+
 // **********************************************************************************************/
-                                                                                                                                    
+
 var replSetManager;
 
 var setUp = function(configuration, options, callback) {
@@ -312,11 +399,11 @@ var setUp = function(configuration, options, callback) {
   replSetManager = new ReplSetManager(rsOptions);
 
   // Start SSL replicaset manager
-  replSetManager.start({kill: true, purge:true, signal: -9}, function(err, result) {      
+  replSetManager.start({kill: true, purge:true, signal: -9}, function(err, result) {
     if(err != null) throw err;
     // Finish setup
-    callback();      
-  });      
+    callback();
+  });
 }
 
 /**
@@ -324,7 +411,7 @@ var setUp = function(configuration, options, callback) {
  */
 exports['Should correctly handle replicaset master stepdown and stepup without loosing auth'] = {
   metadata: { requires: { topology: ['auth'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Db = configuration.require.Db
@@ -340,7 +427,7 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
       );
 
       // Connect
-      new Db('replicaset_test_auth', replSet, {w:1}).open(function(err, db) {    
+      new Db('replicaset_test_auth', replSet, {w:1}).open(function(err, db) {
         // Just set auths for the manager to handle it correctly
         replSetManager.setCredentials("default", "admin", "root", "root");
         // Add a user
@@ -352,7 +439,7 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
             test.ok(result);
 
             replSetManager.shutdown('primary', function(err, result) {
-              
+
               db.collection('replicaset_test_auth').insert({a:1}, {w:1}, function(err, result) {
                 test.equal(null, err);
 
@@ -365,7 +452,7 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
             });
           });
         });
-      });      
+      });
     })
   }
 }
@@ -375,7 +462,7 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
  */
 exports.shouldCorrectlyAuthenticateUsingPrimary = {
   metadata: { requires: { topology: ['auth'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient
@@ -422,7 +509,7 @@ exports.shouldCorrectlyAuthenticateUsingPrimary = {
 
                 client.collections(function(error, names) {
                   test.equal(null, error);
-                  
+
                   client.close();
 
                   replSetManager.stop(function() {
@@ -443,7 +530,7 @@ exports.shouldCorrectlyAuthenticateUsingPrimary = {
  */
 exports.shouldCorrectlyAuthenticateWithTwoSeeds = {
   metadata: { requires: { topology: ['auth'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient
@@ -487,7 +574,7 @@ exports.shouldCorrectlyAuthenticateWithTwoSeeds = {
 
                 client.collections(function(error, names) {
                   test.equal(null, err);
-                  
+
                   client.close();
 
                   replSetManager.stop(function() {
@@ -508,7 +595,7 @@ exports.shouldCorrectlyAuthenticateWithTwoSeeds = {
  */
 exports.shouldCorrectlyAuthenticateWithOnlySecondarySeed = {
   metadata: { requires: { topology: ['auth'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient
@@ -546,13 +633,13 @@ exports.shouldCorrectlyAuthenticateWithOnlySecondarySeed = {
               // connection string
               var config = f("mongodb://me:secret@localhost:%s/node-native-test?authSource=admin&readPreference=secondary&replicaSet=%s&maxPoolSize=1"
                 , replSetManager.startPort, replSetManager.replicasetName);
-              
+
               // Connect
               MongoClient.connect(config, function(error, client) {
                 client.on('all', function() {
                   client.collection('test').insert({a:1}, function(err, r) {
                     test.equal(null, err);
-                    
+
                     // Logout
                     client.logout(function() {
 
@@ -573,7 +660,7 @@ exports.shouldCorrectlyAuthenticateWithOnlySecondarySeed = {
 
                               // Let's restart a secondary
                               replSetManager.restartServer('secondary', function(err, result) {
-                                
+
                                 // Let's restart a secondary
                                 replSetManager.restartServer('secondary', function(err, result) {
                                   // Should fail
@@ -611,7 +698,7 @@ exports.shouldCorrectlyAuthenticateWithOnlySecondarySeed = {
  */
 exports.shouldCorrectlyAuthenticateWithMultipleLoginsAndLogouts = {
   metadata: { requires: { topology: ['auth'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient
@@ -737,9 +824,9 @@ exports.shouldCorrectlyAuthenticateWithMultipleLoginsAndLogouts = {
 
           replSetManager.stop(function() {
             test.done();
-          });          
+          });
         }
-        
+
         db.admin().addUser("me", "secret", {w:4, wtimeout:25000}, ensureFailingInsert);
       });
     });
@@ -751,7 +838,7 @@ exports.shouldCorrectlyAuthenticateWithMultipleLoginsAndLogouts = {
  */
 exports.shouldCorrectlyAuthenticateAndEnsureIndex = {
   metadata: { requires: { topology: ['auth'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient
@@ -824,7 +911,7 @@ exports.shouldCorrectlyAuthenticateAndEnsureIndex = {
  */
 exports.shouldCorrectlyAuthenticateAndUseReadPreference = {
   metadata: { requires: { topology: ['auth'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient
@@ -863,7 +950,7 @@ exports.shouldCorrectlyAuthenticateAndUseReadPreference = {
                 db_p.collection('userconfirm2').insert({a:1}, {w:1}, function(err, result) {
                   test.equal(null, err);
 
-                  db_p.collection('userconfirm2').findOne(function(err, item) {            
+                  db_p.collection('userconfirm2').findOne(function(err, item) {
                     test.equal(null, err);
                     test.equal(1, item.a);
                     db_p.close();
@@ -887,7 +974,7 @@ exports.shouldCorrectlyAuthenticateAndUseReadPreference = {
  */
 exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary = {
   metadata: { requires: { topology: ['auth'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient
@@ -919,7 +1006,7 @@ exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary =
               test.equal(null, err);
 
               db_p.addUser('test', 'test', {w:4, wtimeout:25000}, function(err, result) {
-                test.equal(null, err);                
+                test.equal(null, err);
                 test.ok(result != null);
 
                   db.serverConfig.on('joined', function(t, s) {
@@ -945,7 +1032,7 @@ exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary =
                             });
                           }
                         });
-                      }                        
+                      }
                     }
                   });
                   db.serverConfig.on('left', function(t, s) {
@@ -967,7 +1054,7 @@ exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary =
  */
 exports.shouldCorrectlyAuthWithSecondaryAfterKillPrimary = {
   metadata: { requires: { topology: ['auth'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient
@@ -1030,7 +1117,7 @@ exports.shouldCorrectlyAuthWithSecondaryAfterKillPrimary = {
                               });
                             }
                           });
-                        }                        
+                        }
                       }
                     });
                   });
@@ -1049,7 +1136,7 @@ exports.shouldCorrectlyAuthWithSecondaryAfterKillPrimary = {
  */
 exports.shouldCorrectlyAuthAgainstReplicaSetAdminDbUsingMongoClient = {
   metadata: { requires: { topology: ['auth'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient
@@ -1112,7 +1199,7 @@ exports.shouldCorrectlyAuthAgainstReplicaSetAdminDbUsingMongoClient = {
  */
 exports.shouldCorrectlyAuthAgainstNormalDbUsingMongoClient = {
   metadata: { requires: { topology: ['auth'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient
@@ -1143,7 +1230,7 @@ exports.shouldCorrectlyAuthAgainstNormalDbUsingMongoClient = {
               db_p.addUser("me", "secret", {w:4, wtimeout: 25000}, function runWhatever(err, result) {
                 // Just set auths for the manager to handle it correctly
                 replSetManager.setCredentials("default", "admin", "me", "secret");
-                
+
                 db_p.close();
 
                 MongoClient.connect(f("mongodb://me:secret@%s:%s/%s?rs_name=%s&readPreference=secondary&w=3"
@@ -1181,18 +1268,18 @@ exports.shouldCorrectlyAuthAgainstNormalDbUsingMongoClient = {
 }
 
 /*************************************************************************************
-                                                                                       
-  sMong       sMong    ngosMo   sMong   ongosM    sMong         ongosM       ngos  n   
-  ngosM       ngosM   osMongos  ngosM   osMong   ongosMongo    gosMongo    gosMongosM  
-    ongo      sMo    Mong  Mong  Mongo   ngos   gosM  gosM    sMon  sMon  sMong  Mong  
-    osMon    ongo    gos    osM  gosMon  sMo   sMon    ong    ngo    gos  ngosM        
-    ongos    o Mo   sMon    ongo MongosM ngo   ngo           osMo    Mong  Mongo       
-    osMong  Mo go   ngos    osMo gosMong sMo   sMo           ongo    gosM     Mongo    
-    on osMo go Mo    Mon    ong  Mon osMongo   ngo   ngosMo   sMo    Mon       osMo    
-    os ongosM  gos   gos    osM  gos ongosMo    Mo    Mongo   ngo    gos        ngos   
-    ong sMong sMon   Mong  Mong  Mon  sMongo    gos   gosM    sMon  sMon  sMon  sMon   
-  ngosMo gos ongosM   osMongos  ngosM  gosMo     ongosMon      gosMongo   ngosMongos   
-   Mongo Mo  osMong    ngosMo   sMong   ongo      sMongosM      ongosM    sMongosMo    
+
+  sMong       sMong    ngosMo   sMong   ongosM    sMong         ongosM       ngos  n
+  ngosM       ngosM   osMongos  ngosM   osMong   ongosMongo    gosMongo    gosMongosM
+    ongo      sMo    Mong  Mong  Mongo   ngos   gosM  gosM    sMon  sMon  sMong  Mong
+    osMon    ongo    gos    osM  gosMon  sMo   sMon    ong    ngo    gos  ngosM
+    ongos    o Mo   sMon    ongo MongosM ngo   ngo           osMo    Mong  Mongo
+    osMong  Mo go   ngos    osMo gosMong sMo   sMo           ongo    gosM     Mongo
+    on osMo go Mo    Mon    ong  Mon osMongo   ngo   ngosMo   sMo    Mon       osMo
+    os ongosM  gos   gos    osM  gos ongosMo    Mo    Mongo   ngo    gos        ngos
+    ong sMong sMon   Mong  Mong  Mon  sMongo    gos   gosM    sMon  sMon  sMon  sMon
+  ngosMo gos ongosM   osMongos  ngosM  gosMo     ongosMon      gosMongo   ngosMongos
+   Mongo Mo  osMong    ngosMo   sMong   ongo      sMongosM      ongosM    sMongosMo
 
 **************************************************************************************/
 
@@ -1218,14 +1305,14 @@ var setUpSharded = function(configuration, options, callback) {
         auth: null
       , keyFile: __dirname + '/data/keyfile.txt'
         // ReplSet settings
-      , secondaries: 2      
+      , secondaries: 2
     }
     , mongosOptions: {
-      keyFile: __dirname + '/data/keyfile.txt'      
+      keyFile: __dirname + '/data/keyfile.txt'
     }
     , configsOptions: {
         auth: null
-      , keyFile: __dirname + '/data/keyfile.txt'      
+      , keyFile: __dirname + '/data/keyfile.txt'
     }
   }
 
@@ -1236,11 +1323,11 @@ var setUpSharded = function(configuration, options, callback) {
   shardedManager = new ShardingManager(shOptions);
 
   // Start SSL replicaset manager
-  shardedManager.start({kill: true, purge:true, signal: -9}, function(err, result) {      
+  shardedManager.start({kill: true, purge:true, signal: -9}, function(err, result) {
     if(err != null) throw err;
     // Finish setup
-    callback();      
-  });      
+    callback();
+  });
 }
 
 /**
@@ -1248,7 +1335,7 @@ var setUpSharded = function(configuration, options, callback) {
  */
 exports['should correctly connect and authenticate against admin database using mongos'] = {
   metadata: { requires: { topology: ['auth'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient
@@ -1290,14 +1377,14 @@ exports['should correctly connect and authenticate against admin database using 
 
                   client.collections(function(error, names) {
                     test.equal(null, error);
-                    
+
                     client.close();
 
                     shardedManager.stop(function() {
                       test.done();
                     });
                   });
-                });            
+                });
               }, 5000);
             });
           });
@@ -1312,7 +1399,7 @@ exports['should correctly connect and authenticate against admin database using 
  */
 exports['Should correctly handle replicaset master stepdown and stepup without loosing auth for sharding'] = {
   metadata: { requires: { topology: ['auth'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient
@@ -1365,9 +1452,9 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
                       });
 
                       shardedManager.add(serverDetails1, function(err, result) {
-                        
+
                         shardedManager.add(serverDetails2, function(err, result) {
-                          
+
                           client.collections(function(error, names) {
                             test.equal(null, error);
 
@@ -1380,7 +1467,7 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
                         });
                       });
                     });
-                  });              
+                  });
                 });
               });
             });
