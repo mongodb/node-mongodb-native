@@ -1,3 +1,7 @@
+1.2.4 07-07-2015
+-----------------
+- NODE-493 staggering the socket connections to avoid overwhelming the mongod process.
+
 1.2.3 06-26-2015
 -----------------
 - Minor bug fixes.
