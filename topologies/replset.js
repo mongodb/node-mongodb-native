@@ -576,7 +576,7 @@ ReplSet.prototype.auth = function(mechanism, db) {
 ReplSet.prototype.state = function() {
   return this.s.replState.state;
 }
-  
+
 /**
  * Ensure single socket connections to arbiters and hidden servers
  * @method
@@ -835,7 +835,7 @@ var pickServer = function(self, s, readPreference) {
       // If have a matching server pick one otherwise fall through to primary
       if(servers.length > 0) {
         s.index = (s.index + 1) % servers.length;
-        return servers[s.index];  
+        return servers[s.index];
       }
     }
 
@@ -852,7 +852,7 @@ var pickServer = function(self, s, readPreference) {
       // If have a matching server pick one otherwise fall through to primary
       if(servers.length > 0) {
         s.index = (s.index + 1) % servers.length;
-        return servers[s.index];  
+        return servers[s.index];
       }
 
       // Throw error a we have not valid secondary or primary servers
@@ -927,14 +927,28 @@ var replicasetInquirer = function(self, state, norepeat) {
     // ismaster for Master server
     var primaryIsMaster = null;
 
+    // Kill the server connection if it hangs
+    var timeoutServer = function(_server) {
+      return setTimeout(function() {
+        if(_server.isConnected()) {
+          _server.destroy(true);
+        }
+      }, self.s.options.connectionTimeout);
+    }
+
     //
     // Inspect a specific servers ismaster
     var inspectServer = function(server) {
       if(state.replState.state == DESTROYED) return;
       // Did we get a server
       if(server && server.isConnected()) {
+        // Get the timeout id
+        var timeoutId = timeoutServer(server);
         // Execute ismaster
         server.command('system.$cmd', {ismaster:true}, function(err, r) {
+          // Clear out the timeoutServer
+          clearTimeout(timeoutId);
+          // If the state was destroyed
           if(state.replState.state == DESTROYED) return;
           // Count down the number of servers left
           serversLeft = serversLeft - 1;
