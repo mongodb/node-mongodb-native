@@ -582,6 +582,8 @@
             
                 <li data-name="Cursor#forEach"><a href="Cursor.html#forEach">forEach</a></li>
             
+                <li data-name="Cursor#hasNext"><a href="Cursor.html#hasNext">hasNext</a></li>
+            
                 <li data-name="Cursor#isClosed"><a href="Cursor.html#isClosed">isClosed</a></li>
             
                 <li data-name="Cursor#limit"><a href="Cursor.html#limit">limit</a></li>
@@ -589,6 +591,8 @@
                 <li data-name="Cursor#map"><a href="Cursor.html#map">map</a></li>
             
                 <li data-name="Cursor#maxTimeMS"><a href="Cursor.html#maxTimeMS">maxTimeMS</a></li>
+            
+                <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
             
                 <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
             
@@ -1881,7 +1885,7 @@ Collection instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1512">line 1512</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2024">line 2024</a>
         </div>
         
     </div>
@@ -2471,6 +2475,93 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// Call toArray on an aggregation cursor using a Promise
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  // Some docs for insertion
+  var docs = [{
+      title : "this is my title", author : "bob", posted : new Date() ,
+      pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+      comments : [
+        { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+      ]}];
+
+  // Create a collection
+  var collection = db.collection('aggregationExample2_with_promise');
+  // Insert the docs
+  collection.insertMany(docs, {w: 1}).then(function(result) {
+    // Execute aggregate, notice the pipeline is expressed as an Array
+    var cursor = collection.aggregate([
+        { $project : {
+          author : 1,
+          tags : 1
+        }},
+        { $unwind : "$tags" },
+        { $group : {
+          _id : {tags : "$tags"},
+          authors : { $addToSet : "$author" }
+        }}
+      ], { cursor: { batchSize: 1 } });
+    // Get all the aggregation results
+    cursor.toArray().then(function(docs) {
+      test.equal(2, docs.length);
+      db.close();
+    }).catch(function(err) {
+      console.log(err.stack);
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Call toArray on an aggregation cursor using ES6 generators and the co module
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Some docs for insertion
+  var docs = [{
+      title : "this is my title", author : "bob", posted : new Date() ,
+      pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+      comments : [
+        { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+      ]}];
+
+  // Create a collection
+  var collection = db.collection('aggregationExample2_with_generatorsGenerator');
+
+  // Insert the docs
+  yield collection.insertMany(docs, {w: 1});
+
+  // Execute aggregate, notice the pipeline is expressed as an Array
+  var cursor = collection.aggregate([
+      { $project : {
+        author : 1,
+        tags : 1
+      }},
+      { $unwind : "$tags" },
+      { $group : {
+        _id : {tags : "$tags"},
+        authors : { $addToSet : "$author" }
+      }}
+    ], { cursor: { batchSize: 1 } });
+
+  // Get all the aggregation results
+  var docs = yield cursor.toArray();
+  test.equal(2, docs.length);
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -2480,12 +2571,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="bulkWrite">
             
-            bulkWrite<span class="signature">(operations, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            bulkWrite<span class="signature">(operations, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line433">line 433</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line477">line 477</a>
         </div>
         
     </div>
@@ -2847,10 +2938,14 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
@@ -2889,6 +2984,80 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// Example of a simple bulkWrite operation using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  // Get the collection
+  var col = db.collection('bulk_write_with_promise');
+  col.bulkWrite([
+      { insertOne: { document: { a: 1 } } }
+    , { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+    , { updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+    , { deleteOne: { filter: {c:1} } }
+    , { deleteMany: { filter: {c:1} } }
+    , { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}]
+  , {ordered:true, w:1}).then(function(r) {
+    test.equal(1, r.nInserted);
+    test.equal(2, r.nUpserted);
+    test.equal(0, r.nRemoved);
+
+    // Crud fields
+    test.equal(1, r.insertedCount);
+    test.equal(1, Object.keys(r.insertedIds).length);
+    test.equal(1, r.matchedCount);
+    test.equal(0, r.modifiedCount);
+    test.equal(0, r.deletedCount);
+    test.equal(2, r.upsertedCount);
+    test.equal(2, Object.keys(r.upsertedIds).length);
+
+    // Ordered bulk operation
+    db.close();
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of a simple bulkWrite operation using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+  // Get the collection
+  var col = db.collection('bulk_write_with_generators');
+  var r = yield col.bulkWrite([
+      { insertOne: { document: { a: 1 } } }
+    , { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+    , { updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+    , { deleteOne: { filter: {c:1} } }
+    , { deleteMany: { filter: {c:1} } }
+    , { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}]
+  , {ordered:true, w:1});
+  test.equal(1, r.nInserted);
+  test.equal(2, r.nUpserted);
+  test.equal(0, r.nRemoved);
+
+  // Crud fields
+  test.equal(1, r.insertedCount);
+  test.equal(1, Object.keys(r.insertedIds).length);
+  test.equal(1, r.matchedCount);
+  test.equal(0, r.modifiedCount);
+  test.equal(0, r.deletedCount);
+  test.equal(2, r.upsertedCount);
+  test.equal(2, Object.keys(r.upsertedIds).length);
+
+  // Ordered bulk operation
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -2898,12 +3067,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="count">
             
-            count<span class="signature">(query, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            count<span class="signature">(query, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1209">line 1209</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1577">line 1577</a>
         </div>
         
     </div>
@@ -3258,10 +3427,14 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
@@ -3293,6 +3466,61 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// Example of running simple count commands against a collection using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  // Crete the collection for the distinct example
+  var collection = db.collection('countExample1_with_promise');
+  // Insert documents to perform distinct against
+  collection.insertMany([{a:1}, {a:2}
+    , {a:3}, {a:4, b:1}], {w: 1}).then(function(ids) {
+    // Perform a total count command
+    collection.count().then(function(count) {
+      test.equal(4, count);
+
+      // Peform a partial account where b=1
+      collection.count({b:1}).then(function(count) {
+        test.equal(1, count);
+
+        db.close();
+      });
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of running simple count commands against a collection using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+  // Crete the collection for the distinct example
+  var collection = db.collection('countExample1_with_generators');
+  // Insert documents to perform distinct against
+  var result = yield collection.insertMany([{a:1}, {a:2}
+    , {a:3}, {a:4, b:1}], {w: 1});
+  // Perform a total count command
+  var count = yield collection.count();
+  test.equal(4, count);
+
+  // Peform a partial account where b=1
+  var count = yield collection.count({b:1});
+  test.equal(1, count);
+
+  // Close database
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -3302,12 +3530,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="createIndex">
             
-            createIndex<span class="signature">(fieldOrSpec, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            createIndex<span class="signature">(fieldOrSpec, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line976">line 976</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1224">line 1224</a>
         </div>
         
     </div>
@@ -3953,6 +4181,10 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
@@ -4063,6 +4295,71 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// A more complex createIndex using a Promise and a compound unique index in the background and dropping duplicated documents
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  // Create a collection we want to drop later
+  var collection = db.collection('createIndexExample1_with_promise');
+  // Insert a bunch of documents for the index
+  collection.insertMany([{a:1, b:1}
+    , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}).then(function(result) {
+
+    // Create an index on the a field
+    db.createIndex('createIndexExample1_with_promise', {a:1, b:1}
+      , {unique:true, background:true, w:1}).then(function(indexName) {
+
+      // Show that duplicate records got dropped
+      collection.find({}).toArray().then(function(items) {
+        test.equal(4, items.length);
+
+        // Peform a query, with explain to show we hit the query
+        collection.find({a:2}, {explain:true}).toArray().then(function(explanation) {
+          test.ok(explanation != null);
+
+          db.close();
+        });
+      })
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// A more complex createIndex using a Generator and the co module and a compound unique index in the background and dropping duplicated documents
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+  // Create a collection we want to drop later
+  var collection = db.collection('createIndexExample1_with_generators');
+  // Insert a bunch of documents for the index
+  yield collection.insertMany([{a:1, b:1}
+    , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1});
+
+  // Create an index on the a field
+  yield db.createIndex('createIndexExample1_with_generators', {a:1, b:1}
+    , {unique:true, background:true, w:1});
+
+  // Show that duplicate records got dropped
+  var items = yield collection.find({}).toArray();
+  test.equal(4, items.length);
+
+  // Peform a query, with explain to show we hit the query
+  var explanation = yield collection.find({a:2}, {explain:true}).toArray()
+  test.ok(explanation != null);
+
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -4072,12 +4369,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="createIndexes">
             
-            createIndexes<span class="signature">(indexSpecs, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            createIndexes<span class="signature">(indexSpecs, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line995">line 995</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1258">line 1258</a>
         </div>
         
     </div>
@@ -4207,6 +4504,10 @@ error. Index specifications are defined at http://docs.mongodb.org/manual/refere
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
@@ -4218,12 +4519,12 @@ error. Index specifications are defined at http://docs.mongodb.org/manual/refere
     <div class="nameContainer">
         <h4 class="name" id="deleteMany">
             
-            deleteMany<span class="signature">(filter, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            deleteMany<span class="signature">(filter, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line727">line 727</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line868">line 868</a>
         </div>
         
     </div>
@@ -4542,6 +4843,10 @@ error. Index specifications are defined at http://docs.mongodb.org/manual/refere
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
@@ -4553,12 +4858,12 @@ error. Index specifications are defined at http://docs.mongodb.org/manual/refere
     <div class="nameContainer">
         <h4 class="name" id="deleteOne">
             
-            deleteOne<span class="signature">(filter, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            deleteOne<span class="signature">(filter, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line701">line 701</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line827">line 827</a>
         </div>
         
     </div>
@@ -4877,6 +5182,10 @@ error. Index specifications are defined at http://docs.mongodb.org/manual/refere
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
@@ -4888,12 +5197,12 @@ error. Index specifications are defined at http://docs.mongodb.org/manual/refere
     <div class="nameContainer">
         <h4 class="name" id="distinct">
             
-            distinct<span class="signature">(key, query, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            distinct<span class="signature">(key, query, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1250">line 1250</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1638">line 1638</a>
         </div>
         
     </div>
@@ -5172,6 +5481,10 @@ error. Index specifications are defined at http://docs.mongodb.org/manual/refere
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
@@ -5231,6 +5544,64 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// Example of running the distinct command using a Promise against a collection
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  // Crete the collection for the distinct example
+  var collection = db.collection('distinctExample1_with_promise');
+
+  // Insert documents to perform distinct against
+  collection.insertMany([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
+    {a:2, b:{c:'a'}}, {a:3}, {a:3}], {w:1}).then(function(ids) {
+
+    // Peform a distinct query against the a field
+    collection.distinct('a').then(function(docs) {
+      test.deepEqual([0, 1, 2, 3], docs.sort());
+
+      // Perform a distinct query against the sub-field b.c
+      collection.distinct('b.c').then(function(docs) {
+        test.deepEqual(['a', 'b', 'c'], docs.sort());
+
+        db.close();
+      });
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of running the distinct command using a Generator and the co module against a collection
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+  // Crete the collection for the distinct example
+  var collection = db.collection('distinctExample1_with_generators');
+
+  // Insert documents to perform distinct against
+  yield collection.insertMany([{a:0, b:{c:'a'}}, {a:1, b:{c:'b'}}, {a:1, b:{c:'c'}},
+    {a:2, b:{c:'a'}}, {a:3}, {a:3}], {w:1});
+
+  // Peform a distinct query against the a field
+  var docs = yield collection.distinct('a');
+  test.deepEqual([0, 1, 2, 3], docs.sort());
+
+  // Perform a distinct query against the sub-field b.c
+  var docs = yield collection.distinct('b.c');
+  test.deepEqual(['a', 'b', 'c'], docs.sort());
+
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -5240,12 +5611,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="drop">
             
-            drop<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            drop<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line922">line 922</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1131">line 1131</a>
         </div>
         
     </div>
@@ -5350,14 +5721,18 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
-    <pre class="prettyprint"><code>// Example of a simple document save and then resave with safe set to true
+    <pre class="prettyprint"><code>// Example of a simple collection drop.
 
 var MongoClient = require('mongodb').MongoClient,
   test = require('assert');
@@ -5392,6 +5767,82 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// Example of Collection.prototype.drop using a Promise
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Create a collection we want to drop later
+  db.createCollection('test_other_drop_with_promise').then(function(collection) {
+    // Drop the collection
+    collection.drop().then(function(reply) {
+
+      // Ensure we don't have the collection in the set of names
+      db.listCollections().toArray().then(function(replies) {
+
+        var found = false;
+        // For each collection in the list of collection names in this db look for the
+        // dropped collection
+        replies.forEach(function(document) {
+          if(document.name == "test_other_drop_with_promise") {
+            found = true;
+            return;
+          }
+        });
+
+        // Ensure the collection is not found
+        test.equal(false, found);
+
+        // Let's close the db
+        db.close();
+      });
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of Collection.prototype.drop using a Generator and the co module
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Create a collection we want to drop later
+  var collection = yield db.createCollection('test_other_drop_with_generators');
+
+  // Drop the collection
+  yield collection.drop();
+
+  // Ensure we don't have the collection in the set of names
+  var replies = yield db.listCollections().toArray();
+
+  // Did we find the collection
+  var found = false;
+  // For each collection in the list of collection names in this db look for the
+  // dropped collection
+  replies.forEach(function(document) {
+    if(document.name == "test_other_drop_with_generators") {
+      found = true;
+      return;
+    }
+  });
+
+  // Ensure the collection is not found
+  test.equal(false, found);
+
+  // Let's close the db
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -5401,12 +5852,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="dropAllIndexes">
             
-            dropAllIndexes<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            dropAllIndexes<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1065">line 1065</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1373">line 1373</a>
         </div>
         
     </div>
@@ -5513,14 +5964,18 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
-    <pre class="prettyprint"><code>// Example of a simple document save and then resave with safe set to true
+    <pre class="prettyprint"><code>// Example of a how to drop all the indexes on a collection using dropAllIndexes
 
 var MongoClient = require('mongodb').MongoClient,
   test = require('assert');
@@ -5539,6 +5994,41 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// Example of a how to drop all the indexes on a collection using dropAllIndexes with a Promise
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  db.createCollection('dropExample1_with_promise').then(function(r) {
+    // Drop the collection
+    db.collection('dropExample1_with_promise').dropAllIndexes().then(function(reply) {
+      // Let's close the db
+      db.close();
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of a how to drop all the indexes on a collection using dropAllIndexes with a Generator and the co module
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+  yield db.createCollection('dropExample1_with_generators');
+  // Drop the collection
+  yield db.collection('dropExample1_with_generators').dropAllIndexes();
+  // Let's close the db
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -5548,12 +6038,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="dropIndex">
             
-            dropIndex<span class="signature">(indexName, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            dropIndex<span class="signature">(indexName, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1027">line 1027</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1305">line 1305</a>
         </div>
         
     </div>
@@ -5872,10 +6362,14 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
@@ -5911,6 +6405,70 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// An examples showing the creation and dropping of an index using a Promise
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  var collection = db.collection('dropIndexExample1_with_promise');
+  // Insert a bunch of documents for the index
+  collection.insertMany([{a:1, b:1}
+    , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}).then(function(result) {
+
+    // Create an index on the a field
+    collection.ensureIndex({a:1, b:1}
+      , {unique:true, background:true, w:1}).then(function(indexName) {
+
+      // Drop the index
+      collection.dropIndex("a_1_b_1").then(function(result) {
+
+        // Verify that the index is gone
+        collection.indexInformation().then(function(indexInformation) {
+          test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
+          test.equal(null, indexInformation.a_1_b_1);
+
+          db.close();
+        });
+      });
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// An examples showing the creation and dropping of an index using a Generator and the co module
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+  var collection = db.collection('dropIndexExample1_with_generators');
+  // Insert a bunch of documents for the index
+  yield collection.insertMany([{a:1, b:1}
+    , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1});
+
+  // Create an index on the a field
+  yield collection.ensureIndex({a:1, b:1}
+    , {unique:true, background:true, w:1});
+
+  // Drop the index
+  yield collection.dropIndex("a_1_b_1");
+
+  // Verify that the index is gone
+  var indexInformation = yield collection.indexInformation()
+  test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
+  test.equal(null, indexInformation.a_1_b_1);
+
+  // Close db
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -5920,12 +6478,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="dropIndexes">
             
-            dropIndexes<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            dropIndexes<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1051">line 1051</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1344">line 1344</a>
         </div>
         
     </div>
@@ -6030,10 +6588,14 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
@@ -6077,6 +6639,84 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// An examples showing the creation and dropping of an index using Promises.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Create a collection we want to drop later
+  var collection = db.collection('shouldCorrectlyCreateAndDropAllIndex_with_promise');
+  // Insert a bunch of documents for the index
+  collection.insertMany([{a:1, b:1}
+    , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {w:1}).then(function(result) {
+
+    // Create an index on the a field
+    collection.ensureIndex({a:1, b:1}
+      , {unique:true, background:true, w:1}).then(function(indexName) {
+
+      // Create an additional index
+      collection.ensureIndex({c:1}
+        , {unique:true, background:true, sparse:true, w:1}).then(function(indexName) {
+
+        // Drop the index
+        collection.dropAllIndexes().then(function(result) {
+
+          // Verify that the index is gone
+          collection.indexInformation().then(function(indexInformation) {
+            test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
+            test.equal(null, indexInformation.a_1_b_1);
+            test.equal(null, indexInformation.c_1);
+
+            db.close();
+          });
+        });
+      });
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// An examples showing the creation and dropping of an index using Generators.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Create a collection we want to drop later
+  var collection = db.collection('shouldCorrectlyCreateAndDropAllIndex_with_generators');
+  // Insert a bunch of documents for the index
+  yield collection.insertMany([{a:1, b:1}
+    , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {w:1});
+
+  // Create an index on the a field
+  yield collection.ensureIndex({a:1, b:1}
+    , {unique:true, background:true, w:1});
+
+  // Create an additional index
+  yield collection.ensureIndex({c:1}
+    , {unique:true, background:true, sparse:true, w:1});
+
+  // Drop the index
+  yield collection.dropAllIndexes();
+
+  // Verify that the index is gone
+  var indexInformation = yield collection.indexInformation();
+  test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
+  test.equal(null, indexInformation.a_1_b_1);
+  test.equal(null, indexInformation.c_1);
+
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -6086,12 +6726,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="ensureIndex">
             
-            ensureIndex<span class="signature">(fieldOrSpec, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            ensureIndex<span class="signature">(fieldOrSpec, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1141">line 1141</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1465">line 1465</a>
         </div>
         
     </div>
@@ -6739,6 +7379,10 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
@@ -6815,6 +7459,133 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// A more complex ensureIndex using a compound unique index in the background and dropping duplicated documents using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  var collection = db.collection('ensureIndexExample1_with_promise');
+  // Insert a bunch of documents for the index
+  collection.insertMany([{a:1, b:1}
+    , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}).then(function(result) {
+
+    // Create an index on the a field
+    db.ensureIndex('ensureIndexExample1_with_promise', {a:1, b:1}
+      , {unique:true, background:true, w:1}).then(function(indexName) {
+
+      // Show that duplicate records got dropped
+      collection.find({}).toArray().then(function(items) {
+        test.equal(4, items.length);
+
+        // Peform a query, with explain to show we hit the query
+        collection.find({a:2}, {explain:true}).toArray().then(function(explanation) {
+          test.ok(explanation != null);
+
+          db.close();
+        });
+      })
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// A more complex ensureIndex using a compound unique index in the background using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  var collection = db.collection('ensureIndexExample2_with_promise');
+  // Insert a bunch of documents for the index
+  collection.insertMany([{a:1, b:1}
+    , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}).then(function(result) {
+
+    // Create an index on the a field
+    collection.ensureIndex({a:1, b:1}
+      , {unique:true, background:true, w:1}).then(function(indexName) {
+
+      // Show that duplicate records got dropped
+      collection.find({}).toArray().then(function(items) {
+        test.equal(4, items.length);
+
+        // Peform a query, with explain to show we hit the query
+        collection.find({a:2}, {explain:true}).toArray().then(function(explanation) {
+          test.ok(explanation != null);
+
+          db.close();
+        });
+      })
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// A more complex ensureIndex using a compound unique index in the background and dropping duplicated documents using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+  var collection = db.collection('ensureIndexExample1_with_generators');
+  // Insert a bunch of documents for the index
+  yield collection.insertMany([{a:1, b:1}
+    , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1});
+
+  // Create an index on the a field
+  yield db.ensureIndex('ensureIndexExample1_with_generators', {a:1, b:1}
+    , {unique:true, background:true, w:1});
+
+  // Show that duplicate records got dropped
+  var items = yield collection.find({}).toArray();
+  test.equal(4, items.length);
+
+  // Peform a query, with explain to show we hit the query
+  var explanation = yield collection.find({a:2}, {explain:true}).toArray();
+  test.ok(explanation != null);
+
+  db.close();
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// A more complex ensureIndex using a compound unique index in the background using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+  var collection = db.collection('ensureIndexExample2_with_generators');
+  // Insert a bunch of documents for the index
+  yield collection.insertMany([{a:1, b:1}
+    , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1});
+
+  // Create an index on the a field
+  yield collection.ensureIndex({a:1, b:1}
+    , {unique:true, background:true, w:1});
+
+  // Show that duplicate records got dropped
+  var items = yield collection.find({}).toArray();
+  test.equal(4, items.length);
+
+  // Peform a query, with explain to show we hit the query
+  var explanation = yield collection.find({a:2}, {explain:true}).toArray();
+  test.ok(explanation != null);
+
+  // Close db
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -6829,7 +7600,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line148">line 148</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line159">line 159</a>
         </div>
         
     </div>
@@ -7032,6 +7803,155 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// A simple query using the find method and toArray method with a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Create a collection we want to drop later
+  var collection = db.collection('simple_query_with_promise');
+
+  // Insert a bunch of documents for the testing
+  collection.insertMany([{a:1}, {a:2}, {a:3}], {w:1}).then(function(result) {
+
+    // Peform a simple find and return all the documents
+    collection.find().toArray().then(function(docs) {
+      test.equal(3, docs.length);
+
+      db.close();
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// A simple query showing the explain for a query using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Create a collection we want to drop later
+  var collection = db.collection('simple_explain_query_with_promise');
+  // Insert a bunch of documents for the testing
+  collection.insertMany([{a:1}, {a:2}, {a:3}], {w:1}).then(function(result) {
+
+    // Peform a simple find and return all the documents
+    collection.find({}, {explain:true}).toArray().then(function(docs) {
+      test.equal(1, docs.length);
+
+      db.close();
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// A simple query showing skip and limit using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Create a collection we want to drop later
+  var collection = db.collection('simple_limit_skip_query_with_promise');
+  // Insert a bunch of documents for the testing
+  collection.insertMany([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {w:1}).then(function(result) {
+
+    // Peform a simple find and return all the documents
+    collection.find({}, {skip:1, limit:1, fields:{b:1}}).toArray().then(function(docs) {
+      test.equal(1, docs.length);
+      test.equal(null, docs[0].a);
+      test.equal(2, docs[0].b);
+
+      db.close();
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// A simple query using the find method and toArray method with a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Create a collection we want to drop later
+  var collection = db.collection('simple_query_with_generators');
+
+  // Insert a bunch of documents for the testing
+  yield collection.insertMany([{a:1}, {a:2}, {a:3}], {w:1});
+
+  // Peform a simple find and return all the documents
+  var docs = yield collection.find().toArray();
+  test.equal(3, docs.length);
+
+  // Close the db
+  db.close();
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// A simple query showing the explain for a query using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Create a collection we want to drop later
+  var collection = db.collection('simple_explain_query_with_generators');
+  // Insert a bunch of documents for the testing
+  yield collection.insertMany([{a:1}, {a:2}, {a:3}], {w:1});
+
+  // Peform a simple find and return all the documents
+  var docs = yield collection.find({}, {explain:true}).toArray();
+  test.equal(1, docs.length);
+
+  db.close();
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// A simple query showing skip and limit using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Create a collection we want to drop later
+  var collection = db.collection('simple_limit_skip_query_with_generators');
+  // Insert a bunch of documents for the testing
+  yield collection.insertMany([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {w:1});
+
+  // Peform a simple find and return all the documents
+  var docs = yield collection.find({}, {skip:1, limit:1, fields:{b:1}}).toArray();
+  test.equal(1, docs.length);
+  test.equal(null, docs[0].a);
+  test.equal(2, docs[0].b);
+
+  // Close db
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -7041,12 +7961,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="findAndModify">
             
-            findAndModify<span class="signature">(query, sort, doc, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            findAndModify<span class="signature">(query, sort, doc, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1420">line 1420</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1901">line 1901</a>
         </div>
         
     </div>
@@ -7575,10 +8495,14 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
@@ -7630,6 +8554,95 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// A whole set of different ways to use the findAndModify command with a Promise..
+// The first findAndModify command modifies a document and returns the modified document back.
+// The second findAndModify command removes the document.
+// The second findAndModify command upserts a document and returns the new document.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  // Create a collection we want to drop later
+  var collection = db.collection('simple_find_and_modify_operations_with_promise');
+  // Insert some test documentations
+  collection.insertMany([{a:1}, {b:1}, {c:1}], {w:1}).then(function(result) {
+
+    // Simple findAndModify command returning the new document
+    collection.findAndModify({a:1}, [['a', 1]], {$set:{b1:1}}, {new:true}).then(function(doc) {
+      test.equal(1, doc.value.a);
+      test.equal(1, doc.value.b1);
+
+      // Simple findAndModify command returning the new document and
+      // removing it at the same time
+      collection.findAndModify({b:1}, [['b', 1]],
+        {$set:{b:2}}, {remove:true}).then(function(doc) {
+
+        // Verify that the document is gone
+        collection.findOne({b:1}).then(function(item) {
+          test.equal(null, item);
+
+          // Simple findAndModify command performing an upsert and returning the new document
+          // executing the command safely
+          collection.findAndModify({d:1}, [['b', 1]],
+            {d:1, f:1}, {new:true, upsert:true, w:1}).then(function(doc) {
+              test.equal(1, doc.value.d);
+              test.equal(1, doc.value.f);
+
+              db.close();
+          })
+        });
+      });
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// A whole set of different ways to use the findAndModify command with a Generator and the co module..
+// The first findAndModify command modifies a document and returns the modified document back.
+// The second findAndModify command removes the document.
+// The second findAndModify command upserts a document and returns the new document.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+  // Create a collection we want to drop later
+  var collection = db.collection('simple_find_and_modify_operations_with_generators');
+  // Insert some test documentations
+  yield collection.insertMany([{a:1}, {b:1}, {c:1}], {w:1});
+
+  // Simple findAndModify command returning the new document
+  var doc = yield collection.findAndModify({a:1}, [['a', 1]], {$set:{b1:1}}, {new:true});
+  test.equal(1, doc.value.a);
+  test.equal(1, doc.value.b1);
+
+  // Simple findAndModify command returning the new document and
+  // removing it at the same time
+  var doc = yield collection.findAndModify({b:1}, [['b', 1]],
+    {$set:{b:2}}, {remove:true});
+
+  // Verify that the document is gone
+  var item = yield collection.findOne({b:1});
+  test.equal(null, item);
+
+  // Simple findAndModify command performing an upsert and returning the new document
+  // executing the command safely
+  var doc = yield collection.findAndModify({d:1}, [['b', 1]],
+    {d:1, f:1}, {new:true, upsert:true, w:1});
+  test.equal(1, doc.value.d);
+  test.equal(1, doc.value.f);
+
+  // Close the db
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -7639,12 +8652,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="findAndRemove">
             
-            findAndRemove<span class="signature">(query, sort, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            findAndRemove<span class="signature">(query, sort, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1487">line 1487</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1983">line 1983</a>
         </div>
         
     </div>
@@ -7997,10 +9010,14 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
@@ -8035,6 +9052,67 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// An example of using findAndRemove using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Create a collection we want to drop later
+  var collection = db.collection('simple_find_and_modify_operations_2_with_promise');
+  // Insert some test documentations
+  collection.insertMany([{a:1}, {b:1, d:1}, {c:1}], {w:1}).then(function(result) {
+
+    // Simple findAndModify command returning the old document and
+    // removing it at the same time
+    collection.findAndRemove({b:1}, [['b', 1]]).then(function(doc) {
+      test.equal(1, doc.value.b);
+      test.equal(1, doc.value.d);
+
+      // Verify that the document is gone
+      collection.findOne({b:1}).then(function(item) {
+        test.equal(null, item);
+
+        db.close();
+      });
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// An example of using findAndRemove using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Create a collection we want to drop later
+  var collection = db.collection('simple_find_and_modify_operations_2_with_generators');
+  // Insert some test documentations
+  yield collection.insertMany([{a:1}, {b:1, d:1}, {c:1}], {w:1});
+
+  // Simple findAndModify command returning the old document and
+  // removing it at the same time
+  var doc = yield collection.findAndRemove({b:1}, [['b', 1]]);
+  test.equal(1, doc.value.b);
+  test.equal(1, doc.value.d);
+
+  // Verify that the document is gone
+  var item = yield collection.findOne({b:1});
+  test.equal(null, item);
+
+  // Db close
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -8044,12 +9122,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="findOne">
             
-            findOne<span class="signature">(query, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            findOne<span class="signature">(query, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line861">line 861</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1041">line 1041</a>
         </div>
         
     </div>
@@ -8983,10 +10061,14 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
@@ -9014,6 +10096,57 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// A simple query using findOne with a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Create a collection we want to drop later
+  var collection = db.collection('simple_limit_skip_find_one_query_with_promise');
+  // Insert a bunch of documents for the testing
+  collection.insertMany([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {w:1}).then(function(result) {
+
+    // Peform a simple find and return all the documents
+    collection.findOne({a:2}, {fields:{b:1}}).then(function(doc) {
+      test.equal(null, doc.a);
+      test.equal(2, doc.b);
+
+      db.close();
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// A simple query using findOne with a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Create a collection we want to drop later
+  var collection = db.collection('simple_limit_skip_find_one_query_with_generators');
+
+  // Insert a bunch of documents for the testing
+  yield collection.insertMany([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {w:1});
+
+  // Peform a simple find and return all the documents
+  var doc = yield collection.findOne({a:2}, {fields:{b:1}});
+  test.equal(null, doc.a);
+  test.equal(2, doc.b);
+
+  // Db close
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -9023,12 +10156,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="findOneAndDelete">
             
-            findOneAndDelete<span class="signature">(filter, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            findOneAndDelete<span class="signature">(filter, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1326">line 1326</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1762">line 1762</a>
         </div>
         
     </div>
@@ -9344,10 +10477,14 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
@@ -9375,6 +10512,55 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// Example of a simple findOneAndDelete operation using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  // Get the collection
+  var col = db.collection('find_one_and_delete_with_promise');
+  col.insertMany([{a:1, b:1}], {w:1}).then(function(r) {
+    test.equal(1, r.result.n);
+
+    col.findOneAndDelete({a:1}
+      , { projection: {b:1}, sort: {a:1} }
+      ).then(function(r) {
+        test.equal(1, r.lastErrorObject.n);
+        test.equal(1, r.value.b);
+
+        db.close();
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of a simple findOneAndDelete operation using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+  // Get the collection
+  var col = db.collection('find_one_and_delete_with_generators');
+  var r = yield col.insertMany([{a:1, b:1}], {w:1});
+  test.equal(1, r.result.n);
+
+  var r = yield col.findOneAndDelete({a:1}
+    , { projection: {b:1}, sort: {a:1} }
+    );
+  test.equal(1, r.lastErrorObject.n);
+  test.equal(1, r.value.b);
+
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -9384,12 +10570,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="findOneAndReplace">
             
-            findOneAndReplace<span class="signature">(filter, replacement, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            findOneAndReplace<span class="signature">(filter, replacement, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1355">line 1355</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1806">line 1806</a>
         </div>
         
     </div>
@@ -9809,10 +10995,14 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
@@ -9847,6 +11037,69 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// Example of a simple findOneAndReplace operation using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  // Get the collection
+  var col = db.collection('find_one_and_replace_with_promise');
+  col.insertMany([{a:1, b:1}], {w:1}).then(function(r) {
+    test.equal(1, r.result.n);
+
+    col.findOneAndReplace({a:1}
+      , {c:1, b:1}
+      , {
+            projection: {b:1, c:1}
+          , sort: {a:1}
+          , returnOriginal: false
+          , upsert: true
+        }
+      ).then(function(r) {
+        test.equal(1, r.lastErrorObject.n);
+        test.equal(1, r.value.b);
+        test.equal(1, r.value.c);
+
+        db.close();
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of a simple findOneAndReplace operation using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+  // Get the collection
+  var col = db.collection('find_one_and_replace_with_generators');
+  var r = yield col.insertMany([{a:1, b:1}], {w:1});
+  test.equal(1, r.result.n);
+
+  var r = yield col.findOneAndReplace({a:1}
+    , {c:1, b:1}
+    , {
+          projection: {b:1, c:1}
+        , sort: {a:1}
+        , returnOriginal: false
+        , upsert: true
+      }
+    );
+  test.equal(1, r.lastErrorObject.n);
+  test.equal(1, r.value.b);
+  test.equal(1, r.value.c);
+
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -9856,12 +11109,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="findOneAndUpdate">
             
-            findOneAndUpdate<span class="signature">(filter, update, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            findOneAndUpdate<span class="signature">(filter, update, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1386">line 1386</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1852">line 1852</a>
         </div>
         
     </div>
@@ -10281,10 +11534,14 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
@@ -10319,6 +11576,69 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// Example of a simple findOneAndUpdate operation using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  // Get the collection
+  var col = db.collection('find_one_and_update_with_promise');
+  col.insertMany([{a:1, b:1}], {w:1}).then(function(r) {
+    test.equal(1, r.result.n);
+
+    col.findOneAndUpdate({a:1}
+      , {$set: {d:1}}
+      , {
+            projection: {b:1, d:1}
+          , sort: {a:1}
+          , returnOriginal: false
+          , upsert: true
+        }
+      ).then(function(r) {
+        test.equal(1, r.lastErrorObject.n);
+        test.equal(1, r.value.b);
+        test.equal(1, r.value.d);
+
+        db.close();
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of a simple findOneAndUpdate operation using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+  // Get the collection
+  var col = db.collection('find_one_and_update_with_generators');
+  var r = yield col.insertMany([{a:1, b:1}], {w:1});
+  test.equal(1, r.result.n);
+
+  var r = yield col.findOneAndUpdate({a:1}
+    , {$set: {d:1}}
+    , {
+          projection: {b:1, d:1}
+        , sort: {a:1}
+        , returnOriginal: false
+        , upsert: true
+      }
+    );
+  test.equal(1, r.lastErrorObject.n);
+  test.equal(1, r.value.b);
+  test.equal(1, r.value.d);
+
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -10328,12 +11648,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="geoHaystackSearch">
             
-            geoHaystackSearch<span class="signature">(x, y, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            geoHaystackSearch<span class="signature">(x, y, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1733">line 1733</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2280">line 2280</a>
         </div>
         
     </div>
@@ -10720,10 +12040,14 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
@@ -10752,6 +12076,60 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// Example of a simple geoHaystackSearch query across some documents using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Fetch the collection
+  var collection = db.collection("simple_geo_haystack_command_with_promise");
+
+  // Add a location based index
+  collection.ensureIndex({loc: "geoHaystack", type: 1}, {bucketSize: 1}).then(function(result) {
+
+    // Save a new location tagged document
+    collection.insertMany([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], {w:1}).then(function(result) {
+
+      // Use geoNear command to find document
+      collection.geoHaystackSearch(50, 50, {search:{a:1}, limit:1, maxDistance:100}).then(function(docs) {
+        test.equal(1, docs.results.length);
+        db.close();
+      });
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of a simple geoHaystackSearch query across some documents using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Fetch the collection
+  var collection = db.collection("simple_geo_haystack_command_with_generators");
+
+  // Add a location based index
+  yield collection.ensureIndex({loc: "geoHaystack", type: 1}, {bucketSize: 1});
+
+  // Save a new location tagged document
+  yield collection.insertMany([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], {w:1});
+
+  // Use geoNear command to find document
+  var docs = yield collection.geoHaystackSearch(50, 50, {search:{a:1}, limit:1, maxDistance:100});
+  test.equal(1, docs.results.length);
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -10761,12 +12139,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="geoNear">
             
-            geoNear<span class="signature">(x, y, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            geoNear<span class="signature">(x, y, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1681">line 1681</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2213">line 2213</a>
         </div>
         
     </div>
@@ -11333,10 +12711,14 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
@@ -11366,6 +12748,63 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// Example of a simple geoNear query across some documents using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Fetch the collection
+  var collection = db.collection("simple_geo_near_command_with_promise");
+
+  // Add a location based index
+  collection.ensureIndex({loc:"2d"}).then(function(result) {
+
+    // Save a new location tagged document
+    collection.insertMany([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], {w:1}).then(function(result) {
+
+      // Use geoNear command to find document
+      collection.geoNear(50, 50, {query:{a:1}, num:1}).then(function(docs) {
+        test.equal(1, docs.results.length);
+
+        db.close();
+      });
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of a simple geoNear query across some documents using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Fetch the collection
+  var collection = db.collection("simple_geo_near_command_with_generators");
+
+  // Add a location based index
+  yield collection.ensureIndex({loc:"2d"});
+
+  // Save a new location tagged document
+  yield collection.insertMany([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], {w:1});
+
+  // Use geoNear command to find document
+  var docs = yield collection.geoNear(50, 50, {query:{a:1}, num:1});
+  test.equal(1, docs.results.length);
+
+  // Close db
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -11375,12 +12814,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="group">
             
-            group<span class="signature">(keys, condition, initial, reduce, finalize, command, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            group<span class="signature">(keys, condition, initial, reduce, finalize, command, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1808">line 1808</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2370">line 2370</a>
         </div>
         
     </div>
@@ -11802,14 +13241,18 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
-    <pre class="prettyprint"><code>// A whole lot of different wayt to execute the group command
+    <pre class="prettyprint"><code>// A whole lot of different ways to execute the group command
 
 var MongoClient = require('mongodb').MongoClient,
   Code = require('mongodb').Code,
@@ -11916,6 +13359,220 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// A whole lot of different ways to execute the group command using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  Code = require('mongodb').Code,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Create a test collection
+  var collection = db.collection('test_group_with_promise');
+
+  // Peform a simple group by on an empty collection
+  collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }").then(function(results) {
+    test.deepEqual([], results);
+
+    // Trigger some inserts on the collection
+    collection.insertMany([{'a':2}, {'b':5}, {'a':1}], {w:1}).then(function(ids) {
+
+      // Perform a group count
+      collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }").then(function(results) {
+        test.equal(3, results[0].count);
+
+        // Pefrom a group count using the eval method
+        collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", false).then(function(results) {
+          test.equal(3, results[0].count);
+
+          // Group with a conditional
+          collection.group([], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }").then(function(results) {
+            // Results
+            test.equal(1, results[0].count);
+
+            // Group with a conditional using the EVAL method
+            collection.group([], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }" , false).then(function(results) {
+              // Results
+              test.equal(1, results[0].count);
+              // Insert some more test data
+              collection.insertMany([{'a':2}, {'b':3}], {w:1}).then(function(ids) {
+
+                // Do a Group by field a
+                collection.group(['a'], {}, {"count":0}, "function (obj, prev) { prev.count++; }").then(function(results) {
+                  // Results
+                  test.equal(2, results[0].a);
+                  test.equal(2, results[0].count);
+                  test.equal(null, results[1].a);
+                  test.equal(2, results[1].count);
+                  test.equal(1, results[2].a);
+                  test.equal(1, results[2].count);
+
+                  // Do a Group by field a
+                  collection.group({'a':true}, {}, {"count":0}, function (obj, prev) { prev.count++; }, true).then(function(results) {
+                    // Results
+                    test.equal(2, results[0].a);
+                    test.equal(2, results[0].count);
+                    test.equal(null, results[1].a);
+                    test.equal(2, results[1].count);
+                    test.equal(1, results[2].a);
+                    test.equal(1, results[2].count);
+
+                    // Correctly handle illegal function
+                    collection.group([], {}, {}, "5 ++ 5").then(function(err, results) {
+                    }).catch(function(err) {
+                      test.ok(err.message != null);
+
+                      // Use a function to select the keys used to group by
+                      var keyf = function(doc) { return {a: doc.a}; };
+                      collection.group(keyf, {a: {$gt: 0}}, {"count": 0, "value": 0}, function(obj, prev) { prev.count++; prev.value += obj.a; }, true).then(function(results) {
+                        // Results
+                        results.sort(function(a, b) { return b.count - a.count; });
+                        test.equal(2, results[0].count);
+                        test.equal(2, results[0].a);
+                        test.equal(4, results[0].value);
+                        test.equal(1, results[1].count);
+                        test.equal(1, results[1].a);
+                        test.equal(1, results[1].value);
+
+                        // Use a Code object to select the keys used to group by
+                        var keyf = new Code(function(doc) { return {a: doc.a}; });
+                        collection.group(keyf, {a: {$gt: 0}}, {"count": 0, "value": 0}, function(obj, prev) { prev.count++; prev.value += obj.a; }, true).then(function(results) {
+                          // Results
+                          results.sort(function(a, b) { return b.count - a.count; });
+                          test.equal(2, results[0].count);
+                          test.equal(2, results[0].a);
+                          test.equal(4, results[0].value);
+                          test.equal(1, results[1].count);
+                          test.equal(1, results[1].a);
+                          test.equal(1, results[1].value);
+
+                          // Correctly handle illegal function when using the EVAL method
+                          collection.group([], {}, {}, "5 ++ 5", false).then(function(results) {
+                          }).catch(function(err) {
+                            test.ok(err.message != null);
+
+                            db.close();
+                          });
+                        });
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// A whole lot of different ways to execute the group command using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  Code = require('mongodb').Code;
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Create a test collection
+  var collection = db.collection('test_group_with_generators');
+
+  // Peform a simple group by on an empty collection
+  var results = yield collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }");
+  test.deepEqual([], results);
+
+  // Trigger some inserts on the collection
+  yield collection.insertMany([{'a':2}, {'b':5}, {'a':1}], {w:1});
+
+  // Perform a group count
+  var results = yield collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }");
+  test.equal(3, results[0].count);
+
+  // Pefrom a group count using the eval method
+  var results = yield collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", false);
+  test.equal(3, results[0].count);
+
+  // Group with a conditional
+  var results = yield collection.group([], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }");
+  // Results
+  test.equal(1, results[0].count);
+
+  // Group with a conditional using the EVAL method
+  var results = yield collection.group([], {'a':{'$gt':1}}, {"count":0}, "function (obj, prev) { prev.count++; }" , false);
+  // Results
+  test.equal(1, results[0].count);
+
+  // Insert some more test data
+  yield collection.insertMany([{'a':2}, {'b':3}], {w:1});
+
+  // Do a Group by field a
+  var results = yield collection.group(['a'], {}, {"count":0}, "function (obj, prev) { prev.count++; }");
+  // Results
+  test.equal(2, results[0].a);
+  test.equal(2, results[0].count);
+  test.equal(null, results[1].a);
+  test.equal(2, results[1].count);
+  test.equal(1, results[2].a);
+  test.equal(1, results[2].count);
+
+  // Do a Group by field a
+  var results = yield collection.group({'a':true}, {}, {"count":0}, function (obj, prev) { prev.count++; }, true);
+  // Results
+  test.equal(2, results[0].a);
+  test.equal(2, results[0].count);
+  test.equal(null, results[1].a);
+  test.equal(2, results[1].count);
+  test.equal(1, results[2].a);
+  test.equal(1, results[2].count);
+
+  try {
+    // Correctly handle illegal function
+    var results = yield collection.group([], {}, {}, "5 ++ 5")
+  } catch(err) {
+    test.ok(err.message != null);
+
+    // Use a function to select the keys used to group by
+    var keyf = function(doc) { return {a: doc.a}; };
+    var results = yield collection.group(keyf, {a: {$gt: 0}}, {"count": 0, "value": 0}, function(obj, prev) { prev.count++; prev.value += obj.a; }, true);
+    // Results
+    results.sort(function(a, b) { return b.count - a.count; });
+    test.equal(2, results[0].count);
+    test.equal(2, results[0].a);
+    test.equal(4, results[0].value);
+    test.equal(1, results[1].count);
+    test.equal(1, results[1].a);
+    test.equal(1, results[1].value);
+
+    // Use a Code object to select the keys used to group by
+    var keyf = new Code(function(doc) { return {a: doc.a}; });
+    var results = yield collection.group(keyf, {a: {$gt: 0}}, {"count": 0, "value": 0}, function(obj, prev) { prev.count++; prev.value += obj.a; }, true);
+    // Results
+    results.sort(function(a, b) { return b.count - a.count; });
+    test.equal(2, results[0].count);
+    test.equal(2, results[0].a);
+    test.equal(4, results[0].value);
+    test.equal(1, results[1].count);
+    test.equal(1, results[1].a);
+    test.equal(1, results[1].value);
+
+    try {
+      yield collection.group([], {}, {}, "5 ++ 5", false);
+    } catch(err) {
+      test.ok(err.message != null);
+
+      db.close();
+    }
+  };
+});</code></pre>
+    
+
     
 </dd>
 
@@ -11925,12 +13582,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="indexes">
             
-            indexes<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            indexes<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1280">line 1280</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1687">line 1687</a>
         </div>
         
     </div>
@@ -12035,10 +13692,14 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
@@ -12070,6 +13731,66 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// Example of retrieving a collections indexes using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  // Crete the collection for the distinct example
+  var collection = db.collection('simple_key_based_distinct_with_promise');
+
+  // Create a geo 2d index
+  collection.ensureIndex({loc:"2d"}, {w:1}).then(function(result) {
+
+    // Create a simple single field index
+    collection.ensureIndex({a:1}, {w:1}).then(function(result) {
+
+      setTimeout(function() {
+        // List all of the indexes on the collection
+        collection.indexes().then(function(indexes) {
+          test.equal(3, indexes.length);
+
+          db.close();
+        });
+      }, 1000);
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of retrieving a collections indexes using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+  // Crete the collection for the distinct example
+  var collection = db.collection('simple_key_based_distinct_with_generators');
+
+  // Create a geo 2d index
+  yield collection.ensureIndex({loc:"2d"}, {w:1});
+
+  // Create a simple single field index
+  yield collection.ensureIndex({a:1}, {w:1});
+
+  setTimeout(function() {
+    co(function*() {
+      // List all of the indexes on the collection
+      var indexes = yield collection.indexes()
+      test.equal(3, indexes.length);
+
+      db.close();
+    });
+  }, 1000);
+});</code></pre>
+    
+
     
 </dd>
 
@@ -12079,12 +13800,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="indexExists">
             
-            indexExists<span class="signature">(indexes, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            indexExists<span class="signature">(indexes, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1155">line 1155</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1493">line 1493</a>
         </div>
         
     </div>
@@ -12215,10 +13936,14 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
@@ -12252,6 +13977,68 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// An example showing the use of the indexExists function using a Promise for a single index name and a list of index names.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  // Create a test collection that we are getting the options back from
+  var collection = db.collection('test_collection_index_exists_with_promise', {w:1});
+  // Create an index on the collection
+  collection.createIndex('a', {w:1}).then(function(indexName) {
+    // Let's test to check if a single index exists
+    collection.indexExists("a_1").then(function(result) {
+      test.equal(true, result);
+
+      // Let's test to check if multiple indexes are available
+      collection.indexExists(["a_1", "_id_"]).then(function(result) {
+        test.equal(true, result);
+
+        // Check if a non existing index exists
+        collection.indexExists("c_1").then(function(result) {
+          test.equal(false, result);
+
+          db.close();
+        });
+      });
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// An example showing the use of the indexExists function using a Generator and the co module for a single index name and a list of index names.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+  // Create a test collection that we are getting the options back from
+  var collection = db.collection('test_collection_index_exists_with_generators', {w:1});
+  // Create an index on the collection
+  yield collection.createIndex('a', {w:1});
+
+  // Let's test to check if a single index exists
+  var result = yield collection.indexExists("a_1");
+  test.equal(true, result);
+
+  // Let's test to check if multiple indexes are available
+  var result = yield collection.indexExists(["a_1", "_id_"]);
+  test.equal(true, result);
+
+  // Check if a non existing index exists
+  var result = yield collection.indexExists("c_1");
+  test.equal(false, result);
+
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -12261,12 +14048,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="indexInformation">
             
-            indexInformation<span class="signature">(<span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            indexInformation<span class="signature">(<span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1181">line 1181</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1534">line 1534</a>
         </div>
         
     </div>
@@ -12478,6 +14265,10 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
@@ -12558,6 +14349,152 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// An example showing the information returned by indexInformation using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Create a collection we want to drop later
+  var collection = db.collection('more_index_information_test_2_with_promise');
+  // Insert a bunch of documents for the index
+  collection.insertMany([{a:1, b:1}
+    , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}).then(function(result) {
+
+    // Create an index on the a field
+    collection.ensureIndex({a:1, b:1}
+      , {unique:true, background:true, w:1}).then(function(indexName) {
+      // Fetch basic indexInformation for collection
+      db.indexInformation('more_index_information_test_2_with_promise').then(function(indexInformation) {
+        test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
+        test.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
+
+        // Fetch full index information
+        collection.indexInformation({full:true}).then(function(indexInformation) {
+          test.deepEqual({ _id: 1 }, indexInformation[0].key);
+          test.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
+
+          db.close();
+        });
+      }).catch(function(err) {
+        console.dir(err)
+      });
+    });
+  }).catch(function(err) {
+    console.dir(err)
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// An examples showing the information returned by indexInformation using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Create a collection we want to drop later
+  var collection = db.collection('more_index_information_test_3_with_promise');
+  // Insert a bunch of documents for the index
+  collection.insertMany([{a:1, b:1}
+    , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}).then(function(result) {
+
+    // Create an index on the a field
+    collection.ensureIndex({a:1, b:1}
+      , {unique:true, background:true, w:1}).then(function(indexName) {
+
+      // Fetch basic indexInformation for collection
+      collection.indexInformation().then(function(indexInformation) {
+        test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
+        test.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
+
+        // Fetch full index information
+        collection.indexInformation({full:true}).then(function(indexInformation) {
+          test.deepEqual({ _id: 1 }, indexInformation[0].key);
+          test.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
+
+          db.close();
+        });
+      });
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// An example showing the information returned by indexInformation using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Create a collection we want to drop later
+  var collection = db.collection('more_index_information_test_2_with_generators');
+  // Insert a bunch of documents for the index
+  yield collection.insertMany([{a:1, b:1}
+    , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1});
+
+  // Create an index on the a field
+  yield collection.ensureIndex({a:1, b:1}
+    , {unique:true, background:true, w:1});
+
+  // Fetch basic indexInformation for collection
+  var indexInformation = yield db.indexInformation('more_index_information_test_2_with_generators');
+  test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
+  test.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
+
+  // Fetch full index information
+  var indexInformation = yield collection.indexInformation({full:true});
+  test.deepEqual({ _id: 1 }, indexInformation[0].key);
+  test.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
+
+  // Close db
+  db.close();
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// An examples showing the information returned by indexInformation using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Create a collection we want to drop later
+  var collection = db.collection('more_index_information_test_3_with_generators');
+  // Insert a bunch of documents for the index
+  yield collection.insertMany([{a:1, b:1}
+    , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1});
+
+  // Create an index on the a field
+  yield collection.ensureIndex({a:1, b:1}
+    , {unique:true, background:true, w:1});
+
+  // Fetch basic indexInformation for collection
+  var indexInformation = yield collection.indexInformation();
+  test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
+  test.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
+
+  // Fetch full index information
+  var indexInformation = yield collection.indexInformation({full:true});
+  test.deepEqual({ _id: 1 }, indexInformation[0].key);
+  test.deepEqual({ a: 1, b: 1 }, indexInformation[1].key);
+
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -12572,7 +14509,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2061">line 2061</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2653">line 2653</a>
         </div>
         
     </div>
@@ -12862,7 +14799,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
@@ -12906,6 +14843,92 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// Example of a simple ordered insert/update/upsert/remove ordered collection using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  // Get the collection
+  var col = db.collection('batch_write_ordered_ops_0_with_promise');
+  // Initialize the Ordered Batch
+  var batch = col.initializeOrderedBulkOp();
+  // Add some operations to be executed in order
+  batch.insert({a:1});
+  batch.find({a:1}).updateOne({$set: {b:1}});
+  batch.find({a:2}).upsert().updateOne({$set: {b:2}});
+  batch.insert({a:3});
+  batch.find({a:3}).remove({a:3});
+
+  // Execute the operations
+  batch.execute().then(function(result) {
+    // Check state of result
+    test.equal(2, result.nInserted);
+    test.equal(1, result.nUpserted);
+    test.equal(1, result.nMatched);
+    test.ok(1 == result.nModified || result.nModified == null);
+    test.equal(1, result.nRemoved);
+
+    var upserts = result.getUpsertedIds();
+    test.equal(1, upserts.length);
+    test.equal(2, upserts[0].index);
+    test.ok(upserts[0]._id != null);
+
+    var upsert = result.getUpsertedIdAt(0);
+    test.equal(2, upsert.index);
+    test.ok(upsert._id != null);
+
+    // Finish up test
+    db.close();
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of a simple ordered insert/update/upsert/remove ordered collection using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+  // Get the collection
+  var col = db.collection('batch_write_ordered_ops_0_with_generators');
+  // Initialize the Ordered Batch
+  var batch = col.initializeOrderedBulkOp();
+  // Add some operations to be executed in order
+  batch.insert({a:1});
+  batch.find({a:1}).updateOne({$set: {b:1}});
+  batch.find({a:2}).upsert().updateOne({$set: {b:2}});
+  batch.insert({a:3});
+  batch.find({a:3}).remove({a:3});
+
+  // Execute the operations
+  var result = yield batch.execute();
+  // Check state of result
+  test.equal(2, result.nInserted);
+  test.equal(1, result.nUpserted);
+  test.equal(1, result.nMatched);
+  test.ok(1 == result.nModified || result.nModified == null);
+  test.equal(1, result.nRemoved);
+
+  var upserts = result.getUpsertedIds();
+  test.equal(1, upserts.length);
+  test.equal(2, upserts[0].index);
+  test.ok(upserts[0]._id != null);
+
+  var upsert = result.getUpsertedIdAt(0);
+  test.equal(2, upsert.index);
+  test.ok(upsert._id != null);
+
+  // Finish up test
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -12915,12 +14938,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="initializeUnorderedBulkOp">
             
-            initializeUnorderedBulkOp<span class="signature">(<span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            initializeUnorderedBulkOp<span class="signature">(<span class="optional">options</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="UnorderedBulkOperation.html">UnorderedBulkOperation</a>}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2046">line 2046</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2636">line 2636</a>
         </div>
         
     </div>
@@ -13132,38 +15155,6 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
         </tr>
 	
 	
-	
-        <tr>
-            
-                <td class="name"><code>callback</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type"><a href="UnorderedBulkOperation.html">UnorderedBulkOperation</a></span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                    
-                        
-                    
-                
-                <p>The command result callback</p></td>
-        </tr>
-	
-	
 	</tbody>
 </table>
     
@@ -13210,7 +15201,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
@@ -13255,6 +15246,94 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// Example of a simple ordered insert/update/upsert/remove ordered collection using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  // Get the collection
+  var col = db.collection('batch_write_unordered_ops_legacy_0_with_promise');
+  // Initialize the unordered Batch
+  var batch = col.initializeUnorderedBulkOp({useLegacyOps: true});
+
+  // Add some operations to be executed in order
+  batch.insert({a:1});
+  batch.find({a:1}).updateOne({$set: {b:1}});
+  batch.find({a:2}).upsert().updateOne({$set: {b:2}});
+  batch.insert({a:3});
+  batch.find({a:3}).remove({a:3});
+
+  // Execute the operations
+  batch.execute().then(function(result) {
+    // Check state of result
+    test.equal(2, result.nInserted);
+    test.equal(1, result.nUpserted);
+    test.equal(1, result.nMatched);
+    test.ok(1 == result.nModified || result.nModified == null);
+    test.equal(1, result.nRemoved);
+
+    var upserts = result.getUpsertedIds();
+    test.equal(1, upserts.length);
+    test.equal(2, upserts[0].index);
+    test.ok(upserts[0]._id != null);
+
+    var upsert = result.getUpsertedIdAt(0);
+    test.equal(2, upsert.index);
+    test.ok(upsert._id != null);
+
+    // Finish up test
+    db.close();
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of a simple ordered insert/update/upsert/remove ordered collection using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+  // Get the collection
+  var col = db.collection('batch_write_unordered_ops_legacy_0_with_generators');
+  // Initialize the unordered Batch
+  var batch = col.initializeUnorderedBulkOp({useLegacyOps: true});
+
+  // Add some operations to be executed in order
+  batch.insert({a:1});
+  batch.find({a:1}).updateOne({$set: {b:1}});
+  batch.find({a:2}).upsert().updateOne({$set: {b:2}});
+  batch.insert({a:3});
+  batch.find({a:3}).remove({a:3});
+
+  // Execute the operations
+  var result = yield batch.execute();
+  // Check state of result
+  test.equal(2, result.nInserted);
+  test.equal(1, result.nUpserted);
+  test.equal(1, result.nMatched);
+  test.ok(1 == result.nModified || result.nModified == null);
+  test.equal(1, result.nRemoved);
+
+  var upserts = result.getUpsertedIds();
+  test.equal(1, upserts.length);
+  test.equal(2, upserts[0].index);
+  test.ok(upserts[0]._id != null);
+
+  var upsert = result.getUpsertedIdAt(0);
+  test.equal(2, upsert.index);
+  test.ok(upsert._id != null);
+
+  // Finish up test
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -13264,12 +15343,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="insert">
             
-            insert<span class="signature">(docs, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            insert<span class="signature">(docs, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line538">line 538</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line596">line 596</a>
         </div>
         
     </div>
@@ -13665,6 +15744,10 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
@@ -13778,6 +15861,220 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// A simple document insert using a Promise example, not using safe mode to ensure document persistance on MongoDB
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  var collection = db.collection("simple_document_insert_collection_no_safe_with_promise");
+  // Insert a single document
+  collection.insertOne({hello:'world_no_safe'});
+
+  // Wait for a second before finishing up, to ensure we have written the item to disk
+  setTimeout(function() {
+
+    // Fetch the document
+    collection.findOne({hello:'world_no_safe'}).then(function(item) {
+      test.equal('world_no_safe', item.hello);
+      db.close();
+    })
+  }, 100);
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// A batch document insert using a Promise example, using safe mode to ensure document persistance on MongoDB
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  // Fetch a collection to insert document into
+  var collection = db.collection("batch_document_insert_collection_safe_with_promise");
+  // Insert a single document
+  collection.insertMany([{hello:'world_safe1'}
+    , {hello:'world_safe2'}], {w:1}).then(function(result) {
+
+    // Fetch the document
+    collection.findOne({hello:'world_safe2'}).then(function(item) {
+      test.equal('world_safe2', item.hello);
+      db.close();
+    })
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of inserting a document containing functions using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  // Fetch a collection to insert document into
+  var collection = db.collection("simple_document_insert_with_function_safe_with_promise");
+
+  var o = {w:1};
+  o.serializeFunctions = true;
+  // Insert a single document
+  collection.insertOne({hello:'world'
+    , func:function() {}}, o).then(function(result) {
+
+    // Fetch the document
+    collection.findOne({hello:'world'}).then(function(item) {
+      test.ok("function() {}", item.code);
+      db.close();
+    })
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of using keepGoing to allow batch insert using a Promise to complete even when there are illegal documents in the batch
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Create a collection
+  var collection = db.collection('keepGoingExample_with_promise');
+  // Add an unique index to title to force errors in the batch insert
+  collection.ensureIndex({title:1}, {unique:true}).then(function(indexName) {
+
+    // Insert some intial data into the collection
+    collection.insertMany([{name:"Jim"}
+      , {name:"Sarah", title:"Princess"}], {w:1}).then(function(result) {
+
+      // Force keep going flag, ignoring unique index issue
+      collection.insertMany([{name:"Jim"}
+        , {name:"Sarah", title:"Princess"}
+        , {name:'Gump', title:"Gump"}], {w:1, keepGoing:true}).then(function(result) {
+      }).catch(function(err) {
+        // Count the number of documents left (should not include the duplicates)
+        collection.count().then(function(count) {
+          test.equal(3, count);
+        })
+      });
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// A simple document insert using a Generator and the co module example, not using safe mode to ensure document persistance on MongoDB
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+  var collection = db.collection("simple_document_insert_collection_no_safe_with_generators");
+  // Insert a single document
+  collection.insertOne({hello:'world_no_safe'});
+
+  // Wait for a second before finishing up, to ensure we have written the item to disk
+  setTimeout(function() {
+    co(function*() {
+      // Fetch the document
+      var item = yield collection.findOne({hello:'world_no_safe'});
+      test.equal('world_no_safe', item.hello);
+      db.close();
+    })
+  }, 100);
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// A batch document insert using a Generator and the co module example, using safe mode to ensure document persistance on MongoDB
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+  // Fetch a collection to insert document into
+  var collection = db.collection("batch_document_insert_collection_safe_with_generators");
+
+  // Insert a single document
+  yield collection.insertMany([{hello:'world_safe1'}
+    , {hello:'world_safe2'}], {w:1});
+
+  // Fetch the document
+  var item = yield collection.findOne({hello:'world_safe2'});
+  test.equal('world_safe2', item.hello);
+  db.close();
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of inserting a document containing functions using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+  // Fetch a collection to insert document into
+  var collection = db.collection("simple_document_insert_with_function_safe_with_generators");
+
+  // Get the option
+  var o = {w:1};
+  o.serializeFunctions = true;
+
+  // Insert a single document
+  yield collection.insertOne({hello:'world', func:function() {}}, o);
+
+  // Fetch the document
+  var item = yield collection.findOne({hello:'world'});
+  test.ok("function() {}", item.code);
+  db.close();
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of using keepGoing to allow batch insert using a Generator and the co module to complete even when there are illegal documents in the batch
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Create a collection
+  var collection = db.collection('keepGoingExample_with_generators');
+
+  // Add an unique index to title to force errors in the batch insert
+  yield collection.ensureIndex({title:1}, {unique:true});
+
+  // Insert some intial data into the collection
+  yield collection.insertMany([{name:"Jim"}
+    , {name:"Sarah", title:"Princess"}], {w:1});
+
+  try {
+    // Force keep going flag, ignoring unique index issue
+    yield collection.insertMany([{name:"Jim"}
+      , {name:"Sarah", title:"Princess"}
+      , {name:'Gump', title:"Gump"}], {w:1, keepGoing:true});
+  } catch(err) {}
+  // Count the number of documents left (should not include the duplicates)
+  var count = yield collection.count();
+  test.equal(3, count);
+}).catch(function(err) {
+  console.log(err.stack)
+});</code></pre>
+    
+
     
 </dd>
 
@@ -13787,12 +16084,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="insertMany">
             
-            insertMany<span class="signature">(docs, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            insertMany<span class="signature">(docs, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line370">line 370</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line399">line 399</a>
         </div>
         
     </div>
@@ -14183,10 +16480,14 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
@@ -14206,6 +16507,42 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// Example of a simple insertMany operation using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  // Get the collection
+  var col = db.collection('insert_many_with_promise');
+  col.insertMany([{a:1}, {a:2}]).then(function(r) {
+    test.equal(2, r.insertedCount);
+    // Finish up test
+    db.close();
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of a simple insertMany operation using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+  // Get the collection
+  var col = db.collection('insert_many_with_generators');
+  var r = yield col.insertMany([{a:1}, {a:2}]);
+  test.equal(2, r.insertedCount);
+  // Finish up test
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -14215,12 +16552,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="insertOne">
             
-            insertOne<span class="signature">(doc, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            insertOne<span class="signature">(doc, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line342">line 342</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line356">line 356</a>
         </div>
         
     </div>
@@ -14611,10 +16948,14 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
@@ -14634,6 +16975,42 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// Example of a simple insertOne operation using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  // Get the collection
+  var col = db.collection('insert_one_with_promise');
+  col.insertOne({a:1}).then(function(r) {
+    test.equal(1, r.insertedCount);
+    // Finish up test
+    db.close();
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of a simple insertOne operation using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+  // Get the collection
+  var col = db.collection('insert_one_with_generators');
+  var r = yield col.insertOne({a:1});
+  test.equal(1, r.insertedCount);
+  // Finish up test
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -14643,12 +17020,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="isCapped">
             
-            isCapped<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            isCapped<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line949">line 949</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1182">line 1182</a>
         </div>
         
     </div>
@@ -14753,10 +17130,14 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
@@ -14780,6 +17161,51 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// An example showing how to establish if it's a capped collection using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Create a test collection that we are getting the options back from
+  db.createCollection('test_collection_is_capped_with_promise', {'capped':true, 'size':1024}).then(function(collection) {
+    test.equal('test_collection_is_capped_with_promise', collection.collectionName);
+
+    // Let's fetch the collection options
+    collection.isCapped().then(function(capped) {
+      test.equal(true, capped);
+
+      db.close();
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// An example showing how to establish if it's a capped collection using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Create a test collection that we are getting the options back from
+  var collection = yield db.createCollection('test_collection_is_capped_with_generators', {'capped':true, 'size':1024});
+  test.equal('test_collection_is_capped_with_generators', collection.collectionName);
+
+  // Let's fetch the collection options
+  var capped = yield collection.isCapped();
+  test.equal(true, capped);
+
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -14794,7 +17220,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1097">line 1097</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1419">line 1419</a>
         </div>
         
     </div>
@@ -14985,12 +17411,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="mapReduce">
             
-            mapReduce<span class="signature">(map, reduce, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            mapReduce<span class="signature">(map, reduce, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1945">line 1945</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2522">line 2522</a>
         </div>
         
     </div>
@@ -15617,6 +18043,10 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
@@ -15826,6 +18256,392 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// A simple map reduce example using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Create a test collection
+  var collection = db.collection('test_map_reduce_functions_with_promise');
+
+  // Insert some documents to perform map reduce over
+  collection.insertMany([{'user_id':1}, {'user_id':2}], {w:1}).then(function(r) {
+
+    // Map function
+    var map = function() { emit(this.user_id, 1); };
+    // Reduce function
+    var reduce = function(k,vals) { return 1; };
+
+    // Peform the map reduce
+    collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}}).then(function(collection) {
+
+      // Mapreduce returns the temporary collection with the results
+      collection.findOne({'_id':1}).then(function(result) {
+        test.equal(1, result.value);
+
+        collection.findOne({'_id':2}).then(function(result) {
+          test.equal(1, result.value);
+
+          db.close();
+        });
+      });
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// A simple map reduce example using the inline output type on MongoDB &gt; 1.7.6 returning the statistics using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Create a test collection
+  var collection = db.collection('test_map_reduce_functions_inline_with_promise');
+
+  // Insert some test documents
+  collection.insertMany([{'user_id':1}, {'user_id':2}], {w:1}).then(function(r) {
+
+    // Map function
+    var map = function() { emit(this.user_id, 1); };
+    // Reduce function
+    var reduce = function(k,vals) { return 1; };
+
+    // Execute map reduce and return results inline
+    collection.mapReduce(map, reduce, {out : {inline: 1}, verbose:true}).then(function(result) {
+      test.equal(2, result.results.length);
+      test.ok(result.stats != null);
+
+      collection.mapReduce(map, reduce, {out : {replace: 'mapreduce_integration_test'}, verbose:true}).then(function(result) {
+        test.ok(result.stats != null);
+        db.close();
+      });
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Mapreduce using a provided scope containing a javascript function executed using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  Code = require('mongodb').Code,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Create a test collection
+  var collection = db.collection('test_map_reduce_functions_scope_with_promise');
+
+  // Insert some test documents
+  collection.insertMany([{'user_id':1, 'timestamp':new Date()}
+    , {'user_id':2, 'timestamp':new Date()}], {w:1}).then(function(r) {
+
+    // Map function
+    var map = function(){
+        emit(fn(this.timestamp.getYear()), 1);
+    }
+
+    // Reduce function
+    var reduce = function(k, v){
+        count = 0;
+        for(i = 0; i < v.length; i++) {
+            count += v[i];
+        }
+        return count;
+    }
+
+    // Javascript function available in the map reduce scope
+    var t = function(val){ return val+1; }
+
+    // Execute the map reduce with the custom scope
+    var o = {};
+    o.scope =  { fn: new Code(t.toString()) }
+    o.out = { replace: 'replacethiscollection' }
+
+    collection.mapReduce(map, reduce, o).then(function(outCollection) {
+
+      // Find all entries in the map-reduce collection
+      outCollection.find().toArray().then(function(results) {
+        test.equal(2, results[0].value)
+
+        // mapReduce with scope containing plain function
+        var o = {};
+        o.scope =  { fn: t }
+        o.out = { replace: 'replacethiscollection' }
+
+        collection.mapReduce(map, reduce, o).then(function(outCollection) {
+          // Find all entries in the map-reduce collection
+          outCollection.find().toArray().then(function(results) {
+            test.equal(2, results[0].value)
+
+            db.close();
+          });
+        });
+      });
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Mapreduce using a scope containing javascript objects with functions using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  Code = require('mongodb').Code,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Create a test collection
+  var collection = db.collection('test_map_reduce_functions_scope_objects_with_promise');
+
+  // Insert some test documents
+  collection.insertMany([{'user_id':1, 'timestamp':new Date()}
+    , {'user_id':2, 'timestamp':new Date()}], {w:1}).then(function(r) {
+
+    // Map function
+    var map = function(){
+      emit(obj.fn(this.timestamp.getYear()), 1);
+    }
+
+    // Reduce function
+    var reduce = function(k, v){
+      count = 0;
+      for(i = 0; i < v.length; i++) {
+        count += v[i];
+      }
+      return count;
+    }
+
+    // Javascript function available in the map reduce scope
+    var t = function(val){ return val+1; }
+
+    // Execute the map reduce with the custom scope containing objects
+    var o = {};
+    o.scope =  { obj: {fn: new Code(t.toString())} }
+    o.out = { replace: 'replacethiscollection' }
+
+    collection.mapReduce(map, reduce, o).then(function(outCollection) {
+
+      // Find all entries in the map-reduce collection
+      outCollection.find().toArray().then(function(results) {
+        test.equal(2, results[0].value)
+
+        // mapReduce with scope containing plain function
+        var o = {};
+        o.scope =  { obj: {fn: t} }
+        o.out = { replace: 'replacethiscollection' }
+
+        collection.mapReduce(map, reduce, o).then(function(outCollection) {
+          // Find all entries in the map-reduce collection
+          outCollection.find().toArray().then(function(results) {
+            test.equal(2, results[0].value)
+            db.close();
+          });
+        });
+      });
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// A simple map reduce example using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Create a test collection
+  var collection = db.collection('test_map_reduce_functions_with_generators');
+
+  // Insert some documents to perform map reduce over
+  yield collection.insertMany([{'user_id':1}, {'user_id':2}], {w:1});
+
+  // Map function
+  var map = function() { emit(this.user_id, 1); };
+  // Reduce function
+  var reduce = function(k,vals) { return 1; };
+
+  // Peform the map reduce
+  var collection = yield collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}});
+
+  // Mapreduce returns the temporary collection with the results
+  var result = yield collection.findOne({'_id':1});
+  test.equal(1, result.value);
+  var result = yield collection.findOne({'_id':2});
+  test.equal(1, result.value);
+
+  // Db close
+  db.close();
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// A simple map reduce example using the inline output type on MongoDB &gt; 1.7.6 returning the statistics using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Create a test collection
+  var collection = db.collection('test_map_reduce_functions_inline_with_generators');
+
+  // Insert some test documents
+  yield collection.insertMany([{'user_id':1}, {'user_id':2}], {w:1});
+
+  // Map function
+  var map = function() { emit(this.user_id, 1); };
+  // Reduce function
+  var reduce = function(k,vals) { return 1; };
+
+  // Execute map reduce and return results inline
+  var result = yield collection.mapReduce(map, reduce, {out : {inline: 1}, verbose:true});
+  test.equal(2, result.results.length);
+  test.ok(result.stats != null);
+
+  var result = yield collection.mapReduce(map, reduce, {out : {replace: 'mapreduce_integration_test'}, verbose:true});
+  test.ok(result.stats != null);
+  db.close();
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Mapreduce using a provided scope containing a javascript function executed using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Create a test collection
+  var collection = db.collection('test_map_reduce_functions_scope_with_generators');
+
+  // Insert some test documents
+  yield collection.insertMany([{'user_id':1, 'timestamp':new Date()}
+    , {'user_id':2, 'timestamp':new Date()}], {w:1});
+
+  // Map function
+  var map = function(){
+      emit(fn(this.timestamp.getYear()), 1);
+  }
+
+  // Reduce function
+  var reduce = function(k, v){
+      count = 0;
+      for(i = 0; i < v.length; i++) {
+          count += v[i];
+      }
+      return count;
+  }
+
+  // Javascript function available in the map reduce scope
+  var t = function(val){ return val+1; }
+
+  // Execute the map reduce with the custom scope
+  var o = {};
+  o.scope =  { fn: new Code(t.toString()) }
+  o.out = { replace: 'replacethiscollection' }
+
+  // Execute with output collection
+  var outCollection = yield collection.mapReduce(map, reduce, o);
+  // Find all entries in the map-reduce collection
+  var results = yield outCollection.find().toArray()
+  test.equal(2, results[0].value);
+
+  // mapReduce with scope containing plain function
+  var o = {};
+  o.scope =  { fn: t }
+  o.out = { replace: 'replacethiscollection' }
+
+  // Execute with outCollection
+  var outCollection = yield collection.mapReduce(map, reduce, o);
+  // Find all entries in the map-reduce collection
+  var results = yield outCollection.find().toArray();
+  test.equal(2, results[0].value)
+
+  db.close();
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Mapreduce using a scope containing javascript objects with functions using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Create a test collection
+  var collection = db.collection('test_map_reduce_functions_scope_objects_with_generators');
+
+  // Insert some test documents
+  yield collection.insertMany([{'user_id':1, 'timestamp':new Date()}
+    , {'user_id':2, 'timestamp':new Date()}], {w:1});
+
+  // Map function
+  var map = function(){
+    emit(obj.fn(this.timestamp.getYear()), 1);
+  }
+
+  // Reduce function
+  var reduce = function(k, v){
+    count = 0;
+    for(i = 0; i < v.length; i++) {
+      count += v[i];
+    }
+    return count;
+  }
+
+  // Javascript function available in the map reduce scope
+  var t = function(val){ return val+1; }
+
+  // Execute the map reduce with the custom scope containing objects
+  var o = {};
+  o.scope =  { obj: {fn: new Code(t.toString())} }
+  o.out = { replace: 'replacethiscollection' }
+
+  // Execute returning outCollection
+  var outCollection = yield collection.mapReduce(map, reduce, o);
+
+  // Find all entries in the map-reduce collection
+  var results = yield outCollection.find().toArray();
+  test.equal(2, results[0].value)
+
+  // mapReduce with scope containing plain function
+  var o = {};
+  o.scope =  { obj: {fn: t} }
+  o.out = { replace: 'replacethiscollection' }
+
+  // Execute returning outCollection
+  var outCollection = yield collection.mapReduce(map, reduce, o);
+  // Find all entries in the map-reduce collection
+  var results = yield outCollection.find().toArray();
+  test.equal(2, results[0].value)
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -15835,12 +18651,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="options">
             
-            options<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            options<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line933">line 933</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1152">line 1152</a>
         </div>
         
     </div>
@@ -15945,10 +18761,14 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
@@ -15973,6 +18793,53 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// An example returning the options for a collection using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Create a test collection that we are getting the options back from
+  db.createCollection('test_collection_options_with_promise', {'capped':true, 'size':1024}).then(function(collection) {
+    test.equal('test_collection_options_with_promise', collection.collectionName);
+
+    // Let's fetch the collection options
+    collection.options().then(function(options) {
+      test.equal(true, options.capped);
+      test.ok(options.size >= 1024);
+
+      db.close();
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// An example returning the options for a collection using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Create a test collection that we are getting the options back from
+  var collection = yield db.createCollection('test_collection_options_with_generators', {'capped':true, 'size':1024});
+  test.equal('test_collection_options_with_generators', collection.collectionName);
+
+  // Let's fetch the collection options
+  var options = yield collection.options();
+  test.equal(true, options.capped);
+  test.ok(options.size >= 1024);
+
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -15982,12 +18849,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="parallelCollectionScan">
             
-            parallelCollectionScan<span class="signature">(<span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            parallelCollectionScan<span class="signature">(<span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1619">line 1619</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2135">line 2135</a>
         </div>
         
     </div>
@@ -16311,10 +19178,14 @@ no ordering guarantees for returned results.</p>
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
@@ -16342,6 +19213,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
       test.equal(null, err);
       test.ok(cursors != null);
       test.ok(cursors.length > 0);
+      var left = cursors.length;
 
       for(var i = 0; i < cursors.length; i++) {
         cursors[i].toArray(function(err, items) {
@@ -16349,10 +19221,10 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 
           // Add docs to results array
           results = results.concat(items);
-          numCursors = numCursors - 1;
+          left = left - 1;
 
           // No more cursors let's ensure we got all results
-          if(numCursors == 0) {
+          if(left == 0) {
             test.equal(docs.length, results.length);
 
             db.close();
@@ -16361,6 +19233,92 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
       }
     });
   });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// A parallelCollectionScan example using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  var docs = [];
+
+  // Insert some documents
+  for(var i = 0; i < 1000; i++) {
+    docs.push({a:i});
+  }
+
+  // Get the collection
+  var collection = db.collection('parallelCollectionScan_with_promise');
+  // Insert 1000 documents in a batch
+  collection.insertMany(docs).then(function(result) {
+    var results = [];
+    var numCursors = 3;
+
+    // Execute parallelCollectionScan command
+    collection.parallelCollectionScan({numCursors:numCursors}).then(function(cursors) {
+      test.ok(cursors != null);
+      test.ok(cursors.length > 0);
+      var left = cursors.length;
+
+      for(var i = 0; i < cursors.length; i++) {
+        cursors[i].toArray().then(function(items) {
+          // Add docs to results array
+          results = results.concat(items);
+          left = left - 1;
+
+          // No more cursors let's ensure we got all results
+          if(left == 0) {
+            test.equal(docs.length, results.length);
+
+            db.close();
+          }
+        });
+      }
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// A parallelCollectionScan example using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+  var docs = [];
+
+  // Insert some documents
+  for(var i = 0; i < 1000; i++) {
+    docs.push({a:i});
+  }
+
+  // Get the collection
+  var collection = db.collection('parallelCollectionScan_with_generators');
+  // Insert 1000 documents in a batch
+  yield collection.insertMany(docs);
+  var results = [];
+  var numCursors = 3;
+
+  // Execute parallelCollectionScan command
+  var cursors = yield collection.parallelCollectionScan({numCursors:numCursors});
+  test.ok(cursors != null);
+  test.ok(cursors.length >= 0);
+
+  for(var i = 0; i < cursors.length; i++) {
+    var items = yield cursors[i].toArray();
+    // Add docs to results array
+    results = results.concat(items);
+  }
+
+  test.equal(docs.length, results.length);
+  db.close();
 });</code></pre>
     
 
@@ -16373,12 +19331,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="reIndex">
             
-            reIndex<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            reIndex<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1074">line 1074</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1382">line 1382</a>
         </div>
         
     </div>
@@ -16484,10 +19442,14 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
@@ -16526,6 +19488,75 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// An example showing how to force a reindex of a collection using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Create a collection we want to drop later
+  var collection = db.collection('shouldCorrectlyForceReindexOnCollection_with_promise');
+  // Insert a bunch of documents for the index
+  collection.insertMany([{a:1, b:1}
+    , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {w:1}).then(function(result) {
+
+    // Create an index on the a field
+    collection.ensureIndex({a:1, b:1}
+      , {unique:true, background:true, w:1}).then(function(indexName) {
+
+      // Force a reindex of the collection
+      collection.reIndex().then(function(result) {
+        test.equal(true, result);
+
+        // Verify that the index is gone
+        collection.indexInformation().then(function(indexInformation) {
+          test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
+          test.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
+
+          db.close();
+        });
+      });
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// An example showing how to force a reindex of a collection using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Create a collection we want to drop later
+  var collection = db.collection('shouldCorrectlyForceReindexOnCollection_with_generators');
+  // Insert a bunch of documents for the index
+  yield collection.insertMany([{a:1, b:1}
+    , {a:2, b:2}, {a:3, b:3}, {a:4, b:4, c:4}], {w:1});
+
+  // Create an index on the a field
+  yield collection.ensureIndex({a:1, b:1}
+    , {unique:true, background:true, w:1});
+
+  // Force a reindex of the collection
+  var result = yield collection.reIndex();
+  test.equal(true, result);
+
+  // Verify that the index is gone
+  var indexInformation = yield collection.indexInformation();
+  test.deepEqual([ [ '_id', 1 ] ], indexInformation._id_);
+  test.deepEqual([ [ 'a', 1 ], [ 'b', 1 ] ], indexInformation.a_1_b_1);
+
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -16535,12 +19566,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="remove">
             
-            remove<span class="signature">(selector, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            remove<span class="signature">(selector, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line789">line 789</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line945">line 945</a>
         </div>
         
     </div>
@@ -16897,6 +19928,10 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
@@ -16954,6 +19989,100 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// An example removing all documents in a collection not using safe mode using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Fetch a collection to insert document into
+  var collection = db.collection("remove_all_documents_no_safe_with_promise");
+  // Insert a bunch of documents
+  collection.insertMany([{a:1}, {b:2}], {w:1}).then(function(result) {
+    // Remove all the document
+    collection.removeMany();
+
+    // Fetch all results
+    collection.find().toArray().then(function(items) {
+      test.equal(0, items.length);
+      db.close();
+    });
+  })
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// An example removing a subset of documents using safe mode to ensure removal of documents using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Fetch a collection to insert document into
+  var collection = db.collection("remove_subset_of_documents_safe_with_promise");
+  // Insert a bunch of documents
+  collection.insertMany([{a:1}, {b:2}], {w:1}).then(function(result) {
+    // Remove all the document
+    collection.removeOne({a:1}, {w:1}).then(function(r) {
+      test.equal(1, r.result.n);
+      db.close();
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// An example removing all documents in a collection not using safe mode using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Fetch a collection to insert document into
+  var collection = db.collection("remove_all_documents_no_safe_with_generators");
+
+  // Insert a bunch of documents
+  yield collection.insertMany([{a:1}, {b:2}], {w:1});
+
+  // Remove all the document
+  collection.removeMany();
+
+  // Fetch all results
+  var items = yield collection.find().toArray();
+  test.equal(0, items.length);
+  db.close();
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// An example removing a subset of documents using safe mode to ensure removal of documents using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Fetch a collection to insert document into
+  var collection = db.collection("remove_subset_of_documents_safe_with_generators");
+  // Insert a bunch of documents
+  yield collection.insertMany([{a:1}, {b:2}], {w:1});
+  // Remove all the document
+  var r = yield collection.removeOne({a:1}, {w:1});
+  test.equal(1, r.result.n);
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -16963,12 +20092,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="rename">
             
-            rename<span class="signature">(newName, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            rename<span class="signature">(newName, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line891">line 891</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1085">line 1085</a>
         </div>
         
     </div>
@@ -17212,10 +20341,14 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
@@ -17301,6 +20434,174 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// An example of illegal and legal renaming of a collection using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  // Open a couple of collections
+  db.createCollection('test_rename_collection_with_promise').then(function(collection1) {
+    db.createCollection('test_rename_collection2_with_promise').then(function(collection2) {
+      // Attemp to rename a collection to a number
+      try {
+        collection1.rename(5, function(err, collection) {});
+      } catch(err) {
+        test.ok(err instanceof Error);
+        test.equal("collection name must be a String", err.message);
+      }
+
+      // Attemp to rename a collection to an empty string
+      try {
+        collection1.rename("", function(err, collection) {});
+      } catch(err) {
+        test.ok(err instanceof Error);
+        test.equal("collection names cannot be empty", err.message);
+      }
+
+      // Attemp to rename a collection to an illegal name including the character $
+      try {
+        collection1.rename("te$t", function(err, collection) {});
+      } catch(err) {
+        test.ok(err instanceof Error);
+        test.equal("collection names must not contain '$'", err.message);
+      }
+
+      // Attemp to rename a collection to an illegal name starting with the character .
+      try {
+        collection1.rename(".test", function(err, collection) {});
+      } catch(err) {
+        test.ok(err instanceof Error);
+        test.equal("collection names must not start or end with '.'", err.message);
+      }
+
+      // Attemp to rename a collection to an illegal name ending with the character .
+      try {
+        collection1.rename("test.", function(err, collection) {});
+      } catch(err) {
+        test.ok(err instanceof Error);
+        test.equal("collection names must not start or end with '.'", err.message);
+      }
+
+      // Attemp to rename a collection to an illegal name with an empty middle name
+      try {
+        collection1.rename("tes..t", function(err, collection) {});
+      } catch(err) {
+        test.equal("collection names cannot be empty", err.message);
+      }
+
+      // Insert a couple of documents
+      collection1.insertMany([{'x':1}, {'x':2}], {w:1}).then(function(docs) {
+
+        // Attemp to rename the first collection to the second one, this will fail
+        collection1.rename('test_rename_collection2_with_promise').then(function(err, collection) {
+        }).catch(function(err) {
+          test.ok(err instanceof Error);
+          test.ok(err.message.length > 0);
+
+          // Attemp to rename the first collection to a name that does not exist
+          // this will be succesful
+          collection1.rename('test_rename_collection3_with_promise').then(function(collection2) {
+            test.equal("test_rename_collection3_with_promise", collection2.collectionName);
+
+            // Ensure that the collection is pointing to the new one
+            collection2.count().then(function(count) {
+              test.equal(2, count);
+              db.close();
+            });
+          });
+        });
+      });
+
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// An example of illegal and legal renaming of a collection using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+  // Open a couple of collections
+  var collection1 = yield db.createCollection('test_rename_collection_with_generators');
+  var collection2 = yield db.createCollection('test_rename_collection2_with_generators');
+  // Attemp to rename a collection to a number
+  try {
+    collection1.rename(5, function(err, collection) {});
+  } catch(err) {
+    test.ok(err instanceof Error);
+    test.equal("collection name must be a String", err.message);
+  }
+
+  // Attemp to rename a collection to an empty string
+  try {
+    collection1.rename("", function(err, collection) {});
+  } catch(err) {
+    test.ok(err instanceof Error);
+    test.equal("collection names cannot be empty", err.message);
+  }
+
+  // Attemp to rename a collection to an illegal name including the character $
+  try {
+    collection1.rename("te$t", function(err, collection) {});
+  } catch(err) {
+    test.ok(err instanceof Error);
+    test.equal("collection names must not contain '$'", err.message);
+  }
+
+  // Attemp to rename a collection to an illegal name starting with the character .
+  try {
+    collection1.rename(".test", function(err, collection) {});
+  } catch(err) {
+    test.ok(err instanceof Error);
+    test.equal("collection names must not start or end with '.'", err.message);
+  }
+
+  // Attemp to rename a collection to an illegal name ending with the character .
+  try {
+    collection1.rename("test.", function(err, collection) {});
+  } catch(err) {
+    test.ok(err instanceof Error);
+    test.equal("collection names must not start or end with '.'", err.message);
+  }
+
+  // Attemp to rename a collection to an illegal name with an empty middle name
+  try {
+    collection1.rename("tes..t", function(err, collection) {});
+  } catch(err) {
+    test.equal("collection names cannot be empty", err.message);
+  }
+
+  // Insert a couple of documents
+  yield collection1.insertMany([{'x':1}, {'x':2}], {w:1});
+
+  try {
+    // Attemp to rename the first collection to the second one, this will fail
+    yield collection1.rename('test_rename_collection2_with_generators');
+  } catch(err) {
+    test.ok(err instanceof Error);
+    test.ok(err.message.length > 0);
+
+    // Attemp to rename the first collection to a name that does not exist
+    // this will be succesful
+    var collection2 = yield collection1.rename('test_rename_collection3_with_generators');
+    test.equal("test_rename_collection3_with_generators", collection2.collectionName);
+
+    // Ensure that the collection is pointing to the new one
+    var count = yield collection2.count();
+    test.equal(2, count);
+    db.close();
+  }
+});</code></pre>
+    
+
     
 </dd>
 
@@ -17310,12 +20611,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="replaceOne">
             
-            replaceOne<span class="signature">(filter, doc, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            replaceOne<span class="signature">(filter, doc, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line586">line 586</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line672">line 672</a>
         </div>
         
     </div>
@@ -17702,6 +21003,10 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
@@ -17713,12 +21018,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="save">
             
-            save<span class="signature">(doc, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            save<span class="signature">(doc, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line805">line 805</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line971">line 971</a>
         </div>
         
     </div>
@@ -18038,6 +21343,10 @@ operators and update instead for more efficient operations.</p>
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
@@ -18108,6 +21417,132 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// Example of a simple document save with safe set to false using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Fetch the collection
+  var collection = db.collection("save_a_simple_document_with_promise");
+  // Save a document with no safe option
+  collection.save({hello:'world'});
+
+  // Wait for a second
+  setTimeout(function() {
+
+    // Find the saved document
+    collection.findOne({hello:'world'}).then(function(item) {
+      test.equal('world', item.hello);
+      db.close();
+    });
+  }, 2000);
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of a simple document save and then resave with safe set to true using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Fetch the collection
+  var collection = db.collection("save_a_simple_document_modify_it_and_resave_it_with_promise");
+
+  // Save a document with no safe option
+  collection.save({hello:'world'}, {w:1}).then(function(result) {
+
+    // Find the saved document
+    collection.findOne({hello:'world'}).then(function(item) {
+      test.equal('world', item.hello);
+
+      // Update the document
+      item['hello2'] = 'world2';
+
+      // Save the item with the additional field
+      collection.save(item, {w:1}).then(function(result) {
+
+        // Find the changed document
+        collection.findOne({hello:'world'}).then(function(item) {
+          test.equal('world', item.hello);
+          test.equal('world2', item.hello2);
+
+          db.close();
+        });
+      });
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of a simple document save with safe set to false using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Fetch the collection
+  var collection = db.collection("save_a_simple_document_with_generators");
+  // Save a document with no safe option
+  collection.save({hello:'world'});
+
+  // Wait for a second
+  setTimeout(function() {
+    co(function*() {
+      // Find the saved document
+      var item = yield collection.findOne({hello:'world'});
+      test.equal('world', item.hello);
+      db.close();
+    });
+  }, 2000);
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of a simple document save and then resave with safe set to true using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Fetch the collection
+  var collection = db.collection("save_a_simple_document_modify_it_and_resave_it_with_generators");
+
+  // Save a document with no safe option
+  yield collection.save({hello:'world'}, {w:1});
+
+  // Find the saved document
+  var item = yield collection.findOne({hello:'world'})
+  test.equal('world', item.hello);
+
+  // Update the document
+  item['hello2'] = 'world2';
+
+  // Save the item with the additional field
+  yield collection.save(item, {w:1});
+
+  // Find the changed document
+  var item = yield collection.findOne({hello:'world'});
+  test.equal('world', item.hello);
+  test.equal('world2', item.hello2);
+
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -18117,12 +21552,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="stats">
             
-            stats<span class="signature">(<span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            stats<span class="signature">(<span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1293">line 1293</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1714">line 1714</a>
         </div>
         
     </div>
@@ -18334,10 +21769,14 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
@@ -18363,6 +21802,55 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// Example of retrieving a collections stats using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Crete the collection for the distinct example
+  var collection = db.collection('collection_stats_test_with_promise');
+
+  // Insert some documents
+  collection.insertMany([{a:1}, {hello:'world'}], {w:1}).then(function(result) {
+
+    // Retrieve the statistics for the collection
+    collection.stats().then(function(stats) {
+      test.equal(2, stats.count);
+
+      db.close();
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of retrieving a collections stats using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Crete the collection for the distinct example
+  var collection = db.collection('collection_stats_test_with_generators');
+
+  // Insert some documents
+  yield collection.insertMany([{a:1}, {hello:'world'}], {w:1});
+
+  // Retrieve the statistics for the collection
+  var stats = yield collection.stats();
+  test.equal(2, stats.count);
+
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -18372,12 +21860,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="update">
             
-            update<span class="signature">(selector, document, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            update<span class="signature">(selector, document, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line686">line 686</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line802">line 802</a>
         </div>
         
     </div>
@@ -18817,8 +22305,198 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
+    
+        <h5>Examples</h5>
+        
+
+    
+    <pre class="prettyprint"><code>// Example of a simple document update with safe set to false on an existing document using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Get a collection
+  var collection = db.collection('update_a_simple_document_with_promise');
+
+  // Insert a document, then update it
+  collection.insertOne({a:1}, {w:1}).then(function(doc) {
+
+    // Update the document with an atomic operator
+    collection.updateOne({a:1}, {$set:{b:2}});
+
+    // Wait for a second then fetch the document
+    setTimeout(function() {
+
+      // Fetch the document that we modified
+      collection.findOne({a:1}).then(function(item) {
+        test.equal(1, item.a);
+        test.equal(2, item.b);
+        db.close();
+      });
+    }, 1000);
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of a simple document update using upsert (the document will be inserted if it does not exist) using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Get a collection
+  var collection = db.collection('update_a_simple_document_upsert_with_promise');
+  // Update the document using an upsert operation, ensuring creation if it does not exist
+  collection.updateOne({a:1}, {b:2, a:1}, {upsert:true, w: 1}).then(function(result) {
+    test.equal(1, result.result.n);
+
+    // Fetch the document that we modified and check if it got inserted correctly
+    collection.findOne({a:1}).then(function(item) {
+      test.equal(1, item.a);
+      test.equal(2, item.b);
+      db.close();
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of an update across multiple documents using the multi option and using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Get a collection
+  var collection = db.collection('update_a_simple_document_multi_with_promise');
+
+  // Insert a couple of documentations
+  collection.insertMany([{a:1, b:1}, {a:1, b:2}], {w:1}).then(function(result) {
+
+    var o = {w:1};
+    o.multi = true
+    // Update multiple documents using the multi option
+    collection.updateMany({a:1}, {$set:{b:0}}, o).then(function(r) {
+      test.equal(2, r.result.n);
+
+      // Fetch all the documents and verify that we have changed the b value
+      collection.find().toArray().then(function(items) {
+        test.equal(1, items[0].a);
+        test.equal(0, items[0].b);
+        test.equal(1, items[1].a);
+        test.equal(0, items[1].b);
+
+        db.close();
+      });
+    })
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of a simple document update with safe set to false on an existing document using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Get a collection
+  var collection = db.collection('update_a_simple_document_with_generators');
+
+  // Insert a document, then update it
+  yield collection.insertOne({a:1}, {w:1});
+
+  // Update the document with an atomic operator
+  collection.updateOne({a:1}, {$set:{b:2}});
+
+  // Wait for a second then fetch the document
+  setTimeout(function() {
+    co(function*() {
+      // Fetch the document that we modified
+      var item = yield collection.findOne({a:1});
+      test.equal(1, item.a);
+      test.equal(2, item.b);
+
+      db.close();
+    });
+  }, 1000);
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of a simple document update using upsert (the document will be inserted if it does not exist) using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Get a collection
+  var collection = db.collection('update_a_simple_document_upsert_with_generators');
+  // Update the document using an upsert operation, ensuring creation if it does not exist
+  var result = yield collection.updateOne({a:1}, {b:2, a:1}, {upsert:true, w: 1});
+  test.equal(1, result.result.n);
+
+  // Fetch the document that we modified and check if it got inserted correctly
+  var item = yield collection.findOne({a:1});
+  test.equal(1, item.a);
+  test.equal(2, item.b);
+  db.close();
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of an update across multiple documents using the multi option and using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+
+  // Get a collection
+  var collection = db.collection('update_a_simple_document_multi_with_generators');
+
+  // Insert a couple of documentations
+  yield collection.insertMany([{a:1, b:1}, {a:1, b:2}], {w:1});
+
+  var o = {w:1};
+  o.multi = true
+
+  // Update multiple documents using the multi option
+  var r = yield collection.updateMany({a:1}, {$set:{b:0}}, o);
+  test.equal(2, r.result.n);
+
+  // Fetch all the documents and verify that we have changed the b value
+  var items = yield collection.find().toArray();
+  test.equal(1, items[0].a);
+  test.equal(0, items[0].b);
+  test.equal(1, items[1].a);
+  test.equal(0, items[1].b);
+
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -18828,12 +22506,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="updateMany">
             
-            updateMany<span class="signature">(filter, update, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            updateMany<span class="signature">(filter, update, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line618">line 618</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line719">line 719</a>
         </div>
         
     </div>
@@ -19220,6 +22898,10 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
@@ -19287,6 +22969,55 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// Example of a simple updateMany operation using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  // Get the collection
+  var col = db.collection('update_many_with_promise');
+  col.insertMany([{a:1}, {a:1}]).then(function(r) {
+    test.equal(2, r.insertedCount);
+
+    // Update all documents
+    col.updateMany({a:1}, {$set: {b: 1}}).then(function(r) {
+      test.equal(2, r.matchedCount);
+      test.equal(2, r.modifiedCount);
+
+      // Finish up test
+      db.close();
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of a simple updateMany operation using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+  // Get the collection
+  var col = db.collection('update_many_with_generators');
+  var r = yield col.insertMany([{a:1}, {a:1}]);
+  test.equal(2, r.insertedCount);
+
+  // Update all documents
+  var r = yield col.updateMany({a:1}, {$set: {b: 1}});
+  test.equal(2, r.matchedCount);
+  test.equal(2, r.modifiedCount);
+
+  // Finish up test
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -19296,12 +23027,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="updateOne">
             
-            updateOne<span class="signature">(filter, update, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            updateOne<span class="signature">(filter, update, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line555">line 555</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line626">line 626</a>
         </div>
         
     </div>
@@ -19688,6 +23419,10 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
@@ -19772,6 +23507,48 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// Example of a simple updateOne operation using a Promise.
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  // Get the collection
+  var col = db.collection('update_one_with_promise');
+  col.updateOne({a:1}
+    , {$set: {a:2}}
+    , {upsert:true}).then(function(r) {
+    test.equal(1, r.matchedCount);
+    test.equal(1, r.upsertedCount);
+    // Finish up test
+    db.close();
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Example of a simple updateOne operation using a Generator and the co module.
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+  // Get the collection
+  var col = db.collection('update_one_with_generators');
+  var r = yield col.updateOne({a:1}
+    , {$set: {a:2}}
+    , {upsert:true});
+  test.equal(1, r.matchedCount);
+  test.equal(1, r.upsertedCount);
+  // Finish up test
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -19792,7 +23569,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line399">line 399</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line443">line 443</a>
         </div>
         
     </div>
@@ -20184,7 +23961,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line874">line 874</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1068">line 1068</a>
         </div>
         
     </div>
@@ -20323,7 +24100,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1190">line 1190</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1558">line 1558</a>
         </div>
         
     </div>
@@ -20462,7 +24239,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1600">line 1600</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2116">line 2116</a>
         </div>
         
     </div>
@@ -20601,7 +24378,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line826">line 826</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1006">line 1006</a>
         </div>
         
     </div>
@@ -20740,7 +24517,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line517">line 517</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line575">line 575</a>
         </div>
         
     </div>
@@ -21038,7 +24815,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Wed Jun 17 2015 18:26:24 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue Jul 07 2015 12:36:48 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

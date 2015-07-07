@@ -582,6 +582,8 @@
             
                 <li data-name="Cursor#forEach"><a href="Cursor.html#forEach">forEach</a></li>
             
+                <li data-name="Cursor#hasNext"><a href="Cursor.html#hasNext">hasNext</a></li>
+            
                 <li data-name="Cursor#isClosed"><a href="Cursor.html#isClosed">isClosed</a></li>
             
                 <li data-name="Cursor#limit"><a href="Cursor.html#limit">limit</a></li>
@@ -589,6 +591,8 @@
                 <li data-name="Cursor#map"><a href="Cursor.html#map">map</a></li>
             
                 <li data-name="Cursor#maxTimeMS"><a href="Cursor.html#maxTimeMS">maxTimeMS</a></li>
+            
+                <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
             
                 <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
             
@@ -1778,7 +1782,7 @@ AggregationCursor instance.
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line291">line 291</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line302">line 302</a>
         </div>
         
     </div>
@@ -1899,7 +1903,7 @@ AggregationCursor instance.
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line143">line 143</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line154">line 154</a>
         </div>
         
     </div>
@@ -2035,7 +2039,7 @@ AggregationCursor instance.
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line356">line 356</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line367">line 367</a>
         </div>
         
     </div>
@@ -2106,12 +2110,12 @@ AggregationCursor instance.
     <div class="nameContainer">
         <h4 class="name" id="close">
             
-            close<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            close<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line336">line 336</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line347">line 347</a>
         </div>
         
     </div>
@@ -2223,6 +2227,10 @@ AggregationCursor instance.
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
@@ -2239,7 +2247,7 @@ AggregationCursor instance.
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line323">line 323</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line334">line 334</a>
         </div>
         
     </div>
@@ -2423,12 +2431,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="explain">
             
-            explain<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            explain<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line349">line 349</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line360">line 360</a>
         </div>
         
     </div>
@@ -2540,6 +2548,10 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
@@ -2556,7 +2568,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line157">line 157</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line168">line 168</a>
         </div>
         
     </div>
@@ -2677,7 +2689,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line168">line 168</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line179">line 179</a>
         </div>
         
     </div>
@@ -2798,7 +2810,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line343">line 343</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line354">line 354</a>
         </div>
         
     </div>
@@ -2874,7 +2886,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line179">line 179</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line190">line 190</a>
         </div>
         
     </div>
@@ -2995,7 +3007,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line190">line 190</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line201">line 201</a>
         </div>
         
     </div>
@@ -3116,7 +3128,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line201">line 201</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line212">line 212</a>
         </div>
         
     </div>
@@ -3232,12 +3244,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="next">
             
-            next<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            next<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line276">line 276</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line287">line 287</a>
         </div>
         
     </div>
@@ -3357,10 +3369,14 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
-        <h5>Example</h5>
+        <h5>Examples</h5>
         
 
     
@@ -3404,6 +3420,88 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 });</code></pre>
     
 
+
+    
+    <pre class="prettyprint"><code>// Call next on an aggregation cursor using a Promise
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  // Some docs for insertion
+  var docs = [{
+      title : "this is my title", author : "bob", posted : new Date() ,
+      pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+      comments : [
+        { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+      ]}];
+
+  // Create a collection
+  var collection = db.collection('aggregation_next_example_with_promise');
+  // Insert the docs
+  collection.insertMany(docs, {w: 1}).then(function(result) {
+
+    // Execute aggregate, notice the pipeline is expressed as an Array
+    var cursor = collection.aggregate([
+        { $project : {
+          author : 1,
+          tags : 1
+        }},
+        { $unwind : "$tags" },
+        { $group : {
+          _id : {tags : "$tags"},
+          authors : { $addToSet : "$author" }
+        }}
+      ], { cursor: { batchSize: 1 } });
+    // Get all the aggregation results
+    cursor.next().then(function(docs) {
+      db.close();
+    });
+  });
+});</code></pre>
+    
+
+
+    
+    <pre class="prettyprint"><code>// Call next on an aggregation cursor using a Generator and the co module
+
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co');
+  test = require('assert');
+
+co(function*() {
+  var db = yield MongoClient.connect('mongodb://localhost:27017/test');
+  // Some docs for insertion
+  var docs = [{
+      title : "this is my title", author : "bob", posted : new Date() ,
+      pageViews : 5, tags : [ "fun" , "good" , "fun" ], other : { foo : 5 },
+      comments : [
+        { author :"joe", text : "this is cool" }, { author :"sam", text : "this is bad" }
+      ]}];
+
+  // Create a collection
+  var collection = db.collection('aggregation_next_example_with_generatorsGenerator');
+
+  // Insert the docs
+  yield collection.insertMany(docs, {w: 1});
+
+  // Execute aggregate, notice the pipeline is expressed as an Array
+  var cursor = collection.aggregate([
+      { $project : {
+        author : 1,
+        tags : 1
+      }},
+      { $unwind : "$tags" },
+      { $group : {
+        _id : {tags : "$tags"},
+        authors : { $addToSet : "$author" }
+      }}
+    ], { cursor: { batchSize: 1 } });
+  // Get all the aggregation results
+  var doc = yield cursor.next();
+  db.close();
+});</code></pre>
+    
+
     
 </dd>
 
@@ -3418,7 +3516,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line214">line 214</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line225">line 225</a>
         </div>
         
     </div>
@@ -3541,7 +3639,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line838">line 838</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line965">line 965</a>
         </div>
         
     </div>
@@ -3619,7 +3717,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line844">line 844</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line971">line 971</a>
         </div>
         
     </div>
@@ -3775,7 +3873,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line225">line 225</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line236">line 236</a>
         </div>
         
     </div>
@@ -3898,7 +3996,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line818">line 818</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line945">line 945</a>
         </div>
         
     </div>
@@ -4019,7 +4117,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line236">line 236</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line247">line 247</a>
         </div>
         
     </div>
@@ -4142,7 +4240,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line832">line 832</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line959">line 959</a>
         </div>
         
     </div>
@@ -4218,7 +4316,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line362">line 362</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line373">line 373</a>
         </div>
         
     </div>
@@ -4294,7 +4392,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line284">line 284</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line295">line 295</a>
         </div>
         
     </div>
@@ -4417,7 +4515,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line825">line 825</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line952">line 952</a>
         </div>
         
     </div>
@@ -4538,7 +4636,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line247">line 247</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line258">line 258</a>
         </div>
         
     </div>
@@ -4659,7 +4757,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line258">line 258</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line269">line 269</a>
         </div>
         
     </div>
@@ -4775,12 +4873,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="toArray">
             
-            toArray<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            toArray<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line305">line 305</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line316">line 316</a>
         </div>
         
     </div>
@@ -4903,6 +5001,10 @@ cursor.rewind() can be used to reset the cursor.</p>
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
@@ -4967,7 +5069,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line852">line 852</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line979">line 979</a>
         </div>
         
     </div>
@@ -5097,7 +5199,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line859">line 859</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line986">line 986</a>
         </div>
         
     </div>
@@ -5221,7 +5323,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line269">line 269</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line280">line 280</a>
         </div>
         
     </div>
@@ -5344,7 +5446,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line866">line 866</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line993">line 993</a>
         </div>
         
     </div>
@@ -5471,7 +5573,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line374">line 374</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line385">line 385</a>
         </div>
         
     </div>
@@ -5587,7 +5689,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line368">line 368</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line379">line 379</a>
         </div>
         
     </div>
@@ -5703,7 +5805,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line316">line 316</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line327">line 327</a>
         </div>
         
     </div>
@@ -5845,7 +5947,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line298">line 298</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line309">line 309</a>
         </div>
         
     </div>
@@ -5990,7 +6092,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line114">line 114</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line125">line 125</a>
         </div>
         
     </div>
@@ -6071,7 +6173,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line100">line 100</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line111">line 111</a>
         </div>
         
     </div>
@@ -6152,7 +6254,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line107">line 107</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line118">line 118</a>
         </div>
         
     </div>
@@ -6233,7 +6335,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line121">line 121</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line132">line 132</a>
         </div>
         
     </div>
@@ -6333,7 +6435,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Wed Jun 17 2015 18:26:24 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue Jul 07 2015 12:36:47 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

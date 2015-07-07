@@ -95,7 +95,7 @@ Web frameworks using MongoDB
          * - **Forks**
            - 2
          * - **Watchers**
-           - 25
+           - 24
 
 Object Document Modeling Libraries
 ----------------------------------
@@ -191,9 +191,9 @@ Content Management Systems
          * - **Clone Url**
            - https://github.com/cliftonc/calipso.git
          * - **Forks**
-           - 284
+           - 286
          * - **Watchers**
-           - 1585
+           - 1590
 
 Grid FS libraries or tools
 --------------------------
@@ -245,7 +245,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 3
          * - **Watchers**
-           - 44
+           - 45
 
 .. topic:: mongoq
 
@@ -384,9 +384,9 @@ REST api's around MongoDB or resource based libraries
          * - **Clone Url**
            - https://github.com/tdegrunt/mongodb-rest.git
          * - **Forks**
-           - 113
+           - 118
          * - **Watchers**
-           - 344
+           - 345
 
 .. topic:: lazyBum
 
@@ -730,9 +730,9 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 413
+           - 414
          * - **Watchers**
-           - 3554
+           - 3561
 
 Libraries for the connect middleware
 ------------------------------------
@@ -771,7 +771,7 @@ Libraries for the connect middleware
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 22:43:59 on 11/5/2015
+           - 23:8:55 on 1/6/2015
          * - **Homepage**
            - http://
          * - **Url**
@@ -779,9 +779,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 200
+           - 203
          * - **Watchers**
-           - 740
+           - 755
 
 Libraries or applications for continous integration
 ---------------------------------------------------
@@ -805,9 +805,9 @@ Libraries or applications for continous integration
          * - **Clone Url**
            - https://github.com/ryankee/concrete.git
          * - **Forks**
-           - 70
+           - 71
          * - **Watchers**
-           - 479
+           - 482
 
 Exampe applications
 -------------------
@@ -831,9 +831,9 @@ Exampe applications
          * - **Clone Url**
            - https://github.com/gotik/nodejs-blackboard.git
          * - **Forks**
-           - 18
+           - 20
          * - **Watchers**
-           - 37
+           - 38
 
 .. topic:: node-mongo-cms
 

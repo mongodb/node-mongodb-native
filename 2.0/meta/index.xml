@@ -38,10 +38,23 @@
       <guid>/node-mongodb-native/2.0/meta/release-notes/</guid>
       <description>
 
+&lt;h2 id=&#34;2-0-36-07-07-2015:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.36 07-07-2015&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Fully promisified allowing the use of ES6 generators and libraries like co. Also allows for BYOP (Bring your own promises).&lt;/li&gt;
+&lt;li&gt;NODE-493 updated mongodb-core to 1.2.4 to ensure we cannot DDOS the mongod or mongos process on large connection pool sizes.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;2-0-35-06-17-2015:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.35 06-17-2015&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Upgraded to mongodb-core 1.2.2 including removing warnings when C++ bson parser is not available and a fix for SCRAM authentication.&lt;/li&gt;
+&lt;/ul&gt;
+
 &lt;h2 id=&#34;2-0-34-06-17-2015:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.34 06-17-2015&lt;/h2&gt;
 
 &lt;ul&gt;
-&lt;li&gt;Upgraded to mongodb-core 1.2.0 speeding up serialization and removing the need for the c++ bson extension.&lt;/li&gt;
+&lt;li&gt;Upgraded to mongodb-core 1.2.1 speeding up serialization and removing the need for the c++ bson extension.&lt;/li&gt;
 &lt;li&gt;NODE-486 fixed issue related to limit and skip when calling toArray in 2.0 driver.&lt;/li&gt;
 &lt;li&gt;NODE-483 throw error if capabilities of topology is queries before topology has performed connection setup.&lt;/li&gt;
 &lt;li&gt;NODE-482 fixed issue where MongoClient.connect would incorrectly identify a replset seed list server as a non replicaset member.&lt;/li&gt;

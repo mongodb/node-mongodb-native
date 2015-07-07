@@ -582,6 +582,8 @@
             
                 <li data-name="Cursor#forEach"><a href="Cursor.html#forEach">forEach</a></li>
             
+                <li data-name="Cursor#hasNext"><a href="Cursor.html#hasNext">hasNext</a></li>
+            
                 <li data-name="Cursor#isClosed"><a href="Cursor.html#isClosed">isClosed</a></li>
             
                 <li data-name="Cursor#limit"><a href="Cursor.html#limit">limit</a></li>
@@ -589,6 +591,8 @@
                 <li data-name="Cursor#map"><a href="Cursor.html#map">map</a></li>
             
                 <li data-name="Cursor#maxTimeMS"><a href="Cursor.html#maxTimeMS">maxTimeMS</a></li>
+            
+                <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
             
                 <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
             
@@ -1778,7 +1782,7 @@ CommandCursor instance.
     
         
         <div class="tag-source">
-            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line147">line 147</a>
+            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line158">line 158</a>
         </div>
         
     </div>
@@ -1914,7 +1918,7 @@ CommandCursor instance.
     
         
         <div class="tag-source">
-            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line185">line 185</a>
+            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line196">line 196</a>
         </div>
         
     </div>
@@ -2035,7 +2039,7 @@ CommandCursor instance.
     
         
         <div class="tag-source">
-            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line242">line 242</a>
+            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line253">line 253</a>
         </div>
         
     </div>
@@ -2106,12 +2110,12 @@ CommandCursor instance.
     <div class="nameContainer">
         <h4 class="name" id="close">
             
-            close<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            close<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line229">line 229</a>
+            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line240">line 240</a>
         </div>
         
     </div>
@@ -2223,6 +2227,10 @@ CommandCursor instance.
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
@@ -2239,7 +2247,7 @@ CommandCursor instance.
     
         
         <div class="tag-source">
-            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line216">line 216</a>
+            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line227">line 227</a>
         </div>
         
     </div>
@@ -2380,7 +2388,7 @@ for making sure that the entire result can fit the memory.</p>
     
         
         <div class="tag-source">
-            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line236">line 236</a>
+            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line247">line 247</a>
         </div>
         
     </div>
@@ -2456,7 +2464,7 @@ for making sure that the entire result can fit the memory.</p>
     
         
         <div class="tag-source">
-            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line161">line 161</a>
+            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line172">line 172</a>
         </div>
         
     </div>
@@ -2572,12 +2580,12 @@ for making sure that the entire result can fit the memory.</p>
     <div class="nameContainer">
         <h4 class="name" id="next">
             
-            next<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            next<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line170">line 170</a>
+            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line181">line 181</a>
         </div>
         
     </div>
@@ -2697,6 +2705,10 @@ for making sure that the entire result can fit the memory.</p>
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
@@ -2715,7 +2727,7 @@ for making sure that the entire result can fit the memory.</p>
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line838">line 838</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line965">line 965</a>
         </div>
         
     </div>
@@ -2793,7 +2805,7 @@ for making sure that the entire result can fit the memory.</p>
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line844">line 844</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line971">line 971</a>
         </div>
         
     </div>
@@ -2951,7 +2963,7 @@ for making sure that the entire result can fit the memory.</p>
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line818">line 818</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line945">line 945</a>
         </div>
         
     </div>
@@ -3074,7 +3086,7 @@ for making sure that the entire result can fit the memory.</p>
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line832">line 832</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line959">line 959</a>
         </div>
         
     </div>
@@ -3150,7 +3162,7 @@ for making sure that the entire result can fit the memory.</p>
     
         
         <div class="tag-source">
-            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line248">line 248</a>
+            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line259">line 259</a>
         </div>
         
     </div>
@@ -3226,7 +3238,7 @@ for making sure that the entire result can fit the memory.</p>
     
         
         <div class="tag-source">
-            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line178">line 178</a>
+            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line189">line 189</a>
         </div>
         
     </div>
@@ -3349,7 +3361,7 @@ for making sure that the entire result can fit the memory.</p>
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line825">line 825</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line952">line 952</a>
         </div>
         
     </div>
@@ -3465,12 +3477,12 @@ for making sure that the entire result can fit the memory.</p>
     <div class="nameContainer">
         <h4 class="name" id="toArray">
             
-            toArray<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+            toArray<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line199">line 199</a>
+            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line210">line 210</a>
         </div>
         
     </div>
@@ -3592,6 +3604,10 @@ results when this cursor had been previouly accessed.</p>
     
 
 
+<h5>Returns:</h5>
+Promise if no callback passed
+<br />
+
     
     
     
@@ -3610,7 +3626,7 @@ results when this cursor had been previouly accessed.</p>
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line852">line 852</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line979">line 979</a>
         </div>
         
     </div>
@@ -3740,7 +3756,7 @@ results when this cursor had been previouly accessed.</p>
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line859">line 859</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line986">line 986</a>
         </div>
         
     </div>
@@ -3866,7 +3882,7 @@ results when this cursor had been previouly accessed.</p>
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line866">line 866</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line993">line 993</a>
         </div>
         
     </div>
@@ -3993,7 +4009,7 @@ results when this cursor had been previouly accessed.</p>
     
         
         <div class="tag-source">
-            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line260">line 260</a>
+            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line271">line 271</a>
         </div>
         
     </div>
@@ -4109,7 +4125,7 @@ results when this cursor had been previouly accessed.</p>
     
         
         <div class="tag-source">
-            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line254">line 254</a>
+            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line265">line 265</a>
         </div>
         
     </div>
@@ -4225,7 +4241,7 @@ results when this cursor had been previouly accessed.</p>
     
         
         <div class="tag-source">
-            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line209">line 209</a>
+            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line220">line 220</a>
         </div>
         
     </div>
@@ -4367,7 +4383,7 @@ results when this cursor had been previouly accessed.</p>
     
         
         <div class="tag-source">
-            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line192">line 192</a>
+            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line203">line 203</a>
         </div>
         
     </div>
@@ -4512,7 +4528,7 @@ results when this cursor had been previouly accessed.</p>
     
         
         <div class="tag-source">
-            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line114">line 114</a>
+            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line125">line 125</a>
         </div>
         
     </div>
@@ -4593,7 +4609,7 @@ results when this cursor had been previouly accessed.</p>
     
         
         <div class="tag-source">
-            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line100">line 100</a>
+            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line111">line 111</a>
         </div>
         
     </div>
@@ -4674,7 +4690,7 @@ results when this cursor had been previouly accessed.</p>
     
         
         <div class="tag-source">
-            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line107">line 107</a>
+            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line118">line 118</a>
         </div>
         
     </div>
@@ -4755,7 +4771,7 @@ results when this cursor had been previouly accessed.</p>
     
         
         <div class="tag-source">
-            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line121">line 121</a>
+            <a href="lib_command_cursor.js.html">lib/command_cursor.js</a>, <a href="lib_command_cursor.js.html#line132">line 132</a>
         </div>
         
     </div>
@@ -4855,7 +4871,7 @@ results when this cursor had been previouly accessed.</p>
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Wed Jun 17 2015 18:26:24 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue Jul 07 2015 12:36:48 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

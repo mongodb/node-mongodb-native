@@ -582,6 +582,8 @@
             
                 <li data-name="Cursor#forEach"><a href="Cursor.html#forEach">forEach</a></li>
             
+                <li data-name="Cursor#hasNext"><a href="Cursor.html#hasNext">hasNext</a></li>
+            
                 <li data-name="Cursor#isClosed"><a href="Cursor.html#isClosed">isClosed</a></li>
             
                 <li data-name="Cursor#limit"><a href="Cursor.html#limit">limit</a></li>
@@ -589,6 +591,8 @@
                 <li data-name="Cursor#map"><a href="Cursor.html#map">map</a></li>
             
                 <li data-name="Cursor#maxTimeMS"><a href="Cursor.html#maxTimeMS">maxTimeMS</a></li>
+            
+                <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
             
                 <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
             
@@ -1727,6 +1731,15 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
   var tailableRetryInterval = options.tailableRetryInterval || 500;
   var currentNumberOfRetries = numberOfRetries;
 
+  // Get the promiseLibrary
+  var promiseLibrary = options.promiseLibrary;
+
+  // No promise library selected fall back
+  if(!promiseLibrary) {
+    promiseLibrary = typeof global.Promise == 'function' ?
+      global.Promise : require('es6-promise').Promise;
+  }
+
   // Set up
   Readable.call(this, {objectMode: true});
 
@@ -1752,6 +1765,10 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
     , topology: topology
     // Topology options
     , topologyOptions: topologyOptions
+    // Promise library
+    , promiseLibrary: promiseLibrary
+    // Current doc
+    , currentDoc: null
   }
 
   // Legacy fields
@@ -1796,6 +1813,77 @@ CoreCursor.prototype._next = CoreCursor.prototype.next;
 
 for(var name in CoreCursor.prototype) {
   Cursor.prototype[name] = CoreCursor.prototype[name];
+}
+
+/**
+ * Check if there is any document still available in the cursor
+ * @method
+ * @param {Cursor~resultCallback} callback The result callback.
+ * @throws {MongoError}
+ * @deprecated
+ * @return {Promise} returns Promise if no callback passed
+ */
+Cursor.prototype.hasNext = function(callback) {
+  var self = this;
+
+  // Execute using callback
+  if(typeof callback == 'function') return nextObject(self, function(err, doc) {
+    if(!doc) return callback(null, false);
+    self.s.currentDoc = doc;
+    callback(null, true);
+  });
+
+  // Return a Promise
+  return new this.s.promiseLibrary(function(resolve, reject) {
+    nextObject(self, function(err, doc) {
+      if(self.s.state == Cursor.CLOSED || self.isDead()) return resolve(false);
+      if(err) return reject(err);
+      if(!doc) return resolve(false);
+      self.s.currentDoc = doc;
+      resolve(true);
+    });
+  });
+}
+
+
+/**
+ * Get the next available document from the cursor, returns null if no more documents are available.
+ * @method
+ * @param {Cursor~resultCallback} callback The result callback.
+ * @throws {MongoError}
+ * @deprecated
+ * @return {Promise} returns Promise if no callback passed
+ */
+Cursor.prototype.next = function(callback) {
+  var self = this;
+
+  // Execute using callback
+  if(typeof callback == 'function') {
+    // Return the currentDoc if someone called hasNext first
+    if(self.s.currentDoc) {
+      var doc = self.s.currentDoc;
+      self.s.currentDoc = null;
+      return callback(null, doc);
+    }
+
+    // Return the next object
+    return nextObject(self, callback)
+  };
+
+  // Return a Promise
+  return new this.s.promiseLibrary(function(resolve, reject) {
+    // Return the currentDoc if someone called hasNext first
+    if(self.s.currentDoc) {
+      var doc = self.s.currentDoc;
+      self.s.currentDoc = null;
+      return resolve(doc);
+    }
+
+    nextObject(self, function(err, r) {
+      if(err) return reject(err);
+      resolve(r);
+    });
+  });
 }
 
 /**
@@ -1980,7 +2068,7 @@ Cursor.prototype.skip = function(value) {
  * The callback format for results
  * @callback Cursor~resultCallback
  * @param {MongoError} error An error instance representing the error during the execution.
- * @param {(object|null)} result The result object if the command was executed successfully.
+ * @param {(object|null|boolean)} result The result object if the command was executed successfully.
  */
 
 /**
@@ -2043,24 +2131,25 @@ Cursor.prototype.skip = function(value) {
  * @param {Cursor~resultCallback} callback The result callback.
  * @throws {MongoError}
  * @deprecated
- * @return {null}
+ * @return {Promise} returns Promise if no callback passed
  */
-Cursor.prototype.nextObject = function(callback) {
-  var self = this;
-  if(this.s.state == Cursor.CLOSED || self.isDead()) return handleCallback(callback, new MongoError("Cursor is closed"));
-  if(this.s.state == Cursor.INIT &amp;&amp; this.s.cmd.sort) {
+Cursor.prototype.nextObject = Cursor.prototype.next;
+
+var nextObject = function(self, callback) {
+  if(self.s.state == Cursor.CLOSED || self.isDead()) return handleCallback(callback, new MongoError("Cursor is closed"));
+  if(self.s.state == Cursor.INIT &amp;&amp; self.s.cmd.sort) {
     try {
-      this.s.cmd.sort = formattedOrderClause(this.s.cmd.sort);
+      self.s.cmd.sort = formattedOrderClause(self.s.cmd.sort);
     } catch(err) {
       return handleCallback(callback, err);
     }
   }
-
   // Get the next object
   self._next(function(err, doc) {
     if(err &amp;&amp; err.tailable &amp;&amp; self.s.currentNumberOfRetries == 0) return callback(err);
     if(err &amp;&amp; err.tailable &amp;&amp; self.s.currentNumberOfRetries > 0) {
       self.s.currentNumberOfRetries = self.s.currentNumberOfRetries - 1;
+
       return setTimeout(function() {
         self.nextObject(callback);
       }, self.s.tailableRetryInterval);
@@ -2211,16 +2300,29 @@ Cursor.prototype.setReadPreference = function(r) {
  * @method
  * @param {Cursor~toArrayResultCallback} callback The result callback.
  * @throws {MongoError}
- * @return {null}
+ * @return {Promise} returns Promise if no callback passed
  */
 Cursor.prototype.toArray = function(callback) {
   var self = this;
-  if(!callback) throw new MongoError('callback is mandatory');
-  if(self.s.options.tailable) return handleCallback(callback, new MongoError("Tailable cursor cannot be converted to array"), null);
+  if(self.s.options.tailable) throw new MongoError('Tailable cursor cannot be converted to array');
+
+  // Execute using callback
+  if(typeof callback == 'function') return toArray(self, callback);
+
+  // Return a Promise
+  return new this.s.promiseLibrary(function(resolve, reject) {
+    toArray(self, function(err, r) {
+      if(err) return reject(err);
+      resolve(r);
+    });
+  });
+}
+
+var toArray = function(self, callback) {
   var items = [];
 
   // Reset cursor
-  this.rewind();
+  self.rewind();
   self.s.state = Cursor.INIT;
 
 
@@ -2274,21 +2376,35 @@ Cursor.prototype.toArray = function(callback) {
  * @param {string} [options.hint=null] An index name hint for the query.
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  * @param {Cursor~countResultCallback} callback The result callback.
- * @return {null}
+ * @return {Promise} returns Promise if no callback passed
  */
 Cursor.prototype.count = function(applySkipLimit, opts, callback) {
   var self = this;
+  if(self.s.cmd.query == null) throw new MongoError("count can only be used with find command");
   if(typeof opts == 'function') callback = opts, opts = {};
   opts = opts || {};
-  if(self.s.cmd.query == null) callback(new MongoError("count can only be used with find command"));
+
+  // Execute using callback
+  if(typeof callback == 'function') return count(self, applySkipLimit, opts, callback);
+
+  // Return a Promise
+  return new this.s.promiseLibrary(function(resolve, reject) {
+    count(self, applySkipLimit, opts, function(err, r) {
+      if(err) return reject(err);
+      resolve(r);
+    });
+  });
+};
+
+var count = function(self, applySkipLimit, opts, callback) {
   if(typeof applySkipLimit == 'function') {
     callback = applySkipLimit;
     applySkipLimit = true;
   }
 
   if(applySkipLimit) {
-    if(typeof this.cursorSkip() == 'number') opts.skip = this.cursorSkip();
-    if(typeof this.cursorLimit() == 'number') opts.limit = this.cursorLimit();
+    if(typeof self.cursorSkip() == 'number') opts.skip = self.cursorSkip();
+    if(typeof self.cursorLimit() == 'number') opts.limit = self.cursorLimit();
   }
 
   // Command
@@ -2334,13 +2450,13 @@ Cursor.prototype.count = function(applySkipLimit, opts, callback) {
 
   // Write the initial command out
   connection.write(query.toBin());
-};
+}
 
 /**
  * Close the cursor, sending a KillCursor command and emitting close.
  * @method
  * @param {Cursor~resultCallback} [callback] The result callback.
- * @return {null}
+ * @return {Promise} returns Promise if no callback passed
  */
 Cursor.prototype.close = function(callback) {
   this.s.state = Cursor.CLOSED;
@@ -2349,7 +2465,11 @@ Cursor.prototype.close = function(callback) {
   // Emit the close event for the cursor
   this.emit('close');
   // Callback if provided
-  if(callback) return handleCallback(callback, null, this);
+  if(typeof callback == 'function') return handleCallback(callback, null, this);
+  // Return a Promise
+  return new this.s.promiseLibrary(function(resolve, reject) {
+    resolve();
+  });
 }
 
 /**
@@ -2394,11 +2514,22 @@ Cursor.prototype.stream = function(options) {
  * Execute the explain for the cursor
  * @method
  * @param {Cursor~resultCallback} [callback] The result callback.
- * @return {null}
+ * @return {Promise} returns Promise if no callback passed
  */
 Cursor.prototype.explain = function(callback) {
+  var self = this;
   this.s.cmd.explain = true;
-  this._next(callback);
+
+  // Execute using callback
+  if(typeof callback == 'function') return this._next(callback);
+
+  // Return a Promise
+  return new this.s.promiseLibrary(function(resolve, reject) {
+    self._next(function(err, r) {
+      if(err) return reject(err);
+      resolve(r);
+    });
+  });
 }
 
 Cursor.prototype._read = function(n) {
@@ -2548,7 +2679,7 @@ module.exports = Cursor;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Wed Jun 17 2015 18:26:24 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue Jul 07 2015 12:36:47 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>
