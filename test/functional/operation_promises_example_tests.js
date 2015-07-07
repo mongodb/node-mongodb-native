@@ -4140,67 +4140,6 @@ exports.shouldCorrectlyRetrieveServerInfoWithPromises = {
   }
 }
 
-/**
- * Retrieve the current replicaset status if the server is running as part of a replicaset using a Promise.
- *
- * @example-class Admin
- * @example-method replSetGetStatus
- * @ignore
- */
-exports.shouldCorrectlyRetrieveReplSetGetStatusWithPromises = {
-  metadata: { requires: { promises:true, topology: 'single' } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-
-    db.open().then(function(db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE restartAndDone
-    // REMOVE-LINE test.done();
-    // BEGIN
-
-      // Grab a collection object
-      var collection = db.collection('test_with_promise');
-
-      // Force the creation of the collection by inserting a document
-      // Collections are not created until the first document is inserted
-      collection.insertOne({'a':1}, {w: 1}).then(function(doc) {
-        // Use the admin database for the operation
-        var adminDb = db.admin();
-
-        // Add the new user to the admin database
-        adminDb.addUser('admin14', 'admin14').then(function(result) {
-          test.ok(result != null);
-
-          // Authenticate using the newly added user
-          adminDb.authenticate('admin14', 'admin14', configuration.writeConcernMax()).then(function(result) {
-            test.equal(true, result);
-
-            // Retrive the server Info, returns error if we are not
-            // running a replicaset
-            adminDb.replSetGetStatus().then(function(info) {
-
-              adminDb.removeUser('admin14').then(function(result) {
-                test.ok(result);
-
-                db.close();
-                test.done();
-              });
-            })
-          }).catch(function(err) {
-            console.dir(err)
-          });
-        });
-      });
-    });
-    // END
-  }
-}
-
 /**************************************************************************
  *
  * CURSOR TESTS
