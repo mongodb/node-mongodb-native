@@ -48,7 +48,7 @@ exports['Simple authentication test for single server'] = {
         test.equal(1, r.result.ok);
         // Grab the connection
         var connection = r.connection;
-        // Authenticate 
+        // Authenticate
         _server.auth('mongocr', configuration.db, 'test', 'test', function(err, session) {
           test.equal(null, err);
           test.ok(session != null);
@@ -101,7 +101,7 @@ exports['Simple authentication test for replicaset'] = {
       , port: configuration.port
     }], {
         reconnectInterval: 500
-      , setName: configuration.setName 
+      , setName: configuration.setName
     });
 
     // Register basic auth provider
@@ -130,7 +130,7 @@ exports['Simple authentication test for replicaset'] = {
         // Grab the connection
         var connection = r.connection;
 
-        // Authenticate 
+        // Authenticate
         _server.auth('mongocr', configuration.db, 'test', 'test', function(err, session) {
           test.equal(null, err);
           test.ok(session != null);
@@ -213,7 +213,7 @@ exports['Simple authentication test for mongos'] = {
         // Grab the connection
         var connection = r.connection;
 
-        // Authenticate 
+        // Authenticate
         _server.auth('mongocr', configuration.db, 'test', 'test', function(err, session) {
           test.equal(null, err);
           test.ok(session != null);
