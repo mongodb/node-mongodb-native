@@ -5904,7 +5904,7 @@ exports['Should correctly execute unordered batch with no errors With Promises']
       // Get the collection
       var col = db.collection('batch_write_unordered_ops_legacy_0_with_promise');
       // Initialize the unordered Batch
-      var batch = col.initializeUnorderedBulkOp({useLegacyOps: true});
+      var batch = col.initializeUnorderedBulkOp();
 
       // Add some operations to be executed in order
       batch.insert({a:1});

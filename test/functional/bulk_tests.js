@@ -474,7 +474,7 @@ exports['Should correctly handle single unordered batch API'] = {
         test.equal(err, null);
 
         // Initialize the unordered Batch
-        var batch = col.initializeUnorderedBulkOp({useLegacyOps: true});
+        var batch = col.initializeUnorderedBulkOp();
 
         // Add some operations to be executed in order
         batch.insert({b:1, a:1});
@@ -1182,7 +1182,7 @@ exports['should correctly split unordered bulk batch'] = {
 
         operation.execute(function(err, result) {
           test.equal(null, err);
-          
+
           db.close();
           test.done();
         });
@@ -1241,7 +1241,7 @@ exports['should correctly split ordered bulk batch'] = {
 
         operation.execute(function(err, result) {
           test.equal(null, err);
-          
+
           db.close();
           test.done();
         });
