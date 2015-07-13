@@ -931,7 +931,7 @@ var replicasetInquirer = function(self, state, norepeat) {
     var timeoutServer = function(_server) {
       return setTimeout(function() {
         if(_server.isConnected()) {
-          _server.destroy(true);
+          _server.connections()[0].connection.destroy();
         }
       }, self.s.options.connectionTimeout);
     }

@@ -169,7 +169,6 @@ State.prototype.destroy = function() {
 State.prototype.remove = function(server) {
   if(this.primary && this.primary.equals(server)) {
     this.primary = null;
-    return 'primary';
   }
 
   var length = this.arbiters.length;
@@ -191,8 +190,6 @@ State.prototype.remove = function(server) {
     this.secondaries = this.secondaries.filter(function(s) {
       return !s.equals(server);
     });
-
-    return 'passive';
   }
 
   // Filter out the server from the secondaries
@@ -200,7 +197,13 @@ State.prototype.remove = function(server) {
     return !s.equals(server);
   });
 
-  return 'secondary';
+  // Get the isMaster
+  var isMaster = server.lastIsMaster();
+  // Return primary if the server was primary
+  if(isMaster.ismaster) return 'primary';
+  if(isMaster.secondary) return 'secondary';
+  if(isMaster.passive) return 'passive';
+  return 'arbiter';
 }
 
 /**
