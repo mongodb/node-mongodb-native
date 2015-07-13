@@ -199,7 +199,7 @@ var testFiles =[
 try {
   eval("(function *(){})");
   // Generator tests
-  testFiles.push('/test/functional/mock_tests.js');
+  testFiles.push('/test/tests/functional/mock_tests.js');
 } catch(err) {}
 
 // Add all the tests to run
