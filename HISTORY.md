@@ -1,6 +1,7 @@
 2.0.37
 -----------------
 - NODE-504 Collection - Default options when using promiseLibrary.
+- NODE-500 Accidental repeat of hostname in seed list multiplies total connections persistently.
 - Updated mongodb-core to 1.2.5 to fix NODE-492.
 
 2.0.36 07-07-2015
