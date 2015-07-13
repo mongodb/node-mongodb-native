@@ -175,7 +175,8 @@ var runner = new Runner({
 });
 
 var testFiles =[
-    '/test/tests/functional/server_tests.js'
+    '/test/tests/functional/mock_tests.js'
+  , '/test/tests/functional/server_tests.js'
   , '/test/tests/functional/operations_tests.js'
   , '/test/tests/functional/basic_auth_tests.js'
   , '/test/tests/functional/extend_pick_strategy_tests.js'

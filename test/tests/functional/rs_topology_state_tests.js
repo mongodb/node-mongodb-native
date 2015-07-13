@@ -52,7 +52,9 @@ var executeState = function(assert, test) {
 
         state.update(_ismaster, {name: _name, equals: function(s) {
           return s.name == _name;
-        }, destroy: function() {}});
+        }, destroy: function() {}, lastIsMaster: function() {
+          return _ismaster;
+        }});
       }
 
       update(phase.responses[j][1], phase.responses[j][0]);
