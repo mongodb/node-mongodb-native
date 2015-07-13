@@ -26,7 +26,8 @@
     "mongodb-tools": "~1.0",
     "mkdirp": "0.5.0",
     "rimraf": "2.2.6",
-    "mongodb-version-manager": "^0.7.1"
+    "mongodb-version-manager": "^0.7.1",
+    "co": "4.5.4"    
   },
   "optionalDependencies": {
     "kerberos": "~0.0"
