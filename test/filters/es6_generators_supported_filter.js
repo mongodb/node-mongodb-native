@@ -1,4 +1,4 @@
-var ES6GeneratorsSupportedFilter = function() {  
+var ES6GeneratorsSupportedFilter = function() {
   var serverConfig = null;
 
   this.beforeStart = function(object, callback) {
@@ -19,7 +19,7 @@ var ES6GeneratorsSupportedFilter = function() {
 
     // Do not execute the test
     return check;
-  } 
+  }
 }
 
 module.exports = ES6GeneratorsSupportedFilter;

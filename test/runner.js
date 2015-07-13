@@ -177,8 +177,7 @@ var runner = new Runner({
 });
 
 var testFiles =[
-    '/test/tests/functional/mock_tests.js'
-  , '/test/tests/functional/server_tests.js'
+    '/test/tests/functional/server_tests.js'
   , '/test/tests/functional/operations_tests.js'
   , '/test/tests/functional/basic_auth_tests.js'
   , '/test/tests/functional/extend_pick_strategy_tests.js'
@@ -195,6 +194,13 @@ var testFiles =[
   , '/test/tests/functional/operation_example_tests.js'
   , '/test/tests/functional/replset_failover_tests.js'
 ]
+
+// Check if we support es6 generators
+try {
+  eval("(function *(){})");
+  // Generator tests
+  testFiles.push('/test/functional/mock_tests.js');
+} catch(err) {}
 
 // Add all the tests to run
 testFiles.forEach(function(t) {

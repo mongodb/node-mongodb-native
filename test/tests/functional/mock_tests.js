@@ -1,8 +1,5 @@
 "use strict";
 
-var co = require('co'),
-  mockupdb = require('../../mock');
-
 exports['Should correctly perform a simple server connection using mock'] = {
   metadata: {
     requires: {
@@ -12,7 +9,9 @@ exports['Should correctly perform a simple server connection using mock'] = {
   },
 
   test: function(configuration, test) {
-    var Server = configuration.require.Server;
+    var Server = configuration.require.Server,
+      co = require('co'),
+      mockupdb = require('../../mock');
 
     // Contain mock server
     var mockServer = null;
@@ -74,7 +73,9 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
 
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet,
-      ObjectId = configuration.require.BSON.ObjectId;
+      ObjectId = configuration.require.BSON.ObjectId,
+      co = require('co'),
+      mockupdb = require('../../mock');
 
     // Contain mock server
     var primaryServer = null;
