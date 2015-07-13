@@ -1,3 +1,8 @@
+2.0.37
+-----------------
+- NODE-504 Collection - Default options when using promiseLibrary.
+- Updated mongodb-core to 1.2.5 to fix NODE-492.
+
 2.0.36 07-07-2015
 -----------------
 - Fully promisified allowing the use of ES6 generators and libraries like co. Also allows for BYOP (Bring your own promises).
