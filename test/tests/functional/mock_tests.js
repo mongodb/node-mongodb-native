@@ -6,6 +6,7 @@ var co = require('co'),
 exports['Should correctly perform a simple server connection using mock'] = {
   metadata: {
     requires: {
+      generators: true,
       topology: "single"
     }
   },
@@ -66,6 +67,7 @@ exports['Should correctly perform a simple server connection using mock'] = {
 exports['Should correctly connect to a replicaset where the primary hangs causing monitoring thread to hang'] = {
   metadata: {
     requires: {
+      generators: true,
       topology: "single"
     }
   },

@@ -9,6 +9,8 @@ var Runner = require('integra').Runner
   , NodeVersionFilter = require('./filters/node_version_filter')
   , MongoDBVersionFilter = require('./filters/mongodb_version_filter')
   , MongoDBTopologyFilter = require('./filters/mongodb_topology_filter')
+  , ES6PromisesSupportedFilter = require('./filters/es6_promises_supported_filter')
+  , ES6GeneratorsSupportedFilter = require('./filters/es6_generators_supported_filter')
   , TravisFilter = require('./filters/travis_filter')
   , FileFilter = require('integra').FileFilter
   , TestNameFilter = require('integra').TestNameFilter
@@ -227,6 +229,10 @@ runner.plugin(new NodeVersionFilter(startupOptions));
 runner.plugin(new MongoDBVersionFilter(startupOptions));
 // Add a Topology filter plugin
 runner.plugin(new MongoDBTopologyFilter(startupOptions));
+// Add a Filter allowing us to specify that a function requires Promises
+runner.plugin(new ES6PromisesSupportedFilter())
+// Add a Filter allowing us to validate if generators are available
+runner.plugin(new ES6GeneratorsSupportedFilter())
 
 // Exit when done
 runner.on('exit', function(errors, results) {
