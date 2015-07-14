@@ -1,3 +1,7 @@
+1.2.6 07-14-2015
+-----------------
+- NODE-505 Query fails to find records that have a 'result' property with an array value.
+
 1.2.5 07-14-2015
 -----------------
 - NODE-492 correctly handle hanging replicaset monitoring connections when server is unavailable due to network partitions or firewalls dropping packets, configureable using the connectionTimeoutMS setting.
