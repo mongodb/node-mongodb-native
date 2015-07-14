@@ -81,6 +81,12 @@ Query.prototype.incRequestId = function() {
 }
 
 //
+// Assign a new request Id
+Query.nextRequestId = function() {
+  return _requestId + 1;
+}
+
+//
 // Uses a single allocated buffer for the process, avoiding multiple memory allocations
 Query.prototype.toBin = function() {
   var self = this;

@@ -202,6 +202,8 @@ WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, 
 
     // Create the find command
     var query = executeFindCommand(bson, ns, cmd, cursorState, topology, options)
+    // Mark the cmd as virtual
+    cmd.virtual = false;
     // Signal the documents are in the firstBatch value
     query.documentsReturnedIn = 'firstBatch';
     // Return the query

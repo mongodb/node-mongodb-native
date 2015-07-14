@@ -172,7 +172,8 @@ var execInitialQuery = function(self, query, cmd, options, cursorState, connecti
     }
 
     // Check if we have a command cursor
-    if(Array.isArray(result.documents) && result.documents.length == 1// && !cmd.find
+    if(Array.isArray(result.documents) && result.documents.length == 1
+      && (!cmd.find || (cmd.find && cmd.virtual == false))
       && (result.documents[0].cursor != 'string'
         || result.documents[0]['$err']
         || result.documents[0]['errmsg']
