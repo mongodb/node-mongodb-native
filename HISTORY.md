@@ -1,7 +1,10 @@
+2.0.39 07-14-2015
+-----------------
+- Updated mongodb-core to 1.2.6 for NODE-505.
+
 2.0.38 07-14-2015
 -----------------
 - NODE-505 Query fails to find records that have a 'result' property with an array value.
-- Updated mongodb-core to 1.2.6 for NODE-505.
 
 2.0.37 07-14-2015
 -----------------
