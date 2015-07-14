@@ -42,7 +42,7 @@ exports['Should correctly execute command'] = {
           _server.destroy();
           // Finish the test
           test.done();
-        });      
+        });
       });
 
       // Start connection
@@ -114,7 +114,7 @@ exports['Should correctly execute find'] = {
               cursor.next(function(err, d) {
                 test.equal(null, err)
                 test.equal(null, d);
-                // Destroy the server connection        
+                // Destroy the server connection
                 _server.destroy();
                 // Finish the test
                 test.done();
@@ -167,11 +167,59 @@ exports['Should correctly execute find with limit and skip'] = {
               cursor.next(function(err, d) {
                 test.equal(null, err)
                 test.equal(null, d);
-                // Destroy the server connection        
+                // Destroy the server connection
                 _server.destroy();
                 // Finish the test
                 test.done();
               });
+            });
+          }, 1000)
+        });
+      })
+
+      // Start connection
+      server.connect();
+    });
+  }
+}
+
+exports['Should correctly execute find against document with result array field'] = {
+  metadata: {
+    requires: {}
+  },
+
+  test: function(configuration, test) {
+    configuration.newTopology(function(err, server) {
+      var ReadPreference = configuration.require.ReadPreference;
+
+      // Add event listeners
+      server.on('connect', function(_server) {
+        // Execute the write
+        _server.insert(f("%s.inserts_result_1", configuration.db), [{a:1, result: [{c:1}, {c:2}]}], {
+          writeConcern: {w:1}, ordered:true
+        }, function(err, results) {
+          test.equal(null, err);
+
+          // Work around 2.4.x issue with mongos reporting write done but it has
+          // not actually been written to the primary in the shard yet
+          setTimeout(function() {
+            // Execute find
+            var cursor = _server.cursor(f("%s.inserts_result_1", configuration.db), {
+                find: f("%s.inserts_result_1", configuration.db)
+              , query: {}
+            }, {readPreference: ReadPreference.primary});
+
+            // Execute next
+            cursor.next(function(err, d) {
+              test.equal(null, err);
+              test.equal(1, d.a);
+              test.equal(1, d.result[0].c);
+              test.equal(2, d.result[1].c);
+
+              // Destroy the server connection
+              _server.destroy();
+              // Finish the test
+              test.done();
             });
           }, 1000)
         });
@@ -224,7 +272,7 @@ exports['Should correctly execute aggregation command'] = {
                 test.equal(null, err);
                 test.equal(3, d.a);
 
-                // Destroy the server connection        
+                // Destroy the server connection
                 _server.destroy();
                 // Finish the test
                 test.done();
@@ -270,7 +318,7 @@ exports['Should correctly execute query against cursorId'] = {
               var cursor = _server.cursor(f("%s.inserts11", configuration.db)
                 , result.result.cursors[0].cursor.id
                 , { documents: result.result.cursors[0].cursor.firstBatch });
-              
+
               // Execute next
               cursor.next(function(err, d) {
                 test.equal(null, err);
@@ -285,7 +333,7 @@ exports['Should correctly execute query against cursorId'] = {
                     test.equal(null, err);
                     test.equal(3, d.a);
 
-                    // Destroy the server connection        
+                    // Destroy the server connection
                     _server.destroy();
                     // Finish the test
                     test.done();
@@ -360,7 +408,7 @@ exports['Should correctly kill command cursor'] = {
               cursor.next(function(err, d) {
                 test.equal(null, err);
                 test.equal(null, d);
-                // Destroy the server connection        
+                // Destroy the server connection
                 _server.destroy();
                 // Finish the test
                 test.done();
@@ -411,7 +459,7 @@ exports['Should correctly kill find command cursor'] = {
               cursor.next(function(err, d) {
                 test.equal(null, err);
                 test.equal(null, d);
-                // Destroy the server connection        
+                // Destroy the server connection
                 _server.destroy();
                 // Finish the test
                 test.done();
@@ -453,7 +501,7 @@ exports['Should correctly pipeline operations success'] = {
             test.equal(null, err);
             test.equal(2, result.length);
 
-            // Destroy the server connection        
+            // Destroy the server connection
             _server.destroy();
             // Finish the test
             test.done();
@@ -490,7 +538,7 @@ exports['Should correctly pipeline operations with first failure'] = {
             getLastError: 1
           }], function(err, result) {
             test.ok(err != null);
-            // Destroy the server connection        
+            // Destroy the server connection
             _server.destroy();
             // Finish the test
             test.done();
