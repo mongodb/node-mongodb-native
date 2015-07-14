@@ -1,4 +1,4 @@
-2.0.37
+2.0.37 07-14-2015
 -----------------
 - NODE-504 Collection - Default options when using promiseLibrary.
 - NODE-500 Accidental repeat of hostname in seed list multiplies total connections persistently.
