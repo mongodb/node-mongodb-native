@@ -254,6 +254,9 @@ var testFiles =[
   , '/test/functional/crud_api_tests.js'
   , '/test/functional/reconnect_tests.js'
 
+  // APM tests
+  , '/test/functional/apm_tests.js'
+
   // Logging tests
   , '/test/functional/logger_tests.js'
 
