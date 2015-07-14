@@ -38,6 +38,14 @@
       <guid>/node-mongodb-native/2.0/meta/release-notes/</guid>
       <description>
 
+&lt;h2 id=&#34;2-0-37-07-14-2015:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.37 07-14-2015&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;NODE-504 Collection - Default options when using promiseLibrary.&lt;/li&gt;
+&lt;li&gt;NODE-500 Accidental repeat of hostname in seed list multiplies total connections persistently.&lt;/li&gt;
+&lt;li&gt;Updated mongodb-core to 1.2.5 to fix NODE-492.&lt;/li&gt;
+&lt;/ul&gt;
+
 &lt;h2 id=&#34;2-0-36-07-07-2015:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.36 07-07-2015&lt;/h2&gt;
 
 &lt;ul&gt;

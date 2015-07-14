@@ -181,7 +181,7 @@ Content Management Systems
          :header-rows: 0
 
          * - **Activity Level**
-           - .. image:: ../static/active.png
+           - .. image:: ../static/nonactive.png
          * - **Last push**
            - 22:44:59 on 8/2/2015
          * - **Homepage**
@@ -193,7 +193,7 @@ Content Management Systems
          * - **Forks**
            - 286
          * - **Watchers**
-           - 1590
+           - 1592
 
 Grid FS libraries or tools
 --------------------------
@@ -358,9 +358,9 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Clone Url**
            - https://github.com/meritt/easymongo.git
          * - **Forks**
-           - 14
+           - 15
          * - **Watchers**
-           - 99
+           - 98
 
 REST api's around MongoDB or resource based libraries
 -----------------------------------------------------
@@ -730,7 +730,7 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 414
+           - 415
          * - **Watchers**
            - 3561
 
@@ -771,7 +771,7 @@ Libraries for the connect middleware
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 23:8:55 on 1/6/2015
+           - 21:57:23 on 13/6/2015
          * - **Homepage**
            - http://
          * - **Url**
@@ -781,7 +781,7 @@ Libraries for the connect middleware
          * - **Forks**
            - 203
          * - **Watchers**
-           - 755
+           - 758
 
 Libraries or applications for continous integration
 ---------------------------------------------------
