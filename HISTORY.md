@@ -1,3 +1,7 @@
+1.2.5 07-14-2015
+-----------------
+- NODE-492 correctly handle hanging replicaset monitoring connections when server is unavailable due to network partitions or firewalls dropping packets, configureable using the connectionTimeoutMS setting.
+
 1.2.4 07-07-2015
 -----------------
 - NODE-493 staggering the socket connections to avoid overwhelming the mongod process.

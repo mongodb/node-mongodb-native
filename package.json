@@ -1,6 +1,6 @@
 {
   "name": "mongodb-core",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "Core MongoDB driver functionality, no bells and whistles and meant for integration not end applications",
   "main": "index.js",
   "scripts": {
@@ -27,7 +27,7 @@
     "mkdirp": "0.5.0",
     "rimraf": "2.2.6",
     "mongodb-version-manager": "^0.7.1",
-    "co": "4.5.4"    
+    "co": "4.5.4"
   },
   "optionalDependencies": {
     "kerberos": "~0.0"
