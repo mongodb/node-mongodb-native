@@ -42,13 +42,13 @@ var startupOptions = {
   , skip: false
 }
 
-// Skipping parameters
-var startupOptions = {
-    skipStartup: false
-  , skipRestart: false
-  , skipShutdown: false
-  , skip: false
-}
+// // Skipping parameters
+// var startupOptions = {
+//     skipStartup: false
+//   , skipRestart: false
+//   , skipShutdown: false
+//   , skip: false
+// }
 
 /**
  * Standalone MongoDB Configuration
@@ -211,7 +211,7 @@ var createConfiguration = function(options) {
 
 // Set up the runner
 var runner = new Runner({
-  logLevel:'info',
+  logLevel:'error',
   runners: 1,
   failFast: true
 });
