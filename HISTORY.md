@@ -1,3 +1,7 @@
+2.0.40 07-14-2015
+-----------------
+- Updated mongodb-core to 1.2.7 for APM support.
+
 2.0.39 07-14-2015
 -----------------
 - Updated mongodb-core to 1.2.6 for NODE-505.
