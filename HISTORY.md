@@ -1,3 +1,7 @@
+1.2.7 07-16-2015
+-----------------
+- Refactoring to allow to tap into find/getmore/killcursor in cursors for APM monitoring in driver.
+
 1.2.6 07-14-2015
 -----------------
 - NODE-505 Query fails to find records that have a 'result' property with an array value.
