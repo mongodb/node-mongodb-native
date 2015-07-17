@@ -50,6 +50,12 @@ var startupOptions = {
   , skip: false
 }
 
+// var listener = require('../').instrument();
+// listener.on('started', function(event) {
+//   // console.log("-------------------------------------------- started")
+//   // console.log(JSON.stringify(event, null, 2))
+// });
+
 /**
  * Standalone MongoDB Configuration
  */
@@ -211,7 +217,7 @@ var createConfiguration = function(options) {
 
 // Set up the runner
 var runner = new Runner({
-  logLevel:'error',
+  logLevel:'info',
   runners: 1,
   failFast: true
 });
