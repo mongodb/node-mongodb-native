@@ -40,11 +40,11 @@ connect.connect = connect;
 // Instrumentation instance
 var instrumentation = null;
 
-// Set up the instrumentation method
-connect.instrument = function(options) {
-  if(!instrumentation) instrumentation = new Instrumentation(core, options)
-  return instrumentation;
-}
+// // Set up the instrumentation method
+// connect.instrument = function(options) {
+//   if(!instrumentation) instrumentation = new Instrumentation(core, options)
+//   return instrumentation;
+// }
 
 // Set our exports to be the connect function
 module.exports = connect;

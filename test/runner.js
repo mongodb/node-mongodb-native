@@ -24,7 +24,7 @@ var detector = require('gleak')();
 var smokePlugin = require('./smoke_plugin.js');
 // console.log(argv._);
 var argv = require('optimist')
-    .usage('Usage: $0 -t [target] -e [environment] -n [name] -f [filename] -r [smoke report file]')
+    .usage('Usage: $0 -t [target] -e [environment] -n [name] -f [filename] -r [smoke report file] -s [skip startup of mongod]')
     .demand(['t'])
     .argv;
 
@@ -36,18 +36,20 @@ var shallowClone = function(obj) {
 
 // Skipping parameters
 var startupOptions = {
-    skipStartup: true
-  , skipRestart: true
-  , skipShutdown: true
-  , skip: false
-}
-
-// Skipping parameters
-var startupOptions = {
     skipStartup: false
   , skipRestart: false
   , skipShutdown: false
   , skip: false
+}
+
+// Skipping parameters
+if(argv.s) {
+  var startupOptions = {
+      skipStartup: true
+    , skipRestart: true
+    , skipShutdown: true
+    , skip: false
+  }
 }
 
 // var listener = require('../').instrument();
@@ -260,8 +262,8 @@ var testFiles =[
   , '/test/functional/crud_api_tests.js'
   , '/test/functional/reconnect_tests.js'
 
-  // APM tests
-  , '/test/functional/apm_tests.js'
+  // // APM tests
+  // , '/test/functional/apm_tests.js'
 
   // Logging tests
   , '/test/functional/logger_tests.js'

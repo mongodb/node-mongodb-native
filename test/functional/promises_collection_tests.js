@@ -129,3 +129,32 @@ exports['Should correctly execute findOneAndReplace operation With Promises and 
     // END
   }
 }
+
+exports['Should correctly handle bulkWrite with no options'] = {
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var error = null;
+    var result = null;
+
+    db.open().then(function(db) {
+      // Get the collection
+      var col = db.collection('find_one_and_replace_with_promise_no_option');
+      return col.bulkWrite([
+        { insertOne: { document: { a: 1 } } }
+      ])
+    }).then(function(r) {
+      result = r;
+    }).catch(function(err) {
+      error = err;
+    }).then(function() {
+      test.equal(null, error);
+      test.ok(result != null);
+
+      db.close();
+      test.done();
+    });
+  }
+}
