@@ -1,6 +1,7 @@
 2.0.40 07-14-2015
 -----------------
 - Updated mongodb-core to 1.2.7 for APM support.
+- NODE-506  Ensures that errors from bulk unordered and ordered are instanceof Error (Issue #1282, https://github.com/owenallenaz). 
 
 2.0.39 07-14-2015
 -----------------

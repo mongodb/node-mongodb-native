@@ -82,6 +82,7 @@ exports['Should correctly handle ordered multiple batch api write command error'
         // Execute the operations
         batch.execute(function(err, result) {
           // Basic properties check
+          test.equal(err instanceof Error, true);
           test.equal(1, result.nInserted);
           test.equal(true, result.hasWriteErrors());
           test.ok(1, result.getWriteErrorCount());
@@ -454,6 +455,7 @@ exports['Should correctly handle single unordered batch API'] = {
         // Execute the operations
         batch.execute(function(err, result) {
           // Basic properties check
+          test.equal(err instanceof Error, true);
           test.equal(2, result.nInserted);
           test.equal(0, result.nUpserted);
           test.equal(0, result.nMatched);
