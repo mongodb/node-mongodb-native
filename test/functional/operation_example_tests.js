@@ -2145,7 +2145,7 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
           , {name:"Sarah", title:"Princess"}], configuration.writeConcernMax(), function(err, result) {
 
           // Force keep going flag, ignoring unique index issue
-          collection.insertMany([{name:"Jim"}
+          collection.insert([{name:"Jim"}
             , {name:"Sarah", title:"Princess"}
             , {name:'Gump', title:"Gump"}], {w:1, keepGoing:true}, function(err, result) {
 

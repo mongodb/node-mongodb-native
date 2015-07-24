@@ -365,11 +365,13 @@ exports.shouldCorrectlyHandleGeospatialIndexes = {
           collection.ensureIndex({loc:'2d'}, configuration.writeConcernMax(), function(err, indexName) {
             collection.insert({'loc': [-100,100]}, configuration.writeConcernMax(), function(err, result) {
               test.equal(err,null);
+
               collection.insert({'loc': [200,200]}, configuration.writeConcernMax(), function(err, result) {
                 err = err ? err : {};
-                test.ok(err.message.indexOf("point not in interval of") != -1);
-                test.ok(err.message.indexOf("-180") != -1);
-                test.ok(err.message.indexOf("180") != -1);
+
+                test.ok(err.errmsg.indexOf("point not in interval of") != -1);
+                test.ok(err.errmsg.indexOf("-180") != -1);
+                test.ok(err.errmsg.indexOf("180") != -1);
                 db.close();
                 test.done();
               });
@@ -402,9 +404,9 @@ exports.shouldCorrectlyHandleGeospatialIndexesAlteredRange = {
                 test.equal(err,null);
                 collection.insert({'loc': [-200,-200]}, configuration.writeConcernMax(), function(err, result) {
                   err = err ? err : {};
-                  test.ok(err.message.indexOf("point not in interval of") != -1);
-                  test.ok(err.message.indexOf("0") != -1);
-                  test.ok(err.message.indexOf("1024") != -1);
+                  test.ok(err.errmsg.indexOf("point not in interval of") != -1);
+                  test.ok(err.errmsg.indexOf("0") != -1);
+                  test.ok(err.errmsg.indexOf("1024") != -1);
                   db.close();
                   test.done();
                 });

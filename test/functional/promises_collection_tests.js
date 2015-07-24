@@ -23,9 +23,13 @@ exports['Should correctly execute Collection.prototype.insertOne'] = {
       test.equal(100, db.serverConfig.connections().length);
 
       db.collection('insertOne').insertOne({a:1}).then(function(r) {
+        console.log("========================================================= 0")
 
         db.close();
         test.done();
+      }).catch(function(err) {
+        console.log("========================================================= 1")
+        console.dir(err)
       });
     });
   }

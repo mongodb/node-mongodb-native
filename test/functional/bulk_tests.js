@@ -199,35 +199,16 @@ exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations
 
         // Execute the operations
         batch.execute(function(err, result) {
-          // Test basic settings
-          test.equal(0, result.nInserted);
-          test.equal(true, result.hasWriteErrors());
-          test.ok(1, result.getWriteErrorCount());
+          test.ok(err != null);
 
-          // Individual error checking
-          var error = result.getWriteErrorAt(0);
-          test.equal(0, error.index);
-          test.ok(typeof error.code == 'number');
-          test.ok(error.errmsg != null);
-          test.equal(1, error.getOperation()['$set'].a);
-
+          //
           // Initialize the Ordered Batch
           var batch = col.initializeOrderedBulkOp();
           // Add illegal remove
           batch.find({$set:{a:1}}).removeOne();
           // Execute the operations
           batch.execute(function(err, result) {
-            // Test basic settings
-            test.equal(0, result.nRemoved);
-            test.equal(true, result.hasWriteErrors());
-            test.ok(1, result.getWriteErrorCount());
-
-            // Individual error checking
-            var error = result.getWriteErrorAt(0);
-            test.equal(0, error.index);
-            test.ok(typeof error.code == 'number');
-            test.ok(error.errmsg != null);
-            test.equal(1, error.getOperation().q['$set'].a);
+            test.ok(err != null);
 
             // Initialize the Ordered Batch
             var batch = col.initializeOrderedBulkOp();
@@ -235,18 +216,7 @@ exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations
             batch.find({a:{$set2:1}}).updateOne({c: {$set:{a:1}}});
             // Execute the operations
             batch.execute(function(err, result) {
-              // Test basic settings
-              test.equal(0, result.nMatched);
-              test.ok(0 == result.nModified || result.nModified == null);
-              test.equal(true, result.hasWriteErrors());
-              test.ok(1, result.getWriteErrorCount());
-
-              // Individual error checking
-              var error = result.getWriteErrorAt(0);
-              test.equal(0, error.index);
-              test.ok(typeof error.code == 'number');
-              test.ok(error.errmsg != null);
-              test.equal(1, error.getOperation().u.c['$set'].a);
+              test.ok(err != null);
 
               db.close();
               test.done();
@@ -689,20 +659,7 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
 
         // Execute the operations
         batch.execute(function(err, result) {
-          // Test basic settings
-          test.equal(0, result.nInserted);
-          test.equal(0, result.nMatched);
-          test.equal(0, result.nUpserted);
-          test.ok(0 == result.nModified || result.nModified == null);
-          test.equal(true, result.hasWriteErrors());
-          test.ok(1, result.getWriteErrorCount());
-
-          // Individual error checking
-          var error = result.getWriteErrorAt(0);
-          test.equal(0, error.index);
-          test.ok(typeof error.code == 'number');
-          test.ok(error.errmsg != null);
-          test.equal(1, error.getOperation()['$set'].a);
+          test.ok(err != null);
 
           // Initialize the unordered Batch
           var batch = col.initializeUnorderedBulkOp();
@@ -710,20 +667,7 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
           batch.find({$set:{a:1}}).removeOne();
           // Execute the operations
           batch.execute(function(err, result) {
-            // Test basic settings
-            test.equal(0, result.nInserted);
-            test.equal(0, result.nMatched);
-            test.equal(0, result.nUpserted);
-            test.ok(0 == result.nModified || result.nModified == null);
-            test.equal(true, result.hasWriteErrors());
-            test.ok(1, result.getWriteErrorCount());
-
-            // Individual error checking
-            var error = result.getWriteErrorAt(0);
-            test.equal(0, error.index);
-            test.ok(typeof error.code == 'number');
-            test.ok(error.errmsg != null);
-            test.equal(1, error.getOperation().q['$set'].a);
+            test.ok(err != null);
 
             // Initialize the unordered Batch
             var batch = col.initializeUnorderedBulkOp();
@@ -731,19 +675,7 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
             batch.find({$set:{a:1}}).updateOne({c: {$set:{a:1}}});
             // Execute the operations
             batch.execute(function(err, result) {
-              test.equal(0, result.nInserted);
-              test.equal(0, result.nMatched);
-              test.equal(0, result.nUpserted);
-              test.ok(0 == result.nModified || result.nModified == null);
-              test.equal(true, result.hasWriteErrors());
-              test.ok(1, result.getWriteErrorCount());
-
-              // Individual error checking
-              var error = result.getWriteErrorAt(0);
-              test.equal(0, error.index);
-              test.ok(typeof error.code == 'number');
-              test.ok(error.errmsg != null);
-              test.equal(1, error.getOperation().u.c['$set'].a);
+              test.ok(err != null);
 
               db.close();
               test.done();

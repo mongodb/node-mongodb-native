@@ -1748,7 +1748,7 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
 
       try {
         // Force keep going flag, ignoring unique index issue
-        yield collection.insertMany([{name:"Jim"}
+        yield collection.insert([{name:"Jim"}
           , {name:"Sarah", title:"Princess"}
           , {name:'Gump', title:"Gump"}], {w:1, keepGoing:true});
       } catch(err) {}

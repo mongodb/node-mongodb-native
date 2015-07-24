@@ -528,7 +528,7 @@ exports.shouldCorrectlySerializeDBRefToJSON = {
 /**
  * @ignore
  */
-exports.shouldThrowErrorIfSerializingFunction = {
+exports.shouldThrowErrorIfSerializingFunctionOrdered = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -544,6 +544,39 @@ exports.shouldThrowErrorIfSerializingFunction = {
         test.equal(null, err);
 
         collection.findOne({_id:result.ops[0]._id}, function(err, object) {
+          test.equal(func.toString(), object.z.code);
+          test.equal(1, object.i);
+          db.close();
+          test.done();
+        });
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports.shouldThrowErrorIfSerializingFunctionUnOrdered = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      var collection = db.collection('test_should_throw_error_if_serializing_function_1');
+      var func = function() { return 1};
+      // Insert the update
+      collection.insert({i:1, z:func }, {w:1, serializeFunctions:true, ordered:false}, function(err, result) {
+        test.equal(null, err);
+
+        console.log("--------------------------------- 0")
+        console.dir(result)
+
+        collection.findOne({_id:result.ops[0]._id}, function(err, object) {
+          console.dir(object)
           test.equal(func.toString(), object.z.code);
           test.equal(1, object.i);
           db.close();
@@ -1890,6 +1923,43 @@ exports.shouldCorrectlyPerformInsertAndUpdateWithFunctionSerialization = {
             db.close();
             test.done();
           });
+        });
+      });
+    });
+  }
+}
+
+exports['should correctly insert > 1000 docs using insert and insertMany'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:false})
+    db.open(function(err, db) {
+      var col = db.collection('shouldCorreclyAllowforMoreThanAThousandDocsInsert', {serializeFunctions:true});
+      var docs = [];
+
+      for(var i = 0; i < 2000; i++) {
+        docs.push({a:i});
+      }
+
+      col.insert(docs,function(err,doc){
+        test.equal(null, err);
+        test.equal(2000, doc.result.n);
+        docs = [];
+
+        for(var i = 0; i < 2000; i++) {
+          docs.push({a:i});
+        }
+
+        col.insertMany(docs,function(err,doc){
+          test.equal(null,err);
+          test.equal(2000, doc.result.n);
+
+          db.close();
+          test.done();
         });
       });
     });

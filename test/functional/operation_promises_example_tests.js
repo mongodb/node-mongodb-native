@@ -1656,23 +1656,25 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
 
       // Create a collection
       var collection = db.collection('keepGoingExample_with_promise');
-      // Add an unique index to title to force errors in the batch insert
-      collection.ensureIndex({title:1}, {unique:true}).then(function(indexName) {
+      collection.drop(function() {
+        // Add an unique index to title to force errors in the batch insert
+        collection.ensureIndex({title:1}, {unique:true}).then(function(indexName) {
 
-        // Insert some intial data into the collection
-        collection.insertMany([{name:"Jim"}
-          , {name:"Sarah", title:"Princess"}], configuration.writeConcernMax()).then(function(result) {
-
-          // Force keep going flag, ignoring unique index issue
+          // Insert some intial data into the collection
           collection.insertMany([{name:"Jim"}
-            , {name:"Sarah", title:"Princess"}
-            , {name:'Gump', title:"Gump"}], {w:1, keepGoing:true}).then(function(result) {
-          }).catch(function(err) {
-            // Count the number of documents left (should not include the duplicates)
-            collection.count().then(function(count) {
-              test.equal(3, count);
-              test.done();
-            })
+            , {name:"Sarah", title:"Princess"}], configuration.writeConcernMax()).then(function(result) {
+
+            // Force keep going flag, ignoring unique index issue
+            collection.insert([{name:"Jim"}
+              , {name:"Sarah", title:"Princess"}
+              , {name:'Gump', title:"Gump"}], {w:1, keepGoing:true}).then(function(result) {
+              }).catch(function(err) {
+              // Count the number of documents left (should not include the duplicates)
+              collection.count().then(function(count) {
+                test.equal(3, count);
+                test.done();
+              })
+            });
           });
         });
       });

@@ -378,3 +378,30 @@ exports['Should correctly execute ensureIndex using Promise'] = {
     });
   }
 }
+
+exports['Should correctly execute createCollection using passed down bluebird Promise'] = {
+  metadata: {
+    requires: {
+      promises: true,
+      node: ">0.8.0",
+      topology: ['single']
+    }
+  },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var db = null;
+    var BlueBird = require('bluebird');
+
+    MongoClient.connect(configuration.url(), {promiseLibrary: BlueBird}).then(function(conn) {
+      db = conn;
+      return db.createCollection('test');
+    }).then(function(col) {
+      test.ok(col.s.options.promiseLibrary != null);
+
+      db.close();
+      test.done();
+    });
+  }
+}
