@@ -1,3 +1,7 @@
+1.2.8 07-24-2015
+-----------------
+- Minor fix to handle 2.4.x errors better by correctly return driver layer issues.
+
 1.2.7 07-16-2015
 -----------------
 - Refactoring to allow to tap into find/getmore/killcursor in cursors for APM monitoring in driver.
