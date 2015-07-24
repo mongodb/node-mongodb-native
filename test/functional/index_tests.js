@@ -354,7 +354,7 @@ exports.shouldCorrectlyCreateAndUseSparseIndex = {
 exports.shouldCorrectlyHandleGeospatialIndexes = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { mongodb: ">1.9.1", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { mongodb: ">2.6.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -367,8 +367,8 @@ exports.shouldCorrectlyHandleGeospatialIndexes = {
               test.equal(err,null);
 
               collection.insert({'loc': [200,200]}, configuration.writeConcernMax(), function(err, result) {
-                err = err ? err : {};
-
+                console.dir(err)
+                console.dir(result)
                 test.ok(err.errmsg.indexOf("point not in interval of") != -1);
                 test.ok(err.errmsg.indexOf("-180") != -1);
                 test.ok(err.errmsg.indexOf("180") != -1);
@@ -389,7 +389,7 @@ exports.shouldCorrectlyHandleGeospatialIndexes = {
 exports.shouldCorrectlyHandleGeospatialIndexesAlteredRange = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { mongodb: ">1.9.1", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { mongodb: ">2.6.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -403,7 +403,6 @@ exports.shouldCorrectlyHandleGeospatialIndexesAlteredRange = {
               collection.insert({'loc': [200,200]}, configuration.writeConcernMax(), function(err, result) {
                 test.equal(err,null);
                 collection.insert({'loc': [-200,-200]}, configuration.writeConcernMax(), function(err, result) {
-                  err = err ? err : {};
                   test.ok(err.errmsg.indexOf("point not in interval of") != -1);
                   test.ok(err.errmsg.indexOf("0") != -1);
                   test.ok(err.errmsg.indexOf("1024") != -1);
