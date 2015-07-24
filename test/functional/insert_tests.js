@@ -572,9 +572,6 @@ exports.shouldThrowErrorIfSerializingFunctionUnOrdered = {
       collection.insert({i:1, z:func }, {w:1, serializeFunctions:true, ordered:false}, function(err, result) {
         test.equal(null, err);
 
-        console.log("--------------------------------- 0")
-        console.dir(result)
-
         collection.findOne({_id:result.ops[0]._id}, function(err, object) {
           console.dir(object)
           test.equal(func.toString(), object.z.code);
