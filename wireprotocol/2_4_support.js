@@ -447,6 +447,8 @@ var executeUnordered = function(opType, command, ismaster, ns, bson, pool, callb
   var optionWriteConcern = options.writeConcern || {w:1};
   // Final write concern
   var writeConcern = cloneWriteConcern(optionWriteConcern);
+  // Driver level error
+  var error;
 
   // Execute all the operations
   for(var i = 0; i < ops.length; i++) {
@@ -482,12 +484,14 @@ var executeUnordered = function(opType, command, ismaster, ns, bson, pool, callb
         // Give the result from getLastError the right index
         var callbackOp = function(_index) {
           return function(err, result) {
+            if(err) error = err;
             // Update the number of operations executed
             totalOps = totalOps - 1;
             // Save the getLastError document
-            getLastErrors[_index] = result.documents[0];
+            if(!err) getLastErrors[_index] = result.documents[0];
             // Check if we are done
             if(totalOps == 0) {
+              if(error) return callback(error);
               callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, connection));
             }
           }
