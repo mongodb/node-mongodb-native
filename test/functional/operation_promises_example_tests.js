@@ -121,6 +121,8 @@ exports['Aggregation Cursor next Test With Promises'] = {
         cursor.next().then(function(docs) {
           test.done();
           db.close();
+        }).catch(function(err) {
+          console.dir(err)
         });
       });
     });
