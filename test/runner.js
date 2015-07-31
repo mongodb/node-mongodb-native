@@ -260,6 +260,7 @@ var testFiles =[
   , '/test/functional/bulk_tests.js'
   , '/test/functional/operation_example_tests.js'
   , '/test/functional/crud_api_tests.js'
+  , '/test/functional/apm_tests.js'
   , '/test/functional/reconnect_tests.js'
 
   // // APM tests
