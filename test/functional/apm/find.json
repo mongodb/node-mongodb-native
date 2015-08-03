@@ -1,0 +1,361 @@
+{
+  "data": [
+    {
+      "_id": 1,
+      "x": 11
+    },
+    {
+      "_id": 2,
+      "x": 22
+    },
+    {
+      "_id": 3,
+      "x": 33
+    },
+    {
+      "_id": 4,
+      "x": 44
+    },
+    {
+      "_id": 5,
+      "x": 55
+    }
+  ],
+  "collection_name": "test",
+  "database_name": "command-monitoring-tests",
+  "namespace": "test.command-monitoring-tests",
+  "tests": [
+    {
+      "description": "A successful find event with no options",
+      "operation": {
+        "name": "find",
+        "arguments": {
+          "filter": {
+            "_id": 1
+          }
+        }
+      },
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "find": "test",
+              "filter": {
+                "_id": 1
+              }
+            },
+            "command_name": "find",
+            "database_name": "command-monitoring-tests"
+          }
+        },
+        {
+          "command_succeeded_event": {
+            "reply": {
+              "ok": 1,
+              "cursor": {
+                "id": 0,
+                "ns": "test.command-monitoring-tests",
+                "firstBatch": [
+                  {
+                    "_id": 1,
+                    "x": 11
+                  }
+                ]
+              }
+            },
+            "command_name": "find",
+            "database_name": "command-monitoring-tests"
+          }
+        }
+      ]
+    },
+    {
+      "description": "A successful find event with options",
+      "operation": {
+        "name": "find",
+        "arguments": {
+          "filter": {
+            "_id": 1
+          },
+          "sort": {
+            "_id": 1
+          },
+          "limit": 2
+        }
+      },
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "find": "test",
+              "filter": {
+                "_id": 1
+              },
+              "sort": {
+                "_id": 1
+              },
+              "limit": 2
+            },
+            "command_name": "find",
+            "database_name": "command-monitoring-tests"
+          }
+        },
+        {
+          "command_succeeded_event": {
+            "reply": {
+              "ok": 1,
+              "cursor": {
+                "id": 0,
+                "ns": "test.command-monitoring-tests",
+                "firstBatch": [
+                  {
+                    "_id": 1,
+                    "x": 11
+                  }
+                ]
+              }
+            },
+            "command_name": "find",
+            "database_name": "command-monitoring-tests"
+          }
+        }
+      ]
+    },
+    {
+      "description": "A successful find event with a getmore",
+      "operation": {
+        "name": "find",
+        "arguments": {
+          "filter": {
+            "_id": {
+              "$gte": 1
+            }
+          },
+          "sort": {
+            "_id": 1
+          },
+          "batchSize": 3
+        }
+      },
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "find": "test",
+              "filter": {
+                "_id": {
+                  "$gte": 1
+                }
+              },
+              "sort": {
+                "_id": 1
+              },
+              "limit": 3
+            },
+            "command_name": "find",
+            "database_name": "command-monitoring-tests"
+          }
+        },
+        {
+          "command_succeeded_event": {
+            "reply": {
+              "ok": 1,
+              "cursor": {
+                "ns": "test.command-monitoring-tests",
+                "firstBatch": [
+                  {
+                    "_id": 1,
+                    "x": 11
+                  },
+                  {
+                    "_id": 2,
+                    "x": 22
+                  },
+                  {
+                    "_id": 3,
+                    "x": 33
+                  }
+                ]
+              }
+            },
+            "command_name": "find",
+            "database_name": "command-monitoring-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "collection": "test",
+              "batchSize": 3
+            },
+            "command_name": "getMore",
+            "database_name": "command-monitoring-tests"
+          }
+        },
+        {
+          "command_succeeded_event": {
+            "reply": {
+              "ok": 1,
+              "cursor": {
+                "ns": "test.command-monitoring-tests",
+                "nextBatch": [
+                  {
+                    "_id": 4,
+                    "x": 44
+                  },
+                  {
+                    "_id": 5,
+                    "x": 55
+                  }
+                ]
+              }
+            },
+            "command_name": "getMore",
+            "database_name": "command-monitoring-tests"
+          }
+        }
+      ]
+    },
+    {
+      "description": "A successful find event with a getmore and killcursors",
+      "operation": {
+        "name": "find",
+        "arguments": {
+          "filter": {
+            "_id": {
+              "$gte": 1
+            }
+          },
+          "sort": {
+            "_id": 1
+          },
+          "batchSize": 3,
+          "limit": 4
+        }
+      },
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "find": "test",
+              "filter": {
+                "_id": {
+                  "$gte": 1
+                }
+              },
+              "sort": {
+                "_id": 1
+              },
+              "limit": 3
+            },
+            "command_name": "find",
+            "database_name": "command-monitoring-tests"
+          }
+        },
+        {
+          "command_succeeded_event": {
+            "reply": {
+              "ok": 1,
+              "cursor": {
+                "ns": "test.command-monitoring-tests",
+                "firstBatch": [
+                  {
+                    "_id": 1,
+                    "x": 11
+                  },
+                  {
+                    "_id": 2,
+                    "x": 22
+                  },
+                  {
+                    "_id": 3,
+                    "x": 33
+                  }
+                ]
+              }
+            },
+            "command_name": "find",
+            "database_name": "command-monitoring-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "collection": "test",
+              "batchSize": 1
+            },
+            "command_name": "getMore",
+            "database_name": "command-monitoring-tests"
+          }
+        },
+        {
+          "command_succeeded_event": {
+            "reply": {
+              "ok": 1,
+              "cursor": {
+                "ns": "test.command-monitoring-tests",
+                "nextBatch": [
+                  {
+                    "_id": 4,
+                    "x": 44
+                  }
+                ]
+              }
+            },
+            "command_name": "getMore",
+            "database_name": "command-monitoring-tests"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "killCursors": "test"
+            },
+            "command_name": "killCursors",
+            "database_name": "command-monitoring-tests"
+          }
+        },
+        {
+          "command_succeeded_event": {
+            "reply": {
+              "ok": 1
+            },
+            "command_name": "killCursors",
+            "database_name": "command-monitoring-tests"
+          }
+        }
+      ]
+    },
+    {
+      "description": "A failed find event",
+      "operation": {
+        "name": "find",
+        "arguments": {
+          "filter": {
+            "$or": true
+          }
+        }
+      },
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "find": "test",
+              "filter": {
+                "$or": true
+              }
+            },
+            "command_name": "find",
+            "database_name": "command-monitoring-tests"
+          }
+        },
+        {
+          "command_failed_event": {
+            "command_name": "find",
+            "database_name": "command-monitoring-tests"
+          }
+        }
+      ]
+    }
+  ]
+}

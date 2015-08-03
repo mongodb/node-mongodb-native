@@ -1,0 +1,53 @@
+data:
+  - { _id: 1, x: 11 }
+  - { _id: 2, x: 22 }
+  - { _id: 3, x: 33 }
+
+collection_name: &collection_name "test"
+database_name: &database_name "command-monitoring-tests"
+
+tests:
+  -
+    description: "A successful delete one"
+    operation:
+      name: "deleteOne"
+      arguments:
+        filter:
+          _id: { $gt: 1 }
+    expectations:
+      -
+        command_started_event:
+          command:
+            delete: *collection_name
+            deletes:
+              - { q: { _id: { $gt: 1 }}, limit: 1 }
+            writeConcern: { w: 1 }
+            ordered: true
+          command_name: "delete"
+          database_name: *database_name
+      -
+        command_succeeded_event:
+          reply:
+            - { ok: 1 }
+          command_name: "delete"
+          database_name: *database_name
+  -
+    description: "A failed delete event"
+    operation:
+      name: "deleteOne"
+      arguments:
+        filter:
+          _id: { $nothing: 1 }
+    expectations:
+      -
+        command_started_event:
+          command:
+            delete: *collection_name
+            deletes:
+              q: { _id: { $nothing: 1 }}
+          command_name: "delete"
+          database_name: *database_name
+      -
+        command_failed_event:
+          command_name: "delete"
+          database_name: *database_name

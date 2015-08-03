@@ -1,6 +1,7 @@
 "use strict";
 
-var f = require('util').format;
+var f = require('util').format,
+  fs = require('fs');
 
 exports['Correctly receive the APM events for an insert'] = {
   metadata: { requires: { topology: ['single'] } },
@@ -92,6 +93,310 @@ exports['Correctly receive the APM events for an insert using custom operationId
 
         db.close();
         test.done();
+      });
+    });
+  }
+}
+
+var validateExpecations = function(test, expectation, results) {
+  if(expectation.command_started_event) {
+    // console.log("---------------------------- validate command_started_event")
+    // console.dir(expectation)
+    // Get the command
+    var obj = expectation.command_started_event;
+    // Unpack the expectation
+    var command = obj.command;
+    var databaseName = obj.database_name;
+    var commandName = obj.command_name;
+    // Get the result
+    var result = results.starts.shift();
+    // console.dir(results)
+    // console.log("---------------------------- validate command_started_event 1 RESULT")
+    // console.log(JSON.stringify(result, null, 2))
+    // console.log("---------------------------- validate command_started_event 2 EXPECTED")
+    // console.log(JSON.stringify(obj, null, 2))
+    // // Validate the test
+    test.equal(commandName, result.commandName)
+  } else if(expectation.command_succeeded_event) {
+    // console.log("---------------------------- validate command_succeeded_event")
+    var obj = expectation.command_succeeded_event;
+    // Unpack the expectation
+    var reply = obj.reply;
+    var databaseName = obj.database_name;
+    var commandName = obj.command_name;
+    // Get the result
+    var result = results.successes.shift();
+    // console.dir(results)
+    // console.log("---------------------------- validate command_succeeded_event 1 RESULT")
+    // console.log(JSON.stringify(result, null, 2))
+    // console.log("---------------------------- validate command_succeeded_event 2 EXPECTED")
+    // console.log(JSON.stringify(obj, null, 2))
+    
+
+    // Validate the test
+    test.equal(commandName, result.commandName);
+    // console.dir(result)
+    // console.dir(reply[0])
+    // console.dir(result.reply.result)
+    test.deepEqual(reply[0], result.reply.result);
+    // console.dir(obj)
+    // console.dir(result)
+  } else if(expectation.command_failed_event) {
+    // console.log("---------------------------- validate command_failed_event")
+    var obj = expectation.command_failed_event;
+    // Unpack the expectation
+    var reply = obj.reply;
+    var databaseName = obj.database_name;
+    var commandName = obj.command_name;
+    // Get the result
+    var result = results.failures.shift();
+    // console.log("---------------------------- validate command_failed_event 1")
+    // console.dir(results)
+    // console.dir(expectation)
+
+    // Validate the test
+    test.equal(commandName, result.commandName);
+  }
+}
+
+var executeOperation = function(assert, client, listener, scenario, test, callback) {
+  var successes = [];
+  var failures = [];
+  var starts = [];
+
+  // console.log("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+  // console.log("*****************************************************************************************")
+  // console.log("*****************************************************************************************")
+  // console.log("*****************************************************************************************")
+
+  // Get the operation
+  var operation = test.operation;
+
+  // Set up the listeners
+  listener.on('started', function(event) {
+    // console.log("################################################ started")
+    // console.log(JSON.stringify(event, null, 2))
+    starts.push(event);
+  });
+
+  listener.on('succeeded', function(event) {
+    // console.log("################################################ successes")
+    successes.push(event);
+  });
+
+  listener.on('failed', function(event) {
+    // console.log("################################################ failed")
+    failures.push(event);
+  });
+
+  // Cleanup the listeners
+  var cleanUpListeners = function(_listener) {
+    _listener.removeAllListeners('started');
+    _listener.removeAllListeners('succeeded');
+    _listener.removeAllListeners('failed');
+  }
+
+  // // Set up the test expectations
+  // test.expectations.forEach(function(x) {
+  //   if(x.command_started_event) {
+  //     listener.once('started', function(event) {
+  //       console.log("################################################ started")
+  //       console.log(JSON.stringify(event, null, 2))
+  //       starts.push(event);
+  //     });
+  //   } else if(x.command_succeeded_event) {
+  //     listener.once('succeeded', function(event) {
+  //       // console.log("################################################ successes")
+  //       successes.push(event);
+  //     });
+  //   } else if(x.command_failed_event) {
+  //     listener.once('failed', function(event) {
+  //       // console.log("################################################ failed")
+  //       failures.push(event);
+  //     });
+  //   }
+  // });
+
+  // console.log("------------------------------- operation.name :: " + operation.name)
+
+  // Get the command name
+  var commandName = operation.name;
+  // Get the arguments
+  var args = operation.arguments || {};
+  // Get the database instance
+  var db = client.db(scenario.database_name);
+  // Get the collection
+  var collection = db.collection(scenario.collection_name);
+  // Parameters
+  var params = [];
+
+  // Unpack the operation
+  if(args.filter) {
+    params.push(args.filter);
+  } else if(args.deletes) {
+    params.push(args.deletes);
+  }
+
+  // Find command is special needs to executed using toArray
+  if(operation.name == 'find') {
+    var cursor = collection[commandName]();
+
+    if(args.filter) {
+      cursor = cursor.filter(args.filter);
+    }
+
+    if(args.batchSize) {
+      cursor = cursor.batchSize(args.batchSize);
+    }
+
+    if(args.limit) {
+      cursor = cursor.limit(args.limit);
+    }
+
+    // console.log("----------------------------------------- args")
+    // console.dir(args)
+
+    // Execute find
+    cursor.toArray(function(err, r) {
+      // Validate the expectations
+      test.expectations.forEach(function(x, index) {
+        validateExpecations(assert, x, {
+          successes: successes, failures: failures, starts: starts
+        });
+      });
+
+      // Cleanup listeners
+      cleanUpListeners(listener);
+
+      // Finish the operation
+      callback();
+    });
+  } else {
+    params.push(function(err, result) {
+      // Validate the expectations
+      test.expectations.forEach(function(x, index) {
+        validateExpecations(assert, x, {
+          successes: successes, failures: failures, starts: starts
+        });
+      });
+
+      // Cleanup listeners
+      cleanUpListeners(listener);
+
+      // Finish the operation
+      callback();
+    });
+
+    // Execute the operation
+    collection[commandName].apply(collection, params);
+  }
+
+  // // Execute the test
+  // if(operation.name == 'count') {
+  //   var args = operation.arguments || {};
+  //   // Get the database instance
+  //   var db = client.db(scenario.database_name);
+  //   // Get the collection
+  //   var collection = db.collection(scenario.collection_name);
+  //   // Parameters
+  //   var params = [];
+
+  //   // Unpack the operation
+  //   if(args.filter) {
+  //     params.push(args.filter);
+  //   }
+
+  //   params.push(function(err, result) {
+  //     // Validate the expectations
+  //     test.expectations.forEach(function(x, index) {
+  //       validateExpecations(assert, x, {
+  //         successes: successes, failures: failures, starts: starts
+  //       });
+  //     });
+
+  //     // Finish the operation
+  //     callback();
+  //   });
+
+  //   // Execute the operation
+  //   collection.count.apply(collection, params);
+  // } else if(operation.name == 'deleteOne') {
+
+  // }
+}
+
+var executeTests = function(assert, client, listener, scenario, tests, callback) {
+  if(tests.length == 0) return callback();
+  // Get the scenario
+  var test = tests.shift();
+  // Execute the test
+  console.log(f('execute test [%s]', test.description));
+
+  // Setup and execute the operation
+  executeOperation(assert, client, listener, scenario, test, function() {
+    
+    // Execute the next test
+    executeTests(assert, client, listener, scenario, tests, callback);
+  });
+}
+
+var executeSuite = function(assert, client, listener, scenarios, callback) {
+  if(scenarios.length == 0) return callback();
+  // Get the scenario
+  var scenario = scenarios.shift();
+  // Get the data
+  var data = scenario.data;
+  // Get the database
+  var db = client.db(scenario.database_name);
+  // Insert into the db
+  var collection = db.collection(scenario.collection_name);
+
+  // Drop the collection
+  collection.drop(function() {
+    // Insert the data
+    collection.insertMany(data, function(err, r) {
+      assert.equal(null, err);
+      assert.equal(data.length, r.insertedCount);
+      
+      // Execute the tests
+      executeTests(assert, client, listener, scenario, scenario.tests.slice(0), function() {
+        // Execute the next suite
+        executeSuite(assert, client, listener, scenarios, callback);
+      });    
+    });    
+  });
+}
+
+exports['Correctly run all JSON APM Tests'] = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    // Read all the json files for the APM spec
+    var scenarios = fs.readdirSync(__dirname + '/apm').filter(function(x) {
+      return x.indexOf('.json') != -1;
+    }).map(function(x) {
+      return JSON.parse(fs.readFileSync(__dirname + '/apm/' + x));
+    });
+
+    // scenarios = scenarios.slice(2, 3)
+    // scenarios = scenarios.slice(0, 3)
+    scenarios = scenarios.slice(3, 4)
+
+    // Get the methods
+    var MongoClient = require('../..');
+    var listener = require('../../').instrument();
+
+    // Connect to the db
+    MongoClient.connect(configuration.url(), function(err, client) {
+      test.equal(null, err);
+
+      // Execute each group of tests
+      executeSuite(test, client, listener, scenarios.slice(0), function(err) {
+        test.equal(null, err);
+
+        client.close();
+        test.done();      
       });
     });
   }
