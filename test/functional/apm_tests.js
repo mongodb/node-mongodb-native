@@ -2,39 +2,100 @@
 
 var f = require('util').format;
 
-// exports['Correctly receive the APM events for an insert'] = {
-//   metadata: { requires: { topology: ['single'] } },
+exports['Correctly receive the APM events for an insert'] = {
+  metadata: { requires: { topology: ['single'] } },
 
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var started = [];
-//     var succeeded = [];
-//     var failed = [];
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var started = [];
+    var succeeded = [];
+    var failed = [];
+    var callbackTriggered = false;
 
-//     var listener = require('../..').instrument();
-//     listener.on('started', function(event) {
-//       if(event.commandName == 'insert')
-//         started.push(event);
-//     });
+    var listener = require('../..').instrument(function(err, instrumentations) {
+      callbackTriggered = true;
+    });
 
-//     listener.on('succeeded', function(event) {
-//       if(event.commandName == 'insert')
-//         succeeded.push(event);
-//     });
+    listener.on('started', function(event) {
+      if(event.commandName == 'insert')
+        started.push(event);
+    });
 
-//     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-//     db.open(function(err, db) {
-//       db.collection('apm_test').insertOne({a:1}).then(function(r) {
-//         test.equal(1, r.insertedCount);
-//         test.equal(1, started.length);
-//         test.equal(1, succeeded.length);
+    listener.on('succeeded', function(event) {
+      if(event.commandName == 'insert')
+        succeeded.push(event);
+    });
 
-//         db.close();
-//         test.done();
-//       });
-//     });
-//   }
-// }
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      db.collection('apm_test').insertOne({a:1}).then(function(r) {
+        test.equal(1, r.insertedCount);
+        test.equal(1, started.length);
+        test.equal(1, succeeded.length);
+        test.ok(callbackTriggered);
+        listener.uninstrument();
+
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
+
+exports['Correctly receive the APM events for an insert using custom operationId and time generator'] = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var started = [];
+    var succeeded = [];
+    var failed = [];
+    var callbackTriggered = false;
+
+    var listener = require('../..').instrument({
+      operationIdGenerator: {
+        next: function() {
+          return 10000;
+        }
+      }, 
+      timestampGenerator: {
+        current: function() {
+          return 1;
+        },
+        duration: function(start, end) {
+          return end - start;
+        }
+      }
+    }, function(err, instrumentations) {
+      callbackTriggered = true;
+    });
+
+    listener.on('started', function(event) {
+      if(event.commandName == 'insert')
+        started.push(event);
+    });
+
+    listener.on('succeeded', function(event) {
+      if(event.commandName == 'insert')
+        succeeded.push(event);
+    });
+
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      db.collection('apm_test_1').insertOne({a:1}).then(function(r) {
+        test.equal(1, started.length);
+        test.equal(1, succeeded.length);
+        test.equal(10000, started[0].operationId);
+        test.equal(0, succeeded[0].duration);
+        test.ok(callbackTriggered);
+        listener.uninstrument();
+
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
 
 // exports['Should correctly instrument driver with callback=true, promise=false, returns=null, static=false'] = {
 //   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
