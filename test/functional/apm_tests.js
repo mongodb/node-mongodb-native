@@ -29,6 +29,8 @@ exports['Correctly receive the APM events for an insert'] = {
 
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
     db.open(function(err, db) {
+      test.equal(null, err);
+
       db.collection('apm_test').insertOne({a:1}).then(function(r) {
         test.equal(1, r.insertedCount);
         test.equal(1, started.length);
@@ -223,7 +225,6 @@ var executeOperation = function(assert, client, listener, scenario, test, callba
     });
   } else {
     params.push(function(err, result) {
-
       // Validate the expectations
       test.expectations.forEach(function(x, index) {
         validateExpecations(assert, x, {
@@ -351,11 +352,10 @@ exports['Correctly receive the APM events for a find with getmore and killcursor
       db.collection('apm_test_2').drop(function(err, r) {
 
         // Insert test documents
-        db.collection('apm_test_2').insertMany([{a:1}, {a:1}, {a:1}, {a:1}, {a:1}, {a:1}]).then(function(r) {
+        db.collection('apm_test_2').insertMany([{a:1}, {a:1}, {a:1}, {a:1}, {a:1}, {a:1}], {w:1}).then(function(r) {
           test.equal(6, r.insertedCount);
 
           db.collection('apm_test_2').find({a:1})
-            .sort({a:1})
             .project({_id: 1, a:1})
             .hint({'_id':1})
             .skip(1)
@@ -399,7 +399,7 @@ exports['Correctly receive the APM events for a find with getmore and killcursor
 }
 
 exports['Correctly receive the APM failure event for find'] = {
-  metadata: { requires: { topology: ['single'] } },
+  metadata: { requires: { topology: ['single'], mongodb: ">=2.6.0" } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -805,7 +805,6 @@ exports['Correctly receive the APM events for a bulk operation'] = {
 
     var listener = require('../..').instrument();
     listener.on('started', function(event) {
-      // console.log(JSON.stringify(event, null, 2))
       if(event.commandName == 'insert' || event.commandName == 'update' || event.commandName == 'delete')
         started.push(event);
     });
