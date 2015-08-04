@@ -6,7 +6,7 @@ menu:
   main:
     parent: tutorials
 prev: ../../tutorials/changes-from-1.0
-next: ../../tutorials/connecting
+next: ../../tutorials/apm
 title: Driver Enterprise Features
 weight: 61
 ---
