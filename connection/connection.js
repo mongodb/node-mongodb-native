@@ -356,6 +356,7 @@ Connection.prototype.connect = function(_options) {
       // We are done emit connect
       self.emit('connect', self);
     });
+    self.connection.setTimeout(self.connectionTimeout);
   } else {
     self.connection.on('connect', function() {
       // Set socket timeout instead of connection timeout
