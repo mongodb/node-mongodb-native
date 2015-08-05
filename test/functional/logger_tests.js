@@ -13,6 +13,7 @@ exports['Should correctly Enable logging'] = {
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
       var collection = db.collection('enable_logging_1');
 
       // Logging setup
