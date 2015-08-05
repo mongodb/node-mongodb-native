@@ -1,7 +1,9 @@
 2.0.40 07-14-2015
 -----------------
 - Updated mongodb-core to 1.2.8 for APM support and 2.4 wire protocol error handler fix.
-- NODE-506  Ensures that errors from bulk unordered and ordered are instanceof Error (Issue #1282, https://github.com/owenallenaz).
+- NODE-506 Ensures that errors from bulk unordered and ordered are instanceof Error (Issue #1282, https://github.com/owenallenaz).
+- NODE-526 Unique index not throwing duplicate key error.
+- NODE-528 Ignore undefined fields in Collection.find().
 
 2.0.39 07-14-2015
 -----------------
