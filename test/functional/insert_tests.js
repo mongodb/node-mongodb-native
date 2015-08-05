@@ -573,7 +573,6 @@ exports.shouldThrowErrorIfSerializingFunctionUnOrdered = {
         test.equal(null, err);
 
         collection.findOne({_id:result.ops[0]._id}, function(err, object) {
-          console.dir(object)
           test.equal(func.toString(), object.z.code);
           test.equal(1, object.i);
           db.close();
@@ -1962,3 +1961,131 @@ exports['should correctly insert > 1000 docs using insert and insertMany'] = {
     });
   }
 }
+
+exports['should return error on unordered insertMany with multiple unique key constraints'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:false})
+    db.open(function(err, db) {
+      // Get collection
+      var col = db.collection('insertManyMultipleWriteErrors');
+      col.drop(function(err, r) {
+
+        // Create unique index
+        col.createIndex({a:1}, {unique:true}, function(err, r) {
+          test.equal(null, err);
+
+          col.insertMany([{a:1}, {a:2}, {a:1}, {a:3}, {a:1}], {ordered:false}, function(err, r) {
+            test.ok(err != null);
+            test.ok(err.writeErrors.length == 2);
+
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
+  }
+}
+
+exports['should return error on unordered insert with multiple unique key constraints'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:false})
+    db.open(function(err, db) {
+      // Get collection
+      var col = db.collection('insertManyMultipleWriteErrors1');
+      col.drop(function(err, r) {
+
+        // Create unique index
+        col.createIndex({a:1}, {unique:true}, function(err, r) {
+          test.equal(null, err);
+
+          col.insert([{a:1}, {a:2}, {a:1}, {a:3}, {a:1}], {ordered:false}, function(err, r) {
+            test.ok(err != null);
+            test.ok(err.writeErrors.length == 2);
+
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
+  }
+}
+
+exports['should return error on ordered insertMany with multiple unique key constraints'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:false})
+    db.open(function(err, db) {
+      // Get collection
+      var col = db.collection('insertManyMultipleWriteErrors2');
+      col.drop(function(err, r) {
+
+        // Create unique index
+        col.createIndex({a:1}, {unique:true}, function(err, r) {
+          test.equal(null, err);
+
+          col.insertMany([{a:1}, {a:2}, {a:1}, {a:3}, {a:1}], {ordered:true}, function(err, r) {
+            test.ok(err != null);
+
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
+  }
+}
+
+exports['should return error on ordered insert with multiple unique key constraints'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {native_parser:false})
+    db.open(function(err, db) {
+      // Get collection
+      var col = db.collection('insertManyMultipleWriteErrors3');
+      col.drop(function(err, r) {
+
+        // Create unique index
+        col.createIndex({a:1}, {unique:true}, function(err, r) {
+          test.equal(null, err);
+
+          col.insert([{a:1}, {a:2}, {a:1}, {a:3}, {a:1}], {ordered:true}, function(err, r) {
+            test.ok(err != null);
+
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
+  }
+}
+
+
+
+
+
+
+
+
+
+
