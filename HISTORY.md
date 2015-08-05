@@ -1,3 +1,8 @@
+1.2.9 08-05-2015
+----------------
+- NODE-525 Reset connectionTimeout after it's overwritten by tls.connect.
+- NODE-518 connectTimeoutMS is doubled in 2.0.39.
+
 1.2.8 07-24-2015
 -----------------
 - Minor fix to handle 2.4.x errors better by correctly return driver layer issues.
