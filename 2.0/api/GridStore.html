@@ -584,13 +584,21 @@
             
                 <li data-name="Cursor#hasNext"><a href="Cursor.html#hasNext">hasNext</a></li>
             
+                <li data-name="Cursor#hint"><a href="Cursor.html#hint">hint</a></li>
+            
                 <li data-name="Cursor#isClosed"><a href="Cursor.html#isClosed">isClosed</a></li>
             
                 <li data-name="Cursor#limit"><a href="Cursor.html#limit">limit</a></li>
             
                 <li data-name="Cursor#map"><a href="Cursor.html#map">map</a></li>
             
+                <li data-name="Cursor#max"><a href="Cursor.html#max">max</a></li>
+            
+                <li data-name="Cursor#maxScan"><a href="Cursor.html#maxScan">maxScan</a></li>
+            
                 <li data-name="Cursor#maxTimeMS"><a href="Cursor.html#maxTimeMS">maxTimeMS</a></li>
+            
+                <li data-name="Cursor#min"><a href="Cursor.html#min">min</a></li>
             
                 <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
             
@@ -608,6 +616,8 @@
             
                 <li data-name="Cursor#resume"><a href="Cursor.html#resume">resume</a></li>
             
+                <li data-name="Cursor#returnKey"><a href="Cursor.html#returnKey">returnKey</a></li>
+            
                 <li data-name="Cursor#rewind"><a href="Cursor.html#rewind">rewind</a></li>
             
                 <li data-name="Cursor#setBatchSize"><a href="Cursor.html#setBatchSize">setBatchSize</a></li>
@@ -622,7 +632,11 @@
             
                 <li data-name="Cursor#setReadPreference"><a href="Cursor.html#setReadPreference">setReadPreference</a></li>
             
+                <li data-name="Cursor#showRecordId"><a href="Cursor.html#showRecordId">showRecordId</a></li>
+            
                 <li data-name="Cursor#skip"><a href="Cursor.html#skip">skip</a></li>
+            
+                <li data-name="Cursor#snapshot"><a href="Cursor.html#snapshot">snapshot</a></li>
             
                 <li data-name="Cursor#sort"><a href="Cursor.html#sort">sort</a></li>
             
@@ -2673,7 +2687,7 @@ GridStore instance.
     <div class="nameContainer">
         <h4 class="name" id=".exist">
             
-            <span class="type-signature static">static</span>GridStore.exist<span class="signature">(db, name, <span class="optional">rootCollection</span>, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            <span class="type-signature static">static</span>GridStore.exist<span class="signature">(db, name, <span class="optional">rootCollection</span>, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -2976,6 +2990,8 @@ GridStore instance.
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -3042,7 +3058,7 @@ Promise if no callback passed
     <div class="nameContainer">
         <h4 class="name" id=".list">
             
-            <span class="type-signature static">static</span>GridStore.list<span class="signature">(db, <span class="optional">rootCollection</span>, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            <span class="type-signature static">static</span>GridStore.list<span class="signature">(db, <span class="optional">rootCollection</span>, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -3313,6 +3329,8 @@ Promise if no callback passed
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -3379,7 +3397,7 @@ Promise if no callback passed
     <div class="nameContainer">
         <h4 class="name" id=".read">
             
-            <span class="type-signature static">static</span>GridStore.read<span class="signature">(db, name, <span class="optional">length</span>, <span class="optional">offset</span>, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            <span class="type-signature static">static</span>GridStore.read<span class="signature">(db, name, <span class="optional">length</span>, <span class="optional">offset</span>, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -3721,6 +3739,8 @@ Promise if no callback passed
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -3787,7 +3807,7 @@ Promise if no callback passed
     <div class="nameContainer">
         <h4 class="name" id=".readlines">
             
-            <span class="type-signature static">static</span>GridStore.readlines<span class="signature">(db, name, <span class="optional">separator</span>, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            <span class="type-signature static">static</span>GridStore.readlines<span class="signature">(db, name, <span class="optional">separator</span>, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -4093,6 +4113,8 @@ Promise if no callback passed
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -4159,7 +4181,7 @@ Promise if no callback passed
     <div class="nameContainer">
         <h4 class="name" id=".unlink">
             
-            <span class="type-signature static">static</span>GridStore.unlink<span class="signature">(db, names, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            <span class="type-signature static">static</span>GridStore.unlink<span class="signature">(db, names, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -4392,6 +4414,8 @@ Promise if no callback passed
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -4610,7 +4634,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="close">
             
-            close<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            close<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -4674,6 +4698,13 @@ already exists. This will work properly only if mode was initialized to
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 <p>this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.</p></td>
         </tr>
@@ -5167,7 +5198,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="getc">
             
-            getc<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            getc<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -5229,6 +5260,13 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 <p>this gets called after this method is executed. Passes null to the first parameter and the character read to the second or null to the second if the read/write head is at the end of the file.</p></td>
         </tr>
@@ -5392,7 +5430,7 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="open">
             
-            open<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            open<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -5455,6 +5493,13 @@ new one if file does not exist.</p>
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 <p>this will be called after executing this method</p></td>
         </tr>
@@ -5886,7 +5931,7 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="puts">
             
-            puts<span class="signature">(string, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            puts<span class="signature">(string, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -5950,6 +5995,11 @@ the given string does not have one.</p>
             
             <td class="description last">
                 
+                    
+                    
+                        
+                    
+                
                 <p>the string to write.</p></td>
         </tr>
 	
@@ -5972,6 +6022,13 @@ the given string does not have one.</p>
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 <p>this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.</p></td>
         </tr>
@@ -6128,7 +6185,7 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="read">
             
-            read<span class="signature">(<span class="optional">length</span>, <span class="optional">buffer</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            read<span class="signature">(<span class="optional">length</span>, <span class="optional">buffer</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -6258,6 +6315,8 @@ co(function*() {
             
             <td class="description last">
                 
+                    
+                        <span class="optional">optional</span>
                     
                     
                         
@@ -6446,7 +6505,7 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="readlines">
             
-            readlines<span class="signature">(<span class="optional">separator</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            readlines<span class="signature">(<span class="optional">separator</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -6539,6 +6598,8 @@ co(function*() {
             
             <td class="description last">
                 
+                    
+                        <span class="optional">optional</span>
                     
                     
                         
@@ -6750,7 +6811,7 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="rewind">
             
-            rewind<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            rewind<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -6813,6 +6874,13 @@ co(function*() {
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 <p>this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.</p></td>
         </tr>
@@ -7030,7 +7098,7 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="seek">
             
-            seek<span class="signature">(<span class="optional">position</span>, <span class="optional">seekLocation</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            seek<span class="signature">(<span class="optional">position</span>, <span class="optional">seekLocation</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -7160,6 +7228,8 @@ co(function*() {
             
             <td class="description last">
                 
+                    
+                        <span class="optional">optional</span>
                     
                     
                         
@@ -7532,7 +7602,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="tell">
             
-            tell<span class="signature">(<span class="optional">length</span>, <span class="optional">buffer</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            tell<span class="signature">(<span class="optional">length</span>, <span class="optional">buffer</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -7658,6 +7728,8 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             
             <td class="description last">
                 
+                    
+                        <span class="optional">optional</span>
                     
                     
                         
@@ -7843,7 +7915,7 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="unlink">
             
-            unlink<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            unlink<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -7905,6 +7977,13 @@ co(function*() {
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 <p>the command callback.</p></td>
         </tr>
@@ -8101,7 +8180,7 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="write">
             
-            write<span class="signature">(data, <span class="optional">close</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            write<span class="signature">(data, <span class="optional">close</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -8225,6 +8304,8 @@ co(function*() {
             
             <td class="description last">
                 
+                    
+                        <span class="optional">optional</span>
                     
                     
                         
@@ -8411,7 +8492,7 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="writeFile">
             
-            writeFile<span class="signature">(file, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            writeFile<span class="signature">(file, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -8480,6 +8561,11 @@ co(function*() {
             
             <td class="description last">
                 
+                    
+                    
+                        
+                    
+                
                 <p>the file to store.</p></td>
         </tr>
 	
@@ -8502,6 +8588,13 @@ co(function*() {
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 <p>this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.</p></td>
         </tr>
@@ -9806,7 +9899,7 @@ co(function*() {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue Jul 14 2015 11:44:06 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Aug 06 2015 13:24:15 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

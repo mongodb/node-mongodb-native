@@ -584,13 +584,21 @@
             
                 <li data-name="Cursor#hasNext"><a href="Cursor.html#hasNext">hasNext</a></li>
             
+                <li data-name="Cursor#hint"><a href="Cursor.html#hint">hint</a></li>
+            
                 <li data-name="Cursor#isClosed"><a href="Cursor.html#isClosed">isClosed</a></li>
             
                 <li data-name="Cursor#limit"><a href="Cursor.html#limit">limit</a></li>
             
                 <li data-name="Cursor#map"><a href="Cursor.html#map">map</a></li>
             
+                <li data-name="Cursor#max"><a href="Cursor.html#max">max</a></li>
+            
+                <li data-name="Cursor#maxScan"><a href="Cursor.html#maxScan">maxScan</a></li>
+            
                 <li data-name="Cursor#maxTimeMS"><a href="Cursor.html#maxTimeMS">maxTimeMS</a></li>
+            
+                <li data-name="Cursor#min"><a href="Cursor.html#min">min</a></li>
             
                 <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
             
@@ -608,6 +616,8 @@
             
                 <li data-name="Cursor#resume"><a href="Cursor.html#resume">resume</a></li>
             
+                <li data-name="Cursor#returnKey"><a href="Cursor.html#returnKey">returnKey</a></li>
+            
                 <li data-name="Cursor#rewind"><a href="Cursor.html#rewind">rewind</a></li>
             
                 <li data-name="Cursor#setBatchSize"><a href="Cursor.html#setBatchSize">setBatchSize</a></li>
@@ -622,7 +632,11 @@
             
                 <li data-name="Cursor#setReadPreference"><a href="Cursor.html#setReadPreference">setReadPreference</a></li>
             
+                <li data-name="Cursor#showRecordId"><a href="Cursor.html#showRecordId">showRecordId</a></li>
+            
                 <li data-name="Cursor#skip"><a href="Cursor.html#skip">skip</a></li>
+            
+                <li data-name="Cursor#snapshot"><a href="Cursor.html#snapshot">snapshot</a></li>
             
                 <li data-name="Cursor#sort"><a href="Cursor.html#sort">sort</a></li>
             
@@ -1705,7 +1719,7 @@ var Admin = function(db, topology, promiseLibrary) {
  * @param {object} [options=null] Optional settings.
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  * @param {number} [options.maxTimeMS=null] Number of milliseconds to wait before aborting the query.
- * @param {Admin~resultCallback} callback The command result callback
+ * @param {Admin~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.command = function(command, options, callback) {
@@ -1734,7 +1748,7 @@ Admin.prototype.command = function(command, options, callback) {
  * Retrieve the server information for the current
  * instance of the db client
  *
- * @param {Admin~resultCallback} callback The command result callback
+ * @param {Admin~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.buildInfo = function(callback) {
@@ -1755,7 +1769,7 @@ Admin.prototype.buildInfo = function(callback) {
  * Retrieve the server information for the current
  * instance of the db client
  *
- * @param {Admin~resultCallback} callback The command result callback
+ * @param {Admin~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.serverInfo = function(callback) {
@@ -1778,7 +1792,7 @@ Admin.prototype.serverInfo = function(callback) {
 /**
  * Retrieve this db's server status.
  *
- * @param {Admin~resultCallback} callback The command result callback
+ * @param {Admin~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.serverStatus = function(callback) {
@@ -1810,7 +1824,7 @@ var serverStatus = function(self, callback) {
 /**
  * Retrieve the current profiling Level for MongoDB
  *
- * @param {Admin~resultCallback} callback The command result callback
+ * @param {Admin~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.profilingLevel = function(callback) {
@@ -1847,7 +1861,7 @@ var profilingLevel = function(self, callback) {
 /**
  * Ping the MongoDB server and retrieve results
  *
- * @param {Admin~resultCallback} callback The command result callback
+ * @param {Admin~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.ping = function(options, callback) {
@@ -1873,7 +1887,7 @@ Admin.prototype.ping = function(options, callback) {
  * @method
  * @param {string} username The username.
  * @param {string} [password] The password.
- * @param {Admin~resultCallback} callback The command result callback
+ * @param {Admin~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.authenticate = function(username, password, callback) {
@@ -1893,7 +1907,7 @@ Admin.prototype.authenticate = function(username, password, callback) {
 /**
  * Logout user from server, fire off on all connections and remove all auth info
  * @method
- * @param {Admin~resultCallback} callback The command result callback
+ * @param {Admin~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.logout = function(callback) {
@@ -1943,7 +1957,7 @@ var writeConcern = function(options, db) {
  * @param {boolean} [options.fsync=false] Specify a file sync write concern.
  * @param {object} [options.customData=null] Custom data associated with the user (only Mongodb 2.6 or higher)
  * @param {object[]} [options.roles=null] Roles associated with the created user (only Mongodb 2.6 or higher)
- * @param {Admin~resultCallback} callback The command result callback
+ * @param {Admin~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.addUser = function(username, password, options, callback) {
@@ -1980,7 +1994,7 @@ Admin.prototype.addUser = function(username, password, options, callback) {
  * @param {number} [options.wtimeout=null] The write concern timeout.
  * @param {boolean} [options.j=false] Specify a journal write concern.
  * @param {boolean} [options.fsync=false] Specify a file sync write concern.
- * @param {Admin~resultCallback} callback The command result callback
+ * @param {Admin~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.removeUser = function(username, options, callback) {
@@ -2012,7 +2026,7 @@ Admin.prototype.removeUser = function(username, options, callback) {
  * Set the current profiling level of MongoDB
  *
  * @param {string} level The new profiling level (off, slow_only, all).
- * @param {Admin~resultCallback} callback The command result callback.
+ * @param {Admin~resultCallback} [callback] The command result callback.
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.setProfilingLevel = function(level, callback) {
@@ -2059,7 +2073,7 @@ var setProfilingLevel = function(self, level, callback) {
 /**
  * Retrive the current profiling information for MongoDB
  *
- * @param {Admin~resultCallback} callback The command result callback.
+ * @param {Admin~resultCallback} [callback] The command result callback.
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.profilingInfo = function(callback) {
@@ -2090,7 +2104,7 @@ var profilingInfo = function(self, callback) {
  *
  * @param {string} collectionName The name of the collection to validate.
  * @param {object} [options=null] Optional settings.
- * @param {Admin~resultCallback} callback The command result callback.
+ * @param {Admin~resultCallback} [callback] The command result callback.
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.validateCollection = function(collectionName, options, callback) {
@@ -2144,7 +2158,7 @@ var validateCollection = function(self, collectionName, options, callback) {
 /**
  * List the available databases
  *
- * @param {Admin~resultCallback} callback The command result callback.
+ * @param {Admin~resultCallback} [callback] The command result callback.
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.listDatabases = function(callback) {
@@ -2164,7 +2178,7 @@ Admin.prototype.listDatabases = function(callback) {
 /**
  * Get ReplicaSet status
  *
- * @param {Admin~resultCallback} callback The command result callback.
+ * @param {Admin~resultCallback} [callback] The command result callback.
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.replSetGetStatus = function(callback) {
@@ -2219,7 +2233,7 @@ module.exports = Admin;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue Jul 14 2015 11:44:05 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Aug 06 2015 13:24:15 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

@@ -584,13 +584,21 @@
             
                 <li data-name="Cursor#hasNext"><a href="Cursor.html#hasNext">hasNext</a></li>
             
+                <li data-name="Cursor#hint"><a href="Cursor.html#hint">hint</a></li>
+            
                 <li data-name="Cursor#isClosed"><a href="Cursor.html#isClosed">isClosed</a></li>
             
                 <li data-name="Cursor#limit"><a href="Cursor.html#limit">limit</a></li>
             
                 <li data-name="Cursor#map"><a href="Cursor.html#map">map</a></li>
             
+                <li data-name="Cursor#max"><a href="Cursor.html#max">max</a></li>
+            
+                <li data-name="Cursor#maxScan"><a href="Cursor.html#maxScan">maxScan</a></li>
+            
                 <li data-name="Cursor#maxTimeMS"><a href="Cursor.html#maxTimeMS">maxTimeMS</a></li>
+            
+                <li data-name="Cursor#min"><a href="Cursor.html#min">min</a></li>
             
                 <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
             
@@ -608,6 +616,8 @@
             
                 <li data-name="Cursor#resume"><a href="Cursor.html#resume">resume</a></li>
             
+                <li data-name="Cursor#returnKey"><a href="Cursor.html#returnKey">returnKey</a></li>
+            
                 <li data-name="Cursor#rewind"><a href="Cursor.html#rewind">rewind</a></li>
             
                 <li data-name="Cursor#setBatchSize"><a href="Cursor.html#setBatchSize">setBatchSize</a></li>
@@ -622,7 +632,11 @@
             
                 <li data-name="Cursor#setReadPreference"><a href="Cursor.html#setReadPreference">setReadPreference</a></li>
             
+                <li data-name="Cursor#showRecordId"><a href="Cursor.html#showRecordId">showRecordId</a></li>
+            
                 <li data-name="Cursor#skip"><a href="Cursor.html#skip">skip</a></li>
+            
+                <li data-name="Cursor#snapshot"><a href="Cursor.html#snapshot">snapshot</a></li>
             
                 <li data-name="Cursor#sort"><a href="Cursor.html#sort">sort</a></li>
             
@@ -1818,7 +1832,7 @@ for(var name in CoreCursor.prototype) {
 /**
  * Check if there is any document still available in the cursor
  * @method
- * @param {Cursor~resultCallback} callback The result callback.
+ * @param {Cursor~resultCallback} [callback] The result callback.
  * @throws {MongoError}
  * @deprecated
  * @return {Promise} returns Promise if no callback passed
@@ -1849,7 +1863,7 @@ Cursor.prototype.hasNext = function(callback) {
 /**
  * Get the next available document from the cursor, returns null if no more documents are available.
  * @method
- * @param {Cursor~resultCallback} callback The result callback.
+ * @param {Cursor~resultCallback} [callback] The result callback.
  * @throws {MongoError}
  * @deprecated
  * @return {Promise} returns Promise if no callback passed
@@ -1893,8 +1907,92 @@ Cursor.prototype.next = function(callback) {
  * @return {Cursor}
  */
 Cursor.prototype.filter = function(filter) {
-  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw new MongoError("Cursor is closed");
+  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw MongoError.create({message: "Cursor is closed", driver:true});
   this.s.cmd.query = filter;
+  return this;
+}
+
+/**
+ * Set the cursor maxScan
+ * @method
+ * @param {object} maxScan Constrains the query to only scan the specified number of documents when fulfilling the query
+ * @return {Cursor}
+ */
+Cursor.prototype.maxScan = function(maxScan) {
+  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw MongoError.create({message: "Cursor is closed", driver:true});
+  this.s.cmd.maxScan = maxScan;
+  return this;
+}
+
+/**
+ * Set the cursor hint
+ * @method
+ * @param {object} hint If specified, then the query system will only consider plans using the hinted index.
+ * @return {Cursor}
+ */
+Cursor.prototype.hint = function(hint) {
+  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw MongoError.create({message: "Cursor is closed", driver:true});
+  this.s.cmd.hint = hint;
+  return this;
+}
+
+/**
+ * Set the cursor min
+ * @method
+ * @param {object} min Specify a $min value to specify the inclusive lower bound for a specific index in order to constrain the results of find(). The $min specifies the lower bound for all keys of a specific index in order.
+ * @return {Cursor}
+ */
+Cursor.prototype.min = function(min) {
+  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw MongoError.create({message: "Cursor is closed", driver:true});
+  this.s.cmd.min = min;
+  return this;
+}
+
+/**
+ * Set the cursor max
+ * @method
+ * @param {object} max Specify a $max value to specify the exclusive upper bound for a specific index in order to constrain the results of find(). The $max specifies the upper bound for all keys of a specific index in order.
+ * @return {Cursor}
+ */
+Cursor.prototype.max = function(max) {
+  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw MongoError.create({message: "Cursor is closed", driver:true});
+  this.s.cmd.max = max;
+  return this;
+}
+
+/**
+ * Set the cursor returnKey
+ * @method
+ * @param {object} returnKey Only return the index field or fields for the results of the query. If $returnKey is set to true and the query does not use an index to perform the read operation, the returned documents will not contain any fields. Use one of the following forms:
+ * @return {Cursor}
+ */
+Cursor.prototype.returnKey = function(value) {
+  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw MongoError.create({message: "Cursor is closed", driver:true});
+  this.s.cmd.returnKey = value;
+  return this;
+}
+
+/**
+ * Set the cursor showRecordId
+ * @method
+ * @param {object} showRecordId The $showDiskLoc option has now been deprecated and replaced with the showRecordId field. $showDiskLoc will still be accepted for OP_QUERY stye find.
+ * @return {Cursor}
+ */
+Cursor.prototype.showRecordId = function(value) {
+  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw MongoError.create({message: "Cursor is closed", driver:true});
+  this.s.cmd.showDiskLoc = value;
+  return this;
+}
+
+/**
+ * Set the cursor snapshot
+ * @method
+ * @param {object} snapshot The $snapshot operator prevents the cursor from returning a document more than once because an intervening write operation results in a move of the document.
+ * @return {Cursor}
+ */
+Cursor.prototype.snapshot = function(value) {
+  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw MongoError.create({message: "Cursor is closed", driver:true});
+  this.s.cmd.snapshot = value;
   return this;
 }
 
@@ -1907,8 +2005,8 @@ Cursor.prototype.filter = function(filter) {
  * @return {Cursor}
  */
 Cursor.prototype.setCursorOption = function(field, value) {
-  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw new MongoError("Cursor is closed");
-  if(fields.indexOf(field) == -1) throw new MongoError(f("option %s not a supported option %s", field, fields));
+  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw MongoError.create({message: "Cursor is closed", driver:true});
+  if(fields.indexOf(field) == -1) throw MongoError.create({message: f("option %s not a supported option %s", field, fields), driver:true });
   this.s[field] = value;
   if(field == 'numberOfRetries')
     this.s.currentNumberOfRetries = value;
@@ -1924,9 +2022,9 @@ Cursor.prototype.setCursorOption = function(field, value) {
  * @return {Cursor}
  */
 Cursor.prototype.addCursorFlag = function(flag, value) {
-  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw new MongoError("Cursor is closed");
-  if(flags.indexOf(flag) == -1) throw new MongoError(f("flag %s not a supported flag %s", flag, flags));
-  if(typeof value != 'boolean') throw new MongoError(f("flag %s must be a boolean value", flag));
+  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw MongoError.create({message: "Cursor is closed", driver:true});
+  if(flags.indexOf(flag) == -1) throw MongoError.create({message: f("flag %s not a supported flag %s", flag, flags), driver:true });
+  if(typeof value != 'boolean') throw MongoError.create({message: f("flag %s must be a boolean value", flag), driver:true});
   this.s.cmd[flag] = value;
   return this;
 }
@@ -1940,8 +2038,8 @@ Cursor.prototype.addCursorFlag = function(flag, value) {
  * @return {Cursor}
  */
 Cursor.prototype.addQueryModifier = function(name, value) {
-  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw new MongoError("Cursor is closed");
-  if(name[0] != '$') throw new MongoError(f("%s is not a valid query modifier"));
+  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw MongoError.create({message: "Cursor is closed", driver:true});
+  if(name[0] != '$') throw MongoError.create({message: f("%s is not a valid query modifier"), driver:true});
   // Strip of the $
   var field = name.substr(1);
   // Set on the command
@@ -1959,7 +2057,7 @@ Cursor.prototype.addQueryModifier = function(name, value) {
  * @return {Cursor}
  */
 Cursor.prototype.comment = function(value) {
-  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw new MongoError("Cursor is closed");
+  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw MongoError.create({message: "Cursor is closed", driver:true});
   this.s.cmd.comment = value;
   return this;
 }
@@ -1972,8 +2070,8 @@ Cursor.prototype.comment = function(value) {
  * @return {Cursor}
  */
 Cursor.prototype.maxTimeMS = function(value) {
-  if(typeof value != 'number') throw new MongoError("maxTimeMS must be a number");
-  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw new MongoError("Cursor is closed");
+  if(typeof value != 'number') throw MongoError.create({message: "maxTimeMS must be a number", driver:true});
+  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw MongoError.create({message: "Cursor is closed", driver:true});
   this.s.cmd.maxTimeMS = value;
   return this;
 }
@@ -1988,7 +2086,7 @@ Cursor.prototype.maxTimeMs = Cursor.prototype.maxTimeMS;
  * @return {Cursor}
  */
 Cursor.prototype.project = function(value) {
-  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw new MongoError("Cursor is closed");
+  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw MongoError.create({message: "Cursor is closed", driver:true});
   this.s.cmd.fields = value;
   return this;
 }
@@ -2002,8 +2100,8 @@ Cursor.prototype.project = function(value) {
  * @return {Cursor}
  */
 Cursor.prototype.sort = function(keyOrList, direction) {
-  if(this.s.options.tailable) throw new MongoError("Tailable cursor doesn't support sorting");
-  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw new MongoError("Cursor is closed");
+  if(this.s.options.tailable) throw MongoError.create({message: "Tailable cursor doesn't support sorting", driver:true});
+  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw MongoError.create({message: "Cursor is closed", driver:true});
   var order = keyOrList;
 
   if(direction != null) {
@@ -2023,9 +2121,9 @@ Cursor.prototype.sort = function(keyOrList, direction) {
  * @return {Cursor}
  */
 Cursor.prototype.batchSize = function(value) {
-  if(this.s.options.tailable) throw new MongoError("Tailable cursor doesn't support limit");
-  if(this.s.state == Cursor.CLOSED || this.isDead()) throw new MongoError("Cursor is closed");
-  if(typeof value != 'number') throw new MongoError("batchSize requires an integer");
+  if(this.s.options.tailable) throw MongoError.create({message: "Tailable cursor doesn't support batchSize", driver:true});
+  if(this.s.state == Cursor.CLOSED || this.isDead()) throw MongoError.create({message: "Cursor is closed", driver:true});
+  if(typeof value != 'number') throw MongoError.create({message: "batchSize requires an integer", driver:true});
   this.s.cmd.batchSize = value;
   this.setCursorBatchSize(value);
   return this;
@@ -2039,9 +2137,9 @@ Cursor.prototype.batchSize = function(value) {
  * @return {Cursor}
  */
 Cursor.prototype.limit = function(value) {
-  if(this.s.options.tailable) throw new MongoError("Tailable cursor doesn't support limit");
-  if(this.s.state == Cursor.OPEN || this.s.state == Cursor.CLOSED || this.isDead()) throw new MongoError("Cursor is closed");
-  if(typeof value != 'number') throw new MongoError("limit requires an integer");
+  if(this.s.options.tailable) throw MongoError.create({message: "Tailable cursor doesn't support limit", driver:true});
+  if(this.s.state == Cursor.OPEN || this.s.state == Cursor.CLOSED || this.isDead()) throw MongoError.create({message: "Cursor is closed", driver:true});
+  if(typeof value != 'number') throw MongoError.create({message: "limit requires an integer", driver:true});
   this.s.cmd.limit = value;
   // this.cursorLimit = value;
   this.setCursorLimit(value);
@@ -2056,9 +2154,9 @@ Cursor.prototype.limit = function(value) {
  * @return {Cursor}
  */
 Cursor.prototype.skip = function(value) {
-  if(this.s.options.tailable) throw new MongoError("Tailable cursor doesn't support skip");
-  if(this.s.state == Cursor.OPEN || this.s.state == Cursor.CLOSED || this.isDead()) throw new MongoError("Cursor is closed");
-  if(typeof value != 'number') throw new MongoError("skip requires an integer");
+  if(this.s.options.tailable) throw MongoError.create({message: "Tailable cursor doesn't support skip", driver:true});
+  if(this.s.state == Cursor.OPEN || this.s.state == Cursor.CLOSED || this.isDead()) throw MongoError.create({message: "Cursor is closed", driver:true});
+  if(typeof value != 'number') throw MongoError.create({message: "skip requires an integer", driver:true});
   this.s.cmd.skip = value;
   this.setCursorSkip(value);
   return this;
@@ -2128,7 +2226,7 @@ Cursor.prototype.skip = function(value) {
 /**
  * Get the next available document from the cursor, returns null if no more documents are available.
  * @method
- * @param {Cursor~resultCallback} callback The result callback.
+ * @param {Cursor~resultCallback} [callback] The result callback.
  * @throws {MongoError}
  * @deprecated
  * @return {Promise} returns Promise if no callback passed
@@ -2136,7 +2234,7 @@ Cursor.prototype.skip = function(value) {
 Cursor.prototype.nextObject = Cursor.prototype.next;
 
 var nextObject = function(self, callback) {
-  if(self.s.state == Cursor.CLOSED || self.isDead()) return handleCallback(callback, new MongoError("Cursor is closed"));
+  if(self.s.state == Cursor.CLOSED || self.isDead()) return handleCallback(callback, MongoError.create({message: "Cursor is closed", driver:true}));
   if(self.s.state == Cursor.INIT &amp;&amp; self.s.cmd.sort) {
     try {
       self.s.cmd.sort = formattedOrderClause(self.s.cmd.sort);
@@ -2175,7 +2273,7 @@ var loop = function(self, callback) {
 /**
  * Get the next available document from the cursor, returns null if no more documents are available.
  * @method
- * @param {Cursor~resultCallback} callback The result callback.
+ * @param {Cursor~resultCallback} [callback] The result callback.
  * @throws {MongoError}
  * @deprecated
  * @return {Promise} returns Promise if no callback passed
@@ -2206,10 +2304,10 @@ Cursor.prototype.each = function(callback) {
 
 // Run the each loop
 var _each = function(self, callback) {
-  if(!callback) throw new MongoError('callback is mandatory');
+  if(!callback) throw MongoError.create({message: 'callback is mandatory', driver:true});
   if(self.isNotified()) return;
   if(self.s.state == Cursor.CLOSED || self.isDead()) {
-    return handleCallback(callback, new MongoError("Cursor is closed"), null);
+    return handleCallback(callback, MongoError.create({message: "Cursor is closed", driver:true}));
   }
 
   if(self.s.state == Cursor.INIT) self.s.state = Cursor.OPEN;
@@ -2275,7 +2373,7 @@ Cursor.prototype.forEach = function(iterator, callback) {
  * @return {Cursor}
  */
 Cursor.prototype.setReadPreference = function(r) {
-  if(this.s.state != Cursor.INIT) throw new MongoError('cannot change cursor readPreference after cursor has been accessed');
+  if(this.s.state != Cursor.INIT) throw MongoError.create({message: 'cannot change cursor readPreference after cursor has been accessed', driver:true});
   if(r instanceof ReadPreference) {
     this.s.options.readPreference = new CoreReadPreference(r.mode, r.tags);
   } else {
@@ -2298,13 +2396,13 @@ Cursor.prototype.setReadPreference = function(r) {
  * results when this cursor had been previouly accessed. In that case,
  * cursor.rewind() can be used to reset the cursor.
  * @method
- * @param {Cursor~toArrayResultCallback} callback The result callback.
+ * @param {Cursor~toArrayResultCallback} [callback] The result callback.
  * @throws {MongoError}
  * @return {Promise} returns Promise if no callback passed
  */
 Cursor.prototype.toArray = function(callback) {
   var self = this;
-  if(self.s.options.tailable) throw new MongoError('Tailable cursor cannot be converted to array');
+  if(self.s.options.tailable) throw MongoError.create({message: 'Tailable cursor cannot be converted to array', driver:true});
 
   // Execute using callback
   if(typeof callback == 'function') return toArray(self, callback);
@@ -2375,12 +2473,12 @@ var toArray = function(self, callback) {
  * @param {number} [options.maxTimeMS=null] Number of miliseconds to wait before aborting the query.
  * @param {string} [options.hint=null] An index name hint for the query.
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
- * @param {Cursor~countResultCallback} callback The result callback.
+ * @param {Cursor~countResultCallback} [callback] The result callback.
  * @return {Promise} returns Promise if no callback passed
  */
 Cursor.prototype.count = function(applySkipLimit, opts, callback) {
   var self = this;
-  if(self.s.cmd.query == null) throw new MongoError("count can only be used with find command");
+  if(self.s.cmd.query == null) throw MongoError.create({message: "count can only be used with find command", driver:true});
   if(typeof opts == 'function') callback = opts, opts = {};
   opts = opts || {};
 
@@ -2679,7 +2777,7 @@ module.exports = Cursor;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue Jul 14 2015 11:44:05 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Aug 06 2015 13:24:15 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

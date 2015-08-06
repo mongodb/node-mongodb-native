@@ -584,13 +584,21 @@
             
                 <li data-name="Cursor#hasNext"><a href="Cursor.html#hasNext">hasNext</a></li>
             
+                <li data-name="Cursor#hint"><a href="Cursor.html#hint">hint</a></li>
+            
                 <li data-name="Cursor#isClosed"><a href="Cursor.html#isClosed">isClosed</a></li>
             
                 <li data-name="Cursor#limit"><a href="Cursor.html#limit">limit</a></li>
             
                 <li data-name="Cursor#map"><a href="Cursor.html#map">map</a></li>
             
+                <li data-name="Cursor#max"><a href="Cursor.html#max">max</a></li>
+            
+                <li data-name="Cursor#maxScan"><a href="Cursor.html#maxScan">maxScan</a></li>
+            
                 <li data-name="Cursor#maxTimeMS"><a href="Cursor.html#maxTimeMS">maxTimeMS</a></li>
+            
+                <li data-name="Cursor#min"><a href="Cursor.html#min">min</a></li>
             
                 <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
             
@@ -608,6 +616,8 @@
             
                 <li data-name="Cursor#resume"><a href="Cursor.html#resume">resume</a></li>
             
+                <li data-name="Cursor#returnKey"><a href="Cursor.html#returnKey">returnKey</a></li>
+            
                 <li data-name="Cursor#rewind"><a href="Cursor.html#rewind">rewind</a></li>
             
                 <li data-name="Cursor#setBatchSize"><a href="Cursor.html#setBatchSize">setBatchSize</a></li>
@@ -622,7 +632,11 @@
             
                 <li data-name="Cursor#setReadPreference"><a href="Cursor.html#setReadPreference">setReadPreference</a></li>
             
+                <li data-name="Cursor#showRecordId"><a href="Cursor.html#showRecordId">showRecordId</a></li>
+            
                 <li data-name="Cursor#skip"><a href="Cursor.html#skip">skip</a></li>
+            
+                <li data-name="Cursor#snapshot"><a href="Cursor.html#snapshot">snapshot</a></li>
             
                 <li data-name="Cursor#sort"><a href="Cursor.html#sort">sort</a></li>
             
@@ -1885,7 +1899,7 @@ Collection instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2032">line 2032</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2096">line 2096</a>
         </div>
         
     </div>
@@ -2571,12 +2585,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="bulkWrite">
             
-            bulkWrite<span class="signature">(operations, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            bulkWrite<span class="signature">(operations, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line477">line 477</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line508">line 508</a>
         </div>
         
     </div>
@@ -2857,6 +2871,42 @@ co(function*() {
         </tr>
 	
 	
+	
+        <tr>
+            
+                <td class="name"><code>ordered</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    true
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Execute write operation in ordered or unordered fashion.</p></td>
+        </tr>
+	
+	
 	</tbody>
 </table>
             </td>
@@ -2886,6 +2936,8 @@ co(function*() {
             
             <td class="description last">
                 
+                    
+                        <span class="optional">optional</span>
                     
                     
                         
@@ -3067,12 +3119,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="count">
             
-            count<span class="signature">(query, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            count<span class="signature">(query, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1577">line 1577</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1638">line 1638</a>
         </div>
         
     </div>
@@ -3376,6 +3428,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -3530,12 +3584,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="createIndex">
             
-            createIndex<span class="signature">(fieldOrSpec, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            createIndex<span class="signature">(fieldOrSpec, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1224">line 1224</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1285">line 1285</a>
         </div>
         
     </div>
@@ -4130,6 +4184,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -4205,7 +4261,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     test.equal(null, err);
 
     // Create an index on the a field
-    db.createIndex('createIndexExample1', {a:1, b:1}
+    collection.createIndex({a:1, b:1}
       , {unique:true, background:true, w:1}, function(err, indexName) {
 
       // Show that duplicate records got dropped
@@ -4309,7 +4365,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1}).then(function(result) {
 
     // Create an index on the a field
-    db.createIndex('createIndexExample1_with_promise', {a:1, b:1}
+    collection.createIndex({a:1, b:1}
       , {unique:true, background:true, w:1}).then(function(indexName) {
 
       // Show that duplicate records got dropped
@@ -4345,7 +4401,7 @@ co(function*() {
     , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], {w:1});
 
   // Create an index on the a field
-  yield db.createIndex('createIndexExample1_with_generators', {a:1, b:1}
+  yield collection.createIndex({a:1, b:1}
     , {unique:true, background:true, w:1});
 
   // Show that duplicate records got dropped
@@ -4369,12 +4425,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="createIndexes">
             
-            createIndexes<span class="signature">(indexSpecs, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            createIndexes<span class="signature">(indexSpecs, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1258">line 1258</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1319">line 1319</a>
         </div>
         
     </div>
@@ -4434,6 +4490,11 @@ error. Index specifications are defined at http://docs.mongodb.org/manual/refere
             
             <td class="description last">
                 
+                    
+                    
+                        
+                    
+                
                 <p>An array of index specifications to be created</p></td>
         </tr>
 	
@@ -4456,6 +4517,13 @@ error. Index specifications are defined at http://docs.mongodb.org/manual/refere
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 <p>The command result callback</p></td>
         </tr>
@@ -4519,12 +4587,12 @@ Promise if no callback passed
     <div class="nameContainer">
         <h4 class="name" id="deleteMany">
             
-            deleteMany<span class="signature">(filter, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            deleteMany<span class="signature">(filter, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line868">line 868</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line926">line 926</a>
         </div>
         
     </div>
@@ -4792,6 +4860,8 @@ Promise if no callback passed
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -4858,12 +4928,12 @@ Promise if no callback passed
     <div class="nameContainer">
         <h4 class="name" id="deleteOne">
             
-            deleteOne<span class="signature">(filter, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            deleteOne<span class="signature">(filter, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line827">line 827</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line885">line 885</a>
         </div>
         
     </div>
@@ -5131,6 +5201,8 @@ Promise if no callback passed
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -5197,12 +5269,12 @@ Promise if no callback passed
     <div class="nameContainer">
         <h4 class="name" id="distinct">
             
-            distinct<span class="signature">(key, query, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            distinct<span class="signature">(key, query, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1638">line 1638</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1699">line 1699</a>
         </div>
         
     </div>
@@ -5430,6 +5502,8 @@ Promise if no callback passed
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -5611,12 +5685,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="drop">
             
-            drop<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            drop<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1131">line 1131</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1189">line 1189</a>
         </div>
         
     </div>
@@ -5673,6 +5747,13 @@ co(function*() {
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 <p>The results callback</p></td>
         </tr>
@@ -5857,7 +5938,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1373">line 1373</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1434">line 1434</a>
         </div>
         
     </div>
@@ -5965,7 +6046,7 @@ co(function*() {
 
 
 <h5>Returns:</h5>
-Promise if no callback passed
+Promise if no [callback] passed
 <br />
 
     
@@ -6038,12 +6119,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="dropIndex">
             
-            dropIndex<span class="signature">(indexName, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            dropIndex<span class="signature">(indexName, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1305">line 1305</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1366">line 1366</a>
         </div>
         
     </div>
@@ -6311,6 +6392,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -6478,12 +6561,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="dropIndexes">
             
-            dropIndexes<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            dropIndexes<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1344">line 1344</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1405">line 1405</a>
         </div>
         
     </div>
@@ -6540,6 +6623,13 @@ co(function*() {
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 <p>The command result callback</p></td>
         </tr>
@@ -6726,12 +6816,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="ensureIndex">
             
-            ensureIndex<span class="signature">(fieldOrSpec, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            ensureIndex<span class="signature">(fieldOrSpec, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1465">line 1465</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1526">line 1526</a>
         </div>
         
     </div>
@@ -7325,6 +7415,8 @@ co(function*() {
             
             <td class="description last">
                 
+                    
+                        <span class="optional">optional</span>
                     
                     
                         
@@ -7961,12 +8053,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="findAndModify">
             
-            findAndModify<span class="signature">(query, sort, doc, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            findAndModify<span class="signature">(query, sort, doc, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1907">line 1907</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1971">line 1971</a>
         </div>
         
     </div>
@@ -8442,6 +8534,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -8652,12 +8746,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="findAndRemove">
             
-            findAndRemove<span class="signature">(query, sort, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            findAndRemove<span class="signature">(query, sort, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1991">line 1991</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2055">line 2055</a>
         </div>
         
     </div>
@@ -8957,6 +9051,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -9122,12 +9218,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="findOne">
             
-            findOne<span class="signature">(query, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            findOne<span class="signature">(query, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1041">line 1041</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1099">line 1099</a>
         </div>
         
     </div>
@@ -10010,6 +10106,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -10156,12 +10254,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="findOneAndDelete">
             
-            findOneAndDelete<span class="signature">(filter, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            findOneAndDelete<span class="signature">(filter, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1762">line 1762</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1823">line 1823</a>
         </div>
         
     </div>
@@ -10426,6 +10524,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -10570,12 +10670,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="findOneAndReplace">
             
-            findOneAndReplace<span class="signature">(filter, replacement, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            findOneAndReplace<span class="signature">(filter, replacement, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1808">line 1808</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1870">line 1870</a>
         </div>
         
     </div>
@@ -10944,6 +11044,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -11109,12 +11211,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="findOneAndUpdate">
             
-            findOneAndUpdate<span class="signature">(filter, update, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            findOneAndUpdate<span class="signature">(filter, update, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1856">line 1856</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1919">line 1919</a>
         </div>
         
     </div>
@@ -11483,6 +11585,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -11648,12 +11752,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="geoHaystackSearch">
             
-            geoHaystackSearch<span class="signature">(x, y, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            geoHaystackSearch<span class="signature">(x, y, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2288">line 2288</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2352">line 2352</a>
         </div>
         
     </div>
@@ -11989,6 +12093,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -12139,12 +12245,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="geoNear">
             
-            geoNear<span class="signature">(x, y, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            geoNear<span class="signature">(x, y, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2221">line 2221</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2285">line 2285</a>
         </div>
         
     </div>
@@ -12660,6 +12766,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -12814,12 +12922,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="group">
             
-            group<span class="signature">(keys, condition, initial, reduce, finalize, command, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            group<span class="signature">(keys, condition, initial, reduce, finalize, command, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2378">line 2378</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2442">line 2442</a>
         </div>
         
     </div>
@@ -13189,6 +13297,8 @@ co(function*() {
             
             <td class="description last">
                 
+                    
+                        <span class="optional">optional</span>
                     
                     
                         
@@ -13582,12 +13692,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="indexes">
             
-            indexes<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            indexes<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1687">line 1687</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1748">line 1748</a>
         </div>
         
     </div>
@@ -13644,6 +13754,13 @@ co(function*() {
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 <p>The command result callback</p></td>
         </tr>
@@ -13800,12 +13917,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="indexExists">
             
-            indexExists<span class="signature">(indexes, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            indexExists<span class="signature">(indexes, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1493">line 1493</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1554">line 1554</a>
         </div>
         
     </div>
@@ -13866,6 +13983,11 @@ co(function*() {
             
             <td class="description last">
                 
+                    
+                    
+                        
+                    
+                
                 <p>One or more index names to check.</p></td>
         </tr>
 	
@@ -13888,6 +14010,13 @@ co(function*() {
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 <p>The command result callback</p></td>
         </tr>
@@ -14048,12 +14177,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="indexInformation">
             
-            indexInformation<span class="signature">(<span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            indexInformation<span class="signature">(<span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1534">line 1534</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1595">line 1595</a>
         </div>
         
     </div>
@@ -14213,6 +14342,8 @@ co(function*() {
             
             <td class="description last">
                 
+                    
+                        <span class="optional">optional</span>
                     
                     
                         
@@ -14509,7 +14640,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2661">line 2661</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2725">line 2725</a>
         </div>
         
     </div>
@@ -14943,7 +15074,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2644">line 2644</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2708">line 2708</a>
         </div>
         
     </div>
@@ -15343,12 +15474,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="insert">
             
-            insert<span class="signature">(docs, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            insert<span class="signature">(docs, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line596">line 596</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line658">line 658</a>
         </div>
         
     </div>
@@ -15691,6 +15822,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -15847,7 +15980,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
       , {name:"Sarah", title:"Princess"}], {w:1}, function(err, result) {
 
       // Force keep going flag, ignoring unique index issue
-      collection.insertMany([{name:"Jim"}
+      collection.insert([{name:"Jim"}
         , {name:"Sarah", title:"Princess"}
         , {name:'Gump', title:"Gump"}], {w:1, keepGoing:true}, function(err, result) {
 
@@ -15941,22 +16074,24 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 
   // Create a collection
   var collection = db.collection('keepGoingExample_with_promise');
-  // Add an unique index to title to force errors in the batch insert
-  collection.ensureIndex({title:1}, {unique:true}).then(function(indexName) {
+  collection.drop(function() {
+    // Add an unique index to title to force errors in the batch insert
+    collection.ensureIndex({title:1}, {unique:true}).then(function(indexName) {
 
-    // Insert some intial data into the collection
-    collection.insertMany([{name:"Jim"}
-      , {name:"Sarah", title:"Princess"}], {w:1}).then(function(result) {
-
-      // Force keep going flag, ignoring unique index issue
+      // Insert some intial data into the collection
       collection.insertMany([{name:"Jim"}
-        , {name:"Sarah", title:"Princess"}
-        , {name:'Gump', title:"Gump"}], {w:1, keepGoing:true}).then(function(result) {
-      }).catch(function(err) {
-        // Count the number of documents left (should not include the duplicates)
-        collection.count().then(function(count) {
-          test.equal(3, count);
-        })
+        , {name:"Sarah", title:"Princess"}], {w:1}).then(function(result) {
+
+        // Force keep going flag, ignoring unique index issue
+        collection.insert([{name:"Jim"}
+          , {name:"Sarah", title:"Princess"}
+          , {name:'Gump', title:"Gump"}], {w:1, keepGoing:true}).then(function(result) {
+          }).catch(function(err) {
+          // Count the number of documents left (should not include the duplicates)
+          collection.count().then(function(count) {
+            test.equal(3, count);
+          })
+        });
       });
     });
   });
@@ -16063,7 +16198,7 @@ co(function*() {
 
   try {
     // Force keep going flag, ignoring unique index issue
-    yield collection.insertMany([{name:"Jim"}
+    yield collection.insert([{name:"Jim"}
       , {name:"Sarah", title:"Princess"}
       , {name:'Gump', title:"Gump"}], {w:1, keepGoing:true});
   } catch(err) {}
@@ -16084,12 +16219,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="insertMany">
             
-            insertMany<span class="signature">(docs, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            insertMany<span class="signature">(docs, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line399">line 399</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line419">line 419</a>
         </div>
         
     </div>
@@ -16429,6 +16564,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -16552,7 +16689,7 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="insertOne">
             
-            insertOne<span class="signature">(doc, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            insertOne<span class="signature">(doc, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -16897,6 +17034,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -17020,12 +17159,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="isCapped">
             
-            isCapped<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            isCapped<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1182">line 1182</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1243">line 1243</a>
         </div>
         
     </div>
@@ -17082,6 +17221,13 @@ co(function*() {
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 <p>The results callback</p></td>
         </tr>
@@ -17220,7 +17366,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1419">line 1419</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1480">line 1480</a>
         </div>
         
     </div>
@@ -17411,12 +17557,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="mapReduce">
             
-            mapReduce<span class="signature">(map, reduce, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            mapReduce<span class="signature">(map, reduce, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2530">line 2530</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2594">line 2594</a>
         </div>
         
     </div>
@@ -17976,6 +18122,8 @@ co(function*() {
             
             <td class="description last">
                 
+                    
+                        <span class="optional">optional</span>
                     
                     
                         
@@ -18651,12 +18799,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="options">
             
-            options<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            options<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1152">line 1152</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1210">line 1210</a>
         </div>
         
     </div>
@@ -18713,6 +18861,13 @@ co(function*() {
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 <p>The results callback</p></td>
         </tr>
@@ -18849,12 +19004,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="parallelCollectionScan">
             
-            parallelCollectionScan<span class="signature">(<span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            parallelCollectionScan<span class="signature">(<span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2143">line 2143</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2207">line 2207</a>
         </div>
         
     </div>
@@ -19127,6 +19282,8 @@ no ordering guarantees for returned results.</p>
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -19331,12 +19488,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="reIndex">
             
-            reIndex<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            reIndex<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1382">line 1382</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1443">line 1443</a>
         </div>
         
     </div>
@@ -19394,6 +19551,13 @@ Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground)
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 <p>The command result callback</p></td>
         </tr>
@@ -19566,12 +19730,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="remove">
             
-            remove<span class="signature">(selector, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            remove<span class="signature">(selector, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line945">line 945</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1003">line 1003</a>
         </div>
         
     </div>
@@ -19875,6 +20039,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -20092,12 +20258,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="rename">
             
-            rename<span class="signature">(newName, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            rename<span class="signature">(newName, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1085">line 1085</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1143">line 1143</a>
         </div>
         
     </div>
@@ -20289,6 +20455,8 @@ co(function*() {
             
             <td class="description last">
                 
+                    
+                        <span class="optional">optional</span>
                     
                     
                         
@@ -20611,12 +20779,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="replaceOne">
             
-            replaceOne<span class="signature">(filter, doc, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            replaceOne<span class="signature">(filter, doc, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line672">line 672</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line730">line 730</a>
         </div>
         
     </div>
@@ -20952,6 +21120,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -21018,12 +21188,12 @@ Promise if no callback passed
     <div class="nameContainer">
         <h4 class="name" id="save">
             
-            save<span class="signature">(doc, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            save<span class="signature">(doc, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line971">line 971</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1029">line 1029</a>
         </div>
         
     </div>
@@ -21292,6 +21462,8 @@ operators and update instead for more efficient operations.</p>
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -21552,12 +21724,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="stats">
             
-            stats<span class="signature">(<span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            stats<span class="signature">(<span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1714">line 1714</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1775">line 1775</a>
         </div>
         
     </div>
@@ -21718,6 +21890,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -21860,12 +22034,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="update">
             
-            update<span class="signature">(selector, document, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            update<span class="signature">(selector, document, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line802">line 802</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line860">line 860</a>
         </div>
         
     </div>
@@ -22237,6 +22411,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -22506,12 +22682,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="updateMany">
             
-            updateMany<span class="signature">(filter, update, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            updateMany<span class="signature">(filter, update, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line719">line 719</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line777">line 777</a>
         </div>
         
     </div>
@@ -22847,6 +23023,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -23027,12 +23205,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="updateOne">
             
-            updateOne<span class="signature">(filter, update, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            updateOne<span class="signature">(filter, update, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line626">line 626</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line684">line 684</a>
         </div>
         
     </div>
@@ -23368,6 +23546,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -23569,7 +23749,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line443">line 443</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line473">line 473</a>
         </div>
         
     </div>
@@ -23961,7 +24141,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1068">line 1068</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1126">line 1126</a>
         </div>
         
     </div>
@@ -24100,7 +24280,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1558">line 1558</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1619">line 1619</a>
         </div>
         
     </div>
@@ -24239,7 +24419,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2124">line 2124</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2188">line 2188</a>
         </div>
         
     </div>
@@ -24378,7 +24558,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1006">line 1006</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1064">line 1064</a>
         </div>
         
     </div>
@@ -24517,7 +24697,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line575">line 575</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line637">line 637</a>
         </div>
         
     </div>
@@ -24815,7 +24995,7 @@ co(function*() {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue Jul 14 2015 11:44:06 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Aug 06 2015 13:24:15 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

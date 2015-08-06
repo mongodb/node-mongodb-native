@@ -38,6 +38,31 @@
       <guid>/node-mongodb-native/core/meta/release-notes/</guid>
       <description>
 
+&lt;h2 id=&#34;1-2-9-08-05-2015:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.2.9 08-05-2015&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;NODE-525 Reset connectionTimeout after it&amp;rsquo;s overwritten by tls.connect.&lt;/li&gt;
+&lt;li&gt;NODE-518 connectTimeoutMS is doubled in 2.0.39.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;1-2-8-07-24-2015:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.2.8 07-24-2015&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Minor fix to handle 2.4.x errors better by correctly return driver layer issues.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;1-2-7-07-16-2015:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.2.7 07-16-2015&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Refactoring to allow to tap into find/getmore/killcursor in cursors for APM monitoring in driver.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;1-2-6-07-14-2015:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.2.6 07-14-2015&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;NODE-505 Query fails to find records that have a &amp;lsquo;result&amp;rsquo; property with an array value.&lt;/li&gt;
+&lt;/ul&gt;
+
 &lt;h2 id=&#34;1-2-5-07-14-2015:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.2.5 07-14-2015&lt;/h2&gt;
 
 &lt;ul&gt;

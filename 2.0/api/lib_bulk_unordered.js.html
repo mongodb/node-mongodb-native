@@ -584,13 +584,21 @@
             
                 <li data-name="Cursor#hasNext"><a href="Cursor.html#hasNext">hasNext</a></li>
             
+                <li data-name="Cursor#hint"><a href="Cursor.html#hint">hint</a></li>
+            
                 <li data-name="Cursor#isClosed"><a href="Cursor.html#isClosed">isClosed</a></li>
             
                 <li data-name="Cursor#limit"><a href="Cursor.html#limit">limit</a></li>
             
                 <li data-name="Cursor#map"><a href="Cursor.html#map">map</a></li>
             
+                <li data-name="Cursor#max"><a href="Cursor.html#max">max</a></li>
+            
+                <li data-name="Cursor#maxScan"><a href="Cursor.html#maxScan">maxScan</a></li>
+            
                 <li data-name="Cursor#maxTimeMS"><a href="Cursor.html#maxTimeMS">maxTimeMS</a></li>
+            
+                <li data-name="Cursor#min"><a href="Cursor.html#min">min</a></li>
             
                 <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
             
@@ -608,6 +616,8 @@
             
                 <li data-name="Cursor#resume"><a href="Cursor.html#resume">resume</a></li>
             
+                <li data-name="Cursor#returnKey"><a href="Cursor.html#returnKey">returnKey</a></li>
+            
                 <li data-name="Cursor#rewind"><a href="Cursor.html#rewind">rewind</a></li>
             
                 <li data-name="Cursor#setBatchSize"><a href="Cursor.html#setBatchSize">setBatchSize</a></li>
@@ -622,7 +632,11 @@
             
                 <li data-name="Cursor#setReadPreference"><a href="Cursor.html#setReadPreference">setReadPreference</a></li>
             
+                <li data-name="Cursor#showRecordId"><a href="Cursor.html#showRecordId">showRecordId</a></li>
+            
                 <li data-name="Cursor#skip"><a href="Cursor.html#skip">skip</a></li>
+            
+                <li data-name="Cursor#snapshot"><a href="Cursor.html#snapshot">snapshot</a></li>
             
                 <li data-name="Cursor#sort"><a href="Cursor.html#sort">sort</a></li>
             
@@ -2046,10 +2060,25 @@ var executeBatch = function(self, batch, callback) {
   }
 
   var resultHandler = function(err, result) {
+		// Error is a driver related error not a bulk op error, terminate
+		if(err &amp;&amp; err.driver || err &amp;&amp; err.message) {
+			return callback(err);
+		}
+
     // If we have and error
     if(err) err.ok = 0;
     callback(null, mergeBatchResults(false, batch, self.s.bulkResult, err, result));
   }
+
+	// Set an operationIf if provided
+	if(self.operationId) {
+		resultHandler.operationId = self.operationId;
+	}
+
+	// Serialize functions
+	if(self.s.options.serializeFunctions) {
+		finalOptions.serializeFunctions = true
+	}
 
   try {
     if(batch.batchType == common.INSERT) {
@@ -2062,7 +2091,7 @@ var executeBatch = function(self, batch, callback) {
   } catch(err) {
     // Force top level error
     err.ok = 0;
-    // Merge top level error and return 
+    // Merge top level error and return
     callback(null, mergeBatchResults(false, batch, self.s.bulkResult, err, null));
   }
 }
@@ -2071,14 +2100,21 @@ var executeBatch = function(self, batch, callback) {
 // Execute all the commands
 var executeBatches = function(self, callback) {
   var numberOfCommandsToExecute = self.s.batches.length;
+	var error = null;
   // Execute over all the batches
   for(var i = 0; i &lt; self.s.batches.length; i++) {
     executeBatch(self, self.s.batches[i], function(err, result) {
+			// Driver layer error capture it
+			if(err) error = err;
+			// Count down the number of commands left to execute
       numberOfCommandsToExecute = numberOfCommandsToExecute - 1;
 
       // Execute
       if(numberOfCommandsToExecute == 0) {
-        var error = self.s.bulkResult.writeErrors.length > 0 ? self.s.bulkResult.writeErrors[0] : null;
+				// Driver level error
+				if(error) return callback(error);
+				// Treat write errors
+        var error = self.s.bulkResult.writeErrors.length > 0 ? toError(self.s.bulkResult.writeErrors[0]) : null;
         callback(error, new BulkWriteResult(self.s.bulkResult));
       }
     });
@@ -2101,7 +2137,7 @@ var executeBatches = function(self, callback) {
  * @param {number} [options.wtimeout=null] The write concern timeout.
  * @param {boolean} [options.j=false] Specify a journal write concern.
  * @param {boolean} [options.fsync=false] Specify a file sync write concern.
- * @param {UnorderedBulkOperation~resultCallback} callback The result callback
+ * @param {UnorderedBulkOperation~resultCallback} [callback] The result callback
  * @throws {MongoError}
  * @return {Promise} returns Promise if no callback passed
  */
@@ -2131,7 +2167,7 @@ UnorderedBulkOperation.prototype.execute = function(_writeConcern, callback) {
   return new this.s.promiseLibrary(function(resolve, reject) {
     executeBatches(self, function(err, r) {
       if(err) return reject(err);
-      resolve(r); 
+      resolve(r);
     });
   });
 }
@@ -2145,6 +2181,7 @@ var initializeUnorderedBulkOp = function(topology, collection, options) {
 }
 
 module.exports = initializeUnorderedBulkOp;
+module.exports.Bulk = UnorderedBulkOperation;
 </code></pre>
         </article>
     </section>
@@ -2174,7 +2211,7 @@ module.exports = initializeUnorderedBulkOp;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue Jul 14 2015 11:44:05 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Aug 06 2015 13:24:15 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

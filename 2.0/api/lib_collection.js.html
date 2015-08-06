@@ -584,13 +584,21 @@
             
                 <li data-name="Cursor#hasNext"><a href="Cursor.html#hasNext">hasNext</a></li>
             
+                <li data-name="Cursor#hint"><a href="Cursor.html#hint">hint</a></li>
+            
                 <li data-name="Cursor#isClosed"><a href="Cursor.html#isClosed">isClosed</a></li>
             
                 <li data-name="Cursor#limit"><a href="Cursor.html#limit">limit</a></li>
             
                 <li data-name="Cursor#map"><a href="Cursor.html#map">map</a></li>
             
+                <li data-name="Cursor#max"><a href="Cursor.html#max">max</a></li>
+            
+                <li data-name="Cursor#maxScan"><a href="Cursor.html#maxScan">maxScan</a></li>
+            
                 <li data-name="Cursor#maxTimeMS"><a href="Cursor.html#maxTimeMS">maxTimeMS</a></li>
+            
+                <li data-name="Cursor#min"><a href="Cursor.html#min">min</a></li>
             
                 <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
             
@@ -608,6 +616,8 @@
             
                 <li data-name="Cursor#resume"><a href="Cursor.html#resume">resume</a></li>
             
+                <li data-name="Cursor#returnKey"><a href="Cursor.html#returnKey">returnKey</a></li>
+            
                 <li data-name="Cursor#rewind"><a href="Cursor.html#rewind">rewind</a></li>
             
                 <li data-name="Cursor#setBatchSize"><a href="Cursor.html#setBatchSize">setBatchSize</a></li>
@@ -622,7 +632,11 @@
             
                 <li data-name="Cursor#setReadPreference"><a href="Cursor.html#setReadPreference">setReadPreference</a></li>
             
+                <li data-name="Cursor#showRecordId"><a href="Cursor.html#showRecordId">showRecordId</a></li>
+            
                 <li data-name="Cursor#skip"><a href="Cursor.html#skip">skip</a></li>
+            
+                <li data-name="Cursor#snapshot"><a href="Cursor.html#snapshot">snapshot</a></li>
             
                 <li data-name="Cursor#sort"><a href="Cursor.html#sort">sort</a></li>
             
@@ -1819,7 +1833,7 @@ Collection.prototype.find = function() {
     options = args[0];
   }
 
-  if(len === 2 &amp;&amp; !Array.isArray(fields)) {
+  if(len === 2 &amp;&amp; fields !== undefined &amp;&amp; !Array.isArray(fields)) {
     var fieldKeys = Object.keys(fields);
     var is_option = false;
 
@@ -1924,7 +1938,7 @@ Collection.prototype.find = function() {
 
   // Ensure the query is an object
   if(selector != null &amp;&amp; typeof selector != 'object') {
-    throw new MongoError("query selector must be an object");
+    throw MongoError.create({message: "query selector must be an object", driver:true });
   }
 
   // Build the find command
@@ -1997,13 +2011,14 @@ Collection.prototype.find = function() {
  * @param {boolean} [options.j=false] Specify a journal write concern.
  * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
  * @param {boolean} [options.forceServerObjectId=false] Force server to assign _id values instead of driver.
- * @param {Collection~writeOpCallback} callback The command result callback
+ * @param {Collection~writeOpCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.insertOne = function(doc, options, callback) {
   var self = this;
   if(typeof options == 'function') callback = options, options = {};
-  if(Array.isArray(doc)) return callback(new MongoError('doc parameter must be an object'));
+  options = options || {};
+  if(Array.isArray(doc)) return callback(MongoError.create({message: 'doc parameter must be an object', driver:true }));
 
   // Execute using callback
   if(typeof callback == 'function') return insertOne(self, doc, options, callback);
@@ -2030,6 +2045,25 @@ var insertOne = function(self, doc, options, callback) {
   });
 }
 
+var mapInserManyResults = function(docs, r) {
+  var ids = r.getInsertedIds();
+  var keys = Object.keys(ids);
+  var finalIds = new Array(keys);
+
+  for(var i = 0; i &lt; keys.length; i++) {
+    if(ids[keys[i]]._id) {
+      finalIds[ids[keys[i]].index] = ids[keys[i]]._id;
+    }
+  }
+
+  return {
+    result: {ok: 1, n: r.insertedCount},
+    ops: docs,
+    insertedCount: r.insertedCount,
+    insertedIds: finalIds
+  }
+}
+
 /**
  * Inserts an array of documents into MongoDB.
  * @method
@@ -2040,38 +2074,48 @@ var insertOne = function(self, doc, options, callback) {
  * @param {boolean} [options.j=false] Specify a journal write concern.
  * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
  * @param {boolean} [options.forceServerObjectId=false] Force server to assign _id values instead of driver.
- * @param {Collection~writeOpCallback} callback The command result callback
+ * @param {Collection~writeOpCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.insertMany = function(docs, options, callback) {
   var self = this;
   if(typeof options == 'function') callback = options, options = {};
-  if(!Array.isArray(docs)) return callback(new MongoError('docs parameter must be an array of documents'));
+  options = options || {ordered:true};
+  if(!Array.isArray(docs)) return callback(MongoError.create({message: 'docs parameter must be an array of documents', driver:true }));
+
+  // Get the write concern options
+  if(typeof options.checkKeys != 'boolean') {
+    options.checkKeys = true;
+  }
+
+  // If keep going set unordered
+  options['serializeFunctions'] = options['serializeFunctions'] || self.s.serializeFunctions;
+
+  // Do we want to force the server to assign the _id key
+  if(options.forceServerObjectId == null || options.forceServerObjectId == false) {
+    // Add _id if not specified
+    for(var i = 0; i &lt; docs.length; i++) {
+      if(docs[i]._id == null) docs[i]._id = self.s.pkFactory.createPk();
+    }
+  }
+
+  // Generate the bulk write operations
+  var operations = [{
+    insertMany: docs
+  }];
 
   // Execute using callback
-  if(typeof callback == 'function') return insertMany(self, docs, options, callback);
+  if(typeof callback == 'function') return bulkWrite(self, operations, options, function(err, r) {
+    if(err) return callback(err, r);
+    callback(null, mapInserManyResults(docs, r));
+  });
 
   // Return a Promise
   return new this.s.promiseLibrary(function(resolve, reject) {
-    insertMany(self, docs, options, function(err, r) {
+    bulkWrite(self, operations, options, function(err, r) {
       if(err) return reject(err);
-      resolve(r);
+      resolve(mapInserManyResults(docs, r));
     });
-  });
-}
-
-var insertMany = function(self, docs, options, callback) {
-  insertDocuments(self, docs, options, function(err, r) {
-    if(callback == null) return;
-    if(err &amp;&amp; callback) return callback(err);
-    if(r == null) return callback(null, {result: {ok:1}});
-    r.insertedCount = r.result.n;
-    var ids = [];
-    for(var i = 0; i &lt; docs.length; i++) {
-      if(docs[i]._id) ids.push(docs[i]._id);
-    }
-    r.insertedIds = ids;
-    if(callback) callback(null, r);
   });
 }
 
@@ -2118,13 +2162,18 @@ var insertMany = function(self, docs, options, callback) {
  * @param {number} [options.wtimeout=null] The write concern timeout.
  * @param {boolean} [options.j=false] Specify a journal write concern.
  * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
- * @param {Collection~bulkWriteOpCallback} callback The command result callback
+ * @param {boolean} [options.ordered=true] Execute write operation in ordered or unordered fashion.
+ * @param {Collection~bulkWriteOpCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.bulkWrite = function(operations, options, callback) {
   var self = this;
   if(typeof options == 'function') callback = options, options = {};
-  if(!Array.isArray(operations)) throw new MongoError("operations must be an array of documents");
+  options = options || {ordered:true};
+
+  if(!Array.isArray(operations)) {
+    throw MongoError.create({message: "operations must be an array of documents", driver:true });
+  }
 
   // Execute using callback
   if(typeof callback == 'function') return bulkWrite(self, operations, options, callback);
@@ -2139,7 +2188,7 @@ Collection.prototype.bulkWrite = function(operations, options, callback) {
 }
 
 var bulkWrite = function(self, operations, options, callback) {
-  var bulk = options.ordered == true || options.ordered == null ? self.initializeOrderedBulkOp() : self.initializeUnorderedBulkOp();
+  var bulk = options.ordered == true || options.ordered == null ? self.initializeOrderedBulkOp(options) : self.initializeUnorderedBulkOp(options);
 
   // for each op go through and add to the bulk
   for(var i = 0; i &lt; operations.length; i++) {
@@ -2152,6 +2201,14 @@ var bulkWrite = function(self, operations, options, callback) {
 
   // Execute the bulk
   bulk.execute(writeCon, function(err, r) {
+    // We have connection level error
+    if(!r &amp;&amp; err) return callback(err, null);
+    // We have single error
+    if(r &amp;&amp; r.hasWriteErrors() &amp;&amp; r.getWriteErrorCount() == 1) {
+      return callback(toError(r.getWriteErrorAt(0)), r);
+    }
+
+    // if(err) return callback(err);
     r.insertedCount = r.nInserted;
     r.matchedCount = r.nMatched;
     r.modifiedCount = r.nModified || 0;
@@ -2159,6 +2216,9 @@ var bulkWrite = function(self, operations, options, callback) {
     r.upsertedCount = r.getUpsertedIds().length;
     r.upsertedIds = {};
     r.insertedIds = {};
+
+    // Update the n
+    r.n = r.insertedCount;
 
     // Inserted documents
     var inserted = r.getInsertedIds();
@@ -2172,6 +2232,22 @@ var bulkWrite = function(self, operations, options, callback) {
     // Map upserted ids
     for(var i = 0; i &lt; upserted.length; i++) {
       r.upsertedIds[upserted[i].index] = upserted[i]._id;
+    }
+
+    // Check if we have write errors
+    if(r.hasWriteErrors()) {
+      // Get all the errors
+      var errors = r.getWriteErrors();
+      // Return the MongoError object
+      return callback(toError({
+        message: 'write operation failed', code: errors[0].code, writeErrors: errors
+      }), r);
+    }
+
+    // Check if we have a writeConcern error
+    if(r.getWriteConcernError()) {
+      // Return the MongoError object
+      return callback(toError(r.getWriteConcernError()), r);      
     }
 
     // Return the results
@@ -2236,25 +2312,21 @@ var insertDocuments = function(self, docs, options, callback) {
  * @param {boolean} [options.j=false] Specify a journal write concern.
  * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
  * @param {boolean} [options.forceServerObjectId=false] Force server to assign _id values instead of driver.
- * @param {Collection~writeOpCallback} callback The command result callback
+ * @param {Collection~writeOpCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  * @deprecated Use insertOne, insertMany or bulkWrite
  */
 Collection.prototype.insert = function(docs, options, callback) {
   var self = this;
   if(typeof options == 'function') callback = options, options = {};
-  options = options || {};
+  options = options || {ordered:false};
+  docs = !Array.isArray(docs) ? [docs] : docs;
 
-  // Execute using callback
-  if(typeof callback == 'function') return insertDocuments(self, docs, options, callback);
+  if(options.keepGoing == true) {
+    options.ordered = false;
+  }
 
-  // Return a Promise
-  return new this.s.promiseLibrary(function(resolve, reject) {
-    insertDocuments(self, docs, options, function(err, r) {
-      if(err) return reject(err);
-      resolve(r);
-    });
-  });
+  return this.insertMany(docs, options, callback);
 }
 
 /**
@@ -2267,7 +2339,7 @@ Collection.prototype.insert = function(docs, options, callback) {
  * @param {(number|string)} [options.w=null] The write concern.
  * @param {number} [options.wtimeout=null] The write concern timeout.
  * @param {boolean} [options.j=false] Specify a journal write concern.
- * @param {Collection~writeOpCallback} callback The command result callback
+ * @param {Collection~writeOpCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.updateOne = function(filter, update, options, callback) {
@@ -2313,7 +2385,7 @@ var updateOne = function(self, filter, update, options, callback) {
  * @param {(number|string)} [options.w=null] The write concern.
  * @param {number} [options.wtimeout=null] The write concern timeout.
  * @param {boolean} [options.j=false] Specify a journal write concern.
- * @param {Collection~writeOpCallback} callback The command result callback
+ * @param {Collection~writeOpCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.replaceOne = function(filter, update, options, callback) {
@@ -2360,7 +2432,7 @@ var replaceOne = function(self, filter, update, options, callback) {
  * @param {(number|string)} [options.w=null] The write concern.
  * @param {number} [options.wtimeout=null] The write concern timeout.
  * @param {boolean} [options.j=false] Specify a journal write concern.
- * @param {Collection~writeOpCallback} callback The command result callback
+ * @param {Collection~writeOpCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.updateMany = function(filter, update, options, callback) {
@@ -2441,7 +2513,7 @@ var updateDocuments = function(self, selector, document, options, callback) {
  * @param {boolean} [options.j=false] Specify a journal write concern.
  * @param {boolean} [options.upsert=false] Update operation is an upsert.
  * @param {boolean} [options.multi=false] Update one/all documents with operation.
- * @param {Collection~writeOpCallback} callback The command result callback
+ * @param {Collection~writeOpCallback} [callback] The command result callback
  * @throws {MongoError}
  * @return {Promise} returns Promise if no callback passed
  * @deprecated use updateOne, updateMany or bulkWrite
@@ -2468,7 +2540,7 @@ Collection.prototype.update = function(selector, document, options, callback) {
  * @param {(number|string)} [options.w=null] The write concern.
  * @param {number} [options.wtimeout=null] The write concern timeout.
  * @param {boolean} [options.j=false] Specify a journal write concern.
- * @param {Collection~writeOpCallback} callback The command result callback
+ * @param {Collection~writeOpCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.deleteOne = function(filter, options, callback) {
@@ -2509,7 +2581,7 @@ Collection.prototype.removeOne = Collection.prototype.deleteOne;
  * @param {(number|string)} [options.w=null] The write concern.
  * @param {number} [options.wtimeout=null] The write concern timeout.
  * @param {boolean} [options.j=false] Specify a journal write concern.
- * @param {Collection~writeOpCallback} callback The command result callback
+ * @param {Collection~writeOpCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.deleteMany = function(filter, options, callback) {
@@ -2585,7 +2657,7 @@ var removeDocuments = function(self, selector, options, callback) {
  * @param {number} [options.wtimeout=null] The write concern timeout.
  * @param {boolean} [options.j=false] Specify a journal write concern.
  * @param {boolean} [options.single=false] Removes the first document found.
- * @param {Collection~writeOpCallback} callback The command result callback
+ * @param {Collection~writeOpCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  * @deprecated use deleteOne, deleteMany or bulkWrite
  */
@@ -2612,7 +2684,7 @@ Collection.prototype.remove = function(selector, options, callback) {
  * @param {(number|string)} [options.w=null] The write concern.
  * @param {number} [options.wtimeout=null] The write concern timeout.
  * @param {boolean} [options.j=false] Specify a journal write concern.
- * @param {Collection~writeOpCallback} callback The command result callback
+ * @param {Collection~writeOpCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.save = function(doc, options, callback) {
@@ -2682,7 +2754,7 @@ var save = function(self, doc, options, callback) {
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  * @param {boolean} [options.partial=false] Specify if the cursor should return partial results when querying against a sharded system
  * @param {number} [options.maxTimeMS=null] Number of miliseconds to wait before aborting the query.
- * @param {Collection~resultCallback} callback The command result callback
+ * @param {Collection~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.findOne = function() {
@@ -2726,7 +2798,7 @@ var findOne = function(self, args, callback) {
  * @param {string} newName New name of of the collection.
  * @param {object} [options=null] Optional settings.
  * @param {boolean} [options.dropTarget=false] Drop the target name collection if it previously exists.
- * @param {Collection~collectionResultCallback} callback The results callback
+ * @param {Collection~collectionResultCallback} [callback] The results callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.rename = function(newName, opt, callback) {
@@ -2772,7 +2844,7 @@ var rename = function(self, newName, opt, callback) {
  * Drop the collection from the database, removing it permanently. New accesses will create a new collection.
  *
  * @method
- * @param {Collection~resultCallback} callback The results callback
+ * @param {Collection~resultCallback} [callback] The results callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.drop = function(callback) {
@@ -2793,7 +2865,7 @@ Collection.prototype.drop = function(callback) {
  * Returns the options of the collection.
  *
  * @method
- * @param {Collection~resultCallback} callback The results callback
+ * @param {Collection~resultCallback} [callback] The results callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.options = function(callback) {
@@ -2814,7 +2886,10 @@ Collection.prototype.options = function(callback) {
 var options = function(self, callback) {
   self.s.db.listCollections({name: self.s.name}).toArray(function(err, collections) {
     if(err) return handleCallback(callback, err);
-    if(collections.length == 0) return handleCallback(callback, new MongoError(f("collection %s not found", self.s.namespace)));
+    if(collections.length == 0) {
+      return handleCallback(callback, MongoError.create({message: f("collection %s not found", self.s.namespace), driver:true }));
+    }
+
     handleCallback(callback, err, collections[0].options || null);
   });
 }
@@ -2823,7 +2898,7 @@ var options = function(self, callback) {
  * Returns if the collection is a capped collection
  *
  * @method
- * @param {Collection~resultCallback} callback The results callback
+ * @param {Collection~resultCallback} [callback] The results callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.isCapped = function(callback) {
@@ -2865,7 +2940,7 @@ var isCapped = function(self, callback) {
  * @param {number} [options.v=null] Specify the format version of the indexes.
  * @param {number} [options.expireAfterSeconds=null] Allows you to expire data on indexes applied to a data (MongoDB 2.2 or higher)
  * @param {number} [options.name=null] Override the autogenerated index name (useful if the resulting name is larger than 128 bytes)
- * @param {Collection~resultCallback} callback The command result callback
+ * @param {Collection~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.createIndex = function(fieldOrSpec, options, callback) {
@@ -2899,7 +2974,7 @@ var createIndex = function(self, fieldOrSpec, options, callback) {
  * error. Index specifications are defined at http://docs.mongodb.org/manual/reference/command/createIndexes/.
  * @method
  * @param {array} indexSpecs An array of index specifications to be created
- * @param {Collection~resultCallback} callback The command result callback
+ * @param {Collection~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.createIndexes = function(indexSpecs, callback) {
@@ -2946,7 +3021,7 @@ var createIndexes = function(self, indexSpecs, callback) {
  * @param {(number|string)} [options.w=null] The write concern.
  * @param {number} [options.wtimeout=null] The write concern timeout.
  * @param {boolean} [options.j=false] Specify a journal write concern.
- * @param {Collection~resultCallback} callback The command result callback
+ * @param {Collection~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.dropIndex = function(indexName, options, callback) {
@@ -2985,7 +3060,7 @@ var dropIndex = function(self, indexName, options, callback) {
 /**
  * Drops all indexes from this collection.
  * @method
- * @param {Collection~resultCallback} callback The command result callback
+ * @param {Collection~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.dropIndexes = function(callback) {
@@ -3015,7 +3090,7 @@ var dropIndexes = function(self, callback) {
  * @method
  * @deprecated use dropIndexes
  * @param {Collection~resultCallback} callback The command result callback
- * @return {Promise} returns Promise if no callback passed
+ * @return {Promise} returns Promise if no [callback] passed
  */
 Collection.prototype.dropAllIndexes = Collection.prototype.dropIndexes;
 
@@ -3023,7 +3098,7 @@ Collection.prototype.dropAllIndexes = Collection.prototype.dropIndexes;
  * Reindex all indexes on the collection
  * Warning: reIndex is a blocking operation (indexes are rebuilt in the foreground) and will be slow for large collections.
  * @method
- * @param {Collection~resultCallback} callback The command result callback
+ * @param {Collection~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.reIndex = function(options, callback) {
@@ -3106,7 +3181,7 @@ Collection.prototype.listIndexes = function(options) {
  * @param {number} [options.v=null] Specify the format version of the indexes.
  * @param {number} [options.expireAfterSeconds=null] Allows you to expire data on indexes applied to a data (MongoDB 2.2 or higher)
  * @param {number} [options.name=null] Override the autogenerated index name (useful if the resulting name is larger than 128 bytes)
- * @param {Collection~resultCallback} callback The command result callback
+ * @param {Collection~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.ensureIndex = function(fieldOrSpec, options, callback) {
@@ -3134,7 +3209,7 @@ var ensureIndex = function(self, fieldOrSpec, options, callback) {
  * Checks if one or more indexes exist on the collection, fails on first non-existing index
  * @method
  * @param {(string|array)} indexes One or more index names to check.
- * @param {Collection~resultCallback} callback The command result callback
+ * @param {Collection~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.indexExists = function(indexes, callback) {
@@ -3175,7 +3250,7 @@ var indexExists = function(self, indexes, callback) {
  * @method
  * @param {object} [options=null] Optional settings.
  * @param {boolean} [options.full=false] Returns the full raw index information.
- * @param {Collection~resultCallback} callback The command result callback
+ * @param {Collection~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.indexInformation = function(options, callback) {
@@ -3218,7 +3293,7 @@ var indexInformation = function(self, options, callback) {
  * @param {boolean} [options.skip=null] The number of documents to skip for the count.
  * @param {string} [options.hint=null] An index name hint for the query.
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
- * @param {Collection~countCallback} callback The command result callback
+ * @param {Collection~countCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.count = function(query, options, callback) {
@@ -3279,7 +3354,7 @@ var count = function(self, query, options, callback) {
  * @param {object} query The query for filtering the set of documents to which we apply the distinct filter.
  * @param {object} [options=null] Optional settings.
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
- * @param {Collection~resultCallback} callback The command result callback
+ * @param {Collection~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.distinct = function(key, query, options, callback) {
@@ -3328,7 +3403,7 @@ var distinct = function(self, key, query, options, callback) {
 /**
  * Retrieve all the indexes on the collection.
  * @method
- * @param {Collection~resultCallback} callback The command result callback
+ * @param {Collection~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.indexes = function(callback) {
@@ -3355,7 +3430,7 @@ var indexes = function(self, callback) {
  * @method
  * @param {object} [options=null] Optional settings.
  * @param {number} [options.scale=null] Divide the returned sizes by scale value.
- * @param {Collection~resultCallback} callback The collection result callback
+ * @param {Collection~resultCallback} [callback] The collection result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.stats = function(options, callback) {
@@ -3403,12 +3478,13 @@ var stats = function(self, options, callback) {
  * @param {object} [options.projection=null] Limits the fields to return for all matching documents.
  * @param {object} [options.sort=null] Determines which document the operation modifies if the query selects multiple documents.
  * @param {number} [options.maxTimeMS=null] The maximum amount of time to allow the query to run.
- * @param {Collection~resultCallback} callback The collection result callback
+ * @param {Collection~resultCallback} [callback] The collection result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.findOneAndDelete = function(filter, options, callback) {
   var self = this;
   if(typeof options == 'function') callback = options, options = {};
+  options = options || {};
 
   // Execute using callback
   if(typeof callback == 'function') return findOneAndDelete(self, filter, options, callback);
@@ -3449,12 +3525,13 @@ var findOneAndDelete = function(self, filter, options, callback) {
  * @param {number} [options.maxTimeMS=null] The maximum amount of time to allow the query to run.
  * @param {boolean} [options.upsert=false] Upsert the document if it does not exist.
  * @param {boolean} [options.returnOriginal=true] When false, returns the updated document rather than the original. The default is true.
- * @param {Collection~resultCallback} callback The collection result callback
+ * @param {Collection~resultCallback} [callback] The collection result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.findOneAndReplace = function(filter, replacement, options, callback) {
   var self = this;
   if(typeof options == 'function') callback = options, options = {};
+  options = options || {};
 
   // Execute using callback
   if(typeof callback == 'function') return findOneAndReplace(self, filter, replacement, options, callback);
@@ -3497,12 +3574,13 @@ var findOneAndReplace = function(self, filter, replacement, options, callback) {
  * @param {number} [options.maxTimeMS=null] The maximum amount of time to allow the query to run.
  * @param {boolean} [options.upsert=false] Upsert the document if it does not exist.
  * @param {boolean} [options.returnOriginal=true] When false, returns the updated document rather than the original. The default is true.
- * @param {Collection~resultCallback} callback The collection result callback
+ * @param {Collection~resultCallback} [callback] The collection result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.findOneAndUpdate = function(filter, update, options, callback) {
   var self = this;
   if(typeof options == 'function') callback = options, options = {};
+  options = options || {};
 
   // Execute using callback
   if(typeof callback == 'function') return findOneAndUpdate(self, filter, update, options, callback);
@@ -3547,7 +3625,7 @@ var findOneAndUpdate = function(self, filter, update, options, callback) {
  * @param {boolean} [options.upsert=false] Perform an upsert operation.
  * @param {boolean} [options.new=false] Set to true if you want to return the modified object rather than the original. Ignored for remove.
  * @param {object} [options.fields=null] Object containing the field projection for the result returned from the operation.
- * @param {Collection~resultCallback} callback The command result callback
+ * @param {Collection~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  * @deprecated use findOneAndUpdate, findOneAndReplace or findOneAndDelete instead
  */
@@ -3631,7 +3709,7 @@ var findAndModify = function(self, query, sort, doc, options, callback) {
  * @param {(number|string)} [options.w=null] The write concern.
  * @param {number} [options.wtimeout=null] The write concern timeout.
  * @param {boolean} [options.j=false] Specify a journal write concern.
- * @param {Collection~resultCallback} callback The command result callback
+ * @param {Collection~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  * @deprecated use findOneAndDelete instead
  */
@@ -3784,7 +3862,7 @@ Collection.prototype.aggregate = function(pipeline, options, callback) {
  * @param {number} [options.batchSize=null] Set the batchSize for the getMoreCommand when iterating over the query results.
  * @param {number} [options.numCursors=1] The maximum number of parallel command cursors to return (the number of returned cursors will be in the range 1:numCursors)
  * @param {boolean} [options.raw=false] Return all BSON documents as Raw Buffer documents.
- * @param {Collection~parallelCollectionScanCallback} callback The command result callback
+ * @param {Collection~parallelCollectionScanCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.parallelCollectionScan = function(options, callback) {
@@ -3862,7 +3940,7 @@ var parallelCollectionScan = function(self, options, callback) {
  * @param {boolean} [options.spherical=false] Perform query using a spherical model.
  * @param {boolean} [options.uniqueDocs=false] The closest location in a document to the center of the search region will always be returned MongoDB > 2.X.
  * @param {boolean} [options.includeLocs=false] Include the location data fields in the top level of the results MongoDB > 2.X.
- * @param {Collection~resultCallback} callback The command result callback
+ * @param {Collection~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.geoNear = function(x, y, options, callback) {
@@ -3929,7 +4007,7 @@ var geoNear = function(self, x, y, point, options, callback) {
  * @param {number} [options.maxDistance=null] Include results up to maxDistance from the point.
  * @param {object} [options.search=null] Filter the results by a query.
  * @param {number} [options.limit=false] Max number of results to return.
- * @param {Collection~resultCallback} callback The command result callback
+ * @param {Collection~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.geoHaystackSearch = function(x, y, options, callback) {
@@ -4019,7 +4097,7 @@ var groupFunction = function () {
  * @param {boolean} command Specify if you wish to run using the internal group command or using eval, default is true.
  * @param {object} [options=null] Optional settings.
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
- * @param {Collection~resultCallback} callback The command result callback
+ * @param {Collection~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Collection.prototype.group = function(keys, condition, initial, reduce, finalize, command, options, callback) {
@@ -4170,7 +4248,7 @@ function processScope (scope) {
  * @param {object} [options.scope=null] Can pass in variables that can be access from map/reduce/finalize.
  * @param {boolean} [options.jsMode=false] It is possible to make the execution stay in JS. Provided in MongoDB > 2.0.X.
  * @param {boolean} [options.verbose=false] Provide statistics on job execution time.
- * @param {Collection~resultCallback} callback The command result callback
+ * @param {Collection~resultCallback} [callback] The command result callback
  * @throws {MongoError}
  * @return {Promise} returns Promise if no callback passed
  */
@@ -4385,7 +4463,7 @@ module.exports = Collection;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue Jul 14 2015 11:44:05 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Aug 06 2015 13:24:15 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

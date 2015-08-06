@@ -24,7 +24,7 @@ Web frameworks using MongoDB
          * - **Clone Url**
            - https://github.com/nwtjs/nwt.git
          * - **Forks**
-           - 11
+           - 12
          * - **Watchers**
            - 27
 
@@ -47,7 +47,7 @@ Web frameworks using MongoDB
          * - **Clone Url**
            - https://github.com/mattinsler/caboose.git
          * - **Forks**
-           - 5
+           - 4
          * - **Watchers**
            - 18
 
@@ -121,7 +121,7 @@ Object Document Modeling Libraries
          * - **Forks**
            - 5
          * - **Watchers**
-           - 58
+           - 59
 
 .. topic:: leaf
 
@@ -193,7 +193,7 @@ Content Management Systems
          * - **Forks**
            - 286
          * - **Watchers**
-           - 1592
+           - 1598
 
 Grid FS libraries or tools
 --------------------------
@@ -256,7 +256,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          :header-rows: 0
 
          * - **Activity Level**
-           - .. image:: ../static/active.png
+           - .. image:: ../static/nonactive.png
          * - **Last push**
            - 2:13:27 on 28/2/2015
          * - **Homepage**
@@ -268,7 +268,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 6
          * - **Watchers**
-           - 68
+           - 69
 
 .. topic:: mongolia
 
@@ -384,9 +384,9 @@ REST api's around MongoDB or resource based libraries
          * - **Clone Url**
            - https://github.com/tdegrunt/mongodb-rest.git
          * - **Forks**
-           - 118
+           - 119
          * - **Watchers**
-           - 345
+           - 347
 
 .. topic:: lazyBum
 
@@ -471,7 +471,7 @@ Test helpers and libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 20:36:30 on 16/5/2015
+           - 1:18:3 on 21/6/2015
          * - **Homepage**
            - http://
          * - **Url**
@@ -531,7 +531,7 @@ Queue libraries using MongoDB
          * - **Clone Url**
            - https://github.com/bcoe/karait.git
          * - **Forks**
-           - 5
+           - 6
          * - **Watchers**
            - 97
 
@@ -634,7 +634,7 @@ General frameworks over MongoDB
          * - **Forks**
            - 4
          * - **Watchers**
-           - 23
+           - 21
 
 .. topic:: databank
 
@@ -732,7 +732,7 @@ Libraries or Applications for analytics
          * - **Forks**
            - 415
          * - **Watchers**
-           - 3561
+           - 3565
 
 Libraries for the connect middleware
 ------------------------------------
@@ -771,7 +771,7 @@ Libraries for the connect middleware
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 21:57:23 on 13/6/2015
+           - 16:10:7 on 23/6/2015
          * - **Homepage**
            - http://
          * - **Url**
@@ -779,9 +779,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 203
+           - 205
          * - **Watchers**
-           - 758
+           - 769
 
 Libraries or applications for continous integration
 ---------------------------------------------------
@@ -805,7 +805,7 @@ Libraries or applications for continous integration
          * - **Clone Url**
            - https://github.com/ryankee/concrete.git
          * - **Forks**
-           - 71
+           - 70
          * - **Watchers**
            - 482
 
@@ -831,7 +831,7 @@ Exampe applications
          * - **Clone Url**
            - https://github.com/gotik/nodejs-blackboard.git
          * - **Forks**
-           - 20
+           - 21
          * - **Watchers**
            - 38
 

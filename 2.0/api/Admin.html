@@ -584,13 +584,21 @@
             
                 <li data-name="Cursor#hasNext"><a href="Cursor.html#hasNext">hasNext</a></li>
             
+                <li data-name="Cursor#hint"><a href="Cursor.html#hint">hint</a></li>
+            
                 <li data-name="Cursor#isClosed"><a href="Cursor.html#isClosed">isClosed</a></li>
             
                 <li data-name="Cursor#limit"><a href="Cursor.html#limit">limit</a></li>
             
                 <li data-name="Cursor#map"><a href="Cursor.html#map">map</a></li>
             
+                <li data-name="Cursor#max"><a href="Cursor.html#max">max</a></li>
+            
+                <li data-name="Cursor#maxScan"><a href="Cursor.html#maxScan">maxScan</a></li>
+            
                 <li data-name="Cursor#maxTimeMS"><a href="Cursor.html#maxTimeMS">maxTimeMS</a></li>
+            
+                <li data-name="Cursor#min"><a href="Cursor.html#min">min</a></li>
             
                 <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
             
@@ -608,6 +616,8 @@
             
                 <li data-name="Cursor#resume"><a href="Cursor.html#resume">resume</a></li>
             
+                <li data-name="Cursor#returnKey"><a href="Cursor.html#returnKey">returnKey</a></li>
+            
                 <li data-name="Cursor#rewind"><a href="Cursor.html#rewind">rewind</a></li>
             
                 <li data-name="Cursor#setBatchSize"><a href="Cursor.html#setBatchSize">setBatchSize</a></li>
@@ -622,7 +632,11 @@
             
                 <li data-name="Cursor#setReadPreference"><a href="Cursor.html#setReadPreference">setReadPreference</a></li>
             
+                <li data-name="Cursor#showRecordId"><a href="Cursor.html#showRecordId">showRecordId</a></li>
+            
                 <li data-name="Cursor#skip"><a href="Cursor.html#skip">skip</a></li>
+            
+                <li data-name="Cursor#snapshot"><a href="Cursor.html#snapshot">snapshot</a></li>
             
                 <li data-name="Cursor#sort"><a href="Cursor.html#sort">sort</a></li>
             
@@ -1760,7 +1774,7 @@ collection instance.
     <div class="nameContainer">
         <h4 class="name" id="addUser">
             
-            addUser<span class="signature">(username, password, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            addUser<span class="signature">(username, password, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -2173,6 +2187,8 @@ collection instance.
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -2467,7 +2483,7 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="authenticate">
             
-            authenticate<span class="signature">(username, <span class="optional">password</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            authenticate<span class="signature">(username, <span class="optional">password</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -2588,6 +2604,8 @@ co(function*() {
             
             <td class="description last">
                 
+                    
+                        <span class="optional">optional</span>
                     
                     
                         
@@ -2762,7 +2780,7 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="buildInfo">
             
-            buildInfo<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            buildInfo<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -2825,6 +2843,13 @@ instance of the db client</p>
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 <p>The command result callback</p></td>
         </tr>
@@ -2987,7 +3012,7 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="command">
             
-            command<span class="signature">(command, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            command<span class="signature">(command, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -3224,6 +3249,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -3389,7 +3416,7 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="listDatabases">
             
-            listDatabases<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            listDatabases<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -3451,6 +3478,13 @@ co(function*() {
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 <p>The command result callback.</p></td>
         </tr>
@@ -3580,7 +3614,7 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="logout">
             
-            logout<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            logout<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -3642,6 +3676,13 @@ co(function*() {
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 <p>The command result callback</p></td>
         </tr>
@@ -3806,7 +3847,7 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="ping">
             
-            ping<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            ping<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -3868,6 +3909,13 @@ co(function*() {
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 <p>The command result callback</p></td>
         </tr>
@@ -4030,7 +4078,7 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="profilingInfo">
             
-            profilingInfo<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            profilingInfo<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -4092,6 +4140,13 @@ co(function*() {
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 <p>The command result callback.</p></td>
         </tr>
@@ -4321,7 +4376,7 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="profilingLevel">
             
-            profilingLevel<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            profilingLevel<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -4383,6 +4438,13 @@ co(function*() {
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 <p>The command result callback</p></td>
         </tr>
@@ -4564,7 +4626,7 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="removeUser">
             
-            removeUser<span class="signature">(username, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            removeUser<span class="signature">(username, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -4873,6 +4935,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -5045,7 +5109,7 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="replSetGetStatus">
             
-            replSetGetStatus<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            replSetGetStatus<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -5107,6 +5171,13 @@ co(function*() {
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 <p>The command result callback.</p></td>
         </tr>
@@ -5230,20 +5301,9 @@ co(function*() {
   // Use the admin database for the operation
   var adminDb = db.admin();
 
-  // Add the new user to the admin database
-  var result = yield adminDb.addUser('admin14', 'admin14');
-  test.ok(result != null);
-
-  // Authenticate using the newly added user
-  var result = yield adminDb.authenticate('admin14', 'admin14');
-  test.equal(true, result);
-
   // Retrive the server Info, returns error if we are not
   // running a replicaset
   yield adminDb.replSetGetStatus();
-
-  var result = yield adminDb.removeUser('admin14');
-  test.ok(result);
 
   db.close();
 });</code></pre>
@@ -5302,7 +5362,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="serverInfo">
             
-            serverInfo<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            serverInfo<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -5366,6 +5426,13 @@ instance of the db client</p>
             
             <td class="description last">
                 
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
                 <p>The command result callback</p></td>
         </tr>
 	
@@ -5428,7 +5495,7 @@ Promise if no callback passed
     <div class="nameContainer">
         <h4 class="name" id="serverStatus">
             
-            serverStatus<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            serverStatus<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -5490,6 +5557,13 @@ Promise if no callback passed
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 <p>The command result callback</p></td>
         </tr>
@@ -5675,7 +5749,7 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="setProfilingLevel">
             
-            setProfilingLevel<span class="signature">(level, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            setProfilingLevel<span class="signature">(level, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -5738,6 +5812,11 @@ co(function*() {
             
             <td class="description last">
                 
+                    
+                    
+                        
+                    
+                
                 <p>The new profiling level (off, slow_only, all).</p></td>
         </tr>
 	
@@ -5760,6 +5839,13 @@ co(function*() {
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 <p>The command result callback.</p></td>
         </tr>
@@ -6029,7 +6115,7 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="validateCollection">
             
-            validateCollection<span class="signature">(collectionName, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            validateCollection<span class="signature">(collectionName, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
@@ -6166,6 +6252,8 @@ co(function*() {
             
             <td class="description last">
                 
+                    
+                        <span class="optional">optional</span>
                     
                     
                         
@@ -6662,7 +6750,7 @@ co(function*() {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue Jul 14 2015 11:44:06 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Aug 06 2015 13:24:15 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

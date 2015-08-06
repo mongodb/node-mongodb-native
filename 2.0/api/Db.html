@@ -584,13 +584,21 @@
             
                 <li data-name="Cursor#hasNext"><a href="Cursor.html#hasNext">hasNext</a></li>
             
+                <li data-name="Cursor#hint"><a href="Cursor.html#hint">hint</a></li>
+            
                 <li data-name="Cursor#isClosed"><a href="Cursor.html#isClosed">isClosed</a></li>
             
                 <li data-name="Cursor#limit"><a href="Cursor.html#limit">limit</a></li>
             
                 <li data-name="Cursor#map"><a href="Cursor.html#map">map</a></li>
             
+                <li data-name="Cursor#max"><a href="Cursor.html#max">max</a></li>
+            
+                <li data-name="Cursor#maxScan"><a href="Cursor.html#maxScan">maxScan</a></li>
+            
                 <li data-name="Cursor#maxTimeMS"><a href="Cursor.html#maxTimeMS">maxTimeMS</a></li>
+            
+                <li data-name="Cursor#min"><a href="Cursor.html#min">min</a></li>
             
                 <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
             
@@ -608,6 +616,8 @@
             
                 <li data-name="Cursor#resume"><a href="Cursor.html#resume">resume</a></li>
             
+                <li data-name="Cursor#returnKey"><a href="Cursor.html#returnKey">returnKey</a></li>
+            
                 <li data-name="Cursor#rewind"><a href="Cursor.html#rewind">rewind</a></li>
             
                 <li data-name="Cursor#setBatchSize"><a href="Cursor.html#setBatchSize">setBatchSize</a></li>
@@ -622,7 +632,11 @@
             
                 <li data-name="Cursor#setReadPreference"><a href="Cursor.html#setReadPreference">setReadPreference</a></li>
             
+                <li data-name="Cursor#showRecordId"><a href="Cursor.html#showRecordId">showRecordId</a></li>
+            
                 <li data-name="Cursor#skip"><a href="Cursor.html#skip">skip</a></li>
+            
+                <li data-name="Cursor#snapshot"><a href="Cursor.html#snapshot">snapshot</a></li>
             
                 <li data-name="Cursor#sort"><a href="Cursor.html#sort">sort</a></li>
             
@@ -2672,12 +2686,12 @@ Db instance.
     <div class="nameContainer">
         <h4 class="name" id="addUser">
             
-            addUser<span class="signature">(username, password, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            addUser<span class="signature">(username, password, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1127">line 1127</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1155">line 1155</a>
         </div>
         
     </div>
@@ -3049,6 +3063,8 @@ Db instance.
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -3183,7 +3199,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line353">line 353</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line358">line 358</a>
         </div>
         
     </div>
@@ -3277,12 +3293,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="authenticate">
             
-            authenticate<span class="signature">(username, <span class="optional">password</span>, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            authenticate<span class="signature">(username, <span class="optional">password</span>, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1310">line 1310</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1338">line 1338</a>
         </div>
         
     </div>
@@ -3509,6 +3525,8 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -3652,12 +3670,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="close">
             
-            close<span class="signature">(force, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            close<span class="signature">(force, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line314">line 314</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line319">line 319</a>
         </div>
         
     </div>
@@ -3715,6 +3733,11 @@ co(function*() {
             
             <td class="description last">
                 
+                    
+                    
+                        
+                    
+                
                 <p>Force close, emitting no events</p></td>
         </tr>
 	
@@ -3737,6 +3760,13 @@ co(function*() {
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 <p>The result callback</p></td>
         </tr>
@@ -3920,7 +3950,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line382">line 382</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line387">line 387</a>
         </div>
         
     </div>
@@ -4508,7 +4538,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line780">line 780</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line787">line 787</a>
         </div>
         
     </div>
@@ -4697,12 +4727,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="command">
             
-            command<span class="signature">(command, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            command<span class="signature">(command, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line282">line 282</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line287">line 287</a>
         </div>
         
     </div>
@@ -4934,6 +4964,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -5051,12 +5083,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="createCollection">
             
-            createCollection<span class="signature">(name, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            createCollection<span class="signature">(name, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line472">line 472</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line477">line 477</a>
         </div>
         
     </div>
@@ -5651,6 +5683,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -5895,12 +5929,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="createIndex">
             
-            createIndex<span class="signature">(name, fieldOrSpec, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            createIndex<span class="signature">(name, fieldOrSpec, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line875">line 875</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line882">line 882</a>
         </div>
         
     </div>
@@ -6527,6 +6561,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -6700,12 +6736,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="db">
             
-            db<span class="signature">(name)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="Db.html">Db</a>}</span>
+            db<span class="signature">(name, <span class="optional">options</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="Db.html">Db</a>}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line970">line 970</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line984">line 984</a>
         </div>
         
     </div>
@@ -6716,7 +6752,10 @@ co(function*() {
     
     
     <div class="description">
-        <p>Create a new Db instance sharing the current socket connections.</p>
+        <p>Create a new Db instance sharing the current socket connections. Be aware that the new db instances are
+related in a parent-child relationship to the original instance so that events are correctly emitted on child
+db instances. Child db instances are cached so performing db('db1') twice will return the same instance.
+You can control these behaviors with the options noListener and returnNonCachedInstance.</p>
     </div>
     
 
@@ -6736,6 +6775,8 @@ co(function*() {
 		
 		<th>Type</th>
 		
+		
+		<th>Default</th>
 		
 		
 		<th class="last">Description</th>
@@ -6760,10 +6801,151 @@ co(function*() {
             </td>
             
             
+                <td class="default">
+                
+                </td>
+            
             
             <td class="description last">
                 
+                    
+                    
+                        
+                    
+                
                 <p>The name of the database we want to use.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Optional settings.</p>
+                
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		<th>Default</th>
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>noListener</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Do not make the db an event listener to the original connection.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>returnNonCachedInstance</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Control if you want to return a cached instance or have a new one created</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+            </td>
         </tr>
 	
 	
@@ -6927,12 +7109,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="dropCollection">
             
-            dropCollection<span class="signature">(name, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            dropCollection<span class="signature">(name, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line695">line 695</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line703">line 703</a>
         </div>
         
     </div>
@@ -6990,6 +7172,11 @@ co(function*() {
             
             <td class="description last">
                 
+                    
+                    
+                        
+                    
+                
                 <p>Name of collection to drop</p></td>
         </tr>
 	
@@ -7012,6 +7199,13 @@ co(function*() {
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 <p>The results callback</p></td>
         </tr>
@@ -7183,7 +7377,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line726">line 726</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line734">line 734</a>
         </div>
         
     </div>
@@ -7443,12 +7637,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="ensureIndex">
             
-            ensureIndex<span class="signature">(name, fieldOrSpec, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            ensureIndex<span class="signature">(name, fieldOrSpec, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line942">line 942</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line949">line 949</a>
         </div>
         
     </div>
@@ -8075,6 +8269,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -8250,12 +8446,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="eval">
             
-            eval<span class="signature">(code, parameters, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            eval<span class="signature">(code, parameters, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line636">line 636</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line644">line 644</a>
         </div>
         
     </div>
@@ -8482,6 +8678,8 @@ co(function*() {
             
             <td class="description last">
                 
+                    
+                        <span class="optional">optional</span>
                     
                     
                         
@@ -8863,12 +9061,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="executeDbAdminCommand">
             
-            executeDbAdminCommand<span class="signature">(command, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            executeDbAdminCommand<span class="signature">(command, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line804">line 804</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line811">line 811</a>
         </div>
         
     </div>
@@ -9100,6 +9298,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -9166,12 +9366,12 @@ Promise if no callback passed
     <div class="nameContainer">
         <h4 class="name" id="indexInformation">
             
-            indexInformation<span class="signature">(name, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            indexInformation<span class="signature">(name, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1395">line 1395</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1423">line 1423</a>
         </div>
         
     </div>
@@ -9403,6 +9603,8 @@ Promise if no callback passed
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -9474,7 +9676,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line539">line 539</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line547">line 547</a>
         </div>
         
     </div>
@@ -9790,12 +9992,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="logout">
             
-            logout<span class="signature">(<span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            logout<span class="signature">(<span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1347">line 1347</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1375">line 1375</a>
         </div>
         
     </div>
@@ -9955,6 +10157,8 @@ co(function*() {
             
             <td class="description last">
                 
+                    
+                        <span class="optional">optional</span>
                     
                     
                         
@@ -10119,12 +10323,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="open">
             
-            open<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            open<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line226">line 226</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line231">line 231</a>
         </div>
         
     </div>
@@ -10181,6 +10385,13 @@ co(function*() {
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 <p>Callback</p></td>
         </tr>
@@ -10286,12 +10497,12 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     <div class="nameContainer">
         <h4 class="name" id="removeUser">
             
-            removeUser<span class="signature">(username, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            removeUser<span class="signature">(username, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1216">line 1216</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1244">line 1244</a>
         </div>
         
     </div>
@@ -10559,6 +10770,8 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -10739,12 +10952,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="renameCollection">
             
-            renameCollection<span class="signature">(fromCollection, toCollection, <span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            renameCollection<span class="signature">(fromCollection, toCollection, <span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line666">line 666</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line674">line 674</a>
         </div>
         
     </div>
@@ -10969,6 +11182,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -11168,12 +11383,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="stats">
             
-            stats<span class="signature">(<span class="optional">options</span>, callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            stats<span class="signature">(<span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line502">line 502</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line510">line 510</a>
         </div>
         
     </div>
@@ -11334,6 +11549,8 @@ co(function*() {
             <td class="description last">
                 
                     
+                        <span class="optional">optional</span>
+                    
                     
                         
                     
@@ -11464,7 +11681,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line357">line 357</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line362">line 362</a>
         </div>
         
     </div>
@@ -11603,7 +11820,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line750">line 750</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line757">line 757</a>
         </div>
         
     </div>
@@ -11742,7 +11959,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line300">line 300</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line305">line 305</a>
         </div>
         
     </div>
@@ -11881,7 +12098,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line197">line 197</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line202">line 202</a>
         </div>
         
     </div>
@@ -12020,7 +12237,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line239">line 239</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line244">line 244</a>
         </div>
         
     </div>
@@ -12165,7 +12382,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1564">line 1564</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1592">line 1592</a>
         </div>
         
     </div>
@@ -12246,7 +12463,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1557">line 1557</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1585">line 1585</a>
         </div>
         
     </div>
@@ -12327,7 +12544,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1578">line 1578</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1606">line 1606</a>
         </div>
         
     </div>
@@ -12408,7 +12625,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1599">line 1599</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1627">line 1627</a>
         </div>
         
     </div>
@@ -12489,7 +12706,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1592">line 1592</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1620">line 1620</a>
         </div>
         
     </div>
@@ -12570,7 +12787,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1571">line 1571</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1599">line 1599</a>
         </div>
         
     </div>
@@ -12651,7 +12868,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1585">line 1585</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1613">line 1613</a>
         </div>
         
     </div>
@@ -12751,7 +12968,7 @@ co(function*() {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue Jul 14 2015 11:44:06 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Aug 06 2015 13:24:15 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>
