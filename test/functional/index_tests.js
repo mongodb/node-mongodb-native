@@ -367,8 +367,6 @@ exports.shouldCorrectlyHandleGeospatialIndexes = {
               test.equal(err,null);
 
               collection.insert({'loc': [200,200]}, configuration.writeConcernMax(), function(err, result) {
-                console.dir(err)
-                console.dir(result)
                 test.ok(err.errmsg.indexOf("point not in interval of") != -1);
                 test.ok(err.errmsg.indexOf("-180") != -1);
                 test.ok(err.errmsg.indexOf("180") != -1);

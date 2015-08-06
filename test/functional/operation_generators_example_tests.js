@@ -4164,20 +4164,9 @@ exports.shouldCorrectlyRetrieveReplSetGetStatusWithGenerators = {
       // Use the admin database for the operation
       var adminDb = db.admin();
 
-      // Add the new user to the admin database
-      var result = yield adminDb.addUser('admin14', 'admin14');
-      test.ok(result != null);
-
-      // Authenticate using the newly added user
-      var result = yield adminDb.authenticate('admin14', 'admin14');
-      test.equal(true, result);
-
       // Retrive the server Info, returns error if we are not
       // running a replicaset
       yield adminDb.replSetGetStatus();
-
-      var result = yield adminDb.removeUser('admin14');
-      test.ok(result);
 
       db.close();
       test.done();

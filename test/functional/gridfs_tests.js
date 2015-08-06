@@ -246,9 +246,15 @@ exports.shouldCorrectlyHandleMultipleChunkGridStore = {
     var fs_client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     fs_client.open(function(err, fs_client) {
+      test.equal(null, err);
+
       fs_client.dropDatabase(function(err, done) {
+        test.equal(null, err);
+
         var gridStore = new GridStore(fs_client, "test_gs_multi_chunk", "w");
         gridStore.open(function(err, gridStore) {
+          test.equal(null, err);
+
           gridStore.chunkSize = 512;
           var file1 = ''; var file2 = ''; var file3 = '';
           for(var i = 0; i < gridStore.chunkSize; i++) { file1 = file1 + 'x'; }
@@ -256,10 +262,21 @@ exports.shouldCorrectlyHandleMultipleChunkGridStore = {
           for(var i = 0; i < gridStore.chunkSize; i++) { file3 = file3 + 'z'; }
 
           gridStore.write(file1, function(err, gridStore) {
+            console.dir(err)
+            test.equal(null, err);
+
             gridStore.write(file2, function(err, gridStore) {
+              test.equal(null, err);
+  
               gridStore.write(file3, function(err, gridStore) {
+                test.equal(null, err);
+    
                 gridStore.close(function(err, result) {
+                  test.equal(null, err);
+      
                   fs_client.collection('fs.chunks', function(err, collection) {
+                    test.equal(null, err);
+
                     collection.count(function(err, count) {
                       test.equal(3, count);
 
