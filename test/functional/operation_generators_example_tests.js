@@ -217,7 +217,7 @@ exports.shouldCreateComplexIndexOnTwoFieldsWithGenerators = {
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax());
 
       // Create an index on the a field
-      yield db.createIndex('createIndexExample1_with_generators', {a:1, b:1}
+      yield collection.createIndex({a:1, b:1}
         , {unique:true, background:true, w:1});
 
       // Show that duplicate records got dropped

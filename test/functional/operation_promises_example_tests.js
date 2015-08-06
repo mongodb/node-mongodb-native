@@ -200,7 +200,7 @@ exports.shouldCreateComplexIndexOnTwoFieldsWithPromises = {
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax()).then(function(result) {
 
         // Create an index on the a field
-        db.createIndex('createIndexExample1_with_promise', {a:1, b:1}
+        collection.createIndex({a:1, b:1}
           , {unique:true, background:true, w:1}).then(function(indexName) {
 
           // Show that duplicate records got dropped
