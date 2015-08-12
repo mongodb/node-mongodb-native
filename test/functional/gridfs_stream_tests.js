@@ -49,6 +49,61 @@ exports.shouldUploadFromFileStream = {
   }
 };
 
+/**
+ * @ignore
+ */
+exports.shouldDownloadToUploadStream = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var GridFSBucket = configuration.require.GridFSBucket;
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(),
+      { poolSize:1 });
+    db.open(function(err, db) {
+      var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
+      var CHUNKS_COLL = 'gridfsdownload.chunks';
+      var FILES_COLL = 'gridfsdownload.files';
+      var readStream = fs.createReadStream('./LICENSE');
+
+      var uploadStream = bucket.openUploadStream('test.dat');
+
+      var license = fs.readFileSync('./LICENSE');
+      var id = uploadStream.id;
+
+      uploadStream.once('finish', function() {
+        var downloadStream = bucket.openDownloadStream(id);
+        uploadStream = bucket.openUploadStream('test2.dat');
+        id = uploadStream.id;
+
+        downloadStream.pipe(uploadStream).once('finish', function() {
+          var chunksQuery = db.collection(CHUNKS_COLL).find({ files_id: id });
+          chunksQuery.toArray(function(error, docs) {
+            test.equal(error, null);
+            test.equal(docs.length, 1);
+            test.equal(docs[0].data.toString('hex'), license.toString('hex'));
+
+            var filesQuery = db.collection(FILES_COLL).find({ _id: id });
+            filesQuery.toArray(function(error, docs) {
+              test.equal(error, null);
+              test.equal(docs.length, 1);
+
+              var hash = crypto.createHash('md5');
+              hash.update(license);
+              test.equal(docs[0].md5, hash.digest('hex'));
+              test.done();
+            });
+          });
+        });
+      });
+
+      readStream.pipe(uploadStream);
+    });
+  }
+};
+
+
 var UPLOAD_SPEC = require('./specs/gridfs-upload.json');
 
 for (var i = 0; i < UPLOAD_SPEC.tests.length; ++i) {
