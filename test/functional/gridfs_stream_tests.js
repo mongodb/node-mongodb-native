@@ -17,24 +17,21 @@ exports.shouldUploadFromFileStream = {
       { poolSize:1 });
     db.open(function(err, db) {
       var bucket = new GridFSBucket(db);
-      var stream = fs.createReadStream('./LICENSE');
+      var readStream = fs.createReadStream('./LICENSE');
 
-      bucket.on('error', function(error) {
-        test.equal(error, null);
-        test.ok(false);
-      });
+      var uploadStream = bucket.openUploadStream('test.dat');
 
-      var fileId = bucket.uploadFromStream('test.dat', stream);
       var license = fs.readFileSync('./LICENSE');
+      var id = uploadStream.id;
 
-      bucket.once('done', function() {
-        var chunksQuery = db.collection('fs.chunks').find({ files_id: fileId });
+      uploadStream.once('finish', function() {
+        var chunksQuery = db.collection('fs.chunks').find({ files_id: id });
         chunksQuery.toArray(function(error, docs) {
           test.equal(error, null);
           test.equal(docs.length, 1);
           test.equal(docs[0].data.toString('hex'), license.toString('hex'));
 
-          var filesQuery = db.collection('fs.files').find({ _id: fileId });
+          var filesQuery = db.collection('fs.files').find({ _id: id });
           filesQuery.toArray(function(error, docs) {
             test.equal(error, null);
             test.equal(docs.length, 1);
@@ -46,6 +43,8 @@ exports.shouldUploadFromFileStream = {
           });
         });
       });
+
+      readStream.pipe(uploadStream);
     });
   }
 };
@@ -70,18 +69,15 @@ for (var i = 0; i < UPLOAD_SPEC.tests.length; ++i) {
             var bucket = new GridFSBucket(db, { bucketName: 'expected' });
             var bufStream = new stream();
 
-            bucket.on('error', function(error) {
-              test.equal(error, null);
+            var res = bucket.openUploadStream(testSpec.act.arguments.filename,
+              testSpec.act.arguments.options);
+            var buf = new Buffer(testSpec.act.arguments.source.$hex, 'hex');
+
+            res.on('error', function(error) {
               test.ok(false);
             });
 
-            var result = bucket.uploadFromStream(testSpec.act.arguments.filename,
-              bufStream, testSpec.act.arguments.options);
-            var buf = new Buffer(testSpec.act.arguments.source.$hex, 'hex');
-            bufStream.emit('data', buf);
-            bufStream.emit('end');
-
-            bucket.once('done', function() {
+            res.on('finish', function() {
               var data = testSpec.assert.data;
               var num = data.length;
               data.forEach(function(data) {
@@ -90,7 +86,7 @@ for (var i = 0; i < UPLOAD_SPEC.tests.length; ++i) {
                   test.equal(data.documents.length, docs.length);
 
                   for (var i = 0; i < docs.length; ++i) {
-                    testResultDoc(test, data.documents[i], docs[i], result);
+                    testResultDoc(test, data.documents[i], docs[i], res.id);
                   }
 
                   if (--num === 0) {
@@ -99,6 +95,9 @@ for (var i = 0; i < UPLOAD_SPEC.tests.length; ++i) {
                 });
               });
             });
+
+            res.write(buf);
+            res.end();
           });
         });
       }
