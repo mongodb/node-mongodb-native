@@ -1,5 +1,6 @@
 var core = require('mongodb-core');
 var crypto = require('crypto');
+var ejson = require('mongodb-extended-json');
 var fs = require('fs');
 var stream = require('stream');
 
@@ -160,6 +161,89 @@ for (var i = 0; i < UPLOAD_SPEC.tests.length; ++i) {
   })(test);
 }
 
+var DOWNLOAD_SPEC = require('./specs/gridfs-download.json');
+
+for (var i = 0; i < DOWNLOAD_SPEC.tests.length; ++i) {
+  var test = DOWNLOAD_SPEC.tests[i];
+  (function(testSpec) {
+    exports[testSpec.description] = {
+      metadata: { requires: { topology: ['single'] } },
+
+      test: function(configuration, test) {
+        var GridFSBucket = configuration.require.GridFSBucket;
+
+        var db = configuration.newDbInstance(configuration.writeConcernMax(),
+          { poolSize:1 });
+        db.open(function(err, db) {
+          db.dropDatabase(function(err) {
+            test.equal(err, null);
+            var BUCKET_NAME = 'fs';
+
+            var _runTest = function() {
+              var bucket = new GridFSBucket(db, { bucketName: BUCKET_NAME });
+              var res = new Buffer(0);
+
+              var download = bucket.
+                openDownloadStream(ejson.deflate(testSpec.act.arguments.id));
+
+              download.on('data', function(chunk) {
+                res = Buffer.concat([res, chunk]);
+              });
+
+              download.on('error', function(error) {
+                if (!testSpec.assert.error) {
+                  test.ok(false);
+                  test.done();
+                }
+                test.ok(error.toString().indexOf(testSpec.assert.error) !== -1);
+                test.done();
+              });
+
+              download.on('end', function() {
+                var result = testSpec.assert.result;
+                if (!result) {
+                  test.ok(false);
+                  test.done();
+                }
+
+                test.equal(res.toString('hex'), result.$hex);
+                test.done();
+              });
+            };
+
+            var keys = Object.keys(DOWNLOAD_SPEC.data);
+            var numCollections = Object.keys(DOWNLOAD_SPEC.data).length;
+            keys.forEach(function(collection) {
+              var data =
+                DOWNLOAD_SPEC.data[collection].map(function(v) {
+                  return deflateTestDoc(v);
+                });
+
+              db.collection(BUCKET_NAME + '.' + collection).
+                insertMany(data, function(error) {
+                  test.equal(error, null);
+
+                  if (--numCollections === 0) {
+                    if (testSpec.arrange) {
+                      // only support 1 arrange op for now
+                      test.equal(testSpec.arrange.data.length, 1);
+                      db.command(deflateTestDoc(testSpec.arrange.data[0]), function(error) {
+                        test.equal(error, null);
+                        _runTest();
+                      });
+                    } else {
+                      _runTest();
+                    }
+                  }
+                });
+            });
+          });
+        });
+      }
+    };
+  })(test);
+}
+
 function testResultDoc(test, specDoc, resDoc, result) {
   var specKeys = Object.keys(specDoc);
   var resKeys = Object.keys(resDoc);
@@ -184,4 +268,23 @@ function testResultDoc(test, specDoc, resDoc, result) {
       }
     }
   }
+}
+
+function deflateTestDoc(doc) {
+  var ret = ejson.deflate(doc);
+  convert$hexToBuffer(ret);
+  return ret;
+}
+
+function convert$hexToBuffer(doc) {
+  var keys = Object.keys(doc);
+  keys.forEach(function(key) {
+    if (doc[key] && typeof doc[key] === 'object') {
+      if (doc[key].$hex != null) {
+        doc[key] = new Buffer(doc[key].$hex, 'hex');
+      } else {
+        convert$hexToBuffer(doc[key]);
+      }
+    }
+  });
 }
