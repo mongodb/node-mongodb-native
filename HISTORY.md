@@ -1,3 +1,7 @@
+1.2.10 08-14-2015
+-----------------
+- Added missing Mongos.prototype.parserType function.
+
 1.2.9 08-05-2015
 ----------------
 - NODE-525 Reset connectionTimeout after it's overwritten by tls.connect.
