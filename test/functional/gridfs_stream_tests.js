@@ -16,7 +16,8 @@ exports.shouldUploadFromFileStream = {
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(),
       { poolSize:1 });
-    db.open(function(err, db) {
+    db.open(function(error, db) {
+      test.equal(error, null);
       var bucket = new GridFSBucket(db);
       var readStream = fs.createReadStream('./LICENSE');
 
@@ -26,13 +27,15 @@ exports.shouldUploadFromFileStream = {
       var id = uploadStream.id;
 
       uploadStream.once('finish', function() {
-        var chunksQuery = db.collection('fs.chunks').find({ files_id: id });
+        var chunksColl = db.collection('fs.chunks');
+        var chunksQuery = chunksColl.find({ files_id: id });
         chunksQuery.toArray(function(error, docs) {
           test.equal(error, null);
           test.equal(docs.length, 1);
           test.equal(docs[0].data.toString('hex'), license.toString('hex'));
 
-          var filesQuery = db.collection('fs.files').find({ _id: id });
+          var filesColl = db.collection('fs.files');
+          var filesQuery = filesColl.find({ _id: id });
           filesQuery.toArray(function(error, docs) {
             test.equal(error, null);
             test.equal(docs.length, 1);
@@ -40,7 +43,20 @@ exports.shouldUploadFromFileStream = {
             var hash = crypto.createHash('md5');
             hash.update(license);
             test.equal(docs[0].md5, hash.digest('hex'));
-            test.done();
+
+            // make sure we created indexes
+            filesColl.listIndexes().toArray(function(error, indexes) {
+              test.equal(error, null);
+              test.equal(indexes.length, 2);
+              test.equal(indexes[1].name, 'filename_1_uploadDate_1');
+
+              chunksColl.listIndexes().toArray(function(error, indexes) {
+                test.equal(error, null);
+                test.equal(indexes.length, 2);
+                test.equal(indexes[1].name, 'files_id_1_n_1');
+                test.done();
+              });
+            });
           });
         });
       });
@@ -62,7 +78,7 @@ exports.shouldDownloadToUploadStream = {
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(),
       { poolSize:1 });
-    db.open(function(err, db) {
+    db.open(function(error, db) {
       var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
       var CHUNKS_COLL = 'gridfsdownload.chunks';
       var FILES_COLL = 'gridfsdownload.files';
@@ -116,7 +132,7 @@ exports['Deleting a file'] = {
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(),
       { poolSize:1 });
-    db.open(function(err, db) {
+    db.open(function(error, db) {
       var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
       var CHUNKS_COLL = 'gridfsdownload.chunks';
       var FILES_COLL = 'gridfsdownload.files';
@@ -152,6 +168,36 @@ exports['Deleting a file'] = {
   }
 };
 
+/**
+ * @ignore
+ */
+exports['find()'] = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var GridFSBucket = configuration.require.GridFSBucket;
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(),
+      { poolSize:1 });
+    db.open(function(error, db) {
+      var bucket = new GridFSBucket(db, { bucketName: 'fs' });
+
+      // We're only making sure this doesn't throw
+      bucket.find({
+        batchSize: 1,
+        limit: 2,
+        maxTimeMS: 3,
+        noCursorTimeout: true,
+        skip: 4,
+        sort: { _id: 1 }
+      });
+
+      test.done();
+    });
+  }
+};
+
 var UPLOAD_SPEC = require('./specs/gridfs-upload.json');
 
 for (var i = 0; i < UPLOAD_SPEC.tests.length; ++i) {
@@ -165,9 +211,9 @@ for (var i = 0; i < UPLOAD_SPEC.tests.length; ++i) {
 
         var db = configuration.newDbInstance(configuration.writeConcernMax(),
           { poolSize:1 });
-        db.open(function(err, db) {
-          db.dropDatabase(function(err) {
-            test.equal(err, null);
+        db.open(function(error, db) {
+          db.dropDatabase(function(error) {
+            test.equal(error, null);
 
             var bucket = new GridFSBucket(db, { bucketName: 'expected' });
             var bufStream = new stream();
