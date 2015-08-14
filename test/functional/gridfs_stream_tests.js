@@ -104,6 +104,53 @@ exports.shouldDownloadToUploadStream = {
   }
 };
 
+/**
+ * @ignore
+ */
+exports['Deleting a file'] = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var GridFSBucket = configuration.require.GridFSBucket;
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(),
+      { poolSize:1 });
+    db.open(function(err, db) {
+      var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
+      var CHUNKS_COLL = 'gridfsdownload.chunks';
+      var FILES_COLL = 'gridfsdownload.files';
+      var readStream = fs.createReadStream('./LICENSE');
+
+      var uploadStream = bucket.openUploadStream('test.dat');
+
+      var license = fs.readFileSync('./LICENSE');
+      var id = uploadStream.id;
+
+      uploadStream.once('finish', function() {
+        bucket.delete(id, function(error) {
+          test.equal(error, null);
+
+          var chunksQuery = db.collection(CHUNKS_COLL).find({ files_id: id });
+          chunksQuery.toArray(function(error, docs) {
+            test.equal(error, null);
+            test.equal(docs.length, 0);
+
+            var filesQuery = db.collection(FILES_COLL).find({ _id: id });
+            filesQuery.toArray(function(error, docs) {
+              test.equal(error, null);
+              test.equal(docs.length, 0);
+
+              test.done();
+            });
+          });
+        });
+      });
+
+      readStream.pipe(uploadStream);
+    });
+  }
+};
 
 var UPLOAD_SPEC = require('./specs/gridfs-upload.json');
 
