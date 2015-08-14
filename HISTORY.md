@@ -1,3 +1,8 @@
+2.0.41 08-14-2015
+-----------------
+* Added missing Mongos.prototype.parserType function.
+* Updated mongodb-core to 1.2.10.
+
 2.0.40 07-14-2015
 -----------------
 * Updated mongodb-core to 1.2.9 for 2.4 wire protocol error handler fix.

@@ -24,6 +24,9 @@ exports['Should connect to mongos proxies using connectiong string and options']
       test.ok(db != null);
       test.equal(500, db.serverConfig.haInterval);
 
+      // Should not throw
+      db.native_parser;
+
       db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
         test.equal(null, err);
         test.equal(1, result.result.n);
