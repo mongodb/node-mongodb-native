@@ -108,8 +108,10 @@ var validateExpecations = function(test, expectation, results) {
     var command = obj.command;
     var databaseName = obj.database_name;
     var commandName = obj.command_name;
+
     // Get the result
     var result = results.starts.shift();
+
     // Validate the test
     test.equal(commandName, result.commandName)
   } else if(expectation.command_succeeded_event) {
@@ -118,8 +120,10 @@ var validateExpecations = function(test, expectation, results) {
     var reply = obj.reply;
     var databaseName = obj.database_name;
     var commandName = obj.command_name;
+
     // Get the result
     var result = results.successes.shift();
+
     // Validate the test
     test.equal(commandName, result.commandName);
     // test.deepEqual(reply[0], result.reply.result);
@@ -143,27 +147,6 @@ var executeOperation = function(assert, client, listener, scenario, test, callba
 
   // Get the operation
   var operation = test.operation;
-
-  // Set up the listeners
-  listener.on('started', function(event) {
-    starts.push(event);
-  });
-
-  listener.on('succeeded', function(event) {
-    successes.push(event);
-  });
-
-  listener.on('failed', function(event) {
-    failures.push(event);
-  });
-
-  // Cleanup the listeners
-  var cleanUpListeners = function(_listener) {
-    _listener.removeAllListeners('started');
-    _listener.removeAllListeners('succeeded');
-    _listener.removeAllListeners('failed');
-  }
-
   // Get the command name
   var commandName = operation.name;
   // Get the arguments
@@ -174,74 +157,113 @@ var executeOperation = function(assert, client, listener, scenario, test, callba
   var collection = db.collection(scenario.collection_name);
   // Parameters
   var params = [];
+  // Get the data
+  var data = scenario.data;
 
-  // Unpack the operation
-  if(args.filter) {
-    params.push(args.filter);
-  }
+  // Drop the collection
+  collection.drop(function(err) {
+    // Insert the data
+    collection.insertMany(data, function(err, r) {
+      assert.equal(null, err);
+      assert.equal(data.length, r.insertedCount);
 
-  if(args.deletes) {
-    params.push(args.deletes);
-  } 
-
-  if(args.document) {
-    params.push(args.document);
-  } 
-
-  if(args.update) {
-    params.push(args.update);
-  }
-
-  // Find command is special needs to executed using toArray
-  if(operation.name == 'find') {
-    var cursor = collection[commandName]();
-
-    if(args.filter) {
-      cursor = cursor.filter(args.filter);
-    }
-
-    if(args.batchSize) {
-      cursor = cursor.batchSize(args.batchSize);
-    }
-
-    if(args.limit) {
-      cursor = cursor.limit(args.limit);
-    }
-
-    // Execute find
-    cursor.toArray(function(err, r) {
-      // Validate the expectations
-      test.expectations.forEach(function(x, index) {
-        validateExpecations(assert, x, {
-          successes: successes, failures: failures, starts: starts
-        });
+      // Set up the listeners
+      listener.on('started', function(event) {
+        starts.push(event);
       });
 
-      // Cleanup listeners
-      cleanUpListeners(listener);
-
-      // Finish the operation
-      callback();
-    });
-  } else {
-    params.push(function(err, result) {
-      // Validate the expectations
-      test.expectations.forEach(function(x, index) {
-        validateExpecations(assert, x, {
-          successes: successes, failures: failures, starts: starts
-        });
+      listener.on('succeeded', function(event) {
+        successes.push(event);
       });
 
-      // Cleanup listeners
-      cleanUpListeners(listener);
+      listener.on('failed', function(event) {
+        failures.push(event);
+      });
 
-      // Finish the operation
-      callback();
+      // Cleanup the listeners
+      var cleanUpListeners = function(_listener) {
+        _listener.removeAllListeners('started');
+        _listener.removeAllListeners('succeeded');
+        _listener.removeAllListeners('failed');
+      }
+
+      // Unpack the operation
+      if(args.filter) {
+        params.push(args.filter);
+      }
+
+      if(args.deletes) {
+        params.push(args.deletes);
+      } 
+
+      if(args.document) {
+        params.push(args.document);
+      } 
+
+      if(args.documents) {
+        params.push(args.documents);
+      } 
+
+      if(args.update) {
+        params.push(args.update);
+      }
+
+      if(args.requests) {
+        params.push(args.requests);
+      }
+
+      // Find command is special needs to executed using toArray
+      if(operation.name == 'find') {
+        var cursor = collection[commandName]();
+
+        if(args.filter) {
+          cursor = cursor.filter(args.filter);
+        }
+
+        if(args.batchSize) {
+          cursor = cursor.batchSize(args.batchSize);
+        }
+
+        if(args.limit) {
+          cursor = cursor.limit(args.limit);
+        }
+
+        // Execute find
+        cursor.toArray(function(err, r) {
+          // Validate the expectations
+          test.expectations.forEach(function(x, index) {
+            validateExpecations(assert, x, {
+              successes: successes, failures: failures, starts: starts
+            });
+          });
+
+          // Cleanup listeners
+          cleanUpListeners(listener);
+
+          // Finish the operation
+          callback();
+        });
+      } else {
+        params.push(function(err, result) {
+          // Validate the expectations
+          test.expectations.forEach(function(x, index) {
+            validateExpecations(assert, x, {
+              successes: successes, failures: failures, starts: starts
+            });
+          });
+
+          // Cleanup listeners
+          cleanUpListeners(listener);
+
+          // Finish the operation
+          callback();
+        });
+
+        // Execute the operation
+        collection[commandName].apply(collection, params);
+      }
     });
-
-    // Execute the operation
-    collection[commandName].apply(collection, params);
-  }
+  });
 }
 
 var executeTests = function(assert, client, listener, scenario, tests, callback) {
@@ -268,22 +290,12 @@ var executeSuite = function(assert, client, listener, scenarios, callback) {
   // Get the database
   var db = client.db(scenario.database_name);
   // Insert into the db
-  var collection = db.collection(scenario.collection_name);
-
-  // Drop the collection
-  collection.drop(function() {
-    // Insert the data
-    collection.insertMany(data, function(err, r) {
-      assert.equal(null, err);
-      assert.equal(data.length, r.insertedCount);
-      
-      // Execute the tests
-      executeTests(assert, client, listener, scenario, scenario.tests.slice(0), function() {
-        // Execute the next suite
-        executeSuite(assert, client, listener, scenarios, callback);
-      });    
-    });    
-  });
+  var collection = db.collection(scenario.collection_name);    
+  // Execute the tests
+  executeTests(assert, client, listener, scenario, scenario.tests.slice(0), function() {
+    // Execute the next suite
+    executeSuite(assert, client, listener, scenarios, callback);
+  });    
 }
 
 exports['Correctly run all JSON APM Tests'] = {
@@ -468,332 +480,6 @@ var cleanup = function(overrides) {
   });
 }
 
-// exports['Should correctly instrument driver with all possibilities'] = {
-//   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var methodsCalled = {};
-//     var overrides = [];
-
-//     var listener = require('../..').instrument(function(err, instrumentations) {
-//       instrumentations.forEach(function(obj) {
-//         var object = obj.obj;
-        
-//         // Iterate over all the methods that are just callback with no return
-//         obj.instrumentations.forEach(function(instr) {
-//           var options = instr.options;
-
-//           if(options.callback // Prototype Callback no return value
-//             && !options.promise 
-//             && options.returns == null && !options.static ) {
-
-//             instr.methods.forEach(function(method) {
-//               var applyMethod = function(_method) {
-//                 var func = object.prototype[_method];
-
-//                 overrides.push({
-//                   obj: object.prototype, method: _method, func: func
-//                 });
-
-//                 object.prototype[_method] = function() {
-//                   // console.log(f("================ %s:%s callback:%s, promise:%s, returns:%s, static:%s"
-//                   //   , obj.name, _method, options.callback
-//                   //   , options.promise
-//                   //   , options.returns != null
-//                   //   , options.static == null ? false : options.static));
-//                   if(!methodsCalled[_method]) methodsCalled[_method] = 0;
-//                   methodsCalled[_method] = methodsCalled[_method] + 1;
-
-//                   // Set up and handle the callback
-//                   var self = this;
-//                   var args = Array.prototype.slice.call(arguments, 0);
-//                   var callback = args.pop();
-
-//                   // We passed no callback
-//                   if(typeof callback != 'function') {
-//                     args.push(callback);
-//                     return func.apply(this, args);
-//                   }
-                
-//                   // Intercept the method callback
-//                   args.push(function() {
-//                     var args = Array.prototype.slice.call(arguments, 0);
-//                     callback.apply(self, args);
-//                   });
-
-//                   // Execute the method
-//                   func.apply(this, args);                
-//                 }                
-//               }
-
-//               applyMethod(method);
-//             });
-//           } else if(options.callback // Callback and promise no return value
-//             && options.promise && !options.static) {
-//             instr.methods.forEach(function(method) {
-//               var applyMethod = function(_method) {
-//                 var func = object.prototype[_method];
-//                 object.prototype[_method] = function() {
-//                   if(!methodsCalled[_method]) methodsCalled[_method] = 0;
-//                   methodsCalled[_method] = methodsCalled[_method] + 1;
-
-//                   // Set up and handle the callback
-//                   var self = this;
-//                   var args = Array.prototype.slice.call(arguments, 0);
-//                   var callback = args.pop();
-
-//                   // We passed no callback
-//                   if(typeof callback != 'function') {
-//                     args.push(callback);
-//                     return func.apply(this, args);
-//                   }
-                
-//                   // Intercept the method callback
-//                   args.push(function() {
-//                     var args = Array.prototype.slice.call(arguments, 0);
-//                     callback.apply(self, args);
-//                   });
-
-//                   // Execute the method
-//                   func.apply(this, args);
-//                 }
-//               }
-
-//               applyMethod(method);              
-//             });
-//           } else if(options.callback // Static Callback no return value
-//             && !options.promise 
-//             && options.returns == null && options.static ) {
-
-//             instr.methods.forEach(function(method) {
-//               var applyMethod = function(_method) {
-//                 var func = object[_method];
-
-//                 overrides.push({
-//                   obj: object, method: _method, func: func
-//                 });
-
-//                 object[_method] = function() {
-//                   // console.log(f("================ %s:%s callback:%s, promise:%s, returns:%s, static:%s"
-//                   //   , obj.name, _method, options.callback
-//                   //   , options.promise
-//                   //   , options.returns != null
-//                   //   , options.static == null ? false : options.static));
-//                   if(!methodsCalled[_method]) methodsCalled[_method] = 0;
-//                   methodsCalled[_method] = methodsCalled[_method] + 1;
-
-//                   // Set up and handle the callback
-//                   var self = this;
-//                   var args = Array.prototype.slice.call(arguments, 0);
-//                   var callback = args.pop();
-
-//                   // We passed no callback
-//                   if(typeof callback != 'function') {
-//                     args.push(callback);
-//                     return func.apply(this, args);
-//                   }
-                
-//                   // Intercept the method callback
-//                   args.push(function() {
-//                     var args = Array.prototype.slice.call(arguments, 0);
-//                     callback.apply(self, args);
-//                   });
-
-//                   // Execute the method
-//                   func.apply(this, args);                
-//                 }                
-//               }
-
-//               applyMethod(method);
-//             });
-          
-//           } else if(options.callback // Prototype Callback returning non-promise value
-//             && !options.promise
-//             && options.returns != null && !options.static ){
-
-//             instr.methods.forEach(function(method) {
-//               var applyMethod = function(_method) {
-//                 var func = object.prototype[_method];
-
-//                 overrides.push({
-//                   obj: object.prototype, method: _method, func: func
-//                 });
-
-//                 object.prototype[_method] = function() {
-//                   // console.log(f("================ %s:%s callback:%s, promise:%s, returns:%s, static:%s"
-//                   //   , obj.name, _method, options.callback
-//                   //   , options.promise
-//                   //   , options.returns != null
-//                   //   , options.static == null ? false : options.static));
-//                   if(!methodsCalled[_method]) methodsCalled[_method] = 0;
-//                   methodsCalled[_method] = methodsCalled[_method] + 1;
-
-//                   // Set up and handle the callback
-//                   var self = this;
-//                   var args = Array.prototype.slice.call(arguments, 0);
-//                   var callback = args.pop();
-
-//                   // We passed no callback
-//                   if(typeof callback != 'function') {
-//                     args.push(callback);
-//                     return func.apply(this, args);
-//                   }
-                
-//                   // Intercept the method callback
-//                   args.push(function() {
-//                     var args = Array.prototype.slice.call(arguments, 0);
-//                     callback.apply(self, args);
-//                   });
-
-//                   // Execute the method
-//                   func.apply(this, args);                
-//                 }                
-//               }
-
-//               applyMethod(method);
-//             });
-          
-//           } else if(options.callback // Static Callback returning non-promise value
-//             && !options.promise
-//             && options.returns != null && options.static ){
-
-//             instr.methods.forEach(function(method) {
-//               var applyMethod = function(_method) {
-//                 var func = object[_method];
-
-//                 overrides.push({
-//                   obj: object, method: _method, func: func
-//                 });
-
-//                 object[_method] = function() {
-//                   // console.log(f("================ %s:%s callback:%s, promise:%s, returns:%s, static:%s"
-//                   //   , obj.name, _method, options.callback
-//                   //   , options.promise
-//                   //   , options.returns != null
-//                   //   , options.static == null ? false : options.static));
-//                   if(!methodsCalled[_method]) methodsCalled[_method] = 0;
-//                   methodsCalled[_method] = methodsCalled[_method] + 1;
-
-//                   // Set up and handle the callback
-//                   var self = this;
-//                   var args = Array.prototype.slice.call(arguments, 0);
-//                   var callback = args.pop();
-
-//                   // We passed no callback
-//                   if(typeof callback != 'function') {
-//                     args.push(callback);
-//                     return func.apply(this, args);
-//                   }
-                
-//                   // Intercept the method callback
-//                   args.push(function() {
-//                     var args = Array.prototype.slice.call(arguments, 0);
-//                     callback.apply(self, args);
-//                   });
-
-//                   // Execute the method
-//                   func.apply(this, args);                
-//                 }                
-//               }
-
-//               applyMethod(method);
-//             });
-          
-//           // } else if(!options.callback // Prototype method returning a promise
-//           //   && options.promise && !options.static ){
-
-//           //   instr.methods.forEach(function(method) {
-//           //   });
-          
-//           // } else if(!options.callback // Static method returning a promise
-//           //   && options.promise && options.static ){
-
-//           //   instr.methods.forEach(function(method) {
-//           //   });
-
-//           }
-//         });
-//       });
-//     });
-
-//     var MongoClient = require('../..');
-//     MongoClient.connect(configuration.url(), function(err, client) {
-//       client.collection('apm1').insertOne({a:1}, function(err, r) {
-//         test.equal(null, err);
-//         test.equal(1, r.insertedCount);
-//         test.equal(1, methodsCalled.insertOne);
-
-//         listener.uninstrument();
-//         cleanup(overrides);
-//         client.close();
-//         test.done();
-//       });
-//     });
-//   }
-// }
-
-// exports['Should correctly instrument driver with callback=true, promise=false, returns=null, static=false'] = {
-//   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var methodsCalled = {};
-//     var overrides = [];
-
-//     var listener = require('../..').instrument(function(err, instrumentations) {
-//       instrumentations.forEach(function(obj) {
-//         var object = obj.obj;
-        
-//         // Iterate over all the methods that are just callback with no return
-//         obj.instrumentations.forEach(function(instr) {
-//           var options = instr.options;
-
-//           if(options.callback 
-//             && !options.returns && !options.static) {
-
-//             // Method name
-//             instr.methods.forEach(function(method) {
-//               var applyMethod = function(_method) {
-//                 var func = object.prototype[_method];
-
-//                 overrides.push({
-//                   obj: object.prototype, method: _method, func: func
-//                 });
-
-//                 object.prototype[_method] = function() {
-//                   if(!methodsCalled[_method]) methodsCalled[_method] = 0;
-//                   methodsCalled[_method] = methodsCalled[_method] + 1;
-//                   var args = Array.prototype.slice.call(arguments, 0);
-//                   func.apply(this, args);                
-//                 }                
-//               }
-
-//               applyMethod(method);
-//             });
-//           }
-//         });
-//       });
-//     });
-
-//     var MongoClient = require('../..');
-//     MongoClient.connect(configuration.url(), function(err, client) {
-//       client.collection('apm1').insertOne({a:1}, function(err, r) {
-//         test.equal(null, err);
-//         test.equal(1, r.insertedCount);
-//         test.equal(1, methodsCalled.insertOne);
-
-//         console.dir(overrides)
-
-//         cleanup(overrides);
-//         listener.uninstrument();
-//         client.close();
-//         test.done();
-//       });
-//     });
-//   }
-// }
-
 exports['Correctly receive the APM events for a bulk operation'] = {
   metadata: { requires: { topology: ['single'] } },
 
@@ -833,6 +519,71 @@ exports['Correctly receive the APM events for a bulk operation'] = {
         test.done();
       }).catch(function(err) {
         console.dir(err)
+      });
+    });
+  }
+}
+
+exports['Correctly receive the APM explain command'] = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var ReadPreference = configuration.require.ReadPreference;
+    var started = [];
+    var succeeded = [];
+    var failed = [];
+
+    var listener = require('../..').instrument();
+    listener.on('started', function(event) {
+      if(event.commandName == 'find' || event.commandName == 'getMore' || event.commandName == 'killCursors' || event.commandName == 'explain')
+        started.push(event);
+    });
+
+    listener.on('succeeded', function(event) {
+      if(event.commandName == 'find' || event.commandName == 'getMore' || event.commandName == 'killCursors' || event.commandName == 'explain')
+        succeeded.push(event);
+    });
+
+    listener.on('failed', function(event) {
+      if(event.commandName == 'find' || event.commandName == 'getMore' || event.commandName == 'killCursors' || event.commandName == 'explain')
+        failed.push(event);
+    });
+
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      // Drop the collection
+      db.collection('apm_test_2').drop(function(err, r) {
+
+        // Insert test documents
+        db.collection('apm_test_2').insertMany([{a:1}, {a:1}, {a:1}, {a:1}, {a:1}, {a:1}], {w:1}).then(function(r) {
+          test.equal(6, r.insertedCount);
+
+          db.collection('apm_test_2').find({a:1})
+            .explain().then(function(explain) {
+              test.ok(explain != null);
+
+              test.equal(1, started.length);
+              test.equal('explain', started[0].commandName);
+              test.equal('apm_test_2', started[0].command.explain.find);
+              test.equal(1, succeeded.length);
+              test.equal('explain', succeeded[0].commandName);
+
+              // Started
+              test.equal(started[0].operationId, succeeded[0].operationId);
+
+              // Remove instrumentation
+              listener.uninstrument();
+              db.close();
+              test.done();
+          }).catch(function(err) {
+            console.log(err.stack)
+          });
+        }).catch(function(e) {
+          console.log(err.stack)
+        });
       });
     });
   }

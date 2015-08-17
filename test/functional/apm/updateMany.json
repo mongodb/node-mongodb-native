@@ -17,13 +17,18 @@
   "database_name": "command-monitoring-tests",
   "tests": [
     {
-      "description": "A successful delete one",
+      "description": "A successful update many",
       "operation": {
-        "name": "deleteOne",
+        "name": "updateMany",
         "arguments": {
           "filter": {
             "_id": {
               "$gt": 1
+            }
+          },
+          "update": {
+            "$inc": {
+              "x": 1
             }
           }
         }
@@ -32,20 +37,26 @@
         {
           "command_started_event": {
             "command": {
-              "delete": "test",
-              "deletes": [
+              "update": "test",
+              "ordered": true,
+              "updates": [
                 {
                   "q": {
                     "_id": {
                       "$gt": 1
                     }
                   },
-                  "limit": 1
+                  "u": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  },
+                  "multi": true,
+                  "upsert": false
                 }
-              ],
-              "ordered": true
+              ]
             },
-            "command_name": "delete",
+            "command_name": "update",
             "database_name": "command-monitoring-tests"
           }
         },
@@ -53,21 +64,26 @@
           "command_succeeded_event": {
             "reply": {
               "ok": 1.0,
-              "n": 1
+              "n": 2
             },
-            "command_name": "delete"
+            "command_name": "update"
           }
         }
       ]
     },
     {
-      "description": "A successful delete one command with write errors",
+      "description": "A successful update many command with write errors",
       "operation": {
-        "name": "deleteOne",
+        "name": "updateMany",
         "arguments": {
           "filter": {
             "_id": {
-              "$nothing": 1
+              "$gt": 1
+            }
+          },
+          "update": {
+            "$nothing": {
+              "x": 1
             }
           }
         }
@@ -76,20 +92,26 @@
         {
           "command_started_event": {
             "command": {
-              "delete": "test",
-              "deletes": [
+              "update": "test",
+              "ordered": true,
+              "updates": [
                 {
                   "q": {
                     "_id": {
-                      "$nothing": 1
+                      "$gt": 1
                     }
                   },
-                  "limit": 1
+                  "u": {
+                    "$nothing": {
+                      "x": 1
+                    }
+                  },
+                  "multi": true,
+                  "upsert": false
                 }
-              ],
-              "ordered": true
+              ]
             },
-            "command_name": "delete",
+            "command_name": "update",
             "database_name": "command-monitoring-tests"
           }
         },
@@ -106,7 +128,7 @@
                 }
               ]
             },
-            "command_name": "delete"
+            "command_name": "update"
           }
         }
       ]

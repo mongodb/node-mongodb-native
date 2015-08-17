@@ -38,6 +38,7 @@
           "command_started_event": {
             "command": {
               "update": "test",
+              "ordered": true,
               "updates": [
                 {
                   "q": {
@@ -61,19 +62,75 @@
         },
         {
           "command_succeeded_event": {
-            "reply": [
-              {
-                "ok": 1, "nModified": 1, "n": 1
-              }
-            ],
-            "command_name": "update",
-            "database_name": "command-monitoring-tests"
+            "reply": {
+              "ok": 1.0,
+              "n": 1
+            },
+            "command_name": "update"
           }
         }
       ]
     },
     {
-      "description": "A failed update event",
+      "description": "A successful update one with upsert when the upserted id is not an object id",
+      "operation": {
+        "name": "updateOne",
+        "arguments": {
+          "filter": {
+            "_id": 4
+          },
+          "update": {
+            "$inc": {
+              "x": 1
+            }
+          },
+          "upsert": true
+        }
+      },
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "update": "test",
+              "ordered": true,
+              "updates": [
+                {
+                  "q": {
+                    "_id": 4
+                  },
+                  "u": {
+                    "$inc": {
+                      "x": 1
+                    }
+                  },
+                  "multi": false,
+                  "upsert": true
+                }
+              ]
+            },
+            "command_name": "update",
+            "database_name": "command-monitoring-tests"
+          }
+        },
+        {
+          "command_succeeded_event": {
+            "reply": {
+              "ok": 1.0,
+              "n": 1,
+              "upserted": [
+                {
+                  "index": 0,
+                  "_id": 4
+                }
+              ]
+            },
+            "command_name": "update"
+          }
+        }
+      ]
+    },
+    {
+      "description": "A successful update one command with write errors",
       "operation": {
         "name": "updateOne",
         "arguments": {
@@ -94,6 +151,7 @@
           "command_started_event": {
             "command": {
               "update": "test",
+              "ordered": true,
               "updates": [
                 {
                   "q": {
@@ -116,9 +174,19 @@
           }
         },
         {
-          "command_failed_event": {
-            "command_name": "update",
-            "database_name": "command-monitoring-tests"
+          "command_succeeded_event": {
+            "reply": {
+              "ok": 1.0,
+              "n": 0,
+              "writeErrors": [
+                {
+                  "index": 0,
+                  "code": 42,
+                  "errmsg": ""
+                }
+              ]
+            },
+            "command_name": "update"
           }
         }
       ]

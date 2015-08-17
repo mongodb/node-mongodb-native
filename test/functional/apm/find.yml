@@ -7,6 +7,7 @@ data:
 
 collection_name: &collection_name "test"
 database_name: &database_name "command-monitoring-tests"
+namespace: &namespace "command-monitoring-tests.test"
 
 tests:
   -
@@ -26,41 +27,65 @@ tests:
       -
         command_succeeded_event:
           reply:
-            ok: 1
+            ok: 1.0
             cursor:
-              id: 0
+              id: { $numberLong: "0" }
+              ns: *namespace
               firstBatch:
                 - { _id: 1, x: 11 }
           command_name: "find"
-          database_name: *database_name
   -
     description: "A successful find event with options"
     operation:
       name: "find"
       arguments:
-        filter: { _id: 1 }
+        filter: { _id: { $gt: 1 } }
         sort: { _id: 1 }
         limit: 2
+        skip: 2
+        modifiers:
+          $comment: "test"
+          $hint: { _id: 1 }
+          $max: { _id: 6 }
+          $maxScan: 5000
+          $maxTimeMS: 6000 
+          $min: { _id: 0 }
+          $readPreference: { mode: "secondaryPreferred" }
+          $returnKey: false
+          $showDiskLoc: false
+          $snapshot: false
     expectations:
       -
         command_started_event:
           command:
             find: *collection_name
-            filter: { _id: 1 }
+            filter: { _id:  { $gt: 1 } }
             sort: { _id: 1 }
             limit: 2
+            skip: 2
+            comment: "test"
+            hint: { _id: 1 }
+            max: { _id: 6 }
+            maxScan: 5000
+            maxTimeMS: 6000
+            min: { _id: 0 }
+            readPreference: { mode: "secondaryPreferred" }
+            returnKey: false
+            showRecordId: false
+            snapshot: false
           command_name: "find"
           database_name: *database_name
       -
         command_succeeded_event:
           reply:
-            ok: 1
+            ok: 1.0
             cursor:
-              id: 0
+              id: { $numberLong: "0" }
+              ns: *namespace
               firstBatch:
-                - { _id: 1, x: 11 }
+                - { _id: 4, x: 44 }
+                - { _id: 5, x: 55 }
           command_name: "find"
-          database_name: *database_name
   -
     description: "A successful find event with a getmore"
     operation:
@@ -76,24 +101,25 @@ tests:
             find: *collection_name
             filter: { _id: { $gte : 1 }}
             sort: { _id: 1 }
-            limit: 3
+            batchSize: 3
           command_name: "find"
           database_name: *database_name
       -
         command_succeeded_event:
           reply:
-            ok: 1
+            ok: 1.0
             cursor:
+              id: { $numberLong: "42" }
+              ns: *namespace
               firstBatch:
                 - { _id: 1, x: 11 }
                 - { _id: 2, x: 22 }
                 - { _id: 3, x: 33 }
           command_name: "find"
-          database_name: *database_name
       -
         command_started_event:
           command:
-            # getMore: test should verify this cursor id matches the find.
+            getMore: { $numberLong: "42" }
             collection: *collection_name
             batchSize: 3
           command_name: "getMore"
@@ -101,14 +127,14 @@ tests:
       -
         command_succeeded_event:
           reply:
-            ok: 1
+            ok: 1.0
             cursor:
-              # id: test should verify this cursor id matches the find.
+              id: { $numberLong: "0" }
+              ns: *namespace
               nextBatch:
                 - { _id: 4, x: 44 }
                 - { _id: 5, x: 55 }
           command_name: "getMore"
-          database_name: *database_name
   -
     description: "A successful find event with a getmore and killcursors"
     operation:
@@ -125,24 +151,26 @@ tests:
             find: *collection_name
             filter: { _id: { $gte : 1 }}
             sort: { _id: 1 }
-            limit: 3
+            batchSize: 3
+            limit: 4
           command_name: "find"
           database_name: *database_name
       -
         command_succeeded_event:
           reply:
-            ok: 1
+            ok: 1.0
             cursor:
+              id: { $numberLong: "42" }
+              ns: *namespace
               firstBatch:
                 - { _id: 1, x: 11 }
                 - { _id: 2, x: 22 }
                 - { _id: 3, x: 33 }
           command_name: "find"
-          database_name: *database_name
       -
         command_started_event:
           command:
-            # getMore: test should verify this cursor id matches the find.
+            getMore: { $numberLong: "42" }
             collection: *collection_name
             batchSize: 1
           command_name: "getMore"
@@ -150,27 +178,28 @@ tests:
       -
         command_succeeded_event:
           reply:
-            ok: 1
+            ok: 1.0
             cursor:
-              # id: test should verify this cursor id matches the find.
+              id: { $numberLong: "42" }
+              ns: *namespace
               nextBatch:
                 - { _id: 4, x: 44 }
           command_name: "getMore"
-          database_name: *database_name
       -
         command_started_event:
           command:
             killCursors: *collection_name
-            # cursors:
-              # - test should verify this cursor id matches the find.
+            cursors:
+              - { $numberLong: "42" }
           command_name: "killCursors"
           database_name: *database_name
       -
         command_succeeded_event:
           reply:
-            ok: 1
+            ok: 1.0
+            cursorsUnknown:
+              - { $numberLong: "42" }
           command_name: "killCursors"
-          database_name: *database_name
   -
     description: "A failed find event"
     operation:
@@ -188,4 +217,3 @@ tests:
       -
         command_failed_event:
           command_name: "find"
-          database_name: *database_name

@@ -29,7 +29,8 @@
                   "_id": 2,
                   "x": 22
                 }
-              ]
+              ],
+              "ordered": true
             },
             "command_name": "insert",
             "database_name": "command-monitoring-tests"
@@ -37,19 +38,17 @@
         },
         {
           "command_succeeded_event": {
-            "reply": [
-              {
-                "ok": 1, "n": 1
-              }
-            ],
-            "command_name": "insert",
-            "database_name": "command-monitoring-tests"
+            "reply": {
+              "ok": 1.0,
+              "n": 1
+            },
+            "command_name": "insert"
           }
         }
       ]
     },
     {
-      "description": "A failed insert event",
+      "description": "A successful insert one command with write errors",
       "operation": {
         "name": "insertOne",
         "arguments": {
@@ -69,16 +68,27 @@
                   "_id": 1,
                   "x": 11
                 }
-              ]
+              ],
+              "ordered": true
             },
             "command_name": "insert",
             "database_name": "command-monitoring-tests"
           }
         },
         {
-          "command_failed_event": {
-            "command_name": "insert",
-            "database_name": "command-monitoring-tests"
+          "command_succeeded_event": {
+            "reply": {
+              "ok": 1.0,
+              "n": 0,
+              "writeErrors": [
+                {
+                  "index": 0,
+                  "code": 42,
+                  "errmsg": ""
+                }
+              ]
+            },
+            "command_name": "insert"
           }
         }
       ]

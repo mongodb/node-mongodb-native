@@ -17,9 +17,9 @@
   "database_name": "command-monitoring-tests",
   "tests": [
     {
-      "description": "A successful delete one",
+      "description": "A successful delete many",
       "operation": {
-        "name": "deleteOne",
+        "name": "deleteMany",
         "arguments": {
           "filter": {
             "_id": {
@@ -40,7 +40,7 @@
                       "$gt": 1
                     }
                   },
-                  "limit": 1
+                  "limit": 0
                 }
               ],
               "ordered": true
@@ -53,7 +53,7 @@
           "command_succeeded_event": {
             "reply": {
               "ok": 1.0,
-              "n": 1
+              "n": 2
             },
             "command_name": "delete"
           }
@@ -61,9 +61,9 @@
       ]
     },
     {
-      "description": "A successful delete one command with write errors",
+      "description": "A successful delete many command with write errors",
       "operation": {
-        "name": "deleteOne",
+        "name": "deleteMany",
         "arguments": {
           "filter": {
             "_id": {
@@ -84,7 +84,7 @@
                       "$nothing": 1
                     }
                   },
-                  "limit": 1
+                  "limit": 0
                 }
               ],
               "ordered": true

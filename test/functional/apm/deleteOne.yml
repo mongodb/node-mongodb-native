@@ -21,18 +21,15 @@ tests:
             delete: *collection_name
             deletes:
               - { q: { _id: { $gt: 1 }}, limit: 1 }
-            writeConcern: { w: 1 }
             ordered: true
           command_name: "delete"
           database_name: *database_name
       -
         command_succeeded_event:
-          reply:
-            - { ok: 1 }
+          reply: { ok: 1.0, n: 1 }
           command_name: "delete"
-          database_name: *database_name
   -
-    description: "A failed delete event"
+    description: "A successful delete one command with write errors"
     operation:
       name: "deleteOne"
       arguments:
@@ -44,10 +41,15 @@ tests:
           command:
             delete: *collection_name
             deletes:
-              q: { _id: { $nothing: 1 }}
+              - { q: { _id: { $nothing: 1 }}, limit: 1 }
+            ordered: true
           command_name: "delete"
           database_name: *database_name
       -
-        command_failed_event:
+        command_succeeded_event:
+          reply:
+            ok: 1.0
+            n: 0
+            writeErrors:
+              - { index: 0, code: 42, errmsg: "" }
           command_name: "delete"
-          database_name: *database_name

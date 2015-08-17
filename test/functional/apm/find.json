@@ -23,7 +23,7 @@
   ],
   "collection_name": "test",
   "database_name": "command-monitoring-tests",
-  "namespace": "test.command-monitoring-tests",
+  "namespace": "command-monitoring-tests.test",
   "tests": [
     {
       "description": "A successful find event with no options",
@@ -53,8 +53,10 @@
             "reply": {
               "ok": 1,
               "cursor": {
-                "id": 0,
-                "ns": "test.command-monitoring-tests",
+                "id": {
+                  "$numberLong": "0"
+                },
+                "ns": "command-monitoring-tests.test",
                 "firstBatch": [
                   {
                     "_id": 1,
@@ -63,8 +65,7 @@
                 ]
               }
             },
-            "command_name": "find",
-            "database_name": "command-monitoring-tests"
+            "command_name": "find"
           }
         }
       ]
@@ -75,12 +76,35 @@
         "name": "find",
         "arguments": {
           "filter": {
-            "_id": 1
+            "_id": {
+              "$gt": 1
+            }
           },
           "sort": {
             "_id": 1
           },
-          "limit": 2
+          "limit": 2,
+          "skip": 2,
+          "modifiers": {
+            "$comment": "test",
+            "$hint": {
+              "_id": 1
+            },
+            "$max": {
+              "_id": 6
+            },
+            "$maxScan": 5000,
+            "$maxTimeMS": 6000,
+            "$min": {
+              "_id": 0
+            },
+            "$readPreference": {
+              "mode": "secondaryPreferred"
+            },
+            "$returnKey": false,
+            "$showDiskLoc": false,
+            "$snapshot": false
+          }
         }
       },
       "expectations": [
@@ -89,12 +113,33 @@
             "command": {
               "find": "test",
               "filter": {
-                "_id": 1
+                "_id": {
+                  "$gt": 1
+                }
               },
               "sort": {
                 "_id": 1
               },
-              "limit": 2
+              "limit": 2,
+              "skip": 2,
+              "comment": "test",
+              "hint": {
+                "_id": 1
+              },
+              "max": {
+                "_id": 6
+              },
+              "maxScan": 5000,
+              "maxTimeMS": 6000,
+              "min": {
+                "_id": 0
+              },
+              "readPreference": {
+                "mode": "secondaryPreferred"
+              },
+              "returnKey": false,
+              "showRecordId": false,
+              "snapshot": false
             },
             "command_name": "find",
             "database_name": "command-monitoring-tests"
@@ -105,18 +150,23 @@
             "reply": {
               "ok": 1,
               "cursor": {
-                "id": 0,
-                "ns": "test.command-monitoring-tests",
+                "id": {
+                  "$numberLong": "0"
+                },
+                "ns": "command-monitoring-tests.test",
                 "firstBatch": [
                   {
-                    "_id": 1,
-                    "x": 11
+                    "_id": 4,
+                    "x": 44
+                  },
+                  {
+                    "_id": 5,
+                    "x": 55
                   }
                 ]
               }
             },
-            "command_name": "find",
-            "database_name": "command-monitoring-tests"
+            "command_name": "find"
           }
         }
       ]
@@ -150,7 +200,7 @@
               "sort": {
                 "_id": 1
               },
-              "limit": 3
+              "batchSize": 3
             },
             "command_name": "find",
             "database_name": "command-monitoring-tests"
@@ -161,7 +211,10 @@
             "reply": {
               "ok": 1,
               "cursor": {
-                "ns": "test.command-monitoring-tests",
+                "id": {
+                  "$numberLong": "42"
+                },
+                "ns": "command-monitoring-tests.test",
                 "firstBatch": [
                   {
                     "_id": 1,
@@ -178,13 +231,15 @@
                 ]
               }
             },
-            "command_name": "find",
-            "database_name": "command-monitoring-tests"
+            "command_name": "find"
           }
         },
         {
           "command_started_event": {
             "command": {
+              "getMore": {
+                "$numberLong": "42"
+              },
               "collection": "test",
               "batchSize": 3
             },
@@ -197,7 +252,10 @@
             "reply": {
               "ok": 1,
               "cursor": {
-                "ns": "test.command-monitoring-tests",
+                "id": {
+                  "$numberLong": "0"
+                },
+                "ns": "command-monitoring-tests.test",
                 "nextBatch": [
                   {
                     "_id": 4,
@@ -210,8 +268,7 @@
                 ]
               }
             },
-            "command_name": "getMore",
-            "database_name": "command-monitoring-tests"
+            "command_name": "getMore"
           }
         }
       ]
@@ -246,7 +303,8 @@
               "sort": {
                 "_id": 1
               },
-              "limit": 3
+              "batchSize": 3,
+              "limit": 4
             },
             "command_name": "find",
             "database_name": "command-monitoring-tests"
@@ -257,7 +315,10 @@
             "reply": {
               "ok": 1,
               "cursor": {
-                "ns": "test.command-monitoring-tests",
+                "id": {
+                  "$numberLong": "42"
+                },
+                "ns": "command-monitoring-tests.test",
                 "firstBatch": [
                   {
                     "_id": 1,
@@ -274,13 +335,15 @@
                 ]
               }
             },
-            "command_name": "find",
-            "database_name": "command-monitoring-tests"
+            "command_name": "find"
           }
         },
         {
           "command_started_event": {
             "command": {
+              "getMore": {
+                "$numberLong": "42"
+              },
               "collection": "test",
               "batchSize": 1
             },
@@ -293,7 +356,10 @@
             "reply": {
               "ok": 1,
               "cursor": {
-                "ns": "test.command-monitoring-tests",
+                "id": {
+                  "$numberLong": "42"
+                },
+                "ns": "command-monitoring-tests.test",
                 "nextBatch": [
                   {
                     "_id": 4,
@@ -302,14 +368,18 @@
                 ]
               }
             },
-            "command_name": "getMore",
-            "database_name": "command-monitoring-tests"
+            "command_name": "getMore"
           }
         },
         {
           "command_started_event": {
             "command": {
-              "killCursors": "test"
+              "killCursors": "test",
+              "cursors": [
+                {
+                  "$numberLong": "42"
+                }
+              ]
             },
             "command_name": "killCursors",
             "database_name": "command-monitoring-tests"
@@ -318,10 +388,14 @@
         {
           "command_succeeded_event": {
             "reply": {
-              "ok": 1
+              "ok": 1,
+              "cursorsUnknown": [
+                {
+                  "$numberLong": "42"
+                }
+              ]
             },
-            "command_name": "killCursors",
-            "database_name": "command-monitoring-tests"
+            "command_name": "killCursors"
           }
         }
       ]
@@ -351,8 +425,7 @@
         },
         {
           "command_failed_event": {
-            "command_name": "find",
-            "database_name": "command-monitoring-tests"
+            "command_name": "find"
           }
         }
       ]
