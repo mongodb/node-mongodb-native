@@ -2256,3 +2256,48 @@ exports['Should correctly execute parallelCollectionScan with single cursor emit
     });
   }
 }
+
+exports['Should simulate closed cursor'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { mongodb: ">2.5.5", topology: ["single", "replicaset"] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    // Establish connection to db
+    db.open(function(err, db) {
+      var docs = [];
+
+      // Insert some documents
+      for(var i = 0; i < 1000; i++) {
+        docs.push({a:i});
+      }
+
+      // Get the collection
+      var collection = db.collection('parallelCollectionScan_4');
+      // Insert 1000 documents in a batch
+      collection.insert(docs, function(err, result) {
+        var results = [];
+        var numCursors = 1;
+
+        // Get the cursor
+        var cursor = collection.find({}).batchSize(2);
+        // Get next document
+        cursor.next(function(err, doc) {
+          test.equal(null, err);
+          test.ok(doc != null);
+
+          // Mess with state forcing a call to isDead on the cursor
+          cursor.s.state = 2;
+
+          cursor.next(function(err, doc) {
+            test.ok(err != null);
+            db.close();
+            test.done();
+          })
+        });
+      });
+    });
+  }
+}
