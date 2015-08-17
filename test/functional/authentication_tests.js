@@ -71,7 +71,7 @@ exports.shouldCorrectlyRetrieveReplSetGetStatusWithPromises = {
  * @ignore
  */
 exports.shouldCorrectlyCallValidateCollectionUsingAuthenticatedMode = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configure, test) {

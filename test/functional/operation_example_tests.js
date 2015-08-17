@@ -529,7 +529,7 @@ exports.shouldCreateComplexIndexOnTwoFields = {
         test.equal(null, err);
 
         // Create an index on the a field
-        db.createIndex('createIndexExample1', {a:1, b:1}
+        collection.createIndex({a:1, b:1}
           , {unique:true, background:true, w:1}, function(err, indexName) {
 
           // Show that duplicate records got dropped

@@ -217,7 +217,7 @@ exports.shouldCreateComplexIndexOnTwoFieldsWithGenerators = {
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax());
 
       // Create an index on the a field
-      yield db.createIndex('createIndexExample1_with_generators', {a:1, b:1}
+      yield collection.createIndex({a:1, b:1}
         , {unique:true, background:true, w:1});
 
       // Show that duplicate records got dropped
@@ -4164,20 +4164,9 @@ exports.shouldCorrectlyRetrieveReplSetGetStatusWithGenerators = {
       // Use the admin database for the operation
       var adminDb = db.admin();
 
-      // Add the new user to the admin database
-      var result = yield adminDb.addUser('admin14', 'admin14');
-      test.ok(result != null);
-
-      // Authenticate using the newly added user
-      var result = yield adminDb.authenticate('admin14', 'admin14');
-      test.equal(true, result);
-
       // Retrive the server Info, returns error if we are not
       // running a replicaset
       yield adminDb.replSetGetStatus();
-
-      var result = yield adminDb.removeUser('admin14');
-      test.ok(result);
 
       db.close();
       test.done();

@@ -246,9 +246,15 @@ exports.shouldCorrectlyHandleMultipleChunkGridStore = {
     var fs_client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     fs_client.open(function(err, fs_client) {
+      test.equal(null, err);
+
       fs_client.dropDatabase(function(err, done) {
+        test.equal(null, err);
+
         var gridStore = new GridStore(fs_client, "test_gs_multi_chunk", "w");
         gridStore.open(function(err, gridStore) {
+          test.equal(null, err);
+
           gridStore.chunkSize = 512;
           var file1 = ''; var file2 = ''; var file3 = '';
           for(var i = 0; i < gridStore.chunkSize; i++) { file1 = file1 + 'x'; }
@@ -256,10 +262,21 @@ exports.shouldCorrectlyHandleMultipleChunkGridStore = {
           for(var i = 0; i < gridStore.chunkSize; i++) { file3 = file3 + 'z'; }
 
           gridStore.write(file1, function(err, gridStore) {
+            console.dir(err)
+            test.equal(null, err);
+
             gridStore.write(file2, function(err, gridStore) {
+              test.equal(null, err);
+  
               gridStore.write(file3, function(err, gridStore) {
+                test.equal(null, err);
+    
                 gridStore.close(function(err, result) {
+                  test.equal(null, err);
+      
                   fs_client.collection('fs.chunks', function(err, collection) {
+                    test.equal(null, err);
+
                     collection.count(function(err, count) {
                       test.equal(3, count);
 
@@ -3036,6 +3053,50 @@ exports['should correctly seek on file where size of file is a multiple of the c
                 });
               });
             });
+          });
+        });
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['should correctly write fake png to gridstore'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient
+      , GridStore = configuration.require.GridStore
+      , ObjectID = configuration.require.ObjectID
+      , fs = require('fs')
+      , assert = require('assert');
+
+    // Connection URL
+    var url = 'mongodb://localhost:27017/myproject';
+    var id = new ObjectID();
+
+    // Create a test buffer
+    var buffer = new Buffer(200033);
+
+    // Use connect method to connect to the Server
+    MongoClient.connect(configuration.url(), function(err, db) {
+      assert.equal(null, err);
+
+      var gridStore = new GridStore(db, new ObjectID(), 'w', { "content_type": "image/png", "chunk_size": 1024*4 });
+      gridStore.open(function(err, gridStore) {
+        test.equal(null, err);
+
+        gridStore.write(buffer, function(err, result) {
+          test.equal(null, err);
+  
+          gridStore.close(function(err, result) { 
+            test.equal(null, err);
+
+            db.close();
+            test.done();
           });
         });
       });

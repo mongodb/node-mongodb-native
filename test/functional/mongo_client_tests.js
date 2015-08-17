@@ -352,3 +352,26 @@ exports['Should fail due to wrong uri user:password@localhost'] = {
     }
   }
 }
+
+/**
+ * @ignore
+ */
+exports["correctly timeout MongoClient connect using custom connectTimeoutMS"] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+
+    var start = new Date();
+
+    MongoClient.connect('mongodb://example.com/test?connectTimeoutMS=1000&maxPoolSize=1', function(err, db) {
+      // db.close();
+
+      var end = new Date();
+      console.dir(end.getTime() - start.getTime())
+
+      test.done();
+    });
+  }
+}
