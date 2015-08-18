@@ -871,3 +871,41 @@ exports['should correctly execute updateOne operations with w:0 and upsert'] = {
     });
   }
 }
+
+exports['should correctly execute crud operations using w:0'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    // Establish connection to db
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      var collection = db.collection('w0crudoperations');
+      collection.insertOne({}, function(err, r) {
+        console.log("-------------------------------------------")
+        console.dir(err)
+        console.dir(r)
+
+        db.close();
+        test.done();
+      });
+
+      // collection.insertOne({a:1});
+      // collection.insertMany([{b:1}]);
+      // collection.updateOne({c:1}, {$set:{a:1}}, {upsert:true});
+
+
+      // db.collection('try').updateOne({_id:1}, {$set:{x:1}}, {upsert:true, w:0}, function(err, r) {
+      //   test.equal(null, err);
+      //   test.ok(r != null);
+
+      //   db.close();
+      //   test.done();
+      // });
+    });
+  }
+}

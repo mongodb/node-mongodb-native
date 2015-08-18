@@ -1,3 +1,7 @@
+2.0.42 08-18-2015
+-----------------
+* Added test case to exercise all non-crud methods on mongos topologies, fixed numberOfConnectedServers on mongos topology instance.
+
 2.0.41 08-14-2015
 -----------------
 * Added missing Mongos.prototype.parserType function.
