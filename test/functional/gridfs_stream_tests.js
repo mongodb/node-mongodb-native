@@ -325,10 +325,11 @@ for (var i = 0; i < DOWNLOAD_SPEC.tests.length; ++i) {
                     if (testSpec.arrange) {
                       // only support 1 arrange op for now
                       test.equal(testSpec.arrange.data.length, 1);
-                      db.command(deflateTestDoc(testSpec.arrange.data[0]), function(error) {
-                        test.equal(error, null);
-                        _runTest();
-                      });
+                      applyArrange(db, deflateTestDoc(testSpec.arrange.data[0]),
+                        function(error) {
+                          test.equal(error, null);
+                          _runTest();
+                        });
                     } else {
                       _runTest();
                     }
@@ -385,4 +386,34 @@ function convert$hexToBuffer(doc) {
       }
     }
   });
+}
+
+function applyArrange(db, command, callback) {
+  // Don't count on commands being there since we need to test on 2.2 and 2.4
+  if (command.delete) {
+    if (command.deletes.length !== 1) {
+      return callback(new Error('can only arrange with 1 delete'));
+    }
+    if (command.deletes[0].limit !== 1) {
+      return callback(new Error('can only arrange with delete limit 1'));
+    }
+    db.collection(command.delete).deleteOne(command.deletes[0].q, callback);
+  } else if (command.insert) {
+    db.collection(command.insert).insertMany(command.documents, callback);
+  } else if (command.update) {
+    var bulk = [];
+    for (var i = 0; i < command.updates.length; ++i) {
+      bulk.push({
+        updateOne: {
+          filter: command.updates[i].q,
+          update: command.updates[i].u
+        }
+      });
+    }
+
+    db.collection(command.update).bulkWrite(bulk, callback);
+  } else {
+    var msg = 'Command not recognized: ' + require('util').inspect(command);
+    callback(new Error(msg));
+  }
 }
