@@ -18,50 +18,55 @@ exports.shouldUploadFromFileStream = {
       { poolSize:1 });
     db.open(function(error, db) {
       test.equal(error, null);
-      var bucket = new GridFSBucket(db);
-      var readStream = fs.createReadStream('./LICENSE');
 
-      var uploadStream = bucket.openUploadStream('test.dat');
+      db.dropDatabase(function(error) {
+        test.equal(error, null);
 
-      var license = fs.readFileSync('./LICENSE');
-      var id = uploadStream.id;
+        var bucket = new GridFSBucket(db);
+        var readStream = fs.createReadStream('./LICENSE');
 
-      uploadStream.once('finish', function() {
-        var chunksColl = db.collection('fs.chunks');
-        var chunksQuery = chunksColl.find({ files_id: id });
-        chunksQuery.toArray(function(error, docs) {
-          test.equal(error, null);
-          test.equal(docs.length, 1);
-          test.equal(docs[0].data.toString('hex'), license.toString('hex'));
+        var uploadStream = bucket.openUploadStream('test.dat');
 
-          var filesColl = db.collection('fs.files');
-          var filesQuery = filesColl.find({ _id: id });
-          filesQuery.toArray(function(error, docs) {
+        var license = fs.readFileSync('./LICENSE');
+        var id = uploadStream.id;
+
+        uploadStream.once('finish', function() {
+          var chunksColl = db.collection('fs.chunks');
+          var chunksQuery = chunksColl.find({ files_id: id });
+          chunksQuery.toArray(function(error, docs) {
             test.equal(error, null);
             test.equal(docs.length, 1);
+            test.equal(docs[0].data.toString('hex'), license.toString('hex'));
 
-            var hash = crypto.createHash('md5');
-            hash.update(license);
-            test.equal(docs[0].md5, hash.digest('hex'));
-
-            // make sure we created indexes
-            filesColl.listIndexes().toArray(function(error, indexes) {
+            var filesColl = db.collection('fs.files');
+            var filesQuery = filesColl.find({ _id: id });
+            filesQuery.toArray(function(error, docs) {
               test.equal(error, null);
-              test.equal(indexes.length, 2);
-              test.equal(indexes[1].name, 'filename_1_uploadDate_1');
+              test.equal(docs.length, 1);
 
-              chunksColl.listIndexes().toArray(function(error, indexes) {
+              var hash = crypto.createHash('md5');
+              hash.update(license);
+              test.equal(docs[0].md5, hash.digest('hex'));
+
+              // make sure we created indexes
+              filesColl.listIndexes().toArray(function(error, indexes) {
                 test.equal(error, null);
                 test.equal(indexes.length, 2);
-                test.equal(indexes[1].name, 'files_id_1_n_1');
-                test.done();
+                test.equal(indexes[1].name, 'filename_1_uploadDate_1');
+
+                chunksColl.listIndexes().toArray(function(error, indexes) {
+                  test.equal(error, null);
+                  test.equal(indexes.length, 2);
+                  test.equal(indexes[1].name, 'files_id_1_n_1');
+                  test.done();
+                });
               });
             });
           });
         });
-      });
 
-      readStream.pipe(uploadStream);
+        readStream.pipe(uploadStream);
+      });
     });
   }
 };
