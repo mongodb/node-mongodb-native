@@ -21,6 +21,7 @@
       "lib/bulk/ordered.js",
       "lib/bulk/unordered.js",
       "lib/gridfs/grid_store.js",
+      "node_modules/mongodb-core/lib/error.js",
       "node_modules/mongodb-core/lib/connection/logger.js",
       "node_modules/bson/lib/bson/binary.js",
       "node_modules/bson/lib/bson/code.js",
