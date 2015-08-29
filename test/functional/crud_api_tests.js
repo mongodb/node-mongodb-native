@@ -708,8 +708,6 @@ exports['should correctly execute findAndModify methods using crud api'] = {
           db.collection('t5_1').findOneAndDelete({a:1}
             , { projection: {b:1}, sort: {a:1} }
             , function(err, r) {
-              console.log("------------------------------------------------ findOneAndDelete")
-              console.dir(r)
               test.equal(null, err);
               test.equal(1, r.lastErrorObject.n);
               test.equal(1, r.value.b);
@@ -736,8 +734,6 @@ exports['should correctly execute findAndModify methods using crud api'] = {
                 , upsert: true
               }
             , function(err, r) {
-              console.log("------------------------------------------------ findOneAndReplace")
-              console.dir(r)
               test.equal(null, err);
               test.equal(1, r.lastErrorObject.n);
               test.equal(1, r.value.b);
@@ -765,8 +761,6 @@ exports['should correctly execute findAndModify methods using crud api'] = {
                 , upsert: true
               }
             , function(err, r) {
-              console.log("------------------------------------------------ findOneAndUpdate")
-              console.dir(r)
               test.equal(null, err);
               test.equal(1, r.lastErrorObject.n);
               test.equal(1, r.value.b);
