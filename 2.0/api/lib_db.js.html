@@ -339,9 +339,25 @@
             
                 <li data-name="Collection~countCallback"><a href="Collection.html#~countCallback">countCallback</a></li>
             
+                <li data-name="Collection~deleteWriteOpCallback"><a href="Collection.html#~deleteWriteOpCallback">deleteWriteOpCallback</a></li>
+            
+                <li data-name="Collection~deleteWriteOpResult"><a href="Collection.html#~deleteWriteOpResult">deleteWriteOpResult</a></li>
+            
+                <li data-name="Collection~findAndModifyCallback"><a href="Collection.html#~findAndModifyCallback">findAndModifyCallback</a></li>
+            
+                <li data-name="Collection~findAndModifyWriteOpResult"><a href="Collection.html#~findAndModifyWriteOpResult">findAndModifyWriteOpResult</a></li>
+            
+                <li data-name="Collection~insertWriteOpCallback"><a href="Collection.html#~insertWriteOpCallback">insertWriteOpCallback</a></li>
+            
+                <li data-name="Collection~insertWriteOpResult"><a href="Collection.html#~insertWriteOpResult">insertWriteOpResult</a></li>
+            
                 <li data-name="Collection~parallelCollectionScanCallback"><a href="Collection.html#~parallelCollectionScanCallback">parallelCollectionScanCallback</a></li>
             
                 <li data-name="Collection~resultCallback"><a href="Collection.html#~resultCallback">resultCallback</a></li>
+            
+                <li data-name="Collection~updateWriteOpCallback"><a href="Collection.html#~updateWriteOpCallback">updateWriteOpCallback</a></li>
+            
+                <li data-name="Collection~updateWriteOpResult"><a href="Collection.html#~updateWriteOpResult">updateWriteOpResult</a></li>
             
                 <li data-name="Collection~writeOpCallback"><a href="Collection.html#~writeOpCallback">writeOpCallback</a></li>
             
@@ -599,8 +615,6 @@
                 <li data-name="Cursor#maxTimeMS"><a href="Cursor.html#maxTimeMS">maxTimeMS</a></li>
             
                 <li data-name="Cursor#min"><a href="Cursor.html#min">min</a></li>
-            
-                <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
             
                 <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
             
@@ -1234,6 +1248,44 @@
             </ul>
         </li>
     
+        <li class="item" data-name="MongoError">
+            <span class="title">
+                <a href="MongoError.html">MongoError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MongoError.create">
+            <span class="title">
+                <a href="MongoError.create.html">MongoError.create</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
         <li class="item" data-name="Mongos">
             <span class="title">
                 <a href="Mongos.html">Mongos</a>
@@ -1717,7 +1769,7 @@ var debugFields = ['authSource', 'w', 'wtimeout', 'j', 'native_parser', 'forceSe
  * @param {boolean} [options.raw=false] Return document results as raw BSON buffers.
  * @param {boolean} [options.promoteLongs=true] Promotes Long values to number if they fit inside the 53 bits resolution.
  * @param {number} [options.bufferMaxEntries=-1] Sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited.
- * @param {number} [options.numberOfRetries=5] Number of retries off connection.
+ * @param {number} [options.numberOfRetries=5] Number of times a tailable cursor will re-poll when it gets nothing back.
  * @param {number} [options.retryMiliSeconds=500] Number of milliseconds between retries.
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  * @param {object} [options.pkFactory=null] A primary key factory object for generation of custom _id keys.
@@ -2301,6 +2353,7 @@ var evaluate = function(self, code, parameters, options, callback) {
  * @param {boolean} [options.nolock=false] Tell MongoDB not to block on the evaulation of the javascript.
  * @param {Db~resultCallback} [callback] The results callback
  * @return {Promise} returns Promise if no callback passed
+ * @deprecated MongoDB 3.2 and higher no longer support eval.
  */
 Db.prototype.eval = function(code, parameters, options, callback) {
   var self = this;
@@ -3246,12 +3299,16 @@ var createListener = function(self, e, object) {
 /**
  * Db close event
  *
+ * Emitted after a socket closed against a single server or mongos proxy.
+ *
  * @event Db#close
- * @type {object}
+ * @type {MongoError}
  */
 
 /**
  * Db authenticated event
+ *
+ * Emitted after all server members in the topology (single server, replicaset or mongos) have successfully authenticated.
  *
  * @event Db#authenticated
  * @type {object}
@@ -3260,12 +3317,18 @@ var createListener = function(self, e, object) {
 /**
  * Db reconnect event
  *
+ *  * Server: Emitted when the driver has reconnected and re-authenticated.
+ *  * ReplicaSet: N/A
+ *  * Mongos: Emitted when the driver reconnects and re-authenticates successfully against a Mongos.
+ *
  * @event Db#reconnect
  * @type {object}
  */
 
 /**
  * Db error event
+ *
+ * Emitted after an error occurred against a single server or mongos proxy.
  *
  * @event Db#error
  * @type {MongoError}
@@ -3274,19 +3337,27 @@ var createListener = function(self, e, object) {
 /**
  * Db timeout event
  *
+ * Emitted after a socket timeout occurred against a single server or mongos proxy.
+ *
  * @event Db#timeout
- * @type {object}
+ * @type {MongoError}
  */
 
 /**
  * Db parseError event
  *
+ * The parseError event is emitted if the driver detects illegal or corrupt BSON being received from the server.
+ *
  * @event Db#parseError
- * @type {object}
+ * @type {MongoError}
  */
 
 /**
- * Db fullsetup event, emitted when all servers in the topology have been connected to.
+ * Db fullsetup event, emitted when all servers in the topology have been connected to at start up time.
+ *
+ * * Server: Emitted when the driver has connected to the single server and has authenticated.
+ * * ReplSet: Emitted after the driver has attempted to connect to all replicaset members.
+ * * Mongos: Emitted after the driver has attempted to connect to all mongos proxies.
  *
  * @event Db#fullsetup
  * @type {Db}
@@ -3330,7 +3401,7 @@ module.exports = Db;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Aug 06 2015 13:24:15 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Sat Aug 29 2015 06:48:19 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

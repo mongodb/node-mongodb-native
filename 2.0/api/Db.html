@@ -339,9 +339,25 @@
             
                 <li data-name="Collection~countCallback"><a href="Collection.html#~countCallback">countCallback</a></li>
             
+                <li data-name="Collection~deleteWriteOpCallback"><a href="Collection.html#~deleteWriteOpCallback">deleteWriteOpCallback</a></li>
+            
+                <li data-name="Collection~deleteWriteOpResult"><a href="Collection.html#~deleteWriteOpResult">deleteWriteOpResult</a></li>
+            
+                <li data-name="Collection~findAndModifyCallback"><a href="Collection.html#~findAndModifyCallback">findAndModifyCallback</a></li>
+            
+                <li data-name="Collection~findAndModifyWriteOpResult"><a href="Collection.html#~findAndModifyWriteOpResult">findAndModifyWriteOpResult</a></li>
+            
+                <li data-name="Collection~insertWriteOpCallback"><a href="Collection.html#~insertWriteOpCallback">insertWriteOpCallback</a></li>
+            
+                <li data-name="Collection~insertWriteOpResult"><a href="Collection.html#~insertWriteOpResult">insertWriteOpResult</a></li>
+            
                 <li data-name="Collection~parallelCollectionScanCallback"><a href="Collection.html#~parallelCollectionScanCallback">parallelCollectionScanCallback</a></li>
             
                 <li data-name="Collection~resultCallback"><a href="Collection.html#~resultCallback">resultCallback</a></li>
+            
+                <li data-name="Collection~updateWriteOpCallback"><a href="Collection.html#~updateWriteOpCallback">updateWriteOpCallback</a></li>
+            
+                <li data-name="Collection~updateWriteOpResult"><a href="Collection.html#~updateWriteOpResult">updateWriteOpResult</a></li>
             
                 <li data-name="Collection~writeOpCallback"><a href="Collection.html#~writeOpCallback">writeOpCallback</a></li>
             
@@ -599,8 +615,6 @@
                 <li data-name="Cursor#maxTimeMS"><a href="Cursor.html#maxTimeMS">maxTimeMS</a></li>
             
                 <li data-name="Cursor#min"><a href="Cursor.html#min">min</a></li>
-            
-                <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
             
                 <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
             
@@ -1227,6 +1241,44 @@
                 <li data-name="MongoClient.connect"><a href="MongoClient.html#.connect">connect</a></li>
             
                 <li data-name="MongoClient#connect"><a href="MongoClient.html#connect">connect</a></li>
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MongoError">
+            <span class="title">
+                <a href="MongoError.html">MongoError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MongoError.create">
+            <span class="title">
+                <a href="MongoError.create.html">MongoError.create</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
             
             </ul>
             <ul class="events itemMembers">
@@ -2241,7 +2293,7 @@
                         
                     
                 
-                <p>Number of retries off connection.</p></td>
+                <p>Number of times a tailable cursor will re-poll when it gets nothing back.</p></td>
         </tr>
 	
 	
@@ -2691,7 +2743,7 @@ Db instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1155">line 1155</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1156">line 1156</a>
         </div>
         
     </div>
@@ -3298,7 +3350,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1338">line 1338</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1339">line 1339</a>
         </div>
         
     </div>
@@ -4538,7 +4590,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line787">line 787</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line788">line 788</a>
         </div>
         
     </div>
@@ -5934,7 +5986,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line882">line 882</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line883">line 883</a>
         </div>
         
     </div>
@@ -6741,7 +6793,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line984">line 984</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line985">line 985</a>
         </div>
         
     </div>
@@ -7114,7 +7166,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line703">line 703</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line704">line 704</a>
         </div>
         
     </div>
@@ -7377,7 +7429,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line734">line 734</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line735">line 735</a>
         </div>
         
     </div>
@@ -7642,7 +7694,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line949">line 949</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line950">line 950</a>
         </div>
         
     </div>
@@ -8451,7 +8503,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line644">line 644</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line645">line 645</a>
         </div>
         
     </div>
@@ -8701,6 +8753,8 @@ co(function*() {
     
     
 
+    
+        <dt class="important tag-deprecated">Deprecated</dt><dd><ul class="dummy"><li>MongoDB 3.2 and higher no longer support eval.</li><ul></dd>
     
     
     
@@ -9066,7 +9120,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line811">line 811</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line812">line 812</a>
         </div>
         
     </div>
@@ -9371,7 +9425,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1423">line 1423</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1424">line 1424</a>
         </div>
         
     </div>
@@ -9997,7 +10051,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1375">line 1375</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1376">line 1376</a>
         </div>
         
     </div>
@@ -10502,7 +10556,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1244">line 1244</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1245">line 1245</a>
         </div>
         
     </div>
@@ -10957,7 +11011,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line674">line 674</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line675">line 675</a>
         </div>
         
     </div>
@@ -11729,7 +11783,7 @@ co(function*() {
             <td class="type">
             
                 
-<span class="param-type">MongoError</span>
+<span class="param-type"><a href="MongoError.html">MongoError</a></span>
 
 
             
@@ -11820,7 +11874,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line757">line 757</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line758">line 758</a>
         </div>
         
     </div>
@@ -11868,7 +11922,7 @@ co(function*() {
             <td class="type">
             
                 
-<span class="param-type">MongoError</span>
+<span class="param-type"><a href="MongoError.html">MongoError</a></span>
 
 
             
@@ -12007,7 +12061,7 @@ co(function*() {
             <td class="type">
             
                 
-<span class="param-type">MongoError</span>
+<span class="param-type"><a href="MongoError.html">MongoError</a></span>
 
 
             
@@ -12146,7 +12200,7 @@ co(function*() {
             <td class="type">
             
                 
-<span class="param-type">MongoError</span>
+<span class="param-type"><a href="MongoError.html">MongoError</a></span>
 
 
             
@@ -12285,7 +12339,7 @@ co(function*() {
             <td class="type">
             
                 
-<span class="param-type">MongoError</span>
+<span class="param-type"><a href="MongoError.html">MongoError</a></span>
 
 
             
@@ -12382,7 +12436,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1592">line 1592</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1595">line 1595</a>
         </div>
         
     </div>
@@ -12394,6 +12448,7 @@ co(function*() {
     
     <div class="description">
         <p>Db authenticated event</p>
+<p>Emitted after all server members in the topology (single server, replicaset or mongos) have successfully authenticated.</p>
     </div>
     
 
@@ -12463,7 +12518,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1585">line 1585</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1586">line 1586</a>
         </div>
         
     </div>
@@ -12475,6 +12530,7 @@ co(function*() {
     
     <div class="description">
         <p>Db close event</p>
+<p>Emitted after a socket closed against a single server or mongos proxy.</p>
     </div>
     
 
@@ -12483,7 +12539,7 @@ co(function*() {
         <ul>
             <li>
                 
-<span class="param-type">object</span>
+<span class="param-type"><a href="MongoError.html">MongoError</a></span>
 
 
             </li>
@@ -12544,7 +12600,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1606">line 1606</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1615">line 1615</a>
         </div>
         
     </div>
@@ -12556,6 +12612,7 @@ co(function*() {
     
     <div class="description">
         <p>Db error event</p>
+<p>Emitted after an error occurred against a single server or mongos proxy.</p>
     </div>
     
 
@@ -12564,7 +12621,7 @@ co(function*() {
         <ul>
             <li>
                 
-<span class="param-type">MongoError</span>
+<span class="param-type"><a href="MongoError.html">MongoError</a></span>
 
 
             </li>
@@ -12625,7 +12682,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1627">line 1627</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1642">line 1642</a>
         </div>
         
     </div>
@@ -12636,7 +12693,12 @@ co(function*() {
     
     
     <div class="description">
-        <p>Db fullsetup event, emitted when all servers in the topology have been connected to.</p>
+        <p>Db fullsetup event, emitted when all servers in the topology have been connected to at start up time.</p>
+<ul>
+<li>Server: Emitted when the driver has connected to the single server and has authenticated.</li>
+<li>ReplSet: Emitted after the driver has attempted to connect to all replicaset members.</li>
+<li>Mongos: Emitted after the driver has attempted to connect to all mongos proxies.</li>
+</ul>
     </div>
     
 
@@ -12706,7 +12768,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1620">line 1620</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1633">line 1633</a>
         </div>
         
     </div>
@@ -12718,6 +12780,7 @@ co(function*() {
     
     <div class="description">
         <p>Db parseError event</p>
+<p>The parseError event is emitted if the driver detects illegal or corrupt BSON being received from the server.</p>
     </div>
     
 
@@ -12726,7 +12789,7 @@ co(function*() {
         <ul>
             <li>
                 
-<span class="param-type">object</span>
+<span class="param-type"><a href="MongoError.html">MongoError</a></span>
 
 
             </li>
@@ -12787,7 +12850,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1599">line 1599</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1604">line 1604</a>
         </div>
         
     </div>
@@ -12799,6 +12862,11 @@ co(function*() {
     
     <div class="description">
         <p>Db reconnect event</p>
+<ul>
+<li>Server: Emitted when the driver has reconnected and re-authenticated.</li>
+<li>ReplicaSet: N/A</li>
+<li>Mongos: Emitted when the driver reconnects and re-authenticates successfully against a Mongos.</li>
+</ul>
     </div>
     
 
@@ -12868,7 +12936,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1613">line 1613</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1624">line 1624</a>
         </div>
         
     </div>
@@ -12880,6 +12948,7 @@ co(function*() {
     
     <div class="description">
         <p>Db timeout event</p>
+<p>Emitted after a socket timeout occurred against a single server or mongos proxy.</p>
     </div>
     
 
@@ -12888,7 +12957,7 @@ co(function*() {
         <ul>
             <li>
                 
-<span class="param-type">object</span>
+<span class="param-type"><a href="MongoError.html">MongoError</a></span>
 
 
             </li>
@@ -12968,7 +13037,7 @@ co(function*() {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Aug 06 2015 13:24:15 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Sat Aug 29 2015 06:48:19 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

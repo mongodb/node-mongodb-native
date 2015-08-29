@@ -38,6 +38,19 @@
       <guid>/node-mongodb-native/2.0/meta/release-notes/</guid>
       <description>
 
+&lt;h2 id=&#34;2-0-42-08-18-2015:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.42 08-18-2015&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Added test case to exercise all non-crud methods on mongos topologies, fixed numberOfConnectedServers on mongos topology instance.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;2-0-41-08-14-2015:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.41 08-14-2015&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Added missing Mongos.prototype.parserType function.&lt;/li&gt;
+&lt;li&gt;Updated mongodb-core to 1.2.10.&lt;/li&gt;
+&lt;/ul&gt;
+
 &lt;h2 id=&#34;2-0-40-07-14-2015:066aa012c0230cd32faa0776e0a81250&#34;&gt;2.0.40 07-14-2015&lt;/h2&gt;
 
 &lt;ul&gt;

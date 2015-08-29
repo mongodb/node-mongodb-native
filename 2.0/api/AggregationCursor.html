@@ -339,9 +339,25 @@
             
                 <li data-name="Collection~countCallback"><a href="Collection.html#~countCallback">countCallback</a></li>
             
+                <li data-name="Collection~deleteWriteOpCallback"><a href="Collection.html#~deleteWriteOpCallback">deleteWriteOpCallback</a></li>
+            
+                <li data-name="Collection~deleteWriteOpResult"><a href="Collection.html#~deleteWriteOpResult">deleteWriteOpResult</a></li>
+            
+                <li data-name="Collection~findAndModifyCallback"><a href="Collection.html#~findAndModifyCallback">findAndModifyCallback</a></li>
+            
+                <li data-name="Collection~findAndModifyWriteOpResult"><a href="Collection.html#~findAndModifyWriteOpResult">findAndModifyWriteOpResult</a></li>
+            
+                <li data-name="Collection~insertWriteOpCallback"><a href="Collection.html#~insertWriteOpCallback">insertWriteOpCallback</a></li>
+            
+                <li data-name="Collection~insertWriteOpResult"><a href="Collection.html#~insertWriteOpResult">insertWriteOpResult</a></li>
+            
                 <li data-name="Collection~parallelCollectionScanCallback"><a href="Collection.html#~parallelCollectionScanCallback">parallelCollectionScanCallback</a></li>
             
                 <li data-name="Collection~resultCallback"><a href="Collection.html#~resultCallback">resultCallback</a></li>
+            
+                <li data-name="Collection~updateWriteOpCallback"><a href="Collection.html#~updateWriteOpCallback">updateWriteOpCallback</a></li>
+            
+                <li data-name="Collection~updateWriteOpResult"><a href="Collection.html#~updateWriteOpResult">updateWriteOpResult</a></li>
             
                 <li data-name="Collection~writeOpCallback"><a href="Collection.html#~writeOpCallback">writeOpCallback</a></li>
             
@@ -599,8 +615,6 @@
                 <li data-name="Cursor#maxTimeMS"><a href="Cursor.html#maxTimeMS">maxTimeMS</a></li>
             
                 <li data-name="Cursor#min"><a href="Cursor.html#min">min</a></li>
-            
-                <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
             
                 <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
             
@@ -1234,6 +1248,44 @@
             </ul>
         </li>
     
+        <li class="item" data-name="MongoError">
+            <span class="title">
+                <a href="MongoError.html">MongoError</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
+        <li class="item" data-name="MongoError.create">
+            <span class="title">
+                <a href="MongoError.create.html">MongoError.create</a>
+                
+            </span>
+            <ul class="members itemMembers">
+            
+            </ul>
+            <ul class="typedefs itemMembers">
+            
+            </ul>
+            <ul class="methods itemMembers">
+            
+            </ul>
+            <ul class="events itemMembers">
+            
+            </ul>
+        </li>
+    
         <li class="item" data-name="Mongos">
             <span class="title">
                 <a href="Mongos.html">Mongos</a>
@@ -1791,127 +1843,6 @@ AggregationCursor instance.
     <div class="nameContainer">
         <h4 class="name" id="batchSize">
             
-            batchSize<span class="signature">(value)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line302">line 302</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Get the batchSize of the cursor</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>value</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>The current batchSize for the cursor</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="batchSize">
-            
             batchSize<span class="signature">(value)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="AggregationCursor.html">AggregationCursor</a>}</span>
         </h4>
     
@@ -2023,7 +1954,7 @@ AggregationCursor instance.
     <div class="param-desc">
     
         
-<span class="param-type">MongoError</span>
+<span class="param-type"><a href="MongoError.html">MongoError</a></span>
 
 
     
@@ -2031,6 +1962,127 @@ AggregationCursor instance.
 
 
         
+    
+    
+    
+    
+
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="batchSize">
+            
+            batchSize<span class="signature">(value)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line302">line 302</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Get the batchSize of the cursor</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>The current batchSize for the cursor</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
     
     
     
@@ -2372,7 +2424,7 @@ for making sure that the entire result can fit the memory.</p>
     <div class="param-desc">
     
         
-<span class="param-type">MongoError</span>
+<span class="param-type"><a href="MongoError.html">MongoError</a></span>
 
 
     
@@ -3376,7 +3428,7 @@ Promise if no callback passed
     <div class="param-desc">
     
         
-<span class="param-type">MongoError</span>
+<span class="param-type"><a href="MongoError.html">MongoError</a></span>
 
 
     
@@ -3660,7 +3712,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1049">line 1049</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1037">line 1037</a>
         </div>
         
     </div>
@@ -3738,7 +3790,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1055">line 1055</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1043">line 1043</a>
         </div>
         
     </div>
@@ -4017,7 +4069,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1029">line 1029</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1017">line 1017</a>
         </div>
         
     </div>
@@ -4261,7 +4313,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1043">line 1043</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1031">line 1031</a>
         </div>
         
     </div>
@@ -4536,7 +4588,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1036">line 1036</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1024">line 1024</a>
         </div>
         
     </div>
@@ -5015,7 +5067,7 @@ cursor.rewind() can be used to reset the cursor.</p>
     <div class="param-desc">
     
         
-<span class="param-type">MongoError</span>
+<span class="param-type"><a href="MongoError.html">MongoError</a></span>
 
 
     
@@ -5097,7 +5149,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1063">line 1063</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1051">line 1051</a>
         </div>
         
     </div>
@@ -5227,7 +5279,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1070">line 1070</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1058">line 1058</a>
         </div>
         
     </div>
@@ -5474,7 +5526,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1077">line 1077</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1065">line 1065</a>
         </div>
         
     </div>
@@ -5649,7 +5701,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             <td class="type">
             
                 
-<span class="param-type">MongoError</span>
+<span class="param-type"><a href="MongoError.html">MongoError</a></span>
 
 
             
@@ -5881,7 +5933,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             <td class="type">
             
                 
-<span class="param-type">MongoError</span>
+<span class="param-type"><a href="MongoError.html">MongoError</a></span>
 
 
             
@@ -6023,7 +6075,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
             <td class="type">
             
                 
-<span class="param-type">MongoError</span>
+<span class="param-type"><a href="MongoError.html">MongoError</a></span>
 
 
             
@@ -6463,7 +6515,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Aug 06 2015 13:24:15 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Sat Aug 29 2015 06:48:19 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

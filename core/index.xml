@@ -1034,30 +1034,18 @@ npm install
     </item>
     
     <item>
-      <title>License</title>
-      <link>/node-mongodb-native/core/meta/license/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
-      
-      <guid>/node-mongodb-native/core/meta/license/</guid>
-      <description>
-
-&lt;h2 id=&#34;licensed-under-apache-license-2-0:53e892b8b41cc4caece1cfd5ef21d6e7&#34;&gt;Licensed Under Apache License 2.0&lt;/h2&gt;
-
-&lt;p&gt;Licensed under the Apache License, Version 2.0 (the &amp;ldquo;License&amp;rdquo;); you may not use this file except in compliance with the License. You may obtain a copy of the License at&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&#34;http://www.apache.org/licenses/LICENSE-2.0&#34;&gt;http://www.apache.org/licenses/LICENSE-2.0&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an &amp;ldquo;AS IS&amp;rdquo; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
       <title>Release Notes</title>
       <link>/node-mongodb-native/core/meta/release-notes/</link>
       <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
       
       <guid>/node-mongodb-native/core/meta/release-notes/</guid>
       <description>
+
+&lt;h2 id=&#34;1-2-10-08-14-2015:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.2.10 08-14-2015&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Added missing Mongos.prototype.parserType function.&lt;/li&gt;
+&lt;/ul&gt;
 
 &lt;h2 id=&#34;1-2-9-08-05-2015:066aa012c0230cd32faa0776e0a81250&#34;&gt;1.2.9 08-05-2015&lt;/h2&gt;
 
@@ -1380,6 +1368,24 @@ npm install
 &lt;ul&gt;
 &lt;li&gt;Initial release of mongodb-core&lt;/li&gt;
 &lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>License</title>
+      <link>/node-mongodb-native/core/meta/license/</link>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
+      
+      <guid>/node-mongodb-native/core/meta/license/</guid>
+      <description>
+
+&lt;h2 id=&#34;licensed-under-apache-license-2-0:53e892b8b41cc4caece1cfd5ef21d6e7&#34;&gt;Licensed Under Apache License 2.0&lt;/h2&gt;
+
+&lt;p&gt;Licensed under the Apache License, Version 2.0 (the &amp;ldquo;License&amp;rdquo;); you may not use this file except in compliance with the License. You may obtain a copy of the License at&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;http://www.apache.org/licenses/LICENSE-2.0&#34;&gt;http://www.apache.org/licenses/LICENSE-2.0&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an &amp;ldquo;AS IS&amp;rdquo; BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.&lt;/p&gt;
 </description>
     </item>
     

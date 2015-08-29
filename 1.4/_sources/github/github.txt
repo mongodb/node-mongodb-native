@@ -121,7 +121,7 @@ Object Document Modeling Libraries
          * - **Forks**
            - 5
          * - **Watchers**
-           - 59
+           - 61
 
 .. topic:: leaf
 
@@ -193,7 +193,7 @@ Content Management Systems
          * - **Forks**
            - 286
          * - **Watchers**
-           - 1598
+           - 1597
 
 Grid FS libraries or tools
 --------------------------
@@ -291,7 +291,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 18
          * - **Watchers**
-           - 144
+           - 146
 
 .. topic:: node-mongodb-wrapper
 
@@ -384,7 +384,7 @@ REST api's around MongoDB or resource based libraries
          * - **Clone Url**
            - https://github.com/tdegrunt/mongodb-rest.git
          * - **Forks**
-           - 119
+           - 122
          * - **Watchers**
            - 347
 
@@ -481,7 +481,7 @@ Test helpers and libraries
          * - **Forks**
            - 23
          * - **Watchers**
-           - 68
+           - 69
 
 Tools or applications to manage your MongoDB's
 ----------------------------------------------
@@ -657,7 +657,7 @@ General frameworks over MongoDB
          * - **Forks**
            - 8
          * - **Watchers**
-           - 48
+           - 50
 
 Translation libraries or frameworks
 -----------------------------------
@@ -720,7 +720,7 @@ Libraries or Applications for analytics
          :header-rows: 0
 
          * - **Activity Level**
-           - .. image:: ../static/active.png
+           - .. image:: ../static/nonactive.png
          * - **Last push**
            - 20:46:53 on 23/3/2015
          * - **Homepage**
@@ -732,7 +732,7 @@ Libraries or Applications for analytics
          * - **Forks**
            - 415
          * - **Watchers**
-           - 3565
+           - 3582
 
 Libraries for the connect middleware
 ------------------------------------
@@ -779,9 +779,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 205
+           - 208
          * - **Watchers**
-           - 769
+           - 786
 
 Libraries or applications for continous integration
 ---------------------------------------------------
@@ -795,7 +795,7 @@ Libraries or applications for continous integration
          :header-rows: 0
 
          * - **Activity Level**
-           - .. image:: ../static/active.png
+           - .. image:: ../static/nonactive.png
          * - **Last push**
            - 13:37:8 on 14/3/2015
          * - **Homepage**
@@ -805,9 +805,9 @@ Libraries or applications for continous integration
          * - **Clone Url**
            - https://github.com/ryankee/concrete.git
          * - **Forks**
-           - 70
+           - 69
          * - **Watchers**
-           - 482
+           - 486
 
 Exampe applications
 -------------------
