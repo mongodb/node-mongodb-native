@@ -1,3 +1,7 @@
+2.0.43
+-----------------
+* Propegate timeout event correctly to db instances
+
 2.0.42 08-18-2015
 -----------------
 * Added test case to exercise all non-crud methods on mongos topologies, fixed numberOfConnectedServers on mongos topology instance.

@@ -886,10 +886,6 @@ exports['should correctly execute crud operations using w:0'] = {
 
       var collection = db.collection('w0crudoperations');
       collection.insertOne({}, function(err, r) {
-        console.log("-------------------------------------------")
-        console.dir(err)
-        console.dir(r)
-
         db.close();
         test.done();
       });
