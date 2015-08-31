@@ -588,3 +588,51 @@ exports['Correctly receive the APM explain command'] = {
     });
   }
 }
+
+exports['Correctly filter out sensitive commands'] = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var ReadPreference = configuration.require.ReadPreference;
+    var started = [];
+    var succeeded = [];
+    var failed = [];
+
+    var listener = require('../..').instrument();
+    listener.on('started', function(event) {
+      if(event.commandName == 'getnonce')
+        started.push(event);
+    });
+
+    listener.on('succeeded', function(event) {
+      if(event.commandName == 'getnonce')
+        succeeded.push(event);
+    });
+
+    listener.on('failed', function(event) {
+      if(event.commandName == 'getnonce')
+        failed.push(event);
+    });
+
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      db.command({getnonce:true}, function(err, r) {
+        test.equal(null, err);
+        test.ok(r != null);
+        test.equal(1, started.length);
+        test.equal(1, succeeded.length);
+        test.equal(0, failed.length);
+        test.deepEqual({getnonce:true}, started[0].commandObj);
+        test.deepEqual({}, succeeded[0].reply);
+
+        // Remove instrumentation
+        listener.uninstrument();
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
