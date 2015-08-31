@@ -76,3 +76,47 @@ exports['Should not fail with undefined id'] = {
     });
   }
 }
+
+/**
+ * Should No fail with undefined id
+ * @ignore
+ */
+exports['Should correctly log cursor'] = {
+  metadata: { requires: { topology: ['single'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient
+      , Logger = configuration.require.Logger;
+
+    MongoClient.connect('mongodb://localhost:27017/test', {}, function(err, db) {
+      test.equal(null, err);
+
+      // Status
+      var logged = false;
+
+      // Set the current logger
+      Logger.setCurrentLogger(function() {
+        test.ok(msg != null);
+        test.equal('debug', context.type);
+        test.equal('Db', context.className);
+        logged = true;        
+      });
+
+      // Set the filter
+      Logger.setLevel('debug');
+      Logger.filter('class', ['Cursor']);
+
+      // perform any operation that gets logged
+      db.collection('logging').find().toArray(function(err, d) {
+        test.equal(null, err);
+        test.ok(logged);
+
+        // Clean up
+        Logger.reset();
+        db.close();
+        test.done();
+      });
+    });
+  }
+}

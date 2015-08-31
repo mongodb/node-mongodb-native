@@ -949,13 +949,14 @@ exports['Should Correctly remove server going into recovery mode'] = {
 /**
  * @ignore
  */
-exports['Should not give an error when using a single server seed and no setName'] = {
+exports['Should return single server direct connection when replicaSet not provided'] = {
   metadata: { requires: { topology: 'replicaset' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
-      , MongoClient = mongo.MongoClient;
+      , MongoClient = mongo.MongoClient
+      , Server = mongo.Server;
 
     var url = f("mongodb://localhost:%s/%s"
       , configuration.port
@@ -963,6 +964,7 @@ exports['Should not give an error when using a single server seed and no setName
 
     MongoClient.connect(url, function(err, db) {
       test.equal(null, err);
+      test.ok(db.serverConfig instanceof Server);
 
       restartAndDone(configuration, test);
     });
