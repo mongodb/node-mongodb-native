@@ -135,10 +135,10 @@ var supportsServer = function(_s) {
 //
 // createWireProtocolHandler
 var createWireProtocolHandler = function(result) {
-  // // 3.2 wire protocol handler
-  // if(result && result.maxWireVersion >= 4) {
-  //   return new ThreeTwoWireProtocolSupport(new TwoSixWireProtocolSupport());
-  // }
+  // 3.2 wire protocol handler
+  if(result && result.maxWireVersion >= 4) {
+    return new ThreeTwoWireProtocolSupport(new TwoSixWireProtocolSupport());
+  }
 
   // 2.6 wire protocol handler
   if(result && result.maxWireVersion >= 2) {
