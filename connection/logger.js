@@ -53,8 +53,9 @@ var Logger = function(className, options) {
  * @return {null}
  */
 Logger.prototype.debug = function(message, object) {
-  if(this.isDebug() 
-    && classFilters[this.className] && (filteredClasses[this.className] || Object.keys(filteredClasses).length == 0)) {
+  if(this.isDebug()
+    && ((Object.keys(filteredClasses).length > 0 && filteredClasses[this.className])
+      || (Object.keys(filteredClasses).length == 0 && classFilters[this.className]))) {
     var dateTime = new Date().getTime();
     var msg = f("[%s-%s:%s] %s %s", 'DEBUG', this.className, pid, dateTime, message);        
     var state = {
@@ -74,7 +75,8 @@ Logger.prototype.debug = function(message, object) {
  */
 Logger.prototype.info = function(message, object) {
   if(this.isInfo()
-    && classFilters[this.className] && (filteredClasses[this.className] || Object.keys(filteredClasses).length == 0)) {
+    && ((Object.keys(filteredClasses).length > 0 && filteredClasses[this.className])
+      || (Object.keys(filteredClasses).length == 0 && classFilters[this.className]))) {
     var dateTime = new Date().getTime();
     var msg = f("[%s-%s:%s] %s %s", 'INFO', this.className, pid, dateTime, message);
     var state = {
@@ -93,8 +95,9 @@ Logger.prototype.info = function(message, object) {
  * @return {null}
  */
 Logger.prototype.error = function(message, object) {
-  if(this.isError() 
-    && classFilters[this.className] && (filteredClasses[this.className] || Object.keys(filteredClasses).length == 0)) {
+  if(this.isError()
+    && ((Object.keys(filteredClasses).length > 0 && filteredClasses[this.className])
+      || (Object.keys(filteredClasses).length == 0 && classFilters[this.className]))) {
     var dateTime = new Date().getTime();
     var msg = f("[%s-%s:%s] %s %s", 'ERROR', this.className, pid, dateTime, message);
     var state = {
