@@ -1,4 +1,4 @@
-1.2.11
+1.2.11 08-31-2015
 -----------------
 - NODE-535 If connectWithNoPrimary is true then primary-only connection is not allowed.
 - NODE-534 Passive secondaries are not allowed for secondaryOnlyConnectionAllowed.
