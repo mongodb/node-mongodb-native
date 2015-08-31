@@ -2,6 +2,7 @@
 -----------------
 - NODE-535 If connectWithNoPrimary is true then primary-only connection is not allowed.
 - NODE-534 Passive secondaries are not allowed for secondaryOnlyConnectionAllowed.
+- Fixed filtering bug for logging (Issue 30, https://github.com/christkv/mongodb-core/issues/30).
 
 1.2.10 08-14-2015
 -----------------
