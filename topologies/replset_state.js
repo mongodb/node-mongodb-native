@@ -447,6 +447,14 @@ State.prototype.update = function(ismaster, server) {
       if(self.addPassive(server) && self.addSecondary(server)) {
         if(self.logger.isInfo()) self.logger.info(f('[%s] promoting %s to passive', self.id, ismaster.me));
         self.replSet.emit('joined', 'passive', server);
+
+        // If we have secondaryOnlyConnectionAllowed and just a passive it's
+        // still a valid connection
+        if(self.secondaryOnlyConnectionAllowed && self.state == CONNECTING) {
+          self.state = CONNECTED;
+          self.replSet.emit('connect', self.replSet);
+        }
+
         return true;
       };
 
@@ -454,7 +462,7 @@ State.prototype.update = function(ismaster, server) {
   } else if(!ismaster.ismaster && self.setName == ismaster.setName
     && ismaster.secondary) {
       if(self.addSecondary(server)) {
-        if(self.logger.isInfo()) self.logger.info(f('[%s] promoting %s to passive', self.id, ismaster.me));
+        if(self.logger.isInfo()) self.logger.info(f('[%s] promoting %s to secondary', self.id, ismaster.me));
         self.replSet.emit('joined', 'secondary', server);
 
         if(self.secondaryOnlyConnectionAllowed && self.state == CONNECTING) {
