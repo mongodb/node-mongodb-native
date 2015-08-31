@@ -496,7 +496,8 @@ exports['Member removed by reconfig'] = {
             removedServer = _removedServer;
 
             // Force new election
-            manager.stepDown({force:true}, function(err) {});
+            manager.stepDown({force:true}, function(err) {
+            });
           });
         });
 
@@ -566,7 +567,7 @@ exports['Primary becomes standalone'] = {
           });
 
           // Stop the primary
-          primaryServerManager.stop(function(err, r) {
+          primaryServerManager.stop({signal: -9}, function(err, r) {
 
             // Start a non replset member
             nonReplSetMember.start(function() {
@@ -576,11 +577,12 @@ exports['Primary becomes standalone'] = {
                 test.equal(null, err);
 
                 // Stop the normal server
-                nonReplSetMember.stop(function() {
+                nonReplSetMember.stop({signal: -9}, function() {
 
                   // Restart the primary server
-                  primaryServerManager.start(function() {
-                  });
+                  setTimeout(function() {
+                    primaryServerManager.start(function() {});
+                  }, 5000);
                 });
               });
             });

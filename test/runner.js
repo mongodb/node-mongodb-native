@@ -287,7 +287,7 @@ if(argv.t == 'functional') {
         host: 'localhost'
       , port: 31000
       , setName: 'rs'
-      // , fork:null
+      , fork:null
       , skipStart: startupOptions.skipStartup
       , skipTermination: startupOptions.skipShutdown
       , topology: function(self, _mongo) {
