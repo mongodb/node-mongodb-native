@@ -1,3 +1,8 @@
+1.2.11
+-----------------
+- NODE-535 If connectWithNoPrimary is true then primary-only connection is not allowed.
+- NODE-534 Passive secondaries are not allowed for secondaryOnlyConnectionAllowed.
+
 1.2.10 08-14-2015
 -----------------
 - Added missing Mongos.prototype.parserType function.
