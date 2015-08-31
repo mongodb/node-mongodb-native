@@ -96,10 +96,10 @@ exports['Should correctly log cursor'] = {
       var logged = false;
 
       // Set the current logger
-      Logger.setCurrentLogger(function() {
+      Logger.setCurrentLogger(function(msg, context) {
         test.ok(msg != null);
         test.equal('debug', context.type);
-        test.equal('Db', context.className);
+        test.equal('Cursor', context.className);
         logged = true;        
       });
 
