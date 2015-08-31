@@ -587,7 +587,7 @@ exports['Example of command using ReplSet instance'] = {
       // Execute the command
       _server.command("system.$cmd", {ismaster: true}, function(err, result) {
         test.equal(null, err)
-        _server.destroy();
+        server.destroy();
         test.done();
       });
     });

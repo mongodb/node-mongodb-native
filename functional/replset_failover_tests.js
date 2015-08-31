@@ -4,7 +4,7 @@ var f = require('util').format
   , Long = require('bson').Long;
 
 var restartAndDone = function(configuration, test) {
-  configuration.manager.restart({kill:false}, function() {
+  configuration.manager.restart({kill:true}, function() {
     test.done();
   });
 }
@@ -37,6 +37,7 @@ exports['Should correctly remove and re-add secondary and detect removal and re-
     // The state
     var state = 0;
     var leftServer = null;
+    var done = null;
 
     // Add event listeners
     server.on('fullsetup', function(_server) {
@@ -44,9 +45,15 @@ exports['Should correctly remove and re-add secondary and detect removal and re-
       _server.on('joined', function(t, s) {
         
         if(t == 'secondary' && leftServer && s.name == leftServer.host) {          
-          _server.destroy();
-          // test.done();
-          restartAndDone(configuration, test);
+          server.destroy();
+
+          if(!done) {
+            done = true;
+
+            setTimeout(function() {
+              restartAndDone(configuration, test);
+            }, 10000)
+          }
         }
       });
 
@@ -60,7 +67,7 @@ exports['Should correctly remove and re-add secondary and detect removal and re-
         leftServer = serverDetails;
 
         setTimeout(function() {
-          configuration.manager.add(serverDetails, function(err, result) {});          
+          configuration.manager.add(serverDetails, function(err, result) {});
         }, 10000)
       });      
     });
