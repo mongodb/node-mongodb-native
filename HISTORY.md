@@ -1,6 +1,7 @@
 2.0.43
 -----------------
-* Propegate timeout event correctly to db instances
+* Propagate timeout event correctly to db instances.
+* Application Monitoring API (APM) implemented.
 
 2.0.42 08-18-2015
 -----------------
