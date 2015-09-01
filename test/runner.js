@@ -262,6 +262,7 @@ var testFiles =[
   , '/test/functional/crud_api_tests.js'
   , '/test/functional/reconnect_tests.js'
   , '/test/functional/find_and_modify_tests.js'
+  , '/test/functional/document_validation_tests.js'
 
   // Logging tests
   , '/test/functional/logger_tests.js'

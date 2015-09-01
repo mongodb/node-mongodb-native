@@ -715,7 +715,7 @@ exports.shouldCorrectlyFindAndModifyDocument = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
-      db.createCollection('test_find_and_modify_a_document', function(err, collection) {
+      db.createCollection('test_find_and_modify_a_document_1', function(err, collection) {
         // Test return new document on change
         collection.insert({'a':1, 'b':2}, configuration.writeConcernMax(), function(err, doc) {
           // Let's modify the document in place
@@ -779,7 +779,7 @@ exports.shouldCorrectlyFindAndModifyDocumentAndReturnSelectedFieldsOnly = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
-      db.createCollection('test_find_and_modify_a_document', function(err, collection) {
+      db.createCollection('test_find_and_modify_a_document_2', function(err, collection) {
         // Test return new document on change
         collection.insert({'a':1, 'b':2}, configuration.writeConcernMax(), function(err, doc) {
           // Let's modify the document in place
@@ -2313,12 +2313,12 @@ exports['should correctly execute a findAndModifyWithAWriteConcern'] = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
-      db.createCollection('test_find_and_modify_a_document', function(err, collection) {
+      db.createCollection('test_find_and_modify_a_document_3', function(err, collection) {
         // Test return new document on change
         collection.insert({'a':1, 'b':2}, configuration.writeConcernMax(), function(err, doc) {
           // Let's modify the document in place
           collection.findAndModify({'a':1}
-            , [['a', 1]], {'$set':{'b':3}}, {'new':true, j:1}, function(err, updated_doc) {
+            , [['a', 1]], {'$set':{'b':3}}, {'new':true}, function(err, updated_doc) {
               test.equal(1, updated_doc.value.a);
               test.equal(3, updated_doc.value.b);
 
