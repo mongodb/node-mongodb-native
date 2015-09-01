@@ -295,6 +295,9 @@ var testFiles =[
 
   // APM tests
   , '/test/functional/apm_tests.js'
+
+  // GridFS
+  , '/test/functional/gridfs_stream_tests.js'
 ]
 
 // Check if we support es6 generators
