@@ -40,6 +40,11 @@ var executeWrite = function(topology, type, opsField, ns, ops, options, callback
   writeCommand.ordered = ordered;
   writeCommand.writeConcern = writeConcern;
 
+  // Do we have bypassDocumentValidation set, then enable it on the write command
+  if(typeof options.bypassDocumentValidation == 'boolean') {
+    writeCommand.bypassDocumentValidation = options.bypassDocumentValidation;
+  }
+
   // Options object
   var opts = {};
   if(type == 'insert') opts.checkKeys = true;
