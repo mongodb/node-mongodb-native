@@ -57,7 +57,6 @@ exports['Should Correctly Authenticate using kerberos with MongoClient and authe
 
     // Let's write the actual connection code
     MongoClient.connect(format("mongodb://%s@%s/kerberos?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:true&maxPoolSize=1", urlEncodedPrincipal, server), function(err, db) {
-      console.dir(err)
       test.equal(null, err);
       test.ok(db != null);
 
