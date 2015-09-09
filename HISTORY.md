@@ -1,3 +1,7 @@
+1.2.12 09-08-2015
+-----------------
+- NODE-541 Added initial support for readConcern.
+
 1.2.11 08-31-2015
 -----------------
 - NODE-535 If connectWithNoPrimary is true then primary-only connection is not allowed.
