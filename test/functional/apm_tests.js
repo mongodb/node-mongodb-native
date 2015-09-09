@@ -4,7 +4,7 @@ var f = require('util').format,
   fs = require('fs');
 
 exports['Correctly receive the APM events for an insert'] = {
-  metadata: { requires: { topology: ['single'] } },
+  metadata: { requires: { topology: ['single', 'replicaset'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -46,7 +46,7 @@ exports['Correctly receive the APM events for an insert'] = {
 }
 
 exports['Correctly receive the APM events for an insert using custom operationId and time generator'] = {
-  metadata: { requires: { topology: ['single'] } },
+  metadata: { requires: { topology: ['single', 'replicaset'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -123,7 +123,6 @@ var validateExpecations = function(test, expectation, results) {
 
     // Get the result
     var result = results.successes.shift();
-
     // Validate the test
     test.equal(commandName, result.commandName);
     // test.deepEqual(reply[0], result.reply.result);
@@ -299,7 +298,7 @@ var executeSuite = function(assert, client, listener, scenarios, callback) {
 }
 
 exports['Correctly run all JSON APM Tests'] = {
-  metadata: { requires: { topology: ['single'] } },
+  metadata: { requires: { topology: ['single', 'replicaset'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -331,7 +330,7 @@ exports['Correctly run all JSON APM Tests'] = {
 }
 
 exports['Correctly receive the APM events for a find with getmore and killcursor'] = {
-  metadata: { requires: { topology: ['single'] } },
+  metadata: { requires: { topology: ['single', 'replicaset'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -411,7 +410,7 @@ exports['Correctly receive the APM events for a find with getmore and killcursor
 }
 
 exports['Correctly receive the APM failure event for find'] = {
-  metadata: { requires: { topology: ['single'], mongodb: ">=2.6.0" } },
+  metadata: { requires: { topology: ['single', 'replicaset'], mongodb: ">=2.6.0" } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -481,7 +480,7 @@ var cleanup = function(overrides) {
 }
 
 exports['Correctly receive the APM events for a bulk operation'] = {
-  metadata: { requires: { topology: ['single'] } },
+  metadata: { requires: { topology: ['single', 'replicaset'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -518,14 +517,15 @@ exports['Correctly receive the APM events for a bulk operation'] = {
         db.close();
         test.done();
       }).catch(function(err) {
-        console.dir(err)
+        console.log(err.stack)
+        test.done();
       });
     });
   }
 }
 
 exports['Correctly receive the APM explain command'] = {
-  metadata: { requires: { topology: ['single'] } },
+  metadata: { requires: { topology: ['single', 'replicaset'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -590,7 +590,7 @@ exports['Correctly receive the APM explain command'] = {
 }
 
 exports['Correctly filter out sensitive commands'] = {
-  metadata: { requires: { topology: ['single'] } },
+  metadata: { requires: { topology: ['single', 'replicaset'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {

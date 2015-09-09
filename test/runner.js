@@ -272,6 +272,7 @@ var testFiles =[
   , '/test/functional/replset_read_preference_tests.js'
   , '/test/functional/replset_failover_tests.js'
   , '/test/functional/replset_connection_tests.js'
+  , '/test/functional/readconcern_tests.js'
 
   // Sharding tests
   , '/test/functional/sharding_failover_tests.js'
