@@ -3,7 +3,8 @@
 * Propagate timeout event correctly to db instances.
 * Application Monitoring API (APM) implemented.
 * NOT providing replSet name in MongoClient connection URI will force single server connection. Fixes issue where it was impossible to directly connect to a replicaset member server.
-* Updated mongodb-core to 1.2.11.
+* Updated mongodb-core to 1.2.12.
+* NODE-541 Initial Support "read committed" isolation level where "committed" means confimed by the voting majority of a replica set.
 
 2.0.42 08-18-2015
 -----------------
