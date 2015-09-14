@@ -1,3 +1,7 @@
+2.0.44 
+-----------------
+* Bug fixes for APM upconverting of legacy INSERT/UPDATE/REMOVE wire protocol messages.
+
 2.0.43 09-14-2015
 -----------------
 * Propagate timeout event correctly to db instances.

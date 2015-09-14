@@ -34,6 +34,8 @@ exports['Correctly receive the APM events for an insert'] = {
       db.collection('apm_test').insertOne({a:1}).then(function(r) {
         test.equal(1, r.insertedCount);
         test.equal(1, started.length);
+        test.equal('insert', started[0].commandName);
+        test.equal('apm_test', started[0].command.insert);
         test.equal(1, succeeded.length);
         test.ok(callbackTriggered);
         listener.uninstrument();
@@ -88,6 +90,8 @@ exports['Correctly receive the APM events for an insert using custom operationId
       db.collection('apm_test_1').insertOne({a:1}).then(function(r) {
         test.equal(1, started.length);
         test.equal(1, succeeded.length);
+        test.equal('insert', started[0].commandName);
+        test.equal('apm_test_1', started[0].command.insert);
         test.equal(10000, started[0].operationId);
         test.equal(0, succeeded[0].duration);
         test.ok(callbackTriggered);
@@ -630,6 +634,123 @@ exports['Correctly filter out sensitive commands'] = {
 
         // Remove instrumentation
         listener.uninstrument();
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
+
+exports['Correctly receive the APM events for an updateOne'] = {
+  metadata: { requires: { topology: ['single', 'replicaset'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var started = [];
+    var succeeded = [];
+    var failed = [];
+    var callbackTriggered = false;
+
+    var listener = require('../..').instrument(function(err, instrumentations) {});
+    listener.on('started', function(event) {
+      if(event.commandName == 'update')
+        started.push(event);
+    });
+
+    listener.on('succeeded', function(event) {
+      if(event.commandName == 'update')
+        succeeded.push(event);
+    });
+
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      db.collection('apm_test_u_1').updateOne({a:1}, {$set:{b:1}}, {upsert:true}).then(function(r) {
+        test.equal(1, started.length);
+        test.equal('update', started[0].commandName);
+        test.equal('apm_test_u_1', started[0].command.update);
+        test.equal(1, succeeded.length);
+        listener.uninstrument();
+
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
+
+exports['Correctly receive the APM events for an updateMany'] = {
+  metadata: { requires: { topology: ['single', 'replicaset'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var started = [];
+    var succeeded = [];
+    var failed = [];
+    var callbackTriggered = false;
+
+    var listener = require('../..').instrument(function(err, instrumentations) {});
+    listener.on('started', function(event) {
+      if(event.commandName == 'update')
+        started.push(event);
+    });
+
+    listener.on('succeeded', function(event) {
+      if(event.commandName == 'update')
+        succeeded.push(event);
+    });
+
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      db.collection('apm_test_u_2').updateMany({a:1}, {$set:{b:1}}, {upsert:true}).then(function(r) {
+        test.equal(1, started.length);
+        test.equal('update', started[0].commandName);
+        test.equal('apm_test_u_2', started[0].command.update);
+        test.equal(1, succeeded.length);
+        listener.uninstrument();
+
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
+
+exports['Correctly receive the APM events for deleteOne'] = {
+  metadata: { requires: { topology: ['single', 'replicaset'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var started = [];
+    var succeeded = [];
+    var failed = [];
+    var callbackTriggered = false;
+
+    var listener = require('../..').instrument(function(err, instrumentations) {});
+    listener.on('started', function(event) {
+      if(event.commandName == 'delete')
+        started.push(event);
+    });
+
+    listener.on('succeeded', function(event) {
+      if(event.commandName == 'delete')
+        succeeded.push(event);
+    });
+
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      db.collection('apm_test_u_3').deleteOne({a:1}).then(function(r) {
+        test.equal(1, started.length);
+        test.equal('delete', started[0].commandName);
+        test.equal('apm_test_u_3', started[0].command.delete);
+        test.equal(1, succeeded.length);
+        listener.uninstrument();
+
         db.close();
         test.done();
       });
