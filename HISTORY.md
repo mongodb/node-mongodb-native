@@ -1,4 +1,4 @@
-2.0.43
+2.0.43 09-14-2015
 -----------------
 * Propagate timeout event correctly to db instances.
 * Application Monitoring API (APM) implemented.
