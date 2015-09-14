@@ -2080,8 +2080,116 @@ exports['should return error on ordered insert with multiple unique key constrai
   }
 }
 
+exports['Correctly allow forceServerObjectId for insertOne'] = {
+  metadata: { requires: { topology: ['single'] } },
 
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var started = [];
+    var succeeded = [];
+    var failed = [];
+    var callbackTriggered = false;
 
+    var listener = require('../..').instrument(function(err, instrumentations) {});
+    listener.on('started', function(event) {
+      if(event.commandName == 'insert')
+        started.push(event);
+    });
+
+    listener.on('succeeded', function(event) {
+      if(event.commandName == 'insert')
+        succeeded.push(event);
+    });
+
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      db.collection('apm_test').insertOne({a:1}, {forceServerObjectId:true}).then(function(r) {
+        test.equal(null, err);
+        test.equal(undefined, started[0].command.documents[0]._id);
+        listener.uninstrument();
+
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
+
+exports['Correctly allow forceServerObjectId for insertMany'] = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var started = [];
+    var succeeded = [];
+    var failed = [];
+    var callbackTriggered = false;
+
+    var listener = require('../..').instrument(function(err, instrumentations) {});
+    listener.on('started', function(event) {
+      if(event.commandName == 'insert')
+        started.push(event);
+    });
+
+    listener.on('succeeded', function(event) {
+      if(event.commandName == 'insert')
+        succeeded.push(event);
+    });
+
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      db.collection('apm_test').insertMany([{a:1}], {forceServerObjectId:true}).then(function(r) {
+        test.equal(null, err);
+        test.equal(undefined, started[0].command.documents[0]._id);
+
+        listener.uninstrument();
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
+
+exports['Correctly allow forceServerObjectId for insertMany'] = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var started = [];
+    var succeeded = [];
+    var failed = [];
+    var callbackTriggered = false;
+
+    var listener = require('../..').instrument(function(err, instrumentations) {});
+    listener.on('started', function(event) {
+      if(event.commandName == 'insert')
+        started.push(event);
+    });
+
+    listener.on('succeeded', function(event) {
+      if(event.commandName == 'insert')
+        succeeded.push(event);
+    });
+
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      db.collection('apm_test').insertMany([{a:1}], {forceServerObjectId:true}).then(function(r) {
+        test.equal(null, err);
+        test.equal(undefined, started[0].command.documents[0]._id);
+
+        listener.uninstrument();
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
 
 
 
