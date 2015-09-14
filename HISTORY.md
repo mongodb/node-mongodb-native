@@ -5,7 +5,9 @@
 * NOT providing replSet name in MongoClient connection URI will force single server connection. Fixes issue where it was impossible to directly connect to a replicaset member server.
 * Updated mongodb-core to 1.2.12.
 * NODE-541 Initial Support "read committed" isolation level where "committed" means confimed by the voting majority of a replica set.
-* GridStore doesn't share readPreference setting from connection string.
+* GridStore doesn't share readPreference setting from connection string. (Issue #1295, https://github.com/zhangyaoxing)
+* fixed forceServerObjectId calls (Issue #1292, https://github.com/d-mon-)
+* Pass promise library through to DB function (Issue #1294, https://github.com/RovingCodeMonkey)
 
 2.0.42 08-18-2015
 -----------------
