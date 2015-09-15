@@ -5,17 +5,13 @@
     <link>/node-mongodb-native/core/tutorials/</link>
     <description>Recent content in Tutorials on MongoDB Core 1.0.0</description>
     <generator>Hugo -- gohugo.io</generator>
-    
-    
-    
-    
-    <lastBuildDate>Mon, 01 Jul 2013 00:00:00 UT</lastBuildDate>
+    <lastBuildDate>Mon, 01 Jul 2013 00:00:00 +0000</lastBuildDate>
     <atom:link href="/node-mongodb-native/core/tutorials/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Connecting To MongoDB</title>
       <link>/node-mongodb-native/core/tutorials/connecting/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 +0000</pubDate>
       
       <guid>/node-mongodb-native/core/tutorials/connecting/</guid>
       <description>
@@ -189,7 +185,7 @@ server.connect();
     <item>
       <title>CRUD Operations</title>
       <link>/node-mongodb-native/core/tutorials/crud_operations/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 +0000</pubDate>
       
       <guid>/node-mongodb-native/core/tutorials/crud_operations/</guid>
       <description>
@@ -437,7 +433,7 @@ server.connect();
     <item>
       <title>Logging</title>
       <link>/node-mongodb-native/core/tutorials/logging/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 +0000</pubDate>
       
       <guid>/node-mongodb-native/core/tutorials/logging/</guid>
       <description>
@@ -586,7 +582,7 @@ server.connect();
     <item>
       <title>Cursor</title>
       <link>/node-mongodb-native/core/tutorials/cursor/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 +0000</pubDate>
       
       <guid>/node-mongodb-native/core/tutorials/cursor/</guid>
       <description>

@@ -618,6 +618,8 @@
             
                 <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
             
+                <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
+            
                 <li data-name="Cursor#nextObject"><a href="Cursor.html#nextObject">nextObject</a></li>
             
                 <li data-name="Cursor#pause"><a href="Cursor.html#pause">pause</a></li>
@@ -1729,6 +1731,7 @@ var EventEmitter = require('events').EventEmitter
   , CoreReadPreference = require('mongodb-core').ReadPreference
   , MongoError = require('mongodb-core').MongoError
   , ObjectID = require('mongodb-core').ObjectID
+  , Define = require('./metadata')
   , Logger = require('mongodb-core').Logger
   , Collection = require('./collection')
   , crypto = require('crypto');
@@ -1774,6 +1777,8 @@ var debugFields = ['authSource', 'w', 'wtimeout', 'j', 'native_parser', 'forceSe
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  * @param {object} [options.pkFactory=null] A primary key factory object for generation of custom _id keys.
  * @param {object} [options.promiseLibrary=null] A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
+ * @param {object} [options.readConcern=null] Specify a read concern for the collection. (only MongoDB 3.2 or higher supported)
+ * @param {object} [options.readConcern.level='local'] Specify a read concern level for the collection operations, one of [local|majority]. (only MongoDB 3.2 or higher supported)
  * @property {(Server|ReplSet|Mongos)} serverConfig Get the current db topology.
  * @property {number} bufferMaxEntries Current bufferMaxEntries value for the database
  * @property {string} databaseName The name of the database this instance represents.
@@ -1840,6 +1845,8 @@ var Db = function(databaseName, topology, options) {
     , promiseLibrary: promiseLibrary
     // No listener
     , noListener: typeof options.noListener == 'boolean' ? options.noListener : false
+    // ReadConcern
+    , readConcern: options.readConcern
   }
 
   // Ensure we have a valid db name
@@ -1900,10 +1907,10 @@ var Db = function(databaseName, topology, options) {
   if(this.s.noListener) return;
 
   // Add listeners
-  topology.once('error', createListener(self, 'error', self));
-  topology.once('timeout', createListener(self, 'timeout', self));
+  topology.on('error', createListener(self, 'error', self));
+  topology.on('timeout', createListener(self, 'timeout', self));
   topology.on('close', createListener(self, 'close', self));
-  topology.once('parseError', createListener(self, 'parseError', self));
+  topology.on('parseError', createListener(self, 'parseError', self));
   topology.once('open', createListener(self, 'open', self));
   topology.once('fullsetup', createListener(self, 'fullsetup', self));
   topology.once('all', createListener(self, 'all', self));
@@ -1911,6 +1918,8 @@ var Db = function(databaseName, topology, options) {
 }
 
 inherits(Db, EventEmitter);
+
+var define = Db.define = new Define('Db', Db, false);
 
 /**
  * The callback format for the Db.open method
@@ -1953,6 +1962,8 @@ Db.prototype.open = function(callback) {
     })
   });
 }
+
+define.classMethod('open', {callback: true, promise:true});
 
 /**
  * The callback format for results
@@ -2015,6 +2026,8 @@ Db.prototype.command = function(command, options, callback) {
   });
 }
 
+define.classMethod('command', {callback: true, promise:true});
+
 /**
  * The callback format for results
  * @callback Db~noResultCallback
@@ -2063,6 +2076,8 @@ Db.prototype.close = function(force, callback) {
   });
 }
 
+define.classMethod('close', {callback: true, promise:true});
+
 /**
  * Return the Admin db instance
  * @method
@@ -2071,6 +2086,8 @@ Db.prototype.close = function(force, callback) {
 Db.prototype.admin = function() {
   return new Admin(this, this.s.topology, this.s.promiseLibrary);
 };
+
+define.classMethod('admin', {callback: false, promise:false, returns: [Admin]});
 
 /**
  * The callback format for the collection method, must be used if strict is specified
@@ -2094,6 +2111,8 @@ Db.prototype.admin = function() {
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
  * @param {boolean} [options.strict=false] Returns an error if the collection does not exist
+ * @param {object} [options.readConcern=null] Specify a read concern for the collection. (only MongoDB 3.2 or higher supported)
+ * @param {object} [options.readConcern.level='local'] Specify a read concern level for the collection operations, one of [local|majority]. (only MongoDB 3.2 or higher supported)
  * @param {Db~collectionResultCallback} callback The collection result callback
  * @return {Collection} return the new Collection instance if not in strict mode
  */
@@ -2104,6 +2123,9 @@ Db.prototype.collection = function(name, options, callback) {
   options = shallowClone(options);
   // Set the promise library
   options.promiseLibrary = this.s.promiseLibrary;
+
+  // If we have not set a collection level readConcern set the db level one
+  options.readConcern = options.readConcern || this.s.readConcern;
 
   // Execute
   if(options == null || !options.strict) {
@@ -2134,6 +2156,8 @@ Db.prototype.collection = function(name, options, callback) {
     }
   });
 }
+
+define.classMethod('collection', {callback: true, promise:false, returns: [Collection]});
 
 var createCollection = function(self, name, options, callback) {
   // Get the write concern options
@@ -2211,6 +2235,8 @@ Db.prototype.createCollection = function(name, options, callback) {
   });
 }
 
+define.classMethod('createCollection', {callback: true, promise:true});
+
 /**
  * Get all the db statistics.
  *
@@ -2230,6 +2256,8 @@ Db.prototype.stats = function(options, callback) {
   // Execute the command
   return this.command(commandObject, options, callback);
 }
+
+define.classMethod('stats', {callback: true, promise:true});
 
 // Transformation methods for cursor results
 var listCollectionsTranforms = function(databaseName) {
@@ -2311,6 +2339,8 @@ Db.prototype.listCollections = function(filter, options) {
   return cursor;
 };
 
+define.classMethod('listCollections', {callback: false, promise:false, returns: [CommandCursor]});
+
 var evaluate = function(self, code, parameters, options, callback) {
   var finalCode = code;
   var finalParameters = [];
@@ -2352,8 +2382,8 @@ var evaluate = function(self, code, parameters, options, callback) {
  * @param {object} [options=null] Optional settings.
  * @param {boolean} [options.nolock=false] Tell MongoDB not to block on the evaulation of the javascript.
  * @param {Db~resultCallback} [callback] The results callback
+ * @deprecated Eval is deprecated on MongoDB 3.2 and forward
  * @return {Promise} returns Promise if no callback passed
- * @deprecated MongoDB 3.2 and higher no longer support eval.
  */
 Db.prototype.eval = function(code, parameters, options, callback) {
   var self = this;
@@ -2373,6 +2403,8 @@ Db.prototype.eval = function(code, parameters, options, callback) {
     });
   });
 };
+
+define.classMethod('eval', {callback: true, promise:true});
 
 /**
  * Rename a collection.
@@ -2406,6 +2438,8 @@ Db.prototype.renameCollection = function(fromCollection, toCollection, options, 
   });
 };
 
+define.classMethod('renameCollection', {callback: true, promise:true});
+
 /**
  * Drop a collection from the database, removing it permanently. New accesses will create a new collection.
  *
@@ -2438,6 +2472,8 @@ Db.prototype.dropCollection = function(name, callback) {
   });
 };
 
+define.classMethod('dropCollection', {callback: true, promise:true});
+
 /**
  * Drop a database.
  *
@@ -2468,13 +2504,14 @@ Db.prototype.dropDatabase = function(callback) {
   });
 }
 
+define.classMethod('dropDatabase', {callback: true, promise:true});
+
 /**
  * The callback format for the collections method.
  * @callback Db~collectionsResultCallback
  * @param {MongoError} error An error instance representing the error during the execution.
  * @param {Collection[]} collections An array of all the collections objects for the db instance.
  */
-
 var collections = function(self, callback) {
   // Let's get the collection names
   self.listCollections().toArray(function(err, documents) {
@@ -2512,6 +2549,8 @@ Db.prototype.collections = function(callback) {
   });
 };
 
+define.classMethod('collections', {callback: true, promise:true});
+
 /**
  * Runs a command on the database as admin.
  * @method
@@ -2546,31 +2585,7 @@ Db.prototype.executeDbAdminCommand = function(selector, options, callback) {
   });
 };
 
-var createIndex = function(self, name, fieldOrSpec, options, callback) {
-  // Get the write concern options
-  var finalOptions = writeConcern({}, self, options);
-  // Ensure we have a callback
-  if(finalOptions.writeConcern &amp;&amp; typeof callback != 'function') {
-    throw MongoError.create({message: "Cannot use a writeConcern without a provided callback", driver:true});
-  }
-
-  // Attempt to run using createIndexes command
-  createIndexUsingCreateIndexes(self, name, fieldOrSpec, options, function(err, result) {
-    if(err == null) return handleCallback(callback, err, result);
-    // Create command
-    var doc = createCreateIndexCommand(self, name, fieldOrSpec, options);
-    // Set no key checking
-    finalOptions.checkKeys = false;
-    // Insert document
-    self.s.topology.insert(f("%s.%s", self.s.databaseName, Db.SYSTEM_INDEX_COLLECTION), doc, finalOptions, function(err, result) {
-      if(callback == null) return;
-      if(err) return handleCallback(callback, err);
-      if(result == null) return handleCallback(callback, null, null);
-      if(result.result.writeErrors) return handleCallback(callback, MongoError.create(result.result.writeErrors[0]), null);
-      handleCallback(callback, null, doc.name);
-    });
-  });
-}
+define.classMethod('executeDbAdminCommand', {callback: true, promise:true});
 
 /**
  * Creates an index on the db and collection collection.
@@ -2617,26 +2632,33 @@ Db.prototype.createIndex = function(name, fieldOrSpec, options, callback) {
   });
 };
 
-var ensureIndex = function(self, name, fieldOrSpec, options, callback) {
+var createIndex = function(self, name, fieldOrSpec, options, callback) {
   // Get the write concern options
   var finalOptions = writeConcern({}, self, options);
-  // Create command
-  var selector = createCreateIndexCommand(self, name, fieldOrSpec, options);
-  var index_name = selector.name;
+  // Ensure we have a callback
+  if(finalOptions.writeConcern &amp;&amp; typeof callback != 'function') {
+    throw MongoError.create({message: "Cannot use a writeConcern without a provided callback", driver:true});
+  }
 
-  // Default command options
-  var commandOptions = {};
-  // Check if the index allready exists
-  self.indexInformation(name, finalOptions, function(err, indexInformation) {
-    if(err != null &amp;&amp; err.code != 26) return handleCallback(callback, err, null);
-    // If the index does not exist, create it
-    if(indexInformation == null || !indexInformation[index_name])  {
-      self.createIndex(name, fieldOrSpec, options, callback);
-    } else {
-      if(typeof callback === 'function') return handleCallback(callback, null, index_name);
-    }
+  // Attempt to run using createIndexes command
+  createIndexUsingCreateIndexes(self, name, fieldOrSpec, options, function(err, result) {
+    if(err == null) return handleCallback(callback, err, result);
+    // Create command
+    var doc = createCreateIndexCommand(self, name, fieldOrSpec, options);
+    // Set no key checking
+    finalOptions.checkKeys = false;
+    // Insert document
+    self.s.topology.insert(f("%s.%s", self.s.databaseName, Db.SYSTEM_INDEX_COLLECTION), doc, finalOptions, function(err, result) {
+      if(callback == null) return;
+      if(err) return handleCallback(callback, err);
+      if(result == null) return handleCallback(callback, null, null);
+      if(result.result.writeErrors) return handleCallback(callback, MongoError.create(result.result.writeErrors[0]), null);
+      handleCallback(callback, null, doc.name);
+    });
   });
 }
+
+define.classMethod('createIndex', {callback: true, promise:true});
 
 /**
  * Ensures that an index exists, if it does not it creates it
@@ -2676,6 +2698,29 @@ Db.prototype.ensureIndex = function(name, fieldOrSpec, options, callback) {
     });
   });
 };
+
+var ensureIndex = function(self, name, fieldOrSpec, options, callback) {
+  // Get the write concern options
+  var finalOptions = writeConcern({}, self, options);
+  // Create command
+  var selector = createCreateIndexCommand(self, name, fieldOrSpec, options);
+  var index_name = selector.name;
+
+  // Default command options
+  var commandOptions = {};
+  // Check if the index allready exists
+  self.indexInformation(name, finalOptions, function(err, indexInformation) {
+    if(err != null &amp;&amp; err.code != 26) return handleCallback(callback, err, null);
+    // If the index does not exist, create it
+    if(indexInformation == null || !indexInformation[index_name])  {
+      self.createIndex(name, fieldOrSpec, options, callback);
+    } else {
+      if(typeof callback === 'function') return handleCallback(callback, null, index_name);
+    }
+  });
+}
+
+define.classMethod('ensureIndex', {callback: true, promise:true});
 
 Db.prototype.addChild = function(db) {
   if(this.s.parentDb) return this.s.parentDb.addChild(db);
@@ -2728,6 +2773,8 @@ Db.prototype.db = function(dbName, options) {
   // Return the database
   return db;
 };
+
+define.classMethod('db', {callback: false, promise:false, returns: [Db]});
 
 var _executeAuthCreateUserCommand = function(self, username, password, options, callback) {
   // Special case where there is no password ($external users)
@@ -2886,6 +2933,8 @@ Db.prototype.addUser = function(username, password, options, callback) {
   });
 };
 
+define.classMethod('addUser', {callback: true, promise:true});
+
 var _executeAuthRemoveUserCommand = function(self, username, options, callback) {
   if(typeof options == 'function') callback = options, options = {};
   // Get the error options
@@ -2943,6 +2992,8 @@ var removeUser = function(self, username, options, callback) {
     handleCallback(callback, err, result);
   });
 }
+
+define.classMethod('removeUser', {callback: true, promise:true});
 
 /**
  * Remove a user from a database
@@ -3078,6 +3129,8 @@ Db.prototype.authenticate = function(username, password, options, callback) {
   });
 };
 
+define.classMethod('authenticate', {callback: true, promise:true});
+
 /**
  * Logout user from server, fire off on all connections and remove all auth info
  * @method
@@ -3116,6 +3169,8 @@ Db.prototype.logout = function(options, callback) {
     });
   });
 }
+
+define.classMethod('logout', {callback: true, promise:true});
 
 // Figure out the read preference
 var getReadPreference = function(options, db) {
@@ -3180,6 +3235,8 @@ var indexInformation = function(self, name, options, callback) {
     handleCallback(callback, null, processResults(indexes));
   });
 }
+
+define.classMethod('indexInformation', {callback: true, promise:true});
 
 var createCreateIndexCommand = function(db, name, fieldOrSpec, options) {
   var indexParameters = parseIndexOptions(fieldOrSpec);
@@ -3401,7 +3458,7 @@ module.exports = Db;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Sat Aug 29 2015 06:48:19 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue Sep 15 2015 12:27:49 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

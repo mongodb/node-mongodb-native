@@ -618,6 +618,8 @@
             
                 <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
             
+                <li data-name="Cursor#next"><a href="Cursor.html#next">next</a></li>
+            
                 <li data-name="Cursor#nextObject"><a href="Cursor.html#nextObject">nextObject</a></li>
             
                 <li data-name="Cursor#pause"><a href="Cursor.html#pause">pause</a></li>
@@ -1751,10 +1753,12 @@ var Chunk = require('./chunk'),
   ObjectID = require('mongodb-core').BSON.ObjectID,
   ReadPreference = require('../read_preference'),
   Buffer = require('buffer').Buffer,
+  Collection = require('../collection'),
   fs = require('fs'),
   timers = require('timers'),
   f = require('util').format,
   util = require('util'),
+  Define = require('../metadata'),
   MongoError = require('mongodb-core').MongoError,
   inherits = util.inherits,
   Duplex = require('stream').Duplex || require('readable-stream').Duplex;
@@ -1838,7 +1842,7 @@ var GridStore = function GridStore(db, id, filename, mode, options) {
   // Set the root if overridden
   this.root = this.options['root'] == null ? GridStore.DEFAULT_ROOT_COLLECTION : this.options['root'];
   this.position = 0;
-  this.readPreference = this.options.readPreference || ReadPreference.PRIMARY;
+  this.readPreference = this.options.readPreference || db.options.readPreference || ReadPreference.PRIMARY;
   this.writeConcern = _getWriteConcern(db, this.options);
   // Set default chunk size
   this.internalChunkSize = this.options['chunkSize'] == null ? Chunk.DEFAULT_CHUNK_SIZE : this.options['chunkSize'];
@@ -1880,6 +1884,8 @@ var GridStore = function GridStore(db, id, filename, mode, options) {
      }
   });
 }
+
+var define = GridStore.define = new Define('Gridstore', GridStore, true);
 
 /**
  * The callback format for the Gridstore.open method
@@ -1945,6 +1951,9 @@ var open = function(self, callback) {
   }
 }
 
+// Push the definition for open
+define.classMethod('open', {callback: true, promise:true});
+
 /**
  * Verify if the file is at EOF.
  *
@@ -1954,6 +1963,8 @@ var open = function(self, callback) {
 GridStore.prototype.eof = function() {
   return this.position == this.length ? true : false;
 }
+
+define.classMethod('eof', {callback: false, promise:false, returns: [Boolean]});
 
 /**
  * The callback result format.
@@ -1997,6 +2008,8 @@ var eof = function(self, callback) {
   }
 }
 
+define.classMethod('getc', {callback: true, promise:true});
+
 /**
  * Writes a string to the file with a newline character appended at the end if
  * the given string does not have one.
@@ -2020,6 +2033,8 @@ GridStore.prototype.puts = function(string, callback) {
   });
 }
 
+define.classMethod('puts', {callback: true, promise:true});
+
 /**
  * Return a modified Readable stream including a possible transform method.
  *
@@ -2029,6 +2044,8 @@ GridStore.prototype.puts = function(string, callback) {
 GridStore.prototype.stream = function() {
   return new GridStoreStream(this);
 }
+
+define.classMethod('stream', {callback: false, promise:false, returns: [GridStoreStream]});
 
 /**
  * Writes some data. This method will work properly only if initialized with mode "w" or "w+".
@@ -2052,6 +2069,8 @@ GridStore.prototype.write = function write(data, close, callback) {
   });
 }
 
+define.classMethod('write', {callback: true, promise:true});
+
 /**
  * Handles the destroy part of a stream
  *
@@ -2068,6 +2087,8 @@ GridStore.prototype.destroy = function destroy() {
     this.emit('close');
   }
 }
+
+define.classMethod('destroy', {callback: false, promise:false});
 
 /**
  * Stores a file from the file system to the GridFS database.
@@ -2148,6 +2169,8 @@ var writeFile = function(self, file, callback) {
     });
   });
 }
+
+define.classMethod('writeFile', {callback: true, promise:true});
 
 /**
  * Saves this file to the database. This will overwrite the old entry if it
@@ -2240,6 +2263,8 @@ var close = function(self, callback) {
   }
 }
 
+define.classMethod('close', {callback: true, promise:true});
+
 /**
  * The collection callback format.
  * @callback GridStore~collectionCallback
@@ -2259,6 +2284,8 @@ GridStore.prototype.chunkCollection = function(callback) {
     return this.db.collection((this.root + ".chunks"), callback);
   return this.db.collection((this.root + ".chunks"));
 };
+
+define.classMethod('chunkCollection', {callback: true, promise:false, returns: [Collection]});
 
 /**
  * Deletes all the chunks of this file in the database.
@@ -2300,6 +2327,8 @@ var unlink = function(self, callback) {
   });
 }
 
+define.classMethod('unlink', {callback: true, promise:true});
+
 /**
  * Retrieves the file collection associated with this object.
  *
@@ -2312,6 +2341,8 @@ GridStore.prototype.collection = function(callback) {
     this.db.collection(this.root + ".files", callback);
   return this.db.collection(this.root + ".files");
 };
+
+define.classMethod('collection', {callback: true, promise:false, returns: [Collection]});
 
 /**
  * The readlines callback format.
@@ -2362,6 +2393,8 @@ var readlines = function(self, separator, callback) {
   });
 }
 
+define.classMethod('readlines', {callback: true, promise:true});
+
 /**
  * Deletes all the chunks of this file in the database if mode was set to "w" or
  * "w+" and resets the read/write head to the initial position.
@@ -2407,6 +2440,8 @@ var rewind = function(self, callback) {
     callback(null, self);
   }
 }
+
+define.classMethod('rewind', {callback: true, promise:true});
 
 /**
  * The read callback format.
@@ -2492,6 +2527,8 @@ var read = function(self, length, buffer, callback) {
   });
 }
 
+define.classMethod('read', {callback: true, promise:true});
+
 /**
  * The tell callback format.
  * @callback GridStore~tellCallback
@@ -2517,6 +2554,8 @@ GridStore.prototype.tell = function(callback) {
     resolve(self.position);
   });
 };
+
+define.classMethod('tell', {callback: true, promise:true});
 
 /**
  * The tell callback format.
@@ -2592,6 +2631,8 @@ var seek = function(self, position, seekLocation, callback) {
 
   seekChunk();
 }
+
+define.classMethod('seek', {callback: true, promise:true});
 
 /**
  * @ignore
@@ -2981,6 +3022,8 @@ var exists = function(db, fileIdObject, rootCollection, options, callback) {
   });
 }
 
+define.staticMethod('exist', {callback: true, promise:true});
+
 /**
  * Gets the list of files stored in the GridFS.
  *
@@ -3053,6 +3096,8 @@ var list = function(db, rootCollection, options, callback) {
   });
 }
 
+define.staticMethod('list', {callback: true, promise:true});
+
 /**
  * Reads the contents of a file.
  *
@@ -3124,6 +3169,8 @@ var readStatic = function(db, name, length, offset, options, callback) {
   });
 }
 
+define.staticMethod('read', {callback: true, promise:true});
+
 /**
  * Read the entire file as a list of strings splitting by the provided separator.
  *
@@ -3173,6 +3220,8 @@ var readlinesStatic = function(db, name, separator, options, callback) {
     gridStore.readlines(finalSeperator, callback);
   });
 }
+
+define.staticMethod('readlines', {callback: true, promise:true});
 
 /**
  * Deletes the chunks and metadata information of a file from GridFS.
@@ -3245,6 +3294,8 @@ var unlinkStatic = function(self, db, names, options, callback) {
     });
   }
 }
+
+define.staticMethod('unlink', {callback: true, promise:true});
 
 /**
  *  @ignore
@@ -3610,7 +3661,7 @@ module.exports = GridStore;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Sat Aug 29 2015 06:48:19 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Tue Sep 15 2015 12:27:49 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

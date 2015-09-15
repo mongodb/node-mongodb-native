@@ -70,7 +70,7 @@ Web frameworks using MongoDB
          * - **Clone Url**
            - https://github.com/pvorb/node-bread.git
          * - **Forks**
-           - 4
+           - 3
          * - **Watchers**
            - 8
 
@@ -119,7 +119,7 @@ Object Document Modeling Libraries
          * - **Clone Url**
            - https://github.com/alexeypetrushin/mongo-model.git
          * - **Forks**
-           - 5
+           - 3
          * - **Watchers**
            - 61
 
@@ -191,9 +191,9 @@ Content Management Systems
          * - **Clone Url**
            - https://github.com/cliftonc/calipso.git
          * - **Forks**
-           - 286
+           - 288
          * - **Watchers**
-           - 1597
+           - 1599
 
 Grid FS libraries or tools
 --------------------------
@@ -348,9 +348,9 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          :header-rows: 0
 
          * - **Activity Level**
-           - .. image:: ../static/nonactive.png
+           - .. image:: ../static/active.png
          * - **Last push**
-           - 10:19:45 on 6/0/2015
+           - 20:12:18 on 11/8/2015
          * - **Homepage**
            - http://http://simonenko.su/projects/easymongo
          * - **Url**
@@ -386,7 +386,7 @@ REST api's around MongoDB or resource based libraries
          * - **Forks**
            - 122
          * - **Watchers**
-           - 347
+           - 348
 
 .. topic:: lazyBum
 
@@ -458,7 +458,7 @@ Test helpers and libraries
          * - **Forks**
            - 3
          * - **Watchers**
-           - 26
+           - 27
 
 .. topic:: node-database-cleaner
 
@@ -479,9 +479,9 @@ Test helpers and libraries
          * - **Clone Url**
            - https://github.com/emerleite/node-database-cleaner.git
          * - **Forks**
-           - 23
+           - 24
          * - **Watchers**
-           - 69
+           - 70
 
 Tools or applications to manage your MongoDB's
 ----------------------------------------------
@@ -557,7 +557,7 @@ Logging libraries or applications
          * - **Clone Url**
            - https://github.com/KABA-CCEAC/nodeEventStore.git
          * - **Forks**
-           - 2
+           - 1
          * - **Watchers**
            - 3
 
@@ -657,7 +657,7 @@ General frameworks over MongoDB
          * - **Forks**
            - 8
          * - **Watchers**
-           - 50
+           - 51
 
 Translation libraries or frameworks
 -----------------------------------
@@ -730,9 +730,9 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 415
+           - 413
          * - **Watchers**
-           - 3582
+           - 3592
 
 Libraries for the connect middleware
 ------------------------------------
@@ -779,9 +779,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 208
+           - 210
          * - **Watchers**
-           - 786
+           - 802
 
 Libraries or applications for continous integration
 ---------------------------------------------------
@@ -805,9 +805,9 @@ Libraries or applications for continous integration
          * - **Clone Url**
            - https://github.com/ryankee/concrete.git
          * - **Forks**
-           - 69
+           - 71
          * - **Watchers**
-           - 486
+           - 487
 
 Exampe applications
 -------------------

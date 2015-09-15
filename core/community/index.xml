@@ -5,17 +5,13 @@
     <link>/node-mongodb-native/core/community/</link>
     <description>Recent content in Communities on MongoDB Core 1.0.0</description>
     <generator>Hugo -- gohugo.io</generator>
-    
-    
-    
-    
-    <lastBuildDate>Mon, 01 Jul 2013 00:00:00 UT</lastBuildDate>
+    <lastBuildDate>Mon, 01 Jul 2013 00:00:00 +0000</lastBuildDate>
     <atom:link href="/node-mongodb-native/core/community/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Mailing List</title>
       <link>/node-mongodb-native/core/community/mailing-list/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 +0000</pubDate>
       
       <guid>/node-mongodb-native/core/community/mailing-list/</guid>
       <description>
@@ -43,7 +39,7 @@
     <item>
       <title>Contributing</title>
       <link>/node-mongodb-native/core/community/contributing/</link>
-      <pubDate>Mon, 01 Jul 2013 00:00:00 UT</pubDate>
+      <pubDate>Mon, 01 Jul 2013 00:00:00 +0000</pubDate>
       
       <guid>/node-mongodb-native/core/community/contributing/</guid>
       <description>
