@@ -1,0 +1,38 @@
+{{ if .IsPage }}
+
+{{ $menuPrev    := $.Scratch.Get "menu.Prev"}}
+{{ $menuNext    := $.Scratch.Get "menu.Next"}}
+
+<div id="btnv">
+  {{ with $menuPrev }}
+  <div class="pull-left">
+  <a class="navigation prev" href="{{.Url}}">
+      <i class="fa fa-long-arrow-left"> </i> {{.Name}}
+  </a>
+  </div>
+  {{ end }}
+  {{ with $menuNext }}
+  <div class="pull-right">
+  <a class="navigation next" href="{{.Url}}">
+    {{.Name}} <i class="fa fa-long-arrow-right"> </i>
+  </a>
+  {{ end }}
+</div>
+</div>
+{{ end }}
+
+</div>
+{{ partial "rightColumn.html" . }}
+</div>
+</div>
+</div>
+</section>
+</section>
+<!--main content end-->
+</section>
+<!-- container section end -->
+<!-- javascripts -->
+{{ partial "assets/javascripts.html" . }}
+{{ partial "assets/analytics.html" . }}
+</body>
+</html>

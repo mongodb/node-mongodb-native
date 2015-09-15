@@ -1,0 +1,52 @@
+<!--sidebar start-->
+<aside id="sidebar" class="sidebar">
+    <div class="ssidebar nav-collapse">
+      <div class="ssidebarwrapper">
+        <h3>
+          <a class="index-link" href="{{ .Site.BaseURL}}/../">{{ .Site.Title }}</a>{{ $baseUrl := .Site.BaseURL}}
+          {{ with .Site.Data.mongodb.currentVersion }}<a class="version pull-right" href="{{$baseUrl}}">{{ . }}</a>{{ end }}
+        </h3>
+
+        <!-- sidebar menu start-->
+        <ul class="sidebar-menu">
+          {{ $menuNodeLevel := $.Scratch.Set "menu.NodeLevel" 1 }}
+          {{ $menu := .Site.Menus.main }}
+          {{ $.Scratch.Set "menu.Found" false }}
+          {{ $.Scratch.Set "menu.Item.L6" false }}
+          {{ $.Scratch.Set "menu.Item.L5" false }}
+          {{ $.Scratch.Set "menu.Item.L4" false }}
+          {{ $.Scratch.Set "menu.Item.L3" false }}
+          {{ $.Scratch.Set "menu.Item.L2" false }}
+          {{ $.Scratch.Set "menu.Item.L1" false }}
+          {{ $.Scratch.Set "menu.Item.L0" false }}
+          {{ $.Scratch.Set "menu.Prev" false }}
+          {{ $.Scratch.Set "menu.Next" false }}
+
+          {{ $currentNode := . }}
+          {{ range $menu.ByWeight }}
+            {{ $.Scratch.Set "menu.Item" . }}
+            {{ partial "menu/currentItem.html" $currentNode }}
+          {{end}}
+
+          {{if eq ($.Scratch.Get "menu.Found") false }}
+          {{ $.Scratch.Set "menu.Item.L6" false }}
+          {{ $.Scratch.Set "menu.Item.L5" false }}
+          {{ $.Scratch.Set "menu.Item.L4" false }}
+          {{ $.Scratch.Set "menu.Item.L3" false }}
+          {{ $.Scratch.Set "menu.Item.L2" false }}
+          {{ $.Scratch.Set "menu.Item.L1" false }}
+          {{ $.Scratch.Set "menu.Item.L0" false }}
+          {{end}}
+
+          {{ range $menu.ByWeight }}
+            {{ $.Scratch.Set "menu.Item" . }}
+            {{ partial "menu/item.html" $currentNode }}
+          {{end}}
+        </ul>
+        <!-- sidebar menu end-->
+    </div>
+  </div>
+  {{ partial "menu/footer.html" . }}
+</aside>
+<!--sidebar end-->
+{{ partial "menu/options.html" . }}

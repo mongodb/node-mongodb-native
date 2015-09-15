@@ -1,0 +1,14 @@
+name = "MongoDB"
+license = "Creative Commons Attribution NonCommercial ShareAlike 3.0 Unported"
+licenselink = "http://creativecommons.org/licenses/by-nc-sa/3.0/"
+description = "A standalone mongodb docs theme, for individual driver homepages"
+homepage = "http://mongodb.github.io/mongo-java-driver"
+
+[author]
+  name = "MongoDB Java driver authors"
+  homepage = "http://mongodb.github.io/mongo-java-driver"
+
+[original]
+  name = "MongoDB Docs"
+  homepage = "http://docs.mongodb.org"
+  repo = "https://github.com/mongodb/docs"

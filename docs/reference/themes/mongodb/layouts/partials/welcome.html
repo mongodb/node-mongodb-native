@@ -1,0 +1,32 @@
+<h2>Welcome to the hugo mongodb docs theme.</h2>
+
+<p>You have two choices when it comes to managing this front page.</p>
+
+<h3>1. Markdown:</h3>
+
+<p>First create your own index page in content: <code>hugo new ./content/index.md</code></p>
+
+<p>Set a type in the <a href="http://gohugo.io/content/front-matter/">&ldquo;front matter&rdquo;</a> to <code>index</code> eg:</p>
+
+<pre><code>+++
+date = &quot;2015-03-17T15:36:56Z&quot;
+draft = false
+title = &quot;index&quot;
+type = &quot;index&quot;
++++
+
+## Add your markdown content to your frontpage.
+
+Hello welcome to my driver docs
+</code></pre>
+
+<h3>2. HTML</h3>
+
+<p>Create your own <code>layouts\index.html</code> eg:</p>
+
+<pre><code>&#123;&#123; partial &quot;header.html&quot; . &#125;&#125;
+
+&lt;h2&gt;Add your HTML content to your frontpage.&lt;/h2&gt;
+
+&#123;&#123; partial &quot;footer.html&quot; . &#125;&#125;
+</code></pre>

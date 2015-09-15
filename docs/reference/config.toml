@@ -1,0 +1,24 @@
+baseurl = "/mongo-nodejs-driver/2.0"
+languageCode = "en-us"
+title = "MongoDB Node.js Driver"
+theme = "mongodb"
+canonifyurls = false
+
+[blackfriday]
+  plainIdAnchors = true
+
+
+# Update versions in mongodb.toml as well
+[[menu.main]]
+    name = "API Documentation"
+    pre = "<i class='fa fa-file-text-o'></i>"
+    weight = 90
+    identifier = "apiDocs"
+    url = "http://api.mongodb.org/java/3.1"
+
+[[menu.main]]
+    name = "Source Code"
+    pre = "<i class='fa fa-github'></i>"
+    weight = 90
+    identifier = "githubLink"
+    url = "https://github.com/mongodb/mongo-java-driver/tree/master"

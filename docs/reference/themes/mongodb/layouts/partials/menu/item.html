@@ -1,0 +1,54 @@
+{{ $currentNode := . }}
+{{ $menuItem := $.Scratch.Get "menu.Item"}}
+{{ $menuNodeLevel := $.Scratch.Get "menu.NodeLevel"}}
+
+{{ $menuItemL6  := $.Scratch.Get "menu.Item.L6"}}
+{{ $menuItemL5  := $.Scratch.Get "menu.Item.L5"}}
+{{ $menuItemL4  := $.Scratch.Get "menu.Item.L4"}}
+{{ $menuItemL3  := $.Scratch.Get "menu.Item.L3"}}
+{{ $menuItemL2  := $.Scratch.Get "menu.Item.L2"}}
+{{ $menuItemL1  := $.Scratch.Get "menu.Item.L1"}}
+{{ $menuItemL0  := $.Scratch.Get "menu.Item.L0"}}
+
+{{$.Scratch.Set "menu.isCurrent" false}}
+{{if eq $menuItem $menuItemL0 }}
+  {{$.Scratch.Set "menu.isCurrent" true}}
+{{else if eq $menuItem $menuItemL1 }}
+  {{$.Scratch.Set "menu.isCurrent" true}}
+{{else if eq $menuItem $menuItemL2 }}
+  {{$.Scratch.Set "menu.isCurrent" true}}
+{{else if eq $menuItem $menuItemL3 }}
+  {{$.Scratch.Set "menu.isCurrent" true}}
+{{else if eq $menuItem $menuItemL4 }}
+  {{$.Scratch.Set "menu.isCurrent" true}}
+{{else if eq $menuItem $menuItemL5 }}
+  {{$.Scratch.Set "menu.isCurrent" true}}
+{{else if eq $menuItem $menuItemL6 }}
+  {{$.Scratch.Set "menu.isCurrent" true}}
+{{end}}
+{{ $isCurrent := $.Scratch.Get "menu.isCurrent"}}
+
+{{ if $menuItem.HasChildren }}
+<li class="toctree-l{{$menuNodeLevel}} {{if $isCurrent }} current{{end}}">
+  <a href="{{$menuItem.Url}}" class="">
+      {{ $menuItem.Pre }}
+      <span>{{ $menuItem.Name }}</span>
+      {{if lt $menuNodeLevel 2}}<span class="menu-arrow fa {{if $isCurrent }}fa-angle-down{{else}}fa-angle-right{{end}}"></span>{{end}}
+  </a>
+    <ul {{if $isCurrent }} class="current"{{end}}>
+        {{ range $menuItem.Children }}
+        {{ $menuItem := $.Scratch.Set "menu.Item" . }}
+        {{ $menuNodeLevel := $.Scratch.Add "menu.NodeLevel" 1}}
+        {{ partial "menu/item.html" $currentNode }}
+        {{ $menuNodeLevel := $.Scratch.Add "menu.NodeLevel" -1}}
+        {{ end }}
+    </ul>
+  </li>
+{{else}}
+    <li class="toctree-l{{$menuNodeLevel}}">
+    <a href="{{$menuItem.Url}}">
+        {{ $menuItem.Pre }}
+        {{ $menuItem.Name }}
+    </a>
+  </li>
+{{end}}

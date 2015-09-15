@@ -1,0 +1,1 @@
+https://github.com/mongodb/{{ .Page.Site.Data.mongodb.githubRepo }}/blob/{{ .Page.Site.Data.mongodb.githubBranch }}/{{ if eq (in (.Get 0) "src/") false }}src/{{ end }}{{ .Get 0 }}

@@ -1,0 +1,75 @@
+{{ $currentNode := . }}
+{{ $menuItemL6  := $.Scratch.Get "menu.Item.L6"}}
+{{ $menuItemL5  := $.Scratch.Get "menu.Item.L5"}}
+{{ $menuItemL4  := $.Scratch.Get "menu.Item.L4"}}
+{{ $menuItemL3  := $.Scratch.Get "menu.Item.L3"}}
+{{ $menuItemL2  := $.Scratch.Get "menu.Item.L2"}}
+{{ $menuItemL1  := $.Scratch.Get "menu.Item.L1"}}
+{{ $menuItem    := $.Scratch.Get "menu.Item"}}
+
+{{ if $currentNode.IsMenuCurrent "main" $menuItem }}
+  {{ $.Scratch.Set "menu.Found" true }}
+  {{ $.Scratch.Set "menu.Item.L6" false }}
+  {{ $.Scratch.Set "menu.Item.L5" false }}
+  {{ $.Scratch.Set "menu.Item.L4" false }}
+  {{ $.Scratch.Set "menu.Item.L3" false }}
+  {{ $.Scratch.Set "menu.Item.L2" false }}
+  {{ $.Scratch.Set "menu.Item.L1" false }}
+  {{ $.Scratch.Set "menu.Item.L0" $menuItem }}
+
+  {{ if $menuItemL1 }}
+    {{ if eq $menuItemL1.Identifier $menuItem.Parent }}
+    {{ $.Scratch.Set "menu.Item.L1" $menuItemL1 }}
+    {{ if $menuItemL2 }}
+      {{ if eq $menuItemL2.Identifier $menuItemL1.Parent }}
+      {{ $.Scratch.Set "menu.Item.L2" $menuItemL2 }}
+      {{ if $menuItemL3 }}
+        {{ if eq $menuItemL3.Identifier $menuItemL2.Parent }}
+        {{ $.Scratch.Set "menu.Item.L3" $menuItemL3 }}
+        {{ if $menuItemL4 }}
+          {{ if eq $menuItemL4.Identifier $menuItemL3.Parent }}
+          {{ $.Scratch.Set "menu.Item.L4" $menuItemL4 }}
+          {{ if $menuItemL5 }}
+            {{ if eq $menuItemL5.Identifier $menuItemL4.Parent }}
+            {{ $.Scratch.Set "menu.Item.L5" $menuItemL5 }}
+            {{ if $menuItemL6 }}
+              {{ if eq $menuItemL6.Identifier $menuItemL5.Parent }}
+              {{ $.Scratch.Set "menu.Item.L6" $menuItemL6 }}
+            {{end}}
+            {{end}}
+          {{end}}
+          {{end}}
+        {{end}}
+        {{end}}
+      {{end}}
+      {{end}}
+    {{end}}
+    {{end}}
+  {{end}}
+  {{end}}
+{{ else }}
+  {{ if $menuItem.HasChildren }}
+    {{$found := $.Scratch.Get "menu.Found" }}
+    {{ range $menuItem.Children }}
+      {{ $.Scratch.Set "menu.Item" . }}
+      {{if eq ($.Scratch.Get "menu.Found") false }}
+        {{ $.Scratch.Set "menu.Item.L6" $menuItemL5}}
+        {{ $.Scratch.Set "menu.Item.L5" $menuItemL4}}
+        {{ $.Scratch.Set "menu.Item.L4" $menuItemL3}}
+        {{ $.Scratch.Set "menu.Item.L3" $menuItemL2}}
+        {{ $.Scratch.Set "menu.Item.L2" $menuItemL1}}
+        {{ $.Scratch.Set "menu.Item.L1" $menuItem}}
+        {{ $.Scratch.Set "menu.Item" . }}
+        {{ partial "menu/currentItem.html" $currentNode }}
+        {{if eq ($.Scratch.Get "menu.Found") false }}
+          {{ $.Scratch.Set "menu.Prev" . }}
+        {{ end }}
+      {{ else if and (eq $found false) (eq ($.Scratch.Get "menu.Next") false) }}
+        {{ $.Scratch.Set "menu.Next" . }}
+      {{ end }}
+    {{ end }}
+    {{if eq ($.Scratch.Get "menu.Found") false }}
+      {{ $.Scratch.Set "menu.Prev" false }}
+    {{ end }}
+  {{ end }}
+{{ end }}
