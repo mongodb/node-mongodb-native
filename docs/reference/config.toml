@@ -14,7 +14,7 @@ canonifyurls = false
     pre = "<i class='fa fa-file-text-o'></i>"
     weight = 90
     identifier = "apiDocs"
-    url = "/mongo-nodejs-driver/2.0/api"
+    url = "/api"
 
 [[menu.main]]
     name = "Source Code"
