@@ -12,11 +12,11 @@ title = "MongoDB Driver"
 Welcome to the MongoDB Driver documentation hub.
 
 
-### What's New in 3.1
+### What's New in 2.0
 
 The [What's New]({{< relref "whats-new/index.md" >}}) guide explains the major new features of the driver. 
 
-If you are upgrading from the 2.x series of the driver, consult the [Upgrading]({{< relref "whats-new/upgrading.md" >}}) documentation for 
+If you are upgrading from the 1.x series of the driver, consult the [Upgrading]({{< relref "whats-new/upgrading.md" >}}) documentation for 
 information on breaking changes. 
 
 

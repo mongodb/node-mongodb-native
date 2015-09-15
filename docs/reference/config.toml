@@ -14,11 +14,11 @@ canonifyurls = false
     pre = "<i class='fa fa-file-text-o'></i>"
     weight = 90
     identifier = "apiDocs"
-    url = "http://api.mongodb.org/java/3.1"
+    url = "/mongo-nodejs-driver/2.0/api"
 
 [[menu.main]]
     name = "Source Code"
     pre = "<i class='fa fa-github'></i>"
     weight = 90
     identifier = "githubLink"
-    url = "https://github.com/mongodb/mongo-java-driver/tree/master"
+    url = "https://github.com/mongodb/node-mongodb-native"
