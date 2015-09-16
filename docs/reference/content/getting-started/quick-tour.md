@@ -2,8 +2,8 @@
 date = "2015-03-17T15:36:56Z"
 title = "Quick Tour"
 [menu.main]
-  parent = "Sync Getting Started"
-  identifier = "Sync Quick Tour"
+  parent = "Getting Started"
+  identifier = "Quick Tour"
   weight = 10
   pre = "<i class='fa'></i>"
 +++
@@ -266,4 +266,3 @@ MongoClient.connect(url, function(err, db) {
 ```
 
 This concludes the QuickStart of connecting and performing some Basic operations using the MongoDB Node.js driver. For more detailed information you can look at the tutorials covering more specific topics of interest.
-

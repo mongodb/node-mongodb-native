@@ -2,8 +2,8 @@
 date = "2015-03-19T12:53:30-04:00"
 title = "Connection Settings"
 [menu.main]
-  parent = "Sync Connecting"
-  identifier = "Sync Connection Settings"
+  parent = "Connecting"
+  identifier = "Connection Settings"
   weight = 10
   pre = "<i class='fa'></i>"
 +++

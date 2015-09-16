@@ -2,8 +2,8 @@
 date = "2015-03-18T21:14:20-04:00"
 title = "Logging"
 [menu.main]
-  parent = "Sync Management"
-  identifier = "Sync Logging"
+  parent = "Management"
+  identifier = "Logging"
   weight = 10
   pre = "<i class='fa'></i>"
 +++
