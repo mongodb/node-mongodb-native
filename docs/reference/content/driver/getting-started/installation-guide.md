@@ -58,7 +58,7 @@ If correctly compile and runs the tests you are golden. We can now try to instal
 
 ```
 cd yourproject
-npm install mongod
+npm install mongodb --save
 ```
 
 If it still fails the next step is to examine the npm log. Rerun the command but in this case in verbose mode.
