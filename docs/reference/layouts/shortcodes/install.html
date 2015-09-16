@@ -1,0 +1,84 @@
+{{ $artifactId := .Get "artifactId"}}{{ $version := .Get "version"}}{{ $dependencies := .Get "dependencies"}}{{ $snapshot := in $version "SNAPSHOT" }}
+{{ if $snapshot }}
+{{$ossUrl := "https://oss.sonatype.org/content/repositories/snapshots"}}
+<section class="maven">
+<pre><code class="ini">
+&lt;dependencies&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.mongodb&lt;/groupId&gt;
+        &lt;artifactId&gt;{{$artifactId}}&lt;/artifactId&gt;
+        &lt;version&gt;{{$version}}&lt;/version&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;
+&lt;repositories&gt;
+    &lt;repository&gt;
+        &lt;id&gt;sonatype-snapshots&lt;/id&gt;
+        &lt;name&gt;Sontatype Snapshots&lt;/name&gt;
+        &lt;url&gt;https://oss.sonatype.org/content/repositories/snapshots&lt;/url&gt;
+        &lt;snapshots&gt;
+            &lt;enabled&gt;true&lt;/enabled&gt;
+        &lt;/snapshots&gt;
+    &lt;/repository&gt;
+&lt;/repositories&gt;
+</code></pre>
+</section>
+<section class="gradle hidden">
+<pre><code>
+  dependencies {
+      compile 'org.mongodb:{{$artifactId}}:{{$version}}'
+  }
+  repositories {
+    maven {
+      url 'https://oss.sonatype.org/content/repositories/snapshots'
+    }
+  }
+
+</code></pre>
+</section>
+<section class="downloadInfo small">
+    <p>You can also download the jars
+        <a href="{{$ossUrl}}/org/mongodb/{{$artifactId}}/{{$version}}" target="_blank">directly</a>
+        from sonatype.</a></p>
+    {{ with $dependencies}}
+    <p>
+        <strong>Note:</strong> <code>{{$artifactId}}</code> requires the following dependencies:
+        <a href="{{$ossUrl}}/org/mongodb/bson/{{$version}}" target="_blank"><code>bson</code></a> and
+        <a href="{{$ossUrl}}/org/mongodb/mongodb-driver-core/{{$version}}" target="_blank"><code>mongodb-driver-core</code></a>
+    </p>
+    {{end}}
+</section>
+{{ else }}
+{{$ossUrl := "https://oss.sonatype.org/content/repositories/releases"}}
+<section class="maven">
+<pre><code class="ini">
+&lt;dependencies&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.mongodb&lt;/groupId&gt;
+        &lt;artifactId&gt;{{$artifactId}}&lt;/artifactId&gt;
+        &lt;version&gt;{{$version}}&lt;/version&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;
+
+</code></pre>
+</section>
+<section class="gradle hidden">
+<pre><code>
+  dependencies {
+      compile 'org.mongodb:{{$artifactId}}:{{$version}}'
+  }
+
+</code></pre>
+</section>
+<section class="downloadInfo small">
+    <p>You can also download the jars
+        <a href="{{$ossUrl}}/org/mongodb/{{$artifactId}}/{{$version}}" target="_blank">directly</a>
+        from sonatype.</a></p>
+    {{ with $dependencies}}
+    <p>
+        <strong>Note:</strong> <code>{{$artifactId}}</code> requires the following dependencies:
+        <a href="{{$ossUrl}}/org/mongodb/bson/{{$version}}" target="_blank"><code>bson</code></a> and
+        <a href="{{$ossUrl}}/org/mongodb/mongodb-driver-core/{{$version}}" target="_blank"><code>mongodb-driver-core</code></a>
+    </p>
+    {{end}}
+</section>
+{{ end }}

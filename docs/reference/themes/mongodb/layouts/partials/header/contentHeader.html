@@ -1,0 +1,25 @@
+{{ if .IsPage }}
+{{ $File := .File }}  {{with $File.LogicalName }} {{ $srcref := add (add "docs/reference/content/" $File.Dir) $File.LogicalName }}
+<a class="edit-link" href="https://github.com/mongodb/{{ $.Site.Data.mongodb.githubRepo }}/blob/{{ $.Site.Data.mongodb.githubBranch }}/{{ $srcref }}" target="_blank" title="Edit {{ $File.Dir }}{{ $File.LogicalName }} on GitHub"><i class="fa fa-pencil-square-o"></i></a>
+{{end}}
+{{end}}
+{{ $menuItemL6  := $.Scratch.Get "menu.Item.L6"}}
+{{ $menuItemL5  := $.Scratch.Get "menu.Item.L5"}}
+{{ $menuItemL4  := $.Scratch.Get "menu.Item.L4"}}
+{{ $menuItemL3  := $.Scratch.Get "menu.Item.L3"}}
+{{ $menuItemL2  := $.Scratch.Get "menu.Item.L2"}}
+{{ $menuItemL1  := $.Scratch.Get "menu.Item.L1"}}
+{{ $menuItemL0  := $.Scratch.Get "menu.Item.L0"}}
+{{if $menuItemL0}}
+<div class="bc">
+<ul>
+  {{with $menuItemL6}}<li><a href="{{.Url}}">{{.Name}}</a> <i class="fa fa-angle-right"></i></li>{{end}}
+  {{with $menuItemL5}}<li><a href="{{.Url}}">{{.Name}}</a> <i class="fa fa-angle-right"></i></li>{{end}}
+  {{with $menuItemL4}}<li><a href="{{.Url}}">{{.Name}}</a> <i class="fa fa-angle-right"></i></li>{{end}}
+  {{with $menuItemL3}}<li><a href="{{.Url}}">{{.Name}}</a> <i class="fa fa-angle-right"></i></li>{{end}}
+  {{with $menuItemL2}}<li><a href="{{.Url}}">{{.Name}}</a> <i class="fa fa-angle-right"></i></li>{{end}}
+  {{with $menuItemL1}}<li><a href="{{.Url}}">{{.Name}}</a> <i class="fa fa-angle-right"></i></li>{{end}}
+  <li>{{$menuItemL0.Name}}</li>
+</ul>
+</div>
+{{ end }}

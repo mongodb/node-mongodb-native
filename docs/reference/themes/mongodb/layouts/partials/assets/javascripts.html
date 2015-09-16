@@ -1,0 +1,15 @@
+<script type="text/javascript">
+  var DOCUMENTATION_OPTIONS = {
+   URL_ROOT:    {{.Site.BaseURL}},
+   VERSION:     {{.Site.Data.mongodb.currentVersion}},
+   COLLAPSE_INDEX: false,
+   FILE_SUFFIX: '.html',
+   HAS_SOURCE:  true
+  };
+</script>
+<script type="text/javascript" src="{{.Site.BaseURL}}/js/jquery.js"></script>
+<script type="text/javascript" src="{{.Site.BaseURL}}/lib/bootstrap.js"></script>
+<script type="text/javascript" src="{{.Site.BaseURL}}/js/navbar.js"></script>
+<script type="text/javascript" src="{{.Site.BaseURL}}/lib/highlight/highlight.pack.js"></script>
+<script type="text/javascript" src="{{.Site.BaseURL}}/js/scripts.js"></script>
+{{ partial "assets/javascriptExtras.html" . }}
