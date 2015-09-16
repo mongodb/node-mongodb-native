@@ -2,8 +2,8 @@
 date = "2015-03-19T12:53:26-04:00"
 title = "APM"
 [menu.main]
-  parent = "Sync Management"
- identifier = "Sync APM"
+  parent = "Management"
+ identifier = "APM"
   weight = 100
   pre = "<i class='fa'></i>"
 +++
@@ -24,13 +24,13 @@ var listener = require('mongodb').instrument({
     next: function() {
       return this.operationId++;
     }
-  }, 
-  
+  },
+
   timestampGenerator: {
     current: function() {
       return new Date().getTime();
     },
-    
+
     duration: function(start, end) {
       return end - start;
     }
@@ -274,7 +274,7 @@ var generator = {
   current: function() {
     return new Date().getTime();
   },
-  
+
   duration: function(start, end) {
     return end - start;
   }
@@ -416,12 +416,12 @@ Let's look at a very basic instrumentation example.
 var listener = require('../..').instrument(function(err, instrumentations) {
   instrumentations.forEach(function(obj) {
     var object = obj.obj;
-    
+
     // Iterate over all the methods that are just callback with no return
     obj.instrumentations.forEach(function(instr) {
       var options = instr.options;
 
-      if(options.callback 
+      if(options.callback
         && !options.returns && !options.static) {
 
         // Method name

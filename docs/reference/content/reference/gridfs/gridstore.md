@@ -2,8 +2,8 @@
 date = "2015-03-19T14:27:51-04:00"
 title = "GridStore"
 [menu.main]
-  parent = "Sync GridFS"
-  identifier = "Sync GridStore"
+  parent = "GridFS"
+  identifier = "GridStore"
   weight = 20
   pre = "<i class='fa'></i>"
 +++

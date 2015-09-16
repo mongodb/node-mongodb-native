@@ -2,8 +2,8 @@
 date = "2015-03-19T12:53:26-04:00"
 title = "SSL"
 [menu.main]
-  parent = "Sync Connecting"
-  identifier = "Sync SSL"
+  parent = "Connecting"
+  identifier = "SSL"
   weight = 10
   pre = "<i class='fa'></i>"
 +++

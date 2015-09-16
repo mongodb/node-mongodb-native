@@ -2,8 +2,8 @@
 date = "2015-08-05T12:00:00-00:00"
 title = "GridFS"
 [menu.main]
-  parent = "Sync Reference"
-  identifier = "Sync GridFS"
+  parent = "Reference"
+  identifier = "GridFS"
   weight = 80
   pre = "<i class='fa'></i>"
 +++
@@ -22,5 +22,5 @@ For more information about GridFS see the [MongoDB GridFS documentation](http://
 
 The Node.js Driver includes the legacy `GridStore` API.
 
-- [GridStore]({{<relref "driver/reference/gridfs/gridstore.md">}}): documentation on how to use the `GridStore` API.
+- [GridStore]({{<relref "reference/gridfs/gridstore.md">}}): documentation on how to use the `GridStore` API.
 
