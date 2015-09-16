@@ -435,3 +435,36 @@ exports['Should fail to do map reduce to out collection'] = {
     });
   }
 }
+
+exports['Should correctly execute ensureIndex with readPreference primaryPreferred'] = {
+  metadata: { requires: { topology: 'replicaset', mongodb: '>1.7.6' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var mongo = configuration.require
+      , MongoClient = mongo.MongoClient
+      , ReadPreference = mongo.ReadPreference;
+
+    // Create url
+    var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
+      , format("%s:%s", configuration.host, configuration.port)
+      , format("%s:%s", configuration.host, configuration.port + 1)
+      , "integration_test_"
+      , configuration.replicasetName
+      , "primaryPreferred");
+
+    var manager = configuration.manager;
+
+    // MongoClient.connect(url, function(err, db) {
+    MongoClient.connect('mongodb://localhost:31000,localhost:31001/integration_test_?replicaSet=rs&readPreference=primaryPreferred', function(err, db) {
+      test.equal(null, err);
+
+      var collection = db.collection('ensureIndexWithPrimaryPreferred');
+      collection.ensureIndex({a:1}, function(err, r) {
+        test.equal(null, err);        
+
+        db.close();
+      });
+    });
+  }
+}
