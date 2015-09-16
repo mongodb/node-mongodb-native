@@ -113,6 +113,8 @@
 &lt;li&gt;APM (Application Performance Monitoring) API.&lt;/li&gt;
 &lt;/ul&gt;
 
+&lt;p&gt;&lt;a href=&#34;https://github.com/mongodb/node-mongodb-native/blob/2.0/HISTORY.md&#34;&gt;Driver revision history&lt;/a&gt;.&lt;/p&gt;
+
 &lt;h2 id=&#34;upgrading&#34;&gt;Upgrading&lt;/h2&gt;
 
 &lt;p&gt;See the &lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/whats-new/upgrading/&#34;&gt;upgrading guide&lt;/a&gt; on how to upgrade to 2.0&lt;/p&gt;

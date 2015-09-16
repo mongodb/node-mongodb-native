@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Whats-News on MongoDB Node.js Core Driver</title>
+    <link>/node-mongodb-native/core/whats-new/</link>
+    <description>Recent content in Whats-News on MongoDB Node.js Core Driver</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Thu, 19 Mar 2015 12:53:35 -0400</lastBuildDate>
+    <atom:link href="/node-mongodb-native/core/whats-new/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>What&#39;s New</title>
+      <link>/node-mongodb-native/core/whats-new/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:35 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/core/whats-new/</guid>
+      <description>
+
+&lt;h1 id=&#34;what-s-new-in-1-2&#34;&gt;What&amp;rsquo;s New in 1.2&lt;/h1&gt;
+
+&lt;p&gt;Key features of the 1.2 driver include:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Implements SDAM specification.&lt;/li&gt;
+&lt;li&gt;Performance improvements.&lt;/li&gt;
+&lt;li&gt;New JS-BSON parser that supplants the C++ extension.&lt;/li&gt;
+&lt;li&gt;Brand new logging library exposed to drivers.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://github.com/christkv/mongodb-core/blob/master/HISTORY.md&#34;&gt;Driver revision history&lt;/a&gt;.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
