@@ -732,7 +732,7 @@ Libraries or Applications for analytics
          * - **Forks**
            - 413
          * - **Watchers**
-           - 3592
+           - 3593
 
 Libraries for the connect middleware
 ------------------------------------
@@ -805,7 +805,7 @@ Libraries or applications for continous integration
          * - **Clone Url**
            - https://github.com/ryankee/concrete.git
          * - **Forks**
-           - 71
+           - 70
          * - **Watchers**
            - 487
 

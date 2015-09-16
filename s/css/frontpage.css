@@ -1,0 +1,399 @@
+body {
+  font-family: "PT Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  color: #494747;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  background-color: #f3f4eb;
+  color: #4c3a2c;
+  padding-top: 50px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: "PT Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: normal;
+    color: #313030;
+}
+
+a {
+    color: #006cbc;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+dt {
+  margin-top: 10px;
+  font-size: 18px;
+}
+
+/* Header styles */
+
+#header-db {
+    position: fixed;
+    -webkit-transform: translateZ(0); /* hack around Chrome bug: http://stackoverflow.com/questions/11258877/fixed-element-disappears-in-chrome */
+    height: 50px;
+    top: 0;
+    left: 0;
+    width: 100%;
+    font-size: 31px;
+    background-color: #3b291f;
+    color: white;
+    margin: 0;
+    padding: 0;
+    z-index: 100;
+}
+
+#header-db .header-content {
+    width: 100%;
+    padding: 0 12px;
+
+    transition: width 0.4s cubic-bezier(.02,.01,.47,1);
+    -moz-transition: width 0.4s cubic-bezier(.02,.01,.47,1);
+    -webkit-transition: width 0.4s cubic-bezier(.02,.01,.47,1);
+}
+
+#header-db .nav-items {
+    display: inline-block;
+}
+
+#header-db .nav-items > a {
+    font-size: 14px;
+}
+
+#header-db a {
+    color: white;
+}
+
+#header-db .logo img {
+    height: 36px;
+    vertical-align: top;
+}
+#header-db .nav-items > a:not(:last-child) {
+    margin-right: 15px;
+}
+
+div.gsc-control-cse-en, div.gsc-control-cse { padding: 0 !important; }
+
+form.gsc-search-box {
+    background-color: rgba(255,255,255,0.3);
+    border-radius: 6px;
+    border: 1px solid #3b2920;
+}
+
+.gsc-search-box.gsc-search-box-tools .gsc-search-box .gsc-input {
+    padding: 0;
+}
+
+div.gsc-input-box,
+.gsc-search-box .gsc-input>input:hover, .gsc-input-box-hover,
+.gsc-search-box .gsc-input>input:focus, .gsc-input-box-focus {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+/* [name] selector is a hack to override google's stylsheet */
+.gsc-input input.gsc-input[name="search"] {
+    background-color: transparent !important;
+    color: white;
+    font-weight: 300;
+    font-size: 15px;
+    height: 1.3em !important;
+}
+
+.gsc-input input.gsc-input::-webkit-input-placeholder,
+.gsc-input input.gsc-input:-moz-input-placeholder,
+.gsc-input input.gsc-input::-moz-input-placeholder,
+.gsc-input input.gsc-input:-ms-input-placeholder {
+    color: #CCC;
+}
+
+/* Clear search button */
+.gsib_b {
+    display: none;
+}
+
+/* [title] selector is a hack to override google's stylesheet */
+input.gsc-search-button[title], input.gsc-search-button:hover[title], input.gsc-search-button:focus[title] {
+    border-color: transparent;
+    background-color: transparent;
+    padding: 0 8px;
+    box-sizing: content-box;
+    -moz-box-sizing: content-box;
+    -webkit-box-sizing: content-box;
+}
+
+#header-db .logo {
+    padding: 5px 0;
+}
+
+#header-db .search-db {
+    transition: width 0.3s linear;
+    -webkit-transition: width 0.3s linear;
+    -moz-transition: width 0.3s linear;
+    -o-transition: width 0.3s linear;
+    margin-left: 45px;
+    margin-top: 11px;
+    display: inline-block;
+}
+
+#header-db .search-db.narrow {
+    width: 98px;
+}
+
+#header-db .search-db.wide {
+    width: 226px;
+}
+
+/* Footer styles */
+.footer {
+    width:auto;
+    font-size:80%;
+    border:none;
+    padding: 20px 0;
+}
+
+.footer .copyright {
+    text-align: center;
+}
+
+.footer p {
+    margin: 1em 0;
+    padding: 0;
+    line-height:1.5;
+}
+
+.footer a {
+    color: #989898;
+    text-decoration: underline;
+}
+
+.footer h3 {
+    margin-top: 10px;
+    font-size: 16px;
+}
+
+.footer .box {
+    background-color: #f5f6f7;
+    min-height: 20px;
+    padding: 15px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.footer .box a {
+    color: #333;
+    text-decoration: none;
+}
+
+.footer .box a:hover {
+    text-decoration: underline;
+}
+
+.footer ul {
+    list-style-type: none;
+    padding-left: 20px;
+}
+
+.footer .section-0 {
+    padding-left: 100px;
+}
+
+.footer .section-1 {
+    padding-left: 46px;
+}
+
+.footer .section-2 {
+    padding-left: 64px;
+}
+
+.footer .section-3 {
+    padding-left: 49px;
+}
+
+
+/* Hero Styles */
+
+#hero {
+  background-color: #666;
+  color: #f3f4eb;
+  border-bottom: 1px solid #313030;
+  padding: 12px 0px;
+}
+
+#nodelogo {
+  background-image: url("../img/nodejs.png");
+  background-position: left top;
+  background-repeat: no-repeat;
+}
+
+#mongodbJVMlogo {
+  background-image: url("../img/mongoJVMlogo.png");
+  background-position: left top;
+  background-repeat: no-repeat;
+  width: 83px;
+  height: 150px;
+}
+
+#hero h2 {
+  border-top: 3px solid #6ca439;
+  color: #f3f4eb;
+  padding: 10px 0;
+  display: inline-block;
+}
+
+.btn-mongo, .btn-mongo:visited, .btn-mongo:active {
+  background-image: none;
+  border-radius: 0;
+  color: white;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 14px;
+  border: 2px solid #6ca439;
+  text-shadow: none;
+  text-transform: uppercase;
+}
+
+.btn-mongo:hover {
+  color: white;
+  border-color:#34302d;
+  box-shadow:none;
+  text-decoration:none;
+}
+
+.btn-dark {
+  border: 2px solid #3b291f;
+  background-color: #3b291f;
+  color: white;
+  border-radius: 0;
+}
+
+.btn-dark:hover {
+  color: white;
+  border: 2px solid #6ca439;
+  box-shadow:none;
+  border-radius: 0;
+}
+
+.btn-download, .btn-download:visited, .btn-download:active {
+  margin-top: -10px;
+  padding: 15px 10px;
+  text-shadow: none;
+  text-transform: uppercase;
+}
+
+
+/* Releases styles */
+#releases {
+  padding-bottom: 20px;
+}
+
+#releases h3 {
+  text-align: center;
+}
+
+#releases table {
+  border: 1px solid #3b291f;
+  border-collapse: initial;
+  margin-bottom: 0px;
+}
+
+#releases table thead {
+  font-size: 16px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+#releases table td a {
+  padding: 0px 10px;
+}
+
+/* Download widget */
+#downloadWidget {
+  border: 1px solid #3b291f;
+}
+
+#downloadWidget .downloadForm {
+  margin-top: 10px;
+}
+
+#downloadWidget .downloadLink {
+  padding-left: 0;
+  padding-right: 5px;
+}
+
+#downloadWidget .description {
+  border-top: 1px solid #3b291f;
+  padding: 10px;
+  background-color: #666;
+  color: #f3f4eb;
+  font-weight: 800;
+}
+
+#downloadWidget pre {
+  border-radius: 0;
+  margin: 10px;
+  padding: 0;
+}
+
+#downloadWidget pre code {
+  padding: 10px;
+  min-height: 65px;
+}
+
+#downloadWidget .clipboard {
+  position: relative;
+}
+
+#downloadWidget .clipboard button {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  border-radius: 0;
+  color: white;
+  font-size: 2em;
+}
+
+#downloadWidget .clipboard .zeroclipboard-is-hover {
+  color: white;
+  border: 2px solid #6ca439;
+}
+
+/* University Promo */
+#universityPromo h3 {
+  background-image: url("../img/mongodb-university-logo.png");
+  background-position: left top;
+  background-repeat: no-repeat;
+  height: 72px;
+}
+
+#universityPromo h3 span {
+  display: none;
+}
+
+#universityPromo h4 {
+  margin-top: 20px;
+}
+
+#universityPromo .hero-container .h4-wrapper {
+    width: 100%;
+    margin-top: -30px;
+    padding-bottom: 40px;
+}
+
+#universityPromo .hero-container .h4-wrapper h4 {
+  margin: 0 auto;
+  color: white;
+  font-weight: 500;
+  text-align: center;
+  background: #666;
+}
+
+code {
+  background-color: #ddd;
+  color: #494747;
+}
