@@ -527,26 +527,6 @@ MongoClient.connect(url, function(err, db) {
     </item>
     
     <item>
-      <title>Connecting</title>
-      <link>/node-mongodb-native/2.0/reference/connecting/</link>
-      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
-      
-      <guid>/node-mongodb-native/2.0/reference/connecting/</guid>
-      <description>
-
-&lt;h2 id=&#34;connecting&#34;&gt;Connecting&lt;/h2&gt;
-
-&lt;p&gt;The reference documentation for connecting to a MongoDB server deployment is divided into three sections:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/connection-settings/&#34;&gt;Connection Settings&lt;/a&gt;: documentation of the various ways to specify the properties of a connection&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/authenticating/&#34;&gt;Authenticating&lt;/a&gt;: detailed documentation of the various ways to specify authentication credentials&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/ssl/&#34;&gt;SSL&lt;/a&gt;: Detailed documentation of the various ways to specify the properties of an SSL connection&lt;/li&gt;
-&lt;/ul&gt;
-</description>
-    </item>
-    
-    <item>
       <title>Connection Settings</title>
       <link>/node-mongodb-native/2.0/reference/connecting/connection-settings/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
@@ -825,6 +805,26 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
 });
 
 &lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Connecting</title>
+      <link>/node-mongodb-native/2.0/reference/connecting/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/reference/connecting/</guid>
+      <description>
+
+&lt;h2 id=&#34;connecting&#34;&gt;Connecting&lt;/h2&gt;
+
+&lt;p&gt;The reference documentation for connecting to a MongoDB server deployment is divided into three sections:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/connection-settings/&#34;&gt;Connection Settings&lt;/a&gt;: documentation of the various ways to specify the properties of a connection&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/authenticating/&#34;&gt;Authenticating&lt;/a&gt;: detailed documentation of the various ways to specify authentication credentials&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/ssl/&#34;&gt;SSL&lt;/a&gt;: Detailed documentation of the various ways to specify the properties of an SSL connection&lt;/li&gt;
+&lt;/ul&gt;
 </description>
     </item>
     
@@ -2197,130 +2197,275 @@ $ git checkout -b myNewFeature
     </item>
     
     <item>
-      <title>Installation Guide</title>
-      <link>/node-mongodb-native/2.0/getting-started/installation-guide/</link>
+      <title>Quick Tour</title>
+      <link>/node-mongodb-native/2.0/getting-started/quick-tour/</link>
       <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
       
-      <guid>/node-mongodb-native/2.0/getting-started/installation-guide/</guid>
+      <guid>/node-mongodb-native/2.0/getting-started/quick-tour/</guid>
       <description>
 
-&lt;h1 id=&#34;installation&#34;&gt;Installation&lt;/h1&gt;
+&lt;h1 id=&#34;quickstart&#34;&gt;QuickStart&lt;/h1&gt;
 
-&lt;p&gt;The recommended way to get started using the Node.js 2.0 driver is by using the &lt;code&gt;NPM&lt;/code&gt; (Node Package Manager) to install the dependency in your project.&lt;/p&gt;
+&lt;p&gt;The quick start guide will show you how to set up a simple application using node.js and MongoDB. It scope is only how to set up the driver and perform the simple crud operations. For more inn depth coverage we encourage reading the tutorials.&lt;/p&gt;
 
-&lt;h2 id=&#34;mongodb-driver&#34;&gt;MongoDB Driver&lt;/h2&gt;
+&lt;h2 id=&#34;installing-mongodb-node-js-driver-using-npm&#34;&gt;Installing MongoDB Node.js driver using NPM&lt;/h2&gt;
 
-&lt;p&gt;Given that you have created your own project using &lt;code&gt;npm init&lt;/code&gt; we install the mongodb driver and it&amp;rsquo;s dependencies by executing the following &lt;code&gt;NPM&lt;/code&gt; command.&lt;/p&gt;
+&lt;p&gt;Installing the MongoDB Node.js driver using NPM is very easy. First you need to ensure you have Node.js and NPM correctly set up and in your path. Installing the driver is as easy as.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;npm install mongodb
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;create-the-package-json-file&#34;&gt;Create the package.json file&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s create a directory where our application will live. In our case we will put this under our projects directory.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;mkdir myproject
+cd myproject
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Enter the following command and answer the questions to create the initial structure for your new project&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm init
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next we install the driver dependency.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;npm install mongodb --save
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This will download the MongoDB driver and add a dependency entry in your &lt;code&gt;package.json&lt;/code&gt; file.&lt;/p&gt;
+&lt;p&gt;You should see &lt;strong&gt;NPM&lt;/strong&gt; download a lot of files. Once it&amp;rsquo;s done you&amp;rsquo;ll find all the downloaded packages under the &lt;strong&gt;node_modules&lt;/strong&gt; directory.&lt;/p&gt;
 
-&lt;h2 id=&#34;troubleshooting&#34;&gt;Troubleshooting&lt;/h2&gt;
+&lt;h2 id=&#34;booting-up-a-mongodb-server&#34;&gt;Booting up a MongoDB Server&lt;/h2&gt;
 
-&lt;p&gt;The MongoDB driver depends on several other packages. These are.&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s boot up a MongoDB server instance. Download the right MongoDB version from &lt;a href=&#34;http://www.mongodb.org&#34;&gt;MongoDB&lt;/a&gt;, open a new shell or command line and ensure the &lt;strong&gt;mongod&lt;/strong&gt; command is in the shell or command line path. Now let&amp;rsquo;s create a database directory (in our case under &lt;strong&gt;/data&lt;/strong&gt;).&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;mongod --dbpath=/data --port 27017
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You should see the &lt;strong&gt;mongod&lt;/strong&gt; process start up and print some status information.&lt;/p&gt;
+
+&lt;h2 id=&#34;connecting-to-mongodb&#34;&gt;Connecting to MongoDB&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s create a new &lt;strong&gt;app.js&lt;/strong&gt; file that we will use to show the basic CRUD operations using the MongoDB driver.&lt;/p&gt;
+
+&lt;p&gt;First let&amp;rsquo;s add code to connect to the server and the database &lt;strong&gt;myproject&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  db.close();
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Given that you booted up the &lt;strong&gt;mongod&lt;/strong&gt; process earlier the application should connect successfully and print &lt;strong&gt;Connected correctly to server&lt;/strong&gt; to the console.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s Add some code to show the different CRUD operations available.&lt;/p&gt;
+
+&lt;h2 id=&#34;inserting-a-document&#34;&gt;Inserting a Document&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s create a function that will insert some documents for us.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var insertDocuments = function(db, callback) {
+  // Get the documents collection
+  var collection = db.collection(&#39;documents&#39;);
+  // Insert some documents
+  collection.insertMany([
+    {a : 1}, {a : 2}, {a : 3}
+  ], function(err, result) {
+    assert.equal(err, null);
+    assert.equal(3, result.result.n);
+    assert.equal(3, result.ops.length);
+    console.log(&amp;quot;Inserted 3 documents into the document collection&amp;quot;);
+    callback(result);
+  });
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The insert command will return a results object that contains several fields that might be useful.&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;mongodb-core&lt;/li&gt;
-&lt;li&gt;bson&lt;/li&gt;
-&lt;li&gt;kerberos&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;result&lt;/strong&gt; Contains the result document from MongoDB&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;ops&lt;/strong&gt; Contains the documents inserted with added &lt;strong&gt;_id&lt;/strong&gt; fields&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;connection&lt;/strong&gt; Contains the connection used to perform the insert&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;The &lt;code&gt;kerberos&lt;/code&gt; package is a C++ extension that requires a build environment to be installed on your system. You must be able to build node.js itself to be able to compile and install the &lt;code&gt;kerberos&lt;/code&gt; module. Furthermore the &lt;code&gt;kerberos&lt;/code&gt; module requires the MIT Kerberos package to correctly compile on UNIX operating systems. Consult your UNIX operation system package manager what libraries to install.&lt;/p&gt;
+&lt;p&gt;Let&amp;rsquo;s add call the &lt;strong&gt;insertDocuments&lt;/strong&gt; command to the &lt;strong&gt;MongoClient.connect&lt;/strong&gt; method callback.&lt;/p&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition important&#34;&gt;
-&lt;h5 class=&#34;admonition-title&#34;&gt;important&lt;/h5&gt;
-&lt;p&gt;Windows already contains the SSPI API used for Kerberos authentication. However you will need to install a full compiler tool chain using visual studio C++ to correctly install the kerberos extension.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
 
-&lt;/div&gt;
-&lt;/p&gt;
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
 
-&lt;h3 id=&#34;diagnosing-on-unix&#34;&gt;Diagnosing on UNIX&lt;/h3&gt;
-
-&lt;p&gt;If you don’t have the build essentials it won’t build. In the case of linux you will need gcc and g++, node.js with all the headers and python. The easiest way to figure out what’s missing is by trying to build the js-bson project. You can do this by performing the following steps.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;git clone https://github.com/mongodb/js-bson.git
-cd js-bson
-npm install
-make test
+  insertDocuments(db, function() {
+    db.close();
+  });
+});
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;If all the steps complete you have the right toolchain installed. If you get node-gyp not found you need to install it globally by doing.&lt;/p&gt;
+&lt;p&gt;We can now run the update &lt;strong&gt;app.js&lt;/strong&gt; file.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;npm install -g node-gyp
+&lt;pre&gt;&lt;code&gt;node app.js
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;If correctly compile and runs the tests you are golden. We can now try to install the mongod driver by performing the following command.&lt;/p&gt;
+&lt;p&gt;You should see the following output after running the &lt;strong&gt;app.js&lt;/strong&gt; file.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;cd yourproject
-npm install mongodb --save
+&lt;pre&gt;&lt;code&gt;Connected correctly to server
+Inserted 3 documents into the document collection
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;If it still fails the next step is to examine the npm log. Rerun the command but in this case in verbose mode.&lt;/p&gt;
+&lt;h2 id=&#34;updating-a-document&#34;&gt;Updating a document&lt;/h2&gt;
 
-&lt;pre&gt;&lt;code&gt;npm --loglevel verbose install mongodb
+&lt;p&gt;Let&amp;rsquo;s look at how to do a simple document update by adding a new field &lt;strong&gt;b&lt;/strong&gt; to the document that has the field &lt;strong&gt;a&lt;/strong&gt; set to &lt;strong&gt;2&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var updateDocument = function(db, callback) {
+  // Get the documents collection
+  var collection = db.collection(&#39;documents&#39;);
+  // Update document where a is 2, set b equal to 1
+  collection.updateOne({ a : 2 }
+    , { $set: { b : 1 } }, function(err, result) {
+    assert.equal(err, null);
+    assert.equal(1, result.result.n);
+    console.log(&amp;quot;Updated the document with the field a equal to 2&amp;quot;);
+    callback(result);
+  });  
+}
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This will print out all the steps npm is performing while trying to install the module.&lt;/p&gt;
+&lt;p&gt;The method will update the first document where the field &lt;strong&gt;a&lt;/strong&gt; is equal to &lt;strong&gt;2&lt;/strong&gt; by adding a new field &lt;strong&gt;b&lt;/strong&gt; to the document set to &lt;strong&gt;1&lt;/strong&gt;. Let&amp;rsquo;s update the callback function from &lt;strong&gt;MongoClient.connect&lt;/strong&gt; to include the update method.&lt;/p&gt;
 
-&lt;h3 id=&#34;diagnosing-on-windows&#34;&gt;Diagnosing on Windows&lt;/h3&gt;
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
 
-&lt;p&gt;A known compiler tool chain known to work for compiling &lt;code&gt;kerberos&lt;/code&gt; on windows is the following.&lt;/p&gt;
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
 
-&lt;ul&gt;
-&lt;li&gt;Visual Studio c++ 2010 (do not use higher versions)&lt;/li&gt;
-&lt;li&gt;Windows 7 64bit SDK&lt;/li&gt;
-&lt;li&gt;Python 2.7 or higher&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Open visual studio command prompt. Ensure node.exe is in your path and install node-gyp.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install -g node-gyp
+  insertDocuments(db, function() {
+    updateDocument(db, function() {
+      db.close();
+    });
+  });
+});
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Next you will have to build the project manually to test it. Use any tool you use with git and grab the repo.&lt;/p&gt;
+&lt;h2 id=&#34;remove-a-document&#34;&gt;Remove a document&lt;/h2&gt;
 
-&lt;pre&gt;&lt;code&gt;git clone https://github.com/mongodb/js-bson.git
-cd js-bson
-npm install
-node-gyp rebuild
+&lt;p&gt;Next lets remove the document where the field &lt;strong&gt;a&lt;/strong&gt; equals to &lt;strong&gt;3&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var removeDocument = function(db, callback) {
+  // Get the documents collection
+  var collection = db.collection(&#39;documents&#39;);
+  // Insert some documents
+  collection.deleteOne({ a : 3 }, function(err, result) {
+    assert.equal(err, null);
+    assert.equal(1, result.result.n);
+    console.log(&amp;quot;Removed the document with the field a equal to 3&amp;quot;);
+    callback(result);
+  });    
+}
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This should rebuild the driver successfully if you have everything set up correctly.&lt;/p&gt;
+&lt;p&gt;This will remove the first document where the field &lt;strong&gt;a&lt;/strong&gt; equals to &lt;strong&gt;3&lt;/strong&gt;. Let&amp;rsquo;s add the method to the &lt;strong&gt;MongoClient.connect&lt;/strong&gt; callback function.&lt;/p&gt;
 
-&lt;h3 id=&#34;other-possible-issues&#34;&gt;Other possible issues&lt;/h3&gt;
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
 
-&lt;p&gt;Your python installation might be hosed making gyp break. I always recommend that you test your deployment environment first by trying to build node itself on the server in question as this should unearth any issues with broken packages (and there are a lot of broken packages out there).&lt;/p&gt;
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
 
-&lt;p&gt;Another thing is to ensure your user has write permission to wherever the node modules are being installed.&lt;/p&gt;
+  insertDocuments(db, function() {
+    updateDocument(db, function() {
+      removeDocument(db, function() {
+        db.close();
+      });
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Finally let&amp;rsquo;s retrieve all the documents using a simple find.&lt;/p&gt;
+
+&lt;h2 id=&#34;find-all-documents&#34;&gt;Find All Documents&lt;/h2&gt;
+
+&lt;p&gt;We will finish up the Quickstart CRUD methods by performing a simple query that returns all the documents matching the query.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var findDocuments = function(db, callback) {
+  // Get the documents collection
+  var collection = db.collection(&#39;documents&#39;);
+  // Find some documents
+  collection.find({}).toArray(function(err, docs) {
+    assert.equal(err, null);
+    assert.equal(2, docs.length);
+    console.log(&amp;quot;Found the following records&amp;quot;);
+    console.dir(docs)
+    callback(docs);
+  });      
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This query will return all the documents in the &lt;strong&gt;documents&lt;/strong&gt; collection. Since we removed a document the total documents returned is &lt;strong&gt;2&lt;/strong&gt;. Finally let&amp;rsquo;s add the findDocument method to the &lt;strong&gt;MongoClient.connect&lt;/strong&gt; callback.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/myproject&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  insertDocuments(db, function() {
+    updateDocument(db, function() {
+      removeDocument(db, function() {
+        findDocuments(db, function() {
+          db.close();
+        });
+      });
+    });
+  });
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This concludes the QuickStart of connecting and performing some Basic operations using the MongoDB Node.js driver. For more detailed information you can look at the tutorials covering more specific topics of interest.&lt;/p&gt;
 </description>
     </item>
     
     <item>
-      <title>index</title>
-      <link>/node-mongodb-native/2.0/</link>
+      <title>Getting Started</title>
+      <link>/node-mongodb-native/2.0/getting-started/</link>
       <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
       
-      <guid>/node-mongodb-native/2.0/</guid>
+      <guid>/node-mongodb-native/2.0/getting-started/</guid>
       <description>
 
-&lt;h2 id=&#34;mongodb-node-js-driver-documentation&#34;&gt;MongoDB Node.js Driver Documentation&lt;/h2&gt;
+&lt;h2 id=&#34;getting-started&#34;&gt;Getting Started&lt;/h2&gt;
 
-&lt;p&gt;Welcome to the MongoDB Node.js 2.x driver documentation.&lt;/p&gt;
+&lt;p&gt;To help you get started quickly on the new driver, follow:&lt;/p&gt;
 
-&lt;h3 id=&#34;what-s-new-in-2-0&#34;&gt;What&amp;rsquo;s New in 2.0&lt;/h3&gt;
-
-&lt;p&gt;The &lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/whats-new/&#34;&gt;What&amp;rsquo;s New&lt;/a&gt; guide explains the major new features of the driver.&lt;/p&gt;
-
-&lt;p&gt;If you are upgrading from the 1.x series of the driver, consult the &lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/whats-new/upgrading/&#34;&gt;Upgrading&lt;/a&gt; documentation for
-information on breaking changes.&lt;/p&gt;
-
-&lt;h3 id=&#34;mongodb-driver&#34;&gt;MongoDB Driver&lt;/h3&gt;
-
-&lt;p&gt;For MongoDB Driver, the &lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/getting-started/&#34;&gt;Getting Started&lt;/a&gt; guide contains
-installation instructions and a simple tutorial to get up  and running quickly. For more detailed documentation, see the
-&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/&#34;&gt;Reference&lt;/a&gt; guide.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/getting-started/installation-guide/&#34;&gt;Installation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/getting-started/quick-tour/&#34;&gt;Quick Tour&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 </description>
     </item>
     
