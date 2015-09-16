@@ -12,5 +12,5 @@ title = "Management"
 
 The driver provides two mechanisms for examining its state:
 
-- [Logging]({{< relref "driver/reference/management/logging.md" >}}): Comprehensive logging of all operations using [SLF4J](http://www.slf4j.org/)
+- [Logging]({{< relref "driver/reference/management/logging.md" >}}): Comprehensive logging of all operations.
 - [Application Performance Monitoring]({{< relref "driver/reference/management/apm.md" >}}): The Application Performance Monitoring API is an API developers to tap into the commands issues to MongoDB to record performance metrics and/or inspect the commands sent to MongoDB.
