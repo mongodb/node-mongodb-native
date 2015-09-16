@@ -15,7 +15,7 @@ pids
 logs
 results
 db
-data
+/data/
 out
 public
 docs/public

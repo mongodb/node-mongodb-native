@@ -21,3 +21,10 @@ canonifyurls = false
     weight = 90
     identifier = "githubLink"
     url = "https://github.com/christkv/mongodb-core"
+
+[[menu.main]]
+    name = ""
+    pre = "<img src='https://badges.gitter.im/Join Chat.svg'/>"
+    weight = 150
+    identifier = "gitterLink"
+    url = "https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge"

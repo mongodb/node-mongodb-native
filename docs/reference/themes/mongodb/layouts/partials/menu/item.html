@@ -30,7 +30,7 @@
 
 {{ if $menuItem.HasChildren }}
 <li class="toctree-l{{$menuNodeLevel}} {{if $isCurrent }} current{{end}}">
-  <a href="{{$menuItem.Url}}" class="">
+  <a href="{{$menuItem.URL}}" class="">
       {{ $menuItem.Pre }}
       <span>{{ $menuItem.Name }}</span>
       {{if lt $menuNodeLevel 2}}<span class="menu-arrow fa {{if $isCurrent }}fa-angle-down{{else}}fa-angle-right{{end}}"></span>{{end}}
@@ -46,7 +46,7 @@
   </li>
 {{else}}
     <li class="toctree-l{{$menuNodeLevel}}">
-    <a href="{{$menuItem.Url}}">
+    <a href="{{$menuItem.URL}}">
         {{ $menuItem.Pre }}
         {{ $menuItem.Name }}
     </a>

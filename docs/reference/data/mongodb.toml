@@ -1,0 +1,6 @@
+# Update versions in config.toml as well
+githubRepo = "mongo-nodejs-driver"
+githubBranch = "master"
+currentVersion = "1.2"
+highlightTheme = "idea.css"
+apiUrl = "/api"
