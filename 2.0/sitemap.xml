@@ -8,22 +8,22 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/driver/reference/gridfs/</loc>
+    <loc>/node-mongodb-native/2.0/reference/gridfs/</loc>
     <lastmod>2015-08-05T12:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/driver/reference/connecting/authenticating/</loc>
+    <loc>/node-mongodb-native/2.0/reference/connecting/authenticating/</loc>
     <lastmod>2015-03-19T14:27:51-04:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/driver/reference/gridfs/gridstore/</loc>
+    <loc>/node-mongodb-native/2.0/reference/gridfs/gridstore/</loc>
     <lastmod>2015-03-19T14:27:51-04:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/driver/reference/management/</loc>
+    <loc>/node-mongodb-native/2.0/reference/management/</loc>
     <lastmod>2015-03-19T14:27:51-04:00</lastmod>
   </url>
   
@@ -38,32 +38,32 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/driver/reference/connecting/</loc>
+    <loc>/node-mongodb-native/2.0/reference/connecting/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/driver/reference/connecting/connection-settings/</loc>
+    <loc>/node-mongodb-native/2.0/reference/connecting/connection-settings/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/driver/reference/crud/</loc>
+    <loc>/node-mongodb-native/2.0/reference/crud/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/driver/reference/connecting/ssl/</loc>
+    <loc>/node-mongodb-native/2.0/reference/connecting/ssl/</loc>
     <lastmod>2015-03-19T12:53:26-04:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/driver/reference/management/apm/</loc>
+    <loc>/node-mongodb-native/2.0/reference/management/apm/</loc>
     <lastmod>2015-03-19T12:53:26-04:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/driver/reference/management/logging/</loc>
+    <loc>/node-mongodb-native/2.0/reference/management/logging/</loc>
     <lastmod>2015-03-18T21:14:20-04:00</lastmod>
   </url>
   
@@ -73,32 +73,27 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/driver/getting-started/</loc>
-    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/2.0/driver/getting-started/installation-guide/</loc>
-    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/2.0/driver/getting-started/quick-tour/</loc>
-    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/2.0/driver/</loc>
-    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/2.0/driver/reference/</loc>
+    <loc>/node-mongodb-native/2.0/getting-started/quick-tour/</loc>
     <lastmod>2015-03-17T15:36:56+00:00</lastmod>
   </url>
   
   <url>
     <loc>/node-mongodb-native/2.0/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.0/getting-started/installation-guide/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.0/getting-started/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.0/reference/</loc>
     <lastmod>2015-03-17T15:36:56+00:00</lastmod>
   </url>
   
