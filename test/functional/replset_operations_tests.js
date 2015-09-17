@@ -445,25 +445,15 @@ exports['Should correctly execute ensureIndex with readPreference primaryPreferr
       , MongoClient = mongo.MongoClient
       , ReadPreference = mongo.ReadPreference;
 
-    // Create url
-    var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
-      , format("%s:%s", configuration.host, configuration.port)
-      , format("%s:%s", configuration.host, configuration.port + 1)
-      , "integration_test_"
-      , configuration.replicasetName
-      , "primaryPreferred");
-
-    var manager = configuration.manager;
-
     // MongoClient.connect(url, function(err, db) {
-    MongoClient.connect('mongodb://localhost:31000,localhost:31001/integration_test_?replicaSet=rs&readPreference=primaryPreferred', function(err, db) {
-      test.equal(null, err);
-
+    MongoClient.connect('mongodb://localhost:31001/integration_test_?replicaSet=rs&readPreference=primaryPreferred')
+    .then(function(db) {
       var collection = db.collection('ensureIndexWithPrimaryPreferred');
       collection.ensureIndex({a:1}, function(err, r) {
         test.equal(null, err);        
 
         db.close();
+        test.done();
       });
     });
   }
