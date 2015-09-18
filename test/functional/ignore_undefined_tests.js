@@ -7,7 +7,7 @@ exports['Should correctly insert document ignoring undefined field'] = {
   metadata: { requires: { topology: ['single'] }},
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, ignoreUndefined:true});
+    var db = configuration.newDbInstance({ignoreUndefined:true}, {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('shouldCorrectlyIgnoreUndefinedValue');
       collection.insert({a:1, b:undefined}, configuration.writeConcernMax(), function(err, result) {
@@ -69,7 +69,7 @@ exports['Should correctly update document ignoring undefined field'] = {
   test: function(configuration, test) {
     var ObjectId = configuration.require.ObjectID;
 
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, ignoreUndefined:true});
+    var db = configuration.newDbInstance({ignoreUndefined:true}, {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('shouldCorrectlyIgnoreUndefinedValue2');
       var id = new ObjectId();
