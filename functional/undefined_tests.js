@@ -155,10 +155,10 @@ exports['Should correctly execute remove not culling undefined'] = {
     configuration.newTopology(function(err, server) {
       // Add event listeners
       server.on('connect', function(_server) {
-        var ns = f("%s.remove1", configuration.db);
+        var ns = f("%s.remove2", configuration.db);
         var objectId = new ObjectId();
 
-        _server.command(f('%s.$cmd', configuration.db), {drop: 'remove1'}, function() {
+        _server.command(f('%s.$cmd', configuration.db), {drop: 'remove2'}, function() {
           
           // Execute the write
           _server.insert(ns, [{id: objectId, a:1, b:undefined}, {id: objectId, a:2, b:1}], {
@@ -182,7 +182,6 @@ exports['Should correctly execute remove not culling undefined'] = {
               test.done();
             });
           });
-
         });
       });
 
