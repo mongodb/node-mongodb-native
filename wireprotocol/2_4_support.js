@@ -206,10 +206,17 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
   // Remove readConcern, ensure no failing commands
   if(cmd.readConcern) delete cmd['readConcern'];
 
+  // Set up the serialize and ignoreUndefined fields
+  var serializeFunctions = typeof options.serializeFunctions == 'boolean' 
+    ? options.serializeFunctions : false;
+  var ignoreUndefined = typeof options.ignoreUndefined == 'boolean' 
+    ? options.ignoreUndefined : false;
+
   // Build Query object
   var query = new Query(bson, ns, findCmd, {
       numberToSkip: numberToSkip, numberToReturn: numberToReturn
     , checkKeys: false, returnFieldSelector: cmd.fields
+    , serializeFunctions: serializeFunctions, ignoreUndefined: ignoreUndefined
   });
 
   // Set query flags
@@ -258,10 +265,19 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
   // Remove readConcern, ensure no failing commands
   if(cmd.readConcern) delete cmd['readConcern'];
 
+  // Serialize functions
+  var serializeFunctions = typeof options.serializeFunctions == 'boolean'
+    ? options.serializeFunctions : false;
+
+  // Set up the serialize and ignoreUndefined fields
+  var ignoreUndefined = typeof options.ignoreUndefined == 'boolean' 
+    ? options.ignoreUndefined : false;
+
   // Build Query object
   var query = new Query(bson, f('%s.$cmd', parts.shift()), finalCmd, {
       numberToSkip: 0, numberToReturn: -1
-    , checkKeys: false
+    , checkKeys: false, serializeFunctions: serializeFunctions
+    , ignoreUndefined: ignoreUndefined
   });
 
   // Set query flags

@@ -597,7 +597,7 @@ var nextFunction = function(self, callback) {
 
     try {
       // Get the right wire protocol command
-      self.query = self.server.wireProtocolHandler.command(self.bson, self.ns, self.cmd, self.cursorState, self.topology, self.options);      
+      self.query = self.server.wireProtocolHandler.command(self.bson, self.ns, self.cmd, self.cursorState, self.topology, self.options);
     } catch(err) {
       return callback(err);
     }

@@ -29,6 +29,7 @@ var Insert = function(requestId, ismaster, bson, ns, documents, options) {
 
   // Unpack options
   this.serializeFunctions = typeof options.serializeFunctions == 'boolean' ? options.serializeFunctions : false;
+  this.ignoreUndefined = typeof options.ignoreUndefined == 'boolean' ? options.ignoreUndefined : false;
   this.checkKeys = typeof options.checkKeys == 'boolean' ? options.checkKeys : true;
   this.continueOnError = typeof options.continueOnError == 'boolean' ? options.continueOnError : false;
   // Set flags
@@ -58,7 +59,8 @@ Insert.prototype.toBin = function() {
     var buffer = this.bson.serialize(this.documents[i]
       , this.checkKeys
       , true
-      , this.serializeFunctions);
+      , this.serializeFunctions
+      , 0, this.ignoreUndefined);
 
     // Document is larger than maxBsonObjectSize, terminate serialization
     if(buffer.length > this.ismaster.maxBsonObjectSize) {
@@ -137,6 +139,7 @@ var Update = function(requestId, ismaster, bson, ns, update, options) {
 
   // Unpack options
   this.serializeFunctions = typeof options.serializeFunctions == 'boolean' ? options.serializeFunctions : false;
+  this.ignoreUndefined = typeof options.ignoreUndefined == 'boolean' ? options.ignoreUndefined : false;
   this.checkKeys = typeof options.checkKeys == 'boolean' ? options.checkKeys : false;
 
   // Unpack the update document
@@ -173,7 +176,8 @@ Update.prototype.toBin = function() {
   var selector = this.bson.serialize(this.q
     , this.checkKeys
     , true
-    , this.serializeFunctions);
+    , this.serializeFunctions
+    , 0, this.ignoreUndefined);
   buffers.push(selector);
   totalLength = totalLength + selector.length;
 
@@ -181,7 +185,8 @@ Update.prototype.toBin = function() {
   var update = this.bson.serialize(this.u
     , this.checkKeys
     , true
-    , this.serializeFunctions);
+    , this.serializeFunctions
+    , 0, this.ignoreUndefined);
   buffers.push(update);
   totalLength = totalLength + update.length;
 
@@ -253,6 +258,7 @@ var Remove = function(requestId, ismaster, bson, ns, remove, options) {
 
   // Unpack options
   this.serializeFunctions = typeof options.serializeFunctions == 'boolean' ? options.serializeFunctions : false;
+  this.ignoreUndefined = typeof options.ignoreUndefined == 'boolean' ? options.ignoreUndefined : false;
   this.checkKeys = typeof options.checkKeys == 'boolean' ? options.checkKeys : false;
 
   // Unpack the update document
@@ -286,7 +292,8 @@ Remove.prototype.toBin = function() {
   var selector = this.bson.serialize(this.q
     , this.checkKeys
     , true
-    , this.serializeFunctions);
+    , this.serializeFunctions
+    , 0, this.ignoreUndefined);
   buffers.push(selector);
   totalLength = totalLength + selector.length;
 

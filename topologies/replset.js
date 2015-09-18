@@ -333,6 +333,8 @@ ReplSet.prototype.getServer = function(options) {
  * @param {object} [options.batchSize=0] Batchsize for the operation
  * @param {array} [options.documents=[]] Initial documents list for cursor
  * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+ * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized. 
+ * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {opResultCallback} callback A callback function
  */
 ReplSet.prototype.cursor = function(ns, cmd, cursorOptions) {
@@ -384,6 +386,8 @@ var executeWriteOperation = function(self, op, ns, ops, options, callback) {
  * @param {object} cmd The command hash
  * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
  * @param {Connection} [options.connection] Specify connection object to execute command against
+ * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized. 
+ * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {opResultCallback} callback A callback function
  */
 ReplSet.prototype.command = function(ns, cmd, options, callback) {
@@ -456,6 +460,8 @@ ReplSet.prototype.command = function(ns, cmd, options, callback) {
  * @param {array} ops An array of removes
  * @param {boolean} [options.ordered=true] Execute in order or out of order
  * @param {object} [options.writeConcern={}] Write concern for the operation
+ * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized. 
+ * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {opResultCallback} callback A callback function
  */
 ReplSet.prototype.remove = function(ns, ops, options, callback) {
@@ -478,6 +484,8 @@ ReplSet.prototype.remove = function(ns, ops, options, callback) {
  * @param {array} ops An array of documents to insert
  * @param {boolean} [options.ordered=true] Execute in order or out of order
  * @param {object} [options.writeConcern={}] Write concern for the operation
+ * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized. 
+ * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {opResultCallback} callback A callback function
  */
 ReplSet.prototype.insert = function(ns, ops, options, callback) {
@@ -500,6 +508,8 @@ ReplSet.prototype.insert = function(ns, ops, options, callback) {
  * @param {array} ops An array of updates
  * @param {boolean} [options.ordered=true] Execute in order or out of order
  * @param {object} [options.writeConcern={}] Write concern for the operation
+ * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized. 
+ * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {opResultCallback} callback A callback function
  */
 ReplSet.prototype.update = function(ns, ops, options, callback) {

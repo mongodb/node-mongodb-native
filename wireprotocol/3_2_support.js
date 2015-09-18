@@ -50,6 +50,7 @@ var executeWrite = function(topology, type, opsField, ns, ops, options, callback
   if(type == 'insert') opts.checkKeys = true;
   // Ensure we support serialization of functions
   if(options.serializeFunctions) opts.serializeFunctions = options.serializeFunctions;
+  if(options.ignoreUndefined) opts.ignoreUndefined = options.ignoreUndefined;
   // Execute command
   topology.command(f("%s.$cmd", d), writeCommand, opts, callback);
 }
@@ -412,10 +413,17 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
   // Did we provide a readConcern
   if(cmd.readConcern) findCmd.readConcern = cmd.readConcern;
 
+  // Set up the serialize and ignoreUndefined fields
+  var serializeFunctions = typeof options.serializeFunctions == 'boolean' 
+    ? options.serializeFunctions : false;
+  var ignoreUndefined = typeof options.ignoreUndefined == 'boolean' 
+    ? options.ignoreUndefined : false;
+
   // Build Query object
   var query = new Query(bson, commandns, findCmd, {
       numberToSkip: 0, numberToReturn: -1
     , checkKeys: false, returnFieldSelector: null
+    , serializeFunctions: serializeFunctions, ignoreUndefined: ignoreUndefined
   });
 
   // Set query flags
@@ -449,10 +457,19 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
     finalCmd['$readPreference'] = readPreference.toJSON();
   }
 
+  // Serialize functions
+  var serializeFunctions = typeof options.serializeFunctions == 'boolean'
+    ? options.serializeFunctions : false;
+
+  // Set up the serialize and ignoreUndefined fields
+  var ignoreUndefined = typeof options.ignoreUndefined == 'boolean' 
+    ? options.ignoreUndefined : false;
+
   // Build Query object
   var query = new Query(bson, f('%s.$cmd', parts.shift()), finalCmd, {
       numberToSkip: 0, numberToReturn: -1
-    , checkKeys: false
+    , checkKeys: false, serializeFunctions: serializeFunctions
+    , ignoreUndefined: ignoreUndefined
   });
 
   // Set query flags

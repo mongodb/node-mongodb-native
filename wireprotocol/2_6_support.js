@@ -43,6 +43,7 @@ var executeWrite = function(topology, type, opsField, ns, ops, options, callback
   if(type == 'insert') opts.checkKeys = true;
   // Ensure we support serialization of functions
   if(options.serializeFunctions) opts.serializeFunctions = options.serializeFunctions;
+  if(options.ignoreUndefined) opts.ignoreUndefined = options.ignoreUndefined;
   // Execute command
   topology.command(f("%s.$cmd", d), writeCommand, opts, callback);
 }
@@ -194,12 +195,15 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
   // Serialize functions
   var serializeFunctions = typeof options.serializeFunctions == 'boolean'
     ? options.serializeFunctions : false;
+  var ignoreUndefined = typeof options.ignoreUndefined == 'boolean'
+    ? options.ignoreUndefined : false;
 
   // Build Query object
   var query = new Query(bson, ns, findCmd, {
       numberToSkip: numberToSkip, numberToReturn: numberToReturn
     , checkKeys: false, returnFieldSelector: cmd.fields
     , serializeFunctions: serializeFunctions
+    , ignoreUndefined: ignoreUndefined
   });
 
   // Set query flags
@@ -244,6 +248,9 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
   var serializeFunctions = typeof options.serializeFunctions == 'boolean'
     ? options.serializeFunctions : false;
 
+  var ignoreUndefined = typeof options.ignoreUndefined == 'boolean'
+    ? options.ignoreUndefined : false;
+
   // Throw on majority readConcern passed in
   if(cmd.readConcern && cmd.readConcern.level != 'local') {
     throw new MongoError(f('server %s command does not support a readConcern level of %s', JSON.stringify(cmd), cmd.readConcern.level));
@@ -256,6 +263,7 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
   var query = new Query(bson, f('%s.$cmd', parts.shift()), finalCmd, {
       numberToSkip: 0, numberToReturn: -1
     , checkKeys: false, serializeFunctions: serializeFunctions
+    , ignoreUndefined: ignoreUndefined
   });
 
   // Set query flags
