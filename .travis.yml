@@ -4,7 +4,7 @@ node_js:
   - node
   - '0.10'
   - iojs
-sudo: false
+sudo: true
 env:
   - MONGODB_VERSION=2.4.x
   - MONGODB_VERSION=2.6.x
