@@ -1,3 +1,7 @@
+1.2.13 09-18-2015
+-----------------
+- Added BSON serializer ignoreUndefined option for insert/update/remove/command/cursor.
+
 1.2.12 09-08-2015
 -----------------
 - NODE-541 Added initial support for readConcern.

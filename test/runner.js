@@ -41,6 +41,16 @@ var startupOptions = {
   , skip: false
 }
 
+// Skipping parameters
+if(argv.s) {
+  var startupOptions = {
+      skipStartup: true
+    , skipRestart: true
+    , skipShutdown: true
+    , skip: false
+  }
+}
+
 /**
  * Standalone MongoDB Configuration
  */
@@ -193,6 +203,7 @@ var testFiles =[
   , '/test/tests/functional/tailable_cursor_tests.js'
   , '/test/tests/functional/operation_example_tests.js'
   , '/test/tests/functional/replset_failover_tests.js'
+  , '/test/tests/functional/undefined_tests.js'
 ]
 
 // Check if we support es6 generators
