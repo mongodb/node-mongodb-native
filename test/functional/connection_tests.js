@@ -49,7 +49,7 @@ exports['Should correctly connect to server using just events'] = {
  * @ignore
  */
 exports['Should correctly connect to server using big connection pool'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }, ignore: { travis:true } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
