@@ -1,5 +1,4 @@
 var core = require('mongodb-core');
-var Cursor = require('../../lib/cursor');
 var crypto = require('crypto');
 var ejson = require('mongodb-extended-json');
 var fs = require('fs');
@@ -129,6 +128,50 @@ exports.shouldDownloadToUploadStream = {
 /**
  * @ignore
  */
+exports['openDownloadStreamByName'] = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var GridFSBucket = configuration.require.GridFSBucket;
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(),
+      { poolSize:1 });
+    db.open(function(error, db) {
+      var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
+      var CHUNKS_COLL = 'gridfsdownload.chunks';
+      var FILES_COLL = 'gridfsdownload.files';
+      var readStream = fs.createReadStream('./LICENSE');
+
+      var uploadStream = bucket.openUploadStream('test.dat');
+
+      var license = fs.readFileSync('./LICENSE');
+      var id = uploadStream.id;
+
+      uploadStream.once('finish', function() {
+        var downloadStream = bucket.openDownloadStreamByName('test.dat');
+
+        var gotData = false;
+        downloadStream.on('data', function(data) {
+          test.ok(!gotData);
+          gotData = true;
+          test.ok(data.toString('utf8').indexOf('TERMS AND CONDITIONS') !== -1);
+        });
+
+        downloadStream.on('end', function() {
+          test.ok(gotData);
+          test.done();
+        });
+      });
+
+      readStream.pipe(uploadStream);
+    });
+  }
+};
+
+/**
+ * @ignore
+ */
 exports['Deleting a file'] = {
   metadata: { requires: { topology: ['single'] } },
 
@@ -236,7 +279,7 @@ exports['download empty doc'] = {
         stream.on('end', function() {
           // As per spec, make sure we didn't actually fire a query
           // because the document length is 0
-          test.equal(stream.s.cursor.s.state, Cursor.INIT);
+          test.equal(stream.s.cursor, null);
           test.done();
         });
       });
