@@ -1,4 +1,5 @@
 var core = require('mongodb-core');
+var Cursor = require('../../lib/cursor');
 var crypto = require('crypto');
 var ejson = require('mongodb-extended-json');
 var fs = require('fs');
@@ -199,6 +200,46 @@ exports['find()'] = {
       });
 
       test.done();
+    });
+  }
+};
+
+/**
+ * @ignore
+ */
+exports['download empty doc'] = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var GridFSBucket = configuration.require.GridFSBucket;
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(),
+      { poolSize:1 });
+    db.open(function(error, db) {
+      var bucket = new GridFSBucket(db, { bucketName: 'fs' });
+
+      db.collection('fs.files').insert({ length: 0 }, function(error, result) {
+        test.equal(error, null);
+        test.equal(result.insertedIds.length, 1);
+        var id = result.insertedIds[0];
+
+        var stream = bucket.openDownloadStream(id);
+        stream.on('error', function(error) {
+          test.equal(error, null);
+        });
+
+        stream.on('data', function(data) {
+          test.ok(false);
+        });
+
+        stream.on('end', function() {
+          // As per spec, make sure we didn't actually fire a query
+          // because the document length is 0
+          test.equal(stream.s.cursor.s.state, Cursor.INIT);
+          test.done();
+        });
+      });
     });
   }
 };
