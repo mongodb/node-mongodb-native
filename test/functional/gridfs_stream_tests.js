@@ -128,6 +128,7 @@ exports.shouldDownloadToUploadStream = {
 /**
  * @ignore
  */
+
 exports['openDownloadStreamByName'] = {
   metadata: { requires: { topology: ['single'] } },
 
@@ -168,6 +169,61 @@ exports['openDownloadStreamByName'] = {
     });
   }
 };
+
+/**
+ * @ignore
+ */
+
+exports['start/end options for openDownloadStream'] = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var GridFSBucket = configuration.require.GridFSBucket;
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(),
+      { poolSize:1 });
+    db.open(function(error, db) {
+      var bucket = new GridFSBucket(db, {
+        bucketName: 'gridfsdownload',
+        chunkSizeBytes: 2
+      });
+      var CHUNKS_COLL = 'gridfsdownload.chunks';
+      var FILES_COLL = 'gridfsdownload.files';
+      var readStream = fs.createReadStream('./LICENSE');
+
+      var uploadStream = bucket.openUploadStream('teststart.dat');
+
+      var license = fs.readFileSync('./LICENSE');
+      var id = uploadStream.id;
+
+      uploadStream.once('finish', function() {
+        var downloadStream = bucket.openDownloadStreamByName('teststart.dat',
+          { start: 1, end: 6 });
+
+        downloadStream.on('error', function(error) {
+          test.equal(error, null);
+        });
+
+        var gotData = 0;
+        var str = '';
+        downloadStream.on('data', function(data) {
+          ++gotData;
+          str += data.toString('utf8');
+        });
+
+        downloadStream.on('end', function() {
+          test.equal(gotData, 3);
+          test.equal(str, 'pache');
+          test.done();
+        });
+      });
+
+      readStream.pipe(uploadStream);
+    });
+  }
+};
+
 
 /**
  * @ignore
