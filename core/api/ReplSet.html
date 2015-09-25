@@ -2196,7 +2196,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line526">line 526</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line536">line 536</a>
         </div>
         
     </div>
@@ -2403,7 +2403,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line389">line 389</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line393">line 393</a>
         </div>
         
     </div>
@@ -2435,6 +2435,8 @@ cursor instance
 		<th>Type</th>
 		
 		
+		<th>Default</th>
+		
 		
 		<th class="last">Description</th>
 	</tr>
@@ -2457,6 +2459,10 @@ cursor instance
             
             </td>
             
+            
+                <td class="default">
+                
+                </td>
             
             
             <td class="description last">
@@ -2486,6 +2492,10 @@ cursor instance
             </td>
             
             
+                <td class="default">
+                
+                </td>
+            
             
             <td class="description last">
                 
@@ -2513,6 +2523,10 @@ cursor instance
             
             </td>
             
+            
+                <td class="default">
+                
+                </td>
             
             
             <td class="description last">
@@ -2544,6 +2558,10 @@ cursor instance
             </td>
             
             
+                <td class="default">
+                
+                </td>
+            
             
             <td class="description last">
                 
@@ -2555,6 +2573,78 @@ cursor instance
                     
                 
                 <p>Specify connection object to execute command against</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>options.serializeFunctions</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify if functions on an object should be serialized.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>options.ignoreUndefined</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify if the BSON serializer should ignore undefined fields.</p></td>
         </tr>
 	
 	
@@ -2573,6 +2663,10 @@ cursor instance
             
             </td>
             
+            
+                <td class="default">
+                
+                </td>
             
             
             <td class="description last">
@@ -2663,7 +2757,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line603">line 603</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line613">line 613</a>
         </div>
         
     </div>
@@ -2810,7 +2904,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line338">line 338</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line340">line 340</a>
         </div>
         
     </div>
@@ -3027,6 +3121,78 @@ server.connect();</code></pre>
 	
         <tr>
             
+                <td class="name"><code>options.serializeFunctions</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify if functions on an object should be serialized.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>options.ignoreUndefined</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify if the BSON serializer should ignore undefined fields.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>callback</code></td>
             
             
@@ -3149,7 +3315,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line690">line 690</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line700">line 700</a>
         </div>
         
     </div>
@@ -3476,7 +3642,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line483">line 483</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line491">line 491</a>
         </div>
         
     </div>
@@ -3656,6 +3822,78 @@ server.connect();</code></pre>
 	
         <tr>
             
+                <td class="name"><code>options.serializeFunctions</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify if functions on an object should be serialized.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>options.ignoreUndefined</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify if the BSON serializer should ignore undefined fields.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>callback</code></td>
             
             
@@ -3766,7 +4004,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line660">line 660</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line670">line 670</a>
         </div>
         
     </div>
@@ -3842,7 +4080,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line682">line 682</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line692">line 692</a>
         </div>
         
     </div>
@@ -4070,7 +4308,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line461">line 461</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line467">line 467</a>
         </div>
         
     </div>
@@ -4244,6 +4482,78 @@ server.connect();</code></pre>
                     
                 
                 <p>Write concern for the operation</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>options.serializeFunctions</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify if functions on an object should be serialized.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>options.ignoreUndefined</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify if the BSON serializer should ignore undefined fields.</p></td>
         </tr>
 	
 	
@@ -4486,7 +4796,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line505">line 505</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line515">line 515</a>
         </div>
         
     </div>
@@ -4666,6 +4976,78 @@ server.connect();</code></pre>
 	
         <tr>
             
+                <td class="name"><code>options.serializeFunctions</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify if functions on an object should be serialized.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>options.ignoreUndefined</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Boolean</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    false
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify if the BSON serializer should ignore undefined fields.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
                 <td class="name"><code>callback</code></td>
             
             
@@ -4794,7 +5176,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line708">line 708</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line718">line 718</a>
         </div>
         
     </div>
@@ -4875,7 +5257,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line715">line 715</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line725">line 725</a>
         </div>
         
     </div>
@@ -5070,7 +5452,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line735">line 735</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line745">line 745</a>
         </div>
         
     </div>
@@ -5219,7 +5601,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line726">line 726</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line736">line 736</a>
         </div>
         
     </div>
@@ -5387,7 +5769,7 @@ server.connect();</code></pre>
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Wed Sep 16 2015 15:40:13 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Fri Sep 25 2015 15:13:37 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

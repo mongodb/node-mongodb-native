@@ -2092,6 +2092,12 @@ Collection.prototype.insertOne = function(doc, options, callback) {
   options = options || {};
   if(Array.isArray(doc)) return callback(MongoError.create({message: 'doc parameter must be an object', driver:true }));
 
+  // Add ignoreUndfined
+  if(this.s.options.ignoreUndefined) {
+    options = shallowClone(options);
+    options.ignoreUndefined = this.s.options.ignoreUndefined;
+  }
+
   // Execute using callback
   if(typeof callback == 'function') return insertOne(self, doc, options, callback);
 
@@ -2269,6 +2275,13 @@ Collection.prototype.bulkWrite = function(operations, options, callback) {
 }
 
 var bulkWrite = function(self, operations, options, callback) {
+  // Add ignoreUndfined
+  if(self.s.options.ignoreUndefined) {
+    options = shallowClone(options);
+    options.ignoreUndefined = self.s.options.ignoreUndefined;
+  }
+
+  // Create the bulk operation
   var bulk = options.ordered == true || options.ordered == null ? self.initializeOrderedBulkOp(options) : self.initializeUnorderedBulkOp(options);
 
   // for each op go through and add to the bulk
@@ -2479,6 +2492,12 @@ Collection.prototype.updateOne = function(filter, update, options, callback) {
   if(typeof options == 'function') callback = options, options = {};
   options = shallowClone(options)
 
+  // Add ignoreUndfined
+  if(this.s.options.ignoreUndefined) {
+    options = shallowClone(options);
+    options.ignoreUndefined = this.s.options.ignoreUndefined;
+  }
+
   // Execute using callback
   if(typeof callback == 'function') return updateOne(self, filter, update, options, callback);
 
@@ -2528,6 +2547,12 @@ Collection.prototype.replaceOne = function(filter, update, options, callback) {
   if(typeof options == 'function') callback = options, options = {};
   options = shallowClone(options)
 
+  // Add ignoreUndfined
+  if(this.s.options.ignoreUndefined) {
+    options = shallowClone(options);
+    options.ignoreUndefined = this.s.options.ignoreUndefined;
+  }
+
   // Execute using callback
   if(typeof callback == 'function') return replaceOne(self, filter, update, options, callback);
 
@@ -2576,6 +2601,12 @@ Collection.prototype.updateMany = function(filter, update, options, callback) {
   var self = this;
   if(typeof options == 'function') callback = options, options = {};
   options = shallowClone(options)
+
+  // Add ignoreUndfined
+  if(this.s.options.ignoreUndefined) {
+    options = shallowClone(options);
+    options.ignoreUndefined = this.s.options.ignoreUndefined;
+  }
 
   // Execute using callback
   if(typeof callback == 'function') return updateMany(self, filter, update, options, callback);
@@ -2660,6 +2691,13 @@ var updateDocuments = function(self, selector, document, options, callback) {
  */
 Collection.prototype.update = function(selector, document, options, callback) {
   var self = this;
+
+  // Add ignoreUndfined
+  if(this.s.options.ignoreUndefined) {
+    options = shallowClone(options);
+    options.ignoreUndefined = this.s.options.ignoreUndefined;
+  }
+
   // Execute using callback
   if(typeof callback == 'function') return updateDocuments(self, selector, document, options, callback);
 
@@ -2707,6 +2745,12 @@ Collection.prototype.deleteOne = function(filter, options, callback) {
   if(typeof options == 'function') callback = options, options = {};
   var options = shallowClone(options);
 
+  // Add ignoreUndfined
+  if(this.s.options.ignoreUndefined) {
+    options = shallowClone(options);
+    options.ignoreUndefined = this.s.options.ignoreUndefined;
+  }
+
   // Execute using callback
   if(typeof callback == 'function') return deleteOne(self, filter, options, callback);
 
@@ -2751,6 +2795,12 @@ Collection.prototype.deleteMany = function(filter, options, callback) {
   var self = this;
   if(typeof options == 'function') callback = options, options = {};
   var options = shallowClone(options);
+
+  // Add ignoreUndfined
+  if(this.s.options.ignoreUndefined) {
+    options = shallowClone(options);
+    options.ignoreUndefined = this.s.options.ignoreUndefined;
+  }
 
   // Execute using callback
   if(typeof callback == 'function') return deleteMany(self, filter, options, callback);
@@ -2830,6 +2880,13 @@ define.classMethod('removeMany', {callback: true, promise:true});
  */
 Collection.prototype.remove = function(selector, options, callback) {
   var self = this;
+
+  // Add ignoreUndfined
+  if(this.s.options.ignoreUndefined) {
+    options = shallowClone(options);
+    options.ignoreUndefined = this.s.options.ignoreUndefined;
+  }
+
   // Execute using callback
   if(typeof callback == 'function') return removeDocuments(self, selector, options, callback);
 
@@ -2861,6 +2918,12 @@ Collection.prototype.save = function(doc, options, callback) {
   var self = this;
   if(typeof options == 'function') callback = options, options = {};
   options = options || {};
+
+  // Add ignoreUndfined
+  if(this.s.options.ignoreUndefined) {
+    options = shallowClone(options);
+    options.ignoreUndefined = this.s.options.ignoreUndefined;
+  }
 
   // Execute using callback
   if(typeof callback == 'function') return save(self, doc, options, callback);
@@ -4788,7 +4851,7 @@ module.exports = Collection;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Wed Sep 16 2015 15:40:01 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Fri Sep 25 2015 15:13:26 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

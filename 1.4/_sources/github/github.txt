@@ -181,9 +181,9 @@ Content Management Systems
          :header-rows: 0
 
          * - **Activity Level**
-           - .. image:: ../static/nonactive.png
+           - .. image:: ../static/active.png
          * - **Last push**
-           - 22:44:59 on 8/2/2015
+           - 19:2:50 on 21/8/2015
          * - **Homepage**
            - http://calip.so
          * - **Url**
@@ -191,9 +191,9 @@ Content Management Systems
          * - **Clone Url**
            - https://github.com/cliftonc/calipso.git
          * - **Forks**
-           - 288
+           - 289
          * - **Watchers**
-           - 1599
+           - 1601
 
 Grid FS libraries or tools
 --------------------------
@@ -360,7 +360,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 15
          * - **Watchers**
-           - 98
+           - 99
 
 REST api's around MongoDB or resource based libraries
 -----------------------------------------------------
@@ -458,7 +458,7 @@ Test helpers and libraries
          * - **Forks**
            - 3
          * - **Watchers**
-           - 27
+           - 28
 
 .. topic:: node-database-cleaner
 
@@ -481,7 +481,7 @@ Test helpers and libraries
          * - **Forks**
            - 24
          * - **Watchers**
-           - 70
+           - 71
 
 Tools or applications to manage your MongoDB's
 ----------------------------------------------
@@ -730,9 +730,9 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 413
+           - 414
          * - **Watchers**
-           - 3593
+           - 3603
 
 Libraries for the connect middleware
 ------------------------------------
@@ -771,7 +771,7 @@ Libraries for the connect middleware
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 16:10:7 on 23/6/2015
+           - 14:39:38 on 24/8/2015
          * - **Homepage**
            - http://
          * - **Url**
@@ -779,9 +779,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 210
+           - 213
          * - **Watchers**
-           - 802
+           - 806
 
 Libraries or applications for continous integration
 ---------------------------------------------------
