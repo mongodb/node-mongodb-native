@@ -1,5 +1,5 @@
-2.0.44 
-------------------
+2.0.44 09-28-2015
+-----------------
 * Bug fixes for APM upconverting of legacy INSERT/UPDATE/REMOVE wire protocol messages.
 * NODE-562, fixed issue where a Replicaset MongoDB URI with a single seed and replSet name set would cause a single direct connection instead of topology discovery.
 * Updated mongodb-core to 1.2.14.
