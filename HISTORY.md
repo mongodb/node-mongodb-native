@@ -2,9 +2,10 @@
 -----------------
 * Bug fixes for APM upconverting of legacy INSERT/UPDATE/REMOVE wire protocol messages.
 * NODE-562, fixed issue where a Replicaset MongoDB URI with a single seed and replSet name set would cause a single direct connection instead of topology discovery.
-* Updated mongodb-core to 1.2.13.
+* Updated mongodb-core to 1.2.14.
 * NODE-563 Introduced options.ignoreUndefined for db class and MongoClient db options, made serialize undefined to null default again but allowing for overrides on insert/update/delete operations.
 * Use handleCallback if result is an error for count queries. (Issue #1298, https://github.com/agclever)
+* Rewind cursor to correctly force reconnect on capped collections when first query comes back empty.
 
 2.0.43 09-14-2015
 -----------------
