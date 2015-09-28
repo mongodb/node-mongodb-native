@@ -19,6 +19,26 @@ MongoDB 3.0 changed the default authentication mechanism from
 [SCRAM-SHA-1](http://docs.mongodb.org/manual/core/authentication/#scram-sha-1-authentication).
 {{% /note %}}
 
+## DEFAULT
+
+If no authentication mechanism is specified or the mechanism DEFAULT is specified, the driver will attempt to authenticate using the SCRAM-SHA-1 authentication method if it is available on the MongoDB server. If the server does not support SCRAM-SHA-1 the driver will authenticate using MONGODB-CR.
+
+```js
+var MongoClient = require('mongodb').MongoClient,
+  f = require('util').format,
+  assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://dave:password@localhost:27017?authMechanism=DEFAULT&authSource=db';
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log("Connected correctly to server");
+
+  db.close();
+});
+```
+
 ## SCRAM-SHA-1
 
 To explicitly connect to MongoDB using [SCRAM-SHA-1](http://docs.mongodb .org/manual/core/authentication/#scram-sha-1-authentication), we pass the following parameters to the driver over the connection URI.
