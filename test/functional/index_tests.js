@@ -782,3 +782,38 @@ exports['should correctly pass indexOptionDefault through to createIndexCommand'
     });
   }
 }
+
+/**
+ * @ignore
+ */
+exports['should correctly pass partialIndexes through to createIndexCommand'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'], mongodb: ">=3.1.8" } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      var started = [], succeeded = [];
+
+      var listener = require('../..').instrument(function(err, instrumentations) {});
+      listener.on('started', function(event) {
+        if(event.commandName == 'createIndexes')
+          started.push(event);
+      });
+
+      listener.on('succeeded', function(event) {
+        if(event.commandName == 'createIndexes')
+          succeeded.push(event);
+      });
+
+      db.collection('indexOptionDefault').createIndex({a:1}, { partialFilterExpression: {a:1} }, function(err, r) {
+        test.equal(null, err);
+        test.deepEqual({a:1}, started[0].command.indexes[0].partialFilterExpression);
+
+        listener.uninstrument();
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
