@@ -806,7 +806,7 @@ exports['should correctly pass partialIndexes through to createIndexCommand'] = 
           succeeded.push(event);
       });
 
-      db.collection('indexOptionDefault').createIndex({a:1}, { partialFilterExpression: {a:1} }, function(err, r) {
+      db.collection('partialIndexes').createIndex({a:1}, { partialFilterExpression: {a:1} }, function(err, r) {
         test.equal(null, err);
         test.deepEqual({a:1}, started[0].command.indexes[0].partialFilterExpression);
 
