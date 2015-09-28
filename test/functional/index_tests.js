@@ -747,3 +747,44 @@ exports.shouldCorrectlyCreateTextIndex = {
     });
   }
 }
+
+/**
+ * @ignore
+ */
+exports['should correctly pass indexOptionDefault through to createIndexCommand'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'], mongodb: ">=3.1.8" } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      var listener = require('../..').instrument(function(err, instrumentations) {
+        callbackTriggered = true;
+      });
+
+      listener.on('started', function(event) {
+        if(event.commandName == 'insert')
+          started.push(event);
+      });
+
+      listener.on('succeeded', function(event) {
+        if(event.commandName == 'insert')
+          succeeded.push(event);
+      });
+
+
+      db.collection('indexOptionDefault').createIndex({a:1}, { indexOptionDefaults: true }, function(err, r) {
+        console.log("-------------------------------------------------------------")
+        console.dir(err)
+        console.dir(r)
+        console.dir(started)
+
+        test.equal(null, err);
+        listener.uninstrument();
+
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
