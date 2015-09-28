@@ -758,30 +758,24 @@ exports['should correctly pass indexOptionDefault through to createIndexCommand'
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
-      var listener = require('../..').instrument(function(err, instrumentations) {
-        callbackTriggered = true;
-      });
+      var started = [], succeeded = [];
 
+      var listener = require('../..').instrument(function(err, instrumentations) {});
       listener.on('started', function(event) {
-        if(event.commandName == 'insert')
+        if(event.commandName == 'createIndexes')
           started.push(event);
       });
 
       listener.on('succeeded', function(event) {
-        if(event.commandName == 'insert')
+        if(event.commandName == 'createIndexes')
           succeeded.push(event);
       });
 
-
       db.collection('indexOptionDefault').createIndex({a:1}, { indexOptionDefaults: true }, function(err, r) {
-        console.log("-------------------------------------------------------------")
-        console.dir(err)
-        console.dir(r)
-        console.dir(started)
-
         test.equal(null, err);
-        listener.uninstrument();
+        test.ok(true, started[0].command.indexes[0].indexOptionDefaults);
 
+        listener.uninstrument();
         db.close();
         test.done();
       });
