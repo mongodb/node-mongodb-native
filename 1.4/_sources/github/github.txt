@@ -191,9 +191,9 @@ Content Management Systems
          * - **Clone Url**
            - https://github.com/cliftonc/calipso.git
          * - **Forks**
-           - 289
+           - 290
          * - **Watchers**
-           - 1601
+           - 1604
 
 Grid FS libraries or tools
 --------------------------
@@ -481,7 +481,7 @@ Test helpers and libraries
          * - **Forks**
            - 24
          * - **Watchers**
-           - 71
+           - 70
 
 Tools or applications to manage your MongoDB's
 ----------------------------------------------
@@ -732,7 +732,7 @@ Libraries or Applications for analytics
          * - **Forks**
            - 414
          * - **Watchers**
-           - 3603
+           - 3604
 
 Libraries for the connect middleware
 ------------------------------------
@@ -781,7 +781,7 @@ Libraries for the connect middleware
          * - **Forks**
            - 213
          * - **Watchers**
-           - 806
+           - 808
 
 Libraries or applications for continous integration
 ---------------------------------------------------

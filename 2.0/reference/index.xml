@@ -62,6 +62,25 @@ only available in the MongoDB &lt;a href=&#34;http://docs.mongodb.org/manual/adm
 &lt;/div&gt;
 &lt;/p&gt;
 
+&lt;h2 id=&#34;default&#34;&gt;DEFAULT&lt;/h2&gt;
+
+&lt;p&gt;If no authentication mechanism is specified or the mechanism DEFAULT is specified, the driver will attempt to authenticate using the SCRAM-SHA-1 authentication method if it is available on the MongoDB server. If the server does not support SCRAM-SHA-1 the driver will authenticate using MONGODB-CR.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  f = require(&#39;util&#39;).format,
+  assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://dave:password@localhost:27017?authMechanism=DEFAULT&amp;amp;authSource=db&#39;;
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  db.close();
+});
+&lt;/code&gt;&lt;/pre&gt;
+
 &lt;h2 id=&#34;scram-sha-1&#34;&gt;SCRAM-SHA-1&lt;/h2&gt;
 
 &lt;p&gt;To explicitly connect to MongoDB using &lt;a href=&#34;http://docs.mongodb .org/manual/core/authentication/#scram-sha-1-authentication&#34;&gt;SCRAM-SHA-1&lt;/a&gt;, we pass the following parameters to the driver over the connection URI.&lt;/p&gt;

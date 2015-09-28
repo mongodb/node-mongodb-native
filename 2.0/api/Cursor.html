@@ -347,6 +347,10 @@
             
                 <li data-name="Collection~findAndModifyWriteOpResult"><a href="Collection.html#~findAndModifyWriteOpResult">findAndModifyWriteOpResult</a></li>
             
+                <li data-name="Collection~insertOneWriteOpCallback"><a href="Collection.html#~insertOneWriteOpCallback">insertOneWriteOpCallback</a></li>
+            
+                <li data-name="Collection~insertOneWriteOpResult"><a href="Collection.html#~insertOneWriteOpResult">insertOneWriteOpResult</a></li>
+            
                 <li data-name="Collection~insertWriteOpCallback"><a href="Collection.html#~insertWriteOpCallback">insertWriteOpCallback</a></li>
             
                 <li data-name="Collection~insertWriteOpResult"><a href="Collection.html#~insertWriteOpResult">insertWriteOpResult</a></li>
@@ -2270,6 +2274,157 @@ Cursor instance.
     <div class="nameContainer">
         <h4 class="name" id="batchSize">
             
+            batchSize<span class="signature">(value)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line570">line 570</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Get the batchSize of the cursor</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>value</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>The current batchSize for the cursor</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+
+
+    
+    
+    
+        <h5>Example</h5>
+        
+
+    
+    <pre class="prettyprint"><code>// A simple example showing the use of batchSize on the cursor, batchSize only regulates how many
+// documents are returned for each batch using the getMoreCommand against the MongoDB server
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+
+  // Create a collection
+  var collection = db.collection('simple_batch_size_collection');
+
+  // Insert some documents we can sort on
+  collection.insertMany([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
+    test.equal(null, err);
+
+    // Do normal ascending sort
+    collection.find().batchSize(1).nextObject(function(err, item) {
+      test.equal(null, err);
+      test.equal(1, item.a);
+
+      db.close();
+    });
+  });
+});</code></pre>
+    
+
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="batchSize">
+            
             batchSize<span class="signature">(value)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="Cursor.html">Cursor</a>}</span>
         </h4>
     
@@ -2433,157 +2588,6 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
         
             
 <dt>
-    <div class="nameContainer">
-        <h4 class="name" id="batchSize">
-            
-            batchSize<span class="signature">(value)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{null}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line570">line 570</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Get the batchSize of the cursor</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>value</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>The current batchSize for the cursor</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
-        <h5>Example</h5>
-        
-
-    
-    <pre class="prettyprint"><code>// A simple example showing the use of batchSize on the cursor, batchSize only regulates how many
-// documents are returned for each batch using the getMoreCommand against the MongoDB server
-
-var MongoClient = require('mongodb').MongoClient,
-  test = require('assert');
-MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-
-  // Create a collection
-  var collection = db.collection('simple_batch_size_collection');
-
-  // Insert some documents we can sort on
-  collection.insertMany([{a:1}, {a:2}, {a:3}], {w:1}, function(err, docs) {
-    test.equal(null, err);
-
-    // Do normal ascending sort
-    collection.find().batchSize(1).nextObject(function(err, item) {
-      test.equal(null, err);
-      test.equal(1, item.a);
-
-      db.close();
-    });
-  });
-});</code></pre>
-    
-
-    
-</dd>
-
-        
-            
-<dt>
     <div class="nameContainer inherited">
         <h4 class="name" id="clone">
             
@@ -2670,7 +2674,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line965">line 965</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line967">line 967</a>
         </div>
         
     </div>
@@ -3046,7 +3050,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line881">line 881</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line883">line 883</a>
         </div>
         
     </div>
@@ -3779,7 +3783,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line691">line 691</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line693">line 693</a>
         </div>
         
     </div>
@@ -3959,7 +3963,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1033">line 1033</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1035">line 1035</a>
         </div>
         
     </div>
@@ -4285,7 +4289,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line752">line 752</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line754">line 754</a>
         </div>
         
     </div>
@@ -4745,7 +4749,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line999">line 999</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1001">line 1001</a>
         </div>
         
     </div>
@@ -5027,7 +5031,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line987">line 987</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line989">line 989</a>
         </div>
         
     </div>
@@ -5654,7 +5658,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line222">line 222</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line676">line 676</a>
         </div>
         
     </div>
@@ -5735,6 +5739,8 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
 
+    
+        <dt class="important tag-deprecated">Deprecated</dt><dd class="yes-def tag-deprecated"><ul class="dummy"><li>Yes</li></ul></dd>
     
     
     
@@ -5897,7 +5903,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line674">line 674</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line222">line 222</a>
         </div>
         
     </div>
@@ -5978,8 +5984,6 @@ co(function*() {
     
     
 
-    
-        <dt class="important tag-deprecated">Deprecated</dt><dd class="yes-def tag-deprecated"><ul class="dummy"><li>Yes</li></ul></dd>
     
     
     
@@ -6371,7 +6375,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1128">line 1128</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1130">line 1130</a>
         </div>
         
     </div>
@@ -6449,7 +6453,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1134">line 1134</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1136">line 1136</a>
         </div>
         
     </div>
@@ -6743,7 +6747,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1108">line 1108</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1110">line 1110</a>
         </div>
         
     </div>
@@ -6866,7 +6870,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1122">line 1122</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1124">line 1124</a>
         </div>
         
     </div>
@@ -7665,7 +7669,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1115">line 1115</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1117">line 1117</a>
         </div>
         
     </div>
@@ -7786,7 +7790,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line774">line 774</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line776">line 776</a>
         </div>
         
     </div>
@@ -8544,7 +8548,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1020">line 1020</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1022">line 1022</a>
         </div>
         
     </div>
@@ -8822,7 +8826,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line804">line 804</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line806">line 806</a>
         </div>
         
     </div>
@@ -9053,7 +9057,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1142">line 1142</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1144">line 1144</a>
         </div>
         
     </div>
@@ -9183,7 +9187,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1149">line 1149</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1151">line 1151</a>
         </div>
         
     </div>
@@ -9309,7 +9313,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1156">line 1156</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1158">line 1158</a>
         </div>
         
     </div>
@@ -9436,7 +9440,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line861">line 861</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line863">line 863</a>
         </div>
         
     </div>
@@ -9575,7 +9579,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line738">line 738</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line740">line 740</a>
         </div>
         
     </div>
@@ -9691,7 +9695,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line732">line 732</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line734">line 734</a>
         </div>
         
     </div>
@@ -9952,7 +9956,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line787">line 787</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line789">line 789</a>
         </div>
         
     </div>
@@ -10440,7 +10444,7 @@ co(function*() {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Fri Sep 25 2015 15:13:26 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Mon Sep 28 2015 13:35:40 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

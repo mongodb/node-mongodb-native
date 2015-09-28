@@ -347,6 +347,10 @@
             
                 <li data-name="Collection~findAndModifyWriteOpResult"><a href="Collection.html#~findAndModifyWriteOpResult">findAndModifyWriteOpResult</a></li>
             
+                <li data-name="Collection~insertOneWriteOpCallback"><a href="Collection.html#~insertOneWriteOpCallback">insertOneWriteOpCallback</a></li>
+            
+                <li data-name="Collection~insertOneWriteOpResult"><a href="Collection.html#~insertOneWriteOpResult">insertOneWriteOpResult</a></li>
+            
                 <li data-name="Collection~insertWriteOpCallback"><a href="Collection.html#~insertWriteOpCallback">insertWriteOpCallback</a></li>
             
                 <li data-name="Collection~insertWriteOpResult"><a href="Collection.html#~insertWriteOpResult">insertWriteOpResult</a></li>
@@ -1976,7 +1980,7 @@ Collection instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2371">line 2371</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2389">line 2389</a>
         </div>
         
     </div>
@@ -3273,7 +3277,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1849">line 1849</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1867">line 1867</a>
         </div>
         
     </div>
@@ -3738,7 +3742,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1476">line 1476</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1494">line 1494</a>
         </div>
         
     </div>
@@ -4419,7 +4423,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
         test.equal(4, items.length);
 
         // Peform a query, with explain to show we hit the query
-        collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
+        collection.find({a:2}).explain(function(err, explanation) {
           test.equal(null, err);
           test.ok(explanation != null);
 
@@ -4450,7 +4454,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
       test.equal("a_1", indexName);
 
       // Peform a query, with explain to show we hit the query
-      collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
+      collection.find({a:2}).explain(function(err, explanation) {
         test.equal(null, err);
         test.ok(explanation != null);
 
@@ -4488,7 +4492,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
         test.equal(4, items.length);
 
         // Peform a query, with explain to show we hit the query
-        collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
+        collection.find({a:2}).explain(function(err, explanation) {
           test.equal(null, err);
           test.ok(explanation != null);
 
@@ -4522,7 +4526,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
         test.equal(4, items.length);
 
         // Peform a query, with explain to show we hit the query
-        collection.find({a:2}, {explain:true}).toArray().then(function(explanation) {
+        collection.find({a:2}).explain().then(function(explanation) {
           test.ok(explanation != null);
 
           db.close();
@@ -4558,7 +4562,7 @@ co(function*() {
   test.equal(4, items.length);
 
   // Peform a query, with explain to show we hit the query
-  var explanation = yield collection.find({a:2}, {explain:true}).toArray()
+  var explanation = yield collection.find({a:2}).explain()
   test.ok(explanation != null);
 
   db.close();
@@ -4579,7 +4583,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1512">line 1512</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1530">line 1530</a>
         </div>
         
     </div>
@@ -4741,7 +4745,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1079">line 1079</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1097">line 1097</a>
         </div>
         
     </div>
@@ -5082,7 +5086,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1028">line 1028</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1046">line 1046</a>
         </div>
         
     </div>
@@ -5459,7 +5463,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1917">line 1917</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1935">line 1935</a>
         </div>
         
     </div>
@@ -5875,7 +5879,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1374">line 1374</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1392">line 1392</a>
         </div>
         
     </div>
@@ -6123,7 +6127,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1633">line 1633</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1651">line 1651</a>
         </div>
         
     </div>
@@ -6309,7 +6313,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1561">line 1561</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1579">line 1579</a>
         </div>
         
     </div>
@@ -6751,7 +6755,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1602">line 1602</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1620">line 1620</a>
         </div>
         
     </div>
@@ -7006,7 +7010,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1731">line 1731</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1749">line 1749</a>
         </div>
         
     </div>
@@ -7688,7 +7692,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
         test.equal(4, items.length);
 
         // Peform a query, with explain to show we hit the query
-        collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
+        collection.find({a:2}).explain(function(err, explanation) {
           test.equal(null, err);
           test.ok(explanation != null);
 
@@ -7724,7 +7728,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
         test.equal(4, items.length);
 
         // Peform a query, with explain to show we hit the query
-        collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
+        collection.find({a:2}).explain(function(err, explanation) {
           test.equal(null, err);
           test.ok(explanation != null);
 
@@ -7757,7 +7761,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
         test.equal(4, items.length);
 
         // Peform a query, with explain to show we hit the query
-        collection.find({a:2}, {explain:true}).toArray().then(function(explanation) {
+        collection.find({a:2}).explain().then(function(explanation) {
           test.ok(explanation != null);
 
           db.close();
@@ -7789,7 +7793,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
         test.equal(4, items.length);
 
         // Peform a query, with explain to show we hit the query
-        collection.find({a:2}, {explain:true}).toArray().then(function(explanation) {
+        collection.find({a:2}).explain().then(function(explanation) {
           test.ok(explanation != null);
 
           db.close();
@@ -7824,7 +7828,7 @@ co(function*() {
   test.equal(4, items.length);
 
   // Peform a query, with explain to show we hit the query
-  var explanation = yield collection.find({a:2}, {explain:true}).toArray();
+  var explanation = yield collection.find({a:2}).explain();
   test.ok(explanation != null);
 
   db.close();
@@ -7855,7 +7859,7 @@ co(function*() {
   test.equal(4, items.length);
 
   // Peform a query, with explain to show we hit the query
-  var explanation = yield collection.find({a:2}, {explain:true}).toArray();
+  var explanation = yield collection.find({a:2}).explain();
   test.ok(explanation != null);
 
   // Close db
@@ -8043,9 +8047,9 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     test.equal(null, err);
 
     // Peform a simple find and return all the documents
-    collection.find({}, {explain:true}).toArray(function(err, docs) {
+    collection.find({}).explain(function(err, explain) {
       test.equal(null, err);
-      test.equal(1, docs.length);
+      test.ok(explain != null);
 
       db.close();
     });
@@ -8068,13 +8072,14 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     test.equal(null, err);
 
     // Peform a simple find and return all the documents
-    collection.find({}, {skip:1, limit:1, fields:{b:1}}).toArray(function(err, docs) {
-      test.equal(null, err);
-      test.equal(1, docs.length);
-      test.equal(null, docs[0].a);
-      test.equal(2, docs[0].b);
+    collection.find({})
+      .skip(1).limit(1).project({b:1}).toArray(function(err, docs) {
+        test.equal(null, err);
+        test.equal(1, docs.length);
+        test.equal(null, docs[0].a);
+        test.equal(2, docs[0].b);
 
-      db.close();
+        db.close();
     });
   });
 });</code></pre>
@@ -8118,8 +8123,8 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   collection.insertMany([{a:1}, {a:2}, {a:3}], {w:1}).then(function(result) {
 
     // Peform a simple find and return all the documents
-    collection.find({}, {explain:true}).toArray().then(function(docs) {
-      test.equal(1, docs.length);
+    collection.find({}).explain().then(function(docs) {
+      test.ok(docs != null);
 
       db.close();
     });
@@ -8141,12 +8146,13 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   collection.insertMany([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {w:1}).then(function(result) {
 
     // Peform a simple find and return all the documents
-    collection.find({}, {skip:1, limit:1, fields:{b:1}}).toArray().then(function(docs) {
-      test.equal(1, docs.length);
-      test.equal(null, docs[0].a);
-      test.equal(2, docs[0].b);
+    collection.find({})
+      .skip(1).limit(1).project({b:1}).toArray().then(function(docs) {
+        test.equal(1, docs.length);
+        test.equal(null, docs[0].a);
+        test.equal(2, docs[0].b);
 
-      db.close();
+        db.close();
     });
   });
 });</code></pre>
@@ -8195,8 +8201,8 @@ co(function*() {
   yield collection.insertMany([{a:1}, {a:2}, {a:3}], {w:1});
 
   // Peform a simple find and return all the documents
-  var docs = yield collection.find({}, {explain:true}).toArray();
-  test.equal(1, docs.length);
+  var explain = yield collection.find({}).explain();
+  test.ok(explain != null);
 
   db.close();
 });</code></pre>
@@ -8219,13 +8225,14 @@ co(function*() {
   yield collection.insertMany([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], {w:1});
 
   // Peform a simple find and return all the documents
-  var docs = yield collection.find({}, {skip:1, limit:1, fields:{b:1}}).toArray();
-  test.equal(1, docs.length);
-  test.equal(null, docs[0].a);
-  test.equal(2, docs[0].b);
+  var docs = yield collection.find({})
+  .skip(1).limit(1).project({b:1}).toArray();
+    test.equal(1, docs.length);
+    test.equal(null, docs[0].a);
+    test.equal(2, docs[0].b);
 
-  // Close db
-  db.close();
+    // Close db
+    db.close();
 });</code></pre>
     
 
@@ -8243,7 +8250,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2228">line 2228</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2246">line 2246</a>
         </div>
         
     </div>
@@ -8936,7 +8943,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2327">line 2327</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2345">line 2345</a>
         </div>
         
     </div>
@@ -9408,7 +9415,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1280">line 1280</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1298">line 1298</a>
         </div>
         
     </div>
@@ -10444,7 +10451,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2066">line 2066</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2084">line 2084</a>
         </div>
         
     </div>
@@ -10860,7 +10867,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2117">line 2117</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2135">line 2135</a>
         </div>
         
     </div>
@@ -11401,7 +11408,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2171">line 2171</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2189">line 2189</a>
         </div>
         
     </div>
@@ -11942,7 +11949,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2654">line 2654</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2672">line 2672</a>
         </div>
         
     </div>
@@ -12435,7 +12442,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2580">line 2580</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2598">line 2598</a>
         </div>
         
     </div>
@@ -13112,7 +13119,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2751">line 2751</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2769">line 2769</a>
         </div>
         
     </div>
@@ -13882,7 +13889,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1973">line 1973</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1991">line 1991</a>
         </div>
         
     </div>
@@ -14107,7 +14114,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1761">line 1761</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1779">line 1779</a>
         </div>
         
     </div>
@@ -14367,7 +14374,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1804">line 1804</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1822">line 1822</a>
         </div>
         
     </div>
@@ -14825,7 +14832,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line3057">line 3057</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line3075">line 3075</a>
         </div>
         
     </div>
@@ -15259,7 +15266,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line3038">line 3038</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line3056">line 3056</a>
         </div>
         
     </div>
@@ -15664,7 +15671,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line725">line 725</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line743">line 743</a>
         </div>
         
     </div>
@@ -17276,7 +17283,7 @@ co(function*() {
             <td class="type">
             
                 
-<span class="param-type"><a href="Collection.html#~insertWriteOpCallback">Collection~insertWriteOpCallback</a></span>
+<span class="param-type"><a href="Collection.html#~insertOneWriteOpCallback">Collection~insertOneWriteOpCallback</a></span>
 
 
             
@@ -17421,7 +17428,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1432">line 1432</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1450">line 1450</a>
         </div>
         
     </div>
@@ -17623,7 +17630,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1683">line 1683</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1701">line 1701</a>
         </div>
         
     </div>
@@ -17819,7 +17826,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2912">line 2912</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2930">line 2930</a>
         </div>
         
     </div>
@@ -19097,7 +19104,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1397">line 1397</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1415">line 1415</a>
         </div>
         
     </div>
@@ -19302,7 +19309,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2495">line 2495</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2513">line 2513</a>
         </div>
         
     </div>
@@ -19786,7 +19793,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1644">line 1644</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1662">line 1662</a>
         </div>
         
     </div>
@@ -20028,7 +20035,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1166">line 1166</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1184">line 1184</a>
         </div>
         
     </div>
@@ -20556,7 +20563,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1326">line 1326</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1344">line 1344</a>
         </div>
         
     </div>
@@ -21077,7 +21084,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line830">line 830</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line848">line 848</a>
         </div>
         
     </div>
@@ -21522,7 +21529,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1202">line 1202</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1220">line 1220</a>
         </div>
         
     </div>
@@ -22060,7 +22067,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2002">line 2002</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2020">line 2020</a>
         </div>
         
     </div>
@@ -22370,7 +22377,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line977">line 977</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line995">line 995</a>
         </div>
         
     </div>
@@ -23054,7 +23061,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line885">line 885</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line903">line 903</a>
         </div>
         
     </div>
@@ -23577,7 +23584,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line775">line 775</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line793">line 793</a>
         </div>
         
     </div>
@@ -24544,7 +24551,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1309">line 1309</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1327">line 1327</a>
         </div>
         
     </div>
@@ -24683,7 +24690,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1830">line 1830</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1848">line 1848</a>
         </div>
         
     </div>
@@ -24822,7 +24829,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1009">line 1009</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1027">line 1027</a>
         </div>
         
     </div>
@@ -25169,7 +25176,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2047">line 2047</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2065">line 2065</a>
         </div>
         
     </div>
@@ -25439,6 +25446,399 @@ co(function*() {
                 
 <dt>
     <div class="nameContainer">
+        <h4 class="name" id="~insertOneWriteOpCallback">
+            
+            insertOneWriteOpCallback<span class="signature">(error, result)</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line721">line 721</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>The callback format for inserts</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>error</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="MongoError.html">MongoError</a></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>An error instance representing the error during the execution.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>result</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Collection.html#~insertOneWriteOpResult">Collection~insertOneWriteOpResult</a></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>The result object if the command was executed successfully.</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+            
+                
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="~insertOneWriteOpResult">insertOneWriteOpResult<span class="type-signature type object">Object</span> </h4>
+    </div>
+    
+    
+</dt>
+<dd>
+    
+    
+    
+<dl class="details">
+    
+        
+        <h5 class="subsection-title">Properties:</h5>
+        
+        <dl>
+
+<table class="props">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>insertedCount</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"><p>The total amount of documents inserted.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>ops</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;object></span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"><p>All the documents inserted using insertOne/insertMany/replaceOne. Documents contain the _id field if forceServerObjectId == false for insertOne/insertMany</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>insertedId</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">ObjectId</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"><p>The driver generated ObjectId for the insert operation.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>connection</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"><p>The connection object used for the operation.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>result</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"><p>The raw command result object returned from MongoDB (content might vary by server version).</p>
+                <h6>Properties</h6>
+
+<table class="props">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>ok</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"><p>Is 1 if the command executed correctly.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>n</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"><p>The total count of documents inserted.</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+            </td>
+        </tr>
+	
+	
+	</tbody>
+</table></dl>
+        
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+</dd>
+
+            
+                
+<dt>
+    <div class="nameContainer">
         <h4 class="name" id="~insertWriteOpCallback">
             
             insertWriteOpCallback<span class="signature">(error, result)</span>
@@ -25446,7 +25846,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line703">line 703</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line714">line 714</a>
         </div>
         
     </div>
@@ -25839,7 +26239,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2476">line 2476</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2494">line 2494</a>
         </div>
         
     </div>
@@ -25978,7 +26378,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1245">line 1245</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1263">line 1263</a>
         </div>
         
     </div>
@@ -26117,7 +26517,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line754">line 754</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line772">line 772</a>
         </div>
         
     </div>
@@ -26901,7 +27301,7 @@ co(function*() {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Fri Sep 25 2015 15:13:26 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Mon Sep 28 2015 13:35:40 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>
