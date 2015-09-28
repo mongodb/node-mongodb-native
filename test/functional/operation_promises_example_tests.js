@@ -210,7 +210,7 @@ exports.shouldCreateComplexIndexOnTwoFieldsWithPromises = {
             test.equal(4, items.length);
 
             // Peform a query, with explain to show we hit the query
-            collection.find({a:2}, {explain:true}).toArray().then(function(explanation) {
+            collection.find({a:2}).explain().then(function(explanation) {
               test.ok(explanation != null);
 
               db.close();
@@ -483,7 +483,7 @@ exports.shouldCreateComplexEnsureIndexWithPromises = {
             test.equal(4, items.length);
 
             // Peform a query, with explain to show we hit the query
-            collection.find({a:2}, {explain:true}).toArray().then(function(explanation) {
+            collection.find({a:2}).explain().then(function(explanation) {
               test.ok(explanation != null);
 
               db.close();
@@ -532,7 +532,7 @@ exports.ensureIndexExampleWithCompountIndexWithPromises = {
             test.equal(4, items.length);
 
             // Peform a query, with explain to show we hit the query
-            collection.find({a:2}, {explain:true}).toArray().then(function(explanation) {
+            collection.find({a:2}).explain().then(function(explanation) {
               test.ok(explanation != null);
 
               db.close();
@@ -615,8 +615,8 @@ exports.shouldPeformASimpleExplainQueryWithPromises = {
       collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax()).then(function(result) {
 
         // Peform a simple find and return all the documents
-        collection.find({}, {explain:true}).toArray().then(function(docs) {
-          test.equal(1, docs.length);
+        collection.find({}).explain().then(function(docs) {
+          test.ok(docs != null);
 
           db.close();
           test.done();
@@ -655,13 +655,14 @@ exports.shouldPeformASimpleLimitSkipQueryWithPromises = {
       collection.insertMany([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], configuration.writeConcernMax()).then(function(result) {
 
         // Peform a simple find and return all the documents
-        collection.find({}, {skip:1, limit:1, fields:{b:1}}).toArray().then(function(docs) {
-          test.equal(1, docs.length);
-          test.equal(null, docs[0].a);
-          test.equal(2, docs[0].b);
+        collection.find({})
+          .skip(1).limit(1).project({b:1}).toArray().then(function(docs) {
+            test.equal(1, docs.length);
+            test.equal(null, docs[0].a);
+            test.equal(2, docs[0].b);
 
-          db.close();
-          test.done();
+            db.close();
+            test.done();
         });
       });
     });
@@ -3168,7 +3169,7 @@ exports.shouldCreateOnDbComplexIndexOnTwoFieldsWithPromises = {
             test.equal(4, items.length);
 
             // Peform a query, with explain to show we hit the query
-            collection.find({a:2}, {explain:true}).toArray().then(function(explanation) {
+            collection.find({a:2}).explain().then(function(explanation) {
               test.ok(explanation != null);
 
               db.close();
@@ -3219,7 +3220,7 @@ exports.shouldCreateComplexEnsureIndexDbWithPromises = {
             test.equal(4, items.length);
 
             // Peform a query, with explain to show we hit the query
-            collection.find({a:2}, {explain:true}).toArray().then(function(explanation) {
+            collection.find({a:2}).explain().then(function(explanation) {
               test.ok(explanation != null);
 
               db.close();
