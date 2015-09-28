@@ -280,7 +280,7 @@ var fatalErrorHandler = function(self, state) {
     // Flush out all the callbacks
     if(state.callbacks) state.callbacks.flush(new MongoError(f("server %s received an error %s", self.name, JSON.stringify(err))));
     // Emit error event
-    self.emit('error', err, self);
+    if(self.listeners('error').length > 0) self.emit('error', err, self);
     // If we specified the driver to reconnect perform it
     if(state.reconnect) setTimeout(function() {
       // state.currentReconnectRetry = state.reconnectTries,

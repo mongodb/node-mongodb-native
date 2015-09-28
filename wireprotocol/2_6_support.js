@@ -190,7 +190,10 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
   }
 
   // Remove readConcern, ensure no failing commands
-  if(cmd.readConcern) delete cmd['readConcern'];
+  if(cmd.readConcern) {
+    cmd = copy(cmd);
+    delete cmd['readConcern'];
+  }
 
   // Serialize functions
   var serializeFunctions = typeof options.serializeFunctions == 'boolean'

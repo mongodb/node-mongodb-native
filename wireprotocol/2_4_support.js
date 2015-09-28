@@ -204,7 +204,10 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
   }
 
   // Remove readConcern, ensure no failing commands
-  if(cmd.readConcern) delete cmd['readConcern'];
+  if(cmd.readConcern) {
+    cmd = copy(cmd);
+    delete cmd['readConcern'];
+  }
 
   // Set up the serialize and ignoreUndefined fields
   var serializeFunctions = typeof options.serializeFunctions == 'boolean' 
