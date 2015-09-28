@@ -1,3 +1,8 @@
+1.2.14 09-28-2015
+-----------------
+- NODE-547 only emit error if there are any listeners.
+- Fixed APM issue with issuing readConcern.
+
 1.2.13 09-18-2015
 -----------------
 - Added BSON serializer ignoreUndefined option for insert/update/remove/command/cursor.
