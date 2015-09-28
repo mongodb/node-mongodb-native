@@ -6,6 +6,7 @@
 * NODE-563 Introduced options.ignoreUndefined for db class and MongoClient db options, made serialize undefined to null default again but allowing for overrides on insert/update/delete operations.
 * Use handleCallback if result is an error for count queries. (Issue #1298, https://github.com/agclever)
 * Rewind cursor to correctly force reconnect on capped collections when first query comes back empty.
+* NODE-571 added code 59 to legacy server errors when SCRAM-SHA-1 mechanism fails.
 
 2.0.43 09-14-2015
 -----------------
