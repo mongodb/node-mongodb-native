@@ -828,6 +828,26 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
     </item>
     
     <item>
+      <title>Connecting</title>
+      <link>/node-mongodb-native/2.0/reference/connecting/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/reference/connecting/</guid>
+      <description>
+
+&lt;h2 id=&#34;connecting&#34;&gt;Connecting&lt;/h2&gt;
+
+&lt;p&gt;The reference documentation for connecting to a MongoDB server deployment is divided into three sections:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/connection-settings/&#34;&gt;Connection Settings&lt;/a&gt;: documentation of the various ways to specify the properties of a connection&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/authenticating/&#34;&gt;Authenticating&lt;/a&gt;: detailed documentation of the various ways to specify authentication credentials&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/ssl/&#34;&gt;SSL&lt;/a&gt;: Detailed documentation of the various ways to specify the properties of an SSL connection&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
       <title>CRUD Operations</title>
       <link>/node-mongodb-native/2.0/reference/crud/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
@@ -1282,7 +1302,7 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;The cursor returned by the &lt;em&gt;find&lt;/em&gt; method has a lot of methods that allow for chaining of options for a query. Once the query is ready to be executed you can retrieve the documents using the &lt;em&gt;next&lt;/em&gt;, &lt;em&gt;each&lt;/em&gt; and &lt;em&gt;toArray&lt;/em&gt; methods. If the query returns a lot of documents it&amp;rsquo;s preferable to use the &lt;em&gt;next&lt;/em&gt; or &lt;em&gt;each&lt;/em&gt; methods as the &lt;em&gt;toArray&lt;/em&gt; method will materialize all the documents into memory before calling the callback function potentially using a lot of memory if the query returns a lot of documents.&lt;/p&gt;
 
-&lt;p&gt;We won&amp;rsquo;t look at the options we can set on the cursor as they can be viewed in the &lt;a href=&#34;/node-mongodb-native/2.0/api/Cursor.html&#34;&gt;Cursor API documentation&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;We won&amp;rsquo;t look at the options we can set on the cursor as they can be viewed in the &lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/api/Cursor.html&#34;&gt;Cursor API documentation&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;We already looked at &lt;em&gt;toArray&lt;/em&gt; method above. Let&amp;rsquo;s take a look at the &lt;em&gt;next&lt;/em&gt; method.&lt;/p&gt;
 
@@ -1343,26 +1363,6 @@ MongoClient.connect(url, function(err, db) {
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;The &lt;em&gt;each&lt;/em&gt; method will call the supplied callback until there are no more documents available that satisfy the query. Once the available documents is exhausted it will return &lt;em&gt;null&lt;/em&gt; for the second parameter in the callback. If you wish to terminate the each early you should return false in your &lt;em&gt;each&lt;/em&gt; callback. This will stop the cursor from returning documents.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Connecting</title>
-      <link>/node-mongodb-native/2.0/reference/connecting/</link>
-      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
-      
-      <guid>/node-mongodb-native/2.0/reference/connecting/</guid>
-      <description>
-
-&lt;h2 id=&#34;connecting&#34;&gt;Connecting&lt;/h2&gt;
-
-&lt;p&gt;The reference documentation for connecting to a MongoDB server deployment is divided into three sections:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/connection-settings/&#34;&gt;Connection Settings&lt;/a&gt;: documentation of the various ways to specify the properties of a connection&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/authenticating/&#34;&gt;Authenticating&lt;/a&gt;: detailed documentation of the various ways to specify authentication credentials&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/ssl/&#34;&gt;SSL&lt;/a&gt;: Detailed documentation of the various ways to specify the properties of an SSL connection&lt;/li&gt;
-&lt;/ul&gt;
 </description>
     </item>
     
@@ -2216,103 +2216,29 @@ $ git checkout -b myNewFeature
     </item>
     
     <item>
-      <title>Installation Guide</title>
-      <link>/node-mongodb-native/2.0/getting-started/installation-guide/</link>
+      <title>index</title>
+      <link>/node-mongodb-native/2.0/</link>
       <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
       
-      <guid>/node-mongodb-native/2.0/getting-started/installation-guide/</guid>
+      <guid>/node-mongodb-native/2.0/</guid>
       <description>
 
-&lt;h1 id=&#34;installation&#34;&gt;Installation&lt;/h1&gt;
+&lt;h2 id=&#34;mongodb-node-js-driver-documentation&#34;&gt;MongoDB Node.js Driver Documentation&lt;/h2&gt;
 
-&lt;p&gt;The recommended way to get started using the Node.js 2.0 driver is by using the &lt;code&gt;NPM&lt;/code&gt; (Node Package Manager) to install the dependency in your project.&lt;/p&gt;
+&lt;p&gt;Welcome to the MongoDB Node.js 2.x driver documentation.&lt;/p&gt;
 
-&lt;h2 id=&#34;mongodb-driver&#34;&gt;MongoDB Driver&lt;/h2&gt;
+&lt;h3 id=&#34;what-s-new-in-2-0&#34;&gt;What&amp;rsquo;s New in 2.0&lt;/h3&gt;
 
-&lt;p&gt;Given that you have created your own project using &lt;code&gt;npm init&lt;/code&gt; we install the mongodb driver and it&amp;rsquo;s dependencies by executing the following &lt;code&gt;NPM&lt;/code&gt; command.&lt;/p&gt;
+&lt;p&gt;The &lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/whats-new/&#34;&gt;What&amp;rsquo;s New&lt;/a&gt; guide explains the major new features of the driver.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;npm install mongodb --save
-&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;If you are upgrading from the 1.x series of the driver, consult the &lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/whats-new/upgrading/&#34;&gt;Upgrading&lt;/a&gt; documentation for
+information on breaking changes.&lt;/p&gt;
 
-&lt;p&gt;This will download the MongoDB driver and add a dependency entry in your &lt;code&gt;package.json&lt;/code&gt; file.&lt;/p&gt;
+&lt;h3 id=&#34;mongodb-driver&#34;&gt;MongoDB Driver&lt;/h3&gt;
 
-&lt;h2 id=&#34;troubleshooting&#34;&gt;Troubleshooting&lt;/h2&gt;
-
-&lt;p&gt;The MongoDB driver depends on several other packages. These are.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;mongodb-core&lt;/li&gt;
-&lt;li&gt;bson&lt;/li&gt;
-&lt;li&gt;kerberos&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;The &lt;code&gt;kerberos&lt;/code&gt; package is a C++ extension that requires a build environment to be installed on your system. You must be able to build node.js itself to be able to compile and install the &lt;code&gt;kerberos&lt;/code&gt; module. Furthermore the &lt;code&gt;kerberos&lt;/code&gt; module requires the MIT Kerberos package to correctly compile on UNIX operating systems. Consult your UNIX operation system package manager what libraries to install.&lt;/p&gt;
-
-&lt;p&gt;&lt;div class=&#34;admonition important&#34;&gt;
-&lt;h5 class=&#34;admonition-title&#34;&gt;important&lt;/h5&gt;
-&lt;p&gt;Windows already contains the SSPI API used for Kerberos authentication. However you will need to install a full compiler tool chain using visual studio C++ to correctly install the kerberos extension.&lt;/p&gt;
-
-&lt;/div&gt;
-&lt;/p&gt;
-
-&lt;h3 id=&#34;diagnosing-on-unix&#34;&gt;Diagnosing on UNIX&lt;/h3&gt;
-
-&lt;p&gt;If you don’t have the build essentials it won’t build. In the case of linux you will need gcc and g++, node.js with all the headers and python. The easiest way to figure out what’s missing is by trying to build the js-bson project. You can do this by performing the following steps.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;git clone https://github.com/mongodb/js-bson.git
-cd js-bson
-npm install
-make test
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If all the steps complete you have the right toolchain installed. If you get node-gyp not found you need to install it globally by doing.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install -g node-gyp
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If correctly compile and runs the tests you are golden. We can now try to install the mongod driver by performing the following command.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;cd yourproject
-npm install mongodb --save
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If it still fails the next step is to examine the npm log. Rerun the command but in this case in verbose mode.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm --loglevel verbose install mongodb
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This will print out all the steps npm is performing while trying to install the module.&lt;/p&gt;
-
-&lt;h3 id=&#34;diagnosing-on-windows&#34;&gt;Diagnosing on Windows&lt;/h3&gt;
-
-&lt;p&gt;A known compiler tool chain known to work for compiling &lt;code&gt;kerberos&lt;/code&gt; on windows is the following.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Visual Studio c++ 2010 (do not use higher versions)&lt;/li&gt;
-&lt;li&gt;Windows 7 64bit SDK&lt;/li&gt;
-&lt;li&gt;Python 2.7 or higher&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Open visual studio command prompt. Ensure node.exe is in your path and install node-gyp.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install -g node-gyp
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next you will have to build the project manually to test it. Use any tool you use with git and grab the repo.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;git clone https://github.com/mongodb/js-bson.git
-cd js-bson
-npm install
-node-gyp rebuild
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This should rebuild the driver successfully if you have everything set up correctly.&lt;/p&gt;
-
-&lt;h3 id=&#34;other-possible-issues&#34;&gt;Other possible issues&lt;/h3&gt;
-
-&lt;p&gt;Your python installation might be hosed making gyp break. I always recommend that you test your deployment environment first by trying to build node itself on the server in question as this should unearth any issues with broken packages (and there are a lot of broken packages out there).&lt;/p&gt;
-
-&lt;p&gt;Another thing is to ensure your user has write permission to wherever the node modules are being installed.&lt;/p&gt;
+&lt;p&gt;For MongoDB Driver, the &lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/getting-started/&#34;&gt;Getting Started&lt;/a&gt; guide contains
+installation instructions and a simple tutorial to get up  and running quickly. For more detailed documentation, see the
+&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/&#34;&gt;Reference&lt;/a&gt; guide.&lt;/p&gt;
 </description>
     </item>
     
