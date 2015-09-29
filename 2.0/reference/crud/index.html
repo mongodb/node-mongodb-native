@@ -1539,9 +1539,9 @@ Remove Command with {b:1}
 
 <h2 id="read-methods">Read Methods</h2>
 
-<p>The main method for querying the database are the <em>find</em> and the <em>aggregate</em> method. In this CRUD tutorial we will focus on <em>find</em> only as <em>aggregate</em> has it&rsquo;s own <a href="/tutorials/aggregation">Aggregation Tutorial</a></p>
+<p>The main method for querying the database are the <em>find</em> and the <em>aggregate</em> method. In this CRUD tutorial we will focus on <em>find</em>.</p>
 
-<p>The <em>method</em> return a cursor that allows us to operate on the data. The <em>cursor</em> also implements the Node.js 0.10.x or higher stream interface allowing us to pipe the results to other streams. We will not cover streams here as they are covered in the <a href="/tutorials/streams">Streams Tutorial</a></p>
+<p>The <em>method</em> return a cursor that allows us to operate on the data. The <em>cursor</em> also implements the Node.js 0.10.x or higher stream interface allowing us to pipe the results to other streams.</p>
 
 <p>Let&rsquo;s look at a simple find example that materializes all the documents from a query using the toArray but limits the number of returned results to 2 documents.</p>
 
@@ -1573,7 +1573,7 @@ MongoClient.connect(url, function(err, db) {
 
 <p>The cursor returned by the <em>find</em> method has a lot of methods that allow for chaining of options for a query. Once the query is ready to be executed you can retrieve the documents using the <em>next</em>, <em>each</em> and <em>toArray</em> methods. If the query returns a lot of documents it&rsquo;s preferable to use the <em>next</em> or <em>each</em> methods as the <em>toArray</em> method will materialize all the documents into memory before calling the callback function potentially using a lot of memory if the query returns a lot of documents.</p>
 
-<p>We won&rsquo;t look at the options we can set on the cursor as they can be viewed in the <a href="/api-docs">Cursor API documentation</a>.</p>
+<p>We won&rsquo;t look at the options we can set on the cursor as they can be viewed in the <a href="/2.0/api/Cursor.html">Cursor API documentation</a>.</p>
 
 <p>We already looked at <em>toArray</em> method above. Let&rsquo;s take a look at the <em>next</em> method.</p>
 

@@ -72,7 +72,7 @@ Web frameworks using MongoDB
          * - **Forks**
            - 3
          * - **Watchers**
-           - 8
+           - 9
 
 .. topic:: arrjs
 
@@ -481,7 +481,7 @@ Test helpers and libraries
          * - **Forks**
            - 24
          * - **Watchers**
-           - 70
+           - 72
 
 Tools or applications to manage your MongoDB's
 ----------------------------------------------
@@ -732,7 +732,7 @@ Libraries or Applications for analytics
          * - **Forks**
            - 414
          * - **Watchers**
-           - 3604
+           - 3606
 
 Libraries for the connect middleware
 ------------------------------------
@@ -771,7 +771,7 @@ Libraries for the connect middleware
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 14:39:38 on 24/8/2015
+           - 17:24:25 on 28/8/2015
          * - **Homepage**
            - http://
          * - **Url**
@@ -779,9 +779,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 213
+           - 214
          * - **Watchers**
-           - 808
+           - 809
 
 Libraries or applications for continous integration
 ---------------------------------------------------
@@ -807,7 +807,7 @@ Libraries or applications for continous integration
          * - **Forks**
            - 70
          * - **Watchers**
-           - 487
+           - 489
 
 Exampe applications
 -------------------
