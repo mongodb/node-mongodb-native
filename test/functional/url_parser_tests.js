@@ -471,7 +471,7 @@ exports['GSSAPI parsing'] = {
     try {
       parse("mongodb://kdc.10gen.com/test?authMechanism=NONE");
     } catch(err) {
-      test.equal("only GSSAPI, PLAIN, MONGODB-X509, SCRAM-SHA-1 or MONGODB-CR is supported by authMechanism", err.message);
+      test.equal("only DEFAULT, GSSAPI, PLAIN, MONGODB-X509, SCRAM-SHA-1 or MONGODB-CR is supported by authMechanism", err.message);
     }
 
     object = parse("mongodb://dev1%4010GEN.ME:test@kdc.10gen.com/test?authMechanism=GSSAPI");
