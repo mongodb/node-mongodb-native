@@ -406,9 +406,9 @@ For *unordered* bulk operations this is not important as the driver sorts operat
 This covers write operations for MongoDB. Let's look at querying for documents next.
 
 ## Read Methods
-The main method for querying the database are the *find* and the *aggregate* method. In this CRUD tutorial we will focus on *find* only as *aggregate* has it's own [Aggregation Tutorial](/tutorials/aggregation)
+The main method for querying the database are the *find* and the *aggregate* method. In this CRUD tutorial we will focus on *find*.
 
-The *method* return a cursor that allows us to operate on the data. The *cursor* also implements the Node.js 0.10.x or higher stream interface allowing us to pipe the results to other streams. We will not cover streams here as they are covered in the [Streams Tutorial](/tutorials/streams)
+The *method* return a cursor that allows us to operate on the data. The *cursor* also implements the Node.js 0.10.x or higher stream interface allowing us to pipe the results to other streams.
 
 Let's look at a simple find example that materializes all the documents from a query using the toArray but limits the number of returned results to 2 documents.
 
@@ -441,7 +441,7 @@ MongoClient.connect(url, function(err, db) {
 
 The cursor returned by the *find* method has a lot of methods that allow for chaining of options for a query. Once the query is ready to be executed you can retrieve the documents using the *next*, *each* and *toArray* methods. If the query returns a lot of documents it's preferable to use the *next* or *each* methods as the *toArray* method will materialize all the documents into memory before calling the callback function potentially using a lot of memory if the query returns a lot of documents.
 
-We won't look at the options we can set on the cursor as they can be viewed in the [Cursor API documentation](/api-docs).
+We won't look at the options we can set on the cursor as they can be viewed in the [Cursor API documentation](/2.0/api/Cursor.html).
 
 We already looked at *toArray* method above. Let's take a look at the *next* method.
 
