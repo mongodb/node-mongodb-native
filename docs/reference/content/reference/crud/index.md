@@ -441,7 +441,40 @@ MongoClient.connect(url, function(err, db) {
 
 The cursor returned by the *find* method has a lot of methods that allow for chaining of options for a query. Once the query is ready to be executed you can retrieve the documents using the *next*, *each* and *toArray* methods. If the query returns a lot of documents it's preferable to use the *next* or *each* methods as the *toArray* method will materialize all the documents into memory before calling the callback function potentially using a lot of memory if the query returns a lot of documents.
 
-We won't look at the options we can set on the cursor as they can be viewed in the [Cursor API documentation](/node-mongodb-native/2.0/api/Cursor.html).
+Let's look at some of the options we can set on the cursor.
+
+```js
+collection.find({}).project({a:1})                             // Create a projection of field a 
+collection.find({}).skip(1).limit(10)                          // Skip 1 and limit 10
+collection.find({}).batchSize(5)                               // Set batchSize on cursor to 5
+collection.find({}).filter({a:1})                              // Set query on the cursor
+collection.find({}).comment('add a comment')                   // Add a comment to the query, allowing to correlate queries
+collection.find({}).addCursorFlag('tailable', true)            // Set cursor as tailable
+collection.find({}).addCursorFlag('oplogReplay', true)         // Set cursor as oplogReplay
+collection.find({}).addCursorFlag('noCursorTimeout', true)     // Set cursor as noCursorTimeout
+collection.find({}).addCursorFlag('awaitData', true)           // Set cursor as awaitData
+collection.find({}).addCursorFlag('exhaust', true)             // Set cursor as exhaust
+collection.find({}).addCursorFlag('partial', true)             // Set cursor as partial
+collection.find({}).addQueryModifier('$orderby', {a:1})        // Set $orderby {a:1}
+collection.find({}).max(10)                                    // Set the cursor maxScan
+collection.find({}).maxScan(10)                                // Set the cursor maxScan
+collection.find({}).maxTimeMS(1000)                            // Set the cursor maxTimeMS
+collection.find({}).min(100)                                   // Set the cursor min
+collection.find({}).returnKey(10)                              // Set the cursor returnKey
+collection.find({}).setReadPreference(ReadPreference.PRIMARY)  // Set the cursor readPreference
+collection.find({}).showRecordId(true)                         // Set the cursor showRecordId
+collection.find({}).snapshot(true)                             // Set the cursor snapshot
+collection.find({}).sort([['a', 1]])                           // Sets the sort order of the cursor query
+collection.find({}).hint('a_1')                                // Set the cursor hint
+```
+
+All options are chainable, so one can do the following.
+
+```js
+collection.find({}).maxTimeMS(1000).maxScan(100).skip(1).toArray(..)
+```
+
+More information can be found in the [Cursor API documentation]
 
 We already looked at *toArray* method above. Let's take a look at the *next* method.
 
