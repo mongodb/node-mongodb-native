@@ -1573,7 +1573,7 @@ MongoClient.connect(url, function(err, db) {
 
 <p>The cursor returned by the <em>find</em> method has a lot of methods that allow for chaining of options for a query. Once the query is ready to be executed you can retrieve the documents using the <em>next</em>, <em>each</em> and <em>toArray</em> methods. If the query returns a lot of documents it&rsquo;s preferable to use the <em>next</em> or <em>each</em> methods as the <em>toArray</em> method will materialize all the documents into memory before calling the callback function potentially using a lot of memory if the query returns a lot of documents.</p>
 
-<p>We won&rsquo;t look at the options we can set on the cursor as they can be viewed in the <a href="/2.0/api/Cursor.html">Cursor API documentation</a>.</p>
+<p>We won&rsquo;t look at the options we can set on the cursor as they can be viewed in the <a href="api/Cursor.html">Cursor API documentation</a>.</p>
 
 <p>We already looked at <em>toArray</em> method above. Let&rsquo;s take a look at the <em>next</em> method.</p>
 
