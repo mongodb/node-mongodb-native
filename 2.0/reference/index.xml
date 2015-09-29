@@ -914,12 +914,12 @@ collection.find({}).sort([[&#39;a&#39;, 1]])                           // Sets t
 collection.find({}).hint(&#39;a_1&#39;)                                // Set the cursor hint
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;All options are chainable, so one can do the following.&lt;/p&gt;
+&lt;p&gt;All options are chainable, so one can combine settings in the following way.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;collection.find({}).maxTimeMS(1000).maxScan(100).skip(1).toArray(..)
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;More information can be found in the [Cursor API documentation]&lt;/p&gt;
+&lt;p&gt;More information can be found in the &lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/api/Cursor.html&#34;&gt;Cursor API documentation&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;We already looked at &lt;em&gt;toArray&lt;/em&gt; method above. Let&amp;rsquo;s take a look at the &lt;em&gt;next&lt;/em&gt; method.&lt;/p&gt;
 
