@@ -441,7 +441,7 @@ MongoClient.connect(url, function(err, db) {
 
 The cursor returned by the *find* method has a lot of methods that allow for chaining of options for a query. Once the query is ready to be executed you can retrieve the documents using the *next*, *each* and *toArray* methods. If the query returns a lot of documents it's preferable to use the *next* or *each* methods as the *toArray* method will materialize all the documents into memory before calling the callback function potentially using a lot of memory if the query returns a lot of documents.
 
-Let's look at some of the options we can set on the cursor.
+Let's look at some of the options we can set on the cursor. 
 
 ```js
 collection.find({}).project({a:1})                             // Create a projection of field a 
@@ -468,13 +468,13 @@ collection.find({}).sort([['a', 1]])                           // Sets the sort 
 collection.find({}).hint('a_1')                                // Set the cursor hint
 ```
 
-All options are chainable, so one can do the following.
+All options are chainable, so one can combine settings in the following way.
 
 ```js
 collection.find({}).maxTimeMS(1000).maxScan(100).skip(1).toArray(..)
 ```
 
-More information can be found in the [Cursor API documentation]
+More information can be found in the [Cursor API documentation](/node-mongodb-native/2.0/api/Cursor.html).
 
 We already looked at *toArray* method above. Let's take a look at the *next* method.
 
