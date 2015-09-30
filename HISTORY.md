@@ -1,3 +1,7 @@
+1.2.15
+-----------------
+- Set slaveOk to true for getMore and killCursors commands.
+
 1.2.14 09-28-2015
 -----------------
 - NODE-547 only emit error if there are any listeners.
