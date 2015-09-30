@@ -1,3 +1,7 @@
+2.0.45
+-----------------
+* NODE-566 Fix issue with rewind on capped collections causing cursor state to be reset on connection loss.
+
 2.0.44 09-28-2015
 -----------------
 * Bug fixes for APM upconverting of legacy INSERT/UPDATE/REMOVE wire protocol messages.
