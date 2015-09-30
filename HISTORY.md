@@ -1,4 +1,4 @@
-2.0.45
+2.0.45 09-30-2015
 -----------------
 * NODE-566 Fix issue with rewind on capped collections causing cursor state to be reset on connection loss.
 
