@@ -199,7 +199,7 @@ exports['start/end options for openDownloadStream'] = {
 
       uploadStream.once('finish', function() {
         var downloadStream = bucket.openDownloadStreamByName('teststart.dat',
-          { start: 1, end: 6 });
+          { start: 1 }).end(6);
 
         downloadStream.on('error', function(error) {
           test.equal(error, null);
