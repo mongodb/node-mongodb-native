@@ -128,6 +128,110 @@ exports.shouldDownloadToUploadStream = {
 /**
  * @ignore
  */
+
+exports['openDownloadStreamByName'] = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var GridFSBucket = configuration.require.GridFSBucket;
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(),
+      { poolSize:1 });
+    db.open(function(error, db) {
+      var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
+      var CHUNKS_COLL = 'gridfsdownload.chunks';
+      var FILES_COLL = 'gridfsdownload.files';
+      var readStream = fs.createReadStream('./LICENSE');
+
+      var uploadStream = bucket.openUploadStream('test.dat');
+
+      var license = fs.readFileSync('./LICENSE');
+      var id = uploadStream.id;
+
+      uploadStream.once('finish', function() {
+        var downloadStream = bucket.openDownloadStreamByName('test.dat');
+
+        var gotData = false;
+        downloadStream.on('data', function(data) {
+          test.ok(!gotData);
+          gotData = true;
+          test.ok(data.toString('utf8').indexOf('TERMS AND CONDITIONS') !== -1);
+        });
+
+        downloadStream.on('end', function() {
+          test.ok(gotData);
+          test.done();
+        });
+      });
+
+      readStream.pipe(uploadStream);
+    });
+  }
+};
+
+/**
+ * @ignore
+ */
+
+exports['start/end options for openDownloadStream'] = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var GridFSBucket = configuration.require.GridFSBucket;
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(),
+      { poolSize:1 });
+    db.open(function(error, db) {
+      var bucket = new GridFSBucket(db, {
+        bucketName: 'gridfsdownload',
+        chunkSizeBytes: 2
+      });
+      var CHUNKS_COLL = 'gridfsdownload.chunks';
+      var FILES_COLL = 'gridfsdownload.files';
+      var readStream = fs.createReadStream('./LICENSE');
+
+      var uploadStream = bucket.openUploadStream('teststart.dat');
+
+      var license = fs.readFileSync('./LICENSE');
+      var id = uploadStream.id;
+
+      uploadStream.once('finish', function() {
+        var downloadStream = bucket.openDownloadStreamByName('teststart.dat',
+          { start: 1 }).end(6);
+
+        downloadStream.on('error', function(error) {
+          test.equal(error, null);
+        });
+
+        var gotData = 0;
+        var str = '';
+        downloadStream.on('data', function(data) {
+          ++gotData;
+          str += data.toString('utf8');
+        });
+
+        downloadStream.on('end', function() {
+          // Depending on different versions of node, we may get
+          // different amounts of 'data' events. node 0.10 gives 2,
+          // node >= 0.12 gives 3. Either is correct, but we just
+          // care that we got between 1 and 3, and got the right result
+          test.ok(gotData >= 1 && gotData <= 3);
+          test.equal(str, 'pache');
+          test.done();
+        });
+      });
+
+      readStream.pipe(uploadStream);
+    });
+  }
+};
+
+
+/**
+ * @ignore
+ */
 exports['Deleting a file'] = {
   metadata: { requires: { topology: ['single'] } },
 
@@ -199,6 +303,46 @@ exports['find()'] = {
       });
 
       test.done();
+    });
+  }
+};
+
+/**
+ * @ignore
+ */
+exports['download empty doc'] = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var GridFSBucket = configuration.require.GridFSBucket;
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(),
+      { poolSize:1 });
+    db.open(function(error, db) {
+      var bucket = new GridFSBucket(db, { bucketName: 'fs' });
+
+      db.collection('fs.files').insert({ length: 0 }, function(error, result) {
+        test.equal(error, null);
+        test.equal(result.insertedIds.length, 1);
+        var id = result.insertedIds[0];
+
+        var stream = bucket.openDownloadStream(id);
+        stream.on('error', function(error) {
+          test.equal(error, null);
+        });
+
+        stream.on('data', function(data) {
+          test.ok(false);
+        });
+
+        stream.on('end', function() {
+          // As per spec, make sure we didn't actually fire a query
+          // because the document length is 0
+          test.equal(stream.s.cursor, null);
+          test.done();
+        });
+      });
     });
   }
 };
