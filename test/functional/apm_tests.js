@@ -4,7 +4,7 @@ var f = require('util').format,
   fs = require('fs');
 
 exports['Correctly receive the APM events for an insert'] = {
-  metadata: { requires: { topology: ['single'] } },
+  metadata: { requires: { topology: ['single', 'replicaset'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -34,6 +34,8 @@ exports['Correctly receive the APM events for an insert'] = {
       db.collection('apm_test').insertOne({a:1}).then(function(r) {
         test.equal(1, r.insertedCount);
         test.equal(1, started.length);
+        test.equal('insert', started[0].commandName);
+        test.equal('apm_test', started[0].command.insert);
         test.equal(1, succeeded.length);
         test.ok(callbackTriggered);
         listener.uninstrument();
@@ -46,7 +48,7 @@ exports['Correctly receive the APM events for an insert'] = {
 }
 
 exports['Correctly receive the APM events for an insert using custom operationId and time generator'] = {
-  metadata: { requires: { topology: ['single'] } },
+  metadata: { requires: { topology: ['single', 'replicaset'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -88,6 +90,8 @@ exports['Correctly receive the APM events for an insert using custom operationId
       db.collection('apm_test_1').insertOne({a:1}).then(function(r) {
         test.equal(1, started.length);
         test.equal(1, succeeded.length);
+        test.equal('insert', started[0].commandName);
+        test.equal('apm_test_1', started[0].command.insert);
         test.equal(10000, started[0].operationId);
         test.equal(0, succeeded[0].duration);
         test.ok(callbackTriggered);
@@ -123,7 +127,6 @@ var validateExpecations = function(test, expectation, results) {
 
     // Get the result
     var result = results.successes.shift();
-
     // Validate the test
     test.equal(commandName, result.commandName);
     // test.deepEqual(reply[0], result.reply.result);
@@ -299,7 +302,7 @@ var executeSuite = function(assert, client, listener, scenarios, callback) {
 }
 
 exports['Correctly run all JSON APM Tests'] = {
-  metadata: { requires: { topology: ['single'] } },
+  metadata: { requires: { topology: ['single', 'replicaset'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -331,7 +334,7 @@ exports['Correctly run all JSON APM Tests'] = {
 }
 
 exports['Correctly receive the APM events for a find with getmore and killcursor'] = {
-  metadata: { requires: { topology: ['single'] } },
+  metadata: { requires: { topology: ['single', 'replicaset'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -411,7 +414,7 @@ exports['Correctly receive the APM events for a find with getmore and killcursor
 }
 
 exports['Correctly receive the APM failure event for find'] = {
-  metadata: { requires: { topology: ['single'], mongodb: ">=2.6.0" } },
+  metadata: { requires: { topology: ['single', 'replicaset'], mongodb: ">=2.6.0" } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -481,7 +484,7 @@ var cleanup = function(overrides) {
 }
 
 exports['Correctly receive the APM events for a bulk operation'] = {
-  metadata: { requires: { topology: ['single'] } },
+  metadata: { requires: { topology: ['single', 'replicaset'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -518,14 +521,15 @@ exports['Correctly receive the APM events for a bulk operation'] = {
         db.close();
         test.done();
       }).catch(function(err) {
-        console.dir(err)
+        console.log(err.stack)
+        test.done();
       });
     });
   }
 }
 
 exports['Correctly receive the APM explain command'] = {
-  metadata: { requires: { topology: ['single'] } },
+  metadata: { requires: { topology: ['single', 'replicaset'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -590,7 +594,7 @@ exports['Correctly receive the APM explain command'] = {
 }
 
 exports['Correctly filter out sensitive commands'] = {
-  metadata: { requires: { topology: ['single'] } },
+  metadata: { requires: { topology: ['single', 'replicaset'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -630,6 +634,123 @@ exports['Correctly filter out sensitive commands'] = {
 
         // Remove instrumentation
         listener.uninstrument();
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
+
+exports['Correctly receive the APM events for an updateOne'] = {
+  metadata: { requires: { topology: ['single', 'replicaset'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var started = [];
+    var succeeded = [];
+    var failed = [];
+    var callbackTriggered = false;
+
+    var listener = require('../..').instrument(function(err, instrumentations) {});
+    listener.on('started', function(event) {
+      if(event.commandName == 'update')
+        started.push(event);
+    });
+
+    listener.on('succeeded', function(event) {
+      if(event.commandName == 'update')
+        succeeded.push(event);
+    });
+
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      db.collection('apm_test_u_1').updateOne({a:1}, {$set:{b:1}}, {upsert:true}).then(function(r) {
+        test.equal(1, started.length);
+        test.equal('update', started[0].commandName);
+        test.equal('apm_test_u_1', started[0].command.update);
+        test.equal(1, succeeded.length);
+        listener.uninstrument();
+
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
+
+exports['Correctly receive the APM events for an updateMany'] = {
+  metadata: { requires: { topology: ['single', 'replicaset'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var started = [];
+    var succeeded = [];
+    var failed = [];
+    var callbackTriggered = false;
+
+    var listener = require('../..').instrument(function(err, instrumentations) {});
+    listener.on('started', function(event) {
+      if(event.commandName == 'update')
+        started.push(event);
+    });
+
+    listener.on('succeeded', function(event) {
+      if(event.commandName == 'update')
+        succeeded.push(event);
+    });
+
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      db.collection('apm_test_u_2').updateMany({a:1}, {$set:{b:1}}, {upsert:true}).then(function(r) {
+        test.equal(1, started.length);
+        test.equal('update', started[0].commandName);
+        test.equal('apm_test_u_2', started[0].command.update);
+        test.equal(1, succeeded.length);
+        listener.uninstrument();
+
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
+
+exports['Correctly receive the APM events for deleteOne'] = {
+  metadata: { requires: { topology: ['single', 'replicaset'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var started = [];
+    var succeeded = [];
+    var failed = [];
+    var callbackTriggered = false;
+
+    var listener = require('../..').instrument(function(err, instrumentations) {});
+    listener.on('started', function(event) {
+      if(event.commandName == 'delete')
+        started.push(event);
+    });
+
+    listener.on('succeeded', function(event) {
+      if(event.commandName == 'delete')
+        succeeded.push(event);
+    });
+
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      db.collection('apm_test_u_3').deleteOne({a:1}).then(function(r) {
+        test.equal(1, started.length);
+        test.equal('delete', started[0].commandName);
+        test.equal('apm_test_u_3', started[0].command.delete);
+        test.equal(1, succeeded.length);
+        listener.uninstrument();
+
         db.close();
         test.done();
       });

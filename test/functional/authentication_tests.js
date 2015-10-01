@@ -3,6 +3,46 @@
 var f = require('util').format;
 
 /**
+ * Fail due to illegal authentication mechanism
+ *
+ * @ignore
+ */
+exports['should fail due to illegal authentication mechanism'] = {
+  metadata: { requires: { topology: ['auth'], mongodb: "<=2.6.x" } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
+      , Server = configuration.require.Server;
+
+    // restart server
+    configuration.restart(function() {
+      var db1 = new Db('mongo-ruby-test-auth1', new Server(configuration.host, configuration.port, {auto_reconnect: true}), {w:1});
+      db1.open(function(err, db) {
+        test.equal(null, err);
+
+        db.admin().addUser('admin', 'admin', function(err, result) {
+          test.equal(null, err);
+
+          // Login the user
+          db.admin().authenticate("admin", "admin", {
+            authMechanism: 'SCRAM-SHA-1'
+          }, function(err, result) {
+            test.equal(59, err.code);
+
+            // restart server
+            configuration.restart(function() {
+              test.done();
+            });
+          });
+        });
+      });
+    });
+  }
+}
+
+/**
  * Retrieve the current replicaset status if the server is running as part of a replicaset using a Promise.
  *
  * @example-class Admin

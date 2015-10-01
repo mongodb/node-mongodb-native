@@ -1,9 +1,10 @@
 language: node_js
 node_js:
-  - "0.10"
-  - "0.12"
+  - 0.10
+  - 0.12
   - "iojs"
-sudo: false
+  - 4.0
+sudo: true
 env:
   - MONGODB_VERSION=2.2.x
   - MONGODB_VERSION=2.4.x

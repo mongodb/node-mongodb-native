@@ -1,0 +1,16 @@
+<header id="header-db" class="row" role="navigation">
+  <div class="header-content">
+    <div class="toggle-nav pull-left">
+        <i class="fa fa-bars"></i>
+        <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom"></div>
+    </div>
+    <!--logo start-->
+    <div class="logo pull-left">
+      <a href="{{ .Site.BaseURL}}/../">
+        <img src="{{.Site.BaseURL}}/img/logo-mongodb-header.png", alt="MongoDB.org" />
+      </a>
+    </div>
+    <!--logo end-->
+    {{ partial "header/topRight.html" . }}
+  </div>
+</header>

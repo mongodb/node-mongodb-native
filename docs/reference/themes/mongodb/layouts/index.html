@@ -1,0 +1,12 @@
+{{ partial "header.html" . }}
+{{ $.Scratch.Set "indexFound" false }}
+{{ range where .Data.Pages ".Type" "index" }}
+    {{ $.Scratch.Set "indexFound" true }}
+    {{ .Content }}
+{{ end }}
+
+{{if eq ($.Scratch.Get "indexFound") false }}
+{{ partial "welcome.html" . }}
+{{ end }}
+
+{{ partial "footer.html" . }}

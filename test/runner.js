@@ -261,6 +261,9 @@ var testFiles =[
   , '/test/functional/operation_example_tests.js'
   , '/test/functional/crud_api_tests.js'
   , '/test/functional/reconnect_tests.js'
+  , '/test/functional/find_and_modify_tests.js'
+  , '/test/functional/document_validation_tests.js'
+  , '/test/functional/ignore_undefined_tests.js'
 
   // Logging tests
   , '/test/functional/logger_tests.js'
@@ -270,6 +273,7 @@ var testFiles =[
   , '/test/functional/replset_read_preference_tests.js'
   , '/test/functional/replset_failover_tests.js'
   , '/test/functional/replset_connection_tests.js'
+  , '/test/functional/readconcern_tests.js'
 
   // Sharding tests
   , '/test/functional/sharding_failover_tests.js'

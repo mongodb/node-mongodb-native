@@ -1,0 +1,31 @@
+baseurl = "/node-mongodb-native/2.0"
+languageCode = "en-us"
+title = "MongoDB Node.js Driver"
+theme = "mongodb"
+canonifyurls = false
+
+[blackfriday]
+  plainIdAnchors = true
+
+
+# Update versions in mongodb.toml as well
+[[menu.main]]
+    name = "API Documentation"
+    pre = "<i class='fa fa-file-text-o'></i>"
+    weight = 90
+    identifier = "apiDocs"
+    url = "/api"
+
+[[menu.main]]
+    name = "Source Code"
+    pre = "<i class='fa fa-github'></i>"
+    weight = 90
+    identifier = "githubLink"
+    url = "https://github.com/mongodb/node-mongodb-native"
+
+[[menu.main]]
+    name = ""
+    pre = "<img src='https://badges.gitter.im/Join Chat.svg'/>"
+    weight = 150
+    identifier = "gitterLink"
+    url = "https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge"

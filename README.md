@@ -136,7 +136,7 @@ var insertDocuments = function(db, callback) {
   // Get the documents collection
   var collection = db.collection('documents');
   // Insert some documents
-  collection.insert([
+  collection.insertMany([
     {a : 1}, {a : 2}, {a : 3}
   ], function(err, result) {
     assert.equal(err, null);
@@ -195,7 +195,7 @@ var updateDocument = function(db, callback) {
   // Get the documents collection
   var collection = db.collection('documents');
   // Update document where a is 2, set b equal to 1
-  collection.update({ a : 2 }
+  collection.updateOne({ a : 2 }
     , { $set: { b : 1 } }, function(err, result) {
     assert.equal(err, null);
     assert.equal(1, result.result.n);
@@ -226,16 +226,16 @@ MongoClient.connect(url, function(err, db) {
 });
 ```
 
-Remove a document
+Delete a document
 -----------------
-Next lets remove the document where the field **a** equals to **3**.
+Next lets delete the document where the field **a** equals to **3**.
 
 ```js
-var removeDocument = function(db, callback) {
+var deleteDocument = function(db, callback) {
   // Get the documents collection
   var collection = db.collection('documents');
   // Insert some documents
-  collection.remove({ a : 3 }, function(err, result) {
+  collection.deleteOne({ a : 3 }, function(err, result) {
     assert.equal(err, null);
     assert.equal(1, result.result.n);
     console.log("Removed the document with the field a equal to 3");
@@ -244,7 +244,8 @@ var removeDocument = function(db, callback) {
 }
 ```
 
-This will remove the first document where the field **a** equals to **3**. Let's add the method to the **MongoClient.connect** callback function.
+This will delete the first document where the field **a** equals to **3**. Let's add the method to the **MongoClient
+.connect** callback function.
 
 ```js
 var MongoClient = require('mongodb').MongoClient
@@ -259,7 +260,7 @@ MongoClient.connect(url, function(err, db) {
 
   insertDocuments(db, function() {
     updateDocument(db, function() {
-      removeDocument(db, function() {
+      deleteDocument(db, function() {
         db.close();
       });
     });
@@ -288,7 +289,8 @@ var findDocuments = function(db, callback) {
 }
 ```
 
-This query will return all the documents in the **documents** collection. Since we removed a document the total documents returned is **2**. Finally let's add the findDocument method to the **MongoClient.connect** callback.
+This query will return all the documents in the **documents** collection. Since we deleted a document the total 
+documents returned is **2**. Finally let's add the findDocument method to the **MongoClient.connect** callback.
 
 ```js
 var MongoClient = require('mongodb').MongoClient
@@ -303,7 +305,7 @@ MongoClient.connect(url, function(err, db) {
 
   insertDocuments(db, function() {
     updateDocument(db, function() {
-      removeDocument(db, function() {
+      deleteDocument(db, function() {
         findDocuments(db, function() {
           db.close();
         });

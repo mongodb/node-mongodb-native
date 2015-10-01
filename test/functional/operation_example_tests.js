@@ -538,7 +538,7 @@ exports.shouldCreateComplexIndexOnTwoFields = {
             test.equal(4, items.length);
 
             // Peform a query, with explain to show we hit the query
-            collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
+            collection.find({a:2}).explain(function(err, explanation) {
               test.equal(null, err);
               test.ok(explanation != null);
 
@@ -586,7 +586,7 @@ exports.shouldCreateASimpleIndexOnASingleField = {
           test.equal("a_1", indexName);
 
           // Peform a query, with explain to show we hit the query
-          collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
+          collection.find({a:2}).explain(function(err, explanation) {
             test.equal(null, err);
             test.ok(explanation != null);
 
@@ -641,7 +641,7 @@ exports.createIndexExample3 = {
             test.equal(4, items.length);
 
             // Peform a query, with explain to show we hit the query
-            collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
+            collection.find({a:2}).explain(function(err, explanation) {
               test.equal(null, err);
               test.ok(explanation != null);
 
@@ -925,7 +925,7 @@ exports.shouldCreateComplexEnsureIndex = {
             test.equal(4, items.length);
 
             // Peform a query, with explain to show we hit the query
-            collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
+            collection.find({a:2}).explain(function(err, explanation) {
               test.equal(null, err);
               test.ok(explanation != null);
 
@@ -978,7 +978,7 @@ exports.ensureIndexExampleWithCompountIndex = {
             test.equal(4, items.length);
 
             // Peform a query, with explain to show we hit the query
-            collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
+            collection.find({a:2}).explain(function(err, explanation) {
               test.equal(null, err);
               test.ok(explanation != null);
 
@@ -1065,9 +1065,9 @@ exports.shouldPeformASimpleExplainQuery = {
         test.equal(null, err);
 
         // Peform a simple find and return all the documents
-        collection.find({}, {explain:true}).toArray(function(err, docs) {
+        collection.find({}).explain(function(err, explain) {
           test.equal(null, err);
-          test.equal(1, docs.length);
+          test.ok(explain != null);
 
           db.close();
           test.done();
@@ -1107,14 +1107,15 @@ exports.shouldPeformASimpleLimitSkipQuery = {
         test.equal(null, err);
 
         // Peform a simple find and return all the documents
-        collection.find({}, {skip:1, limit:1, fields:{b:1}}).toArray(function(err, docs) {
-          test.equal(null, err);
-          test.equal(1, docs.length);
-          test.equal(null, docs[0].a);
-          test.equal(2, docs[0].b);
+        collection.find({})
+          .skip(1).limit(1).project({b:1}).toArray(function(err, docs) {
+            test.equal(null, err);
+            test.equal(1, docs.length);
+            test.equal(null, docs[0].a);
+            test.equal(2, docs[0].b);
 
-          db.close();
-          test.done();
+            db.close();
+            test.done();
         });
       });
     });
@@ -3790,7 +3791,7 @@ exports.shouldCreateOnDbComplexIndexOnTwoFields = {
             test.equal(4, items.length);
 
             // Peform a query, with explain to show we hit the query
-            collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
+            collection.find({a:2}).explain(function(err, explanation) {
               test.equal(null, err);
               test.ok(explanation != null);
 
@@ -3844,7 +3845,7 @@ exports.shouldCreateComplexEnsureIndexDb = {
             test.equal(4, items.length);
 
             // Peform a query, with explain to show we hit the query
-            collection.find({a:2}, {explain:true}).toArray(function(err, explanation) {
+            collection.find({a:2}).explain(function(err, explanation) {
               test.equal(null, err);
               test.ok(explanation != null);
 

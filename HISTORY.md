@@ -1,9 +1,28 @@
-2.0.43
+2.0.45 09-30-2015
+-----------------
+* NODE-566 Fix issue with rewind on capped collections causing cursor state to be reset on connection loss.
+
+2.0.44 09-28-2015
+-----------------
+* Bug fixes for APM upconverting of legacy INSERT/UPDATE/REMOVE wire protocol messages.
+* NODE-562, fixed issue where a Replicaset MongoDB URI with a single seed and replSet name set would cause a single direct connection instead of topology discovery.
+* Updated mongodb-core to 1.2.14.
+* NODE-563 Introduced options.ignoreUndefined for db class and MongoClient db options, made serialize undefined to null default again but allowing for overrides on insert/update/delete operations.
+* Use handleCallback if result is an error for count queries. (Issue #1298, https://github.com/agclever)
+* Rewind cursor to correctly force reconnect on capped collections when first query comes back empty.
+* NODE-571 added code 59 to legacy server errors when SCRAM-SHA-1 mechanism fails.
+* NODE-572 Remove examples that use the second parameter to `find()`.
+
+2.0.43 09-14-2015
 -----------------
 * Propagate timeout event correctly to db instances.
 * Application Monitoring API (APM) implemented.
 * NOT providing replSet name in MongoClient connection URI will force single server connection. Fixes issue where it was impossible to directly connect to a replicaset member server.
-* Updated mongodb-core to 1.2.11.
+* Updated mongodb-core to 1.2.12.
+* NODE-541 Initial Support "read committed" isolation level where "committed" means confimed by the voting majority of a replica set.
+* GridStore doesn't share readPreference setting from connection string. (Issue #1295, https://github.com/zhangyaoxing)
+* fixed forceServerObjectId calls (Issue #1292, https://github.com/d-mon-)
+* Pass promise library through to DB function (Issue #1294, https://github.com/RovingCodeMonkey)
 
 2.0.42 08-18-2015
 -----------------
@@ -249,7 +268,7 @@
 2.0.0-alpha2 2014-10-02
 -----------------------
 * CRUD API (insertOne, insertMany, updateOne, updateMany, removeOne, removeMany, bulkWrite, findOneAndDelete, findOneAndUpdate, findOneAndReplace)
-* Cluster Management Spec compatible
+* Cluster Management Spec compatible.
 
 2.0.0-alpha1 2014-09-08
 -----------------------

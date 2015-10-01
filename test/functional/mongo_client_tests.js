@@ -366,10 +366,42 @@ exports["correctly timeout MongoClient connect using custom connectTimeoutMS"] =
     var start = new Date();
 
     MongoClient.connect('mongodb://example.com/test?connectTimeoutMS=1000&maxPoolSize=1', function(err, db) {
-      // db.close();
+      test.ok(err != null);
+      test.ok((new Date().getTime() - start.getTime()) >= 1000)
+      test.done();
+    });
+  }
+}
 
-      var end = new Date();
-      console.dir(end.getTime() - start.getTime())
+/**
+ * @ignore
+ */
+exports["correctly error out when no socket available on MongoClient.connect"] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    MongoClient.connect('mongodb://localhost:27088/test', function(err, db) {
+      test.ok(err != null);
+
+      test.done();
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports["correctly error out when no socket available on MongoClient.connect with domain"] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+
+    MongoClient.connect('mongodb://test.com:80/test', function(err, db) {
+      test.ok(err != null);
 
       test.done();
     });
