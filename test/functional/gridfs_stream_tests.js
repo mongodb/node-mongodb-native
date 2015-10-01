@@ -213,7 +213,11 @@ exports['start/end options for openDownloadStream'] = {
         });
 
         downloadStream.on('end', function() {
-          test.equal(gotData, 3);
+          // Depending on different versions of node, we may get
+          // different amounts of 'data' events. node 0.10 gives 2,
+          // node >= 0.12 gives 3. Either is correct, but we just
+          // care that we got between 1 and 3, and got the right result
+          test.ok(gotData >= 1 && gotData <= 3);
           test.equal(str, 'pache');
           test.done();
         });
