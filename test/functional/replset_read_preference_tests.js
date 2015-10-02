@@ -848,7 +848,7 @@ exports['Ensure tag read goes only to the correct servers using nearest'] = {
     );
 
     // Open the database
-    var db = new Db('local', replSet, {w:0, readPreference: new ReadPreference(ReadPreference.NEAREST, {"loc":"ny"})});
+    var db = new Db('local', replSet, {w:1, readPreference: new ReadPreference(ReadPreference.NEAREST, {"loc":"ny"})});
     var success = false;
     // Trigger test once whole set is up
     db.on("fullsetup", function() {

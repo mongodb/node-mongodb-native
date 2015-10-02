@@ -705,26 +705,29 @@ exports['Should correctly connect to arbiter with single connection'] = {
 
     // Replset start port
     var replicasetManager = configuration.manager;
-    // Get the arbiters
-    var arbiters = replicasetManager.arbiters;
-    var host = arbiters[0].split(":")[0];
-    var port = parseInt(arbiters[0].split(":")[1], 10);
-    var db = new Db('integration_test_', new Server(host, port), {w:1});
-
-    db.open(function(err, p_db) {
+    replicasetManager.getServerManagerByType('arbiter', function(err, server) {
       test.equal(null, err);
 
-      p_db.command({ismaster: true}, function(err, result) {
+      // Get the arbiters
+      var host = server.host;
+      var port = server.port;
+      var db = new Db('integration_test_', new Server(host, port), {w:1});
+
+      db.open(function(err, p_db) {
         test.equal(null, err);
 
-        // Should fail
-        p_db.collection('t').insert({a:1}, function(err, r) {
-          test.ok(err != null);
+        p_db.command({ismaster: true}, function(err, result) {
+          test.equal(null, err);
 
-          p_db.close();
-          restartAndDone(configuration, test);
+          // Should fail
+          p_db.collection('t').insert({a:1}, function(err, r) {
+            test.ok(err != null);
+
+            p_db.close();
+            restartAndDone(configuration, test);
+          });
         });
-      });
+      })
     })
   }
 }
@@ -741,22 +744,24 @@ exports['Should correctly connect to secondary with single connection'] = {
 
     // Replset start port
     var replicasetManager = configuration.manager;
-    // Get the arbiters
-    var secondaries = replicasetManager.secondaries;
-    var host = secondaries[0].split(":")[0];
-    var port = parseInt(secondaries[0].split(":")[1], 10);
-    var db = new Db('integration_test_', new Server(host, port), {w:1});
-
-    db.open(function(err, p_db) {
+    replicasetManager.getServerManagerByType('secondary', function(err, server) {
       test.equal(null, err);
+      // Get the arbiters
+      var host = server.host;
+      var port = server.port;
+      var db = new Db('integration_test_', new Server(host, port), {w:1});
 
-      p_db.command({ismaster: true}, function(err, result) {
+      db.open(function(err, p_db) {
         test.equal(null, err);
 
-        p_db.close();
-        restartAndDone(configuration, test);
+        p_db.command({ismaster: true}, function(err, result) {
+          test.equal(null, err);
+
+          p_db.close();
+          restartAndDone(configuration, test);
+        });
       });
-    })
+    });
   }
 }
 
