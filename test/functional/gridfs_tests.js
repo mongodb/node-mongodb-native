@@ -248,13 +248,11 @@ exports.shouldCorrectlyHandleMultipleChunkGridStore = {
     fs_client.open(function(err, fs_client) {
       test.equal(null, err);
 
-      fs_client.dropDatabase(function(err, done) {
+      var gridStore = new GridStore(fs_client, "test_gs_multi_chunk", "w");
+      gridStore.open(function(err, gridStore) {
         test.equal(null, err);
-
-        var gridStore = new GridStore(fs_client, "test_gs_multi_chunk", "w");
-        gridStore.open(function(err, gridStore) {
-          test.equal(null, err);
-
+        
+        gridStore.chunkCollection().deleteMany({}, function(err) {
           gridStore.chunkSize = 512;
           var file1 = ''; var file2 = ''; var file3 = '';
           for(var i = 0; i < gridStore.chunkSize; i++) { file1 = file1 + 'x'; }
@@ -262,7 +260,6 @@ exports.shouldCorrectlyHandleMultipleChunkGridStore = {
           for(var i = 0; i < gridStore.chunkSize; i++) { file3 = file3 + 'z'; }
 
           gridStore.write(file1, function(err, gridStore) {
-            console.dir(err)
             test.equal(null, err);
 
             gridStore.write(file2, function(err, gridStore) {
@@ -311,39 +308,41 @@ exports.shouldCorrectlyHandleUnlinkingWeirdName = {
     var fs_client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     fs_client.open(function(err, fs_client) {
-      fs_client.dropDatabase(function(err, done) {
-        var gridStore = new GridStore(fs_client, "9476700.937375426_1271170118964-clipped.png", "w", {'root':'articles'});
-        gridStore.open(function(err, gridStore) {
-          gridStore.write("hello, world!", function(err, gridStore) {
-            gridStore.close(function(err, result) {
-              fs_client.collection('articles.files', function(err, collection) {
-                collection.count(function(err, count) {
-                  test.equal(1, count);
-                })
-              });
+      var gridStore = new GridStore(fs_client, "9476700.937375426_1271170118964-clipped.png", "w", {'root':'articles'});
+      gridStore.open(function(err, gridStore) {
+        fs_client.collection('articles.files').deleteMany({}, function() {
+          fs_client.collection('articles.chunks').deleteMany({}, function() {
+            gridStore.write("hello, world!", function(err, gridStore) {
+              gridStore.close(function(err, result) {
+                fs_client.collection('articles.files', function(err, collection) {
+                  collection.count(function(err, count) {
+                    test.equal(1, count);
+                  })
+                });
 
-              fs_client.collection('articles.chunks', function(err, collection) {
-                collection.count(function(err, count) {
-                  test.equal(1, count);
+                fs_client.collection('articles.chunks', function(err, collection) {
+                  collection.count(function(err, count) {
+                    test.equal(1, count);
 
-                  // Unlink the file
-                  GridStore.unlink(fs_client, '9476700.937375426_1271170118964-clipped.png', {'root':'articles'}, function(err, gridStore) {
-                    fs_client.collection('articles.files', function(err, collection) {
-                      collection.count(function(err, count) {
-                        test.equal(0, count);
-                      })
+                    // Unlink the file
+                    GridStore.unlink(fs_client, '9476700.937375426_1271170118964-clipped.png', {'root':'articles'}, function(err, gridStore) {
+                      fs_client.collection('articles.files', function(err, collection) {
+                        collection.count(function(err, count) {
+                          test.equal(0, count);
+                        })
+                      });
+
+                      fs_client.collection('articles.chunks', function(err, collection) {
+                        collection.count(function(err, count) {
+                          test.equal(0, count);
+
+                          fs_client.close();
+                          test.done();
+                        })
+                      });
                     });
-
-                    fs_client.collection('articles.chunks', function(err, collection) {
-                      collection.count(function(err, count) {
-                        test.equal(0, count);
-
-                        fs_client.close();
-                        test.done();
-                      })
-                    });
-                  });
-                })
+                  })
+                });
               });
             });
           });
@@ -366,41 +365,42 @@ exports.shouldCorrectlyUnlinkAnArrayOfFiles = {
     var fs_client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     fs_client.open(function(err, fs_client) {
-      fs_client.dropDatabase(function(err, done) {
-        test.equal(null, err)
+      var gridStore = new GridStore(fs_client, "test_gs_unlink_as_array", "w");
+      gridStore.open(function(err, gridStore) {
+        fs_client.collection('fs.files').deleteMany({}, function() {
+          fs_client.collection('fs.chunks').deleteMany({}, function() {
+            
+            gridStore.write("hello, world!", function(err, gridStore) {
+              gridStore.close(function(err, result) {
+                fs_client.collection('fs.files', function(err, collection) {
+                  collection.count(function(err, count) {
+                    test.equal(1, count);
+                  })
+                });
 
-        var gridStore = new GridStore(fs_client, "test_gs_unlink_as_array", "w");
-        gridStore.open(function(err, gridStore) {
-          gridStore.write("hello, world!", function(err, gridStore) {
-            gridStore.close(function(err, result) {
-              fs_client.collection('fs.files', function(err, collection) {
-                collection.count(function(err, count) {
-                  test.equal(1, count);
-                })
-              });
+                fs_client.collection('fs.chunks', function(err, collection) {
+                  collection.count(function(err, count) {
+                    test.equal(1, count);
 
-              fs_client.collection('fs.chunks', function(err, collection) {
-                collection.count(function(err, count) {
-                  test.equal(1, count);
+                    // Unlink the file
+                    GridStore.unlink(fs_client, ['test_gs_unlink_as_array'], function(err, gridStore) {
+                      fs_client.collection('fs.files', function(err, collection) {
+                        collection.count(function(err, count) {
+                          test.equal(0, count);
+                        })
+                      });
 
-                  // Unlink the file
-                  GridStore.unlink(fs_client, ['test_gs_unlink_as_array'], function(err, gridStore) {
-                    fs_client.collection('fs.files', function(err, collection) {
-                      collection.count(function(err, count) {
-                        test.equal(0, count);
-                      })
+                      fs_client.collection('fs.chunks', function(err, collection) {
+                        collection.count(function(err, count) {
+                          test.equal(0, count);
+                          fs_client.close();
+
+                          test.done();
+                        })
+                      });
                     });
-
-                    fs_client.collection('fs.chunks', function(err, collection) {
-                      collection.count(function(err, count) {
-                        test.equal(0, count);
-                        fs_client.close();
-
-                        test.done();
-                      })
-                    });
-                  });
-                })
+                  })
+                });
               });
             });
           });
@@ -2146,23 +2146,27 @@ exports.shouldCorrectlySaveEmptyFile = {
     var fs_db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
 
     fs_db.open(function(err, fs_db) {
-      fs_db.dropDatabase(function(err, done) {
-        var gridStore = new GridStore(fs_db, "test_gs_save_empty_file", "w");
-        gridStore.open(function(err, gridStore) {
-          gridStore.write("", function(err, gridStore) {
-            gridStore.close(function(err, result) {
-              fs_db.collection('fs.files', function(err, collection) {
-                collection.count(function(err, count) {
-                  test.equal(1, count);
+      var gridStore = new GridStore(fs_db, "test_gs_save_empty_file", "w");
+      gridStore.open(function(err, gridStore) {
+
+        fs_db.collection('fs.files').deleteMany({}, function() {
+          fs_db.collection('fs.chunks').deleteMany({}, function() {
+
+            gridStore.write("", function(err, gridStore) {
+              gridStore.close(function(err, result) {
+                fs_db.collection('fs.files', function(err, collection) {
+                  collection.count(function(err, count) {
+                    test.equal(1, count);
+                  });
                 });
-              });
 
-              fs_db.collection('fs.chunks', function(err, collection) {
-                collection.count(function(err, count) {
-                  test.equal(0, count);
+                fs_db.collection('fs.chunks', function(err, collection) {
+                  collection.count(function(err, count) {
+                    test.equal(0, count);
 
-                  fs_db.close();
-                  test.done();
+                    fs_db.close();
+                    test.done();
+                  });
                 });
               });
             });

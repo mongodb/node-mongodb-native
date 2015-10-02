@@ -925,7 +925,7 @@ exports.shouldCorrectlyPerformSimpleGeoNearCommandWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommandWithGenerators = {
-  metadata: { requires: { generators:true, topology: ["single", "replicaset"] } },
+  metadata: { requires: { generators:true, topology: ["single"] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1467,7 +1467,7 @@ exports.shouldCorrectlyExecuteIndexExistsWithGenerators = {
  */
 exports.shouldCorrectlyShowTheResultsFromIndexInformationWithGenerators = {
   metadata: {
-    requires: { generators:true, topology: ["single", "replicaset"] }
+    requires: { generators:true, topology: ["single"] }
   },
 
   // The actual test we wish to run
@@ -1859,7 +1859,7 @@ exports.shouldCorrectlyRetriveCollectionOptionsWithGenerators = {
 exports['Should correctly execute parallelCollectionScan with multiple cursors with Generators'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, mongodb: ">2.5.5", topology: ["single", "replicaset"] } },
+  metadata: { requires: { generators:true, mongodb: ">2.5.5", topology: ["single"] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {

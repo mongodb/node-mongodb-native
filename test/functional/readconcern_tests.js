@@ -310,7 +310,55 @@ exports['Should set majority readConcern aggregate command'] = {
   }
 }
 
-exports['Should set majority readConcern mapReduce command'] = {
+exports['Should set majority readConcern aggregate command but ignore due to out'] = {
+  metadata: { requires: { topology: 'replicaset', mongodb: ">= 3.1.8" } },
+
+  test: function(configuration, test) {
+    var listener = require('../..').instrument(function(err, instrumentations) {});
+    // Contains all the apm events
+    var started = [];
+    var succeeded = [];
+    // Get a new instance
+    var db = configuration.newDbInstance({w:1, readConcern: {level: 'majority'}}, {poolSize:1});
+    db.open(function(err, db) {
+      test.equal(null, err);
+      test.deepEqual({level: 'majority'}, db.s.readConcern);
+
+      // Get a collection
+      var collection = db.collection('readConcernCollectionAggregate1');
+      // Validate readConcern
+      test.deepEqual({level: 'majority'}, collection.s.readConcern);
+      
+      // Listen to apm events
+      listener.on('started', function(event) { if(event.commandName == 'aggregate') started.push(event); });
+      listener.on('succeeded', function(event) { if(event.commandName == 'aggregate') succeeded.push(event);});
+
+      // Execute find
+      collection.aggregate([{$match: {}}, {$out:'readConcernCollectionAggregate1Output'}]).toArray(function(err, r) {
+        test.equal(null, err);
+        test.equal(1, started.length);
+        test.equal('aggregate', started[0].commandName);
+        test.equal('aggregate', succeeded[0].commandName);
+        test.equal(undefined, started[0].command.readConcern);
+
+        // Execute find
+        collection.aggregate([{$match: {}}], {out: 'readConcernCollectionAggregate2Output'}).toArray(function(err, r) {
+          test.equal(null, err);
+          test.equal(2, started.length);
+          test.equal('aggregate', started[1].commandName);
+          test.equal('aggregate', succeeded[1].commandName);
+          test.equal(undefined, started[1].command.readConcern);
+
+          listener.uninstrument();
+          db.close();
+          test.done();       
+        });
+      });
+    });
+  }
+}
+
+exports['Should set majority readConcern mapReduce command but be ignored'] = {
   metadata: { requires: { topology: 'replicaset', mongodb: ">= 3.1.9" } },
 
   test: function(configuration, test) {
@@ -342,7 +390,7 @@ exports['Should set majority readConcern mapReduce command'] = {
           test.equal(1, succeeded.length);
           test.equal('mapreduce', started[0].commandName);
           test.equal('mapreduce', succeeded[0].commandName);
-          test.deepEqual({level:'majority'}, started[0].command.readConcern);
+          test.equal(undefined, started[0].command.readConcern);
 
           listener.uninstrument();
           db.close();
