@@ -1873,7 +1873,7 @@ exports['Each should not hang on iterating over no results'] = {
 }
 
 exports.shouldCorrectlyFindDocumentsByRegExp = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {

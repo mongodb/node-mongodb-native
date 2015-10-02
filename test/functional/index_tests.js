@@ -259,12 +259,12 @@ exports.shouldCorrectlyHandleDistinctIndexes = {
           {'a':2, 'b':{'c':'a'}}, {'a':3}, {'a':3}], configuration.writeConcernMax(), function(err, ids) {
             collection.distinct('a', function(err, docs) {
               test.deepEqual([0, 1, 2, 3], docs.sort());
-            });
 
-            collection.distinct('b.c', function(err, docs) {
-              test.deepEqual(['a', 'b', 'c'], docs.sort());
-              db.close();
-              test.done();
+              collection.distinct('b.c', function(err, docs) {
+                test.deepEqual(['a', 'b', 'c'], docs.sort());
+                db.close();
+                test.done();
+              });
             });
         })
       });

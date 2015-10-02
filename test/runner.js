@@ -438,32 +438,6 @@ if(argv.t == 'functional') {
         return new m.Server(host, port, serverOptions);
       },
     });
-  } else if(argv.e == 'heap') {
-    // Create single server instance running heap storage engine
-    config = createConfiguration({
-        manager: function() {
-          var ServerManager = require('mongodb-tools').ServerManager;
-          // Return manager
-          return new ServerManager({
-              host: 'localhost'
-            , port: 27017
-            , storageEngine: 'heap1'
-          });
-        },
-    });
-  } else if(argv.e == 'wiredtiger') {
-    // Create single server instance running heap storage engine
-    config = createConfiguration({
-        manager: function() {
-          var ServerManager = require('mongodb-tools').ServerManager;
-          // Return manager
-          return new ServerManager({
-              host: 'localhost'
-            , port: 27017
-            , storageEngine: 'wiredtiger'
-          });
-        },
-    });
   } else if(argv.e == 'auth') {
     // Create ssl server
     config = createConfiguration({
