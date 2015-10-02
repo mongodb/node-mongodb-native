@@ -210,9 +210,9 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
   }
 
   // Set up the serialize and ignoreUndefined fields
-  var serializeFunctions = typeof options.serializeFunctions == 'boolean' 
+  var serializeFunctions = typeof options.serializeFunctions == 'boolean'
     ? options.serializeFunctions : false;
-  var ignoreUndefined = typeof options.ignoreUndefined == 'boolean' 
+  var ignoreUndefined = typeof options.ignoreUndefined == 'boolean'
     ? options.ignoreUndefined : false;
 
   // Build Query object
@@ -273,7 +273,7 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
     ? options.serializeFunctions : false;
 
   // Set up the serialize and ignoreUndefined fields
-  var ignoreUndefined = typeof options.ignoreUndefined == 'boolean' 
+  var ignoreUndefined = typeof options.ignoreUndefined == 'boolean'
     ? options.ignoreUndefined : false;
 
   // Build Query object
@@ -408,7 +408,11 @@ var executeOrdered = function(opType ,command, ismaster, ns, bson, pool, callbac
     // Get a pool connection
     var connection = pool.get();
     // No more items in the list
-    if(list.length == 0) return _callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, connection));
+    if(list.length == 0) {
+      return process.nextTick(function() {
+        _callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, connection));
+      });
+    }
 
     // Get the first operation
     var doc = list.shift();
@@ -463,7 +467,9 @@ var executeOrdered = function(opType ,command, ismaster, ns, bson, pool, callbac
       // write commands
       getLastErrors.push({ ok: 1, errmsg: err.message, code: 14 });
       // Return due to an error
-      return callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, connection));
+      process.nextTick(function() {
+        callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, connection));
+      });
     }
   }
 
@@ -496,8 +502,11 @@ var executeUnordered = function(opType, command, ismaster, ns, bson, pool, callb
     var connection = pool.get();
 
     // Error out if no connection available
-    if(connection == null)
-      return _callback(new MongoError("no connection available"));
+    if(connection == null) {
+      return process.nextTick(function() {
+        _callback(new MongoError("no connection available"));
+      });
+    }
 
     try {
       // Execute the insert
@@ -526,8 +535,10 @@ var executeUnordered = function(opType, command, ismaster, ns, bson, pool, callb
             if(!err) getLastErrors[_index] = result.documents[0];
             // Check if we are done
             if(totalOps == 0) {
-              if(error) return callback(error);
-              callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, connection));
+              process.nextTick(function() {
+                if(error) return callback(error);
+                callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, connection));
+              });
             }
           }
         }
