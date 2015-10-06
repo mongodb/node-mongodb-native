@@ -1,3 +1,8 @@
+2.0.46
+-----------------
+* Updated mongodb-core to 1.2.16.
+* NODE-578 Order of sort fields is lost for numeric field names.
+
 2.0.45 09-30-2015
 -----------------
 * NODE-566 Fix issue with rewind on capped collections causing cursor state to be reset on connection loss.
