@@ -912,3 +912,41 @@ exports['Always uses primary readPreference for findAndModify'] = {
     });
   }
 }
+
+// /**
+//  * @ignore
+//  */
+// exports['should correctly list Collections on secondary'] = {
+//   metadata: { requires: { topology: 'replicaset' } },
+  
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var mongo = configuration.require
+//       , MongoClient = mongo.MongoClient
+//       , ReadPreference = mongo.ReadPreference;
+
+//     var manager = configuration.manager;
+//     // var url = format("mongodb://localhost:%s,localhost:%s,localhost:%s/integration_test_?slaveOk=true&rs_name=%s"
+//     //   , configuration.port, configuration.port + 1, configuration.port + 1, configuration.replicasetName);
+//     var url = format("mongodb://localhost:%s/integration_test_?slaveOk=true"
+//       , configuration.port);
+
+//     // Connect using the MongoClient
+//     MongoClient.connect(url, function(err,db){
+//         test.equal(null, err);
+//         test.ok(db != null);
+
+//         db.collection("replicaset_slave_ok").insert({testfield:123}, function(err, result) {
+//           test.equal(null, err);
+          
+//           db.listCollections().toArray(function(err, docs) {
+//             console.log("-----------------------------------------------")
+//             console.dir(err)
+//             console.dir(docs)
+//             db.close();
+//             test.done();
+//           });
+//         });
+//       });
+//   }
+// }

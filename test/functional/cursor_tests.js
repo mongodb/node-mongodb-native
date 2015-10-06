@@ -326,7 +326,10 @@ exports.shouldCorrectlyExecuteSortOnCursor = {
           test.deepEqual([['a', "asc"]], cursor.sortValue);finished();
 
           cursor = collection.find().sort([['a', -1], ['b', 1]]);
-          test.deepEqual([['a', -1], ['b', 1]], cursor.sortValue);finished();
+          var entries = cursor.sortValue.entries();
+          test.deepEqual(['a', -1], entries.next().value);
+          test.deepEqual(['b', 1], entries.next().value);
+          finished();
 
           cursor = collection.find().sort('a', 1).sort('a', -1);
           test.deepEqual([['a', -1]], cursor.sortValue);finished();
