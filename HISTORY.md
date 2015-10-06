@@ -1,6 +1,8 @@
-1.2.15
+1.2.15 10-06-2015
 -----------------
 - Set slaveOk to true for getMore and killCursors commands.
+- Don't swallow callback errors for 2.4 single server (Issue #49, https://github.com/vkarpov15).
+- Apply toString('hex') to each buffer in an array when logging (Issue #48, https://github.com/nbrachet).
 
 1.2.14 09-28-2015
 -----------------
