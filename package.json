@@ -15,7 +15,7 @@
     "core"
   ],
   "dependencies": {
-    "bson": "~0.4"
+    "bson": ">=0.4.13"
   },
   "devDependencies": {
     "integra": "0.1.8",
