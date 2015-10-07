@@ -193,7 +193,7 @@ Content Management Systems
          * - **Forks**
            - 290
          * - **Watchers**
-           - 1604
+           - 1603
 
 Grid FS libraries or tools
 --------------------------
@@ -266,7 +266,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Clone Url**
            - https://github.com/zzdhidden/mongoq.git
          * - **Forks**
-           - 6
+           - 7
          * - **Watchers**
            - 69
 
@@ -314,7 +314,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 12
          * - **Watchers**
-           - 53
+           - 51
 
 .. topic:: mdoq-mongodb
 
@@ -384,7 +384,7 @@ REST api's around MongoDB or resource based libraries
          * - **Clone Url**
            - https://github.com/tdegrunt/mongodb-rest.git
          * - **Forks**
-           - 122
+           - 123
          * - **Watchers**
            - 348
 
@@ -471,7 +471,7 @@ Test helpers and libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 1:18:3 on 21/6/2015
+           - 3:18:2 on 30/8/2015
          * - **Homepage**
            - http://
          * - **Url**
@@ -481,7 +481,7 @@ Test helpers and libraries
          * - **Forks**
            - 24
          * - **Watchers**
-           - 72
+           - 73
 
 Tools or applications to manage your MongoDB's
 ----------------------------------------------
@@ -730,9 +730,9 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 414
+           - 416
          * - **Watchers**
-           - 3606
+           - 3612
 
 Libraries for the connect middleware
 ------------------------------------
@@ -779,9 +779,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 214
+           - 213
          * - **Watchers**
-           - 809
+           - 810
 
 Libraries or applications for continous integration
 ---------------------------------------------------
@@ -833,7 +833,7 @@ Exampe applications
          * - **Forks**
            - 21
          * - **Watchers**
-           - 38
+           - 37
 
 .. topic:: node-mongo-cms
 
