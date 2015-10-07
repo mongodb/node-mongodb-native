@@ -225,8 +225,17 @@ var runner = new Runner({
 });
 
 var testFiles =[
+  // Logging tests
+    '/test/functional/logger_tests.js'
+
+  // APM tests
+  , '/test/functional/apm_tests.js'
+
+  // Replicaset read concern (make sure no illegal state due to teardown tests)
+  , '/test/functional/readconcern_tests.js'
+
   // Promise tests
-    '/test/functional/promises_db_tests.js'
+  , '/test/functional/promises_db_tests.js'
   , '/test/functional/promises_collection_tests.js'
   , '/test/functional/promises_cursor_tests.js'
   , '/test/functional/operation_promises_example_tests.js'
@@ -265,15 +274,11 @@ var testFiles =[
   , '/test/functional/document_validation_tests.js'
   , '/test/functional/ignore_undefined_tests.js'
 
-  // Logging tests
-  , '/test/functional/logger_tests.js'
-
   // Replicaset tests
   , '/test/functional/replset_operations_tests.js'
   , '/test/functional/replset_read_preference_tests.js'
   , '/test/functional/replset_failover_tests.js'
   , '/test/functional/replset_connection_tests.js'
-  , '/test/functional/readconcern_tests.js'
 
   // Sharding tests
   , '/test/functional/sharding_failover_tests.js'
@@ -296,9 +301,6 @@ var testFiles =[
 
   // Authentication Tests
   , '/test/functional/authentication_tests.js'
-
-  // APM tests
-  , '/test/functional/apm_tests.js'
 ]
 
 // Check if we support es6 generators

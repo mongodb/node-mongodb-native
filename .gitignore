@@ -18,6 +18,7 @@ out/
 docs/public
 public/
 .idea/
+test_boot/
 t.js
 .DS_Store
 
