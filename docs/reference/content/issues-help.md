@@ -8,15 +8,15 @@ title = "Issues & Help"
 
 # Issues & Help
 
-We are lucky to have a vibrant MongoDB Java community with lots of varying
-experience of using the Java driver.  We often find the quickest way to get support for
+We are lucky to have a vibrant Node.js community with lots of varying
+experience of using the Node.js driver.  We often find the quickest way to get support for
 general questions is through the [mongodb-user google group](http://groups.google.com/group/mongodb-user)
-or through [stackoverflow](http://stackoverflow.com/questions/tagged/mongodb+java).  Please also
+or through [stackoverflow](http://stackoverflow.com/questions/tagged/mongodb+nodejs).  Please also
 refer to our own [support channels](http://www.mongodb.org/about/support) documentation.
 
 ## Bugs / Feature Requests
 
-If you think you’ve found a bug or want to see a new feature in the Java driver,
+If you think you’ve found a bug or want to see a new feature in the Node.js driver,
 please open a case in our issue management tool, JIRA:
 
 - [Create an account and login](https://jira.mongodb.org).
@@ -33,7 +33,7 @@ MongoDB project, please report it according to the [instructions here](http://do
 We are happy to accept contributions to help improve the driver.
 We will guide user contributions to ensure they meet the standards of the codebase.
 Please ensure that any pull requests include documentation, tests and also pass
-a the gradle checks.
+the travis.ci checks.
 
 To get started check out the source and work on a branch:
 
