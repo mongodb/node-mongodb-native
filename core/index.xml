@@ -241,97 +241,6 @@ server.connect();
     </item>
     
     <item>
-      <title>Extending Cursors</title>
-      <link>/node-mongodb-native/core/driver/reference/extending/</link>
-      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
-      
-      <guid>/node-mongodb-native/core/driver/reference/extending/</guid>
-      <description>
-
-&lt;h1 id=&#34;extending-the-functionality-of-the-driver-cursor&#34;&gt;Extending the functionality of the Driver Cursor&lt;/h1&gt;
-
-&lt;p&gt;The Core Driver cursor is a very minimalist cursor by design and only supports a single &lt;code&gt;next&lt;/code&gt; method to iterate over the query results. In this tutorial we will examine how we can extend the cursor to support an additional &lt;code&gt;toArray&lt;/code&gt; method and show how we can configure our topology to always return the new extended Cursor on all &lt;code&gt;cursor&lt;/code&gt; method calls.&lt;/p&gt;
-
-&lt;p&gt;Let&amp;rsquo;s look at the code.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var Server = require(&#39;mongodb-core&#39;).Server
-  , Cursor = require(&#39;mongodb-core&#39;).Cursor
-  , inherits = require(&#39;util&#39;).inherits
-
-//
-// Create an extended cursor that adds a toArray function
-var ExtendedCursor = function(bson, ns, cmd, options, connection, callbacks, options) {
-  Cursor.apply(this, Array.prototype.slice.call(arguments, 0));
-  var self = this;
-
-  // Resolve all the next
-  var getAllNexts = function(items, callback) {
-    self.next(function(err, item) {
-      if(err) return callback(err);
-      if(item == null) return callback(null, null);
-      items.push(item);
-      getAllNexts(items, callback);
-    });
-  }
-
-  // Adding a toArray function to the cursor
-  this.toArray = function(callback) {
-    var items = [];
-
-    getAllNexts(items, function(err, r) {
-      if(err) return callback(err, null);          
-      callback(null, items);
-    });
-  }
-}
-
-// Extend the Cursor
-inherits(ExtendedCursor, Cursor);
-
-// Connect using new cursor
-var server = new Server({
-    host: &#39;localhost&#39;
-  , port: 27017
-  , cursorFactory: ExtendedCursor
-});
-
-// Wait for the connection event
-server.on(&#39;connect&#39;, function(_server) {
-  // Execute find
-  var cursor = _server.cursor(&#39;db.test&#39;, {
-      find: f(&amp;quot;%s.inserts_extend_cursors&amp;quot;, configuration.db)
-    , query: {}
-  });
-
-  // Execute next
-  cursor.toArray(function(err, items) {
-    test.equal(null, err);
-
-    // Execute find
-    var cursor = _server.cursor(&#39;db.test&#39;, {
-        find: f(&amp;quot;%s.inserts_extend_cursors&amp;quot;, configuration.db)
-      , query: {}
-    }, {cursorFactory: ExtendedCursor});
-
-    // Execute next
-    cursor.toArray(function(err, items) {
-      test.equal(null, err);
-      server.destroy();
-    });
-  });
-});
-
-// Start connecting
-server.connect();
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;It&amp;rsquo;s fairly straight forward to create the new cursor factory. We extend the &lt;code&gt;Cursor&lt;/code&gt; class and add the new &lt;code&gt;toArray&lt;/code&gt; method. We then specify the new &lt;code&gt;ExtendedCursor&lt;/code&gt; factory as the &lt;code&gt;cursorFactory&lt;/code&gt; when we create the new &lt;code&gt;Server&lt;/code&gt; connection. From then on every time we call the &lt;code&gt;cursor&lt;/code&gt; method we receive an instance of the &lt;code&gt;ExtendedCursor&lt;/code&gt; that we specified. We can even override a specific &lt;code&gt;cursor&lt;/code&gt; method call by passing it a different &lt;code&gt;cursorFactory&lt;/code&gt; in the options allowing for complete flexibility in using different types of cursor.&lt;/p&gt;
-
-&lt;p&gt;That covers how to customize the cursor for your needs.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
       <title>CRUD Operations</title>
       <link>/node-mongodb-native/core/driver/reference/crud/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
@@ -580,6 +489,97 @@ server.connect();
     </item>
     
     <item>
+      <title>Extending Cursors</title>
+      <link>/node-mongodb-native/core/driver/reference/extending/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/core/driver/reference/extending/</guid>
+      <description>
+
+&lt;h1 id=&#34;extending-the-functionality-of-the-driver-cursor&#34;&gt;Extending the functionality of the Driver Cursor&lt;/h1&gt;
+
+&lt;p&gt;The Core Driver cursor is a very minimalist cursor by design and only supports a single &lt;code&gt;next&lt;/code&gt; method to iterate over the query results. In this tutorial we will examine how we can extend the cursor to support an additional &lt;code&gt;toArray&lt;/code&gt; method and show how we can configure our topology to always return the new extended Cursor on all &lt;code&gt;cursor&lt;/code&gt; method calls.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s look at the code.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var Server = require(&#39;mongodb-core&#39;).Server
+  , Cursor = require(&#39;mongodb-core&#39;).Cursor
+  , inherits = require(&#39;util&#39;).inherits
+
+//
+// Create an extended cursor that adds a toArray function
+var ExtendedCursor = function(bson, ns, cmd, options, connection, callbacks, options) {
+  Cursor.apply(this, Array.prototype.slice.call(arguments, 0));
+  var self = this;
+
+  // Resolve all the next
+  var getAllNexts = function(items, callback) {
+    self.next(function(err, item) {
+      if(err) return callback(err);
+      if(item == null) return callback(null, null);
+      items.push(item);
+      getAllNexts(items, callback);
+    });
+  }
+
+  // Adding a toArray function to the cursor
+  this.toArray = function(callback) {
+    var items = [];
+
+    getAllNexts(items, function(err, r) {
+      if(err) return callback(err, null);          
+      callback(null, items);
+    });
+  }
+}
+
+// Extend the Cursor
+inherits(ExtendedCursor, Cursor);
+
+// Connect using new cursor
+var server = new Server({
+    host: &#39;localhost&#39;
+  , port: 27017
+  , cursorFactory: ExtendedCursor
+});
+
+// Wait for the connection event
+server.on(&#39;connect&#39;, function(_server) {
+  // Execute find
+  var cursor = _server.cursor(&#39;db.test&#39;, {
+      find: f(&amp;quot;%s.inserts_extend_cursors&amp;quot;, configuration.db)
+    , query: {}
+  });
+
+  // Execute next
+  cursor.toArray(function(err, items) {
+    test.equal(null, err);
+
+    // Execute find
+    var cursor = _server.cursor(&#39;db.test&#39;, {
+        find: f(&amp;quot;%s.inserts_extend_cursors&amp;quot;, configuration.db)
+      , query: {}
+    }, {cursorFactory: ExtendedCursor});
+
+    // Execute next
+    cursor.toArray(function(err, items) {
+      test.equal(null, err);
+      server.destroy();
+    });
+  });
+});
+
+// Start connecting
+server.connect();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;It&amp;rsquo;s fairly straight forward to create the new cursor factory. We extend the &lt;code&gt;Cursor&lt;/code&gt; class and add the new &lt;code&gt;toArray&lt;/code&gt; method. We then specify the new &lt;code&gt;ExtendedCursor&lt;/code&gt; factory as the &lt;code&gt;cursorFactory&lt;/code&gt; when we create the new &lt;code&gt;Server&lt;/code&gt; connection. From then on every time we call the &lt;code&gt;cursor&lt;/code&gt; method we receive an instance of the &lt;code&gt;ExtendedCursor&lt;/code&gt; that we specified. We can even override a specific &lt;code&gt;cursor&lt;/code&gt; method call by passing it a different &lt;code&gt;cursorFactory&lt;/code&gt; in the options allowing for complete flexibility in using different types of cursor.&lt;/p&gt;
+
+&lt;p&gt;That covers how to customize the cursor for your needs.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
       <title>Logging</title>
       <link>/node-mongodb-native/core/driver/reference/management/logging/</link>
       <pubDate>Wed, 18 Mar 2015 21:14:20 -0400</pubDate>
@@ -762,125 +762,6 @@ $ git checkout -b myNewFeature
     </item>
     
     <item>
-      <title>Installation Guide</title>
-      <link>/node-mongodb-native/core/driver/getting-started/installation-guide/</link>
-      <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
-      
-      <guid>/node-mongodb-native/core/driver/getting-started/installation-guide/</guid>
-      <description>
-
-&lt;h1 id=&#34;installation&#34;&gt;Installation&lt;/h1&gt;
-
-&lt;p&gt;The recommended way to get started using the Node.js Core driver is by using the &lt;code&gt;NPM&lt;/code&gt; (Node Package Manager) to install the dependency in your project.&lt;/p&gt;
-
-&lt;h2 id=&#34;mongodb-core-driver&#34;&gt;MongoDB Core Driver&lt;/h2&gt;
-
-&lt;p&gt;Given that you have created your own project using &lt;code&gt;npm init&lt;/code&gt; we install the mongodb driver and it&amp;rsquo;s dependencies by executing the following &lt;code&gt;NPM&lt;/code&gt; command.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install mongodb-core --save
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This will download the MongoDB Core driver and add a dependency entry in your &lt;code&gt;package.json&lt;/code&gt; file.&lt;/p&gt;
-
-&lt;h2 id=&#34;troubleshooting&#34;&gt;Troubleshooting&lt;/h2&gt;
-
-&lt;p&gt;The MongoDB driver depends on several other packages. These are.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;bson&lt;/li&gt;
-&lt;li&gt;kerberos&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;The &lt;code&gt;kerberos&lt;/code&gt; package is a C++ extension that requires a build environment to be installed on your system. You must be able to build node.js itself to be able to compile and install the &lt;code&gt;kerberos&lt;/code&gt; module. Furthermore the &lt;code&gt;kerberos&lt;/code&gt; module requires the MIT Kerberos package to correctly compile on UNIX operating systems. Consult your UNIX operation system package manager what libraries to install.&lt;/p&gt;
-
-&lt;p&gt;&lt;div class=&#34;admonition important&#34;&gt;
-&lt;h5 class=&#34;admonition-title&#34;&gt;important&lt;/h5&gt;
-&lt;p&gt;Windows already contains the SSPI API used for Kerberos authentication. However you will need to install a full compiler tool chain using visual studio C++ to correctly install the kerberos extension.&lt;/p&gt;
-
-&lt;/div&gt;
-&lt;/p&gt;
-
-&lt;h3 id=&#34;diagnosing-on-unix&#34;&gt;Diagnosing on UNIX&lt;/h3&gt;
-
-&lt;p&gt;If you don’t have the build essentials it won’t build. In the case of linux you will need gcc and g++, node.js with all the headers and python. The easiest way to figure out what’s missing is by trying to build the js-bson project. You can do this by performing the following steps.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;git clone https://github.com/mongodb/js-bson.git
-cd js-bson
-npm install
-make test
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If all the steps complete you have the right toolchain installed. If you get node-gyp not found you need to install it globally by doing.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install -g node-gyp
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If correctly compile and runs the tests you are golden. We can now try to install the mongod driver by performing the following command.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;cd yourproject
-npm install mongodb-core --save
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If it still fails the next step is to examine the npm log. Rerun the command but in this case in verbose mode.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm --loglevel verbose install mongodb-core
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This will print out all the steps npm is performing while trying to install the module.&lt;/p&gt;
-
-&lt;h3 id=&#34;diagnosing-on-windows&#34;&gt;Diagnosing on Windows&lt;/h3&gt;
-
-&lt;p&gt;A known compiler tool chain known to work for compiling &lt;code&gt;kerberos&lt;/code&gt; on windows is the following.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Visual Studio c++ 2010 (do not use higher versions)&lt;/li&gt;
-&lt;li&gt;Windows 7 64bit SDK&lt;/li&gt;
-&lt;li&gt;Python 2.7 or higher&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Open visual studio command prompt. Ensure node.exe is in your path and install node-gyp.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install -g node-gyp
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next you will have to build the project manually to test it. Use any tool you use with git and grab the repo.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;git clone https://github.com/mongodb/js-bson.git
-cd js-bson
-npm install
-node-gyp rebuild
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This should rebuild the driver successfully if you have everything set up correctly.&lt;/p&gt;
-
-&lt;h3 id=&#34;other-possible-issues&#34;&gt;Other possible issues&lt;/h3&gt;
-
-&lt;p&gt;Your python installation might be hosed making gyp break. I always recommend that you test your deployment environment first by trying to build node itself on the server in question as this should unearth any issues with broken packages (and there are a lot of broken packages out there).&lt;/p&gt;
-
-&lt;p&gt;Another thing is to ensure your user has write permission to wherever the node modules are being installed.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Getting Started</title>
-      <link>/node-mongodb-native/core/driver/getting-started/</link>
-      <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
-      
-      <guid>/node-mongodb-native/core/driver/getting-started/</guid>
-      <description>
-
-&lt;h2 id=&#34;getting-started&#34;&gt;Getting Started&lt;/h2&gt;
-
-&lt;p&gt;To help you get started quickly on the new driver, follow:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/driver/getting-started/installation-guide/&#34;&gt;Installation&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/driver/getting-started/quick-tour/&#34;&gt;Quick Tour&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</description>
-    </item>
-    
-    <item>
       <title>Quick Tour</title>
       <link>/node-mongodb-native/core/driver/getting-started/quick-tour/</link>
       <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
@@ -1059,6 +940,125 @@ server.connect();
 &lt;h2 id=&#34;next-steps&#34;&gt;Next steps&lt;/h2&gt;
 
 &lt;p&gt;The next step is to get more in depth information about how the different aspects of the core driver works and how to leverage them to extend the functionality of the cursors. Please view the tutorials for more detailed information.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Getting Started</title>
+      <link>/node-mongodb-native/core/driver/getting-started/</link>
+      <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
+      
+      <guid>/node-mongodb-native/core/driver/getting-started/</guid>
+      <description>
+
+&lt;h2 id=&#34;getting-started&#34;&gt;Getting Started&lt;/h2&gt;
+
+&lt;p&gt;To help you get started quickly on the new driver, follow:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/driver/getting-started/installation-guide/&#34;&gt;Installation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/driver/getting-started/quick-tour/&#34;&gt;Quick Tour&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Installation Guide</title>
+      <link>/node-mongodb-native/core/driver/getting-started/installation-guide/</link>
+      <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
+      
+      <guid>/node-mongodb-native/core/driver/getting-started/installation-guide/</guid>
+      <description>
+
+&lt;h1 id=&#34;installation&#34;&gt;Installation&lt;/h1&gt;
+
+&lt;p&gt;The recommended way to get started using the Node.js Core driver is by using the &lt;code&gt;NPM&lt;/code&gt; (Node Package Manager) to install the dependency in your project.&lt;/p&gt;
+
+&lt;h2 id=&#34;mongodb-core-driver&#34;&gt;MongoDB Core Driver&lt;/h2&gt;
+
+&lt;p&gt;Given that you have created your own project using &lt;code&gt;npm init&lt;/code&gt; we install the mongodb driver and it&amp;rsquo;s dependencies by executing the following &lt;code&gt;NPM&lt;/code&gt; command.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install mongodb-core --save
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will download the MongoDB Core driver and add a dependency entry in your &lt;code&gt;package.json&lt;/code&gt; file.&lt;/p&gt;
+
+&lt;h2 id=&#34;troubleshooting&#34;&gt;Troubleshooting&lt;/h2&gt;
+
+&lt;p&gt;The MongoDB driver depends on several other packages. These are.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;bson&lt;/li&gt;
+&lt;li&gt;kerberos&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The &lt;code&gt;kerberos&lt;/code&gt; package is a C++ extension that requires a build environment to be installed on your system. You must be able to build node.js itself to be able to compile and install the &lt;code&gt;kerberos&lt;/code&gt; module. Furthermore the &lt;code&gt;kerberos&lt;/code&gt; module requires the MIT Kerberos package to correctly compile on UNIX operating systems. Consult your UNIX operation system package manager what libraries to install.&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;admonition important&#34;&gt;
+&lt;h5 class=&#34;admonition-title&#34;&gt;important&lt;/h5&gt;
+&lt;p&gt;Windows already contains the SSPI API used for Kerberos authentication. However you will need to install a full compiler tool chain using visual studio C++ to correctly install the kerberos extension.&lt;/p&gt;
+
+&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;h3 id=&#34;diagnosing-on-unix&#34;&gt;Diagnosing on UNIX&lt;/h3&gt;
+
+&lt;p&gt;If you don’t have the build essentials it won’t build. In the case of linux you will need gcc and g++, node.js with all the headers and python. The easiest way to figure out what’s missing is by trying to build the js-bson project. You can do this by performing the following steps.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;git clone https://github.com/mongodb/js-bson.git
+cd js-bson
+npm install
+make test
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If all the steps complete you have the right toolchain installed. If you get node-gyp not found you need to install it globally by doing.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install -g node-gyp
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If correctly compile and runs the tests you are golden. We can now try to install the mongod driver by performing the following command.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;cd yourproject
+npm install mongodb-core --save
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If it still fails the next step is to examine the npm log. Rerun the command but in this case in verbose mode.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm --loglevel verbose install mongodb-core
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will print out all the steps npm is performing while trying to install the module.&lt;/p&gt;
+
+&lt;h3 id=&#34;diagnosing-on-windows&#34;&gt;Diagnosing on Windows&lt;/h3&gt;
+
+&lt;p&gt;A known compiler tool chain known to work for compiling &lt;code&gt;kerberos&lt;/code&gt; on windows is the following.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Visual Studio c++ 2010 (do not use higher versions)&lt;/li&gt;
+&lt;li&gt;Windows 7 64bit SDK&lt;/li&gt;
+&lt;li&gt;Python 2.7 or higher&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Open visual studio command prompt. Ensure node.exe is in your path and install node-gyp.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install -g node-gyp
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next you will have to build the project manually to test it. Use any tool you use with git and grab the repo.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;git clone https://github.com/mongodb/js-bson.git
+cd js-bson
+npm install
+node-gyp rebuild
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This should rebuild the driver successfully if you have everything set up correctly.&lt;/p&gt;
+
+&lt;h3 id=&#34;other-possible-issues&#34;&gt;Other possible issues&lt;/h3&gt;
+
+&lt;p&gt;Your python installation might be hosed making gyp break. I always recommend that you test your deployment environment first by trying to build node itself on the server in question as this should unearth any issues with broken packages (and there are a lot of broken packages out there).&lt;/p&gt;
+
+&lt;p&gt;Another thing is to ensure your user has write permission to wherever the node modules are being installed.&lt;/p&gt;
 </description>
     </item>
     

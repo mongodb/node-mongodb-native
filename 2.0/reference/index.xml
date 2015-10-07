@@ -2088,8 +2088,7 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;h2 id=&#34;reference&#34;&gt;Reference&lt;/h2&gt;
 
-&lt;p&gt;The reference documentation for the Java driver focuses on high-level documentation and use-cases. The Javadoc-generated API reference is
-&lt;a href=&#34;http://api.mongodb.org/java/3.0/&#34;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The reference documentation for the Node.js driver driver focuses on high-level documentation and use-cases.&lt;/p&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/&#34;&gt;Connecting&lt;/a&gt;: Documentation of the driver&amp;rsquo;s support for connecting to MongoDB servers&lt;/li&gt;
