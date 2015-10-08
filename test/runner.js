@@ -275,8 +275,8 @@ var testFiles =[
   , '/test/functional/ignore_undefined_tests.js'
 
   // Replicaset tests
-  , '/test/functional/replset_operations_tests.js'
   , '/test/functional/replset_read_preference_tests.js'
+  , '/test/functional/replset_operations_tests.js'
   , '/test/functional/replset_failover_tests.js'
   , '/test/functional/replset_connection_tests.js'
 

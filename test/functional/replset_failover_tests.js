@@ -1,5 +1,7 @@
 "use strict";
 
+var format = require('util').format;
+
 var restartAndDone = function(configuration, test) {
   configuration.manager.restart(function() {
     test.done();
@@ -392,5 +394,73 @@ exports['Should correctly read from secondary even if primary is down'] = {
     db.open(function(err, p_db) {
       db = p_db;
     });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['shouldStillQuerySecondaryWhenNoPrimaryAvailable'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var mongo = configuration.require
+      , MongoClient = mongo.MongoClient
+      , ReadPreference = mongo.ReadPreference;
+
+    var manager = configuration.manager;
+    var url = format("mongodb://localhost:%s,localhost:%s,localhost:%s/integration_test_?rs_name=%s"
+      , configuration.port, configuration.port + 1, configuration.port + 1, configuration.replicasetName);
+
+    // Connect using the MongoClient
+    MongoClient.connect(url, { 
+        replSet: {
+          //set replset check interval to be much smaller than our querying interval
+          haInterval: 50,
+          socketOptions: {
+            connectTimeoutMS: 500
+          }
+        }
+      }, function(err,db){
+        test.equal(null, err);
+        test.ok(db != null);
+
+        db.collection("replicaset_readpref_test").insert({testfield:123}, function(err, result) {
+          test.equal(null, err);
+          
+          db.collection("replicaset_readpref_test").findOne({}, function(err, result){
+            test.equal(null, err);
+            test.equal(result.testfield, 123);
+
+            // wait five seconds, then kill 2 of the 3 nodes that are up.
+            setTimeout(function(){
+              manager.shutdown('secondary', {signal: -15}, function() {
+                manager.shutdown('primary', {signal: -15}, function() {
+                });
+              });
+            }, 5000);
+
+            // we should be able to continue querying for a full minute
+            var counter = 0;
+            var callbacksWaiting = 0;
+            var intervalid = setInterval(function() {
+              if(counter++ >= 30){
+                clearInterval(intervalid);
+                db.close();
+                return restartAndDone(configuration, test);
+              }
+
+              callbacksWaiting++;
+
+              db.collection("replicaset_readpref_test").findOne({},
+                {readPreference: ReadPreference.SECONDARY_PREFERRED},
+                function(err, result) {
+                  callbacksWaiting--;
+              });
+            }, 1000);
+          });
+        });
+      });
   }
 }

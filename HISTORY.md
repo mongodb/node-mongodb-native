@@ -1,6 +1,6 @@
 2.0.46
 -----------------
-* Updated mongodb-core to 1.2.16.
+* Updated mongodb-core to 1.2.17.
 * NODE-578 Order of sort fields is lost for numeric field names.
 * Expose BSON Map (ES6 Map or polyfill).
 
