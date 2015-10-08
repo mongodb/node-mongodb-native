@@ -589,6 +589,15 @@ Server.prototype.setBSONParserType = function(type) {
 }
 
 /**
+ * Reduce the poolSize to the provided max connections value
+ * @method
+ * @param {number} maxConnections reduce the poolsize to maxConnections
+ */
+Server.prototype.capConnections = function(maxConnections) {
+  this.s.pool.capConnections(maxConnections);
+}
+
+/**
  * Returns the last known ismaster document for this server
  * @method
  * @return {object}
