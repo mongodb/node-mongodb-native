@@ -1,3 +1,7 @@
+1.2.17 10-08-2015
+-----------------
+- Connections to arbiters only maintain a single connection.
+
 1.2.15 10-06-2015
 -----------------
 - Set slaveOk to true for getMore and killCursors commands.
