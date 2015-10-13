@@ -152,12 +152,6 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
   // Using special modifier
   var usesSpecialModifier = false;
 
-  // We have a Mongos topology, check if we need to add a readPreference
-  if(topology.type == 'mongos' && readPreference) {
-    findCmd['$readPreference'] = readPreference.toJSON();
-    usesSpecialModifier = true;
-  }
-
   // Add special modifiers to the query
   if(cmd.sort) findCmd['orderby'] = cmd.sort, usesSpecialModifier = true;
   if(cmd.hint) findCmd['$hint'] = cmd.hint, usesSpecialModifier = true;
@@ -201,6 +195,24 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
   var ignoreUndefined = typeof options.ignoreUndefined == 'boolean'
     ? options.ignoreUndefined : false;
 
+  // // We have a Mongos topology, check if we need to add a readPreference
+  // if(topology.type == 'mongos' && readPreference) {
+  //   findCmd['$readPreference'] = readPreference.toJSON();
+  //   usesSpecialModifier = true;
+  // }
+
+  // We have a Mongos topology, check if we need to add a readPreference
+  if(topology.type == 'mongos' 
+    && readPreference 
+    && readPreference.preference != 'primary') {
+    findCmd = {
+      '$query': findCmd,
+      '$readPreference': readPreference.toJSON()
+    };
+
+    usesSpecialModifier = true;
+  }
+
   // Build Query object
   var query = new Query(bson, ns, findCmd, {
       numberToSkip: numberToSkip, numberToReturn: numberToReturn
@@ -242,10 +254,10 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
   // Build command namespace
   var parts = ns.split(/\./);
 
-  // We have a Mongos topology, check if we need to add a readPreference
-  if(topology.type == 'mongos' && readPreference) {
-    finalCmd['$readPreference'] = readPreference.toJSON();
-  }
+  // // We have a Mongos topology, check if we need to add a readPreference
+  // if(topology.type == 'mongos' && readPreference) {
+  //   finalCmd['$readPreference'] = readPreference.toJSON();
+  // }
 
   // Serialize functions
   var serializeFunctions = typeof options.serializeFunctions == 'boolean'
@@ -261,6 +273,16 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
 
   // Remove readConcern, ensure no failing commands
   if(cmd.readConcern) delete cmd['readConcern'];
+
+  // We have a Mongos topology, check if we need to add a readPreference
+  if(topology.type == 'mongos' 
+    && readPreference 
+    && readPreference.preference != 'primary') {
+    finalCmd = {
+      '$query': finalCmd,
+      '$readPreference': readPreference.toJSON()
+    };
+  }
 
   // Build Query object
   var query = new Query(bson, f('%s.$cmd', parts.shift()), finalCmd, {

@@ -255,10 +255,10 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
   // Build command namespace
   var parts = ns.split(/\./);
 
-  // We have a Mongos topology, check if we need to add a readPreference
-  if(topology.type == 'mongos' && readPreference) {
-    finalCmd['$readPreference'] = readPreference.toJSON();
-  }
+  // // We have a Mongos topology, check if we need to add a readPreference
+  // if(topology.type == 'mongos' && readPreference) {
+  //   finalCmd['$readPreference'] = readPreference.toJSON();
+  // }
 
   // Throw on majority readConcern passed in
   if(cmd.readConcern && cmd.readConcern.level != 'local') {
@@ -275,6 +275,16 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
   // Set up the serialize and ignoreUndefined fields
   var ignoreUndefined = typeof options.ignoreUndefined == 'boolean'
     ? options.ignoreUndefined : false;
+
+  // We have a Mongos topology, check if we need to add a readPreference
+  if(topology.type == 'mongos' 
+    && readPreference
+    && readPreference.preference != 'primary') {
+    finalCmd = {
+      '$query': finalCmd,
+      '$readPreference': readPreference.toJSON()
+    };
+  }
 
   // Build Query object
   var query = new Query(bson, f('%s.$cmd', parts.shift()), finalCmd, {
