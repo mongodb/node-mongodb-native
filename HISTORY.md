@@ -1,3 +1,7 @@
+1.2.18
+-----------------
+- Minor 3.2 fix for handling readPreferences on sharded commands.
+
 1.2.17 10-08-2015
 -----------------
 - Connections to arbiters only maintain a single connection.
