@@ -9,6 +9,7 @@ var connect = require('./lib/mongo_client').connect;
 connect.MongoError = core.MongoError;
 
 // Actual driver classes exported
+connect.Admin = require('./lib/admin');
 connect.MongoClient = require('./lib/mongo_client');
 connect.Db = require('./lib/db');
 connect.Collection = require('./lib/collection');
