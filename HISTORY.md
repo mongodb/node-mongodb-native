@@ -1,6 +1,7 @@
-1.2.19
+1.2.19 10-15-2015
 -----------------
 - Make batchSize always be > 0 for 3.2 wire protocol to make it work consistently with pre 3.2 servers.
+- Locked to bson 0.4.19.
 
 1.2.18 10-15-2015
 -----------------
