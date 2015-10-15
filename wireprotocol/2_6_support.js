@@ -36,7 +36,11 @@ var executeWrite = function(topology, type, opsField, ns, ops, options, callback
   writeCommand[type] = p.join('.');
   writeCommand[opsField] = ops;
   writeCommand.ordered = ordered;
-  writeCommand.writeConcern = writeConcern;
+
+  // Did we specify a write concern
+  if(writeConcern && Object.keys(writeConcern).length > 0) {
+    writeCommand.writeConcern = writeConcern;
+  }
 
   // Options object
   var opts = {};

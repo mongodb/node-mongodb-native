@@ -116,8 +116,10 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
   // Did we pass in a cursor id
   if(typeof cmd == 'number') {
     this.cursorState.cursorId = Long.fromNumber(cmd);
+    this.cursorState.lastCursorId = this.cursorState.cursorId;
   } else if(cmd instanceof Long) {
     this.cursorState.cursorId = cmd;
+    this.cursorState.lastCursorId = cmd;
   }
 }
 
@@ -191,6 +193,8 @@ var execInitialQuery = function(self, query, cmd, options, cursorState, connecti
           }
           // Promote id to long if needed
           cursorState.cursorId = typeof id == 'number' ? Long.fromNumber(id) : id;
+          cursorState.lastCursorId = cursorState.cursorId;
+
           // If we have a firstBatch set it
           if(Array.isArray(result.documents[0].cursor.firstBatch)) {
             cursorState.documents = result.documents[0].cursor.firstBatch;//.reverse();
@@ -209,6 +213,7 @@ var execInitialQuery = function(self, query, cmd, options, cursorState, connecti
 
     // Otherwise fall back to regular find path
     cursorState.cursorId = result.cursorId;
+    cursorState.lastCursorId = result.cursorId;
     cursorState.documents = result.documents;
 
     // Transform the results with passed in transformation method if provided
@@ -292,6 +297,7 @@ Cursor.prototype._find = function(callback) {
           }
           // Promote id to long if needed
           self.cursorState.cursorId = typeof id == 'number' ? Long.fromNumber(id) : id;
+          self.cursorState.lastCursorId = self.cursorState.cursorId;
           // If we have a firstBatch set it
           if(Array.isArray(result.documents[0].cursor.firstBatch)) {
             self.cursorState.documents = result.documents[0].cursor.firstBatch;//.reverse();
@@ -311,6 +317,7 @@ Cursor.prototype._find = function(callback) {
     // Otherwise fall back to regular find path
     self.cursorState.cursorId = result.cursorId;
     self.cursorState.documents = result.documents;
+    self.cursorState.lastCursorId = result.cursorId;
 
     // Transform the results with passed in transformation method if provided
     if(self.cursorState.transforms && typeof self.cursorState.transforms.query == 'function') {
@@ -342,8 +349,16 @@ Cursor.prototype._getmore = function(callback) {
   if(this.logger.isDebug()) this.logger.debug(f("schedule getMore call for query [%s]", JSON.stringify(this.query)))
   // Determine if it's a raw query
   var raw = this.options.raw || this.cmd.raw;
+
+  // Set the current batchSize
+  var batchSize = this.cursorState.batchSize;
+  if(this.cursorState.limit > 0 
+    && ((this.cursorState.currentLimit + batchSize) > this.cursorState.limit)) {
+    batchSize = this.cursorState.limit - this.cursorState.currentLimit;
+  }
+
   // We have a wire protocol handler
-  this.server.wireProtocolHandler.getMore(this.bson, this.ns, this.cursorState, this.cursorState.batchSize, raw, this.connection, this.callbacks, this.options, callback);
+  this.server.wireProtocolHandler.getMore(this.bson, this.ns, this.cursorState, batchSize, raw, this.connection, this.callbacks, this.options, callback);
 }
 
 Cursor.prototype._killcursor = function(callback) {
@@ -623,6 +638,7 @@ var nextFunction = function(self, callback) {
     // Initial result
     if(self.cursorState.cursorId == null) {
       self.cursorState.cursorId = result.cursorId;
+      self.cursorState.lastCursorId = result.cursorId;
       nextFunction(self, callback);
     }
   }
