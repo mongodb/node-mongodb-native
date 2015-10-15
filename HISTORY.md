@@ -1,8 +1,9 @@
 2.0.46
 -----------------
-* Updated mongodb-core to 1.2.17.
+* Updated mongodb-core to 1.2.18.
 * NODE-578 Order of sort fields is lost for numeric field names.
 * Expose BSON Map (ES6 Map or polyfill).
+* Minor fixes for APM support to pass extended APM test suite.
 
 2.0.45 09-30-2015
 -----------------

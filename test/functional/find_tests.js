@@ -397,16 +397,16 @@ exports.shouldCorrectlyFindEmbeddedDocument = {
              collection.find({ 'a.id': 10 }).toArray(function(err, documents) {
                test.equal(1, documents.length);
                test.equal('bar', documents[0].b);
-             });
 
-             // test using string value
-             collection.find({ 'a.value': 'foo' }).toArray(function(err, documents) {
-               // should yield 2 documents
-               test.equal(2, documents.length);
-               test.equal('bar', documents[0].b);
-               test.equal('bar2', documents[1].b);
-               db.close();
-               test.done();
+               // test using string value
+               collection.find({ 'a.value': 'foo' }).toArray(function(err, documents) {
+                 // should yield 2 documents
+                 test.equal(2, documents.length);
+                 test.equal('bar', documents[0].b);
+                 test.equal('bar2', documents[1].b);
+                 db.close();
+                 test.done();
+               });
              });
           });
         });

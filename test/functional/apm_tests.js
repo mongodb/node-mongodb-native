@@ -117,7 +117,16 @@ var validateExpecations = function(test, expectation, results) {
     var result = results.starts.shift();
 
     // Validate the test
-    test.equal(commandName, result.commandName)
+    test.equal(commandName, result.commandName);
+    test.equal(databaseName, result.databaseName);
+
+    // Do we have a getMore command or killCursor command
+    if(commandName == 'getMore') {
+      test.ok(!result.command.getMore.isZero());
+    } else if(commandName == 'killCursors') {
+    } else {
+      test.deepEqual(command, result.command);
+    }
   } else if(expectation.command_succeeded_event) {
     var obj = expectation.command_succeeded_event;
     // Unpack the expectation
@@ -127,17 +136,25 @@ var validateExpecations = function(test, expectation, results) {
 
     // Get the result
     var result = results.successes.shift();
+
     // Validate the test
     test.equal(commandName, result.commandName);
-    // test.deepEqual(reply[0], result.reply.result);
+    // Do we have a getMore command
+    if(commandName.toLowerCase() == 'getmore' || 
+      commandName.toLowerCase() == 'find') {
+      reply.cursor.id = result.reply.cursor.id;
+      test.deepEqual(reply, result.reply);
+    }
   } else if(expectation.command_failed_event) {
     var obj = expectation.command_failed_event;
     // Unpack the expectation
     var reply = obj.reply;
     var databaseName = obj.database_name;
     var commandName = obj.command_name;
+
     // Get the result
     var result = results.failures.shift();
+
     // Validate the test
     test.equal(commandName, result.commandName);
   }
@@ -160,6 +177,8 @@ var executeOperation = function(assert, client, listener, scenario, test, callba
   var collection = db.collection(scenario.collection_name);
   // Parameters
   var params = [];
+  // Options
+  var options = null;
   // Get the data
   var data = scenario.data;
 
@@ -215,20 +234,48 @@ var executeOperation = function(assert, client, listener, scenario, test, callba
         params.push(args.requests);
       }
 
+      if(args.writeConcern) {
+        if(options == null) {
+          options = args.writeConcern;
+        } else {
+          for(var name in args.writeConcern) {
+            options[name] = args.writeConcern[name];
+          }
+        }
+      }
+
+      if(typeof args.ordered == 'boolean') {
+        if(options == null) {
+          options = {ordered: args.ordered};
+        } else {
+          options.ordered = args.ordered;
+        }
+      }
+
+      if(typeof args.upsert == 'boolean') {
+        if(options == null) {
+          options = {upsert: args.upsert};
+        } else {
+          options.upsert = args.upsert;
+        }
+      }      
+
       // Find command is special needs to executed using toArray
       if(operation.name == 'find') {
         var cursor = collection[commandName]();
 
-        if(args.filter) {
-          cursor = cursor.filter(args.filter);
-        }
+        // Set the options
+        if(args.filter) cursor = cursor.filter(args.filter);
+        if(args.batchSize) cursor = cursor.batchSize(args.batchSize);
+        if(args.limit) cursor = cursor.limit(args.limit);
+        if(args.skip) cursor = cursor.skip(args.skip);
+        if(args.sort) cursor = cursor.sort(args.sort);
 
-        if(args.batchSize) {
-          cursor = cursor.batchSize(args.batchSize);
-        }
-
-        if(args.limit) {
-          cursor = cursor.limit(args.limit);
+        // Set any modifiers
+        if(args.modifiers) {
+          for(var name in args.modifiers) {
+            cursor.addQueryModifier(name, args.modifiers[name]);
+          }
         }
 
         // Execute find
@@ -247,6 +294,9 @@ var executeOperation = function(assert, client, listener, scenario, test, callba
           callback();
         });
       } else {
+        // Add options if they exists
+        if(options) params.push(options);
+        // Add callback function
         params.push(function(err, result) {
           // Validate the expectations
           test.expectations.forEach(function(x, index) {
@@ -308,9 +358,20 @@ exports['Correctly run all JSON APM Tests'] = {
   test: function(configuration, test) {
     // Read all the json files for the APM spec
     var scenarios = fs.readdirSync(__dirname + '/apm').filter(function(x) {
+      // if(x.indexOf('bulkWrite.json') != -1) return true;
+      // return false;
+
       return x.indexOf('.json') != -1;
     }).map(function(x) {
-      return JSON.parse(fs.readFileSync(__dirname + '/apm/' + x));
+      var r = null;
+
+      try {
+        r = JSON.parse(fs.readFileSync(__dirname + '/apm/' + x));
+      } catch(err) {
+        console.dir(err)
+      }
+
+      return r;
     });
 
     // Get the methods
@@ -389,11 +450,11 @@ exports['Correctly receive the APM events for a find with getmore and killcursor
               test.equal(0, failed.length);
 
               // Success messages
-              test.equal(2, succeeded[0].reply.length);
+              test.ok(succeeded[0].reply != null);
               test.equal(succeeded[0].operationId, succeeded[1].operationId);
               test.equal(succeeded[0].operationId, succeeded[2].operationId);
-              test.equal(2, succeeded[1].reply.length);
-              test.equal(1, succeeded[2].reply.length);
+              test.ok(succeeded[1].reply != null);
+              test.ok(succeeded[2].reply != null);
 
               // Started
               test.equal(started[0].operationId, started[1].operationId);

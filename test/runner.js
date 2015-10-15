@@ -401,7 +401,7 @@ if(argv.t == 'functional') {
         port: 50000,
         host: 'localhost',
         url: "mongodb://%slocalhost:50000/integration_tests",
-        writeConcernMax: {w: 'majority', wtimeout: 30000},
+        writeConcernMax: {w: 3, wtimeout: 30000},
 
         topology: function(host, port, serverOptions) {
           var m = require('../');

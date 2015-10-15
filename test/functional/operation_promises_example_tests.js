@@ -2657,6 +2657,8 @@ exports.shouldCorrectlyRetrievelistCollectionsWithPromises = {
             db.close();
             test.done();
           });
+        }).catch(function(err) {
+          console.dir(err)
         });
       });
     });
@@ -6397,8 +6399,6 @@ exports['Should correctly add capped collection options to cursor With Promises'
           cursor.on('data', function() {});
 
           cursor.on('end', function() {
-            console.log("------------------------------------------------")
-            console.log(new Date().getTime() - s.getTime())
             test.ok((new Date().getTime() - s.getTime()) > 1000);
 
             db.close();

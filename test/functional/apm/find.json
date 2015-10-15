@@ -74,6 +74,9 @@
       "description": "A successful find event with options",
       "operation": {
         "name": "find",
+        "read_preference": {
+          "mode": "primaryPreferred"
+        },
         "arguments": {
           "filter": {
             "_id": {
@@ -83,7 +86,6 @@
           "sort": {
             "_id": 1
           },
-          "limit": 2,
           "skip": 2,
           "modifiers": {
             "$comment": "test",
@@ -97,9 +99,6 @@
             "$maxTimeMS": 6000,
             "$min": {
               "_id": 0
-            },
-            "$readPreference": {
-              "mode": "secondaryPreferred"
             },
             "$returnKey": false,
             "$showDiskLoc": false,
@@ -120,7 +119,6 @@
               "sort": {
                 "_id": 1
               },
-              "limit": 2,
               "skip": 2,
               "comment": "test",
               "hint": {
@@ -133,9 +131,6 @@
               "maxTimeMS": 6000,
               "min": {
                 "_id": 0
-              },
-              "readPreference": {
-                "mode": "secondaryPreferred"
               },
               "returnKey": false,
               "showRecordId": false,
@@ -275,6 +270,7 @@
     },
     {
       "description": "A successful find event with a getmore and killcursors",
+      "ignore_if_server_version_greater_than": "3.0",
       "operation": {
         "name": "find",
         "arguments": {
@@ -396,6 +392,107 @@
               ]
             },
             "command_name": "killCursors"
+          }
+        }
+      ]
+    },
+    {
+      "description": "A successful find event with a getmore and the server kills the cursor",
+      "ignore_if_server_version_less_than": "3.1",
+      "operation": {
+        "name": "find",
+        "arguments": {
+          "filter": {
+            "_id": {
+              "$gte": 1
+            }
+          },
+          "sort": {
+            "_id": 1
+          },
+          "batchSize": 3,
+          "limit": 4
+        }
+      },
+      "expectations": [
+        {
+          "command_started_event": {
+            "command": {
+              "find": "test",
+              "filter": {
+                "_id": {
+                  "$gte": 1
+                }
+              },
+              "sort": {
+                "_id": 1
+              },
+              "batchSize": 3,
+              "limit": 4
+            },
+            "command_name": "find",
+            "database_name": "command-monitoring-tests"
+          }
+        },
+        {
+          "command_succeeded_event": {
+            "reply": {
+              "ok": 1,
+              "cursor": {
+                "id": {
+                  "$numberLong": "42"
+                },
+                "ns": "command-monitoring-tests.test",
+                "firstBatch": [
+                  {
+                    "_id": 1,
+                    "x": 11
+                  },
+                  {
+                    "_id": 2,
+                    "x": 22
+                  },
+                  {
+                    "_id": 3,
+                    "x": 33
+                  }
+                ]
+              }
+            },
+            "command_name": "find"
+          }
+        },
+        {
+          "command_started_event": {
+            "command": {
+              "getMore": {
+                "$numberLong": "42"
+              },
+              "collection": "test",
+              "batchSize": 3
+            },
+            "command_name": "getMore",
+            "database_name": "command-monitoring-tests"
+          }
+        },
+        {
+          "command_succeeded_event": {
+            "reply": {
+              "ok": 1,
+              "cursor": {
+                "id": {
+                  "$numberLong": "0"
+                },
+                "ns": "command-monitoring-tests.test",
+                "nextBatch": [
+                  {
+                    "_id": 4,
+                    "x": 44
+                  }
+                ]
+              }
+            },
+            "command_name": "getMore"
           }
         }
       ]

@@ -8009,7 +8009,7 @@ exports['Should correctly execute ordered batch with no errors using write comma
  * @ignore
  */
 exports['Should correctly execute unordered batch with no errors'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {

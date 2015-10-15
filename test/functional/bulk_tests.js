@@ -431,7 +431,7 @@ exports['Should correctly execute ordered batch using w:0'] = {
 }
 
 exports['Should correctly handle single unordered batch API'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -489,7 +489,7 @@ exports['Should correctly handle single unordered batch API'] = {
 }
 
 exports['Should correctly handle multiple unordered batch API'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -568,7 +568,7 @@ exports['Should correctly handle multiple unordered batch API'] = {
 }
 
 exports['Should fail due to document being to big for unordered batch'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -600,7 +600,7 @@ exports['Should fail due to document being to big for unordered batch'] = {
 }
 
 exports['Should correctly split up messages into more batches for unordered batches'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -640,7 +640,7 @@ exports['Should correctly split up messages into more batches for unordered batc
 }
 
 exports['Should Correctly Fail Unordered Batch Operation due to illegal Operations'] = {
-  metadata: { requires: { mongodb: '>2.5.4', topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { mongodb: '>2.5.4', topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -690,7 +690,7 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
 }
 
 exports['Should Correctly Execute Unordered Batch with duplicate key errors on updates'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -710,9 +710,12 @@ exports['Should Correctly Execute Unordered Batch with duplicate key errors on u
         batch.insert({a:1});
         batch.find({a:1}).update({$set: {b: 1}});
         batch.insert({b:1});
+        batch.insert({b:1});
+        batch.insert({b:1});
+        batch.insert({b:1});
 
         // Execute the operations
-        batch.execute(function(err, result) {
+        batch.execute(configuration.writeConcernMax(),function(err, result) {
           // Test basic settings
           test.equal(2, result.nInserted);
           test.equal(true, result.hasWriteErrors());
@@ -720,10 +723,9 @@ exports['Should Correctly Execute Unordered Batch with duplicate key errors on u
 
           // Individual error checking
           var error = result.getWriteErrorAt(0);
-          test.equal(1, error.index);
+          test.equal(2, error.index);
           test.ok(error.code == 11000 || error.code == 11001);
           test.ok(error.errmsg != null);
-          test.equal(1, error.getOperation().u['$set'].b);
 
           db.close();
           test.done();
@@ -734,7 +736,7 @@ exports['Should Correctly Execute Unordered Batch with duplicate key errors on u
 }
 
 exports['Should Correctly Execute Unordered Batch of with upserts causing duplicate key errors on updates'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -758,7 +760,7 @@ exports['Should Correctly Execute Unordered Batch of with upserts causing duplic
         batch.insert({b:1});
 
         // Execute the operations
-        batch.execute(function(err, result) {
+        batch.execute(configuration.writeConcernMax(), function(err, result) {
           // Test basic settings
           test.equal(2, result.nInserted);
           test.equal(2, result.nUpserted);
@@ -791,7 +793,7 @@ exports['Should Correctly Execute Unordered Batch of with upserts causing duplic
 }
 
 exports['Should correctly perform unordered upsert with custom _id'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -806,7 +808,7 @@ exports['Should correctly perform unordered upsert with custom _id'] = {
       batch.find({_id:2}).upsert().updateOne({$set: {b:2}});
 
       // Execute the operations
-      batch.execute(function(err, result) {
+      batch.execute(configuration.writeConcernMax(), function(err, result) {
         // Check state of result
         test.equal(1, result.nUpserted);
         test.equal(0, result.nInserted);
@@ -828,7 +830,7 @@ exports['Should correctly perform unordered upsert with custom _id'] = {
 }
 
 exports['Should prohibit batch finds with no selector'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -861,7 +863,7 @@ exports['Should prohibit batch finds with no selector'] = {
 }
 
 exports['Should throw an error when no operations in unordered batch'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -873,7 +875,7 @@ exports['Should throw an error when no operations in unordered batch'] = {
 
       try {
         // Initialize the Ordered Batch
-        col.initializeUnorderedBulkOp().execute(function(err, result) {});
+        col.initializeUnorderedBulkOp().execute(configuration.writeConcernMax(),function(err, result) {});
       } catch(err) {
         threw = true;
       }
@@ -886,7 +888,7 @@ exports['Should throw an error when no operations in unordered batch'] = {
 }
 
 exports['Should correctly execute unordered batch using w:0'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {

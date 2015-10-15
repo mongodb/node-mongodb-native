@@ -560,7 +560,7 @@ exports.shouldThrowErrorIfSerializingFunctionOrdered = {
 exports.shouldThrowErrorIfSerializingFunctionUnOrdered = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1332,7 +1332,7 @@ exports.shouldExecuteInsertWithNoCallbackAndWriteConcern = {
 exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcern = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1344,7 +1344,7 @@ exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcern = {
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
-      var collection = db.collection('gh-completely');
+      var collection = db.collection('gh-completely2');
       collection.insert({ a: 1 }, { w: 0 }, cb);
 
       setTimeout(function(){
@@ -1361,11 +1361,12 @@ exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcern = {
 exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithUpdate = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
     function cb (err) {
+      console.dir(err)
       test.equal(null, err);
       cb.called++;
       test.equal(1, cb.called);
@@ -1374,7 +1375,7 @@ exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithUpdate = {
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
-      var collection = db.collection('gh-completely');
+      var collection = db.collection('gh-completely3');
       collection.update({ a: 1 }, {a:2}, { upsert:true, w: 0 }, cb);
 
       setTimeout(function(){
@@ -1391,7 +1392,7 @@ exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithUpdate = {
 exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithRemove = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1404,7 +1405,7 @@ exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithRemove = {
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
-      var collection = db.collection('gh-completely');
+      var collection = db.collection('gh-completely1');
       collection.remove({ a: 1 }, { w: 0 }, cb);
 
       setTimeout(function(){
@@ -1965,7 +1966,7 @@ exports['should correctly insert > 1000 docs using insert and insertMany'] = {
 exports['should return error on unordered insertMany with multiple unique key constraints'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -1995,7 +1996,7 @@ exports['should return error on unordered insertMany with multiple unique key co
 exports['should return error on unordered insert with multiple unique key constraints'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {

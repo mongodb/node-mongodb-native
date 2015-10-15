@@ -28,7 +28,7 @@ exports['Should correctly perform a Mongos secondary read using the read prefere
       // Perform a simple insert into a collection
       var collection = db.collection("shard_test1");
       // Insert a simple doc
-      collection.insert({test:1}, {w:2, wtimeout:10000}, function(err, result) {
+      collection.insert({test:1}, {w:4, wtimeout:10000}, function(err, result) {
         test.equal(null, err);
 
         // Set debug level for the driver
@@ -86,7 +86,7 @@ exports['Should correctly fail a Mongos read using a unsupported read preference
       // Perform a simple insert into a collection
       var collection = db.collection("shard_test2");
       // Insert a simple doc
-      collection.insert({test:1}, {w:2, wtimeout:10000}, function(err, result) {
+      collection.insert({test:1}, {w:4, wtimeout:10000}, function(err, result) {
         test.equal(null, err);
 
         // Set debug level for the driver
@@ -143,7 +143,7 @@ exports['Should fail a Mongos secondary read using the read preference and tags 
       // Perform a simple insert into a collection
       var collection = db.collection("shard_test3");
       // Insert a simple doc
-      collection.insert({test:1}, {w:2, wtimeout:10000}, function(err, result) {
+      collection.insert({test:1}, {w:4, wtimeout:10000}, function(err, result) {
         test.equal(null, err);
 
         // Set debug level for the driver
@@ -199,7 +199,7 @@ exports['Should correctly read from a tagged secondary using Mongos'] = {
       // Perform a simple insert into a collection
       var collection = db.collection("shard_test4");
       // Insert a simple doc
-      collection.insert({test:1}, {w:2, wtimeout:10000}, function(err, result) {
+      collection.insert({test:1}, {w:4, wtimeout:10000}, function(err, result) {
         test.equal(null, err);
 
         // Set debug level for the driver
@@ -251,7 +251,7 @@ exports['Should correctly connect to MongoS using single server instance'] = {
       // Perform a simple insert into a collection
       var collection = db.collection("shard_test5");
       // Insert a simple doc
-      collection.insert({test:1}, {w:2, wtimeout:10000}, function(err, result) {
+      collection.insert({test:1}, {w:4, wtimeout:10000}, function(err, result) {
         test.equal(null, err);
 
         collection.findOne({test:1}, {}, {readPreference:new ReadPreference(ReadPreference.SECONDARY, [{"dc2":"sf"}, {"dc1":"ny"}])}, function(err, item) {

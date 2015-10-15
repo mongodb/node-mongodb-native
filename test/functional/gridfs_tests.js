@@ -387,15 +387,15 @@ exports.shouldCorrectlyUnlinkAnArrayOfFiles = {
                       fs_client.collection('fs.files', function(err, collection) {
                         collection.count(function(err, count) {
                           test.equal(0, count);
-                        })
-                      });
 
-                      fs_client.collection('fs.chunks', function(err, collection) {
-                        collection.count(function(err, count) {
-                          test.equal(0, count);
-                          fs_client.close();
+                          fs_client.collection('fs.chunks', function(err, collection) {
+                            collection.count(function(err, count) {
+                              test.equal(0, count);
+                              fs_client.close();
 
-                          test.done();
+                              test.done();
+                            })
+                          });
                         })
                       });
                     });
