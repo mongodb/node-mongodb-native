@@ -1,6 +1,7 @@
-1.2.18
+1.2.18 10-15-2015
 -----------------
 - Minor 3.2 fix for handling readPreferences on sharded commands.
+- Minor fixes to correctly pass APM specification test suite.
 
 1.2.17 10-08-2015
 -----------------
