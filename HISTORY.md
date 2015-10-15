@@ -1,3 +1,7 @@
+1.2.19
+-----------------
+- Make batchSize always be > 0 for 3.2 wire protocol to make it work consistently with pre 3.2 servers.
+
 1.2.18 10-15-2015
 -----------------
 - Minor 3.2 fix for handling readPreferences on sharded commands.
