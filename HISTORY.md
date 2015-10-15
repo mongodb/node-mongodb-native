@@ -1,4 +1,4 @@
-2.0.46
+2.0.46 10-15-2015
 -----------------
 * Updated mongodb-core to 1.2.19.
 * NODE-578 Order of sort fields is lost for numeric field names.
