@@ -25,7 +25,7 @@
     , "semver": "4.1.0"
     , "rimraf": "2.2.6"
     , "gleak": "0.5.0"
-    , "mongodb-version-manager": "^0.8.6"
+    , "mongodb-version-manager": "^0.8.8"
     , "mongodb-tools": "~1.0"
     , "co": "4.5.4"
     , "bluebird": "2.9.27"

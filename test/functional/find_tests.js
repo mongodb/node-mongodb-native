@@ -2330,3 +2330,69 @@ exports['should correctly execute a findAndModifyWithAWriteConcern'] = {
     });
   }
 }
+
+/**
+ * Test a simple find
+ * @ignore
+ */
+exports['should execute query using batchSize of 0'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      var collection = db.collection('test_find_simple_batchsize_0', function(err, collection) {
+        var doc1 = null;
+        var doc2 = null;
+
+        // Insert some test documents
+        collection.insert([{a:2}, {b:3}, {b:4}], configuration.writeConcernMax(), function(err, r) {
+
+          // Ensure correct insertion testing via the cursor and the count function
+          collection.find().batchSize(-5).toArray(function(err, documents) {
+            console.dir(err)
+            test.equal(null, err);
+            test.equal(3, documents.length);
+            // Let's close the db
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
+  }
+}
+
+/**
+ * Test a simple find
+ * @ignore
+ */
+exports['should execute query using limit of 0'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      var collection = db.collection('test_find_simple_limit_0', function(err, collection) {
+        var doc1 = null;
+        var doc2 = null;
+
+        // Insert some test documents
+        collection.insert([{a:2}, {b:3}, {b:4}], configuration.writeConcernMax(), function(err, r) {
+
+          // Ensure correct insertion testing via the cursor and the count function
+          collection.find().limit(-5).toArray(function(err, documents) {
+            test.equal(null, err);
+            test.equal(3, documents.length);
+
+            // Let's close the db
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
+  }
+}
