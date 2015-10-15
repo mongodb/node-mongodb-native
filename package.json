@@ -13,7 +13,7 @@
     "legacy"
   ],
   "dependencies": {
-      "mongodb-core": "1.2.18"
+      "mongodb-core": "1.2.19"
     , "readable-stream": "1.0.31"
     , "es6-promise": "2.1.1"
   },
