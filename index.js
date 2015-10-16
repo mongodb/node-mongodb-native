@@ -21,6 +21,7 @@ connect.GridStore = require('./lib/gridfs/grid_store');
 connect.Chunk = require('./lib/gridfs/chunk');
 connect.Logger = core.Logger;
 connect.Cursor = require('./lib/cursor');
+connect.GridFSBucket = require('./lib/gridfs-stream');
 
 // BSON types exported
 connect.Binary = core.BSON.Binary;

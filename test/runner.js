@@ -304,6 +304,9 @@ var testFiles =[
 
   // Authentication Tests
   , '/test/functional/authentication_tests.js'
+
+  // GridFS
+  , '/test/functional/gridfs_stream_tests.js'
 ]
 
 // Check if we support es6 generators
