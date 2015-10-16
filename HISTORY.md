@@ -1,3 +1,7 @@
+1.2.20 
+-----------------
+- Fixed bug in arbiter connection capping code.
+
 1.2.19 10-15-2015
 -----------------
 - Make batchSize always be > 0 for 3.2 wire protocol to make it work consistently with pre 3.2 servers.
