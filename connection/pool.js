@@ -213,9 +213,10 @@ Pool.prototype.get = function() {
 Pool.prototype.capConnections = function(maxConnections) {
   // Do we have more connections than specified slice it
   if(this.connections.length > maxConnections) {
-    this.connections = this.connections.slice(0, maxConnections);
     // Get the rest of the connections
     var connections = this.connections.slice(maxConnections);
+    // Cap the active connections
+    this.connections = this.connections.slice(0, maxConnections);
     // Remove all listeners
     for(var i = 0; i < connections.length; i++) {
       connections[i].removeAllListeners('close');
