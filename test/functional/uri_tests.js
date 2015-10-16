@@ -98,7 +98,7 @@ exports['Should correctly connect via normal url using connect'] = {
   test: function(configuration, test) {
     var mongodb = configuration.require;
 
-    mongodb.connect("mongodb://localhost?safe=false", function(err, db) {
+    mongodb.connect("mongodb://localhost/?safe=false", function(err, db) {
       db.close();
       test.done();
     });
@@ -112,7 +112,7 @@ exports['Should correctly connect via normal url using require'] = {
   
   // The actual test we wish to run
   test: function(configuration, test) {
-    require('../..')("mongodb://localhost", function(err, db) {
+    require('../..')("mongodb://localhost/", function(err, db) {
       db.close();
       test.done();
     });
@@ -128,7 +128,7 @@ exports['Should correctly connect via normal url journal option'] = {
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
 
-    MongoClient.connect("mongodb://localhost?journal=true", function(err, db) {
+    MongoClient.connect("mongodb://localhost/?journal=true", function(err, db) {
       test.equal(true, db.writeConcern.j);
       db.close();
       test.done();
@@ -145,7 +145,7 @@ exports['Should correctly connect via normal url using ip'] = {
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
 
-    MongoClient.connect("mongodb://127.0.0.1:27017?fsync=true", function(err, db) {
+    MongoClient.connect("mongodb://127.0.0.1:27017/?fsync=true", function(err, db) {
       test.equal(true, db.writeConcern.fsync);
       db.close();
       test.done();
@@ -162,7 +162,7 @@ exports['Should correctly connect via normal url setting up poolsize of 1'] = {
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
 
-    MongoClient.connect("mongodb://127.0.0.1:27017?maxPoolSize=1", function(err, db) {
+    MongoClient.connect("mongodb://127.0.0.1:27017/?maxPoolSize=1", function(err, db) {
       test.deepEqual(1, db.serverConfig.connections().length);
       test.equal('admin', db.databaseName);
       db.close();

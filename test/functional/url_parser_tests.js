@@ -14,7 +14,7 @@ exports['Should correctly parse mongodb://localhost'] = {
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://localhost");
+    var object = parse("mongodb://localhost/");
     test.equal(1, object.servers.length);
     test.equal('localhost', object.servers[0].host);
     test.equal('27017', object.servers[0].port);
@@ -32,7 +32,7 @@ exports['Should correctly parse mongodb://localhost:27017'] = {
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://localhost:27017");
+    var object = parse("mongodb://localhost:27017/");
     test.equal(1, object.servers.length);
     test.equal('localhost', object.servers[0].host);
     test.equal('27017', object.servers[0].port);
@@ -44,13 +44,13 @@ exports['Should correctly parse mongodb://localhost:27017'] = {
 /**
  * @ignore
  */
-exports['Should correctly parse mongodb://localhost?safe=true&readPreference=secondary'] = {
+exports['Should correctly parse mongodb://localhost/?safe=true&readPreference=secondary'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://localhost?safe=true&readPreference=secondary");
+    var object = parse("mongodb://localhost/?safe=true&readPreference=secondary");
     // var object = parse("mongodb://localhost?safe");
     test.equal(1, object.servers.length);
     test.equal('localhost', object.servers[0].host);
@@ -63,13 +63,13 @@ exports['Should correctly parse mongodb://localhost?safe=true&readPreference=sec
 /**
  * @ignore
  */
-exports['Should correctly parse mongodb://localhost:28101'] = {
+exports['Should correctly parse mongodb://localhost:28101/'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://localhost:28101");
+    var object = parse("mongodb://localhost:28101/");
     test.equal(1, object.servers.length);
     test.equal('localhost', object.servers[0].host);
     test.equal('28101', object.servers[0].port);

@@ -1,0 +1,42 @@
+{
+    "tests": [
+        {
+            "auth": {
+                "db": "admin", 
+                "password": "secret", 
+                "username": "alice"
+            }, 
+            "description": "Option names are normalized to lowercase", 
+            "hosts": [
+                {
+                    "host": "example.com", 
+                    "port": null, 
+                    "type": "hostname"
+                }
+            ], 
+            "options": {
+                "authmechanism": "MONGODB-CR"
+            }, 
+            "uri": "mongodb://alice:secret@example.com/admin?AUTHMechanism=MONGODB-CR", 
+            "valid": true, 
+            "warning": false
+        }, 
+        {
+            "auth": null, 
+            "description": "Option key and value (escaped null bytes)", 
+            "hosts": [
+                {
+                    "host": "example.com", 
+                    "port": null, 
+                    "type": "hostname"
+                }
+            ], 
+            "options": {
+                "replicaset": "my\u0000rs"
+            }, 
+            "uri": "mongodb://example.com/?replicaSet=my%00rs", 
+            "valid": true, 
+            "warning": false
+        }
+    ]
+}

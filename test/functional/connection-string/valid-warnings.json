@@ -1,0 +1,68 @@
+{
+    "tests": [
+        {
+            "auth": null, 
+            "description": "Unrecognized option keys are ignored", 
+            "hosts": [
+                {
+                    "host": "example.com", 
+                    "port": null, 
+                    "type": "hostname"
+                }
+            ], 
+            "options": null, 
+            "uri": "mongodb://example.com/?foo=bar", 
+            "valid": true, 
+            "warning": true
+        }, 
+        {
+            "auth": null, 
+            "description": "Unsupported option values are ignored", 
+            "hosts": [
+                {
+                    "host": "example.com", 
+                    "port": null, 
+                    "type": "hostname"
+                }
+            ], 
+            "options": null, 
+            "uri": "mongodb://example.com/?fsync=ifPossible", 
+            "valid": true, 
+            "warning": true
+        }, 
+        {
+            "auth": null, 
+            "description": "Repeated option keys", 
+            "hosts": [
+                {
+                    "host": "example.com", 
+                    "port": null, 
+                    "type": "hostname"
+                }
+            ], 
+            "options": {
+                "replicaset": "test"
+            }, 
+            "uri": "mongodb://example.com/?replicaSet=test&replicaSet=test", 
+            "valid": true, 
+            "warning": true
+        }, 
+        {
+            "auth": null, 
+            "description": "Deprecated (or unknown) options are ignored if replacement exists", 
+            "hosts": [
+                {
+                    "host": "example.com", 
+                    "port": null, 
+                    "type": "hostname"
+                }
+            ], 
+            "options": {
+                "wtimeoutms": 10
+            }, 
+            "uri": "mongodb://example.com/?wtimeout=5&wtimeoutMS=10", 
+            "valid": true, 
+            "warning": true
+        }
+    ]
+}

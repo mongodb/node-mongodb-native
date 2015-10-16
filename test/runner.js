@@ -231,6 +231,9 @@ var testFiles =[
   // APM tests
   , '/test/functional/apm_tests.js'
 
+  // Connection spec tests
+  , '/test/functional/connection_string_spec_tests.js'
+
   // Replicaset read concern (make sure no illegal state due to teardown tests)
   , '/test/functional/readconcern_tests.js'
 

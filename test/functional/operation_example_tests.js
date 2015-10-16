@@ -5782,7 +5782,7 @@ exports['Should correctly connect to a replicaset'] = {
     // Create url
     var url = f("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
       , f("%s:%s", configuration.host, configuration.port)
-      , f("%s:%s", configuration.host, configuration.host + 1)
+      , f("%s:%s", configuration.host, configuration.port + 1)
       , "integration_test_"
       , configuration.replicasetName
       , "primary");
