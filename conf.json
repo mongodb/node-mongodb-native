@@ -6,6 +6,7 @@
       "test/functional/operation_promises_example_tests.js",
       "test/functional/operation_generators_example_tests.js",
       "test/functional/authentication_tests.js",
+      "test/functional/gridfs_stream_tests.js",
       "lib/admin.js",
       "lib/collection.js",
       "lib/cursor.js",

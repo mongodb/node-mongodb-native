@@ -5,6 +5,10 @@ var fs = require('fs');
 var stream = require('stream');
 
 /**
+ * Correctly stream a file from disk into GridFS using openUploadStream
+ *
+ * @example-class GridFSBucket
+ * @example-method openUploadStream
  * @ignore
  */
 exports.shouldUploadFromFileStream = {
@@ -18,7 +22,12 @@ exports.shouldUploadFromFileStream = {
       { poolSize:1 });
     db.open(function(error, db) {
       test.equal(error, null);
-
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
       db.dropDatabase(function(error) {
         test.equal(error, null);
 
@@ -30,9 +39,12 @@ exports.shouldUploadFromFileStream = {
         var license = fs.readFileSync('./LICENSE');
         var id = uploadStream.id;
 
+        // Wait for stream to finish
         uploadStream.once('finish', function() {
           var chunksColl = db.collection('fs.chunks');
           var chunksQuery = chunksColl.find({ files_id: id });
+          
+          // Get all the chunks
           chunksQuery.toArray(function(error, docs) {
             test.equal(error, null);
             test.equal(docs.length, 1);
@@ -68,10 +80,15 @@ exports.shouldUploadFromFileStream = {
         readStream.pipe(uploadStream);
       });
     });
+    // END
   }
 };
 
 /**
+ * Correctly upload a file to GridFS and then retrieve it as a stream
+ *
+ * @example-class GridFSBucket
+ * @example-method openDownloadStream
  * @ignore
  */
 exports.shouldDownloadToUploadStream = {
@@ -84,6 +101,12 @@ exports.shouldDownloadToUploadStream = {
     var db = configuration.newDbInstance(configuration.writeConcernMax(),
       { poolSize:1 });
     db.open(function(error, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
       var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
       var CHUNKS_COLL = 'gridfsdownload.chunks';
       var FILES_COLL = 'gridfsdownload.files';
@@ -122,13 +145,17 @@ exports.shouldDownloadToUploadStream = {
 
       readStream.pipe(uploadStream);
     });
+    // END
   }
 };
 
 /**
+ * Correctly download a GridFS file by name
+ *
+ * @example-class GridFSBucket
+ * @example-method openDownloadStreamByName
  * @ignore
  */
-
 exports['openDownloadStreamByName'] = {
   metadata: { requires: { topology: ['single'] } },
 
@@ -139,6 +166,12 @@ exports['openDownloadStreamByName'] = {
     var db = configuration.newDbInstance(configuration.writeConcernMax(),
       { poolSize:1 });
     db.open(function(error, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
       var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
       var CHUNKS_COLL = 'gridfsdownload.chunks';
       var FILES_COLL = 'gridfsdownload.files';
@@ -167,13 +200,17 @@ exports['openDownloadStreamByName'] = {
 
       readStream.pipe(uploadStream);
     });
+    // END
   }
 };
 
 /**
+ * Provide start and end parameters for file download to skip ahead x bytes and limit the total amount of bytes read to n
+ *
+ * @example-class GridFSBucket
+ * @example-method openDownloadStream
  * @ignore
  */
-
 exports['start/end options for openDownloadStream'] = {
   metadata: { requires: { topology: ['single'] } },
 
@@ -184,6 +221,12 @@ exports['start/end options for openDownloadStream'] = {
     var db = configuration.newDbInstance(configuration.writeConcernMax(),
       { poolSize:1 });
     db.open(function(error, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
       var bucket = new GridFSBucket(db, {
         bucketName: 'gridfsdownload',
         chunkSizeBytes: 2
@@ -225,11 +268,15 @@ exports['start/end options for openDownloadStream'] = {
 
       readStream.pipe(uploadStream);
     });
+    // END
   }
 };
 
-
 /**
+ * Deleting a file from GridFS
+ *
+ * @example-class GridFSBucket
+ * @example-method delete
  * @ignore
  */
 exports['Deleting a file'] = {
@@ -242,6 +289,12 @@ exports['Deleting a file'] = {
     var db = configuration.newDbInstance(configuration.writeConcernMax(),
       { poolSize:1 });
     db.open(function(error, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
       var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
       var CHUNKS_COLL = 'gridfsdownload.chunks';
       var FILES_COLL = 'gridfsdownload.files';
@@ -274,12 +327,10 @@ exports['Deleting a file'] = {
 
       readStream.pipe(uploadStream);
     });
+    // END
   }
 };
 
-/**
- * @ignore
- */
 exports['find()'] = {
   metadata: { requires: { topology: ['single'] } },
 
@@ -290,6 +341,12 @@ exports['find()'] = {
     var db = configuration.newDbInstance(configuration.writeConcernMax(),
       { poolSize:1 });
     db.open(function(error, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
       var bucket = new GridFSBucket(db, { bucketName: 'fs' });
 
       // We're only making sure this doesn't throw
@@ -304,6 +361,161 @@ exports['find()'] = {
 
       test.done();
     });
+    // END
+  }
+};
+
+/**
+ * Drop an entire buckets files and chunks
+ *
+ * @example-class GridFSBucket
+ * @example-method drop
+ * @ignore
+ */
+exports['drop example'] = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var GridFSBucket = configuration.require.GridFSBucket;
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(),
+      { poolSize:1 });
+    db.open(function(error, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
+      var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
+      var CHUNKS_COLL = 'gridfsdownload.chunks';
+      var FILES_COLL = 'gridfsdownload.files';
+      var readStream = fs.createReadStream('./LICENSE');
+
+      var uploadStream = bucket.openUploadStream('test.dat');
+
+      var license = fs.readFileSync('./LICENSE');
+      var id = uploadStream.id;
+
+      uploadStream.once('finish', function() {
+        bucket.drop(function(error) {
+          test.equal(error, null);
+
+          var chunksQuery = db.collection(CHUNKS_COLL).find({ files_id: id });
+          chunksQuery.toArray(function(error, docs) {
+            test.equal(error, null);
+            test.equal(docs.length, 0);
+
+            var filesQuery = db.collection(FILES_COLL).find({ _id: id });
+            filesQuery.toArray(function(error, docs) {
+              test.equal(error, null);
+              test.equal(docs.length, 0);
+
+              test.done();
+            });
+          });
+        });
+      });
+
+      readStream.pipe(uploadStream);
+    });
+    // END
+  }
+};
+
+/**
+ * Find all associates files with a bucket
+ *
+ * @example-class GridFSBucket
+ * @example-method find
+ * @ignore
+ */
+exports['find example'] = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var GridFSBucket = configuration.require.GridFSBucket;
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(),
+      { poolSize:1 });
+    db.open(function(error, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
+      var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload_2' });
+      var CHUNKS_COLL = 'gridfsdownload.chunks';
+      var FILES_COLL = 'gridfsdownload.files';
+      var readStream = fs.createReadStream('./LICENSE');
+
+      var uploadStream = bucket.openUploadStream('test.dat');
+
+      var license = fs.readFileSync('./LICENSE');
+      var id = uploadStream.id;
+
+      uploadStream.once('finish', function() {
+        bucket.find({}, {batchSize:1}).toArray(function(err, files) {
+          test.equal(null, err);
+          test.equal(1, files.length);
+          test.done();
+        });
+      });
+
+      readStream.pipe(uploadStream);
+    });
+    // END
+  }
+};
+
+/**
+ * Rename a file
+ *
+ * @example-class GridFSBucket
+ * @example-method rename
+ * @ignore
+ */
+exports['rename example'] = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var GridFSBucket = configuration.require.GridFSBucket;
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(),
+      { poolSize:1 });
+    db.open(function(error, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
+      var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload_3' });
+      var CHUNKS_COLL = 'gridfsdownload.chunks';
+      var FILES_COLL = 'gridfsdownload.files';
+      var readStream = fs.createReadStream('./LICENSE');
+
+      var uploadStream = bucket.openUploadStream('test.dat');
+
+      var license = fs.readFileSync('./LICENSE');
+      var id = uploadStream.id;
+
+      uploadStream.once('finish', function() {
+
+        // Rename the file
+        bucket.rename(id, 'renamed_it.dat', function(err) {
+          test.equal(null, err);
+          test.done();
+        });
+      });
+
+      readStream.pipe(uploadStream);
+    });
+    // END
   }
 };
 
