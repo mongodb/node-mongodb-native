@@ -1,10 +1,10 @@
 +++
 date = "2015-10-15T14:27:51-04:00"
-title = "GridFS Streaming"
+title = "Grid File System API"
 [menu.main]
   parent = "GridFS"
   identifier = "GridFSStream"
-  weight = 30
+  weight = 10
   pre = "<i class='fa'></i>"
 +++
 

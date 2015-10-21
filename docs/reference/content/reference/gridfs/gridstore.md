@@ -1,6 +1,6 @@
 +++
 date = "2015-03-19T14:27:51-04:00"
-title = "GridStore"
+title = "Legacy GridStore"
 [menu.main]
   parent = "GridFS"
   identifier = "GridStore"
@@ -8,7 +8,12 @@ title = "GridStore"
   pre = "<i class='fa'></i>"
 +++
 
+{{% warning %}}
+The GridStore API is deprecated as all official drivers are moving to a new shared API model.
 
+- [Grid File System API]({{<relref "reference/gridfs/streaming.md">}}): documentation on how to use the new `GridFS` API.
+
+{{% /warning %}}
 
 ## GridFS
 
