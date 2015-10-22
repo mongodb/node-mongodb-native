@@ -1,3 +1,9 @@
+2.1.0
+-----------------
+* Implements the connection string specification, https://github.com/mongodb/specifications/blob/master/source/connection-string/connection-string-spec.rst.
+* Implements the new GridFS specification, https://github.com/mongodb/specifications/blob/master/source/gridfs/gridfs-spec.rst.
+* Full MongoDB 3.2 support.
+
 2.0.46 10-15-2015
 -----------------
 * Updated mongodb-core to 1.2.19.
