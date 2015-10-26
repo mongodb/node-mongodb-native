@@ -78,7 +78,7 @@ exports.shouldCorrectlyHandleMultipleDocumentInsert = {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('test_multiple_insert');
-      var docs = [{a:1}, {a:2}];
+      var docs = [{a:1}, {a:2}].map(Object.freeze);
 
       collection.insert(docs, configuration.writeConcernMax(), function(err, r) {
         r.ops.forEach(function(doc) {
