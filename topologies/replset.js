@@ -783,20 +783,30 @@ var clearCredentials = function(s, ns) {
 var filterByTags = function(readPreference, servers) {
   if(readPreference.tags == null) return servers;
   var filteredServers = [];
-  var tags = readPreference.tags;
+  var tagsArray = !Array.isArray(readPreference.tags) ? [tags] : tags;
 
-  // Iterate over all the servers
-  for(var i = 0; i < servers.length; i++) {
-    var serverTag = servers[i].lastIsMaster().tags || {};
-    // Did we find the a matching server
-    var found = true;
-    // Check if the server is valid
-    for(var name in tags) {
-      if(serverTag[name] != tags[name]) found = false;
+  // Iterate over the tags
+  for(var j = 0; j < tagsArray.length; j++) {
+    var tags = tagsArray[j];
+
+    // Iterate over all the servers
+    for(var i = 0; i < servers.length; i++) {
+      var serverTag = servers[i].lastIsMaster().tags || {};
+      // Did we find the a matching server
+      var found = true;
+      // Check if the server is valid
+      for(var name in tags) {
+        if(serverTag[name] != tags[name]) found = false;
+      }
+
+      // Add to candidate list
+      if(found) {
+        filteredServers.push(servers[i]);
+      }
     }
 
-    // Add to candidate list
-    if(found) filteredServers.push(servers[i]);
+    // We found servers by the highest priority
+    if(found) break;
   }
 
   // Returned filtered servers
