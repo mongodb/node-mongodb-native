@@ -1,6 +1,7 @@
 1.2.20 
 -----------------
 - Fixed bug in arbiter connection capping code.
+- NODE-599 correctly handle arrays of server tags in order of priority.
 
 1.2.19 10-15-2015
 -----------------
