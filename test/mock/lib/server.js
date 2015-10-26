@@ -24,6 +24,8 @@ var Server = function(port, host) {
   this.port = port;
   // Create a server socket
   this.socket = net.createServer();
+  // Responses
+  this.messages = [];
 }
 
 inherits(Server, EventEmitter);
@@ -48,6 +50,10 @@ Server.prototype.start = function() {
     self.socket.listen(self.port, self.host, function() {
       resolve(self);
     });
+
+    self.on('message', function(message, connection) {
+      self.messages.push(new Request(self, connection, message));
+    });
   });
 }
 
@@ -55,9 +61,15 @@ Server.prototype.receive = function() {
   var self = this;
 
   return new Promise(function(resolve, reject) {
-    self.once('message', function(response, connection) {
-      resolve(new Request(self, connection, response));
-    });
+    var waiting = function() {
+      if(self.messages.length > 0) {
+        return resolve(self.messages.shift());
+      }
+
+      setTimeout(waiting, 10);
+    }
+
+    waiting();
   });
 }
 
@@ -155,7 +167,6 @@ var dataHandler = function(self, connection) {
         } else {
           if(data.length > 4) {
             // Retrieve the message size
-            // var sizeOfMessage = data.readUInt32LE(0);
             var sizeOfMessage = data[0] | data[1] << 8 | data[2] << 16 | data[3] << 24;
             // If we have a negative sizeOfMessage emit error and return
             if(sizeOfMessage < 0 || sizeOfMessage > self.maxBsonMessageSize) {
