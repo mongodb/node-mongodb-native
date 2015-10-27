@@ -135,7 +135,7 @@ MongoClient.connect(url, function(err, db) {
 });
 ```
 
-The *update* method also accepts an second argument that can be an options object. This object can have the following fields.
+The *update* method also accepts a third argument that can be an options object. This object can have the following fields.
 
 *  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 returns an acknowledgment of the write with not results `{ok:1}` and w >= 1 or w = 'majority' acknowledges the write with full write results.
 *  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
@@ -165,15 +165,13 @@ MongoClient.connect(url, function(err, db) {
     assert.equal(null, err);
     assert.equal(3, r.insertedCount);
 
-    // Update a single document
-    col.deleteOne({a:1}
-      , {$set: {b: 1}}, function(err, r) {
+    // Remove a single document
+    col.deleteOne({a:1}, function(err, r) {
       assert.equal(null, err);
       assert.equal(1, r.deletedCount);
 
       // Update multiple documents
-      col.deleteMany({a:2}
-        , {$set: {b: 1}}, function(err, r) {
+      col.deleteMany({a:2}, function(err, r) {
         assert.equal(null, err);
         assert.equal(2, r.deletedCount);
         db.close();
@@ -183,7 +181,7 @@ MongoClient.connect(url, function(err, db) {
 });
 ```
 
-The *deleteOne* and *deleteMany* methods also accepts an second argument that can be an options object. This object can have the following fields.
+The *deleteOne* and *deleteMany* methods also accepts a second argument that can be an options object. This object can have the following fields.
 
 *  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 returns an acknowledgment of the write with not results `{ok:1}` and w >= 1 or w = 'majority' acknowledges the write with full write results.
 *  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
@@ -192,8 +190,8 @@ The *deleteOne* and *deleteMany* methods also accepts an second argument that ca
 
 Just as for *updateOne/updateMany* and *insertOne/insertMany* the *deleteOne/deleteMany* method allows you to specify a per operation write concern using the *w*, *wtimeout* and *fsync* parameters
 
-### FindAndModify and findAndDelete
-The two methods *findOneAndUpdate*, *findOneAndDelete* and *findOneAndReplace* are special commands that allows the user to update or upsert a document and have the modified or existing document returned. It comes at a cost as the operation takes a write lock for the duration of the operation as it needs to ensure the modification is *atomic*. Let's look at *findOneAndUpdate* first using an example.
+### findOneAndUpdate, findOneAndDelete and findOneAndReplace
+The three methods *findOneAndUpdate*, *findOneAndDelete* and *findOneAndReplace* are special commands that allows the user to update or upsert a document and have the modified or existing document returned. It comes at a cost as the operation takes a write lock for the duration of the operation as it needs to ensure the modification is *atomic*. Let's look at *findOneAndUpdate* first using an example.
 
 ```js
 var MongoClient = require('mongodb').MongoClient
@@ -232,7 +230,7 @@ MongoClient.connect(url, function(err, db) {
 });
 ```
 
-The *findOneAndUpdate* method also accepts an second argument that can be an options object. This object can have the following fields.
+The *findOneAndUpdate* method also accepts a third argument that can be an options object. This object can have the following fields.
 
 *  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 returns an acknowledgment of the write with not results `{ok:1}` and w >= 1 or w = 'majority' acknowledges the write with full write results.
 *  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
@@ -242,7 +240,7 @@ The *findOneAndUpdate* method also accepts an second argument that can be an opt
 *  `projection`, (Object, default:null) Projection for returned result
 *  `returnOriginal`, (Boolean, default:true) Set to false if you want to return the modified object rather than the original. Ignored for remove.
 
-The *findAndDelete* function is a function especially defined to help remove a document. Let's look at an example of usage.
+The *findOneAndDelete* function is a function especially defined to help remove a document. Let's look at an example of usage.
 
 ```js
 var MongoClient = require('mongodb').MongoClient
@@ -262,7 +260,7 @@ MongoClient.connect(url, function(err, db) {
     assert.equal(3, r.result.n);
 
     // Remove a document from MongoDB and return it
-    col.findOneAndRemove({a:1}, {
+    col.findOneAndDelete({a:1}, {
         sort: [[a,1]]
       }
       , function(err, doc) {
@@ -369,7 +367,7 @@ MongoClient.connect(url, function(err, db) {
 
 We will not cover the results object here as it's documented in the driver API. The Bulk API handles all the splitting of operations into multiple writes and also emulates 2.6 and higher write commands for 2.4 and earlier servers.
 
-There is are some important things to keep in mind when using the bulk API and especially the *ordered* bulk API mode. The write commands are single operation type. That means they can only do insert/update and remove. If you f.ex do the following combination of operations.
+There are some important things to keep in mind when using the bulk API and especially the *ordered* bulk API mode. The write commands are single operation type. That means they can only do insert/update and remove. If you f.ex do the following combination of operations.
 
     Insert {a:1}
     Update {a:1} to {a:1, b:1}
@@ -385,7 +383,7 @@ This will result in the driver issuing 4 write commands to the server.
     Remove Command with {b:1}
     Insert Command with {a:3}    
 
-If you instead organize the your *ordered* in the following manner.
+If you instead organize your *ordered* in the following manner.
 
     Insert {a:1}
     Insert {a:2}
