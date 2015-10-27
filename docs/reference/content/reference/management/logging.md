@@ -31,7 +31,7 @@ MongoClient.connect(url, function(err, db) {
   // Set debug level
   Logger.setLevel('debug');
 
-  // Insert a single document
+  // Execute command {ismaster:true} against db
   db.command({ismaster:true}, function(err, d) {
     assert.equal(null, err);
     db.close();
@@ -59,9 +59,10 @@ MongoClient.connect(url, function(err, db) {
 
   // Set debug level
   Logger.setLevel('debug');
+  // Only log statements on 'Db' class
   Logger.filter('class', ['Db']);
 
-  // Insert a single document
+  // Execute command {ismaster:true} against db
   db.command({ismaster:true}, function(err, d) {
     assert.equal(null, err);
     db.close();
@@ -125,7 +126,7 @@ MongoClient.connect(url, function(err, db) {
     console.log(msg, context);
   });
 
-  // Insert a single document
+  // Execute command {ismaster:true} against db
   db.command({ismaster:true}, function(err, d) {
     assert.equal(null, err);
     db.close();
