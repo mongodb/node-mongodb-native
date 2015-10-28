@@ -3,6 +3,8 @@
 * Implements the connection string specification, https://github.com/mongodb/specifications/blob/master/source/connection-string/connection-string-spec.rst.
 * Implements the new GridFS specification, https://github.com/mongodb/specifications/blob/master/source/gridfs/gridfs-spec.rst.
 * Full MongoDB 3.2 support.
+* Updated mongodb-core to 1.2.20.
+* NODE-601 Added maxAwaitTimeMS support for 3.2 getMore to allow for custom timeouts on tailable cursors.
 
 2.0.46 10-15-2015
 -----------------

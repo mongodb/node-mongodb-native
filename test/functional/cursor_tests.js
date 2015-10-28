@@ -360,50 +360,6 @@ exports.shouldCorrectlyExecuteSortOnCursor = {
   }
 }
 
-// /**
-//  * @ignore
-//  * @api private
-//  */
-// exports.shouldCorrectlyThrowErrorOnToArrayWhenMissingCallback = {
-//   // Add a tag that our runner can trigger on
-//   // in this case we are setting that node needs to be higher than 0.10.X to run
-//   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-//     db.open(function(err, db) {
-//       db.createCollection('test_to_array', function(err, collection) {
-//         function insert(callback) {
-//           var total = 10;
-
-//           for(var i = 0; i < 10; i++) {
-//             collection.insert({'x':i}, configuration.writeConcernMax(), function(e) {
-//               total = total - 1;
-//               if(total == 0) callback();
-//             });
-//           }
-//         }
-
-//         function finished() {
-//           collection.find(function(err, cursor) {
-//             test.throws(function () {
-//               cursor.toArray();
-//             });
-
-//             db.close();
-//             test.done();
-//           });
-//         }
-
-//         insert(function() {
-//           finished();
-//         });
-//       });
-//     });
-//   }
-// }
-
 /**
  * @ignore
  * @api private
@@ -3037,17 +2993,6 @@ exports['Should correctly apply skip and limit to large set of documents'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    // var docs = [];
-    //
-    // for(var i = 0; i < 4000) {
-    //
-    // }
-
-    // for(var i = 0; i < 1000; i++) {
-    //   var d = new Date().getTime() + i*1000;
-    //   docs[i] = {'a':i, createdAt:new Date(d)};
-    // }
-    //
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       test.equal(null, err);
@@ -3073,25 +3018,41 @@ exports['Should correctly apply skip and limit to large set of documents'] = {
           test.done();
         });
       });
+    });
+  }
+}
 
-      // // insert all docs
-      // collection.insert(docs, configuration.writeConcernMax(), function(err, result) {
-      //   test.equal(null, err);
-      //   var total = 0;
-      //
-      //   // Create a cursor for the content
-      //   var cursor = collection.find({})
-      //     .map(function(x) { return {a:1}; })
-      //     .batchSize(5)
-      //     .limit(10);
-      //   cursor.forEach(function(doc) {
-      //     test.equal(1, doc.a);
-      //   }, function(err, doc) {
-      //     test.equal(null, err);
-      //     db.close();
-      //     test.done();
-      //   });
-      // })
+/**
+ * @ignore
+ */
+exports['should tail cursor using maxAwaitTimeMS for 3.2 or higher'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single'], mongodb: ">3.1.9" } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      var options = { capped: true, size: 8};
+      db.createCollection('should_await_data_max_awaittime_ms', options, function(err, collection) {
+        collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
+          var s = new Date();         
+          // Create cursor with awaitdata, and timeout after the period specified
+          collection.find({})
+            .addCursorFlag('tailable', true)
+            .addCursorFlag('awaitData', true)
+            .setCursorOption('numberOfRetries', 0)
+            .maxAwaitTimeMS(500)
+            .each(function(err, result) {
+              if(result == null) {
+                test.ok((new Date().getTime() - s.getTime()) >= 500);
+                db.close();
+                test.done();                
+              }
+          });
+        });
+      });
     });
   }
 }
