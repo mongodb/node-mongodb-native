@@ -39,7 +39,7 @@ exports['Should iterate cursor'] = {
               test.equal(null, err);
               test.equal(2, d.a);
               test.equal(0, cursor.bufferedCount());
-              // Destroy the server connection        
+              // Destroy the server connection
               _server.destroy();
               // Finish the test
               test.done();
@@ -94,7 +94,7 @@ exports['Should iterate cursor but readBuffered'] = {
               test.equal(null, err);
               test.equal(null, d);
 
-              // Destroy the server connection        
+              // Destroy the server connection
               _server.destroy();
               // Finish the test
               test.done();
@@ -145,7 +145,7 @@ exports['Should callback exhausted cursor with error'] = {
               cursor.next(function(err, d) {
                 test.ok(err);
                 test.equal(null, d);
-                // Destroy the server connection        
+                // Destroy the server connection
                 _server.destroy();
                 // Finish the test
                 test.done();
