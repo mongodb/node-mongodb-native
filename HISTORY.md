@@ -4,6 +4,7 @@
 - NODE-599 correctly handle arrays of server tags in order of priority.
 - Fix for 2.6 wire protocol handler related to readPreference handling.
 - Added maxAwaitTimeMS support for 3.2 getMore to allow for custom timeouts on tailable cursors.
+- Make CoreCursor check for $err before saying that 'next' succeeded (Issue #53, https://github.com/vkarpov15).
 
 1.2.19 10-15-2015
 -----------------
