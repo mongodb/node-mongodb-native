@@ -1,4 +1,4 @@
-1.2.20 
+1.2.20 10-28-2015
 -----------------
 - Fixed bug in arbiter connection capping code.
 - NODE-599 correctly handle arrays of server tags in order of priority.
