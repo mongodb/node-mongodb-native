@@ -322,7 +322,7 @@ Cursor.prototype._find = function(callback) {
     // Return callback
     callback(null, null);
   }
-  
+
   // If we have a raw query decorate the function
   if(self.options.raw || self.cmd.raw) {
     queryCallback.raw = self.options.raw || self.cmd.raw;
@@ -347,7 +347,7 @@ Cursor.prototype._getmore = function(callback) {
 
   // Set the current batchSize
   var batchSize = this.cursorState.batchSize;
-  if(this.cursorState.limit > 0 
+  if(this.cursorState.limit > 0
     && ((this.cursorState.currentLimit + batchSize) > this.cursorState.limit)) {
     batchSize = this.cursorState.limit - this.cursorState.currentLimit;
   }
@@ -740,6 +740,10 @@ var nextFunction = function(self, callback) {
 
     // Get the document
     var doc = self.cursorState.documents[self.cursorState.cursorIndex++];
+
+    if (doc.$err) {
+      return handleCallback(callback, new MongoError(doc.$err));
+    }
 
     // Transform the doc with passed in transformation method if provided
     if(self.cursorState.transforms && typeof self.cursorState.transforms.doc == 'function') {
