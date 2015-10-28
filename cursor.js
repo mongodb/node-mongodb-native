@@ -147,11 +147,6 @@ Cursor.prototype.cursorSkip = function() {
   return this.cursorState.skip;
 }
 
-// //
-// // Execute getMore command
-// var execGetMore = function(self, callback) {
-// }
-
 //
 // Execute the first query
 var execInitialQuery = function(self, query, cmd, options, cursorState, connection, logger, callbacks, callback) {
