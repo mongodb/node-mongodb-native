@@ -1,12 +1,12 @@
 os: linux
 language: node_js
 node_js:
-  - node
-  - '0.10'
-  - iojs
+  - "0.10"
+  - "0.12"
+  - "4.2.x"
 sudo: true
 env:
   - MONGODB_VERSION=2.4.x
   - MONGODB_VERSION=2.6.x
   - MONGODB_VERSION=3.0.x
-  - MONGODB_VERSION=3.2.x
+  - MONGODB_VERSION=3.2.0-rc1
