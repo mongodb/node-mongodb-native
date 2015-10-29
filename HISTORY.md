@@ -3,8 +3,16 @@
 * Implements the connection string specification, https://github.com/mongodb/specifications/blob/master/source/connection-string/connection-string-spec.rst.
 * Implements the new GridFS specification, https://github.com/mongodb/specifications/blob/master/source/gridfs/gridfs-spec.rst.
 * Full MongoDB 3.2 support.
-* Updated mongodb-core to 1.2.20.
 * NODE-601 Added maxAwaitTimeMS support for 3.2 getMore to allow for custom timeouts on tailable cursors.
+
+2.0.47 10-28-2015
+-----------------
+* Updated mongodb-core to 1.2.20.
+* Fixed bug in arbiter connection capping code.
+* NODE-599 correctly handle arrays of server tags in order of priority.
+* Fix for 2.6 wire protocol handler related to readPreference handling.
+* Added maxAwaitTimeMS support for 3.2 getMore to allow for custom timeouts on tailable cursors.
+* Make CoreCursor check for $err before saying that 'next' succeeded (Issue #53, https://github.com/vkarpov15).
 
 2.0.46 10-15-2015
 -----------------
