@@ -186,7 +186,7 @@ var runner = new Runner({
   , failFast: true
 });
 
-var testFiles =[
+var testFiles = [
     '/test/tests/functional/server_tests.js'
   , '/test/tests/functional/operations_tests.js'
   , '/test/tests/functional/basic_auth_tests.js'
