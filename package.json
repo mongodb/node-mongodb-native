@@ -26,14 +26,14 @@
     "mongodb-tools": "~1.0",
     "mkdirp": "0.5.0",
     "rimraf": "2.2.6",
-    "mongodb-version-manager": "^0.8.10",
+    "mongodb-version-manager": "^1.x",
     "co": "4.5.4"
   },
   "optionalDependencies": {
     "kerberos": "~0.0"
   },
   "author": "Christian Kvalheim",
-  "license": "Apache 2.0",
+  "license": "Apache-2.0",
   "bugs": {
     "url": "https://github.com/christkv/mongodb-core/issues"
   },
