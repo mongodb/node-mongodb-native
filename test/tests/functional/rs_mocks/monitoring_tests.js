@@ -169,8 +169,10 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
               primaryServer.destroy();
               firstSecondaryServer.destroy();
               secondSecondaryServer.destroy();
-              test.done();
+              server.destroy();
               running = false;
+              
+              test.done();
               return;
             }
 
@@ -182,6 +184,8 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
       // Schedule an insert
       schedule();
     });
+
+    server.on('error', function(){});
 
     server.on('joined', function(type, server) {
       if(type == 'primary') joinedPrimaries[server.name] = 1;
