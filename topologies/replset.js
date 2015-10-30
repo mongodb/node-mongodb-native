@@ -649,16 +649,25 @@ ReplSet.prototype.connect = function(_options) {
   // Attempt to connect to all the servers
   while(this.s.disconnectedServers.length > 0) {
     // Get the server
-    var server = this.s.disconnectedServers.shift();
+    var server = self.s.disconnectedServers.shift();
 
     // Set up the event handlers
-    server.once('error', errorHandlerTemp(this, this.s, 'error'));
-    server.once('close', errorHandlerTemp(this, this.s, 'close'));
-    server.once('timeout', errorHandlerTemp(this, this.s, 'timeout'));
-    server.once('connect', connectHandler(this, this.s));
+    server.once('error', errorHandlerTemp(self, self.s, 'error'));
+    server.once('close', errorHandlerTemp(self, self.s, 'close'));
+    server.once('timeout', errorHandlerTemp(self, self.s, 'timeout'));
+    server.once('connect', connectHandler(self, self.s));
 
-    // Attempt to connect
-    server.connect();
+    // Ensure we schedule the opening of new socket
+    // on separate ticks of the event loop
+    var execute = function(_server) {
+      // Attempt to connect    
+      process.nextTick(function() {
+    // console.log("------------------ START :: " + _server.name)
+        _server.connect();
+      });      
+    }
+
+    execute(server);
   }
 }
 
@@ -927,8 +936,17 @@ var replicasetInquirer = function(self, state, norepeat) {
       server.once('close', errorHandlerTemp(self, state, 'close'));
       server.once('timeout', errorHandlerTemp(self, state, 'timeout'));
       server.once('connect', connectHandler(self, state));
-      // Attempt to connect
-      server.connect();
+
+      // Ensure we schedule the opening of new socket
+      // on separate ticks of the event loop
+      var execute = function(_server) {
+        // Attempt to connect    
+        process.nextTick(function() {
+          _server.connect();
+        });      
+      }
+
+      execute(server);
     }
 
     // Cleanup state (removed disconnected servers)
@@ -972,6 +990,8 @@ var replicasetInquirer = function(self, state, norepeat) {
         var timeoutId = timeoutServer(server);
         // Execute ismaster
         server.command('system.$cmd', {ismaster:true}, function(err, r) {
+          // console.log("------------------------------------------------------------- ismaster result")
+          // console.dir(r.result)
           // Clear out the timeoutServer
           clearTimeout(timeoutId);
           // If the state was destroyed
@@ -1014,6 +1034,8 @@ var replicasetInquirer = function(self, state, norepeat) {
             if(Array.isArray(ismaster.passives)) hosts = hosts.concat(ismaster.passives);
             // Process all the hsots
             processHosts(self, state, hosts);
+          } else if(err == null && !Array.isArray(ismaster.hosts)) {
+            server.destroy();
           }
 
           // No read Preferences strategies
@@ -1086,6 +1108,8 @@ var replicasetInquirer = function(self, state, norepeat) {
 // Error handler for initial connect
 var errorHandlerTemp = function(self, state, event) {
   return function(err, server) {
+    // console.log("------------------------------- errorHandlerTemp :: " + server.name)
+    // console.dir(err)
     // Log the information
     if(state.logger.isInfo()) state.logger.info(f('[%s] server %s disconnected', state.id, server.lastIsMaster() ? server.lastIsMaster().me : server.name));
     // Filter out any connection servers
@@ -1133,6 +1157,7 @@ var errorHandlerTemp = function(self, state, event) {
 // Connect handler
 var connectHandler = function(self, state) {
   return function(server) {
+    // console.log("------------------------------- connect :: " + server.name)
     if(state.logger.isInfo()) state.logger.info(f('[%s] connected to %s', state.id, server.name));
     // Destroyed connection
     if(state.replState.state == DESTROYED) {
@@ -1290,8 +1315,12 @@ var connectToServer = function(self, state, host, port, options) {
   server.once('close', errorHandlerTemp(self, state, 'close'));
   server.once('timeout', errorHandlerTemp(self, state, 'timeout'));
   server.once('connect', connectHandler(self, state));
+  
   // Attempt to connect
-  server.connect();
+  process.nextTick(function() {
+    // console.log("------------------ RECONNECT START :: " + server.name)
+    server.connect();
+  });
 }
 
 //

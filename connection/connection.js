@@ -378,7 +378,11 @@ Connection.prototype.connect = function(_options) {
  * @method
  */
 Connection.prototype.destroy = function() {
-  if(this.connection) this.connection.destroy();
+  if(this.connection) {
+    this.connection.end();
+    this.connection.destroy();
+  }
+
   this.destroyed = true;
 }
 
