@@ -44,6 +44,7 @@ Server.prototype.start = function() {
     });
 
     self.socket.on('connection', function(c) {
+      c.on('error', function(e) {});
       c.on('data', dataHandler(self, c));
     });
 
