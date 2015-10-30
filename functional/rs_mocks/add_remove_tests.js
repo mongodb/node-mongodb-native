@@ -191,6 +191,8 @@ exports['Successfully add a new secondary server to the set'] = {
       }
     });
 
+    server.on('error', function(){});
+
     server.on('connect', function(e) {
       server.__connected = true;
     });
@@ -384,6 +386,8 @@ exports['Successfully remove a secondary server from the set'] = {
         test.done();        
       }
     });
+
+    server.on('error', function(){});
 
     server.on('connect', function(e) {
       server.__connected = true;
@@ -584,6 +588,8 @@ exports['Successfully remove a secondary server from the set then re-add it'] = 
         test.done();
       }
     });
+
+    server.on('error', function(){});
 
     server.on('left', function(_type, _server) {
       if(_type == 'secondary' && _server.name == 'localhost:32003') {
