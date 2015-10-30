@@ -184,6 +184,8 @@ exports['Successfully failover to new primary'] = {
       }, 100);
     });
 
+    server.on('error', function(){});
+
     // Add event listeners
     server.on('fullsetup', function(_server) {});
     server.connect();
