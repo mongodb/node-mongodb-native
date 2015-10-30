@@ -217,6 +217,12 @@ Pool.prototype.capConnections = function(maxConnections) {
     var connections = this.connections.slice(maxConnections);
     // Cap the active connections
     this.connections = this.connections.slice(0, maxConnections);
+
+    if (this.index >= maxConnections){
+      // Go back to the beggining of the pool if capping connections
+      this.index = 0;
+    }
+
     // Remove all listeners
     for(var i = 0; i < connections.length; i++) {
       connections[i].removeAllListeners('close');
