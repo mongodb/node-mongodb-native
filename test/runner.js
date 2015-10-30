@@ -187,35 +187,34 @@ var runner = new Runner({
 });
 
 var testFiles =[
-  //   '/test/tests/functional/server_tests.js'
-  // , '/test/tests/functional/operations_tests.js'
-  // , '/test/tests/functional/basic_auth_tests.js'
-  // , '/test/tests/functional/extend_pick_strategy_tests.js'
-  // , '/test/tests/functional/mongos_tests.js'
-  // , '/test/tests/functional/extend_cursor_tests.js'
-  // , '/test/tests/functional/pool_tests.js'
-  // , '/test/tests/functional/connection_tests.js'
-  // , '/test/tests/functional/rs_topology_tests.js'
-  // , '/test/tests/functional/rs_topology_state_tests.js'
-  // , '/test/tests/functional/single_topology_tests.js'
-  // , '/test/tests/functional/cursor_tests.js'
-  // , '/test/tests/functional/error_tests.js'
-  // , '/test/tests/functional/tailable_cursor_tests.js'
-  // , '/test/tests/functional/operation_example_tests.js'
-  // , '/test/tests/functional/replset_failover_tests.js'
-  // , '/test/tests/functional/undefined_tests.js'
+    '/test/tests/functional/server_tests.js'
+  , '/test/tests/functional/operations_tests.js'
+  , '/test/tests/functional/basic_auth_tests.js'
+  , '/test/tests/functional/extend_pick_strategy_tests.js'
+  , '/test/tests/functional/mongos_tests.js'
+  , '/test/tests/functional/extend_cursor_tests.js'
+  , '/test/tests/functional/pool_tests.js'
+  , '/test/tests/functional/connection_tests.js'
+  , '/test/tests/functional/rs_topology_tests.js'
+  , '/test/tests/functional/rs_topology_state_tests.js'
+  , '/test/tests/functional/single_topology_tests.js'
+  , '/test/tests/functional/cursor_tests.js'
+  , '/test/tests/functional/error_tests.js'
+  , '/test/tests/functional/tailable_cursor_tests.js'
+  , '/test/tests/functional/operation_example_tests.js'
+  , '/test/tests/functional/replset_failover_tests.js'
+  , '/test/tests/functional/undefined_tests.js'
 ]
 
 // Check if we support es6 generators
 try {
   eval("(function *(){})");
   // Generator tests
-  // testFiles.push('/test/tests/functional/rs_mocks/add_remove_tests.js');
-  // testFiles.push('/test/tests/functional/rs_mocks/connection_tests.js');
+  testFiles.push('/test/tests/functional/rs_mocks/add_remove_tests.js');
+  testFiles.push('/test/tests/functional/rs_mocks/connection_tests.js');
   testFiles.push('/test/tests/functional/rs_mocks/failover_tests.js');
-  // testFiles.push('/test/tests/functional/rs_mocks/splits_tests.js');
-  // testFiles.push('/test/tests/functional/rs_mocks/monitoring_tests.js');
-  // testFiles.push('/test/tests/functional/rs_mocks/read_preferences_tests.js');
+  testFiles.push('/test/tests/functional/rs_mocks/monitoring_tests.js');
+  testFiles.push('/test/tests/functional/rs_mocks/read_preferences_tests.js');
 } catch(err) {}
 
 // Add all the tests to run
@@ -360,16 +359,16 @@ if(argv.t == 'functional') {
     return runner.run(Configuration(config));
   }
 
-  // Kill any running MongoDB processes and
-  // `install $MONGODB_VERSION` || `use existing installation` || `install stable`
-  m(function(err){
-    if(err) return console.error(err) && process.exit(1);
+  // // Kill any running MongoDB processes and
+  // // `install $MONGODB_VERSION` || `use existing installation` || `install stable`
+  // m(function(err){
+  //   if(err) return console.error(err) && process.exit(1);
 
-    m.current(function(err, version){
-      if(err) return console.error(err) && process.exit(1);
-      console.log('Running tests against MongoDB version `%s`', version);
+  //   m.current(function(err, version){
+  //     if(err) return console.error(err) && process.exit(1);
+  //     console.log('Running tests against MongoDB version `%s`', version);
       // Run the configuration
       runner.run(Configuration(config));
-    });
-  });
+  //   });
+  // });
 }
