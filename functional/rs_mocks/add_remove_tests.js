@@ -344,8 +344,14 @@ exports['Successfully remove a secondary server from the set'] = {
         size: 1
     });
 
+    // Joined
+    var joined = 0;
+
     server.on('joined', function(_type, _server) {
-      if(_type == 'arbiter') {
+      joined = joined + 1;
+
+      // primary, secondary and arbiter have joined
+      if(joined == 4) {
         test.equal(true, server.__connected);
 
         test.equal(2, server.s.replState.secondaries.length);
