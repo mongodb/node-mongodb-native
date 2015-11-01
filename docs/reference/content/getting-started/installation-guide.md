@@ -29,6 +29,7 @@ The MongoDB driver depends on several other packages. These are.
 * mongodb-core
 * bson
 * kerberos
+* node-gyp
 
 The `kerberos` package is a C++ extension that requires a build environment to be installed on your system. You must be able to build node.js itself to be able to compile and install the `kerberos` module. Furthermore the `kerberos` module requires the MIT Kerberos package to correctly compile on UNIX operating systems. Consult your UNIX operation system package manager what libraries to install.
 
@@ -36,16 +37,14 @@ The `kerberos` package is a C++ extension that requires a build environment to b
 Windows already contains the SSPI API used for Kerberos authentication. However you will need to install a full compiler tool chain using visual studio C++ to correctly install the kerberos extension.
 {{% /note %}}
 
-
 ### Diagnosing on UNIX
 
-If you don’t have the build essentials it won’t build. In the case of linux you will need gcc and g++, node.js with all the headers and python. The easiest way to figure out what’s missing is by trying to build the js-bson project. You can do this by performing the following steps.
+If you don’t have the build essentials it won’t build. In the case of linux you will need gcc and g++, node.js with all the headers and python. The easiest way to figure out what’s missing is by trying to build the kerberos project. You can do this by performing the following steps.
 
 ```
-git clone https://github.com/mongodb/js-bson.git
-cd js-bson
+git clone https://github.com/christkv/kerberos.git
+cd kerberos
 npm install
-make test
 ```
 
 If all the steps complete you have the right toolchain installed. If you get node-gyp not found you need to install it globally by doing.
@@ -54,7 +53,7 @@ If all the steps complete you have the right toolchain installed. If you get nod
 npm install -g node-gyp
 ```
 
-If correctly compile and runs the tests you are golden. We can now try to install the mongod driver by performing the following command.
+If correctly compiles and runs the tests you are golden. We can now try to install the mongod driver by performing the following command.
 
 ```
 cd yourproject
@@ -86,8 +85,8 @@ npm install -g node-gyp
 Next you will have to build the project manually to test it. Use any tool you use with git and grab the repo.
 
 ```
-git clone https://github.com/mongodb/js-bson.git
-cd js-bson
+git clone https://github.com/christkv/kerberos.git
+cd kerberos
 npm install
 node-gyp rebuild
 ```

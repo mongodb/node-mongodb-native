@@ -818,44 +818,44 @@ exports['should correctly pass partialIndexes through to createIndexCommand'] = 
   }
 }
 
-/**
- * @ignore
- */
-exports['should correctly return all indexes'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+// /**
+//  * @ignore
+//  */
+// exports['should correctly return all indexes'] = {
+//   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-    db.open(function(err, db) {
-      db.createCollection('test_drop_indexes', function(err, collection) {
-        collection.insert({a:1}, configuration.writeConcernMax(), function(err, ids) {
-          // Create an index on the collection
-          db.createIndex(collection.collectionName, 'a', configuration.writeConcernMax(), function(err, indexName) {
-            test.equal("a_1", indexName);
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+//     db.open(function(err, db) {
+//       db.createCollection('test_drop_indexes', function(err, collection) {
+//         collection.insert({a:1}, configuration.writeConcernMax(), function(err, ids) {
+//           // Create an index on the collection
+//           db.createIndex(collection.collectionName, 'a', configuration.writeConcernMax(), function(err, indexName) {
+//             test.equal("a_1", indexName);
 
-            collection.indexes(function(err, indexes) {
-              console.log("-----------------------------------------------")
-              console.dir(err)
-              console.dir(indexes)
+//             collection.indexes(function(err, indexes) {
+//               console.log("-----------------------------------------------")
+//               console.dir(err)
+//               console.dir(indexes)
 
-              db.close();
-              test.done();
-            });
+//               db.close();
+//               test.done();
+//             });
 
-            // // Drop all the indexes
-            // collection.dropAllIndexes(function(err, result) {
-            //   test.equal(true, result);
+//             // // Drop all the indexes
+//             // collection.dropAllIndexes(function(err, result) {
+//             //   test.equal(true, result);
 
-            //   collection.indexInformation(function(err, result) {
-            //     test.ok(result['a_1'] == null);
-            //     db.close();
-            //     test.done();
-            //   })
-            // })
-          });
-        })
-      });
-    });
-  }
-}
+//             //   collection.indexInformation(function(err, result) {
+//             //     test.ok(result['a_1'] == null);
+//             //     db.close();
+//             //     test.done();
+//             //   })
+//             // })
+//           });
+//         })
+//       });
+//     });
+//   }
+// }
