@@ -209,12 +209,17 @@ var testFiles = [
 // Check if we support es6 generators
 try {
   eval("(function *(){})");
-  // Generator tests
+  // Single server Mock Tests
+  testFiles.push('/test/tests/functional/single_mocks/timeout_tests.js');
+
+  // Replicaset Mock Tests
   testFiles.push('/test/tests/functional/rs_mocks/add_remove_tests.js');
   testFiles.push('/test/tests/functional/rs_mocks/connection_tests.js');
   testFiles.push('/test/tests/functional/rs_mocks/failover_tests.js');
   testFiles.push('/test/tests/functional/rs_mocks/monitoring_tests.js');
   testFiles.push('/test/tests/functional/rs_mocks/read_preferences_tests.js');
+
+  // Mongos Mock Tests
 } catch(err) {}
 
 // Add all the tests to run
