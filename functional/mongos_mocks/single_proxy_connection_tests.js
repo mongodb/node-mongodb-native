@@ -1,4 +1,4 @@
-exports['Should correctly timeout socket operation and then correctly re-execute'] = {
+exports['Should correctly timeout mongos socket operation and then correctly re-execute'] = {
   metadata: {
     requires: {
       generators: true,
@@ -7,7 +7,7 @@ exports['Should correctly timeout socket operation and then correctly re-execute
   },
 
   test: function(configuration, test) {
-    var Server = configuration.require.Server,
+    var Mongos = configuration.require.Mongos,
       ObjectId = configuration.require.BSON.ObjectId,
       co = require('co'),
       mockupdb = require('../../../mock');
@@ -29,13 +29,14 @@ exports['Should correctly timeout socket operation and then correctly re-execute
     // Default message fields
     var defaultFields = {
       "ismaster" : true,
+      "msg" : "isdbgrid",
       "maxBsonObjectSize" : 16777216,
       "maxMessageSizeBytes" : 48000000,
       "maxWriteBatchSize" : 1000,
       "localTime" : new Date(),
       "maxWireVersion" : 3,
       "minWireVersion" : 0,
-      "ok" : 1 
+      "ok" : 1
     }
 
     // Primary server states
@@ -50,7 +51,7 @@ exports['Should correctly timeout socket operation and then correctly re-execute
 
     // Boot the mock
     co(function*() {
-      server = yield mockupdb.createServer(37017, 'localhost');
+      server = yield mockupdb.createServer(52000, 'localhost');
 
       // Primary state machine
       co(function*() {
@@ -86,11 +87,12 @@ exports['Should correctly timeout socket operation and then correctly re-execute
     });
 
     // Attempt to connect
-    var server = new Server({
-      host: 'localhost',
-      port: '37017',
+    var server = new Mongos([
+        { host: 'localhost', port: 52000 },      
+      ], {
       connectionTimeout: 3000,
       socketTimeout: 1000,
+      haInterval: 1000,
       size: 1
     });
 
