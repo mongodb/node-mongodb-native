@@ -220,6 +220,7 @@ try {
   testFiles.push('/test/tests/functional/rs_mocks/read_preferences_tests.js');
 
   // Mongos Mock Tests
+  testFiles.push('/test/tests/functional/mongos_mocks/single_proxy_connection_tests.js');
 } catch(err) {}
 
 // Add all the tests to run
