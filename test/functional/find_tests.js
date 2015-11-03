@@ -2396,3 +2396,37 @@ exports['should execute query using limit of 0'] = {
     });
   }
 }
+
+/**
+ * Test a simple find
+ * @ignore
+ */
+exports['should execute query using $elemMatch'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      var collection = db.collection('elem_match_test', function(err, collection) {
+        var doc1 = null;
+        var doc2 = null;
+
+        // Insert some test documents
+        collection.insert([{ _id: 1, results: [ 82, 85, 88 ] },
+          { _id: 2, results: [ 75, 88, 89 ] }], configuration.writeConcernMax(), function(err, r) {
+
+          // Ensure correct insertion testing via the cursor and the count function
+          collection.find({ results: { $elemMatch: { $gte: 80, $lt: 85 } } }).toArray(function(err, documents) {
+            test.equal(null, err);
+            test.deepEqual([ { _id: 1, results: [ 82, 85, 88 ] } ], documents);
+
+            // Let's close the db
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
+  }
+}
