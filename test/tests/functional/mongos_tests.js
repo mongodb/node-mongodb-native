@@ -108,6 +108,57 @@ exports['Should correctly execute write using mongos'] = {
   }
 }
 
+exports['Should correctly execute read using readPreference secondary'] = {
+  metadata: {
+    requires: {
+      topology: "mongos"
+    }
+  },
+
+  test: function(configuration, test) {
+    var Mongos = configuration.require.Mongos,
+      ReadPreference = configuration.require.ReadPreference;
+
+    // Attempt to connect
+    var server = new Mongos([{
+        host: configuration.host
+      , port: configuration.port
+    }]);
+
+    // Add event listeners
+    server.on('connect', function(_server) {
+      // Execute the write
+      _server.insert(f("%s.inserts_mongos10", configuration.db), [{a:1}], {
+        writeConcern: {w:'majority'}, ordered:true
+      }, function(err, results) {
+        test.equal(null, err);
+        test.equal(1, results.result.n);
+
+        // Execute find
+        var cursor = _server.cursor(f("%s.inserts_mongos10", configuration.db), {
+            find: 'inserts_mongos10'
+          , query: {}
+          , batchSize: 2
+          , readPreference: ReadPreference.secondary
+        });
+
+        // Execute next
+        cursor.next(function(err, d) {
+          test.equal(null, err);
+          test.ok(d != null);
+          // Destroy the connection
+          _server.destroy();
+          // Finish the test
+          test.done();
+        });
+      });
+    })
+
+    // Start connection
+    server.connect();
+  }
+}
+
 exports['Should correctly remove mongos and re-add it'] = {
   metadata: {
     requires: {
