@@ -185,7 +185,7 @@ Ping.prototype.ha = function(topology, state, callback) {
 
   // Execute operation
   var operation = function(_server) {
-    var start = new Date();      
+    var start = new Date();
     // Execute ping against server
     _server.command('system.$cmd', {ismaster:1}, function(err, r) {
       count = count - 1;

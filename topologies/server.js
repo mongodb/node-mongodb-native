@@ -359,13 +359,17 @@ var connectHandler = function(self, state) {
   return function(connection) {
     // Apply any applyAuthentications
     applyAuthentications(function() {
-
+      // Get the actual latency of the ismaster
+      var start = new Date().getTime();
       // Execute an ismaster
       self.command('system.$cmd', {ismaster:true}, function(err, r) {
         if(err) {
           state.state = DISCONNECTED;
           return self.emit('close', err, self);
         }
+
+        // Set the latency for this instance
+        state.isMasterLatencyMS = new Date().getTime() - start;
 
         // Set the current ismaster
         if(!err) {
@@ -538,6 +542,8 @@ var Server = function(options) {
     , bson: options.bson ? options.bson : bsonInstance
     // Internal connection pool
     , pool: null
+    // Is master latency
+    , isMasterLatencyMS: 0
     // Server details
     , serverDetails: {
         host: options.host
