@@ -135,6 +135,11 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
   if(typeof readPreference == 'string') readPreference = new ReadPreference(readPreference);
   if(!(readPreference instanceof ReadPreference)) throw new MongoError('readPreference must be a ReadPreference instance');
 
+  // Does the cmd have a readPreference
+  if(cmd.readPreference) {
+    readPreference = cmd.readPreference;
+  }
+
   // Ensure we have at least some options
   options = options || {};
   // Set the optional batchSize
@@ -234,6 +239,11 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
   if(typeof readPreference == 'string') readPreference = new ReadPreference(readPreference);
   if(!(readPreference instanceof ReadPreference)) throw new MongoError('readPreference must be a ReadPreference instance');
 
+  // Does the cmd have a readPreference
+  if(cmd.readPreference) {
+    readPreference = cmd.readPreference;
+  }
+
   // Set empty options object
   options = options || {}
 
@@ -245,11 +255,6 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
 
   // Build command namespace
   var parts = ns.split(/\./);
-
-  // // We have a Mongos topology, check if we need to add a readPreference
-  // if(topology.type == 'mongos' && readPreference) {
-  //   finalCmd['$readPreference'] = readPreference.toJSON();
-  // }
 
   // Serialize functions
   var serializeFunctions = typeof options.serializeFunctions == 'boolean'

@@ -293,6 +293,11 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
   if(typeof readPreference == 'string') readPreference = new ReadPreference(readPreference);
   if(!(readPreference instanceof ReadPreference)) throw new MongoError('readPreference must be a ReadPreference instance');
 
+  // Does the cmd have a readPreference
+  if(cmd.readPreference) {
+    readPreference = cmd.readPreference;
+  }
+
   // Ensure we have at least some options
   options = options || {};
   // Set the optional batchSize
