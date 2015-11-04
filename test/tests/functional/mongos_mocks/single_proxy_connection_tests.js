@@ -107,6 +107,7 @@ exports['Should correctly timeout mongos socket operation and then correctly re-
             test.equal(null, err);
 
             server.destroy();
+            running = false;
             test.done();
           });
         }, 1200)
