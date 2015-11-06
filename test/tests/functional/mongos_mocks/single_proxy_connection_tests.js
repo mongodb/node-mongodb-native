@@ -93,14 +93,13 @@ exports['Should correctly timeout mongos socket operation and then correctly re-
       ], {
       connectionTimeout: 3000,
       socketTimeout: 1000,
-      haInterval: 1000,
+      haInterval: 500,
       size: 1
     });
 
     // Add event listeners
     server.once('connect', function(_server) {
       _server.insert('test.test', [{created:new Date()}], function(err, r) {
-        test.ok(err != null);
 
         // Let auto-reconnect run and restablish connection
         setTimeout(function() {
@@ -111,7 +110,7 @@ exports['Should correctly timeout mongos socket operation and then correctly re-
             running = false;
             test.done();
           });
-        }, 1200)
+        }, 2500)
       });
     });
 
