@@ -99,16 +99,18 @@ exports['Should correctly timeout socket operation and then correctly re-execute
       _server.insert('test.test', [{created:new Date()}], function(err, r) {
         test.ok(err != null);
 
-        // Let auto-reconnect run and restablish connection
-        setTimeout(function() {
+        // Run an interval
+        var intervalId = setInterval(function() {
           _server.insert('test.test', [{created:new Date()}], function(err, r) {
-            test.equal(null, err);
-
-            server.destroy();
-            running = false;
-            test.done();
+            if(r) {
+              clearInterval(intervalId);
+              test.equal(37017, r.connection.port);
+              server.destroy();
+              running = false;
+              test.done();              
+            }
           });
-        }, 1200)
+        }, 500);
       });
     });
 

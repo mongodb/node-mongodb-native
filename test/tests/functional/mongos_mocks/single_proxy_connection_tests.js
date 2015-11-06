@@ -66,12 +66,12 @@ exports['Should correctly timeout mongos socket operation and then correctly re-
           } else if(doc.insert && currentStep == 1) {
             // Stop responding to any calls (emulate dropping packets on the floor)
             if(stopRespondingPrimary) {
+              currentStep += 1;
+              stopRespondingPrimary = false;
+              // Timeout after 1500 ms
               yield timeoutPromise(1500);
               continue;
             }
-
-            currentStep += 1;
-            stopRespondingPrimary = false;
           } else if(doc.ismaster && currentStep == 2) {
             request.reply(serverIsMaster[0]);
           } else if(doc.insert && currentStep == 2) {
@@ -84,11 +84,11 @@ exports['Should correctly timeout mongos socket operation and then correctly re-
       setTimeout(function() {
         stopRespondingPrimary = true;
         currentIsMasterState = 1;
-      }, 1000);
+      }, 500);
     });
 
     // Attempt to connect
-    var server = new Mongos([
+    var _server = new Mongos([
         { host: 'localhost', port: 52000 },      
       ], {
       connectionTimeout: 3000,
@@ -98,23 +98,22 @@ exports['Should correctly timeout mongos socket operation and then correctly re-
     });
 
     // Add event listeners
-    server.once('connect', function(_server) {
-      _server.insert('test.test', [{created:new Date()}], function(err, r) {
-
-        // Let auto-reconnect run and restablish connection
-        setTimeout(function() {
-          _server.insert('test.test', [{created:new Date()}], function(err, r) {
-            test.equal(null, err);
-
+    _server.once('connect', function() {
+      // Run an interval
+      var intervalId = setInterval(function() {
+        _server.insert('test.test', [{created:new Date()}], function(err, r) {
+          if(r) {
+            clearInterval(intervalId);
+            test.equal(52000, r.connection.port);
             server.destroy();
             running = false;
-            test.done();
-          });
-        }, 2500)
-      });
+            test.done();              
+          }
+        });
+      }, 500);
     });
 
-    server.on('error', function(){});
-    server.connect();
+    _server.on('error', function(){});
+    _server.connect();
   }
 }
