@@ -377,7 +377,6 @@ exports['Should correctly bring back both proxies and use it'] = {
     server.once('fullsetup', function(_server) {
       var intervalId = setInterval(function() {
         server.insert('test.test', [{created:new Date()}], function(err, r) {
-          test.ok(err != null);
           // Clea out the interval
           clearInterval(intervalId);
           // Let the proxies come back
