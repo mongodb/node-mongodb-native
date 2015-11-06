@@ -1085,7 +1085,12 @@ Server.prototype.addAuthProvider = function(name, provider) {
  */
 Server.prototype.equals = function(server) {
   if(typeof server == 'string') return server == this.name;
-  return server.name == this.name;
+  
+  if(server && server.name) {
+    return server.name == this.name;    
+  }
+
+  return false;
 }
 
 /**

@@ -1320,6 +1320,8 @@ var connectToServer = function(self, state, host, port, options) {
 // Add server to the list if it does not exist
 var addToListIfNotExist = function(list, server) {
   var found = false;
+  // If the server is a null value return false
+  if(server == null) return found;
 
   // Remove any non used handlers
   ['error', 'close', 'timeout', 'connect'].forEach(function(e) {
