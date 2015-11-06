@@ -90,45 +90,45 @@ exports['Should correctly load-balance the operations'] = {
         stopRespondingPrimary = true;
         currentIsMasterState = 1;
       }, 5000);
-    });
 
-    // Attempt to connect
-    var server = new Mongos([
-        { host: 'localhost', port: 52000 },
-        { host: 'localhost', port: 52001 },
-      ], {
-      connectionTimeout: 3000,
-      socketTimeout: 1000,
-      haInterval: 1000,
-      size: 1
-    });
+      // Attempt to connect
+      var server = new Mongos([
+          { host: 'localhost', port: 52000 },
+          { host: 'localhost', port: 52001 },
+        ], {
+        connectionTimeout: 3000,
+        socketTimeout: 1000,
+        haInterval: 1000,
+        size: 1
+      });
 
-    // Add event listeners
-    server.once('connect', function(_server) {
-      _server.insert('test.test', [{created:new Date()}], function(err, r) {
-        test.equal(null, err);
-        test.equal(52000, r.connection.port);
-
+      // Add event listeners
+      server.once('connect', function(_server) {
         _server.insert('test.test', [{created:new Date()}], function(err, r) {
           test.equal(null, err);
-          test.equal(52001, r.connection.port);
-  
+          test.equal(52000, r.connection.port);
+
           _server.insert('test.test', [{created:new Date()}], function(err, r) {
             test.equal(null, err);
-            test.equal(52000, r.connection.port);
+            test.equal(52001, r.connection.port);
     
-            server.destroy();
-            mongos1.destroy();
-            mongos2.destroy();
-            running = false;
-            test.done();
+            _server.insert('test.test', [{created:new Date()}], function(err, r) {
+              test.equal(null, err);
+              test.equal(52000, r.connection.port);
+      
+              server.destroy();
+              mongos1.destroy();
+              mongos2.destroy();
+              running = false;
+              test.done();
+            });
           });
         });
       });
-    });
 
-    server.on('error', function(){});
-    server.connect();
+      server.on('error', function(){});
+      server.connect();      
+    });
   }
 }
 
