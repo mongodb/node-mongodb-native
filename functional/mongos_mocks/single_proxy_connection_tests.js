@@ -71,6 +71,7 @@ exports['Should correctly timeout mongos socket operation and then correctly re-
             }
 
             currentStep += 1;
+            stopRespondingPrimary = false;
           } else if(doc.ismaster && currentStep == 2) {
             request.reply(serverIsMaster[0]);
           } else if(doc.insert && currentStep == 2) {
@@ -83,7 +84,7 @@ exports['Should correctly timeout mongos socket operation and then correctly re-
       setTimeout(function() {
         stopRespondingPrimary = true;
         currentIsMasterState = 1;
-      }, 5000);
+      }, 1000);
     });
 
     // Attempt to connect
