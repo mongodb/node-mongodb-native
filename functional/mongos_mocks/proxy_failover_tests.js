@@ -359,7 +359,7 @@ exports['Should correctly bring back both proxies and use it'] = {
       setTimeout(function() {
         stopRespondingPrimary = true;
         currentIsMasterState = 1;
-      }, 5000);
+      }, 1000);
     });
 
     // Attempt to connect
@@ -388,8 +388,6 @@ exports['Should correctly bring back both proxies and use it'] = {
 
           // Perform interval inserts waiting for both proxies to come back
           var intervalId2 = setInterval(function() {
-            // Bring back the missing proxy
-            if(currentStep == 0) currentStep = currentStep + 1;
             // Perform inserts
             server.insert('test.test', [{created:new Date()}], function(err, r) {
               if(r) {
