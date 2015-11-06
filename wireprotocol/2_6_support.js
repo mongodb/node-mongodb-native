@@ -222,12 +222,30 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
   query.slaveOk = readPreference.slaveOk();
 
   // Set up the option bits for wire protocol
-  if(typeof cmd.tailable == 'boolean') query.tailable = cmd.tailable;
-  if(typeof cmd.oplogReplay == 'boolean') query.oplogReplay = cmd.oplogReplay;
-  if(typeof cmd.noCursorTimeout == 'boolean') query.noCursorTimeout = cmd.noCursorTimeout;
-  if(typeof cmd.awaitData == 'boolean') query.awaitData = cmd.awaitData;
-  if(typeof cmd.exhaust == 'boolean') query.exhaust = cmd.exhaust;
-  if(typeof cmd.partial == 'boolean') query.partial = cmd.partial;
+  if(typeof cmd.tailable == 'boolean') {
+    query.tailable = cmd.tailable;
+  }
+
+  if(typeof cmd.oplogReplay == 'boolean') {
+    query.oplogReplay = cmd.oplogReplay;
+  }
+  
+  if(typeof cmd.noCursorTimeout == 'boolean') {
+    query.noCursorTimeout = cmd.noCursorTimeout;
+  }
+
+  if(typeof cmd.awaitData == 'boolean') {
+    query.awaitData = cmd.awaitData;
+  }
+  
+  if(typeof cmd.exhaust == 'boolean') {
+    query.exhaust = cmd.exhaust;
+  }
+  
+  if(typeof cmd.partial == 'boolean') {
+    query.partial = cmd.partial;
+  }
+
   // Return the query
   return query;
 }

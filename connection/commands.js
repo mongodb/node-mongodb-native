@@ -68,7 +68,7 @@ var Query = function(bson, ns, query, options) {
   // Flags
   this.tailable = false;
   this.slaveOk = false;
-  this.oplogReply = false;
+  this.oplogReplay = false;
   this.noCursorTimeout = false;
   this.awaitData = false;
   this.exhaust = false;
@@ -96,13 +96,33 @@ Query.prototype.toBin = function() {
 
   // Set up the flags
   var flags = 0;
-  if(this.tailable) flags |= OPTS_TAILABLE_CURSOR;
-  if(this.slaveOk) flags |= OPTS_SLAVE;
-  if(this.oplogReply) flags |= OPTS_OPLOG_REPLAY;
-  if(this.noCursorTimeout) flags |= OPTS_NO_CURSOR_TIMEOUT;
-  if(this.awaitData) flags |= OPTS_AWAIT_DATA;
-  if(this.exhaust) flags |= OPTS_EXHAUST;
-  if(this.partial) flags |= OPTS_PARTIAL;
+  if(this.tailable) {
+    flags |= OPTS_TAILABLE_CURSOR;
+  }
+
+  if(this.slaveOk) {
+    flags |= OPTS_SLAVE;
+  }
+
+  if(this.oplogReplay) {
+    flags |= OPTS_OPLOG_REPLAY;
+  }
+  
+  if(this.noCursorTimeout) {
+    flags |= OPTS_NO_CURSOR_TIMEOUT;
+  }
+  
+  if(this.awaitData) {
+    flags |= OPTS_AWAIT_DATA;
+  }
+
+  if(this.exhaust) {
+    flags |= OPTS_EXHAUST;
+  }
+  
+  if(this.partial) {
+    flags |= OPTS_PARTIAL;
+  }
 
   // If batchSize is different to self.numberToReturn
   if(self.batchSize != self.numberToReturn) self.numberToReturn = self.batchSize;
