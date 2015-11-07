@@ -506,6 +506,11 @@ if(argv.t == 'functional') {
   } catch(err) {
   }
 
+  // Skip the version download and use local mongod in PATH
+  if(argv.l) {
+    return runner.run(config);
+  }
+
   // Kill any running MongoDB processes and
   // `install $MONGODB_VERSION` || `use existing installation` || `install stable`
   m(function(err){

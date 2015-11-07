@@ -1,3 +1,12 @@
+2.0.48 11-07-2015
+-----------------
+* GridFS no longer performs any deletes when writing a brand new file that does not have any previous <db>.fs.chunks or <db>.fs.files documents.
+* Updated mongodb-core to 1.2.21.
+* Hardened the checking for replicaset equality checks.
+* OpReplay flag correctly set on Wire protocol query.
+* Mongos load balancing added, introduced localThresholdMS to control the feature.
+* Kerberos now a peerDependency, making it not install it by default in Node 5.0 or higher.
+
 2.0.47 10-28-2015
 -----------------
 * Updated mongodb-core to 1.2.20.
