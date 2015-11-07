@@ -617,6 +617,8 @@ exports.shouldCorrectlyPerformWorkingFiledWithBigFile = {
         file.on('close', function () {
           // Flush the remaining data to GridFS
           gridStore.close(function(err, result) {
+            test.equal(null, err);
+            
             // Read in the whole file and check that it's the same content
             GridStore.read(client, result._id, function(err, fileData) {
               var data = fs.readFileSync('./test_gs_working_field_read.tmp');
