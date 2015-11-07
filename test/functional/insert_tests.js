@@ -1381,7 +1381,7 @@ exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithUpdate = {
       setTimeout(function(){
         db.close();
         test.done();
-      }, 100)
+      }, 500)
     });
   }
 }
