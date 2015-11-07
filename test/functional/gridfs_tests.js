@@ -3107,3 +3107,87 @@ exports['should correctly write fake png to gridstore'] = {
     });
   }
 }
+
+exports['should not attempt to delete chunks when no file exists'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient
+      , GridStore = configuration.require.GridStore
+      , ObjectID = configuration.require.ObjectID;
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var started = [];
+    var succeeded = [];
+    var failed = [];
+
+    // Create a test buffer
+    var buffer = new Buffer(2000);
+
+    // Establish connection to db
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      var listener = require('../..').instrument(function(err, instrumentations) {});
+      listener.on('started', function(event) {
+        if(event.commandName == 'delete')
+          started.push(event);
+      });
+
+      listener.on('succeeded', function(event) {
+        if(event.commandName == 'delete')
+          succeeded.push(event);
+      });
+
+      var gridStore = new GridStore(db, new ObjectID(), 'w', { "content_type": "image/png", "chunk_size": 1024*4 });
+      gridStore.open(function(err, gridStore) {
+        test.equal(null, err);
+
+        gridStore.write(buffer, function(err, result) {
+          test.equal(null, err);
+  
+          gridStore.close(function(err, result) { 
+            test.equal(null, err);
+
+            listener.uninstrument();
+            db.close();
+            test.done();
+          });
+        });
+      });
+
+      // // Execute findOneAndUpdate
+      // collection.findOneAndUpdate({}, {$set: {a:1}}, {fsync:1}, function(err, r) {
+      //   test.equal(null, err);
+      //   test.deepEqual({fsync:1}, started[0].command.writeConcern);
+
+      //   // Cleanup
+      //   started = [];
+      //   succeeded = [];
+
+      //   // Execute findOneAndReplace
+      //   collection.findOneAndReplace({}, {b:1}, {fsync:1}, function(err, r) {
+      //     test.equal(null, err);
+      //     test.deepEqual({fsync:1}, started[0].command.writeConcern);
+
+      //     // Cleanup
+      //     started = [];
+      //     succeeded = [];
+
+      //     // Execute findOneAndReplace
+      //     collection.findOneAndDelete({}, {fsync:1}, function(err, r) {
+      //       test.equal(null, err);
+      //       test.deepEqual({fsync:1}, started[0].command.writeConcern);
+
+      //       listener.uninstrument();
+      //       db.close();
+      //       test.done();                
+      //     });
+      //   });
+      // });
+    });
+  }
+}
