@@ -573,7 +573,7 @@ exports.shouldCorrectlyPerformWorkingFiledReadWithChunkSizeLessThanFileSize = {
  * @ignore
  */
 exports.shouldCorrectlyPerformWorkingFiledWithBigFile = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] }, mongodb: ">=2.6.0" },
 
   // The actual test we wish to run
   test: function(configuration, test) {
