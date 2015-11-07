@@ -1,3 +1,10 @@
+1.2.21 11-07-2015
+-----------------
+- Hardened the checking for replicaset equality checks.
+- OpReplay flag correctly set on Wire protocol query.
+- Mongos load balancing added, introduced localThresholdMS to control the feature.
+- Kerberos now a peerDependency, making it not install it by default in Node 5.0 or higher.
+
 1.2.20 10-28-2015
 -----------------
 - Fixed bug in arbiter connection capping code.
