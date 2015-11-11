@@ -167,6 +167,8 @@ var ReplSet = function(seedlist, options) {
     , authInProgressServers: []
     // Minimum heartbeat frequency used if we detect a server close
     , minHeartbeatFrequencyMS: 500
+    // stores high availability timer to allow efficient destroy
+    , haTimer : null
   }
 
   // Add bson parser to options
@@ -613,7 +615,7 @@ var handleIsmaster = function(self) {
 ReplSet.prototype.connect = function(_options) {
   var self = this;
   // Start replicaset inquiry process
-  setTimeout(replicasetInquirer(this, this.s, false), this.s.haInterval);
+  setHaTimer(self, self.s);
   // Additional options
   if(_options) for(var name in _options) this.s.options[name] = _options[name];
 
@@ -721,6 +723,8 @@ ReplSet.prototype.destroy = function(emitClose) {
   events.forEach(function(e) {
     self.removeAllListeners(e);
   });
+  
+  clearTimeout(self.s.haTimer);
 }
 
 /**
@@ -898,6 +902,12 @@ var pickServer = function(self, s, readPreference) {
   return s.replState.primary;
 }
 
+var setHaTimer = function(self, state) {
+  // all haTimers are set to to repeat, so we pass norepeat false
+  self.s.haTimer = setTimeout(replicasetInquirer(self, state, false), state.haInterval);
+  return self.s.haTimer;
+}
+
 var replicasetInquirer = function(self, state, norepeat) {
   return function() {
     if(state.replState.state == DESTROYED) return
@@ -962,7 +972,7 @@ var replicasetInquirer = function(self, state, norepeat) {
       // Ended highAvailabilityProcessRunning
       state.highAvailabilityProcessRunning = false;
       // Restart ha process
-      if(!norepeat) setTimeout(replicasetInquirer(self, state, false), state.haInterval);
+      if(!norepeat) setHaTimer(self, state);
       return;
     }
 
@@ -1003,7 +1013,7 @@ var replicasetInquirer = function(self, state, norepeat) {
             // Ended highAvailabilityProcessRunnfing
             state.highAvailabilityProcessRunning = false;
             // Return the replicasetInquirer
-            if(!norepeat) setTimeout(replicasetInquirer(self, state, false), state.haInterval);
+            if(!norepeat) setHaTimer(self, state);
             return;
           }
 
@@ -1044,7 +1054,7 @@ var replicasetInquirer = function(self, state, norepeat) {
             // Ended highAvailabilityProcessRunning
             state.highAvailabilityProcessRunning = false;
             // Let's keep monitoring
-            if(!norepeat) setTimeout(replicasetInquirer(self, state, false), state.haInterval);
+            if(!norepeat) setHaTimer(self, state);
             return;
           }
 
@@ -1068,7 +1078,7 @@ var replicasetInquirer = function(self, state, norepeat) {
                   // Ended highAvailabilityProcessRunning
                   state.highAvailabilityProcessRunning = false;
                   // Let's keep monitoring
-                  if(!norepeat) setTimeout(replicasetInquirer(self, state, false), state.haInterval);
+                  if(!norepeat) setHaTimer(self, state);
                   return;
                 }
               });
