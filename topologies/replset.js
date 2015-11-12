@@ -925,6 +925,11 @@ var replicasetInquirer = function(self, state, norepeat) {
     // Emit replicasetInquirer
     self.emit('ha', 'start', {norepeat: norepeat, id: localHaId, state: state.replState ? state.replState.toJSON() : {}});
 
+    // console.log("---------------------------------------- replicasetInquirer")
+    // console.dir(state.disconnectedServers.map(function(x) {
+      // return x.name;
+    // }));
+
     // Let's process all the disconnected servers
     while(state.disconnectedServers.length > 0) {
       // Get the first disconnected server
@@ -989,14 +994,19 @@ var replicasetInquirer = function(self, state, norepeat) {
         var timeoutId = timeoutServer(server);
         // Execute ismaster
         server.command('system.$cmd', {ismaster:true}, function(err, r) {
+          // console.log("************************************ inspectServer")
           // Clear out the timeoutServer
           clearTimeout(timeoutId);
+          
           // If the state was destroyed
           if(state.replState.state == DESTROYED) return;
+          
           // Count down the number of servers left
           serversLeft = serversLeft - 1;
+          
           // If we have an error but still outstanding server request return
           if(err && serversLeft > 0) return;
+          
           // We had an error and have no more servers to inspect, schedule a new check
           if(err && serversLeft == 0) {
             self.emit('ha', 'end', {norepeat: norepeat, id: localHaId, state: state.replState ? state.replState.toJSON() : {}});
@@ -1017,8 +1027,13 @@ var replicasetInquirer = function(self, state, norepeat) {
           // Update the replicaset state
           state.replState.update(ismaster, server);
 
-          // Add any new servers
-          if(err == null && ismaster.ismaster && Array.isArray(ismaster.hosts)) {
+          // 
+          // Process hosts list from ismaster under two conditions
+          // 1. Ismaster result is from primary
+          // 2. There is no primary and the ismaster result is from a non-primary
+          if(err == null 
+            && (ismaster.ismaster || (!state.primary)) 
+            && Array.isArray(ismaster.hosts)) {
             // Hosts to process
             var hosts = ismaster.hosts;
             // Add arbiters to list of hosts if we have any
@@ -1247,8 +1262,12 @@ var connectHandler = function(self, state) {
 //
 // Detect if we need to add new servers
 var processHosts = function(self, state, hosts) {
+  // console.log("############################################# processHosts 0")
   if(state.replState.state == DESTROYED) return;
+  // console.log("############################################# processHosts 1")
   if(Array.isArray(hosts)) {
+  // console.log("############################################# processHosts 2")
+  // console.dir(hosts)
     // Check any hosts exposed by ismaster
     for(var i = 0; i < hosts.length; i++) {
       // Get the object
@@ -1373,6 +1392,7 @@ var closeHandler = function(self, state) {
   return function(err, server) {
     if(state.replState.state == DESTROYED) return;
     if(state.logger.isInfo()) state.logger.info(f('[%s] server %s closed', state.id, server.lastIsMaster() ? server.lastIsMaster().me : server.name));
+    // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ closeHandler")
     var found = addToListIfNotExist(state.disconnectedServers, server);
     if(!found) self.emit('left', state.replState.remove(server), server);
 
