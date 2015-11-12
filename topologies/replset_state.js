@@ -171,6 +171,9 @@ State.prototype.destroy = function() {
   this.secondaries.forEach(function(s) {
     s.destroy();
   });
+  this.arbiters.forEach(function(s) {
+    s.destroy();
+  });
 }
 
 /**
