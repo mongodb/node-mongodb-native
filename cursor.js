@@ -694,13 +694,13 @@ var nextFunction = function(self, callback) {
 
       // Execute the next get more
       self._getmore(function(err, doc) {
-        console.log("________ getmore called")
-        console.log(self.cursorState.documents.length)
-        console.log(self.cursorState.cursorId)
+        // console.log("________ getmore called")
+        // console.log(self.cursorState.documents.length)
+        // console.log(self.cursorState.cursorId)
         if(err) return handleCallback(callback, err);
         if(self.cursorState.documents.length == 0
           && Long.ZERO.equals(self.cursorState.cursorId) && !self.cmd.tailable) {
-        console.log("________ getmore called ALL DONE")
+        // console.log("________ getmore called ALL DONE")
             self.cursorState.dead = true;
             // Finished iterating over the cursor
             return setCursorDeadAndNotified(self, callback);

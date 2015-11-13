@@ -85,13 +85,13 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
 
   // Query callback
   var queryCallback = function(err, r) {
-    console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ queryCallback")
-    console.dir(err)
-    if(r) {
-      console.dir(r.responseFlags)
-      console.dir(r.cursorId)
-      console.dir(r.documents)
-    }
+    // console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ queryCallback")
+    // console.dir(err)
+    // if(r) {
+    //   console.dir(r.responseFlags)
+    //   console.dir(r.cursorId)
+    //   console.dir(r.documents)
+    // }
     if(err) return callback(err);
 
     // If we have a timed out query or a cursor that was killed
@@ -99,7 +99,7 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
       return callback(new MongoError("cursor killed or timed out"), null);
     }
 
-    console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ queryCallback 1")
+    // console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ queryCallback 1")
 
     // Ensure we have a Long valie cursor id
     var cursorId = typeof r.cursorId == 'number'
@@ -111,13 +111,13 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
     //   return callback(MongoError.create(r.documents[0]));
     // }
 
-    console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ queryCallback 2")
+    // console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ queryCallback 2")
 
     // Set all the values
     cursorState.documents = r.documents;
     cursorState.cursorId = cursorId;
 
-    console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ queryCallback 3")
+    // console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ queryCallback 3")
 
     // Return
     callback(null);
