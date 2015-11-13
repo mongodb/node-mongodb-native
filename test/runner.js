@@ -371,7 +371,7 @@ if(argv.t == 'functional') {
 
   // Skip the version download and use local mongod in PATH
   if(argv.l) {
-    return runner.run(config);
+    return runner.run(Configuration(config));
   }
 
   // Kill any running MongoDB processes and
