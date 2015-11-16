@@ -176,11 +176,6 @@ State.prototype.pickServer = function(readPreference) {
     }
   });
 
-  // console.log("####################################### servers :: " + servers.length)
-  // servers.forEach(function(x) {
-  //   console.log(x.name)
-  // })
-
   // Do we have a custom readPreference strategy, use it
   if(this.s.readPreferenceStrategies != null && this.s.readPreferenceStrategies[readPreference] != null) {
     return this.s.readPreferenceStrategies[readPreference].pickServer(servers, readPreference);

@@ -935,11 +935,6 @@ var replicasetInquirer = function(self, state, norepeat) {
     // Emit replicasetInquirer
     self.emit('ha', 'start', {norepeat: norepeat, id: localHaId, state: state.replState ? state.replState.toJSON() : {}});
 
-    // console.log("---------------------------------------- replicasetInquirer")
-    // console.dir(state.disconnectedServers.map(function(x) {
-      // return x.name;
-    // }));
-
     // Let's process all the disconnected servers
     while(state.disconnectedServers.length > 0) {
       // Get the first disconnected server
@@ -1004,7 +999,6 @@ var replicasetInquirer = function(self, state, norepeat) {
         var timeoutId = timeoutServer(server);
         // Execute ismaster
         server.command('system.$cmd', {ismaster:true}, function(err, r) {
-          // console.log("************************************ inspectServer")
           // Clear out the timeoutServer
           clearTimeout(timeoutId);
           
@@ -1272,12 +1266,8 @@ var connectHandler = function(self, state) {
 //
 // Detect if we need to add new servers
 var processHosts = function(self, state, hosts) {
-  // console.log("############################################# processHosts 0")
   if(state.replState.state == DESTROYED) return;
-  // console.log("############################################# processHosts 1")
   if(Array.isArray(hosts)) {
-  // console.log("############################################# processHosts 2")
-  // console.dir(hosts)
     // Check any hosts exposed by ismaster
     for(var i = 0; i < hosts.length; i++) {
       // Get the object
@@ -1402,7 +1392,6 @@ var closeHandler = function(self, state) {
   return function(err, server) {
     if(state.replState.state == DESTROYED) return;
     if(state.logger.isInfo()) state.logger.info(f('[%s] server %s closed', state.id, server.lastIsMaster() ? server.lastIsMaster().me : server.name));
-    // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ closeHandler")
     var found = addToListIfNotExist(state.disconnectedServers, server);
     if(!found) self.emit('left', state.replState.remove(server), server);
 
