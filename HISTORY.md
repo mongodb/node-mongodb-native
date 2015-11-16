@@ -1,3 +1,8 @@
+1.2.22 11-16-2015
+-----------------
+- Fixes to handle getMore command errors for MongoDB 3.2
+- Allows the process to properly close upon a Db.close() call on the replica set by shutting down the haTimer and closing arbiter connections.
+
 1.2.21 11-07-2015
 -----------------
 - Hardened the checking for replicaset equality checks.
