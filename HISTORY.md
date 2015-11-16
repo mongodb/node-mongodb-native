@@ -6,6 +6,7 @@
 * NODE-601 Added maxAwaitTimeMS support for 3.2 getMore to allow for custom timeouts on tailable cursors.
 * Updated mongodb-core to 1.2.22.
 * Return destination in GridStore pipe function.
+* NODE-606 better error handling on destroyed topology for db.js methods.
 
 2.0.48 11-07-2015
 -----------------
