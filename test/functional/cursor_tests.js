@@ -1170,14 +1170,13 @@ exports.shouldCorrectlyRefillViaGetMoreCommand = {
     db.open(function(err, db) {
       db.createCollection('test_refill_via_get_more', function(err, collection) {
         function insert(callback) {
-          var total = COUNT;
+          var docs = [];
 
           for(var i = 0; i < COUNT; i++) {
-            collection.insert({'a':i}, configuration.writeConcernMax(), function(e) {
-              total = total - 1;
-              if(total == 0) callback();
-            });
+            docs.push({a:i});
           }
+
+          collection.insertMany(docs, configuration.writeConcernMax(), callback);
         }
 
         function finished() {
@@ -1246,14 +1245,13 @@ exports.shouldCorrectlyRefillViaGetMoreAlternativeCollection = {
         var COUNT = 1000;
 
         function insert(callback) {
-          var total = COUNT;
+          var docs = [];
 
           for(var i = 0; i < COUNT; i++) {
-            collection.insert({'a':i}, configuration.writeConcernMax(), function(e) {
-              total = total - 1;
-              if(total == 0) callback();
-            });
+            docs.push({a:i});
           }
+
+          collection.insertMany(docs, configuration.writeConcernMax(), callback);
         }
 
         function finished() {
@@ -1958,7 +1956,7 @@ exports.shouldAwaitData = {
           collection.find({}, {tailable:true, awaitdata:true, numberOfRetries:1}).each(function(err, result) {
             if(err != null) {
               var e = new Date();
-              test.ok((e.getTime() - s.getTime()) > 1000);
+              test.ok((e.getTime() - s.getTime()) >= 500);
               db.close();
               test.done();
             }

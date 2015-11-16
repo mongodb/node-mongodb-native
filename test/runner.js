@@ -397,6 +397,7 @@ if(argv.t == 'functional') {
               dbpath: path.join(path.resolve('db'))
             , logpath: path.join(path.resolve('db'))
             , arbiters: 1
+            // , enableMajorityReadConcern:null
             , tags: [{loc: "ny"}, {loc: "sf"}, {loc: "sf"}]
             , replSet: 'rs', startPort: 31000
           });
