@@ -5,6 +5,7 @@
 * Full MongoDB 3.2 support.
 * NODE-601 Added maxAwaitTimeMS support for 3.2 getMore to allow for custom timeouts on tailable cursors.
 * Updated mongodb-core to 1.2.22.
+* Return destination in GridStore pipe function.
 
 2.0.48 11-07-2015
 -----------------
