@@ -260,7 +260,6 @@ exports['Should correctly recover from an immediate shutdown mid insert'] = {
 
     server.once('reconnect', function(_server) {
       _server.insert('test.test', [{created:new Date()}], function(err, r) {
-        test.equal(37017, r.connection.port);
         test.ok(brokenPipe);
         server.destroy();
         running = false;
