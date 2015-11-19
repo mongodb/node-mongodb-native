@@ -1,3 +1,7 @@
+1.2.23 11-16-2015
+-----------------
+- ismaster runs against admin.$cmd instead of system.$cmd.
+
 1.2.22 11-16-2015
 -----------------
 - Fixes to handle getMore command errors for MongoDB 3.2
