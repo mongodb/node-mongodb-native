@@ -8,7 +8,7 @@ var extend = function(template, fields) {
   }
 
   for(var name in fields) {
-   object[name] = fields[name]; 
+   object[name] = fields[name];
   }
 
   return object;
@@ -29,7 +29,7 @@ exports['Successfully add a new secondary server to the set'] = {
       Long = configuration.require.BSON.Long,
       co = require('co'),
       mockupdb = require('../../../mock');
-    
+
     // Contain mock server
     var primaryServer = null;
     var firstSecondaryServer = null;
@@ -166,7 +166,7 @@ exports['Successfully add a new secondary server to the set'] = {
         test.equal('localhost:32000', server.s.replState.primary.name);
 
         // Flip the ismaster message
-        currentIsMasterIndex = currentIsMasterIndex + 1; 
+        currentIsMasterIndex = currentIsMasterIndex + 1;
       } else if(_type == 'secondary' && _server.name == 'localhost:32003') {
         test.equal(true, server.__connected);
 
@@ -180,14 +180,13 @@ exports['Successfully add a new secondary server to the set'] = {
         test.ok(server.s.replState.primary != null);
         test.equal('localhost:32000', server.s.replState.primary.name);
 
+        running = false;
         primaryServer.destroy();
         firstSecondaryServer.destroy();
         secondSecondaryServer.destroy();
         arbiterServer.destroy();
         server.destroy();
-        running = false;
-
-        test.done();        
+        test.done();
       }
     });
 
@@ -218,7 +217,7 @@ exports['Successfully remove a secondary server from the set'] = {
       Long = configuration.require.BSON.Long,
       co = require('co'),
       mockupdb = require('../../../mock');
-    
+
     // Contain mock server
     var primaryServer = null;
     var firstSecondaryServer = null;
@@ -365,7 +364,7 @@ exports['Successfully remove a secondary server from the set'] = {
         test.equal('localhost:32000', server.s.replState.primary.name);
 
         // Flip the ismaster message
-        currentIsMasterIndex = currentIsMasterIndex + 1; 
+        currentIsMasterIndex = currentIsMasterIndex + 1;
       }
     });
 
@@ -389,7 +388,7 @@ exports['Successfully remove a secondary server from the set'] = {
         server.destroy();
         running = false;
 
-        test.done();        
+        test.done();
       }
     });
 
@@ -420,7 +419,7 @@ exports['Successfully remove a secondary server from the set then re-add it'] = 
       Long = configuration.require.BSON.Long,
       co = require('co'),
       mockupdb = require('../../../mock');
-    
+
     // Contain mock server
     var primaryServer = null;
     var firstSecondaryServer = null;
@@ -556,8 +555,8 @@ exports['Successfully remove a secondary server from the set then re-add it'] = 
 
     server.on('joined', function(_type, _server) {
       if(_type == 'arbiter') {
-        currentIsMasterIndex = currentIsMasterIndex + 1; 
-      } else if(_type == 'secondary' 
+        currentIsMasterIndex = currentIsMasterIndex + 1;
+      } else if(_type == 'secondary'
         && _server.name == 'localhost:32003' && currentIsMasterIndex == 2) {
         test.equal(true, server.__connected);
 
@@ -598,7 +597,7 @@ exports['Successfully remove a secondary server from the set then re-add it'] = 
         test.equal('localhost:32000', server.s.replState.primary.name);
 
         // Flip the ismaster message
-        currentIsMasterIndex = currentIsMasterIndex + 1; 
+        currentIsMasterIndex = currentIsMasterIndex + 1;
       }
     });
 
