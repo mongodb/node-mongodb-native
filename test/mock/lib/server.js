@@ -82,10 +82,7 @@ Server.prototype.receive = function() {
 
   return new Promise(function(resolve, reject) {
     var waiting = function() {
-      if(self.state == 'destroyed') return resolve({
-        connection: null, document: {}
-      });
-
+      if(self.state == 'destroyed') return reject();
       // If we have a message return it
       if(self.messages.length > 0) {
         return resolve(self.messages.shift());

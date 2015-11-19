@@ -111,15 +111,15 @@ exports['Should correctly load-balance the operations'] = {
           _server.insert('test.test', [{created:new Date()}], function(err, r) {
             test.equal(null, err);
             test.equal(52001, r.connection.port);
-    
+
             _server.insert('test.test', [{created:new Date()}], function(err, r) {
               test.equal(null, err);
               test.equal(52000, r.connection.port);
-      
+
+              running = false;
               server.destroy();
               mongos1.destroy();
               mongos2.destroy();
-              running = false;
               test.done();
             });
           });
@@ -127,7 +127,7 @@ exports['Should correctly load-balance the operations'] = {
       });
 
       server.on('error', function(){});
-      server.connect();      
+      server.connect();
     });
   }
 }
@@ -236,11 +236,11 @@ exports['Should ignore one of the mongos instances due to being outside the late
       server.insert('test.test', [{created:new Date()}], function(err, r) {
         test.equal(null, err);
         test.equal(52000, r.connection.port);
-  
+
         server.insert('test.test', [{created:new Date()}], function(err, r) {
           test.equal(null, err);
           test.equal(52000, r.connection.port);
-  
+
           server.destroy();
 
           // Attempt to connect
@@ -260,11 +260,11 @@ exports['Should ignore one of the mongos instances due to being outside the late
             server2.insert('test.test', [{created:new Date()}], function(err, r) {
               test.equal(null, err);
               test.equal(52001, r.connection.port);
-        
+
               server2.insert('test.test', [{created:new Date()}], function(err, r) {
                 test.equal(null, err);
                 test.equal(52000, r.connection.port);
-        
+
                 server2.destroy();
                 mongos1.destroy();
                 mongos2.destroy();
