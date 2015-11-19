@@ -401,6 +401,7 @@ Connection.prototype.write = function(buffer) {
         this.logger.debug(f('writing buffer [%s] to %s:%s', buffer[i].toString('hex'), this.host, this.port));
     }
   }
+
   // Write out the command
   if(!Array.isArray(buffer)) return this.connection.write(buffer, 'binary');
   // Iterate over all buffers and write them in order to the socket
