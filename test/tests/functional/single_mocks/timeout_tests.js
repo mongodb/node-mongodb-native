@@ -138,8 +138,8 @@ exports['Should correctly recover from an immediate shutdown mid insert'] = {
     var running = true;
     // Current index for the ismaster
     var currentStep = 0;
-    // Primary stop responding
-    var stopRespondingPrimary = false;
+    // Should fail due to broken pipe
+    var brokenPipe = false;
 
     // Extend the object
     var extend = function(template, fields) {
@@ -173,12 +173,15 @@ exports['Should correctly recover from an immediate shutdown mid insert'] = {
     co(function*() {
       server = yield mockupdb.createServer(37017, 'localhost', {
         onRead: function(server, connection, buffer, bytesRead) {
-          // Reset the mock to accept ismasters
-          currentStep += 1;
           // Force EPIPE error
-          if(currentStep == 1) connection.destroy();
-          // Return connection was destroyed
-          return true;
+          if(currentStep == 1)  {
+            // Destroy connection mid write
+            connection.destroy();
+            // Reset the mock to accept ismasters
+            currentStep += 1;
+            // Return connection was destroyed
+            return true;
+          }
         }
       });
 
@@ -188,11 +191,14 @@ exports['Should correctly recover from an immediate shutdown mid insert'] = {
           var request = yield server.receive();
           // Get the document
           var doc = request.document;
-          if(doc.ismaster) {
-            request.reply(serverIsMaster[0]);
+          if(doc.ismaster && currentStep == 0) {
             currentStep += 1;
+            request.reply(serverIsMaster[0]);
           } else if(doc.insert && currentStep == 2) {
+            currentStep += 1;
             request.reply({ok:1, n:doc.documents, lastOp: new Date()});
+          } else if(doc.ismaster) {
+            request.reply(serverIsMaster[0]);
           }
         }
       });
@@ -204,32 +210,45 @@ exports['Should correctly recover from an immediate shutdown mid insert'] = {
       port: '37017',
       connectionTimeout: 3000,
       socketTimeout: 1000,
-      size: 5
+      size: 1
     });
 
     // Add event listeners
     server.once('connect', function(_server) {
-      _server.insert('test.test', [{created:new Date()}], function(err, r) {
-        console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 1")
-        console.dir(err)
+      var docs = [];
+      // Create big insert message
+      for(var i = 0; i < 1000; i++) {
+        docs.push({
+          a:i,
+          string: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string1: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string2: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string3: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string4: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string5: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string6: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string7: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string8: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string9: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string10: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string11: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string12: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+        });
+      }
+
+      _server.insert('test.test', docs, function(err, r) {
         test.ok(err != null);
+        brokenPipe = true;
       });
     });
 
     server.once('reconnect', function(_server) {
-      var docs = [];
-      // Create big insert message
-      for(var i = 0; i < 10000; i++) {
-        docs.push({a:i, string: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world'})
-      }
-
-      _server.insert('test.test', docs, function(err, r) {
-        if(r) {
-          test.equal(37017, r.connection.port);
-          _server.destroy();
-          running = false;
-          test.done();
-        }
+      _server.insert('test.test', [{created:new Date()}], function(err, r) {
+        test.equal(37017, r.connection.port);
+        test.ok(brokenPipe);
+        server.destroy();
+        running = false;
+        test.done();
       });
     });
 

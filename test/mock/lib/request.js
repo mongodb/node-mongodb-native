@@ -45,7 +45,6 @@ Request.prototype.reply = function(documents, options) {
 
   // Get the buffers
   var buffer = response.toBin();
-  console.log(buffer.toString('hex'))
 
   // Do we kill connection after n bytes
   if(killConnectionAfterNBytes == null) {
