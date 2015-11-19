@@ -26,6 +26,10 @@ Request.prototype.reply = function(documents, options) {
   var startingFrom = typeof options.startingFrom == 'number' ? options.startingFrom : 0;
   var numberReturned = documents.length;
 
+  // Additional response Options
+  var killConnectionAfterNBytes = typeof options.killConnectionAfterNBytes == 'number'
+    ? options.killConnectionAfterNBytes : null;
+
   // Create the Response document
   var response = new Response(this.bson, documents, {
     // Header field
@@ -40,9 +44,18 @@ Request.prototype.reply = function(documents, options) {
   });
 
   // Get the buffers
-  var buffers = response.toBin();
-  for(var i = 0; i < buffers.length; i++) {
-    this.connection.write(buffers[i]);
+  var buffer = response.toBin();
+  console.log(buffer.toString('hex'))
+
+  // Do we kill connection after n bytes
+  if(killConnectionAfterNBytes == null) {
+    this.connection.write(buffer);
+  } else {
+    // Fail to send whole reply
+    if(killConnectionAfterNBytes <= buffer.length) {
+      this.connection.write(buffer.slice(0, killConnectionAfterNBytes));
+      this.connection.destroy();
+    }
   }
 }
 
@@ -120,7 +133,7 @@ Response.prototype.toBin = function() {
   // Add docs to list of buffers
   buffers = buffers.concat(docs);
   // Return all the buffers
-  return buffers;
+  return Buffer.concat(buffers);
 }
 
 var writeInt32 = function(buffer, index, value) {
