@@ -998,7 +998,7 @@ var replicasetInquirer = function(self, state, norepeat) {
         // Get the timeout id
         var timeoutId = timeoutServer(server);
         // Execute ismaster
-        server.command('system.$cmd', {ismaster:true}, function(err, r) {
+        server.command('admin.$cmd', {ismaster:true}, function(err, r) {
           // Clear out the timeoutServer
           clearTimeout(timeoutId);
           
