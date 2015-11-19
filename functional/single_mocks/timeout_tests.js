@@ -233,6 +233,22 @@ exports['Should correctly recover from an immediate shutdown mid insert'] = {
           string10: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
           string11: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
           string12: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string13: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string14: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string15: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string16: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string17: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string18: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string19: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string20: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string21: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string22: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string23: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string24: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string25: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string26: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string27: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
+          string28: 'hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world hello world',
         });
       }
 

@@ -117,7 +117,7 @@ exports['Should correctly failover due to proxy going away causing timeout'] = {
             mongos1.destroy();
             mongos2.destroy();
             running = false;
-            test.done();              
+            test.done();
           }
         })
       }, 500);
@@ -188,6 +188,7 @@ exports['Should correctly bring back proxy and use it'] = {
             request.reply(serverIsMaster[0]);
           } else if(doc.insert && currentStep == 0) {
             yield timeoutPromise(1600);
+            request.connection.destroy();
           } else if(doc.insert && currentStep == 1) {
             request.reply({ok:1, n:doc.documents, lastOp: new Date()});
           }
@@ -258,7 +259,7 @@ exports['Should correctly bring back proxy and use it'] = {
                   mongos1.destroy();
                   mongos2.destroy();
                   running = false;
-                  test.done();              
+                  test.done();
                 }
               });
             }, 500);
@@ -377,7 +378,7 @@ exports['Should correctly bring back both proxies and use it'] = {
     server.once('fullsetup', function(_server) {
       var intervalId = setInterval(function() {
         server.insert('test.test', [{created:new Date()}], function(err, r) {
-          // Clea out the interval
+          // Clear out the interval
           clearInterval(intervalId);
           // Let the proxies come back
           if(currentStep == 0) currentStep = currentStep + 1;
@@ -387,6 +388,7 @@ exports['Should correctly bring back both proxies and use it'] = {
 
           // Perform interval inserts waiting for both proxies to come back
           var intervalId2 = setInterval(function() {
+            // console.log("============= intervalId2 = " + Object.keys(proxies).length)
             // Perform inserts
             server.insert('test.test', [{created:new Date()}], function(err, r) {
               if(r) {
@@ -397,14 +399,14 @@ exports['Should correctly bring back both proxies and use it'] = {
               if(Object.keys(proxies).length == 2) {
                 clearInterval(intervalId2);
 
+                running = false;
                 server.destroy();
                 mongos1.destroy();
                 mongos2.destroy();
-                running = false;
-                test.done();              
+                test.done();
               }
             });
-          }, 500);
+          }, 100);
         })
       }, 500);
     });
