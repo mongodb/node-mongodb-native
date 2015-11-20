@@ -26,7 +26,7 @@ Web frameworks using MongoDB
          * - **Forks**
            - 12
          * - **Watchers**
-           - 27
+           - 30
 
 .. topic:: caboose
 
@@ -170,7 +170,7 @@ Content Management Systems
          * - **Forks**
            - 0
          * - **Watchers**
-           - 4
+           - 5
 
 .. topic:: calipso
 
@@ -191,9 +191,9 @@ Content Management Systems
          * - **Clone Url**
            - https://github.com/cliftonc/calipso.git
          * - **Forks**
-           - 290
+           - 293
          * - **Watchers**
-           - 1603
+           - 1615
 
 Grid FS libraries or tools
 --------------------------
@@ -219,7 +219,7 @@ Grid FS libraries or tools
          * - **Forks**
            - 0
          * - **Watchers**
-           - 9
+           - 10
 
 Wrapper libraries to ease the use of development or provide simple ODM like behaviours
 --------------------------------------------------------------------------------------
@@ -312,7 +312,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Clone Url**
            - https://github.com/idottv/node-mongodb-wrapper.git
          * - **Forks**
-           - 12
+           - 13
          * - **Watchers**
            - 51
 
@@ -360,7 +360,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 15
          * - **Watchers**
-           - 99
+           - 98
 
 REST api's around MongoDB or resource based libraries
 -----------------------------------------------------
@@ -384,9 +384,9 @@ REST api's around MongoDB or resource based libraries
          * - **Clone Url**
            - https://github.com/tdegrunt/mongodb-rest.git
          * - **Forks**
-           - 123
+           - 127
          * - **Watchers**
-           - 348
+           - 347
 
 .. topic:: lazyBum
 
@@ -432,7 +432,7 @@ REST api's around MongoDB or resource based libraries
          * - **Forks**
            - 1
          * - **Watchers**
-           - 9
+           - 10
 
 Test helpers and libraries
 --------------------------
@@ -458,7 +458,7 @@ Test helpers and libraries
          * - **Forks**
            - 3
          * - **Watchers**
-           - 28
+           - 30
 
 .. topic:: node-database-cleaner
 
@@ -471,7 +471,7 @@ Test helpers and libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 3:18:2 on 30/8/2015
+           - 20:7:44 on 3/10/2015
          * - **Homepage**
            - http://
          * - **Url**
@@ -479,9 +479,9 @@ Test helpers and libraries
          * - **Clone Url**
            - https://github.com/emerleite/node-database-cleaner.git
          * - **Forks**
-           - 24
+           - 25
          * - **Watchers**
-           - 73
+           - 76
 
 Tools or applications to manage your MongoDB's
 ----------------------------------------------
@@ -645,9 +645,9 @@ General frameworks over MongoDB
          :header-rows: 0
 
          * - **Activity Level**
-           - .. image:: ../static/nonactive.png
+           - .. image:: ../static/active.png
          * - **Last push**
-           - 19:22:45 on 29/6/2013
+           - 22:55:46 on 23/9/2015
          * - **Homepage**
            - http://
          * - **Url**
@@ -655,9 +655,9 @@ General frameworks over MongoDB
          * - **Clone Url**
            - https://github.com/evanp/databank.git
          * - **Forks**
-           - 8
+           - 9
          * - **Watchers**
-           - 51
+           - 54
 
 Translation libraries or frameworks
 -----------------------------------
@@ -706,7 +706,7 @@ Translation libraries or frameworks
          * - **Forks**
            - 22
          * - **Watchers**
-           - 110
+           - 109
 
 Libraries or Applications for analytics
 ---------------------------------------
@@ -732,7 +732,7 @@ Libraries or Applications for analytics
          * - **Forks**
            - 416
          * - **Watchers**
-           - 3612
+           - 3642
 
 Libraries for the connect middleware
 ------------------------------------
@@ -779,9 +779,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 213
+           - 214
          * - **Watchers**
-           - 810
+           - 849
 
 Libraries or applications for continous integration
 ---------------------------------------------------
@@ -805,9 +805,9 @@ Libraries or applications for continous integration
          * - **Clone Url**
            - https://github.com/ryankee/concrete.git
          * - **Forks**
-           - 70
+           - 69
          * - **Watchers**
-           - 489
+           - 500
 
 Exampe applications
 -------------------
@@ -833,7 +833,7 @@ Exampe applications
          * - **Forks**
            - 21
          * - **Watchers**
-           - 37
+           - 36
 
 .. topic:: node-mongo-cms
 

@@ -986,7 +986,20 @@
 <li>mongodb-core</li>
 <li>bson</li>
 <li>kerberos</li>
+<li>node-gyp</li>
 </ul>
+
+<p>The only native extension is the <code>kerberos</code> extension. This is a <code>peerDependency</code> for the <code>mongodb</code> module. This means that if you need to use <code>kerberos</code> you will need to add the <code>kerberos</code> module to your modules dependencies.</p>
+
+<p>If you have <strong>NPM 2.0</strong> or earlier NPM will attempt to download and build the <code>kerberos</code> module if you do not have it defined as a dependency in your module. However from <strong>NPM 3.0</strong> onwards NPM will not attempt to build the <code>kerberos</code> module but instead print a warning in your install log that looks something like the following.</p>
+
+<pre><code>npm WARN EPEERINVALID mongodb-core@1.2.21 requires a peer of kerberos@~0.0 but none was installed.
+</code></pre>
+
+<p>This tells you that the driver could not resolve it&rsquo;s <code>peerDependency</code>. However don&rsquo;t worry. You only need the <code>kerberos</code> module if intend to use <code>kerberos</code>. In the case you need to you can add it to your package.json by doing the following for the case of the line above.</p>
+
+<pre><code>npm install kerberos@0.0.x
+</code></pre>
 
 <p>The <code>kerberos</code> package is a C++ extension that requires a build environment to be installed on your system. You must be able to build node.js itself to be able to compile and install the <code>kerberos</code> module. Furthermore the <code>kerberos</code> module requires the MIT Kerberos package to correctly compile on UNIX operating systems. Consult your UNIX operation system package manager what libraries to install.</p>
 
@@ -999,12 +1012,11 @@
 
 <h3 id="diagnosing-on-unix">Diagnosing on UNIX</h3>
 
-<p>If you don’t have the build essentials it won’t build. In the case of linux you will need gcc and g++, node.js with all the headers and python. The easiest way to figure out what’s missing is by trying to build the js-bson project. You can do this by performing the following steps.</p>
+<p>If you don’t have the build essentials it won’t build. In the case of linux you will need gcc and g++, node.js with all the headers and python. The easiest way to figure out what’s missing is by trying to build the kerberos project. You can do this by performing the following steps.</p>
 
-<pre><code>git clone https://github.com/mongodb/js-bson.git
-cd js-bson
+<pre><code>git clone https://github.com/christkv/kerberos.git
+cd kerberos
 npm install
-make test
 </code></pre>
 
 <p>If all the steps complete you have the right toolchain installed. If you get node-gyp not found you need to install it globally by doing.</p>
@@ -1012,7 +1024,7 @@ make test
 <pre><code>npm install -g node-gyp
 </code></pre>
 
-<p>If correctly compile and runs the tests you are golden. We can now try to install the mongod driver by performing the following command.</p>
+<p>If correctly compiles and runs the tests you are golden. We can now try to install the mongod driver by performing the following command.</p>
 
 <pre><code>cd yourproject
 npm install mongodb --save
@@ -1042,8 +1054,8 @@ npm install mongodb --save
 
 <p>Next you will have to build the project manually to test it. Use any tool you use with git and grab the repo.</p>
 
-<pre><code>git clone https://github.com/mongodb/js-bson.git
-cd js-bson
+<pre><code>git clone https://github.com/christkv/kerberos.git
+cd kerberos
 npm install
 node-gyp rebuild
 </code></pre>

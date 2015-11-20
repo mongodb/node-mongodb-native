@@ -705,6 +705,8 @@
             
                 <li data-name="Server#auth"><a href="Server.html#auth">auth</a></li>
             
+                <li data-name="Server#capConnections"><a href="Server.html#capConnections">capConnections</a></li>
+            
                 <li data-name="Server#command"><a href="Server.html#command">command</a></li>
             
                 <li data-name="Server#connect"><a href="Server.html#connect">connect</a></li>
@@ -1156,6 +1158,8 @@ var ReplSet = function(seedlist, options) {
     , authInProgressServers: []
     // Minimum heartbeat frequency used if we detect a server close
     , minHeartbeatFrequencyMS: 500
+    // stores high availability timer to allow efficient destroy
+    , haTimer : null
   }
 
   // Add bson parser to options
@@ -1602,7 +1606,7 @@ var handleIsmaster = function(self) {
 ReplSet.prototype.connect = function(_options) {
   var self = this;
   // Start replicaset inquiry process
-  setTimeout(replicasetInquirer(this, this.s, false), this.s.haInterval);
+  setHaTimer(self, self.s);
   // Additional options
   if(_options) for(var name in _options) this.s.options[name] = _options[name];
 
@@ -1638,16 +1642,24 @@ ReplSet.prototype.connect = function(_options) {
   // Attempt to connect to all the servers
   while(this.s.disconnectedServers.length > 0) {
     // Get the server
-    var server = this.s.disconnectedServers.shift();
+    var server = self.s.disconnectedServers.shift();
 
     // Set up the event handlers
-    server.once('error', errorHandlerTemp(this, this.s, 'error'));
-    server.once('close', errorHandlerTemp(this, this.s, 'close'));
-    server.once('timeout', errorHandlerTemp(this, this.s, 'timeout'));
-    server.once('connect', connectHandler(this, this.s));
+    server.once('error', errorHandlerTemp(self, self.s, 'error'));
+    server.once('close', errorHandlerTemp(self, self.s, 'close'));
+    server.once('timeout', errorHandlerTemp(self, self.s, 'timeout'));
+    server.once('connect', connectHandler(self, self.s));
 
-    // Attempt to connect
-    server.connect();
+    // Ensure we schedule the opening of new socket
+    // on separate ticks of the event loop
+    var execute = function(_server) {
+      // Attempt to connect    
+      process.nextTick(function() {
+        _server.connect();
+      });      
+    }
+
+    execute(server);
   }
 }
 
@@ -1702,6 +1714,8 @@ ReplSet.prototype.destroy = function(emitClose) {
   events.forEach(function(e) {
     self.removeAllListeners(e);
   });
+  
+  clearTimeout(self.s.haTimer);
 }
 
 /**
@@ -1772,20 +1786,30 @@ var clearCredentials = function(s, ns) {
 var filterByTags = function(readPreference, servers) {
   if(readPreference.tags == null) return servers;
   var filteredServers = [];
-  var tags = readPreference.tags;
+  var tagsArray = !Array.isArray(readPreference.tags) ? [tags] : tags;
 
-  // Iterate over all the servers
-  for(var i = 0; i &lt; servers.length; i++) {
-    var serverTag = servers[i].lastIsMaster().tags || {};
-    // Did we find the a matching server
-    var found = true;
-    // Check if the server is valid
-    for(var name in tags) {
-      if(serverTag[name] != tags[name]) found = false;
+  // Iterate over the tags
+  for(var j = 0; j &lt; tagsArray.length; j++) {
+    var tags = tagsArray[j];
+
+    // Iterate over all the servers
+    for(var i = 0; i &lt; servers.length; i++) {
+      var serverTag = servers[i].lastIsMaster().tags || {};
+      // Did we find the a matching server
+      var found = true;
+      // Check if the server is valid
+      for(var name in tags) {
+        if(serverTag[name] != tags[name]) found = false;
+      }
+
+      // Add to candidate list
+      if(found) {
+        filteredServers.push(servers[i]);
+      }
     }
 
-    // Add to candidate list
-    if(found) filteredServers.push(servers[i]);
+    // We found servers by the highest priority
+    if(found) break;
   }
 
   // Returned filtered servers
@@ -1869,6 +1893,12 @@ var pickServer = function(self, s, readPreference) {
   return s.replState.primary;
 }
 
+var setHaTimer = function(self, state) {
+  // all haTimers are set to to repeat, so we pass norepeat false
+  self.s.haTimer = setTimeout(replicasetInquirer(self, state, false), state.haInterval);
+  return self.s.haTimer;
+}
+
 var replicasetInquirer = function(self, state, norepeat) {
   return function() {
     if(state.replState.state == DESTROYED) return
@@ -1906,8 +1936,17 @@ var replicasetInquirer = function(self, state, norepeat) {
       server.once('close', errorHandlerTemp(self, state, 'close'));
       server.once('timeout', errorHandlerTemp(self, state, 'timeout'));
       server.once('connect', connectHandler(self, state));
-      // Attempt to connect
-      server.connect();
+
+      // Ensure we schedule the opening of new socket
+      // on separate ticks of the event loop
+      var execute = function(_server) {
+        // Attempt to connect    
+        process.nextTick(function() {
+          _server.connect();
+        });      
+      }
+
+      execute(server);
     }
 
     // Cleanup state (removed disconnected servers)
@@ -1924,7 +1963,7 @@ var replicasetInquirer = function(self, state, norepeat) {
       // Ended highAvailabilityProcessRunning
       state.highAvailabilityProcessRunning = false;
       // Restart ha process
-      if(!norepeat) setTimeout(replicasetInquirer(self, state, false), state.haInterval);
+      if(!norepeat) setHaTimer(self, state);
       return;
     }
 
@@ -1950,22 +1989,26 @@ var replicasetInquirer = function(self, state, norepeat) {
         // Get the timeout id
         var timeoutId = timeoutServer(server);
         // Execute ismaster
-        server.command('system.$cmd', {ismaster:true}, function(err, r) {
+        server.command('admin.$cmd', {ismaster:true}, function(err, r) {
           // Clear out the timeoutServer
           clearTimeout(timeoutId);
+          
           // If the state was destroyed
           if(state.replState.state == DESTROYED) return;
+          
           // Count down the number of servers left
           serversLeft = serversLeft - 1;
+          
           // If we have an error but still outstanding server request return
           if(err &amp;&amp; serversLeft > 0) return;
+          
           // We had an error and have no more servers to inspect, schedule a new check
           if(err &amp;&amp; serversLeft == 0) {
             self.emit('ha', 'end', {norepeat: norepeat, id: localHaId, state: state.replState ? state.replState.toJSON() : {}});
             // Ended highAvailabilityProcessRunnfing
             state.highAvailabilityProcessRunning = false;
             // Return the replicasetInquirer
-            if(!norepeat) setTimeout(replicasetInquirer(self, state, false), state.haInterval);
+            if(!norepeat) setHaTimer(self, state);
             return;
           }
 
@@ -1979,15 +2022,27 @@ var replicasetInquirer = function(self, state, norepeat) {
           // Update the replicaset state
           state.replState.update(ismaster, server);
 
-          // Add any new servers
-          if(err == null &amp;&amp; ismaster.ismaster &amp;&amp; Array.isArray(ismaster.hosts)) {
+          // 
+          // Process hosts list from ismaster under two conditions
+          // 1. Ismaster result is from primary
+          // 2. There is no primary and the ismaster result is from a non-primary
+          if(err == null 
+            &amp;&amp; (ismaster.ismaster || (!state.primary)) 
+            &amp;&amp; Array.isArray(ismaster.hosts)) {
             // Hosts to process
             var hosts = ismaster.hosts;
             // Add arbiters to list of hosts if we have any
-            if(Array.isArray(ismaster.arbiters)) hosts = hosts.concat(ismaster.arbiters);
+            if(Array.isArray(ismaster.arbiters)) {
+              hosts = hosts.concat(ismaster.arbiters.map(function(x) {
+                return {host: x, arbiter:true};
+              }));
+            }
+
             if(Array.isArray(ismaster.passives)) hosts = hosts.concat(ismaster.passives);
             // Process all the hsots
             processHosts(self, state, hosts);
+          } else if(err == null &amp;&amp; !Array.isArray(ismaster.hosts)) {
+            server.destroy();
           }
 
           // No read Preferences strategies
@@ -1999,7 +2054,7 @@ var replicasetInquirer = function(self, state, norepeat) {
             // Ended highAvailabilityProcessRunning
             state.highAvailabilityProcessRunning = false;
             // Let's keep monitoring
-            if(!norepeat) setTimeout(replicasetInquirer(self, state, false), state.haInterval);
+            if(!norepeat) setHaTimer(self, state);
             return;
           }
 
@@ -2023,7 +2078,7 @@ var replicasetInquirer = function(self, state, norepeat) {
                   // Ended highAvailabilityProcessRunning
                   state.highAvailabilityProcessRunning = false;
                   // Let's keep monitoring
-                  if(!norepeat) setTimeout(replicasetInquirer(self, state, false), state.haInterval);
+                  if(!norepeat) setHaTimer(self, state);
                   return;
                 }
               });
@@ -2101,6 +2156,8 @@ var errorHandlerTemp = function(self, state, event) {
     }
   }
 }
+// TODO with arbiter
+//  - if connected to an arbiter, shut down all but single server connection
 
 // Connect handler
 var connectHandler = function(self, state) {
@@ -2121,7 +2178,14 @@ var connectHandler = function(self, state) {
     var processNewServer = function() {
       // Discover any additional servers
       var ismaster = server.lastIsMaster();
+      
+      // Are we an arbiter, restrict number of connections to 
+      // one single connection
+      if(ismaster.arbiterOnly) {
+        server.capConnections(1);
+      }
 
+      // Deal with events
       var events = ['error', 'close', 'timeout', 'connect', 'message'];
       // Remove any non used handlers
       events.forEach(function(e) {
@@ -2145,7 +2209,12 @@ var connectHandler = function(self, state) {
       // Hosts to process
       var hosts = ismaster.hosts;
       // Add arbiters to list of hosts if we have any
-      if(Array.isArray(ismaster.arbiters)) hosts = hosts.concat(ismaster.arbiters);
+      if(Array.isArray(ismaster.arbiters)) {
+        hosts = hosts.concat(ismaster.arbiters.map(function(x) {
+          return {host: x, arbiter:true};
+        }));
+      }
+
       if(Array.isArray(ismaster.passives)) hosts = hosts.concat(ismaster.passives);
 
       // Add any new servers
@@ -2192,14 +2261,24 @@ var processHosts = function(self, state, hosts) {
   if(Array.isArray(hosts)) {
     // Check any hosts exposed by ismaster
     for(var i = 0; i &lt; hosts.length; i++) {
+      // Get the object
+      var host = hosts[i];
+      var options = {};
+
+      // Do we have an arbiter
+      if(typeof host == 'object') {
+        host = host.host;
+        options.arbiter = host.arbiter;
+      }
+
       // If not found we need to create a new connection
-      if(!state.replState.contains(hosts[i])) {
-        if(state.connectingServers[hosts[i]] == null &amp;&amp; !inInitialConnectingServers(self, state, hosts[i])) {
-          if(state.logger.isInfo()) state.logger.info(f('[%s] scheduled server %s for connection', state.id, hosts[i]));
+      if(!state.replState.contains(host)) {
+        if(state.connectingServers[host] == null &amp;&amp; !inInitialConnectingServers(self, state, host)) {
+          if(state.logger.isInfo()) state.logger.info(f('[%s] scheduled server %s for connection', state.id, host));
           // Make sure we know what is trying to connect
-          state.connectingServers[hosts[i]] = hosts[i];
+          state.connectingServers[host] = host;
           // Connect the server
-          connectToServer(self, state, hosts[i].split(':')[0], parseInt(hosts[i].split(':')[1], 10));
+          connectToServer(self, state, host.split(':')[0], parseInt(host.split(':')[1], 10), options);
         }
       }
     }
@@ -2214,7 +2293,8 @@ var inInitialConnectingServers = function(self, state, address) {
 }
 
 // Connect to a new server
-var connectToServer = function(self, state, host, port) {
+var connectToServer = function(self, state, host, port, options) {
+  options = options || {};
   var opts = cloneOptions(state.options);
   opts.host = host;
   opts.port = port;
@@ -2224,6 +2304,12 @@ var connectToServer = function(self, state, host, port) {
   // Share the auth store
   opts.authProviders = state.authProviders;
   opts.emitError = true;
+  
+  // Do we have an arbiter set the poolSize to 1
+  if(options.arbiter) {
+    opts.size = 1;
+  }
+
   // Create a new server instance
   var server = new Server(opts);
   // Handle the ismaster
@@ -2233,14 +2319,19 @@ var connectToServer = function(self, state, host, port) {
   server.once('close', errorHandlerTemp(self, state, 'close'));
   server.once('timeout', errorHandlerTemp(self, state, 'timeout'));
   server.once('connect', connectHandler(self, state));
+  
   // Attempt to connect
-  server.connect();
+  process.nextTick(function() {
+    server.connect();
+  });
 }
 
 //
 // Add server to the list if it does not exist
 var addToListIfNotExist = function(list, server) {
   var found = false;
+  // If the server is a null value return false
+  if(server == null) return found;
 
   // Remove any non used handlers
   ['error', 'close', 'timeout', 'connect'].forEach(function(e) {
@@ -2349,7 +2440,7 @@ module.exports = ReplSet;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Wed Oct 07 2015 13:00:24 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Fri Nov 20 2015 12:46:07 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

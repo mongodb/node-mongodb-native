@@ -705,6 +705,8 @@
             
                 <li data-name="Server#auth"><a href="Server.html#auth">auth</a></li>
             
+                <li data-name="Server#capConnections"><a href="Server.html#capConnections">capConnections</a></li>
+            
                 <li data-name="Server#command"><a href="Server.html#command">command</a></li>
             
                 <li data-name="Server#connect"><a href="Server.html#connect">connect</a></li>
@@ -1141,6 +1143,11 @@ var createWireProtocolHandler = function(result) {
 //
 // Reconnect server
 var reconnectServer = function(self, state) {
+  // Flush out any left over callbacks
+  if(self &amp;&amp; state &amp;&amp; state.callbacks) {
+    state.callbacks.flush(new MongoError(f("server %s received a broken socket pipe error", self.name)));
+  }
+
   // If the current reconnect retries is 0 stop attempting to reconnect
   if(state.currentReconnectRetry == 0) {
     return self.destroy(true, true);
@@ -1155,6 +1162,7 @@ var reconnectServer = function(self, state) {
   state.pool = new Pool(state.options);
   // error handler
   var reconnectErrorHandler = function(err) {
+    // Set the state to disconnected so we can peform a proper reconnect
     state.state = DISCONNECTED;
     // Destroy the pool
     state.pool.destroy();
@@ -1348,13 +1356,17 @@ var connectHandler = function(self, state) {
   return function(connection) {
     // Apply any applyAuthentications
     applyAuthentications(function() {
-
+      // Get the actual latency of the ismaster
+      var start = new Date().getTime();
       // Execute an ismaster
-      self.command('system.$cmd', {ismaster:true}, function(err, r) {
+      self.command('admin.$cmd', {ismaster:true}, function(err, r) {
         if(err) {
           state.state = DISCONNECTED;
           return self.emit('close', err, self);
         }
+
+        // Set the latency for this instance
+        state.isMasterLatencyMS = new Date().getTime() - start;
 
         // Set the current ismaster
         if(!err) {
@@ -1527,6 +1539,8 @@ var Server = function(options) {
     , bson: options.bson ? options.bson : bsonInstance
     // Internal connection pool
     , pool: null
+    // Is master latency
+    , isMasterLatencyMS: 0
     // Server details
     , serverDetails: {
         host: options.host
@@ -1575,6 +1589,15 @@ Server.prototype.setBSONParserType = function(type) {
   }
 
   this.s.options.bson = new nBSON(bsonTypes);
+}
+
+/**
+ * Reduce the poolSize to the provided max connections value
+ * @method
+ * @param {number} maxConnections reduce the poolsize to maxConnections
+ */
+Server.prototype.capConnections = function(maxConnections) {
+  this.s.pool.capConnections(maxConnections);
 }
 
 /**
@@ -1679,7 +1702,8 @@ var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAl
   var connection = options.connection || self.s.pool.get();
 
   // Double check if we have a valid connection
-  if(!connection.isConnected()) {
+  // Checking that the connection exists to avoid an uncaught exception in case there is an issue with the pool
+  if(!(connection &amp;&amp; connection.isConnected())) {
     return callback(new MongoError(f("no connection available to server %s", self.name)));
   }
 
@@ -1754,7 +1778,7 @@ var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAl
  * @param {object} cmd The command hash
  * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
  * @param {Connection} [options.connection] Specify connection object to execute command against
- * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized. 
+ * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {opResultCallback} callback A callback function
  */
@@ -1908,7 +1932,7 @@ Server.prototype.command = function(ns, cmd, options, callback) {
  * @param {array} ops An array of documents to insert
  * @param {boolean} [options.ordered=true] Execute in order or out of order
  * @param {object} [options.writeConcern={}] Write concern for the operation
- * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized. 
+ * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {opResultCallback} callback A callback function
  */
@@ -1936,7 +1960,7 @@ Server.prototype.insert = function(ns, ops, options, callback) {
  * @param {array} ops An array of updates
  * @param {boolean} [options.ordered=true] Execute in order or out of order
  * @param {object} [options.writeConcern={}] Write concern for the operation
- * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized. 
+ * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {opResultCallback} callback A callback function
  */
@@ -1944,6 +1968,7 @@ Server.prototype.update = function(ns, ops, options, callback) {
   if(typeof options == 'function') callback = options, options = {};
   var self = this;
   if(this.s.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
+
   // Topology is not connected, save the call in the provided store to be
   // Executed at some point when the handler deems it's reconnected
   if(!self.isConnected() &amp;&amp; self.s.disconnectHandler != null) {
@@ -1953,6 +1978,7 @@ Server.prototype.update = function(ns, ops, options, callback) {
 
   // Setup the docs as an array
   ops = Array.isArray(ops) ? ops : [ops];
+
   // Execute write
   return self.s.wireProtocolHandler.update(self, self.s.ismaster, ns, self.s.bson, self.s.pool, self.s.callbacks, ops, options, callback);
 }
@@ -1964,7 +1990,7 @@ Server.prototype.update = function(ns, ops, options, callback) {
  * @param {array} ops An array of removes
  * @param {boolean} [options.ordered=true] Execute in order or out of order
  * @param {object} [options.writeConcern={}] Write concern for the operation
- * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized. 
+ * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {opResultCallback} callback A callback function
  */
@@ -2056,7 +2082,12 @@ Server.prototype.addAuthProvider = function(name, provider) {
  */
 Server.prototype.equals = function(server) {
   if(typeof server == 'string') return server == this.name;
-  return server.name == this.name;
+
+  if(server &amp;&amp; server.name) {
+    return server.name == this.name;
+  }
+
+  return false;
 }
 
 /**
@@ -2145,7 +2176,7 @@ Server.prototype.parserType = function() {
  * @param {object} [options.batchSize=0] Batchsize for the operation
  * @param {array} [options.documents=[]] Initial documents list for cursor
  * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
- * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized. 
+ * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {opResultCallback} callback A callback function
  */
@@ -2246,7 +2277,7 @@ module.exports = Server;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Wed Oct 07 2015 13:00:24 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Fri Nov 20 2015 12:46:07 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

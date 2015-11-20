@@ -569,7 +569,7 @@ MongoClient.connect(url, function(err, db) {
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The &lt;em&gt;update&lt;/em&gt; method also accepts an second argument that can be an options object. This object can have the following fields.&lt;/p&gt;
+&lt;p&gt;The &lt;em&gt;update&lt;/em&gt; method also accepts a third argument that can be an options object. This object can have the following fields.&lt;/p&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/li&gt;
@@ -601,15 +601,13 @@ MongoClient.connect(url, function(err, db) {
     assert.equal(null, err);
     assert.equal(3, r.insertedCount);
 
-    // Update a single document
-    col.deleteOne({a:1}
-      , {$set: {b: 1}}, function(err, r) {
+    // Remove a single document
+    col.deleteOne({a:1}, function(err, r) {
       assert.equal(null, err);
       assert.equal(1, r.deletedCount);
 
       // Update multiple documents
-      col.deleteMany({a:2}
-        , {$set: {b: 1}}, function(err, r) {
+      col.deleteMany({a:2}, function(err, r) {
         assert.equal(null, err);
         assert.equal(2, r.deletedCount);
         db.close();
@@ -619,7 +617,7 @@ MongoClient.connect(url, function(err, db) {
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The &lt;em&gt;deleteOne&lt;/em&gt; and &lt;em&gt;deleteMany&lt;/em&gt; methods also accepts an second argument that can be an options object. This object can have the following fields.&lt;/p&gt;
+&lt;p&gt;The &lt;em&gt;deleteOne&lt;/em&gt; and &lt;em&gt;deleteMany&lt;/em&gt; methods also accepts a second argument that can be an options object. This object can have the following fields.&lt;/p&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/li&gt;
@@ -630,9 +628,9 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;Just as for &lt;em&gt;updateOne/updateMany&lt;/em&gt; and &lt;em&gt;insertOne/insertMany&lt;/em&gt; the &lt;em&gt;deleteOne/deleteMany&lt;/em&gt; method allows you to specify a per operation write concern using the &lt;em&gt;w&lt;/em&gt;, &lt;em&gt;wtimeout&lt;/em&gt; and &lt;em&gt;fsync&lt;/em&gt; parameters&lt;/p&gt;
 
-&lt;h3 id=&#34;findandmodify-and-findanddelete&#34;&gt;FindAndModify and findAndDelete&lt;/h3&gt;
+&lt;h3 id=&#34;findoneandupdate-findoneanddelete-and-findoneandreplace&#34;&gt;findOneAndUpdate, findOneAndDelete and findOneAndReplace&lt;/h3&gt;
 
-&lt;p&gt;The two methods &lt;em&gt;findOneAndUpdate&lt;/em&gt;, &lt;em&gt;findOneAndDelete&lt;/em&gt; and &lt;em&gt;findOneAndReplace&lt;/em&gt; are special commands that allows the user to update or upsert a document and have the modified or existing document returned. It comes at a cost as the operation takes a write lock for the duration of the operation as it needs to ensure the modification is &lt;em&gt;atomic&lt;/em&gt;. Let&amp;rsquo;s look at &lt;em&gt;findOneAndUpdate&lt;/em&gt; first using an example.&lt;/p&gt;
+&lt;p&gt;The three methods &lt;em&gt;findOneAndUpdate&lt;/em&gt;, &lt;em&gt;findOneAndDelete&lt;/em&gt; and &lt;em&gt;findOneAndReplace&lt;/em&gt; are special commands that allows the user to update or upsert a document and have the modified or existing document returned. It comes at a cost as the operation takes a write lock for the duration of the operation as it needs to ensure the modification is &lt;em&gt;atomic&lt;/em&gt;. Let&amp;rsquo;s look at &lt;em&gt;findOneAndUpdate&lt;/em&gt; first using an example.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
   , assert = require(&#39;assert&#39;);
@@ -670,7 +668,7 @@ MongoClient.connect(url, function(err, db) {
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The &lt;em&gt;findOneAndUpdate&lt;/em&gt; method also accepts an second argument that can be an options object. This object can have the following fields.&lt;/p&gt;
+&lt;p&gt;The &lt;em&gt;findOneAndUpdate&lt;/em&gt; method also accepts a third argument that can be an options object. This object can have the following fields.&lt;/p&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/li&gt;
@@ -682,7 +680,7 @@ MongoClient.connect(url, function(err, db) {
 &lt;li&gt;&lt;code&gt;returnOriginal&lt;/code&gt;, (Boolean, default:true) Set to false if you want to return the modified object rather than the original. Ignored for remove.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;The &lt;em&gt;findAndDelete&lt;/em&gt; function is a function especially defined to help remove a document. Let&amp;rsquo;s look at an example of usage.&lt;/p&gt;
+&lt;p&gt;The &lt;em&gt;findOneAndDelete&lt;/em&gt; function is a function especially defined to help remove a document. Let&amp;rsquo;s look at an example of usage.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
   , assert = require(&#39;assert&#39;);
@@ -701,7 +699,7 @@ MongoClient.connect(url, function(err, db) {
     assert.equal(3, r.result.n);
 
     // Remove a document from MongoDB and return it
-    col.findOneAndRemove({a:1}, {
+    col.findOneAndDelete({a:1}, {
         sort: [[a,1]]
       }
       , function(err, doc) {
@@ -812,7 +810,7 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;We will not cover the results object here as it&amp;rsquo;s documented in the driver API. The Bulk API handles all the splitting of operations into multiple writes and also emulates 2.6 and higher write commands for 2.4 and earlier servers.&lt;/p&gt;
 
-&lt;p&gt;There is are some important things to keep in mind when using the bulk API and especially the &lt;em&gt;ordered&lt;/em&gt; bulk API mode. The write commands are single operation type. That means they can only do insert/update and remove. If you f.ex do the following combination of operations.&lt;/p&gt;
+&lt;p&gt;There are some important things to keep in mind when using the bulk API and especially the &lt;em&gt;ordered&lt;/em&gt; bulk API mode. The write commands are single operation type. That means they can only do insert/update and remove. If you f.ex do the following combination of operations.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;Insert {a:1}
 Update {a:1} to {a:1, b:1}
@@ -830,7 +828,7 @@ Remove Command with {b:1}
 Insert Command with {a:3}    
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;If you instead organize the your &lt;em&gt;ordered&lt;/em&gt; in the following manner.&lt;/p&gt;
+&lt;p&gt;If you instead organize your &lt;em&gt;ordered&lt;/em&gt; in the following manner.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;Insert {a:1}
 Insert {a:2}
@@ -1973,7 +1971,7 @@ MongoClient.connect(url, function(err, db) {
   // Set debug level
   Logger.setLevel(&#39;debug&#39;);
 
-  // Insert a single document
+  // Execute command {ismaster:true} against db
   db.command({ismaster:true}, function(err, d) {
     assert.equal(null, err);
     db.close();
@@ -2000,9 +1998,10 @@ MongoClient.connect(url, function(err, db) {
 
   // Set debug level
   Logger.setLevel(&#39;debug&#39;);
+  // Only log statements on &#39;Db&#39; class
   Logger.filter(&#39;class&#39;, [&#39;Db&#39;]);
 
-  // Insert a single document
+  // Execute command {ismaster:true} against db
   db.command({ismaster:true}, function(err, d) {
     assert.equal(null, err);
     db.close();
@@ -2066,7 +2065,7 @@ MongoClient.connect(url, function(err, db) {
     console.log(msg, context);
   });
 
-  // Insert a single document
+  // Execute command {ismaster:true} against db
   db.command({ismaster:true}, function(err, d) {
     assert.equal(null, err);
     db.close();

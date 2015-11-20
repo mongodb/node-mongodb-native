@@ -1254,7 +1254,7 @@ MongoClient.connect(url, function(err, db) {
 });
 </code></pre>
 
-<p>The <em>update</em> method also accepts an second argument that can be an options object. This object can have the following fields.</p>
+<p>The <em>update</em> method also accepts a third argument that can be an options object. This object can have the following fields.</p>
 
 <ul>
 <li><code>w</code>, {Number/String, &gt; -1 || &lsquo;majority&rsquo;} the write concern for the operation where &lt; 1 returns an acknowledgment of the write with not results <code>{ok:1}</code> and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write with full write results.</li>
@@ -1286,15 +1286,13 @@ MongoClient.connect(url, function(err, db) {
     assert.equal(null, err);
     assert.equal(3, r.insertedCount);
 
-    // Update a single document
-    col.deleteOne({a:1}
-      , {$set: {b: 1}}, function(err, r) {
+    // Remove a single document
+    col.deleteOne({a:1}, function(err, r) {
       assert.equal(null, err);
       assert.equal(1, r.deletedCount);
 
       // Update multiple documents
-      col.deleteMany({a:2}
-        , {$set: {b: 1}}, function(err, r) {
+      col.deleteMany({a:2}, function(err, r) {
         assert.equal(null, err);
         assert.equal(2, r.deletedCount);
         db.close();
@@ -1304,7 +1302,7 @@ MongoClient.connect(url, function(err, db) {
 });
 </code></pre>
 
-<p>The <em>deleteOne</em> and <em>deleteMany</em> methods also accepts an second argument that can be an options object. This object can have the following fields.</p>
+<p>The <em>deleteOne</em> and <em>deleteMany</em> methods also accepts a second argument that can be an options object. This object can have the following fields.</p>
 
 <ul>
 <li><code>w</code>, {Number/String, &gt; -1 || &lsquo;majority&rsquo;} the write concern for the operation where &lt; 1 returns an acknowledgment of the write with not results <code>{ok:1}</code> and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write with full write results.</li>
@@ -1315,9 +1313,9 @@ MongoClient.connect(url, function(err, db) {
 
 <p>Just as for <em>updateOne/updateMany</em> and <em>insertOne/insertMany</em> the <em>deleteOne/deleteMany</em> method allows you to specify a per operation write concern using the <em>w</em>, <em>wtimeout</em> and <em>fsync</em> parameters</p>
 
-<h3 id="findandmodify-and-findanddelete">FindAndModify and findAndDelete</h3>
+<h3 id="findoneandupdate-findoneanddelete-and-findoneandreplace">findOneAndUpdate, findOneAndDelete and findOneAndReplace</h3>
 
-<p>The two methods <em>findOneAndUpdate</em>, <em>findOneAndDelete</em> and <em>findOneAndReplace</em> are special commands that allows the user to update or upsert a document and have the modified or existing document returned. It comes at a cost as the operation takes a write lock for the duration of the operation as it needs to ensure the modification is <em>atomic</em>. Let&rsquo;s look at <em>findOneAndUpdate</em> first using an example.</p>
+<p>The three methods <em>findOneAndUpdate</em>, <em>findOneAndDelete</em> and <em>findOneAndReplace</em> are special commands that allows the user to update or upsert a document and have the modified or existing document returned. It comes at a cost as the operation takes a write lock for the duration of the operation as it needs to ensure the modification is <em>atomic</em>. Let&rsquo;s look at <em>findOneAndUpdate</em> first using an example.</p>
 
 <pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
   , assert = require('assert');
@@ -1355,7 +1353,7 @@ MongoClient.connect(url, function(err, db) {
 });
 </code></pre>
 
-<p>The <em>findOneAndUpdate</em> method also accepts an second argument that can be an options object. This object can have the following fields.</p>
+<p>The <em>findOneAndUpdate</em> method also accepts a third argument that can be an options object. This object can have the following fields.</p>
 
 <ul>
 <li><code>w</code>, {Number/String, &gt; -1 || &lsquo;majority&rsquo;} the write concern for the operation where &lt; 1 returns an acknowledgment of the write with not results <code>{ok:1}</code> and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write with full write results.</li>
@@ -1367,7 +1365,7 @@ MongoClient.connect(url, function(err, db) {
 <li><code>returnOriginal</code>, (Boolean, default:true) Set to false if you want to return the modified object rather than the original. Ignored for remove.</li>
 </ul>
 
-<p>The <em>findAndDelete</em> function is a function especially defined to help remove a document. Let&rsquo;s look at an example of usage.</p>
+<p>The <em>findOneAndDelete</em> function is a function especially defined to help remove a document. Let&rsquo;s look at an example of usage.</p>
 
 <pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
   , assert = require('assert');
@@ -1386,7 +1384,7 @@ MongoClient.connect(url, function(err, db) {
     assert.equal(3, r.result.n);
 
     // Remove a document from MongoDB and return it
-    col.findOneAndRemove({a:1}, {
+    col.findOneAndDelete({a:1}, {
         sort: [[a,1]]
       }
       , function(err, doc) {
@@ -1497,7 +1495,7 @@ MongoClient.connect(url, function(err, db) {
 
 <p>We will not cover the results object here as it&rsquo;s documented in the driver API. The Bulk API handles all the splitting of operations into multiple writes and also emulates 2.6 and higher write commands for 2.4 and earlier servers.</p>
 
-<p>There is are some important things to keep in mind when using the bulk API and especially the <em>ordered</em> bulk API mode. The write commands are single operation type. That means they can only do insert/update and remove. If you f.ex do the following combination of operations.</p>
+<p>There are some important things to keep in mind when using the bulk API and especially the <em>ordered</em> bulk API mode. The write commands are single operation type. That means they can only do insert/update and remove. If you f.ex do the following combination of operations.</p>
 
 <pre><code>Insert {a:1}
 Update {a:1} to {a:1, b:1}
@@ -1515,7 +1513,7 @@ Remove Command with {b:1}
 Insert Command with {a:3}    
 </code></pre>
 
-<p>If you instead organize the your <em>ordered</em> in the following manner.</p>
+<p>If you instead organize your <em>ordered</em> in the following manner.</p>
 
 <pre><code>Insert {a:1}
 Insert {a:2}
@@ -1719,7 +1717,7 @@ MongoClient.connect(url, function(err, db) {
 <li><a href="#inserting-documents">Inserting Documents</a></li>
 <li><a href="#updating-documents">Updating Documents</a></li>
 <li><a href="#removing-documents">Removing Documents</a></li>
-<li><a href="#findandmodify-and-findanddelete">FindAndModify and findAndDelete</a></li>
+<li><a href="#findoneandupdate-findoneanddelete-and-findoneandreplace">findOneAndUpdate, findOneAndDelete and findOneAndReplace</a></li>
 <li><a href="#bulkwrite">BulkWrite</a></li>
 </ul></li>
 <li><a href="#bulk-write-operations">Bulk Write Operations</a></li>

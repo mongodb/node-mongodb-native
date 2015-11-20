@@ -983,7 +983,7 @@ MongoClient.connect(url, function(err, db) {
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The &lt;em&gt;update&lt;/em&gt; method also accepts an second argument that can be an options object. This object can have the following fields.&lt;/p&gt;
+&lt;p&gt;The &lt;em&gt;update&lt;/em&gt; method also accepts a third argument that can be an options object. This object can have the following fields.&lt;/p&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/li&gt;
@@ -1015,15 +1015,13 @@ MongoClient.connect(url, function(err, db) {
     assert.equal(null, err);
     assert.equal(3, r.insertedCount);
 
-    // Update a single document
-    col.deleteOne({a:1}
-      , {$set: {b: 1}}, function(err, r) {
+    // Remove a single document
+    col.deleteOne({a:1}, function(err, r) {
       assert.equal(null, err);
       assert.equal(1, r.deletedCount);
 
       // Update multiple documents
-      col.deleteMany({a:2}
-        , {$set: {b: 1}}, function(err, r) {
+      col.deleteMany({a:2}, function(err, r) {
         assert.equal(null, err);
         assert.equal(2, r.deletedCount);
         db.close();
@@ -1033,7 +1031,7 @@ MongoClient.connect(url, function(err, db) {
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The &lt;em&gt;deleteOne&lt;/em&gt; and &lt;em&gt;deleteMany&lt;/em&gt; methods also accepts an second argument that can be an options object. This object can have the following fields.&lt;/p&gt;
+&lt;p&gt;The &lt;em&gt;deleteOne&lt;/em&gt; and &lt;em&gt;deleteMany&lt;/em&gt; methods also accepts a second argument that can be an options object. This object can have the following fields.&lt;/p&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/li&gt;
@@ -1044,9 +1042,9 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;Just as for &lt;em&gt;updateOne/updateMany&lt;/em&gt; and &lt;em&gt;insertOne/insertMany&lt;/em&gt; the &lt;em&gt;deleteOne/deleteMany&lt;/em&gt; method allows you to specify a per operation write concern using the &lt;em&gt;w&lt;/em&gt;, &lt;em&gt;wtimeout&lt;/em&gt; and &lt;em&gt;fsync&lt;/em&gt; parameters&lt;/p&gt;
 
-&lt;h3 id=&#34;findandmodify-and-findanddelete&#34;&gt;FindAndModify and findAndDelete&lt;/h3&gt;
+&lt;h3 id=&#34;findoneandupdate-findoneanddelete-and-findoneandreplace&#34;&gt;findOneAndUpdate, findOneAndDelete and findOneAndReplace&lt;/h3&gt;
 
-&lt;p&gt;The two methods &lt;em&gt;findOneAndUpdate&lt;/em&gt;, &lt;em&gt;findOneAndDelete&lt;/em&gt; and &lt;em&gt;findOneAndReplace&lt;/em&gt; are special commands that allows the user to update or upsert a document and have the modified or existing document returned. It comes at a cost as the operation takes a write lock for the duration of the operation as it needs to ensure the modification is &lt;em&gt;atomic&lt;/em&gt;. Let&amp;rsquo;s look at &lt;em&gt;findOneAndUpdate&lt;/em&gt; first using an example.&lt;/p&gt;
+&lt;p&gt;The three methods &lt;em&gt;findOneAndUpdate&lt;/em&gt;, &lt;em&gt;findOneAndDelete&lt;/em&gt; and &lt;em&gt;findOneAndReplace&lt;/em&gt; are special commands that allows the user to update or upsert a document and have the modified or existing document returned. It comes at a cost as the operation takes a write lock for the duration of the operation as it needs to ensure the modification is &lt;em&gt;atomic&lt;/em&gt;. Let&amp;rsquo;s look at &lt;em&gt;findOneAndUpdate&lt;/em&gt; first using an example.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
   , assert = require(&#39;assert&#39;);
@@ -1084,7 +1082,7 @@ MongoClient.connect(url, function(err, db) {
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The &lt;em&gt;findOneAndUpdate&lt;/em&gt; method also accepts an second argument that can be an options object. This object can have the following fields.&lt;/p&gt;
+&lt;p&gt;The &lt;em&gt;findOneAndUpdate&lt;/em&gt; method also accepts a third argument that can be an options object. This object can have the following fields.&lt;/p&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/li&gt;
@@ -1096,7 +1094,7 @@ MongoClient.connect(url, function(err, db) {
 &lt;li&gt;&lt;code&gt;returnOriginal&lt;/code&gt;, (Boolean, default:true) Set to false if you want to return the modified object rather than the original. Ignored for remove.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;The &lt;em&gt;findAndDelete&lt;/em&gt; function is a function especially defined to help remove a document. Let&amp;rsquo;s look at an example of usage.&lt;/p&gt;
+&lt;p&gt;The &lt;em&gt;findOneAndDelete&lt;/em&gt; function is a function especially defined to help remove a document. Let&amp;rsquo;s look at an example of usage.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
   , assert = require(&#39;assert&#39;);
@@ -1115,7 +1113,7 @@ MongoClient.connect(url, function(err, db) {
     assert.equal(3, r.result.n);
 
     // Remove a document from MongoDB and return it
-    col.findOneAndRemove({a:1}, {
+    col.findOneAndDelete({a:1}, {
         sort: [[a,1]]
       }
       , function(err, doc) {
@@ -1226,7 +1224,7 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;We will not cover the results object here as it&amp;rsquo;s documented in the driver API. The Bulk API handles all the splitting of operations into multiple writes and also emulates 2.6 and higher write commands for 2.4 and earlier servers.&lt;/p&gt;
 
-&lt;p&gt;There is are some important things to keep in mind when using the bulk API and especially the &lt;em&gt;ordered&lt;/em&gt; bulk API mode. The write commands are single operation type. That means they can only do insert/update and remove. If you f.ex do the following combination of operations.&lt;/p&gt;
+&lt;p&gt;There are some important things to keep in mind when using the bulk API and especially the &lt;em&gt;ordered&lt;/em&gt; bulk API mode. The write commands are single operation type. That means they can only do insert/update and remove. If you f.ex do the following combination of operations.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;Insert {a:1}
 Update {a:1} to {a:1, b:1}
@@ -1244,7 +1242,7 @@ Remove Command with {b:1}
 Insert Command with {a:3}    
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;If you instead organize the your &lt;em&gt;ordered&lt;/em&gt; in the following manner.&lt;/p&gt;
+&lt;p&gt;If you instead organize your &lt;em&gt;ordered&lt;/em&gt; in the following manner.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;Insert {a:1}
 Insert {a:2}
@@ -2085,7 +2083,7 @@ MongoClient.connect(url, function(err, db) {
   // Set debug level
   Logger.setLevel(&#39;debug&#39;);
 
-  // Insert a single document
+  // Execute command {ismaster:true} against db
   db.command({ismaster:true}, function(err, d) {
     assert.equal(null, err);
     db.close();
@@ -2112,9 +2110,10 @@ MongoClient.connect(url, function(err, db) {
 
   // Set debug level
   Logger.setLevel(&#39;debug&#39;);
+  // Only log statements on &#39;Db&#39; class
   Logger.filter(&#39;class&#39;, [&#39;Db&#39;]);
 
-  // Insert a single document
+  // Execute command {ismaster:true} against db
   db.command({ismaster:true}, function(err, d) {
     assert.equal(null, err);
     db.close();
@@ -2178,7 +2177,7 @@ MongoClient.connect(url, function(err, db) {
     console.log(msg, context);
   });
 
-  // Insert a single document
+  // Execute command {ismaster:true} against db
   db.command({ismaster:true}, function(err, d) {
     assert.equal(null, err);
     db.close();
@@ -2247,21 +2246,115 @@ $ git checkout -b myNewFeature
     </item>
     
     <item>
-      <title>Getting Started</title>
-      <link>/node-mongodb-native/2.0/getting-started/</link>
+      <title>Installation Guide</title>
+      <link>/node-mongodb-native/2.0/getting-started/installation-guide/</link>
       <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
       
-      <guid>/node-mongodb-native/2.0/getting-started/</guid>
+      <guid>/node-mongodb-native/2.0/getting-started/installation-guide/</guid>
       <description>
 
-&lt;h2 id=&#34;getting-started&#34;&gt;Getting Started&lt;/h2&gt;
+&lt;h1 id=&#34;installation&#34;&gt;Installation&lt;/h1&gt;
 
-&lt;p&gt;To help you get started quickly on the new driver, follow:&lt;/p&gt;
+&lt;p&gt;The recommended way to get started using the Node.js 2.0 driver is by using the &lt;code&gt;NPM&lt;/code&gt; (Node Package Manager) to install the dependency in your project.&lt;/p&gt;
+
+&lt;h2 id=&#34;mongodb-driver&#34;&gt;MongoDB Driver&lt;/h2&gt;
+
+&lt;p&gt;Given that you have created your own project using &lt;code&gt;npm init&lt;/code&gt; we install the mongodb driver and it&amp;rsquo;s dependencies by executing the following &lt;code&gt;NPM&lt;/code&gt; command.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install mongodb --save
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will download the MongoDB driver and add a dependency entry in your &lt;code&gt;package.json&lt;/code&gt; file.&lt;/p&gt;
+
+&lt;h2 id=&#34;troubleshooting&#34;&gt;Troubleshooting&lt;/h2&gt;
+
+&lt;p&gt;The MongoDB driver depends on several other packages. These are.&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/getting-started/installation-guide/&#34;&gt;Installation&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/getting-started/quick-tour/&#34;&gt;Quick Tour&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;mongodb-core&lt;/li&gt;
+&lt;li&gt;bson&lt;/li&gt;
+&lt;li&gt;kerberos&lt;/li&gt;
+&lt;li&gt;node-gyp&lt;/li&gt;
 &lt;/ul&gt;
+
+&lt;p&gt;The only native extension is the &lt;code&gt;kerberos&lt;/code&gt; extension. This is a &lt;code&gt;peerDependency&lt;/code&gt; for the &lt;code&gt;mongodb&lt;/code&gt; module. This means that if you need to use &lt;code&gt;kerberos&lt;/code&gt; you will need to add the &lt;code&gt;kerberos&lt;/code&gt; module to your modules dependencies.&lt;/p&gt;
+
+&lt;p&gt;If you have &lt;strong&gt;NPM 2.0&lt;/strong&gt; or earlier NPM will attempt to download and build the &lt;code&gt;kerberos&lt;/code&gt; module if you do not have it defined as a dependency in your module. However from &lt;strong&gt;NPM 3.0&lt;/strong&gt; onwards NPM will not attempt to build the &lt;code&gt;kerberos&lt;/code&gt; module but instead print a warning in your install log that looks something like the following.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm WARN EPEERINVALID mongodb-core@1.2.21 requires a peer of kerberos@~0.0 but none was installed.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This tells you that the driver could not resolve it&amp;rsquo;s &lt;code&gt;peerDependency&lt;/code&gt;. However don&amp;rsquo;t worry. You only need the &lt;code&gt;kerberos&lt;/code&gt; module if intend to use &lt;code&gt;kerberos&lt;/code&gt;. In the case you need to you can add it to your package.json by doing the following for the case of the line above.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install kerberos@0.0.x
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;kerberos&lt;/code&gt; package is a C++ extension that requires a build environment to be installed on your system. You must be able to build node.js itself to be able to compile and install the &lt;code&gt;kerberos&lt;/code&gt; module. Furthermore the &lt;code&gt;kerberos&lt;/code&gt; module requires the MIT Kerberos package to correctly compile on UNIX operating systems. Consult your UNIX operation system package manager what libraries to install.&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;admonition important&#34;&gt;
+&lt;h5 class=&#34;admonition-title&#34;&gt;important&lt;/h5&gt;
+&lt;p&gt;Windows already contains the SSPI API used for Kerberos authentication. However you will need to install a full compiler tool chain using visual studio C++ to correctly install the kerberos extension.&lt;/p&gt;
+
+&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;h3 id=&#34;diagnosing-on-unix&#34;&gt;Diagnosing on UNIX&lt;/h3&gt;
+
+&lt;p&gt;If you don’t have the build essentials it won’t build. In the case of linux you will need gcc and g++, node.js with all the headers and python. The easiest way to figure out what’s missing is by trying to build the kerberos project. You can do this by performing the following steps.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;git clone https://github.com/christkv/kerberos.git
+cd kerberos
+npm install
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If all the steps complete you have the right toolchain installed. If you get node-gyp not found you need to install it globally by doing.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install -g node-gyp
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If correctly compiles and runs the tests you are golden. We can now try to install the mongod driver by performing the following command.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;cd yourproject
+npm install mongodb --save
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If it still fails the next step is to examine the npm log. Rerun the command but in this case in verbose mode.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm --loglevel verbose install mongodb
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will print out all the steps npm is performing while trying to install the module.&lt;/p&gt;
+
+&lt;h3 id=&#34;diagnosing-on-windows&#34;&gt;Diagnosing on Windows&lt;/h3&gt;
+
+&lt;p&gt;A known compiler tool chain known to work for compiling &lt;code&gt;kerberos&lt;/code&gt; on windows is the following.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Visual Studio c++ 2010 (do not use higher versions)&lt;/li&gt;
+&lt;li&gt;Windows 7 64bit SDK&lt;/li&gt;
+&lt;li&gt;Python 2.7 or higher&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Open visual studio command prompt. Ensure node.exe is in your path and install node-gyp.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install -g node-gyp
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next you will have to build the project manually to test it. Use any tool you use with git and grab the repo.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;git clone https://github.com/christkv/kerberos.git
+cd kerberos
+npm install
+node-gyp rebuild
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This should rebuild the driver successfully if you have everything set up correctly.&lt;/p&gt;
+
+&lt;h3 id=&#34;other-possible-issues&#34;&gt;Other possible issues&lt;/h3&gt;
+
+&lt;p&gt;Your python installation might be hosed making gyp break. I always recommend that you test your deployment environment first by trying to build node itself on the server in question as this should unearth any issues with broken packages (and there are a lot of broken packages out there).&lt;/p&gt;
+
+&lt;p&gt;Another thing is to ensure your user has write permission to wherever the node modules are being installed.&lt;/p&gt;
 </description>
     </item>
     
