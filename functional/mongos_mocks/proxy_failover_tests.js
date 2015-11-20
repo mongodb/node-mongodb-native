@@ -333,6 +333,7 @@ exports['Should correctly bring back both proxies and use it'] = {
             request.reply(serverIsMaster[0]);
           } else if(doc.insert && currentStep == 0) {
             yield timeoutPromise(1600);
+            request.connection.destroy();
           } else if(doc.insert && currentStep == 1) {
             request.reply({ok:1, n:doc.documents, lastOp: new Date()});
           }
@@ -350,6 +351,7 @@ exports['Should correctly bring back both proxies and use it'] = {
             request.reply(serverIsMaster[0]);
           } else if(doc.insert && currentStep == 0) {
             yield timeoutPromise(1600);
+            request.connection.destroy();
           } else if(doc.insert && currentStep == 1) {
             request.reply({ok:1, n:doc.documents, lastOp: new Date()});
           }
@@ -388,7 +390,6 @@ exports['Should correctly bring back both proxies and use it'] = {
 
           // Perform interval inserts waiting for both proxies to come back
           var intervalId2 = setInterval(function() {
-            // console.log("============= intervalId2 = " + Object.keys(proxies).length)
             // Perform inserts
             server.insert('test.test', [{created:new Date()}], function(err, r) {
               if(r) {
