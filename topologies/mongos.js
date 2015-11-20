@@ -17,18 +17,18 @@ var inherits = require('util').inherits
 /**
  * @fileOverview The **Mongos** class is a class that represents a Mongos Proxy topology and is
  * used to construct connections.
- * 
+ *
  * @example
  * var Mongos = require('mongodb-core').Mongos
  *   , ReadPreference = require('mongodb-core').ReadPreference
  *   , assert = require('assert');
- * 
+ *
  * var server = new Mongos([{host: 'localhost', port: 30000}]);
  * // Wait for the connection event
  * server.on('connect', function(server) {
  *   server.destroy();
  * });
- * 
+ *
  * // Start connecting
  * server.connect();
  */
@@ -153,7 +153,7 @@ State.prototype.destroy = function() {
     server.destroy();
     // Add to list of disconnected servers
     this.s.disconnectedServers.push(server);
-  }        
+  }
 }
 
 //
@@ -219,10 +219,10 @@ State.prototype.pickServer = function(readPreference) {
  * @fires Mongos#joined
  * @fires Mongos#left
  */
-var Mongos = function(seedlist, options) {  
+var Mongos = function(seedlist, options) {
   var self = this;
   options = options || {};
-  
+
   // Add event listener
   EventEmitter.call(this);
 
@@ -232,7 +232,7 @@ var Mongos = function(seedlist, options) {
   if(seedlist.length == 0) throw new MongoError("seedlist must contain at least one entry");
   // Validate entries
   seedlist.forEach(function(e) {
-    if(typeof e.host != 'string' || typeof e.port != 'number') 
+    if(typeof e.host != 'string' || typeof e.port != 'number')
       throw new MongoError("seedlist entry must contain a host and port");
   });
 
@@ -296,9 +296,9 @@ var Mongos = function(seedlist, options) {
 
   // BSON property (find a server and pass it along)
   Object.defineProperty(this, 'bson', {
-    enumerable: true, get: function() { 
+    enumerable: true, get: function() {
       var servers = self.s.mongosState.getAll();
-      return servers.length > 0 ? servers[0].bson : null; 
+      return servers.length > 0 ? servers[0].bson : null;
     }
   });
 
@@ -349,7 +349,7 @@ Mongos.prototype.setBSONParserType = function(type) {
   }
 
   this.s.options.bson = new nBSON(bsonTypes);
-}  
+}
 
 /**
  * Returns the last known ismaster document for this server
@@ -359,7 +359,7 @@ Mongos.prototype.setBSONParserType = function(type) {
 Mongos.prototype.lastIsMaster = function() {
   var connectedServers = this.s.mongosState.connectedServers();
   if(connectedServers.length > 0) return connectedServers[0].lastIsMaster();
-  return null; 
+  return null;
 }
 
 /**
@@ -395,7 +395,7 @@ Mongos.prototype.connect = function(_options) {
   // Attempt to connect to all the servers
   while(servers.length > 0) {
     // Get the server
-    var server = servers.shift();      
+    var server = servers.shift();
 
     // Remove any non used handlers
     ['error', 'close', 'timeout', 'connect', 'message', 'parseError'].forEach(function(e) {
@@ -456,7 +456,7 @@ Mongos.prototype.isDestroyed = function() {
  * @param {array} ops An array of documents to insert
  * @param {boolean} [options.ordered=true] Execute in order or out of order
  * @param {object} [options.writeConcern={}] Write concern for the operation
- * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized. 
+ * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {opResultCallback} callback A callback function
  */
@@ -480,7 +480,7 @@ Mongos.prototype.insert = function(ns, ops, options, callback) {
  * @param {array} ops An array of updates
  * @param {boolean} [options.ordered=true] Execute in order or out of order
  * @param {object} [options.writeConcern={}] Write concern for the operation
- * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized. 
+ * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {opResultCallback} callback A callback function
  */
@@ -504,7 +504,7 @@ Mongos.prototype.update = function(ns, ops, options, callback) {
  * @param {array} ops An array of removes
  * @param {boolean} [options.ordered=true] Execute in order or out of order
  * @param {object} [options.writeConcern={}] Write concern for the operation
- * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized. 
+ * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {opResultCallback} callback A callback function
  */
@@ -519,7 +519,7 @@ Mongos.prototype.remove = function(ns, ops, options, callback) {
   }
 
   executeWriteOperation(this.s, 'remove', ns, ops, options, callback);
-}    
+}
 
 /**
  * Execute a command
@@ -528,7 +528,7 @@ Mongos.prototype.remove = function(ns, ops, options, callback) {
  * @param {object} cmd The command hash
  * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
  * @param {Connection} [options.connection] Specify connection object to execute command against
- * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized. 
+ * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {opResultCallback} callback A callback function
  */
@@ -559,7 +559,7 @@ Mongos.prototype.command = function(ns, cmd, options, callback) {
         count = count - 1;
         // Finished executing command
         if(count == 0) {
-          // Was it a logout command clear any credentials      
+          // Was it a logout command clear any credentials
           if(cmd.logout) clearCredentials(state, ns);
           // Return the error
           callback(err, r);
@@ -572,7 +572,7 @@ Mongos.prototype.command = function(ns, cmd, options, callback) {
 
 
   try {
-    // Get a primary      
+    // Get a primary
     server = self.s.mongosState.pickServer(options.writeConcern ? ReadPreference.primary : options.readPreference);
   } catch(err) {
     return callback(err);
@@ -581,9 +581,9 @@ Mongos.prototype.command = function(ns, cmd, options, callback) {
   // No server returned we had an error
   if(server == null) return callback(new MongoError("no mongos found"));
   server.command(ns, cmd, options, function(err, r) {
-    // Was it a logout command clear any credentials      
+    // Was it a logout command clear any credentials
     if(cmd.logout) clearCredentials(self.s, ns);
-    callback(err, r);      
+    callback(err, r);
   });
 }
 
@@ -595,7 +595,7 @@ Mongos.prototype.command = function(ns, cmd, options, callback) {
  * @param {object} [options.batchSize=0] Batchsize for the operation
  * @param {array} [options.documents=[]] Initial documents list for cursor
  * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
- * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized. 
+ * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {opResultCallback} callback A callback function
  */
@@ -665,7 +665,7 @@ Mongos.prototype.auth = function(mechanism, db) {
     // Execute the auth
     server.auth.apply(server, finalArguments);
   }
-}  
+}
 
 //
 // Plugin methods
@@ -733,7 +733,7 @@ Mongos.prototype.connections = function() {
 //
 // Inquires about state changes
 //
-var mongosInquirer = function(self, state) {    
+var mongosInquirer = function(self, state) {
   return function() {
     if(state.state == DESTROYED) return
     if(state.state == CONNECTED) state.retriesLeft = state.reconnectTries;
@@ -754,15 +754,16 @@ var mongosInquirer = function(self, state) {
 
     // Log the information
     if(state.logger.isDebug()) state.logger.debug(f('mongos ha proceess running'));
-    
+
     // Let's query any disconnected proxies
     var disconnectedServers = state.mongosState.disconnectedServers();
+    console.log("-------------------------------------------------- mongosInquirer :: " + disconnectedServers.length)
     if(disconnectedServers.length == 0) return setTimeout(mongosInquirer(self, state), state.haInterval);
-    
+
     // Count of connections waiting to be connected
     var connectionCount = disconnectedServers.length;
     if(state.logger.isDebug()) state.logger.debug(f('mongos ha proceess found %d disconnected proxies', connectionCount));
-    
+
     // Let's attempt to reconnect
     while(disconnectedServers.length > 0) {
       var server = disconnectedServers.shift();
@@ -772,7 +773,7 @@ var mongosInquirer = function(self, state) {
       ['error', 'close', 'timeout', 'connect', 'message', 'parseError'].forEach(function(e) {
         server.removeAllListeners(e);
       });
-  
+
       // Set up the event handlers
       server.once('error', errorHandlerTemp(self, state, server));
       server.once('close', errorHandlerTemp(self, state, server));
@@ -783,7 +784,7 @@ var mongosInquirer = function(self, state) {
     }
 
     // Let's keep monitoring but wait for possible timeout to happen
-    return setTimeout(mongosInquirer(self, state), state.options.connectionTimeout + state.haInterval);      
+    return setTimeout(mongosInquirer(self, state), state.options.connectionTimeout + state.haInterval);
   }
 }
 
@@ -816,7 +817,7 @@ var errorHandler = function(self, state) {
     }
 
     // Signal server left
-    self.emit('left', 'mongos', server);    
+    self.emit('left', 'mongos', server);
     if(state.emitError) self.emit('error', err, server);
   }
 }
@@ -883,7 +884,7 @@ var connectHandler = function(self, state, e) {
       }
 
       // Full setup
-      if(state.mongosState.disconnectedServers().length == 0 && 
+      if(state.mongosState.disconnectedServers().length == 0 &&
         state.mongosState.connectedServers().length > 0 &&
         !state.fullsetup) {
         state.fullsetup = true;
@@ -891,7 +892,7 @@ var connectHandler = function(self, state, e) {
       }
 
       // all connected
-      if(state.mongosState.disconnectedServers().length == 0 && 
+      if(state.mongosState.disconnectedServers().length == 0 &&
         state.mongosState.connectedServers().length == state.seedlist.length &&
         !state.all) {
         state.all = true;
@@ -917,7 +918,7 @@ var connectHandler = function(self, state, e) {
     var count = state.credentials.length;
     // Apply the credentials
     for(var i = 0; i < state.credentials.length; i++) {
-      server.auth.apply(server, state.credentials[i].concat([function(err, r) {        
+      server.auth.apply(server, state.credentials[i].concat([function(err, r) {
         count = count - 1;
         if(count == 0) processNewServer(server);
       }]));
@@ -986,7 +987,7 @@ var executeWriteOperation = function(state, op, ns, ops, options, callback) {
   // Ensure we have no options
   options = options || {};
   try {
-    // Get a primary   
+    // Get a primary
     server = state.mongosState.pickServer();
   } catch(err) {
     return callback(err);
@@ -995,7 +996,7 @@ var executeWriteOperation = function(state, op, ns, ops, options, callback) {
   // No server returned we had an error
   if(server == null) return callback(new MongoError("no mongos found"));
   // Execute the command
-  server[op](ns, ops, options, callback);          
+  server[op](ns, ops, options, callback);
 }
 
 /**
