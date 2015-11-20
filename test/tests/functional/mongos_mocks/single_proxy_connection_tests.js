@@ -70,7 +70,7 @@ exports['Should correctly timeout mongos socket operation and then correctly re-
               stopRespondingPrimary = false;
               // Timeout after 1500 ms
               yield timeoutPromise(1500);
-              continue;
+              request.connection.destroy();
             }
           } else if(doc.ismaster && currentStep == 2) {
             request.reply(serverIsMaster[0]);
