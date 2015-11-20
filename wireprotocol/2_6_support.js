@@ -181,7 +181,7 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
 
   // If we have explain, return a single document and close cursor
   if(cmd.explain) {
-    numberToReturn = -1;
+    numberToReturn = 0;
     usesSpecialModifier = true;
     findCmd['$explain'] = true;
   }
@@ -229,7 +229,7 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
   if(typeof cmd.oplogReplay == 'boolean') {
     query.oplogReplay = cmd.oplogReplay;
   }
-  
+
   if(typeof cmd.noCursorTimeout == 'boolean') {
     query.noCursorTimeout = cmd.noCursorTimeout;
   }
@@ -237,11 +237,11 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
   if(typeof cmd.awaitData == 'boolean') {
     query.awaitData = cmd.awaitData;
   }
-  
+
   if(typeof cmd.exhaust == 'boolean') {
     query.exhaust = cmd.exhaust;
   }
-  
+
   if(typeof cmd.partial == 'boolean') {
     query.partial = cmd.partial;
   }
@@ -290,8 +290,8 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
   if(cmd.readConcern) delete cmd['readConcern'];
 
   // We have a Mongos topology, check if we need to add a readPreference
-  if(topology.type == 'mongos' 
-    && readPreference 
+  if(topology.type == 'mongos'
+    && readPreference
     && readPreference.preference != 'primary') {
     finalCmd = {
       '$query': finalCmd,
