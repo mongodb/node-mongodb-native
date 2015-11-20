@@ -1,3 +1,8 @@
+1.2.24 11-20-2015
+-----------------
+- Fix Automattic/mongoose#3481; flush callbacks on error, (Issue #57, https://github.com/vkarpov15).
+- $explain query for wire protocol 2.6 and 2.4 does not set number of returned documents to -1 but to 0.
+
 1.2.23 11-16-2015
 -----------------
 - ismaster runs against admin.$cmd instead of system.$cmd.
