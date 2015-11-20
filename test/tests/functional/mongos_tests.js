@@ -28,7 +28,7 @@ exports['Should correctly connect using mongos object'] = {
         test.equal(true, _server.isConnected());
         _server.destroy();
         test.equal(false, _server.isConnected());
-        test.done();        
+        test.done();
       }, 100);
     })
 
@@ -64,7 +64,7 @@ exports['Should correctly execute command using mongos'] = {
         _server.destroy();
         // Finish the test
         test.done();
-      });      
+      });
     });
 
     // Start connection
@@ -193,9 +193,12 @@ exports['Should correctly remove mongos and re-add it'] = {
         left = left + 1;
       });
 
+      var done = false;
+
       var interval = setInterval(function() {
         // We are done
-        if(joined == 2 && left == 2) {
+        if(joined == 2 && left == 2 && !done) {
+          done = true;
           clearInterval(interval);
           server.destroy();
           return test.done();
@@ -223,7 +226,7 @@ exports['Should correctly remove mongos and re-add it'] = {
 
                 setTimeout(function() {
                   // Shutdown the second secondary
-                  configuration.manager.add(serverDetails, function(err, result) {});          
+                  configuration.manager.add(serverDetails, function(err, result) {});
                 }, 2000)
               });
             });

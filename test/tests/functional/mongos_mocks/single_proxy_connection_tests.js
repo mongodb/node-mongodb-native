@@ -89,7 +89,7 @@ exports['Should correctly timeout mongos socket operation and then correctly re-
 
     // Attempt to connect
     var _server = new Mongos([
-        { host: 'localhost', port: 52000 },      
+        { host: 'localhost', port: 52000 },
       ], {
       connectionTimeout: 3000,
       socketTimeout: 1000,
@@ -97,17 +97,21 @@ exports['Should correctly timeout mongos socket operation and then correctly re-
       size: 1
     });
 
+    // Are we done
+    var done = false;
+
     // Add event listeners
     _server.once('connect', function() {
       // Run an interval
       var intervalId = setInterval(function() {
         _server.insert('test.test', [{created:new Date()}], function(err, r) {
-          if(r) {
+          if(r && !done) {
+            done = true;
             clearInterval(intervalId);
             test.equal(52000, r.connection.port);
-            server.destroy();
             running = false;
-            test.done();              
+            server.destroy();
+            test.done();
           }
         });
       }, 500);
