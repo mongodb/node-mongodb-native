@@ -1,3 +1,12 @@
+2.0.49 11-20-2015
+-----------------
+* Updated mongodb-core to 1.2.24 with several fixes.
+  * Fix Automattic/mongoose#3481; flush callbacks on error, (Issue #57, https://github.com/vkarpov15).
+  * $explain query for wire protocol 2.6 and 2.4 does not set number of returned documents to -1 but to 0.
+  * ismaster runs against admin.$cmd instead of system.$cmd.
+  * Fixes to handle getMore command errors for MongoDB 3.2
+  * Allows the process to properly close upon a Db.close() call on the replica set by shutting down the haTimer and closing arbiter connections.
+
 2.0.48 11-07-2015
 -----------------
 * GridFS no longer performs any deletes when writing a brand new file that does not have any previous <db>.fs.chunks or <db>.fs.files documents.

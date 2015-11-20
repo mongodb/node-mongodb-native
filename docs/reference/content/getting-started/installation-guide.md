@@ -31,6 +31,20 @@ The MongoDB driver depends on several other packages. These are.
 * kerberos
 * node-gyp
 
+The only native extension is the `kerberos` extension. This is a `peerDependency` for the `mongodb` module. This means that if you need to use `kerberos` you will need to add the `kerberos` module to your modules dependencies.
+
+If you have **NPM 2.0** or earlier NPM will attempt to download and build the `kerberos` module if you do not have it defined as a dependency in your module. However from **NPM 3.0** onwards NPM will not attempt to build the `kerberos` module but instead print a warning in your install log that looks something like the following.
+
+```
+npm WARN EPEERINVALID mongodb-core@1.2.21 requires a peer of kerberos@~0.0 but none was installed.
+```
+
+This tells you that the driver could not resolve it's `peerDependency`. However don't worry. You only need the `kerberos` module if intend to use `kerberos`. In the case you need to you can add it to your package.json by doing the following for the case of the line above.
+
+```
+npm install kerberos@0.0.x
+```
+
 The `kerberos` package is a C++ extension that requires a build environment to be installed on your system. You must be able to build node.js itself to be able to compile and install the `kerberos` module. Furthermore the `kerberos` module requires the MIT Kerberos package to correctly compile on UNIX operating systems. Consult your UNIX operation system package manager what libraries to install.
 
 {{% note class="important" %}}
