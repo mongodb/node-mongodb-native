@@ -493,22 +493,22 @@ exports['Read preferences parsing'] = {
     test.equal(true, object.server_options.slave_ok);
 
     object = parse("mongodb://localhost/db?readPreference=primary");
-    test.equal("primary", object.db_options.read_preference);
+    test.equal("primary", object.db_options.readPreference);
 
     object = parse("mongodb://localhost/db?readPreference=primaryPreferred");
-    test.equal("primaryPreferred", object.db_options.read_preference);
+    test.equal("primaryPreferred", object.db_options.readPreference);
 
     object = parse("mongodb://localhost/db?readPreference=secondary");
-    test.equal("secondary", object.db_options.read_preference);
+    test.equal("secondary", object.db_options.readPreference);
 
     object = parse("mongodb://localhost/db?readPreference=secondaryPreferred");
-    test.equal("secondaryPreferred", object.db_options.read_preference);
+    test.equal("secondaryPreferred", object.db_options.readPreference);
 
     object = parse("mongodb://localhost/db?readPreference=nearest");
-    test.equal("nearest", object.db_options.read_preference);
+    test.equal("nearest", object.db_options.readPreference);
 
     object = parse("mongodb://localhost/db");
-    test.equal("primary", object.db_options.read_preference);
+    test.equal("primary", object.db_options.readPreference);
 
     test.throws(function() {parse("mongodb://localhost/db?readPreference=blah"), "readPreference must be either primary/primaryPreferred/secondary/secondaryPreferred/nearest"});
     test.done();
