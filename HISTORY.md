@@ -1,4 +1,4 @@
-1.2.25
+1.2.25 11-23-2015
 -----------------
 - Correctly error out when passed a seedlist of non-valid server members.
 
