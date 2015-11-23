@@ -8,6 +8,10 @@
 * Return destination in GridStore pipe function.
 * NODE-606 better error handling on destroyed topology for db.js methods.
 
+2.0.50
+-----------------
+* Updated mongodb-core to 1.2.25.
+
 2.0.49 11-20-2015
 -----------------
 * Updated mongodb-core to 1.2.24 with several fixes.
