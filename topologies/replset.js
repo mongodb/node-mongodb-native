@@ -335,7 +335,7 @@ ReplSet.prototype.getServer = function(options) {
  * @param {object} [options.batchSize=0] Batchsize for the operation
  * @param {array} [options.documents=[]] Initial documents list for cursor
  * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
- * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized. 
+ * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {opResultCallback} callback A callback function
  */
@@ -388,7 +388,7 @@ var executeWriteOperation = function(self, op, ns, ops, options, callback) {
  * @param {object} cmd The command hash
  * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
  * @param {Connection} [options.connection] Specify connection object to execute command against
- * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized. 
+ * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {opResultCallback} callback A callback function
  */
@@ -462,7 +462,7 @@ ReplSet.prototype.command = function(ns, cmd, options, callback) {
  * @param {array} ops An array of removes
  * @param {boolean} [options.ordered=true] Execute in order or out of order
  * @param {object} [options.writeConcern={}] Write concern for the operation
- * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized. 
+ * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {opResultCallback} callback A callback function
  */
@@ -486,7 +486,7 @@ ReplSet.prototype.remove = function(ns, ops, options, callback) {
  * @param {array} ops An array of documents to insert
  * @param {boolean} [options.ordered=true] Execute in order or out of order
  * @param {object} [options.writeConcern={}] Write concern for the operation
- * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized. 
+ * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {opResultCallback} callback A callback function
  */
@@ -510,7 +510,7 @@ ReplSet.prototype.insert = function(ns, ops, options, callback) {
  * @param {array} ops An array of updates
  * @param {boolean} [options.ordered=true] Execute in order or out of order
  * @param {object} [options.writeConcern={}] Write concern for the operation
- * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized. 
+ * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {opResultCallback} callback A callback function
  */
@@ -662,10 +662,10 @@ ReplSet.prototype.connect = function(_options) {
     // Ensure we schedule the opening of new socket
     // on separate ticks of the event loop
     var execute = function(_server) {
-      // Attempt to connect    
+      // Attempt to connect
       process.nextTick(function() {
         _server.connect();
-      });      
+      });
     }
 
     execute(server);
@@ -723,7 +723,7 @@ ReplSet.prototype.destroy = function(emitClose) {
   events.forEach(function(e) {
     self.removeAllListeners(e);
   });
-  
+
   clearTimeout(self.s.haTimer);
 }
 
@@ -949,10 +949,10 @@ var replicasetInquirer = function(self, state, norepeat) {
       // Ensure we schedule the opening of new socket
       // on separate ticks of the event loop
       var execute = function(_server) {
-        // Attempt to connect    
+        // Attempt to connect
         process.nextTick(function() {
           _server.connect();
-        });      
+        });
       }
 
       execute(server);
@@ -1001,16 +1001,16 @@ var replicasetInquirer = function(self, state, norepeat) {
         server.command('admin.$cmd', {ismaster:true}, function(err, r) {
           // Clear out the timeoutServer
           clearTimeout(timeoutId);
-          
+
           // If the state was destroyed
           if(state.replState.state == DESTROYED) return;
-          
+
           // Count down the number of servers left
           serversLeft = serversLeft - 1;
-          
+
           // If we have an error but still outstanding server request return
           if(err && serversLeft > 0) return;
-          
+
           // We had an error and have no more servers to inspect, schedule a new check
           if(err && serversLeft == 0) {
             self.emit('ha', 'end', {norepeat: norepeat, id: localHaId, state: state.replState ? state.replState.toJSON() : {}});
@@ -1031,12 +1031,12 @@ var replicasetInquirer = function(self, state, norepeat) {
           // Update the replicaset state
           state.replState.update(ismaster, server);
 
-          // 
+          //
           // Process hosts list from ismaster under two conditions
           // 1. Ismaster result is from primary
           // 2. There is no primary and the ismaster result is from a non-primary
-          if(err == null 
-            && (ismaster.ismaster || (!state.primary)) 
+          if(err == null
+            && (ismaster.ismaster || (!state.primary))
             && Array.isArray(ismaster.hosts)) {
             // Hosts to process
             var hosts = ismaster.hosts;
@@ -1187,8 +1187,8 @@ var connectHandler = function(self, state) {
     var processNewServer = function() {
       // Discover any additional servers
       var ismaster = server.lastIsMaster();
-      
-      // Are we an arbiter, restrict number of connections to 
+
+      // Are we an arbiter, restrict number of connections to
       // one single connection
       if(ismaster.arbiterOnly) {
         server.capConnections(1);
@@ -1205,7 +1205,17 @@ var connectHandler = function(self, state) {
       delete state.connectingServers[server.name];
       // Update the replicaset state, destroy if not added
       if(!state.replState.update(ismaster, server)) {
-        return server.destroy();
+        // Destroy the server instance
+        server.destroy();
+        // console.log("############################### FAILED")
+        // No more candiate servers
+        if(state.state = CONNECTING && state.initialConnectionServers.length == 0
+          && state.replState.primary == null && state.replState.secondaries.length == 0) {
+            // console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@ FUCK")
+            return self.emit('error', new MongoError("no replicaset members found in seedlist"));
+        }
+
+        return;
       }
 
       // Add the server handling code
@@ -1313,7 +1323,7 @@ var connectToServer = function(self, state, host, port, options) {
   // Share the auth store
   opts.authProviders = state.authProviders;
   opts.emitError = true;
-  
+
   // Do we have an arbiter set the poolSize to 1
   if(options.arbiter) {
     opts.size = 1;
@@ -1328,7 +1338,7 @@ var connectToServer = function(self, state, host, port, options) {
   server.once('close', errorHandlerTemp(self, state, 'close'));
   server.once('timeout', errorHandlerTemp(self, state, 'timeout'));
   server.once('connect', connectHandler(self, state));
-  
+
   // Attempt to connect
   process.nextTick(function() {
     server.connect();
