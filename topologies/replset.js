@@ -1207,11 +1207,10 @@ var connectHandler = function(self, state) {
       if(!state.replState.update(ismaster, server)) {
         // Destroy the server instance
         server.destroy();
-        // console.log("############################### FAILED")
+
         // No more candiate servers
         if(state.state = CONNECTING && state.initialConnectionServers.length == 0
           && state.replState.primary == null && state.replState.secondaries.length == 0) {
-            // console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@ FUCK")
             return self.emit('error', new MongoError("no replicaset members found in seedlist"));
         }
 
