@@ -1,6 +1,6 @@
 {
   "name": "mongodb",
-  "version": "2.0.49",
+  "version": "2.0.50",
   "description": "MongoDB legacy driver emulation layer on top of mongodb-core",
   "main": "index.js",
   "repository": {
@@ -13,7 +13,7 @@
     "legacy"
   ],
   "dependencies": {
-      "mongodb-core": "1.2.24"
+      "mongodb-core": "1.2.25"
     , "readable-stream": "1.0.31"
     , "es6-promise": "2.1.1"
   },
