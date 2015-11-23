@@ -1,3 +1,7 @@
+1.2.25
+-----------------
+- Correctly error out when passed a seedlist of non-valid server members.
+
 1.2.24 11-20-2015
 -----------------
 - Fix Automattic/mongoose#3481; flush callbacks on error, (Issue #57, https://github.com/vkarpov15).
