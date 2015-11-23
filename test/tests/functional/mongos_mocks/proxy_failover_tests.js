@@ -380,8 +380,10 @@ exports['Should correctly bring back both proxies and use it'] = {
     server.once('fullsetup', function(_server) {
       var intervalId = setInterval(function() {
         server.insert('test.test', [{created:new Date()}], function(err, r) {
+          if(intervalId == null) return;
           // Clear out the interval
           clearInterval(intervalId);
+          intervalId = null;
           // Let the proxies come back
           if(currentStep == 0) currentStep = currentStep + 1;
 
@@ -392,6 +394,7 @@ exports['Should correctly bring back both proxies and use it'] = {
           var intervalId2 = setInterval(function() {
             // Perform inserts
             server.insert('test.test', [{created:new Date()}], function(err, r) {
+              if(intervalId2 == null) return;
               if(r) {
                 proxies[r.connection.port] = true
               }
@@ -399,7 +402,8 @@ exports['Should correctly bring back both proxies and use it'] = {
               // Do we have both proxies answering
               if(Object.keys(proxies).length == 2) {
                 clearInterval(intervalId2);
-
+                intervalId2 = null;
+                
                 running = false;
                 server.destroy();
                 mongos1.destroy();
