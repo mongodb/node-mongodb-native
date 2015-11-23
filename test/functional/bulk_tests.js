@@ -930,7 +930,7 @@ exports['Should correctly execute unordered batch using w:0'] = {
  *******************************************************************/
 // exports['Should fail with journal write concern due to --nojournal ordered'] = {
 //   metadata: { requires: { topology: 'single', mongodb: '>2.5.4' }},
-
+//
 //   // The actual test we wish to run
 //   test: function(configuration, test) {
 //     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -942,15 +942,13 @@ exports['Should correctly execute unordered batch using w:0'] = {
 //       // Add some operations to be executed in order
 //       batch.insert({a:1});
 //       batch.insert({a:2});
-
+//
 //       // Execute the operations
 //       batch.execute({j: true}, function(err, result) {
-//         console.dir(err)
-//         console.dir(result)
 //         test.ok(err != null);
 //         test.ok(err.code != null);
 //         test.ok(err.errmsg != null);
-
+//
 //         // Finish up test
 //         db.close();
 //         test.done();
@@ -995,7 +993,7 @@ exports['Should fail with w:2 and wtimeout write concern due single mongod insta
  *******************************************************************/
 // exports['Should fail with journal write concern due to --nojournal unordered'] = {
 //   metadata: { requires: { topology: 'single', mongodb: '>2.5.4' }},
-
+//
 //   // The actual test we wish to run
 //   test: function(configuration, test) {
 //     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
@@ -1007,13 +1005,13 @@ exports['Should fail with w:2 and wtimeout write concern due single mongod insta
 //       // Add some operations to be executed in order
 //       batch.insert({a:1});
 //       batch.insert({a:2});
-
+//
 //       // Execute the operations
 //       batch.execute({j: true}, function(err, result) {
 //         test.ok(err != null);
 //         test.ok(err.code != null);
 //         test.ok(err.errmsg != null);
-
+//
 //         // Finish up test
 //         db.close();
 //         test.done();
