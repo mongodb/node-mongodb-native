@@ -4,87 +4,14 @@ var fs = require('fs')
   , f = require('util').format;
 
 var restartAndDone = function(configuration, test) {
-  // configuration.manager.stop({purge:false, kill:true, signal:9}, function() {
-    configuration.manager.restart(function() {
-      test.done();      
-    });
-  // });
+  configuration.manager.restart().then(function() {
+    test.done();
+  });
 }
-
-// exports.beforeTests = function(configuration, callback) {
-//   configuration.restart({purge:false, kill:true}, function() {
-//     callback();
-//   });
-// }
-
-// // ../topology_test_descriptions/rs/new_primary.json
-// exports['New primary'] = {
-//   metadata: {
-//     requires: {
-//       topology: "replicaset"
-//     }
-//   },
-
-//   test: function(configuration, test) {
-//     var Server = configuration.require.Server
-//       , ServerManager = require('mongodb-tools').ServerManager
-//       , ReplSet = configuration.require.ReplSet
-//       , manager = configuration.manager;
-
-//     // State
-//     var state = {'primary':[], 'secondary': [], 'arbiter': [], 'passive': []};
-//     // Get the primary server
-//     manager.getServerManagerByType('primary', function(err, primaryServerManager) {
-//       test.equal(null, err);
-
-//       var config = [{
-//           host: primaryServerManager.host
-//         , port: primaryServerManager.port
-//       }];
-
-//       var options = {
-//         setName: configuration.setName
-//       };
-
-//       // Attempt to connect
-//       var server = new ReplSet(config, options);
-//       server.on('fullsetup', function(_server) {
-//         var removedServer = null;
-
-//         // Let's listen to changes
-//         server.on('left', function(_t, _server) {
-//           if(_t == 'primary') {
-//             test.equal(f('%s:%s', primaryServerManager.host, primaryServerManager.port), _server.name);
-//           }
-//         });
-
-//         server.on('joined', function(_t, _server) {
-//           if(_t == 'primary') {
-//             test.ok(server.state.primary != null);
-//             test.equal(3, server.state.secondaries.length);
-//             test.equal(1, server.state.arbiters.length);
-//             test.equal(1, server.state.passives.length);
-//             server.destroy();
-//             restartAndDone(configuration, test);
-//           }
-//         });
-
-//         manager.stepDown(function(err) {});
-//       });
-
-//       // Start connection
-//       server.connect();
-//     });
-//   }
-// }
 
 // ../topology_test_descriptions/rs/discover_arbiters.json
 exports['Discover arbiters'] = {
-  metadata: {
-    requires: {
-      topology: "replicaset"
-    }
-  },
+  metadata: { requires: { topology: "replicaset" } },
 
   test: function(configuration, test) {
     var Server = configuration.require.Server
@@ -92,13 +19,11 @@ exports['Discover arbiters'] = {
       , manager = configuration.manager;
 
     // Get the primary server
-    manager.getServerManagerByType('primary', function(err, serverManager) {
-      test.equal(null, err);
-
+    manager.primary().then(function(manager) {
       // Attempt to connect
       var server = new ReplSet([{
-          host: serverManager.host
-        , port: serverManager.port
+          host: manager.host
+        , port: manager.port
       }], {
         setName: configuration.setName
       });
@@ -118,11 +43,7 @@ exports['Discover arbiters'] = {
 
 // ../topology_test_descriptions/rs/discover_passives.json
 exports['Discover passives'] = {
-  metadata: {
-    requires: {
-      topology: "replicaset"
-    }
-  },
+  metadata: { requires: { topology: "replicaset" } },
 
   test: function(configuration, test) {
     var Server = configuration.require.Server
@@ -130,13 +51,11 @@ exports['Discover passives'] = {
       , manager = configuration.manager;
 
     // Get the primary server
-    manager.getServerManagerByType('primary', function(err, serverManager) {
-      test.equal(null, err);
-
+    manager.primary().then(function(manager) {
       // Attempt to connect
       var server = new ReplSet([{
-          host: serverManager.host
-        , port: serverManager.port
+          host: manager.host
+        , port: manager.port
       }], {
         setName: configuration.setName
       });
@@ -144,7 +63,8 @@ exports['Discover passives'] = {
       server.on('joined', function(_type, _server) {
         if(_type == 'passive') {
           server.destroy();
-          restartAndDone(configuration, test);        }
+          restartAndDone(configuration, test);
+        }
       });
 
       // Start connection
@@ -155,11 +75,7 @@ exports['Discover passives'] = {
 
 // ../topology_test_descriptions/rs/discover_primary.json
 exports['Discover primary'] = {
-  metadata: {
-    requires: {
-      topology: "replicaset"
-    }
-  },
+  metadata: { requires: { topology: "replicaset" } },
 
   test: function(configuration, test) {
     var Server = configuration.require.Server
@@ -167,13 +83,11 @@ exports['Discover primary'] = {
       , manager = configuration.manager;
 
     // Get the primary server
-    manager.getServerManagerByType('primary', function(err, serverManager) {
-      test.equal(null, err);
-
+    manager.primary().then(function(manager) {
       // Attempt to connect
       var server = new ReplSet([{
-          host: serverManager.host
-        , port: serverManager.port
+          host: manager.host
+        , port: manager.port
       }], {
         setName: configuration.setName
       });
@@ -193,11 +107,7 @@ exports['Discover primary'] = {
 
 // ../topology_test_descriptions/rs/discover_secondary.json
 exports['Discover secondaries'] = {
-  metadata: {
-    requires: {
-      topology: "replicaset"
-    }
-  },
+  metadata: { requires: { topology: "replicaset" } },
 
   test: function(configuration, test) {
     var Server = configuration.require.Server
@@ -205,13 +115,11 @@ exports['Discover secondaries'] = {
       , manager = configuration.manager;
 
     // Get the primary server
-    manager.getServerManagerByType('primary', function(err, serverManager) {
-      test.equal(null, err);
-
+    manager.primary().then(function(manager) {
       // Attempt to connect
       var server = new ReplSet([{
-          host: serverManager.host
-        , port: serverManager.port
+          host: manager.host
+        , port: manager.port
       }], {
         setName: configuration.setName
       });
@@ -233,11 +141,7 @@ exports['Discover secondaries'] = {
 
 // ../topology_test_descriptions/rs/discovery.json
 exports['Replica set discovery'] = {
-  metadata: {
-    requires: {
-      topology: "replicaset"
-    }
-  },
+  metadata: { requires: { topology: "replicaset" } },
 
   test: function(configuration, test) {
     var Server = configuration.require.Server
@@ -247,13 +151,11 @@ exports['Replica set discovery'] = {
     // State
     var state = {'primary':1, 'secondary': 2, 'arbiter': 1, 'passive': 1};
     // Get the primary server
-    manager.getServerManagerByType('primary', function(err, serverManager) {
-      test.equal(null, err);
-
+    manager.primary().then(function(manager) {
       // Attempt to connect
       var server = new ReplSet([{
-          host: serverManager.host
-        , port: serverManager.port
+          host: manager.host
+        , port: manager.port
       }], {
         setName: configuration.setName
       });
@@ -276,27 +178,6 @@ exports['Replica set discovery'] = {
   }
 }
 
-var waitForPrimary = function(ReplSet, count, config, options, callback) {
-  if(count == 0) return callback(new Error("could not connect"));
-  // Attempt to connect
-  var server = new ReplSet(config, options);
-  server.on('error', function(err) {
-    server.destroy();
-
-    setTimeout(function() {
-      waitForPrimary(ReplSet, count - 1, config, options, callback);
-    }, 1000);
-  });
-
-  server.on('fullsetup', function(_server) {
-    server.destroy();
-    callback();
-  });
-
-  // Start connection
-  server.connect();
-}
-
 // ../topology_test_descriptions/rs/ghost_discovery.json
 exports['Ghost discovered/Member brought up as standalone'] = {
   metadata: {
@@ -307,36 +188,32 @@ exports['Ghost discovered/Member brought up as standalone'] = {
 
   test: function(configuration, test) {
     var Server = configuration.require.Server
-      , ServerManager = require('mongodb-tools').ServerManager
+      , ServerManager = require('mongodb-topology-manager').Server
       , ReplSet = configuration.require.ReplSet
       , manager = configuration.manager;
 
     // State
     var state = {'primary':1, 'secondary': 1, 'arbiter': 1, 'passive': 1};
     // Get the primary server
-    manager.getServerManagerByType('primary', function(err, primaryServerManager) {
-      test.equal(null, err);
-
+    manager.primary().then(function(primaryManager) {
       // Get the secondary server
-      manager.getServerManagerByType('secondary', function(err, serverManager) {
-        test.equal(null, err);
+      manager.secondaries().then(function(managers) {
+        var serverManager = managers[0];
 
         // Stop the secondary
-        serverManager.stop(function(err, r) {
-
+        serverManager.stop().then(function() {
           // Start a new server manager
-          var nonReplSetMember = new ServerManager({
-              host: serverManager.host
-            , port: serverManager.port
-            , dbpath: serverManager.dbpath
-            , logpath: serverManager.logpath
+          var nonReplSetMember = new ServerManager('mongod', {
+            bind_ip: serverManager.host,
+            port: serverManager.port,
+            dbpath: serverManager.options.dbpath
           });
 
           // Start a non replset member
-          nonReplSetMember.start(function() {
+          nonReplSetMember.start().then(function() {
             var config = [{
-                host: primaryServerManager.host
-              , port: primaryServerManager.port
+                host: primaryManager.host
+              , port: primaryManager.port
             }];
 
             var options = {
@@ -344,8 +221,7 @@ exports['Ghost discovered/Member brought up as standalone'] = {
             };
 
             // Wait for primary
-            waitForPrimary(ReplSet, 30, config, options, function(err, r) {
-              test.equal(null, err);
+            manager.waitForPrimary().then(function() {
 
               // Attempt to connect
               var server = new ReplSet(config, options);
@@ -359,9 +235,9 @@ exports['Ghost discovered/Member brought up as standalone'] = {
                   server.destroy();
 
                   // Stop the normal server
-                  nonReplSetMember.stop(function() {
+                  nonReplSetMember.stop().then(function() {
                     // Restart the secondary server
-                    serverManager.start(function() {
+                    serverManager.start().then(function() {
                       restartAndDone(configuration, test);
                     });
                   });
@@ -394,13 +270,12 @@ exports['Host list differs from seeds'] = {
     // State
     var state = {'primary':1, 'secondary': 2, 'arbiter': 1, 'passive': 1};
     // Get the primary server
-    manager.getServerManagerByType('primary', function(err, serverManager) {
-      test.equal(null, err);
+    manager.primary().then(function(manager) {
 
       // Attempt to connect
       var server = new ReplSet([{
-          host: serverManager.host
-        , port: serverManager.port
+          host: manager.host
+        , port: manager.port
       }, {
           host: 'localhost'
         , port: 41000
@@ -436,18 +311,16 @@ exports['Member removed by reconfig'] = {
 
   test: function(configuration, test) {
     var Server = configuration.require.Server
-      , ServerManager = require('mongodb-tools').ServerManager
       , ReplSet = configuration.require.ReplSet
       , manager = configuration.manager;
 
     // State
     var state = {'primary':[], 'secondary': [], 'arbiter': [], 'passive': []};
     // Get the primary server
-    manager.getServerManagerByType('primary', function(err, primaryServerManager) {
-      test.equal(null, err);
-
-      manager.getServerManagerByType('secondary', function(err, secondaryServerManager) {
-        test.equal(null, err);
+    manager.primary().then(function(primaryServerManager) {
+      // Get the secondary server
+      manager.secondaries().then(function(managers) {
+        var secondaryServerManager = managers[0];
 
         var config = [{
             host: primaryServerManager.host
@@ -482,22 +355,22 @@ exports['Member removed by reconfig'] = {
               test.equal(1, server.state.passives.length);
               server.destroy();
 
-              // Add back the secondary
-              manager.add(removedServer, function(err) {
-                test.equal(null, err);
+              // Add a new member to the set
+              manager.addMember(secondaryServerManager, {
+                returnImmediately: false, force:false
+              }).then(function(x) {
                 restartAndDone(configuration, test);
               });
             }
           });
 
-          // Get the secondary server
-          manager.remove('secondary', function(err, _removedServer) {
-            test.equal(null, err);
-            removedServer = _removedServer;
+          // Remove the secondary server
+          manager.removeMember(secondaryServerManager, {
+            returnImmediately: false, force: false, skipWait:true
+          }).then(function() {
 
-            // Force new election
-            manager.stepDown({force:true}, function(err) {
-            });
+            // Step down primary and block until we have a new primary
+            manager.stepDownPrimary(false, {stepDownSecs: 10}).then(function() {});
           });
         });
 
@@ -518,27 +391,25 @@ exports['Primary becomes standalone'] = {
 
   test: function(configuration, test) {
     var Server = configuration.require.Server
-      , ServerManager = require('mongodb-tools').ServerManager
+      , ServerManager = require('mongodb-topology-manager').Server
       , ReplSet = configuration.require.ReplSet
       , manager = configuration.manager;
 
     // State
     var joined = {'primary':[], 'secondary': [], 'arbiter': [], 'passive': []};
     var left = {'primary':[], 'secondary': [], 'arbiter': [], 'passive': []};
-    // Get the primary server
-    manager.getServerManagerByType('primary', function(err, primaryServerManager) {
-      test.equal(null, err);
 
+    // Get the primary server
+    manager.primary().then(function(primaryServerManager) {
       // Get the secondary server
-      manager.getServerManagerByType('secondary', function(err, serverManager) {
-        test.equal(null, err);
+      manager.secondaries().then(function(managers) {
+        var serverManager = managers[0];
 
         // Start a new server manager
-        var nonReplSetMember = new ServerManager({
-            host: primaryServerManager.host
-          , port: primaryServerManager.port
-          , dbpath: primaryServerManager.dbpath
-          , logpath: primaryServerManager.logpath
+        var nonReplSetMember = new ServerManager('mongod', {
+          bind_ip: primaryServerManager.host,
+          port: primaryServerManager.port,
+          dbpath: primaryServerManager.options.dbpath
         });
 
         var config = [{
@@ -567,25 +438,23 @@ exports['Primary becomes standalone'] = {
           });
 
           // Stop the primary
-          primaryServerManager.stop({signal: -9}, function(err, r) {
-
+          primaryServerManager.stop().then(function(r) {
             // Start a non replset member
-            nonReplSetMember.start(function() {
+            nonReplSetMember.start().then(function() {
 
-              // Wait for primary
-              waitForPrimary(ReplSet, 90, config, options, function(err, r) {
-                test.equal(null, err);
+              // Wait for Primary
+              manager.waitForPrimary().then(function(r) {
 
                 // Stop the normal server
-                nonReplSetMember.stop({signal: -9}, function() {
+                nonReplSetMember.stop().then(function() {
 
                   // Restart the primary server
-                  setTimeout(function() {
-                    primaryServerManager.start(function() {});
-                  }, 5000);
-                });
-              });
-            });
+                  primaryServerManager.start().then(function() {
+                    restartAndDone(configuration, test);
+                  }).catch(function(err) {console.log(err.stack)});
+                }).catch(function(err) {console.log(err.stack)});
+              }).catch(function(err) {console.log(err.stack)});
+            }).catch(function(err) {console.log(err.stack)});
           });
         });
 

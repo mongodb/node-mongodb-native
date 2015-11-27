@@ -18,6 +18,7 @@
     "bson": "~0.4.19"
   },
   "devDependencies": {
+    "mongodb-topology-manager": "1.0.x",
     "integra": "0.1.8",
     "optimist": "latest",
     "jsdoc": "3.3.0-alpha8",
