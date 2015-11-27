@@ -1402,7 +1402,9 @@ var closeHandler = function(self, state) {
     if(state.replState.state == DESTROYED) return;
     if(state.logger.isInfo()) state.logger.info(f('[%s] server %s closed', state.id, server.lastIsMaster() ? server.lastIsMaster().me : server.name));
     var found = addToListIfNotExist(state.disconnectedServers, server);
-    if(!found) self.emit('left', state.replState.remove(server), server);
+    if(!found) {
+      self.emit('left', state.replState.remove(server), server);
+    }
 
     // Fire off a detection of missing server using minHeartbeatFrequencyMS
     setTimeout(function() {
