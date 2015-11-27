@@ -14,9 +14,6 @@ var Runner = require('integra').Runner
   , TravisFilter = require('./filters/travis_filter')
   , FileFilter = require('integra').FileFilter
   , TestNameFilter = require('integra').TestNameFilter;
-  // , ServerManager = require('mongodb-tools').ServerManager
-  // , ReplSetManager = require('mongodb-tools').ReplSetManager
-  // , ShardingManager = require('mongodb-tools').ShardingManager;
 
 var detector = require('gleak')();
 var smokePlugin = require('../lib/tools/smoke_plugin.js');
@@ -27,7 +24,8 @@ var argv = require('optimist')
 
 // MongoDB Topology Manager
 var ServerManager = require('mongodb-topology-manager').Server,
-  ReplSetManager = require('mongodb-topology-manager').ReplSet;
+  ReplSetManager = require('mongodb-topology-manager').ReplSet,
+  ShardingManager = require('./test_topologies.js').Sharded;
 
 // Skipping parameters
 var startupOptions = {
@@ -359,52 +357,24 @@ if(argv.t == 'functional') {
     }
   }
 
-  // if(argv.e == 'replicaset') {
-  //   //
-  //   // Replicaset
-  //   config = {
-  //       host: 'localhost'
-  //     , port: 31000
-  //     , setName: 'rs'
-  //     , fork:null
-  //     , skipStart: startupOptions.skipStartup
-  //     , skipTermination: startupOptions.skipShutdown
-  //     , topology: function(self, _mongo) {
-  //       return new _mongo.ReplSet([{
-  //           host: 'localhost'
-  //         , port: 31000
-  //       }], { setName: 'rs' });
-  //     }
-  //     , manager: new ReplSetManager({
-  //         dbpath: path.join(path.resolve('db'))
-  //       , logpath: path.join(path.resolve('db'))
-  //       , tags: [{loc: "ny"}, {loc: "sf"}, {loc: "sf"}]
-  //       , arbiters: 1
-  //       , passives: 1
-  //     })
-  //   }
-  // } else if(argv.e == 'sharded') {
-  //   //
-  //   // Sharded
-  //   config = {
-  //       host: 'localhost'
-  //     , port: 50000
-  //     , skipStart: startupOptions.skipStartup
-  //     , skipTermination: startupOptions.skipShutdown
-  //     , topology: function(self, _mongo) {
-  //       return new _mongo.Mongos([{
-  //           host: 'localhost'
-  //         , port: 50000
-  //       }]);
-  //     }, manager: new ShardingManager({
-  //         dbpath: path.join(path.resolve('db'))
-  //       , logpath: path.join(path.resolve('db'))
-  //       , tags: [{loc: "ny"}, {loc: "sf"}, {loc: "sf"}]
-  //       , mongosStartPort: 50000
-  //       , replsetStartPort: 31000
-  //     })
-  //   }
-  // }
+  if(argv.e == 'sharded') {
+    //
+    // Sharded
+    config = {
+        host: 'localhost'
+      , port: 51000
+      , skipStart: startupOptions.skipStartup
+      , skipTermination: startupOptions.skipShutdown
+      , topology: function(self, _mongo) {
+        return new _mongo.Mongos([{
+            host: 'localhost'
+          , port: 51000
+        }]);
+      }, manager: new ShardingManager({
+
+      })
+    }
+  }
 
   // If we have a test we are filtering by
   if(argv.f) {

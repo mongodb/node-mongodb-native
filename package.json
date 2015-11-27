@@ -4,7 +4,7 @@
   "description": "Core MongoDB driver functionality, no bells and whistles and meant for integration not end applications",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test/runner.js -t functional"
   },
   "repository": {
     "type": "git",
@@ -24,9 +24,9 @@
     "jsdoc": "3.3.0-alpha8",
     "semver": "4.1.0",
     "gleak": "0.5.0",
-    "mongodb-tools": "~1.0",
     "mkdirp": "0.5.0",
     "rimraf": "2.2.6",
+    "es6-promise": "^3.0.2",
     "mongodb-version-manager": "^1.x",
     "co": "4.5.4"
   },
@@ -38,6 +38,5 @@
   "bugs": {
     "url": "https://github.com/christkv/mongodb-core/issues"
   },
-  "scripts": { "test" : "node test/runner.js -t functional" },
   "homepage": "https://github.com/christkv/mongodb-core"
 }
