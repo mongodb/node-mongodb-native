@@ -428,7 +428,7 @@ exports['Primary becomes standalone'] = {
             joined[_type].push(_server);
 
             if(_type == 'primary') {
-              _server.destroy();
+              server.destroy();
               restartAndDone(configuration, test);
             }
           });
@@ -451,10 +451,10 @@ exports['Primary becomes standalone'] = {
                   // Restart the primary server
                   primaryServerManager.start().then(function() {
                     restartAndDone(configuration, test);
-                  }).catch(function(err) {console.log(err.stack)});
-                }).catch(function(err) {console.log(err.stack)});
-              }).catch(function(err) {console.log(err.stack)});
-            }).catch(function(err) {console.log(err.stack)});
+                  });
+                });
+              });
+            });
           });
         });
 
