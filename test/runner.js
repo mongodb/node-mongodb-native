@@ -193,45 +193,45 @@ var runner = new Runner({
 });
 
 var testFiles = [
-  //   '/test/tests/functional/server_tests.js'
-  // , '/test/tests/functional/operations_tests.js'
-  // , '/test/tests/functional/basic_auth_tests.js'
-  // , '/test/tests/functional/extend_pick_strategy_tests.js'
-  // , '/test/tests/functional/mongos_tests.js'
-  // , '/test/tests/functional/extend_cursor_tests.js'
-  // , '/test/tests/functional/pool_tests.js'
-  // , '/test/tests/functional/connection_tests.js'
+    '/test/tests/functional/server_tests.js'
+  , '/test/tests/functional/operations_tests.js'
+  , '/test/tests/functional/basic_auth_tests.js'
+  , '/test/tests/functional/extend_pick_strategy_tests.js'
+  , '/test/tests/functional/mongos_tests.js'
+  , '/test/tests/functional/extend_cursor_tests.js'
+  , '/test/tests/functional/pool_tests.js'
+  , '/test/tests/functional/connection_tests.js'
   , '/test/tests/functional/rs_topology_tests.js'
-  // , '/test/tests/functional/rs_topology_state_tests.js'
-  // , '/test/tests/functional/single_topology_tests.js'
-  // , '/test/tests/functional/cursor_tests.js'
-  // , '/test/tests/functional/error_tests.js'
-  // , '/test/tests/functional/tailable_cursor_tests.js'
-  // , '/test/tests/functional/operation_example_tests.js'
-  // , '/test/tests/functional/replset_failover_tests.js'
-  // , '/test/tests/functional/undefined_tests.js'
+  , '/test/tests/functional/rs_topology_state_tests.js'
+  , '/test/tests/functional/single_topology_tests.js'
+  , '/test/tests/functional/cursor_tests.js'
+  , '/test/tests/functional/error_tests.js'
+  , '/test/tests/functional/tailable_cursor_tests.js'
+  , '/test/tests/functional/operation_example_tests.js'
+  , '/test/tests/functional/replset_failover_tests.js'
+  , '/test/tests/functional/undefined_tests.js'
 ]
 
 // Check if we support es6 generators
 try {
   eval("(function *(){})");
 
-  // // Replicaset Mock Tests
-  // testFiles.push('/test/tests/functional/rs_mocks/add_remove_tests.js');
-  // testFiles.push('/test/tests/functional/rs_mocks/connection_tests.js');
-  // testFiles.push('/test/tests/functional/rs_mocks/failover_tests.js');
-  // testFiles.push('/test/tests/functional/rs_mocks/monitoring_tests.js');
-  // testFiles.push('/test/tests/functional/rs_mocks/read_preferences_tests.js');
-  // testFiles.push('/test/tests/functional/rs_mocks/step_down_tests.js');
-  //
-  // // Mongos Mock Tests
-  // testFiles.push('/test/tests/functional/mongos_mocks/single_proxy_connection_tests.js');
-  // testFiles.push('/test/tests/functional/mongos_mocks/multiple_proxies_tests.js');
-  // testFiles.push('/test/tests/functional/mongos_mocks/proxy_failover_tests.js');
-  // testFiles.push('/test/tests/functional/mongos_mocks/proxy_read_preference_tests.js');
-  //
-  // // Single server Mock Tests
-  // testFiles.push('/test/tests/functional/single_mocks/timeout_tests.js');
+  // Replicaset Mock Tests
+  testFiles.push('/test/tests/functional/rs_mocks/add_remove_tests.js');
+  testFiles.push('/test/tests/functional/rs_mocks/connection_tests.js');
+  testFiles.push('/test/tests/functional/rs_mocks/failover_tests.js');
+  testFiles.push('/test/tests/functional/rs_mocks/monitoring_tests.js');
+  testFiles.push('/test/tests/functional/rs_mocks/read_preferences_tests.js');
+  testFiles.push('/test/tests/functional/rs_mocks/step_down_tests.js');
+
+  // Mongos Mock Tests
+  testFiles.push('/test/tests/functional/mongos_mocks/single_proxy_connection_tests.js');
+  testFiles.push('/test/tests/functional/mongos_mocks/multiple_proxies_tests.js');
+  testFiles.push('/test/tests/functional/mongos_mocks/proxy_failover_tests.js');
+  testFiles.push('/test/tests/functional/mongos_mocks/proxy_read_preference_tests.js');
+
+  // Single server Mock Tests
+  testFiles.push('/test/tests/functional/single_mocks/timeout_tests.js');
 } catch(err) {}
 
 // Add all the tests to run

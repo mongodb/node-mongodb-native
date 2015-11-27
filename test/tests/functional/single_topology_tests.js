@@ -3,23 +3,6 @@
 var fs = require('fs')
   , f = require('util').format;
 
-// var parseTopologyTestFiles = function(dir) {
-//   console.dir()
-//   // Get all the entries
-//   var entries = fs.readdirSync(dir);
-//   // Filter out all the entries that are not json files
-//   entries = entries.filter(function(entry) {
-//     return entry.indexOf('.json') != -1;
-//   });
-//   // Read in and parse all the entries
-//   entries = entries.map(function(entry) {
-//     var file = fs.readFileSync(f("%s/%s", dir, entry), 'utf8');
-//     return JSON.parse(file);
-//   });
-
-//   return entries;
-// }
-
 // ../topology_test_descriptions/single/direct_connection_external_ip.json
 exports['Direct connection to RSPrimary via external IP'] = {
   metadata: {
@@ -33,8 +16,7 @@ exports['Direct connection to RSPrimary via external IP'] = {
       , manager = configuration.manager;
 
     // Get the primary server
-    manager.getServerManagerByType('primary', function(err, serverManager) {
-      test.equal(null, err);
+    manager.primary().then(function(serverManager) {
 
       // Attempt to connect
       var server = new Server({
@@ -94,13 +76,11 @@ exports['Connect to RSArbiter'] = {
       , manager = configuration.manager;
 
     // Get the primary server
-    manager.getServerManagerByType('arbiter', function(err, serverManager) {
-      test.equal(null, err);
-
+    manager.arbiters().then(function(managers) {
       // Attempt to connect
       var server = new Server({
-          host: serverManager.host
-        , port: serverManager.port
+          host: managers[0].host
+        , port: managers[0].port
       });
 
       server.on('connect', function(_server) {
@@ -126,15 +106,13 @@ exports['Connect to RSSecondary'] = {
     var Server = configuration.require.Server
       , manager = configuration.manager;
 
-    // Get the primary server
-    manager.getServerManagerByType('secondary', function(err, serverManager) {
-      test.equal(null, err);
-
-      // Attempt to connect
-      var server = new Server({
-          host: serverManager.host
-        , port: serverManager.port
-      });
+      // Get the primary server
+      manager.secondaries().then(function(managers) {
+        // Attempt to connect
+        var server = new Server({
+            host: managers[0].host
+          , port: managers[0].port
+        });
 
       server.on('connect', function(_server) {
         _server.destroy();
