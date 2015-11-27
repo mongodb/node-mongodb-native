@@ -14,6 +14,7 @@
   ],
   "dependencies": {
       "mongodb-core": "1.2.25"
+    , "kerberos": "0.0.17"
     , "readable-stream": "1.0.31"
     , "es6-promise": "2.1.1"
   },
