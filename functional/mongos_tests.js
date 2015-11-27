@@ -185,14 +185,6 @@ exports['Should correctly remove mongos and re-add it'] = {
 
     // Add event listeners
     server.on('connect', function(_server) {
-      _server.on('joined', function(t, s) {
-        joined = joined + 1;
-      });
-
-      _server.on('left', function(t, s) {
-        left = left + 1;
-      });
-
       var done = false;
 
       var interval = setInterval(function() {
@@ -208,31 +200,38 @@ exports['Should correctly remove mongos and re-add it'] = {
         _server.insert(f("%s.inserts_mongos2", configuration.db), [{a:1}], {
           writeConcern: {w:1}, ordered:true
         }, function(err, results) {
-          test.equal(null, err);
+          // test.equal(null, err);
         });
       }, 1000)
 
       setTimeout(function() {
-        // Shutdown the first secondary
-        configuration.manager.remove('mongos', {index: 0}, function(err, serverDetails) {
-          if(err) console.dir(err);
+        var proxies = configuration.manager.proxies();
 
+        _server.on('joined', function(t, s) {
+          joined = joined + 1;
+        });
+
+        _server.on('left', function(t, s) {
+          left = left + 1;
+        });
+
+        proxies[0].stop().then(function() {
           setTimeout(function() {
-            // Shutdown the second secondary
-            configuration.manager.add(serverDetails, function(err, result) {
-              // Shutdown the first secondary
-              configuration.manager.remove('mongos', {index: 1}, function(err, serverDetails) {
-                if(err) console.dir(err);
+
+            proxies[0].start().then(function() {
+
+              proxies[1].stop().then(function() {
 
                 setTimeout(function() {
-                  // Shutdown the second secondary
-                  configuration.manager.add(serverDetails, function(err, result) {});
+
+                  proxies[1].start().then(function() {
+                  });
                 }, 2000)
               });
             });
           }, 2000)
         });
-      }, 2000);
+      }, 5000);
     });
 
     // Start connection
