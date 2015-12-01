@@ -1,15 +1,16 @@
 "use strict";
 
-var format = require('util').format;
+var format = require('util').format,
+  f = require('util').format;
 
 var restartAndDone = function(configuration, test) {
-  configuration.manager.restart(function() {
+  configuration.manager.restart().then(function() {
     test.done();
   });
 }
 
 exports.beforeTests = function(configuration, callback) {
-  configuration.restart({purge:false, kill:true}, function() {
+  configuration.manager.restart().then(function() {
     callback();
   });
 }
@@ -20,7 +21,8 @@ exports['Should correctly remove and re-add secondary and detect removal and re-
   test: function(configuration, test) {
     // The state
     var state = 0;
-    var leftServer = null;
+    var secondaryServerManager = null;
+    var manager = configuration.manager;
 
     // Get a new instance
     var db = configuration.newDbInstance({w:0}, {poolSize:1});
@@ -28,26 +30,40 @@ exports['Should correctly remove and re-add secondary and detect removal and re-
       test.equal(null, err);
 
       db.serverConfig.on('joined', function(t, d, s) {
-        if(t == 'secondary' && leftServer && s.name == leftServer.host) {
-          db.close();
-          restartAndDone(configuration, test);
+        if(t == 'secondary'
+          && secondaryServerManager
+          && s.name == f('%s:%s', secondaryServerManager.host, secondaryServerManager.port)) {
+            db.close();
+            restartAndDone(configuration, test);
         }
       });
 
       db.serverConfig.on('left', function(t, s) {
-        if(t == 'secondary' && leftServer && s.name == leftServer.host) state++;
+        if(t == 'secondary'
+          && secondaryServerManager
+          && s.name == f('%s:%s', secondaryServerManager.host, secondaryServerManager.port)) {
+            state++;
+        }
       });
 
       db.once('fullsetup', function() {
-        // Shutdown the first secondary
-        configuration.manager.remove('secondary', function(err, serverDetails) {
-          leftServer = serverDetails;
+        // Get the secondary server
+        manager.secondaries().then(function(managers) {
+          secondaryServerManager = managers[0];
 
-          setTimeout(function() {
-            // Shutdown the second secondary
-            configuration.manager.add(serverDetails, function(err, result) {});
-          }, 10000)
-        });      
+          // Remove the secondary server
+          manager.removeMember(secondaryServerManager, {
+            returnImmediately: false, force: false, skipWait:true
+          }).then(function() {
+            setTimeout(function() {
+              // Add a new member to the set
+              manager.addMember(secondaryServerManager, {
+                returnImmediately: false, force:false
+              }).then(function(x) {
+              });
+            }, 10000)
+          });
+        });
       });
     });
   }
@@ -58,7 +74,7 @@ exports['Should correctly remove and re-add secondary and detect removal and re-
  */
 exports['Should correctly receive ha'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:0}, {poolSize:1});
@@ -78,7 +94,7 @@ exports['Should correctly receive ha'] = {
  */
 exports['Should correctly handle primary stepDown'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     // The state
@@ -106,7 +122,7 @@ exports['Should correctly handle primary stepDown'] = {
       }, 500);
 
       db.once('fullsetup', function() {
-        configuration.manager.stepDown({force: true}, function(err, result) {});        
+        configuration.manager.stepDownPrimary(false, {stepDownSecs: 1, force:true}).then(function() {});
       });
     });
   }
@@ -122,17 +138,27 @@ exports['Should correctly recover from secondary shutdowns'] = {
 
     // Get a new instance
     var db = configuration.newDbInstance({w:0}, {poolSize:1});
+    // Managers
+    var managers = null;
 
     // Wait for a second and shutdown secondaries
     db.once('fullsetup', function() {
-      // Shutdown the first secondary
-      configuration.manager.shutdown('secondary', {signal:15}, function(err, result) {
-        // Shutdown the second secondary
-        configuration.manager.shutdown('secondary', {signal:15}, function(err, result) {
+      configuration.manager.secondaries().then(function(m) {
+        managers = m;
+
+        // Stop bot secondaries
+        managers[0].stop().then(function() {
+          managers[1].stop().then(function() {
+            // Start bot secondaries
+            managers[0].start().then(function() {
+              managers[1].start().then(function() {
+              });
+            });
+          });
         });
       });
     });
-    
+
     db.open(function(err, db) {
       test.equal(null, err);
       // The state
@@ -141,7 +167,6 @@ exports['Should correctly recover from secondary shutdowns'] = {
 
       // Wait for left events
       db.serverConfig.on('left', function(t, s) {
-        // console.log("-- left :: " + t + " :: " + s.name)
         left[s.name] = ({type: t, server: s});
 
         // Restart the servers
@@ -149,7 +174,6 @@ exports['Should correctly recover from secondary shutdowns'] = {
           db.serverConfig.removeAllListeners('left')
           // Wait for close event due to primary stepdown
           db.serverConfig.on('joined', function(t, d, s) {
-          // console.log("-- joined :: " + t + " :: " + s.name)
             if('secondary' == t && left[s.name]) {
               joined++;
             }
@@ -167,13 +191,6 @@ exports['Should correctly recover from secondary shutdowns'] = {
                   });
               });
             }
-          });
-
-          // Let's restart a secondary
-          configuration.manager.restartServer('secondary', function(err, result) {
-            // Let's restart a secondary
-            configuration.manager.restartServer('secondary', function(err, result) {
-            });
           });
         }
       });
@@ -196,26 +213,47 @@ exports['Should correctly remove and re-add secondary with new priority and dete
 
       // Add event listeners
       db.serverConfig.on('joined', function(t, d, s) {
-        if(t == 'primary' && leftServer && s.name == leftServer.host) {
+        if(t == 'primary' && leftServer && s.name == f('%s:%s', leftServer.host, leftServer.port)) {
           db.close();
           restartAndDone(configuration, test);
         }
       });
 
       db.serverConfig.on('left', function(t, s) {
-        if(t == 'secondary' && leftServer && s.name == leftServer.host) state++;
+        if(t == 'secondary' && leftServer && s.name == f('%s:%s', leftServer.host, leftServer.port)) state++;
       });
 
       db.once('fullsetup', function() {
-        // Shutdown the first secondary
-        configuration.manager.remove('secondary', function(err, serverDetails) {
-          serverDetails.priority = 10;
-          leftServer = serverDetails;
+        configuration.manager.secondaries().then(function(managers) {
+          leftServer = managers[0];
 
-          setTimeout(function() {
-            // Shutdown the second secondary
-            configuration.manager.add(serverDetails, function(err, result) {});          
-          }, 10000)
+          // Remove the first secondary
+          configuration.manager.removeMember(managers[0], {
+            returnImmediately: false, force: false, skipWait:true
+          }).then(function() {
+            var config = JSON.parse(JSON.stringify(configuration.manager.configurations[0]));
+            var members = config.members;
+            // Update the right configuration
+            for(var i = 0; i < members.length; i++) {
+              if(members[i].host == f('%s:%s', managers[0].host, managers[0].port)) {
+                members[i].priority = 10;
+                break;
+              }
+            }
+
+            // Update the version number
+            config.version = config.version + 1;
+
+            // Force the reconfiguration
+            configuration.manager.reconfigure(config, {
+              returnImmediately:false, force:false
+            }).then(function() {
+              setTimeout(function() {
+                managers[0].start().then(function() {
+                });
+              }, 10000)
+            })
+          });
         });
       });
     });
@@ -260,72 +298,74 @@ exports['Should work correctly with inserts after bringing master back'] = {
             test.equal(null, err);
             test.equal(1, c);
 
+            manager.primary().then(function(primary) {
 
-            // Kill the primary
-            manager.shutdown('primary', {signal: -15}, function() {
-              // Execute a set of inserts
-              function inserts(callback) {
-                var a = 30;
-                var totalCount = 5;
+              primary.stop().then(function() {
 
-                for(var i = 0; i < 5; i++) {
-                  collection.insert({a:a}, {w:2, wtimeout: 10000}, function(err) {
-                    totalCount = totalCount - 1;
+                // Execute a set of inserts
+                function inserts(callback) {
+                  var a = 30;
+                  var totalCount = 5;
 
-                    if(totalCount == 0) {
-                      callback();
-                    }
-                  });
-                  a = a + 10;
+                  for(var i = 0; i < 5; i++) {
+                    collection.insert({a:a}, {w:2, wtimeout: 10000}, function(err) {
+                      totalCount = totalCount - 1;
+
+                      if(totalCount == 0) {
+                        callback();
+                      }
+                    });
+                    a = a + 10;
+                  }
                 }
-              }
 
-              inserts(function(err) {                
-                // Restart the old master and wait for the sync to happen
-                manager.restart(function(err, result) {
-                  // Contains the results
-                  var results = [];
+                inserts(function(err) {
+                  // Restart the old master and wait for the sync to happen
+                  primary.start().then(function(result) {
+                    // Contains the results
+                    var results = [];
 
-                  collection.find().each(function(err, item) {
-                    if(item == null) {
-                      // Ensure we have the correct values
-                      test.equal(6, results.length);
-                      [20, 30, 40, 50, 60, 70].forEach(function(a) {
-                        test.equal(1, results.filter(function(element) {
-                          return element.a == a;
-                        }).length);
-                      });
+                    collection.find().each(function(err, item) {
+                      if(item == null) {
+                        // Ensure we have the correct values
+                        test.equal(6, results.length);
+                        [20, 30, 40, 50, 60, 70].forEach(function(a) {
+                          test.equal(1, results.filter(function(element) {
+                            return element.a == a;
+                          }).length);
+                        });
 
-                      // Run second check
-                      collection.save({a:80}, {w:1}, function(err, r) {
-                        if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
-
-                        collection.find().toArray(function(err, items) {
+                        // Run second check
+                        collection.save({a:80}, {w:1}, function(err, r) {
                           if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
 
-                          // Ensure we have the correct values
-                          test.equal(7, items.length);
+                          collection.find().toArray(function(err, items) {
+                            if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
 
-                          // Sort items by a
-                          items = items.sort(function(a,b) { return a.a > b.a});
-                          // Test all items
-                          test.equal(20, items[0].a);
-                          test.equal(30, items[1].a);
-                          test.equal(40, items[2].a);
-                          test.equal(50, items[3].a);
-                          test.equal(60, items[4].a);
-                          test.equal(70, items[5].a);
-                          test.equal(80, items[6].a);
-                          db.close();
-                          restartAndDone(configuration, test);
+                            // Ensure we have the correct values
+                            test.equal(7, items.length);
+
+                            // Sort items by a
+                            items = items.sort(function(a,b) { return a.a > b.a});
+                            // Test all items
+                            test.equal(20, items[0].a);
+                            test.equal(30, items[1].a);
+                            test.equal(40, items[2].a);
+                            test.equal(50, items[3].a);
+                            test.equal(60, items[4].a);
+                            test.equal(70, items[5].a);
+                            test.equal(80, items[6].a);
+                            db.close();
+                            restartAndDone(configuration, test);
+                          });
                         });
-                      });
-                    } else {
-                      results.push(item);
-                    }
+                      } else {
+                        results.push(item);
+                      }
+                    });
                   });
-                })
-              })
+                });
+              });
             });
           });
         });
@@ -368,27 +408,31 @@ exports['Should correctly read from secondary even if primary is down'] = {
 
       // Insert a document
       collection.insert({a:1}, {w:2, wtimeout:10000}, function(err, result) {
-        
+
         // Run a simple query
         collection.findOne(function (err, doc) {
           test.ok(err == null);
           test.ok(1, doc.a);
 
           // Shut down primary server
-          manager.shutdown('primary', {signal: -15}, function (err, result) {
+          manager.primary().then(function(primary) {
 
-            // Run a simple query
-            collection.findOne(function (err, doc) {
-              // test.ok(Object.keys(replSet._state.secondaries).length > 0);
-              test.equal(null, err);
-              test.ok(doc != null);
+            // Stop the primary
+            primary.stop().then(function() {
 
-              p_db.close();
-              restartAndDone(configuration, test);
+              // Run a simple query
+              collection.findOne(function (err, doc) {
+                // test.ok(Object.keys(replSet._state.secondaries).length > 0);
+                test.equal(null, err);
+                test.ok(doc != null);
+
+                p_db.close();
+                restartAndDone(configuration, test);
+              });
             });
           });
         });
-      });  
+      });
     });
 
     db.open(function(err, p_db) {
@@ -402,7 +446,7 @@ exports['Should correctly read from secondary even if primary is down'] = {
  */
 exports['shouldStillQuerySecondaryWhenNoPrimaryAvailable'] = {
   metadata: { requires: { topology: 'replicaset' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -414,7 +458,7 @@ exports['shouldStillQuerySecondaryWhenNoPrimaryAvailable'] = {
       , configuration.port, configuration.port + 1, configuration.port + 1, configuration.replicasetName);
 
     // Connect using the MongoClient
-    MongoClient.connect(url, { 
+    MongoClient.connect(url, {
         replSet: {
           //set replset check interval to be much smaller than our querying interval
           haInterval: 50,
@@ -428,15 +472,21 @@ exports['shouldStillQuerySecondaryWhenNoPrimaryAvailable'] = {
 
         db.collection("replicaset_readpref_test").insert({testfield:123}, function(err, result) {
           test.equal(null, err);
-          
+
           db.collection("replicaset_readpref_test").findOne({}, function(err, result){
             test.equal(null, err);
             test.equal(result.testfield, 123);
 
             // wait five seconds, then kill 2 of the 3 nodes that are up.
             setTimeout(function(){
-              manager.shutdown('secondary', {signal: -15}, function() {
-                manager.shutdown('primary', {signal: -15}, function() {
+              manager.secondaries().then(function(secondaries) {
+                secondaries[0].stop().then(function() {
+                  // Shut down primary server
+                  manager.primary().then(function(primary) {
+                    // Stop the primary
+                    primary.stop().then(function() {
+                    });
+                  });
                 });
               });
             }, 5000);

@@ -5,7 +5,7 @@
  * @ignore
  */
 exports['Should correctly authenticate against scram'] = {
-  metadata: { requires: { topology: 'scram', mongodb: '>=2.7.5' } },
+  metadata: { requires: { topology: 'scram', mongodb: '>=3.2.0' } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -43,8 +43,7 @@ exports['Should correctly authenticate against scram'] = {
                 test.ok(r != null);
 
                 // Attempt to reconnect authenticating against the admin database
-                MongoClient.connect('mongodb://test:test2@localhost:27017/test?authMechanism=SCRAM-SHA-1&authSource=admin&maxPoolSize=5', function(err, db2) {
-                  test.ok(err != null);
+                MongoClient.connect('mongodb://test:test@localhost:27017/test?authMechanism=SCRAM-SHA-1&authSource=admin&maxPoolSize=5', function(err, db2) {
                   test.equal(null, err);
 
                   // Remove the user

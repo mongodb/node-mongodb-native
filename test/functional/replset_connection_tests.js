@@ -3,13 +3,13 @@
 var f = require('util').format;
 
 var restartAndDone = function(configuration, test) {
-  configuration.manager.restart(function() {
+  configuration.manager.restart().then(function() {
     test.done();
   });
 }
 
 exports.beforeTests = function(configuration, callback) {
-  configuration.restart({purge:false, kill:true}, function() {
+  configuration.manager.restart().then(function() {
     callback();
   });
 }
@@ -33,7 +33,7 @@ exports['Should throw error due to mongos connection usage'] = {
       , {rs_name:configuration.replicasetName}
       );
     } catch(err) {
-      restartAndDone(configuration, test);
+      test.done();
     }
   }
 }
@@ -61,7 +61,7 @@ exports['Should correctly handle error when no server up in replicaset'] = {
       test.ok(err != null);
 
       db.close();
-      restartAndDone(configuration, test);
+      test.done();
     });
   }
 }
@@ -76,22 +76,24 @@ exports['Should correctly connect with default replicaset'] = {
       , Db = configuration.require.Db;
 
     // Replset start port
-    configuration.manager.shutdown('secondary', {signal:15}, function() {
-      // Replica configuration
-      var replSet = new ReplSet([
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ]
-        , {rs_name:configuration.replicasetName}
-      );
+    configuration.manager.secondaries().then(function(managers) {
+      managers[0].stop().then(function() {
+        // Replica configuration
+        var replSet = new ReplSet([
+            new Server(configuration.host, configuration.port),
+            new Server(configuration.host, configuration.port + 1),
+            new Server(configuration.host, configuration.port + 2)
+          ]
+          , {rs_name:configuration.replicasetName}
+        );
 
-      var db = new Db('integration_test_', replSet, {w:0});
-      db.open(function(err, p_db) {
-        test.equal(null, err);
-        p_db.close();
-        restartAndDone(configuration, test);
-      })
+        var db = new Db('integration_test_', replSet, {w:0});
+        db.open(function(err, p_db) {
+          test.equal(null, err);
+          p_db.close();
+          restartAndDone(configuration, test);
+        })
+      });
     });
   }
 }
@@ -106,22 +108,24 @@ exports['Should correctly connect with default replicaset and no setName specifi
       , Db = configuration.require.Db;
 
     // Replset start port
-    configuration.manager.shutdown('secondary', {signal:15}, function() {
-      // Replica configuration
-      var replSet = new ReplSet([
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ]
-        , {}
-      );
+    configuration.manager.secondaries().then(function(managers) {
+      managers[0].stop().then(function() {
+        // Replica configuration
+        var replSet = new ReplSet([
+            new Server(configuration.host, configuration.port),
+            new Server(configuration.host, configuration.port + 1),
+            new Server(configuration.host, configuration.port + 2)
+          ]
+          , {}
+        );
 
-      var db = new Db('integration_test_', replSet, {w:0});
-      db.open(function(err, p_db) {
-        test.equal(null, err);
-        p_db.close();
-        restartAndDone(configuration, test);
-      })
+        var db = new Db('integration_test_', replSet, {w:0});
+        db.open(function(err, p_db) {
+          test.equal(null, err);
+          p_db.close();
+          restartAndDone(configuration, test);
+        });
+      });
     });
   }
 }
@@ -151,7 +155,7 @@ exports['Should correctly connect with default replicaset and socket options set
       var connection = db.serverConfig.connections()[0];
       test.equal(100, connection.keepAliveInitialDelay);
       p_db.close();
-      restartAndDone(configuration, test);
+      test.done();
     })
   }
 }
@@ -184,7 +188,7 @@ exports['Should emit close no callback'] = {
 
       setTimeout(function() {
         test.equal(dbCloseCount, 1);
-        restartAndDone(configuration, test);
+        test.done();
       }, 2000);
     })
   }
@@ -219,7 +223,7 @@ exports['Should emit close with callback'] = {
         // Let all events fire.
         process.nextTick(function() {
           test.equal(dbCloseCount, 1);
-          restartAndDone(configuration, test);
+          test.done();
         });
       });
     })
@@ -247,7 +251,7 @@ exports['Should correctly pass error when wrong replicaSet'] = {
     var db = new Db('integration_test_', replSet, {w:0});
     db.open(function(err, p_db) {
       test.notEqual(null, err);
-      restartAndDone(configuration, test);
+      test.done();
     })
   }
 }
@@ -305,8 +309,8 @@ exports['Should connect with primary stepped down'] = {
       {rs_name:configuration.replicasetName}
     );
 
-    // Step down primary server
-    configuration.manager.stepDown({force:true}, function(err, result) {
+    // // Step down primary server
+    configuration.manager.stepDownPrimary(false, {stepDownSecs: 1, force:true}).then(function() {
       // Wait for new primary to pop up
       ensureConnection(configuration, retries, function(err, p_db) {
         new Db('integration_test_', replSet, {w:0}).open(function(err, p_db) {
@@ -332,29 +336,31 @@ exports['Should connect with third node killed'] = {
       , Server = configuration.require.Server
       , Db = configuration.require.Db;
 
-    // Kill specific node
-    configuration.manager.shutdown('secondary', {signal: -15}, function(err, node) {
-      // Replica configuration
-      var replSet = new ReplSet([
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        {rs_name:configuration.replicasetName}
-      );
+    // Replset start port
+    configuration.manager.secondaries().then(function(managers) {
+      managers[0].stop().then(function() {
+        // Replica configuration
+        var replSet = new ReplSet([
+            new Server(configuration.host, configuration.port),
+            new Server(configuration.host, configuration.port + 1),
+            new Server(configuration.host, configuration.port + 2)
+          ],
+          {rs_name:configuration.replicasetName}
+        );
 
-      // Wait for new primary to pop up
-      ensureConnection(configuration, retries, function(err, p_db) {
+        // Wait for new primary to pop up
+        ensureConnection(configuration, retries, function(err, p_db) {
 
-        new Db('integration_test_', replSet, {w:0}).open(function(err, p_db) {
-          test.ok(err == null);
-          // Get a connection
-          var connection = p_db.serverConfig.connections()[0];
-          test.equal(true, connection.isConnected());
-          // Close the database
-          p_db.close();
-          restartAndDone(configuration, test);
-        })
+          new Db('integration_test_', replSet, {w:0}).open(function(err, p_db) {
+            test.ok(err == null);
+            // Get a connection
+            var connection = p_db.serverConfig.connections()[0];
+            test.equal(true, connection.isConnected());
+            // Close the database
+            p_db.close();
+            restartAndDone(configuration, test);
+          })
+        });
       });
     });
   }
@@ -369,28 +375,30 @@ exports['Should connect with primary node killed'] = {
       , Server = configuration.require.Server
       , Db = configuration.require.Db;
 
-    // Kill specific node
-    configuration.manager.shutdown('primary', {signal: -15}, function(err, node) {
-      // Replica configuration
-      var replSet = new ReplSet([
-          new Server(configuration.host, configuration.port),
-          new Server(configuration.host, configuration.port + 1),
-          new Server(configuration.host, configuration.port + 2)
-        ],
-        {rs_name:configuration.replicasetName}
-      );
+    // Replset start port
+    configuration.manager.primary().then(function(primary) {
+      primary.stop().then(function() {
+        // Replica configuration
+        var replSet = new ReplSet([
+            new Server(configuration.host, configuration.port),
+            new Server(configuration.host, configuration.port + 1),
+            new Server(configuration.host, configuration.port + 2)
+          ],
+          {rs_name:configuration.replicasetName}
+        );
 
-      // Wait for new primary to pop up
-      ensureConnection(configuration, retries, function(err, p_db) {
-        new Db('integration_test_', replSet, {w:0}).open(function(err, p_db) {
-          test.ok(err == null);
-          // Get a connection
-          var connection = p_db.serverConfig.connections()[0];
-          test.equal(true, connection.isConnected());
-          // Close the database
-          p_db.close();
-          restartAndDone(configuration, test);
-        })
+        // Wait for new primary to pop up
+        ensureConnection(configuration, retries, function(err, p_db) {
+          new Db('integration_test_', replSet, {w:0}).open(function(err, p_db) {
+            test.ok(err == null);
+            // Get a connection
+            var connection = p_db.serverConfig.connections()[0];
+            test.equal(true, connection.isConnected());
+            // Close the database
+            p_db.close();
+            restartAndDone(configuration, test);
+          })
+        });
       });
     });
   }
@@ -425,7 +433,7 @@ exports['Should correctly emit open signal and full set signal'] = {
 
       // Close and cleanup
       _db.close();
-      restartAndDone(configuration, test);
+      test.done();
     });
 
     db.open(function(err, p_db) {})
@@ -463,7 +471,7 @@ exports['ReplSet honors socketOptions options'] = {
       test.equal(3000, connection.socketTimeout);
       test.equal(false, connection.noDelay);
       p_db.close();
-      restartAndDone(configuration, test);
+      test.done();
     });
   }
 }
@@ -542,7 +550,7 @@ exports['Should correctly emit all signals even if not yet connected'] = {
                 setTimeout(function() {
                   test.equal(2, close_count);
                   test.equal(2, open_count);
-                  restartAndDone(configuration, test);
+                  test.done();
                 }, 1000);
               });
             });
@@ -588,10 +596,13 @@ exports['Should receive all events for primary and secondary leaving'] = {
     var db = new Db('integration_test_', replSet, {w:0});
     db.open(function(err, p_db) {
       // Kill the secondary
-      configuration.manager.shutdown('secondary', {signal:-15}, function() {
-        test.equal(null, err);
-        p_db.close();
-        restartAndDone(configuration, test);
+      // Replset start port
+      configuration.manager.secondaries().then(function(managers) {
+        managers[0].stop().then(function() {
+          test.equal(null, err);
+          p_db.close();
+          restartAndDone(configuration, test);
+        });
       });
     });
   }
@@ -637,8 +648,11 @@ exports['Should Fail due to bufferMaxEntries = 0 not causing any buffering'] = {
       });
 
       // Kill the secondary
-      configuration.manager.shutdown('primary', {signal: -15}, function() {
-        test.equal(null, err);
+      // Replset start port
+      configuration.manager.primary().then(function(primary) {
+        primary.stop().then(function() {
+          test.equal(null, err);
+        });
       });
     });
   }
@@ -686,81 +700,9 @@ exports['Should correctly receive ping and ha events'] = {
         if(ping && ha_connect && ha_ismaster) {
           clearInterval(interval);
           db.close();
-          restartAndDone(configuration, test);
+          test.done();
         }
       }, 100);
-    });
-  }
-}
-
-exports['Should correctly connect to arbiter with single connection'] = {
-  metadata: { requires: { topology: 'replicaset' } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var mongo = configuration.require
-      , ReplSet = mongo.ReplSet
-      , Server = mongo.Server
-      , Db = mongo.Db;
-
-    // Replset start port
-    var replicasetManager = configuration.manager;
-    replicasetManager.getServerManagerByType('arbiter', function(err, server) {
-      test.equal(null, err);
-
-      // Get the arbiters
-      var host = server.host;
-      var port = server.port;
-      var db = new Db('integration_test_', new Server(host, port), {w:1});
-
-      db.open(function(err, p_db) {
-        test.equal(null, err);
-
-        p_db.command({ismaster: true}, function(err, result) {
-          test.equal(null, err);
-
-          // Should fail
-          p_db.collection('t').insert({a:1}, function(err, r) {
-            test.ok(err != null);
-
-            p_db.close();
-            restartAndDone(configuration, test);
-          });
-        });
-      })
-    })
-  }
-}
-
-exports['Should correctly connect to secondary with single connection'] = {
-  metadata: { requires: { topology: 'replicaset' } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var mongo = configuration.require
-      , ReplSet = mongo.ReplSet
-      , Server = mongo.Server
-      , Db = mongo.Db;
-
-    // Replset start port
-    var replicasetManager = configuration.manager;
-    replicasetManager.getServerManagerByType('secondary', function(err, server) {
-      test.equal(null, err);
-      // Get the arbiters
-      var host = server.host;
-      var port = server.port;
-      var db = new Db('integration_test_', new Server(host, port), {w:1});
-
-      db.open(function(err, p_db) {
-        test.equal(null, err);
-
-        p_db.command({ismaster: true}, function(err, result) {
-          test.equal(null, err);
-
-          p_db.close();
-          restartAndDone(configuration, test);
-        });
-      });
     });
   }
 }
@@ -798,7 +740,7 @@ exports['Should correctly connect to a replicaset with additional options'] = {
         test.equal(1, result.result.n);
 
         db.close();
-        restartAndDone(configuration, test);
+        test.done();
       });
     });
   }
@@ -828,7 +770,7 @@ exports['Should correctly connect to a replicaset with readPreference set'] = {
         test.equal(null, err);
 
         db.close();
-        restartAndDone(configuration, test);
+        test.done();
       });
     });
   }
@@ -854,7 +796,7 @@ exports['Should give an error for non-existing servers'] = {
 
     MongoClient.connect(url, function(err, db) {
       test.ok(err != null);
-      restartAndDone(configuration, test);
+      test.done();
     });
   }
 }
@@ -885,7 +827,7 @@ exports['Should correctly connect to a replicaset with writeConcern specified an
       test.equal('majority', gs.writeConcern.w);
       test.equal(5000, gs.writeConcern.wtimeout);
       db.close();
-      restartAndDone(configuration, test);
+      test.done();
     });
   }
 }
@@ -932,7 +874,7 @@ exports['Should Correctly remove server going into recovery mode'] = {
           db1.admin().command({ replSetMaintenance: 0 }, function(err, result) {
             db.close();
             db1.close();
-            restartAndDone(configuration, test);
+            test.done();
           });
         });
 
@@ -971,7 +913,7 @@ exports['Should return single server direct connection when replicaSet not provi
       test.equal(null, err);
       test.ok(db.serverConfig instanceof Server);
 
-      restartAndDone(configuration, test);
+      test.done();
     });
   }
 }
@@ -994,8 +936,8 @@ exports['Should not give an error when using a two server seeds and no setName']
 
     MongoClient.connect(url, function(err, db) {
       test.equal(null, err);
-      
-      restartAndDone(configuration, test);
+
+      test.done();
     });
   }
 }
@@ -1022,6 +964,73 @@ var waitForPrimary = function(count, config, options, callback) {
   server.connect();
 }
 
+exports['Should correctly connect to arbiter with single connection'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var mongo = configuration.require
+      , ReplSet = mongo.ReplSet
+      , Server = mongo.Server
+      , Db = mongo.Db;
+
+    // Replset start port
+    configuration.manager.arbiters().then(function(managers) {
+      // Get the arbiters
+      var host = managers[0].host;
+      var port = managers[0].port;
+      var db = new Db('integration_test_', new Server(host, port), {w:1});
+
+      db.open(function(err, p_db) {
+        test.equal(null, err);
+
+        p_db.command({ismaster: true}, function(err, result) {
+          test.equal(null, err);
+
+          // Should fail
+          p_db.collection('t').insert({a:1}, function(err, r) {
+            test.ok(err != null);
+
+            p_db.close();
+            restartAndDone(configuration, test);
+          });
+        });
+      })
+    })
+  }
+}
+
+exports['Should correctly connect to secondary with single connection'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var mongo = configuration.require
+      , ReplSet = mongo.ReplSet
+      , Server = mongo.Server
+      , Db = mongo.Db;
+
+    // replicasetManager.getServerManagerByType('secondary', function(err, server) {
+    configuration.manager.secondaries().then(function(managers) {
+      // Get the arbiters
+      var host = managers[0].host;
+      var port = managers[0].port;
+      var db = new Db('integration_test_', new Server(host, port), {w:1});
+
+      db.open(function(err, p_db) {
+        test.equal(null, err);
+
+        p_db.command({ismaster: true}, function(err, result) {
+          test.equal(null, err);
+
+          p_db.close();
+          restartAndDone(configuration, test);
+        });
+      });
+    });
+  }
+}
+
 exports['Replicaset connection where a server is standalone'] = {
   metadata: {
     requires: {
@@ -1032,7 +1041,7 @@ exports['Replicaset connection where a server is standalone'] = {
   test: function(configuration, test) {
     var Server = configuration.require.Server
       , ReplSet = configuration.require.ReplSet
-      , ServerManager = require('mongodb-tools').ServerManager
+      , ServerManager = require('mongodb-topology-manager').Server
       , MongoClient = configuration.require.MongoClient
       , manager = configuration.manager;
 
@@ -1040,40 +1049,20 @@ exports['Replicaset connection where a server is standalone'] = {
     var joined = {'primary':[], 'secondary': [], 'arbiter': [], 'passive': []};
     var left = {'primary':[], 'secondary': [], 'arbiter': [], 'passive': []};
     // Get the primary server
-    manager.getServerManagerByType('primary', function(err, primaryServerManager) {
-      test.equal(null, err);
+    configuration.manager.primary().then(function(primaryServerManager) {
+      var nonReplSetMember = new ServerManager('mongod', {
+        bind_ip: primaryServerManager.host,
+        port: primaryServerManager.port,
+        dbpath: primaryServerManager.options.dbpath
+      });
 
-      // Get the secondary server
-      manager.getServerManagerByType('secondary', function(err, serverManager) {
-        test.equal(null, err);
-
-        // Start a new server manager
-        var nonReplSetMember = new ServerManager({
-            host: primaryServerManager.host
-          , port: primaryServerManager.port
-          , dbpath: primaryServerManager.dbpath
-          , logpath: primaryServerManager.logpath
-        });
-
-        var config = [{
-            host: serverManager.host
-          , port: serverManager.port
-        }];
-
-        var options = {
-          setName: configuration.replicasetName
-        };
-
-        // Stop the primary
-        primaryServerManager.stop(function(err, r) {
-
+      // Stop the primary
+      primaryServerManager.stop().then(function(err, r) {
+        nonReplSetMember.purge().then(function() {
           // Start a non replset member
-          nonReplSetMember.start(function() {
+          nonReplSetMember.start().then(function() {
 
-            // Wait for primary
-            waitForPrimary(30, config, options, function(err, r) {
-              test.equal(null, err);
-
+            configuration.manager.waitForPrimary().then(function() {
               var url = f("mongodb://localhost:%s,localhost:%s,localhost:%s/integration_test_?replicaSet=%s"
                     , configuration.port, configuration.port + 1, configuration.port + 2, configuration.replicasetName)
               // Attempt to connect using MongoClient uri
@@ -1082,7 +1071,7 @@ exports['Replicaset connection where a server is standalone'] = {
                 test.ok(db.serverConfig instanceof ReplSet);
 
                 // Stop the normal server
-                nonReplSetMember.stop(function() {
+                nonReplSetMember.stop().then(function() {
                   restartAndDone(configuration, test);
                 });
               });

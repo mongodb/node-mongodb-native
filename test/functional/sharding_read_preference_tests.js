@@ -5,7 +5,7 @@
  */
 exports['Should correctly perform a Mongos secondary read using the read preferences'] = {
   metadata: { requires: { topology: 'sharded' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Mongos = configuration.require.Mongos
@@ -28,7 +28,7 @@ exports['Should correctly perform a Mongos secondary read using the read prefere
       // Perform a simple insert into a collection
       var collection = db.collection("shard_test1");
       // Insert a simple doc
-      collection.insert({test:1}, {w:4, wtimeout:10000}, function(err, result) {
+      collection.insert({test:1}, {w:'majority', wtimeout:10000}, function(err, result) {
         test.equal(null, err);
 
         // Set debug level for the driver
@@ -36,7 +36,6 @@ exports['Should correctly perform a Mongos secondary read using the read prefere
 
         // Get the current logger
         var logger = Logger.currentLogger();
-        // console.dir(Logger.currentLogger)
         Logger.setCurrentLogger(function(message, options) {
           if(options.type =='debug' && options.className == 'Cursor'
             && options.message.indexOf('"mode":"secondary"') != -1) {
@@ -63,7 +62,7 @@ exports['Should correctly perform a Mongos secondary read using the read prefere
  */
 exports['Should correctly fail a Mongos read using a unsupported read preference'] = {
   metadata: { requires: { topology: 'sharded' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Mongos = configuration.require.Mongos
@@ -86,7 +85,7 @@ exports['Should correctly fail a Mongos read using a unsupported read preference
       // Perform a simple insert into a collection
       var collection = db.collection("shard_test2");
       // Insert a simple doc
-      collection.insert({test:1}, {w:4, wtimeout:10000}, function(err, result) {
+      collection.insert({test:1}, {w:'majority', wtimeout:10000}, function(err, result) {
         test.equal(null, err);
 
         // Set debug level for the driver
@@ -94,7 +93,6 @@ exports['Should correctly fail a Mongos read using a unsupported read preference
 
         // Get the current logger
         var logger = Logger.currentLogger();
-        // console.dir(Logger.currentLogger)
         Logger.setCurrentLogger(function(message, options) {
           if(options.type =='debug' && options.className == 'Cursor'
             && options.message.indexOf('"mode":"notsupported"') != -1) {
@@ -120,7 +118,7 @@ exports['Should correctly fail a Mongos read using a unsupported read preference
  */
 exports['Should fail a Mongos secondary read using the read preference and tags that dont exist'] = {
   metadata: { requires: { topology: 'sharded' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Mongos = configuration.require.Mongos
@@ -143,7 +141,7 @@ exports['Should fail a Mongos secondary read using the read preference and tags 
       // Perform a simple insert into a collection
       var collection = db.collection("shard_test3");
       // Insert a simple doc
-      collection.insert({test:1}, {w:4, wtimeout:10000}, function(err, result) {
+      collection.insert({test:1}, {w:'majority', wtimeout:10000}, function(err, result) {
         test.equal(null, err);
 
         // Set debug level for the driver
@@ -151,7 +149,6 @@ exports['Should fail a Mongos secondary read using the read preference and tags 
 
         // Get the current logger
         var logger = Logger.currentLogger();
-        // console.dir(Logger.currentLogger)
         Logger.setCurrentLogger(function(message, options) {
           if(options.type =='debug' && options.className == 'Cursor'
             && options.message.indexOf('{"mode":"secondary","tags":[{"dc":"sf","s":"1"},{"dc":"ma","s":"2"}]}') != -1) {
@@ -176,7 +173,7 @@ exports['Should fail a Mongos secondary read using the read preference and tags 
  */
 exports['Should correctly read from a tagged secondary using Mongos'] = {
   metadata: { requires: { topology: 'sharded' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Mongos = configuration.require.Mongos
@@ -199,7 +196,7 @@ exports['Should correctly read from a tagged secondary using Mongos'] = {
       // Perform a simple insert into a collection
       var collection = db.collection("shard_test4");
       // Insert a simple doc
-      collection.insert({test:1}, {w:4, wtimeout:10000}, function(err, result) {
+      collection.insert({test:1}, {w:'majority', wtimeout:10000}, function(err, result) {
         test.equal(null, err);
 
         // Set debug level for the driver
@@ -207,7 +204,6 @@ exports['Should correctly read from a tagged secondary using Mongos'] = {
 
         // Get the current logger
         var logger = Logger.currentLogger();
-        // console.dir(Logger.currentLogger)
         Logger.setCurrentLogger(function(message, options) {
           if(options.type =='debug' && options.className == 'Cursor'
             && options.message.indexOf('{"mode":"secondary","tags":[{"loc":"ny"},{"loc":"sf"}]}') != -1) {
@@ -233,7 +229,7 @@ exports['Should correctly read from a tagged secondary using Mongos'] = {
  */
 exports['Should correctly connect to MongoS using single server instance'] = {
   metadata: { requires: { topology: 'sharded' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Mongos = configuration.require.Mongos
@@ -251,7 +247,7 @@ exports['Should correctly connect to MongoS using single server instance'] = {
       // Perform a simple insert into a collection
       var collection = db.collection("shard_test5");
       // Insert a simple doc
-      collection.insert({test:1}, {w:4, wtimeout:10000}, function(err, result) {
+      collection.insert({test:1}, {w:'majority', wtimeout:10000}, function(err, result) {
         test.equal(null, err);
 
         collection.findOne({test:1}, {}, {readPreference:new ReadPreference(ReadPreference.SECONDARY, [{"dc2":"sf"}, {"dc1":"ny"}])}, function(err, item) {
@@ -271,7 +267,7 @@ exports['Should correctly connect to MongoS using single server instance'] = {
  */
 exports['Should correctly connect to the mongos using Server connection'] = {
   metadata: { requires: { topology: 'sharded' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Mongos = configuration.require.Mongos
@@ -282,7 +278,7 @@ exports['Should correctly connect to the mongos using Server connection'] = {
     db.open(function(e, db) {
       test.equal(null, e);
 
-      db.createCollection("GabeTest", function(e,collection) { 
+      db.createCollection("GabeTest", function(e,collection) {
         test.equal(null, e);
 
         db.close();
@@ -298,7 +294,7 @@ exports['Should correctly connect to the mongos using Server connection'] = {
  */
 exports.shouldCorrectlyEmitOpenEvent = {
   metadata: { requires: { topology: 'sharded' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Mongos = configuration.require.Mongos
@@ -309,8 +305,8 @@ exports.shouldCorrectlyEmitOpenEvent = {
 
     // Set up mongos connection
     var mongos = new Mongos([
-        new Server("localhost", 50000, { auto_reconnect: true }),
-        new Server("localhost", 50001, { auto_reconnect: true })
+        new Server(configuration.host, configuration.port, { auto_reconnect: true }),
+        new Server(configuration.host, configuration.port + 1, { auto_reconnect: true })
       ])
 
     var openCalled = false;

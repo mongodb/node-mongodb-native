@@ -3,13 +3,13 @@
 var format = require('util').format;
 
 var restartAndDone = function(configuration, test) {
-  configuration.manager.restart(function() {
+  configuration.manager.restart().then(function() {
     test.done();
   });
 }
 
 exports.beforeTests = function(configuration, callback) {
-  configuration.restart({purge:false, kill:true}, function() {
+  configuration.manager.restart().then(function() {
     callback();
   });
 }
@@ -83,13 +83,12 @@ exports['Should fail due to w:5 and wtimeout:1 with ordered batch api'] = {
     }
 
     MongoClient.connect(url, function(err, db) {
-      console.dir(err)
       test.equal(null, err);
 
       executeTests(db, function() {
         // Finish up test
         db.close();
-        restartAndDone(configuration, test);
+        test.done();
       });
     });
   }
@@ -172,7 +171,7 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
       executeTests(db, function() {
         // Finish up test
         db.close();
-        restartAndDone(configuration, test);
+        test.done();
       });
     });
   }
@@ -253,7 +252,7 @@ exports['Should fail due to w:5 and wtimeout:1 with unordered batch api'] = {
       executeTests(db, function() {
         // Finish up test
         db.close();
-        restartAndDone(configuration, test);
+        test.done();
       });
     });
   }
@@ -340,52 +339,7 @@ exports['Should fail due to w:5 and wtimeout:1 combined with duplicate key error
       executeTests(db, function() {
         // Finish up test
         db.close();
-        restartAndDone(configuration, test);
-      });
-    });
-  }
-}
-
-exports['Should Correctly group using replicaset'] = {
-  metadata: { requires: { topology: 'replicaset' } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var mongo = configuration.require
-      , MongoClient = mongo.MongoClient
-      , ReadPreference = mongo.ReadPreference;
-
-    // Create url
-    var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
-      , format("%s:%s", configuration.host, configuration.port)
-      , format("%s:%s", configuration.host, configuration.port + 1)
-      , "integration_test_"
-      , configuration.replicasetName
-      , "primary");
-
-    var manager = configuration.manager;
-
-    MongoClient.connect(url, function(err, db) {
-      test.equal(null, err);
-
-      var collection = db.collection('testgroup_replicaset', {
-            readPreference: ReadPreference.SECONDARY
-          , w:2, wtimeout: 10000
-        });
-
-      collection.insert([{key:1,x:10}, {key:2,x:30}, {key:1,x:20}, {key:3,x:20}], configuration.writeConcernMax(), function(err, result) {
-        // Kill the primary
-        manager.shutdown('primary', {signal: -15}, function(node) {
-          // Do a collection find
-          collection.group(['key'], {}, {sum:0}, function reduce(record, memo){
-            memo.sum += record.x;
-          }, true, function(err, items){
-            test.equal(null, err);
-            test.equal(3, items.length);
-            db.close();
-            restartAndDone(configuration, test);
-          })
-        });
+        test.done();
       });
     });
   }
@@ -429,7 +383,7 @@ exports['Should fail to do map reduce to out collection'] = {
         collection.mapReduce(map, reduce
           , {out : {replace:'replacethiscollection'}, readPreference:ReadPreference.SECONDARY}, function(err, results) {
           db.close();
-          restartAndDone(configuration, test);
+          test.done();
         });
       });
     });
@@ -450,10 +404,58 @@ exports['Should correctly execute ensureIndex with readPreference primaryPreferr
     .then(function(db) {
       var collection = db.collection('ensureIndexWithPrimaryPreferred');
       collection.ensureIndex({a:1}, function(err, r) {
-        test.equal(null, err);        
+        test.equal(null, err);
 
         db.close();
         test.done();
+      });
+    });
+  }
+}
+
+exports['Should Correctly group using replicaset'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var mongo = configuration.require
+      , MongoClient = mongo.MongoClient
+      , ReadPreference = mongo.ReadPreference;
+
+    // Create url
+    var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
+      , format("%s:%s", configuration.host, configuration.port)
+      , format("%s:%s", configuration.host, configuration.port + 1)
+      , "integration_test_"
+      , configuration.replicasetName
+      , "primary");
+
+    var manager = configuration.manager;
+
+    MongoClient.connect(url, function(err, db) {
+      test.equal(null, err);
+
+      var collection = db.collection('testgroup_replicaset', {
+            readPreference: ReadPreference.SECONDARY
+          , w:2, wtimeout: 10000
+        });
+
+      collection.insert([{key:1,x:10}, {key:2,x:30}, {key:1,x:20}, {key:3,x:20}], configuration.writeConcernMax(), function(err, result) {
+        // Kill the primary
+        manager.primary().then(function(m) {
+          // Stop the primary
+          m.stop().then(function() {
+            // Do a collection find
+            collection.group(['key'], {}, {sum:0}, function reduce(record, memo){
+              memo.sum += record.x;
+            }, true, function(err, items){
+              test.equal(null, err);
+              test.equal(3, items.length);
+              db.close();
+              restartAndDone(configuration, test);
+            })
+          });
+        });
       });
     });
   }

@@ -1337,20 +1337,14 @@ exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcern = {
   // The actual test we wish to run
   test: function(configuration, test) {
     function cb (err) {
-      cb.called++;
-      test.equal(1, cb.called);
+      db.close();
+      test.done();
     }
-    cb.called = 0;
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('gh-completely2');
       collection.insert({ a: 1 }, { w: 0 }, cb);
-
-      setTimeout(function(){
-        db.close();
-        test.done();
-      }, 100)
     });
   }
 }
@@ -1366,22 +1360,15 @@ exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithUpdate = {
   // The actual test we wish to run
   test: function(configuration, test) {
     function cb (err) {
-      console.dir(err)
       test.equal(null, err);
-      cb.called++;
-      test.equal(1, cb.called);
+      db.close();
+      test.done();
     }
-    cb.called = 0;
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('gh-completely3');
       collection.update({ a: 1 }, {a:2}, { upsert:true, w: 0 }, cb);
-
-      setTimeout(function(){
-        db.close();
-        test.done();
-      }, 100)
     });
   }
 }
@@ -1398,20 +1385,14 @@ exports.executesCallbackOnceWithOveriddenDefaultDbWriteConcernWithRemove = {
   test: function(configuration, test) {
     function cb (err) {
       test.equal(null, err);
-      cb.called++;
-      test.equal(1, cb.called);
+      db.close();
+      test.done();
     }
-    cb.called = 0;
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('gh-completely1');
       collection.remove({ a: 1 }, { w: 0 }, cb);
-
-      setTimeout(function(){
-        db.close();
-        test.done();
-      }, 100);
     });
   }
 }
@@ -2219,7 +2200,7 @@ exports['Insert document including sub documents'] = {
 
       db.collection('sub_documents').insertOne(doc, function(err, r) {
         test.equal(null, err);
-        
+
         db.collection('sub_documents').find({}).next(function(err, v) {
           test.equal(null, err);
           test.equal('a', v.products[0].suppliers[0].shipments[0].shipment1);
@@ -2231,10 +2212,3 @@ exports['Insert document including sub documents'] = {
     });
   }
 }
-
-
-
-
-
-
-
