@@ -1,10 +1,11 @@
 "use strict";
 
-var fs = require('fs');
+var fs = require('fs'),
+  f = require('util').format;
 var replSetManager;
 
 var setUp = function(configuration, options, callback) {
-  var ReplSetManager = require('mongodb-tools').ReplSetManager
+  var ReplSetManager = require('mongodb-topology-manager').ReplSet
     , Db = configuration.require.Db
     , Server = configuration.require.Server
     , MongoClient = configuration.require.MongoClient;
@@ -15,37 +16,59 @@ var setUp = function(configuration, options, callback) {
   // Load the cert
   var cert = fs.readFileSync(__dirname + "/ssl/client.pem");
 
-  // Default rs options
-  var rsOptions = {
-    // SSL information
-    host: "server",
-    ssl:true,
-    sslPEMKeyFile: __dirname + "/ssl/server.pem",
-    sslCAFile: __dirname + "/ssl/ca.pem",
-    sslCRLFile: __dirname + "/ssl/crl.pem",
-    sslMode: 'requireSSL',
-
-    // The client certificate
-    key: cert,
-    cert: cert,
-    rejectUnauthorized: false,
-
-    // ReplSet settings
-    secondaries: 2
+  // Override options
+  if(options) {
+    var rsOptions = options;
+  } else {
+    var rsOptions = {
+      server: {
+        sslPEMKeyFile: __dirname + "/ssl/server.pem", sslCAFile: __dirname + "/ssl/ca.pem", sslCRLFile: __dirname + "/ssl/crl.pem", sslMode: 'requireSSL'
+      },
+      client: {
+        replSet: 'rs', ssl:true, rejectUnauthorized: false, key: cert, cert: cert, host: 'server'
+      }
+    }
   }
 
-  // Override options
-  if(options) rsOptions = options;
+  // Set up the nodes
+  var nodes = [{
+    options: {
+      bind_ip: 'server', port: 31000,
+      dbpath: f('%s/../db/31000', __dirname),
+    }
+  }, {
+    options: {
+      bind_ip: 'server', port: 31001,
+      dbpath: f('%s/../db/31001', __dirname),
+    }
+  }, {
+    options: {
+      bind_ip: 'server', port: 31002,
+      dbpath: f('%s/../db/31002', __dirname),
+    }
+  }]
 
-  // Create Replicaset Manager
-  replSetManager = new ReplSetManager(rsOptions);
+  // Merge in any node start up options
+  for(var i = 0; i < nodes.length; i++) {
+    for(var name in rsOptions.server) {
+      nodes[i].options[name] = rsOptions.server[name];
+    }
+  }
 
-  // Start SSL replicaset manager
-  replSetManager.start({kill: true, purge:true, signal: -9}, function(err, result) {      
-    if(err != null) throw err;
-    // Finish setup
-    callback();      
-  });      
+  // Create a manager
+  var replicasetManager = new ReplSetManager('mongod', nodes, rsOptions.client);
+
+  // Purge the set
+  replicasetManager.purge().then(function() {
+    // Start the server
+    replicasetManager.start().then(function() {
+      setTimeout(function() {
+        callback(null, replicasetManager);
+      }, 10000);
+    }).catch(function(e) {
+      console.dir(e);
+    });
+  });
 }
 
 /**
@@ -53,25 +76,24 @@ var setUp = function(configuration, options, callback) {
  */
 exports.shouldFailDuePresentingWrongCredentialsToServer = {
   metadata: { requires: { topology: 'ssl' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ReplSetManager = require('mongodb-tools').ReplSetManager
-      , Db = configuration.require.Db
+    var Db = configuration.require.Db
       , Server = configuration.require.Server
       , ReplSet = configuration.require.ReplSet
       , MongoClient = configuration.require.MongoClient;
 
-    setUp(configuration, function() {
+    setUp(configuration, function(e, replicasetManager) {
       // Read the ca
       var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
       var cert = fs.readFileSync(__dirname + "/ssl/mycert.pem");
       var key = fs.readFileSync(__dirname + "/ssl/mycert.pem");
 
-      // Create new 
-      var replSet = new ReplSet( [ 
-          new Server( "server", replSetManager.startPort + 1, { auto_reconnect: true } ),
-          new Server( "server", replSetManager.startPort, { auto_reconnect: true } ),
+      // Create new
+      var replSet = new ReplSet( [
+          new Server( "server", 31001, { auto_reconnect: true } ),
+          new Server( "server", 31000, { auto_reconnect: true } ),
         ], {
             rs_name:configuration.replicasetName
           , poolSize:5
@@ -93,7 +115,7 @@ exports.shouldFailDuePresentingWrongCredentialsToServer = {
 
         db.close();
 
-        replSetManager.stop(function() {
+        replicasetManager.stop().then(function() {
           test.done();
         });
       });
@@ -106,25 +128,24 @@ exports.shouldFailDuePresentingWrongCredentialsToServer = {
  */
 exports['Should correctly receive ping and ha events using ssl'] = {
   metadata: { requires: { topology: 'ssl' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ReplSetManager = require('mongodb-tools').ReplSetManager
-      , Db = configuration.require.Db
+    var Db = configuration.require.Db
       , Server = configuration.require.Server
       , ReplSet = configuration.require.ReplSet
       , MongoClient = configuration.require.MongoClient;
 
-    setUp(configuration, function() {
+    setUp(configuration, function(e, replicasetManager) {
       // Read the ca
       var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
       var cert = fs.readFileSync(__dirname + "/ssl/client.pem");
       var key = fs.readFileSync(__dirname + "/ssl/client.pem");
 
-      // Create new 
-      var replSet = new ReplSet( [ 
-          new Server( "server", replSetManager.startPort + 1, { auto_reconnect: true } ),
-          new Server( "server", replSetManager.startPort, { auto_reconnect: true } ),
+      // Create new
+      var replSet = new ReplSet( [
+          new Server( "server", 31001, { auto_reconnect: true } ),
+          new Server( "server", 31000, { auto_reconnect: true } ),
         ], {
             rs_name:configuration.replicasetName
           , ssl:true
@@ -156,7 +177,7 @@ exports['Should correctly receive ping and ha events using ssl'] = {
             clearInterval(interval);
             db.close();
 
-            replSetManager.stop(function() {
+            replicasetManager.stop().then(function() {
               test.done();
             });
           }
@@ -171,11 +192,10 @@ exports['Should correctly receive ping and ha events using ssl'] = {
  */
 exports.shouldFailToValidateServerSSLCertificate = {
   metadata: { requires: { topology: 'ssl' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ReplSetManager = require('mongodb-tools').ReplSetManager
-      , Db = configuration.require.Db
+    var Db = configuration.require.Db
       , Server = configuration.require.Server
       , ReplSet = configuration.require.ReplSet
       , MongoClient = configuration.require.MongoClient;
@@ -195,18 +215,18 @@ exports.shouldFailToValidateServerSSLCertificate = {
     }
 
     // Startup replicaset
-    setUp(configuration, rsOptions, function() {
-      // Create new 
-      var replSet = new ReplSet( [ 
-          new Server( "server", replSetManager.startPort + 1, { auto_reconnect: true } ),
-          new Server( "server", replSetManager.startPort, { auto_reconnect: true } ),
+    setUp(configuration, function(e, replicasetManager) {
+      // Create new
+      var replSet = new ReplSet( [
+          new Server( "server", 31001, { auto_reconnect: true } ),
+          new Server( "server", 31000, { auto_reconnect: true } ),
         ], {
             rs_name:configuration.replicasetName
           , ssl:true
           , sslValidate:true
           , sslCA:ca
           , poolSize:1
-        } 
+        }
       );
 
       // Connect to the replicaset
@@ -217,7 +237,7 @@ exports.shouldFailToValidateServerSSLCertificate = {
 
         db.close();
 
-        replSetManager.stop(function() {
+        replicasetManager.stop().then(function() {
           test.done();
         });
       });
@@ -230,25 +250,24 @@ exports.shouldFailToValidateServerSSLCertificate = {
  */
 exports.shouldCorrectlyValidateAndPresentCertificateReplSet = {
   metadata: { requires: { topology: 'ssl' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ReplSetManager = require('mongodb-tools').ReplSetManager
-      , Db = configuration.require.Db
+    var Db = configuration.require.Db
       , Server = configuration.require.Server
       , ReplSet = configuration.require.ReplSet
       , MongoClient = configuration.require.MongoClient;
 
-    setUp(configuration, function() {
+    setUp(configuration, function(e, replicasetManager) {
       // Read the ca
       var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
       var cert = fs.readFileSync(__dirname + "/ssl/client.pem");
       var key = fs.readFileSync(__dirname + "/ssl/client.pem");
 
-      // Create new 
-      var replSet = new ReplSet( [ 
-          new Server( "server", replSetManager.startPort + 1, { auto_reconnect: true } ),
-          new Server( "server", replSetManager.startPort, { auto_reconnect: true } ),
+      // Create new
+      var replSet = new ReplSet( [
+          new Server( "server", 31001, { auto_reconnect: true } ),
+          new Server( "server", 31000, { auto_reconnect: true } ),
         ], {
             rs_name:configuration.replicasetName
           , ssl:true
@@ -277,11 +296,11 @@ exports.shouldCorrectlyValidateAndPresentCertificateReplSet = {
                 test.equal(3, items.length);
                 db.close();
 
-                replSetManager.stop(function() {
+                replicasetManager.stop().then(function() {
                   test.done();
                 });
               })
-            });            
+            });
           });
         });
       });
@@ -294,31 +313,35 @@ exports.shouldCorrectlyValidateAndPresentCertificateReplSet = {
  */
 exports.shouldCorrectlyConnectToSSLBasedReplicaset = {
   metadata: { requires: { topology: 'ssl' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ReplSetManager = require('mongodb-tools').ReplSetManager
-      , Db = configuration.require.Db
+    var Db = configuration.require.Db
       , Server = configuration.require.Server
       , ReplSet = configuration.require.ReplSet
       , MongoClient = configuration.require.MongoClient;
 
-    // Default rs options
-    var rsOptions = {
-      host: "server",
-      ssl:true  ,
-      sslMode: 'requireSSL',
-      sslPEMKeyFile: __dirname + "/ssl/server.pem",
-      secondaries:2,
-    }
+    // Read the ca
+    var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
+    var cert = fs.readFileSync(__dirname + "/ssl/mycert.pem");
+    var key = fs.readFileSync(__dirname + "/ssl/mycert.pem");
 
-    setUp(configuration, rsOptions, function() {    
+    setUp(configuration, {
+      server: {
+        sslMode: 'requireSSL',
+        sslPEMKeyFile: __dirname + "/ssl/server.pem"
+      },
+      client: {
+        ssl:true, host: "server", replSet: 'rs', key:cert, ca:ca, cert:cert,
+        passphrase:'10gen', rejectUnauthorized: false
+      }
+    }, function(e, replicasetManager) {
       // Read the ca
       var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
-      // Create new 
-      var replSet = new ReplSet( [ 
-          new Server( "server", replSetManager.startPort + 1, { auto_reconnect: true } ),
-          new Server( "server", replSetManager.startPort, { auto_reconnect: true } ),
+      // Create new
+      var replSet = new ReplSet( [
+          new Server( "server", 31001, { auto_reconnect: true } ),
+          new Server( "server", 31000, { auto_reconnect: true } ),
         ], {
             rs_name:configuration.replicasetName
           , ssl:true
@@ -326,18 +349,19 @@ exports.shouldCorrectlyConnectToSSLBasedReplicaset = {
           , sslCA:ca
         }
       );
-      
+
       // Connect to the replicaset
       var slaveDb = null;
       var db = new Db('foo', replSet, {w:0});
       db.open(function(err, p_db) {
         test.equal(null, err);
         test.ok(!!p_db);
+
         p_db.collection('test').find({}, function(error) {
           test.equal(null, error);
           p_db.close();
 
-          replSetManager.stop(function() {
+          replicasetManager.stop().then(function() {
             test.done();
           });
         });
@@ -351,22 +375,21 @@ exports.shouldCorrectlyConnectToSSLBasedReplicaset = {
  */
 exports.shouldFailToValidateServerSSLCertificate = {
   metadata: { requires: { topology: 'ssl' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ReplSetManager = require('mongodb-tools').ReplSetManager
-      , Db = configuration.require.Db
+    var Db = configuration.require.Db
       , Server = configuration.require.Server
       , ReplSet = configuration.require.ReplSet
       , MongoClient = configuration.require.MongoClient;
 
-    setUp(configuration, function() {
+    setUp(configuration, function(e, replicasetManager) {
       // Read the ca
       var ca = [fs.readFileSync(__dirname + "/ssl/mycert.pem")];
-      // Create new 
-      var replSet = new ReplSet( [ 
-          new Server( "server", replSetManager.startPort + 1, { auto_reconnect: true } ),
-          new Server( "server", replSetManager.startPort, { auto_reconnect: true } ),
+      // Create new
+      var replSet = new ReplSet( [
+          new Server( "server", 31001, { auto_reconnect: true } ),
+          new Server( "server", 31000, { auto_reconnect: true } ),
         ], {
             rs_name:configuration.replicasetName
           , ssl:true
@@ -386,7 +409,7 @@ exports.shouldFailToValidateServerSSLCertificate = {
 
         db.close();
 
-        replSetManager.stop(function() {
+        replicasetManager.stop().then(function() {
           test.done();
         });
       });
@@ -399,23 +422,22 @@ exports.shouldFailToValidateServerSSLCertificate = {
  */
 exports.shouldFailDueToNotPresentingCertificateToServer = {
   metadata: { requires: { topology: 'ssl' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ReplSetManager = require('mongodb-tools').ReplSetManager
-      , Db = configuration.require.Db
+    var Db = configuration.require.Db
       , Server = configuration.require.Server
       , ReplSet = configuration.require.ReplSet
       , MongoClient = configuration.require.MongoClient;
 
-    setUp(configuration, function() {
+    setUp(configuration, function(e, replicasetManager) {
       // Read the ca
       var ca = [fs.readFileSync(__dirname + "/ssl/mycert.pem")];
       var cert = fs.readFileSync(__dirname + "/ssl/client.pem");
-      // Create new 
-      var replSet = new ReplSet( [ 
-          new Server( "server", replSetManager.startPort + 1, { auto_reconnect: true } ),
-          new Server( "server", replSetManager.startPort, { auto_reconnect: true } ),
+      // Create new
+      var replSet = new ReplSet( [
+          new Server( "server", 31001, { auto_reconnect: true } ),
+          new Server( "server", 31000, { auto_reconnect: true } ),
         ], {
             rs_name:configuration.replicasetName
           , ssl:true
@@ -423,7 +445,7 @@ exports.shouldFailDueToNotPresentingCertificateToServer = {
           , sslCA:ca
           , sslCert:cert
           , poolSize:1
-        } 
+        }
       );
 
       // Connect to the replicaset
@@ -435,7 +457,7 @@ exports.shouldFailDueToNotPresentingCertificateToServer = {
 
         db.close();
 
-        replSetManager.stop(function() {
+        replicasetManager.stop().then(function() {
           test.done();
         });
       });
@@ -448,11 +470,10 @@ exports.shouldFailDueToNotPresentingCertificateToServer = {
  */
 exports.shouldCorrectlyPresentPasswordProtectedCertificate = {
   metadata: { requires: { topology: 'ssl' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ReplSetManager = require('mongodb-tools').ReplSetManager
-      , Db = configuration.require.Db
+    var Db = configuration.require.Db
       , Server = configuration.require.Server
       , ReplSet = configuration.require.ReplSet
       , MongoClient = configuration.require.MongoClient;
@@ -461,33 +482,31 @@ exports.shouldCorrectlyPresentPasswordProtectedCertificate = {
     var cert = fs.readFileSync(__dirname + "/ssl/password_protected.pem");
     var key = fs.readFileSync(__dirname + "/ssl/password_protected.pem");
 
-    // Default rs options
-    var rsOptions = {
-      // SSL information
-      host: "server",
-      ssl:true,
-      sslPEMKeyFile: __dirname + "/ssl/server.pem",
-      sslCAFile: __dirname + "/ssl/ca.pem",
-      sslCRLFile: __dirname + "/ssl/crl.pem",
-      sslMode: 'requireSSL',
-
-      // The client certificate
-      ca: ca,
-      key: key,
-      cert: cert,
-      rejectUnauthorized: true,
-      passphrase: 'qwerty',
-
-      // ReplSet settings
-      secondaries: 2
-    }
-
     // Startup replicaset
-    setUp(configuration, rsOptions, function() {
-      // Create new 
-      var replSet = new ReplSet( [ 
-          new Server( "server", replSetManager.startPort + 1, { auto_reconnect: true } ),
-          new Server( "server", replSetManager.startPort, { auto_reconnect: true } ),
+    setUp(configuration, {
+      server: {
+        sslPEMKeyFile: __dirname + "/ssl/server.pem",
+        sslCAFile: __dirname + "/ssl/ca.pem",
+        sslCRLFile: __dirname + "/ssl/crl.pem",
+        sslMode: 'requireSSL'
+      },
+      client: {
+        // SSL information
+        host: "server",
+        ssl:true,
+        // The client certificate
+        ca: ca,
+        key: key,
+        cert: cert,
+        rejectUnauthorized: true,
+        passphrase: 'qwerty',
+        replSet: 'rs'
+      }
+    }, function(e, replicasetManager) {
+      // Create new
+      var replSet = new ReplSet( [
+          new Server( "server", 31001, { auto_reconnect: true } ),
+          new Server( "server", 31000, { auto_reconnect: true } ),
         ], {
             rs_name:configuration.replicasetName
           , ssl:true
@@ -497,7 +516,7 @@ exports.shouldCorrectlyPresentPasswordProtectedCertificate = {
           , sslCert:cert
           , sslPass: 'qwerty'
           , poolSize:1
-        } 
+        }
       );
 
       // Connect to the replicaset
@@ -516,13 +535,13 @@ exports.shouldCorrectlyPresentPasswordProtectedCertificate = {
                 test.equal(3, items.length);
                 db.close();
 
-                replSetManager.stop(function() {
+                replicasetManager.stop().then(function() {
                   test.done();
                 });
               });
             });
           });
-        });        
+        });
       });
     });
   }
@@ -533,42 +552,41 @@ exports.shouldCorrectlyPresentPasswordProtectedCertificate = {
  */
 exports.shouldCorrectlyValidateServerSSLCertificate = {
   metadata: { requires: { topology: 'ssl' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ReplSetManager = require('mongodb-tools').ReplSetManager
-      , Db = configuration.require.Db
+    var Db = configuration.require.Db
       , Server = configuration.require.Server
       , ReplSet = configuration.require.ReplSet
       , MongoClient = configuration.require.MongoClient;
 
     var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
 
-    // Default rs options
-    var rsOptions = {
-      // SSL information
-      host: "server",
-      ssl:true,
-      sslPEMKeyFile: __dirname + "/ssl/server.pem",
-      sslMode: 'requireSSL',
-
-      // ReplSet settings
-      secondaries: 2
-    }
-
     // Startup replicaset
-    setUp(configuration, rsOptions, function() {
-      // Create new 
-      var replSet = new ReplSet( [ 
-          new Server( "server", replSetManager.startPort + 1, { auto_reconnect: true } ),
-          new Server( "server", replSetManager.startPort, { auto_reconnect: true } ),
+    setUp(configuration, {
+      server: {
+        sslPEMKeyFile: __dirname + "/ssl/server.pem",
+        sslMode: 'requireSSL'
+      },
+      client: {
+        // SSL information
+        host: "server",
+        ssl:true,
+        rejectUnauthorized:false,
+        replSet: 'rs'
+      }
+    }, function(e, replicasetManager) {
+      // Create new
+      var replSet = new ReplSet( [
+          new Server( "server", 31001, { auto_reconnect: true } ),
+          new Server( "server", 31000, { auto_reconnect: true } ),
         ], {
             rs_name:configuration.replicasetName
           , ssl:true
           , sslValidate:true
           , sslCA:ca
           , poolSize:1
-        } 
+        }
       );
 
       // Connect to the replicaset
@@ -587,13 +605,13 @@ exports.shouldCorrectlyValidateServerSSLCertificate = {
                 test.equal(3, items.length);
                 db.close();
 
-                replSetManager.stop(function() {
+                replicasetManager.stop().then(function() {
                   test.done();
                 });
               });
             });
           });
-        });        
+        });
       });
     });
   }

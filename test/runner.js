@@ -3,35 +3,36 @@
 var Runner = require('integra').Runner
   , Cover = require('integra').Cover
   , RCover = require('integra').RCover
-  , FileFilter = require('integra').FileFilter
+  , f = require('util').format
+  , m = require('mongodb-version-manager')
+  , path = require('path')
   , NodeVersionFilter = require('./filters/node_version_filter')
   , MongoDBVersionFilter = require('./filters/mongodb_version_filter')
   , MongoDBTopologyFilter = require('./filters/mongodb_topology_filter')
   , ES6PromisesSupportedFilter = require('./filters/es6_promises_supported_filter')
   , ES6GeneratorsSupportedFilter = require('./filters/es6_generators_supported_filter')
-  , OSFilter = require('./filters/os_filter')
   , TravisFilter = require('./filters/travis_filter')
-  , DisabledFilter = require('./filters/disabled_filter')
   , FileFilter = require('integra').FileFilter
-  , TestNameFilter = require('integra').TestNameFilter
-  , path = require('path')
-  , rimraf = require('rimraf')
-  , fs = require('fs')
-  , m = require('mongodb-version-manager')
-  , f = require('util').format;
+  , TestNameFilter = require('integra').TestNameFilter;
 
 var detector = require('gleak')();
 var smokePlugin = require('./smoke_plugin.js');
-// console.log(argv._);
 var argv = require('optimist')
-    .usage('Usage: $0 -t [target] -e [environment] -n [name] -f [filename] -r [smoke report file] -s [skip startup of mongod]')
+    .usage('Usage: $0 -t [target] -e [environment] -n [name] -f [filename] -r [smoke report file]')
     .demand(['t'])
     .argv;
 
-var shallowClone = function(obj) {
-  var copy = {};
-  for(var name in obj) copy[name] = obj[name];
-  return copy;
+// MongoDB Topology Manager
+var ServerManager = require('mongodb-topology-manager').Server,
+  ReplSetManager = require('mongodb-topology-manager').ReplSet,
+  ShardingManager = require('./test_topologies.js').Sharded;
+
+// Skipping parameters
+var startupOptions = {
+    skipStartup: true
+  , skipRestart: true
+  , skipShutdown: true
+  , skip: false
 }
 
 // Skipping parameters
@@ -52,85 +53,90 @@ if(argv.s) {
   }
 }
 
-// var listener = require('../').instrument();
-// listener.on('started', function(event) {
-//   // console.log("-------------------------------------------- started")
-//   // console.log(JSON.stringify(event, null, 2))
-// });
-
 /**
  * Standalone MongoDB Configuration
  */
-var createConfiguration = function(options) {
+var f = require('util').format;
+var mongo = require('..');
+var Logger = mongo.Logger;
+
+var clone = function(obj) {
+  var copy = {};
+  for(var name in obj) copy[name] = obj[name];
+  return copy;
+}
+
+var Configuration = function(options) {
   options = options || {};
+  var host = options.host || 'localhost';
+  var port = options.port || 27017;
+  var db = options.db || 'integration_tests';
+  var url = options.url || "mongodb://%slocalhost:27017/" + db;
+  var manager = options.manager;
+  var skipStart = typeof options.skipStart == 'boolean' ? options.skipStart : false;
+  var skipTermination = typeof options.skipTermination == 'boolean' ? options.skipTermination : false;
+  var setName = options.setName || 'rs';
+  var replicasetName = options.replicasetName || 'rs';
 
-  // Create the configuration
-  var Configuration = function(context) {
-    var mongo = require('../');
-    var Db = mongo.Db;
-    var Server = mongo.Server;
-    var Logger = mongo.Logger;
-    var ServerManager = require('mongodb-tools').ServerManager;
-    var database = "integration_tests";
-    var url = options.url || "mongodb://%slocalhost:27017/" + database;
-    var port = options.port || 27017;
-    var host = options.host || 'localhost';
-    var replicasetName = options.replicasetName || 'rs';
-    var writeConcern = options.writeConcern || {w:1};
-    var writeConcernMax = options.writeConcernMax || {w:1};
+  // Write concerns
+  var writeConcern = options.writeConcern || {w:1};
+  var writeConcernMax = options.writeConcernMax || {w:1};
 
-    Logger.setCurrentLogger(function() {});
-    Logger.setLevel('info');
+  // Default function
+  var defaultFunction = function(host, port, options) {
+    return new mongo.Server(host, port, options || {});
+  };
 
-    // Shallow clone the options
-    var fOptions = shallowClone(options);
-    options.journal = false;
+  // Create a topology function
+  var topology = options.topology || defaultFunction;
 
-    // Override manager or use default
-    var manager = options.manager ? options.manager() : new ServerManager(fOptions);
-
-    // clone
-    var clone = function(o) {
-      var p = {}; for(var name in o) p[name] = o[name];
-      return p;
-    }
-
-    // return configuration
+  return function(context) {
     return {
-      manager: manager,
-      replicasetName: replicasetName,
-
       start: function(callback) {
-        if(startupOptions.skipStartup) return callback();
-        manager.start({purge:true, signal:-9, kill:true}, function(err) {
-          if(err) throw err;
-          callback();
+        var self = this;
+        if(skipStart) return callback();
+
+        // Purge the database
+        manager.purge().then(function() {
+          console.log("[purge the directories]");
+
+          var Logger = require('mongodb-topology-manager').Logger;
+          manager.start().then(function() {
+            console.log("[started the topology]");
+            var Logger = require('mongodb-topology-manager').Logger;
+            // Logger.setLevel('info');
+            // Create an instance
+            new mongo.Db(self.db, topology(host, port)).open(function(err, db) {
+              if(err) return callback(err);
+
+              db.dropDatabase(function(err) {
+                db.close();
+                callback();
+              });
+            });
+          }).catch(function(err) {
+            console.log(err.stack);
+          });
+        }).catch(function(err) {
+          console.log(err.stack);
         });
       },
 
       stop: function(callback) {
-        if(startupOptions.skipShutdown) return callback();
-        manager.stop({signal: -15}, function() {
-
-          // Print any global leaks
-          detector.detect().forEach(function (name) {
-            console.warn('found global leak: %s', name);
-          });
-
-          // Finish stop
+        if(skipTermination) return callback();
+        // Stop the servers
+        manager.stop().then(function() {
           callback();
         });
       },
 
       restart: function(options, callback) {
-        if(typeof options == 'function') callback = options, options = {};
-        if(startupOptions.skipRestart) return callback();
-        var purge = typeof options.purge == 'boolean' ? options.purge : true;
-        var kill = typeof options.kill == 'boolean' ? options.kill : true;
-        manager.restart({purge:purge, kill:kill}, function() {
-          setTimeout(function() {
-            callback();
-          }, 1000);
+        if(typeof options == 'function') callback = options, options = {purge:true, kill:true};
+        if(skipTermination) return callback();
+
+        // Stop the servers
+        manager.restart().then(function() {
+          callback();
         });
       },
 
@@ -145,7 +151,9 @@ var createConfiguration = function(options) {
       newDbInstance: function(dbOptions, serverOptions) {
         serverOptions = serverOptions || {};
         // Override implementation
-        if(options.newDbInstance) return options.newDbInstance(dbOptions, serverOptions);
+        if(options.newDbInstance) {
+          return options.newDbInstance(dbOptions, serverOptions);
+        }
 
         // Set up the options
         var keys = Object.keys(options);
@@ -156,14 +164,14 @@ var createConfiguration = function(options) {
         var host = serverOptions && serverOptions.host || 'localhost';
 
         // Default topology
-        var topology = Server;
+        var topology = mongo.Server;
         // If we have a specific topology
         if(options.topology) {
           topology = options.topology;
         }
 
         // Return a new db instance
-        return new Db(database, new topology(host, port, serverOptions), dbOptions);
+        return new mongo.Db(db, new topology(host, port, serverOptions), dbOptions);
       },
 
       newDbInstanceWithDomainSocket: function(dbOptions, serverOptions) {
@@ -171,7 +179,7 @@ var createConfiguration = function(options) {
         if(options.newDbInstanceWithDomainSocket) return options.newDbInstanceWithDomainSocket(dbOptions, serverOptions);
 
         // Default topology
-        var topology = Server;
+        var topology = mongo.Server;
         // If we have a specific topology
         if(options.topology) {
           topology = options.topology;
@@ -185,11 +193,11 @@ var createConfiguration = function(options) {
         if(keys.indexOf('sslOnNormalPorts') != -1) serverOptions.ssl = true;
         // If we explicitly testing undefined port behavior
         if(serverOptions && serverOptions.port == 'undefined') {
-          return new Db('integration_tests', topology(host, undefined, serverOptions), dbOptions);
+          return new mongo.Db(db, topology(host, undefined, serverOptions), dbOptions);
         }
 
         // Normal socket connection
-        return new Db('integration_tests', topology(host, serverOptions), dbOptions);
+        return new mongo.Db(db, topology(host, serverOptions), dbOptions);
       },
 
       url: function(username, password) {
@@ -203,28 +211,54 @@ var createConfiguration = function(options) {
         return f(url, auth);
       },
 
+      // newTopology: function(options, callback) {
+      //   if(typeof options == 'function') {
+      //     callback = options;
+      //     options = {};
+      //   }
+      //
+      //   callback(null, topology(this, mongo));
+      // },
+      //
+      // newConnection: function(options, callback) {
+      //   if(typeof options == 'function') {
+      //     callback = options;
+      //     options = {};
+      //   }
+      //
+      //   var server = topology(this, mongo);
+      //   // Set up connect
+      //   server.once('connect', function() {
+      //     callback(null, server);
+      //   });
+      //
+      //   // Connect
+      //   server.connect();
+      // },
+
       // Additional parameters needed
+      database: db || options.db,
       require: mongo,
-      database: database || options.database,
-      nativeParser: true,
       port: port,
       host: host,
+      setName: setName,
+      db: db,
+      manager: manager,
+      replicasetName: replicasetName,
       writeConcern: function() { return clone(writeConcern) },
       writeConcernMax: function() { return clone(writeConcernMax) }
     }
   }
-
-  return Configuration;
 }
 
 // Set up the runner
 var runner = new Runner({
-  logLevel:'info',
-  runners: 1,
-  failFast: true
+    logLevel:'info'
+  , runners: 1
+  , failFast: true
 });
 
-var testFiles =[
+var testFiles = [
   // Logging tests
     '/test/functional/logger_tests.js'
 
@@ -349,10 +383,6 @@ runner.plugin(new NodeVersionFilter(startupOptions));
 runner.plugin(new MongoDBVersionFilter(startupOptions));
 // Add a Topology filter plugin
 runner.plugin(new MongoDBTopologyFilter(startupOptions));
-// Add a OS filter plugin
-runner.plugin(new OSFilter(startupOptions))
-// Add a Disable filter plugin
-runner.plugin(new DisabledFilter(startupOptions))
 // Add a Filter allowing us to specify that a function requires Promises
 runner.plugin(new ES6PromisesSupportedFilter())
 // Add a Filter allowing us to validate if generators are available
@@ -363,6 +393,18 @@ runner.on('exit', function(errors, results) {
   process.exit(0)
 });
 
+// Set Logger level for driver
+// Logger.setLevel('info');
+Logger.setLevel('error');
+// Logger.setLevel('debug');
+// Logger.filter('class', ['ReplSet', 'Server', 'Connection']);
+// Logger.filter('class', ['ReplSet', 'Server', 'Pool', 'Connection']);
+// Logger.filter('class', ['ReplSet', 'Server', 'Cursor']);
+//Logger.filter('class', ['Mongos', 'Server']);
+//Logger.filter('class', ['Mongos', 'Server']);
+// Logger.filter('class', ['Mongos']);
+// Logger.filter('class', ['ReplSet']);
+
 // We want to export a smoke.py style json file
 if(argv.r) {
   console.log("Writing smoke output to " + argv.r);
@@ -371,160 +413,236 @@ if(argv.r) {
 
 // Are we running a functional test
 if(argv.t == 'functional') {
-  var config = createConfiguration();
+  // Contain the config
+  var config = null;
 
+  //
+  // Execute the final code
+  var executeTestSuite = function() {
+    // If we have a test we are filtering by
+    if(argv.f) {
+      runner.plugin(new FileFilter(argv.f));
+    }
+
+    if(argv.n) {
+      runner.plugin(new TestNameFilter(argv.n));
+    }
+
+    // Add travis filter
+    runner.plugin(new TravisFilter());
+
+    // Skip startup
+    if(startupOptions.skipStartup) {
+      return runner.run(Configuration(config));
+    }
+
+    // Skip the version download and use local mongod in PATH
+    if(argv.l) {
+      return runner.run(Configuration(config));
+    }
+
+    // Kill any running MongoDB processes and
+    // `install $MONGODB_VERSION` || `use existing installation` || `install stable`
+    m(function(err){
+      if(err) return console.error(err) && process.exit(1);
+
+      m.current(function(err, version){
+        if(err) return console.error(err) && process.exit(1);
+        console.log('Running tests against MongoDB version `%s`', version);
+        // Run the configuration
+        runner.run(Configuration(config));
+      });
+    });
+  }
+
+  //
+  // Replicaset configuration
   if(argv.e == 'replicaset') {
-    config = createConfiguration({
-        port: 31000,
-        host: 'localhost',
-        url: "mongodb://%slocalhost:31000/integration_tests?rs_name=rs",
-        writeConcernMax: {w: 'majority', wtimeout: 30000},
-        replicasetName: 'rs',
-
-        topology: function(host, port, serverOptions) {
-          var m = require('../');
-          host = host || 'localhost'; port = port || 31000;
-          serverOptions = shallowClone(serverOptions);
-          serverOptions.rs_name = 'rs';
-          serverOptions.poolSize = 1;
-          return new m.ReplSet([new m.Server(host, port)], serverOptions);
-        },
-
-        manager: function() {
-          var ReplSetManager = require('mongodb-tools').ReplSetManager;
-          // Return manager
-          return new ReplSetManager({
-              dbpath: path.join(path.resolve('db'))
-            , logpath: path.join(path.resolve('db'))
-            , arbiters: 1
-            // , enableMajorityReadConcern:null
-            , tags: [{loc: "ny"}, {loc: "sf"}, {loc: "sf"}]
-            , replSet: 'rs', startPort: 31000
-          });
-        },
-    });
-  } else if(argv.e == 'sharded') {
-    config = createConfiguration({
-        port: 50000,
-        host: 'localhost',
-        url: "mongodb://%slocalhost:50000/integration_tests",
-        writeConcernMax: {w: 3, wtimeout: 30000},
-
-        topology: function(host, port, serverOptions) {
-          var m = require('../');
-          host = host || 'localhost'; port = port || 50000;
-          serverOptions = shallowClone(serverOptions);
-          serverOptions.poolSize = 1;
-          return new m.Mongos([new m.Server(host, port, serverOptions)]);
-        },
-
-        manager: function() {
-          var ShardingManager = require('mongodb-tools').ShardingManager;
-          return new ShardingManager({
-              dbpath: path.join(path.resolve('db'))
-            , logpath: path.join(path.resolve('db'))
-            , tags: [{loc: "ny"}, {loc: "sf"}, {loc: "sf"}]
-            , mongosStartPort: 50000
-            , replsetStartPort: 31000
-          });
+    // Establish the server version
+    new ServerManager('mongod').discover().then(function(r) {
+      // The individual nodes
+      var nodes = [{
+        tags: {loc: 'ny'},
+        // mongod process options
+        options: {
+          bind_ip: 'localhost',
+          port: 31000,
+          dbpath: f('%s/../db/31000', __dirname),
+          setParameter: ['enableTestCommands=1']
         }
+      }, {
+        tags: {loc: 'sf'},
+        options: {
+          bind_ip: 'localhost',
+          port: 31001,
+          dbpath: f('%s/../db/31001', __dirname),
+          setParameter: ['enableTestCommands=1']
+        }
+      }, {
+        tags: {loc: 'sf'},
+        options: {
+          bind_ip: 'localhost',
+          port: 31002,
+          dbpath: f('%s/../db/31002', __dirname),
+          setParameter: ['enableTestCommands=1']
+        }
+      }, {
+        tags: {loc: 'sf'},
+        priority: 0,
+        options: {
+          bind_ip: 'localhost',
+          port: 31003,
+          dbpath: f('%s/../db/31003', __dirname),
+          setParameter: ['enableTestCommands=1']
+        }
+      }, {
+        arbiter: true,
+        options: {
+          bind_ip: 'localhost',
+          port: 31004,
+          dbpath: f('%s/../db/31004', __dirname),
+          setParameter: ['enableTestCommands=1']
+        }
+      }];
+
+      // Do we have 3.2
+      if(r.version[0] == 3 && r.version[1] == 2) {
+        nodes = nodes.map(function(x) {
+          x.options.enableMajorityReadConcern = null;
+          return x;
+        });
+      }
+
+      // Test suite Configuration
+      config = {
+          host: 'localhost', port: 31000, setName: 'rs'
+        , url: "mongodb://%slocalhost:31000/integration_tests?rs_name=rs"
+        , writeConcernMax: {w: 'majority', wtimeout: 30000}
+        , replicasetName: 'rs'
+        , topology: function(host, port, serverOptions) {
+            host = host || 'localhost'; port = port || 31000;
+            serverOptions = clone(serverOptions);
+            serverOptions.rs_name = 'rs';
+            serverOptions.poolSize = 1;
+            return new mongo.ReplSet([
+              new mongo.Server(host, port)
+            ], serverOptions);
+          }
+        , manager: new ReplSetManager('mongod', nodes, {
+          replSet: 'rs'
+        })
+      }
+
+      // Execute test suite
+      executeTestSuite();
     });
-  } else if(argv.e == 'ssl') {
+  }
+
+  //
+  // Sharded configuration
+  if(argv.e == 'sharded') {
+    //
+    // Sharded
+    config = {
+        host: 'localhost'
+      , port: 51000
+      , url: "mongodb://%slocalhost:51000/integration_tests"
+      , writeConcernMax: {w: 'majority', wtimeout: 30000}
+      , skipStart: startupOptions.skipStartup
+      , skipTermination: startupOptions.skipShutdown
+      , topology: function(host, port, options) {
+        return new mongo.Mongos([
+          new mongo.Server(host, port, options || {})
+        ]);
+      }, manager: new ShardingManager({
+      })
+    }
+
+    executeTestSuite();
+  }
+
+  //
+  // SSL configuration
+  if(argv.e == 'ssl') {
     // Create ssl server
-    config = createConfiguration({
+    config = {
         sslOnNormalPorts: null
       , fork:null
       , sslPEMKeyFile: __dirname + "/functional/ssl/server.pem"
       , url: "mongodb://%slocalhost:27017/integration_tests?ssl=true"
-
       , topology: function(host, port, serverOptions) {
-        var m = require('../');
-        host = host || 'localhost'; port = port || 27017;
-        serverOptions = shallowClone(serverOptions);
+        host = host || 'localhost';
+        port = port || 27017;
+        serverOptions = clone(serverOptions);
         serverOptions.poolSize = 1;
         serverOptions.ssl = true
         serverOptions.sslValidate = false;
-        return new m.Server(host, port, serverOptions);
-      },
-    });
-  } else if(argv.e == 'auth') {
+        return new mongo.Server(host, port, serverOptions);
+      }, manager: new ServerManager('mongod', {
+        dbpath: path.join(path.resolve('db'), f("data-%d", 27017)),
+        sslOnNormalPorts: null,
+        sslPEMKeyFile: __dirname + "/functional/ssl/server.pem",
+        setParameter: ['enableTestCommands=1']
+      })
+    }
+
+    executeTestSuite();
+  }
+
+  //
+  // SSL configuration
+  if(argv.e == 'scram') {
     // Create ssl server
-    config = createConfiguration({
-        auth: null
+    config = {
+        url: "mongodb://%slocalhost:27017/integration_tests"
       , topology: function(host, port, serverOptions) {
-        var m = require('../');
-        host = host || 'localhost'; port = port || 27017;
-        serverOptions = shallowClone(serverOptions);
+        host = host || 'localhost';
+        port = port || 27017;
+        serverOptions = clone(serverOptions);
         serverOptions.poolSize = 1;
-        return new m.Server(host, port, serverOptions);
-      },
-    });
-  } else if(argv.e == 'ldap' || argv.e == 'kerberos') {
-    startupOptions.skipStartup = true;
-    startupOptions.skipRestart = true;
-    startupOptions.skipShutdown = true;
-    startupOptions.skip = true;
-  } else if(argv.e == 'scram') {
+        return new mongo.Server(host, port, serverOptions);
+      }, manager: new ServerManager('mongod', {
+        dbpath: path.join(path.resolve('db'), f("data-%d", 27017)),
+        auth:null
+      })
+    }
+
+    executeTestSuite();
+  }
+
+  //
+  // Authentication Configuration
+  if(argv.e == 'auth') {
     // Create ssl server
-    config = createConfiguration({
-        fork:null
-      , auth: null
-      , setParameter: 'authenticationMechanisms=SCRAM-SHA-1'
-
+    config = {
+        url: "mongodb://%slocalhost:27017/integration_tests"
       , topology: function(host, port, serverOptions) {
-        var m = require('../');
-        host = host || 'localhost'; port = port || 27017;
-        serverOptions = shallowClone(serverOptions);
+        host = host || 'localhost';
+        port = port || 27017;
+        serverOptions = clone(serverOptions);
         serverOptions.poolSize = 1;
-        return new m.Server(host, port, serverOptions);
-      },
-    });
+        return new mongo.Server(host, port, serverOptions);
+      }, manager: new ServerManager('mongod', {
+        dbpath: path.join(path.resolve('db'), f("data-%d", 27017)),
+        auth:null
+      })
+    }
+
+    executeTestSuite();
   }
 
-    // startupOptions.skipStartup = true;
-    // startupOptions.skipRestart = true;
-    // startupOptions.skipShutdown = true;
-    // startupOptions.skip = true;
+  //
+  // Single server
+  if(!argv.e || argv.e == 'kerberos' || argv.e == 'ldap') {
+    config = {
+        host: 'localhost'
+      , port: 27017
+      , manager: new ServerManager('mongod', {
+        dbpath: path.join(path.resolve('db'), f("data-%d", 27017)),
+        setParameter: ['enableTestCommands=1']
+      })
+    }
 
-  // If we have a test we are filtering by
-  if(argv.f) {
-    runner.plugin(new FileFilter(argv.f));
+    executeTestSuite();
   }
-
-  if(argv.n) {
-    runner.plugin(new TestNameFilter(argv.n));
-  }
-
-  // Add travis filter
-  runner.plugin(new TravisFilter());
-
-  // Skip startup
-  if(startupOptions.skipStartup) {
-    return runner.run(config);
-  }
-
-  // Remove db directories
-  try {
-    rimraf.sync('./data');
-    rimraf.sync('./db');
-  } catch(err) {
-  }
-
-  // Skip the version download and use local mongod in PATH
-  if(argv.l) {
-    return runner.run(config);
-  }
-
-  // Kill any running MongoDB processes and
-  // `install $MONGODB_VERSION` || `use existing installation` || `install stable`
-  m(function(err){
-    if(err) return console.error(err) && process.exit(1);
-
-    m.current(function(err, version){
-      if(err) return console.error(err) && process.exit(1);
-      console.log('Running tests against MongoDB version `%s`', version);
-      // Run the configuration
-      runner.run(config);
-    });
-  });
 }

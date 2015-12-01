@@ -44,7 +44,7 @@ exports['Should set local readConcern on db level'] = {
 
         listener.uninstrument();
         db.close();
-        test.done();       
+        test.done();
       });
     });
   }
@@ -80,7 +80,7 @@ exports['Should set majority readConcern on db level'] = {
 
         listener.uninstrument();
         db.close();
-        test.done();       
+        test.done();
       });
     });
   }
@@ -114,7 +114,7 @@ exports['Should set local readConcern at collection level'] = {
 
         listener.uninstrument();
         db.close();
-        test.done();       
+        test.done();
       });
     });
   }
@@ -148,7 +148,7 @@ exports['Should set majority readConcern at collection level'] = {
 
         listener.uninstrument();
         db.close();
-        test.done();       
+        test.done();
       });
     });
   }
@@ -189,7 +189,7 @@ exports['Should set local readConcern using MongoClient'] = {
 
         listener.uninstrument();
         db.close();
-        test.done();       
+        test.done();
       });
     });
   }
@@ -230,7 +230,7 @@ exports['Should set majority readConcern using MongoClient'] = {
 
         listener.uninstrument();
         db.close();
-        test.done();       
+        test.done();
       });
     });
   }
@@ -265,7 +265,7 @@ exports['Should error out with readConcern level set to majority'] = {
 
         listener.uninstrument();
         db.close();
-        test.done();       
+        test.done();
       });
     });
   }
@@ -289,7 +289,7 @@ exports['Should set majority readConcern aggregate command'] = {
       var collection = db.collection('readConcernCollectionAggregate');
       // Validate readConcern
       test.deepEqual({level: 'majority'}, collection.s.readConcern);
-      
+
       // Listen to apm events
       listener.on('started', function(event) { if(event.commandName == 'aggregate') started.push(event); });
       listener.on('succeeded', function(event) { if(event.commandName == 'aggregate') succeeded.push(event);});
@@ -304,7 +304,7 @@ exports['Should set majority readConcern aggregate command'] = {
 
         listener.uninstrument();
         db.close();
-        test.done();       
+        test.done();
       });
     });
   }
@@ -328,7 +328,7 @@ exports['Should set majority readConcern aggregate command but ignore due to out
       var collection = db.collection('readConcernCollectionAggregate1');
       // Validate readConcern
       test.deepEqual({level: 'majority'}, collection.s.readConcern);
-      
+
       // Listen to apm events
       listener.on('started', function(event) { if(event.commandName == 'aggregate') started.push(event); });
       listener.on('succeeded', function(event) { if(event.commandName == 'aggregate') succeeded.push(event);});
@@ -351,7 +351,7 @@ exports['Should set majority readConcern aggregate command but ignore due to out
 
           listener.uninstrument();
           db.close();
-          test.done();       
+          test.done();
         });
       });
     });
@@ -660,49 +660,6 @@ exports['Should set majority readConcern geoSearch command'] = {
             db.close();
             test.done();
           });
-        });
-      });
-    });
-  }
-}
-
-exports['Should set majority explain command'] = {
-  metadata: { requires: { topology: 'replicaset', mongodb: ">= 3.1.8" } },
-
-  test: function(configuration, test) {
-    var listener = require('../..').instrument(function(err, instrumentations) {});
-    // Contains all the apm events
-    var started = [];
-    var succeeded = [];
-    // Get a new instance
-    var db = configuration.newDbInstance({w:1, readConcern: {level: 'majority'}}, {poolSize:1});
-    db.open(function(err, db) {
-      test.equal(null, err);
-      test.deepEqual({level: 'majority'}, db.s.readConcern);
-
-      // Get the collection
-      var collection = db.collection('test_explain_read_concern');
-
-      // Listen to apm events
-      listener.on('started', function(event) { if(event.commandName == 'explain') started.push(event); });
-      listener.on('succeeded', function(event) { if(event.commandName == 'explain') succeeded.push(event);});
-
-      // Save a new location tagged document
-      collection.insertMany([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], configuration.writeConcernMax(), function(err, result) {
-        test.equal(null, err);
-
-        // Use geoNear command to find document
-        collection.find({a:1}).explain(function(err, docs) {
-          test.equal(null, err);
-          test.equal(1, started.length);
-          test.equal(1, succeeded.length);
-          test.equal('explain', started[0].commandName);
-          test.equal('explain', succeeded[0].commandName);
-          test.deepEqual({level:'majority'}, started[0].command.readConcern);
-
-          listener.uninstrument();
-          db.close();
-          test.done();
         });
       });
     });
