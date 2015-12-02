@@ -1,3 +1,9 @@
+1.2.26 11-23-2015
+-----------------
+- Converted test suite to use mongodb-topology-manager.
+- Upgraded bson library to V0.4.20.
+- Minor fixes for 3.2 readPreferences.
+
 1.2.25 11-23-2015
 -----------------
 - Correctly error out when passed a seedlist of non-valid server members.
