@@ -33,7 +33,7 @@ var executeWrite = function(topology, type, opsField, ns, ops, options, callback
   // Options
   var ordered = typeof options.ordered == 'boolean' ? options.ordered : true;
   var writeConcern = options.writeConcern;
-  
+
   // return skeleton
   var writeCommand = {};
   writeCommand[type] = p.join('.');
@@ -148,7 +148,7 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
     batchSize: Math.abs(batchSize)
   }
 
-  if(cursorState.cmd.tailable 
+  if(cursorState.cmd.tailable
     && typeof cursorState.cmd.maxAwaitTimeMS == 'number') {
     getMoreCmd.maxTimeMS = cursorState.cmd.maxAwaitTimeMS;
   }
@@ -428,13 +428,13 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
   if(cmd.readConcern) findCmd.readConcern = cmd.readConcern;
 
   // Set up the serialize and ignoreUndefined fields
-  var serializeFunctions = typeof options.serializeFunctions == 'boolean' 
+  var serializeFunctions = typeof options.serializeFunctions == 'boolean'
     ? options.serializeFunctions : false;
-  var ignoreUndefined = typeof options.ignoreUndefined == 'boolean' 
+  var ignoreUndefined = typeof options.ignoreUndefined == 'boolean'
     ? options.ignoreUndefined : false;
 
   // We have a Mongos topology, check if we need to add a readPreference
-  if(topology.type == 'mongos' 
+  if(topology.type == 'mongos'
     && readPreference
     && readPreference.preference != 'primary') {
     findCmd = {
@@ -481,12 +481,12 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
     ? options.serializeFunctions : false;
 
   // Set up the serialize and ignoreUndefined fields
-  var ignoreUndefined = typeof options.ignoreUndefined == 'boolean' 
+  var ignoreUndefined = typeof options.ignoreUndefined == 'boolean'
     ? options.ignoreUndefined : false;
 
   // We have a Mongos topology, check if we need to add a readPreference
-  if(topology.type == 'mongos' 
-    && readPreference 
+  if(topology.type == 'mongos'
+    && readPreference
     && readPreference.preference != 'primary') {
     finalCmd = {
       '$query': finalCmd,

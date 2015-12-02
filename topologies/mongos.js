@@ -131,6 +131,7 @@ State.prototype.getAll = function() {
 // Get all connections
 State.prototype.getAllConnections = function() {
   var connections = [];
+
   this.s.connectedServers.forEach(function(e) {
     connections = connections.concat(e.connections());
   });
