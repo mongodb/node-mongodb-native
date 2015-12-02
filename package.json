@@ -15,7 +15,7 @@
     "core"
   ],
   "dependencies": {
-    "bson": "~0.4.19"
+    "bson": "~0.4.20"
   },
   "devDependencies": {
     "mongodb-topology-manager": "1.0.x",
