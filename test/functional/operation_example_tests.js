@@ -6017,7 +6017,7 @@ exports.shouldCorrectlyTransformObjectIDToHexAndObjectId = {
     // Convert the object id to a hex string
     var originalHex = objectId.toHexString();
     // Create a new ObjectID using the createFromHexString function
-    var newObjectId = new ObjectID.createFromHexString(originalHex)
+    var newObjectId = ObjectID.createFromHexString(originalHex)
     // Convert the new ObjectID back into a hex string using the toHexString function
     var newHex = newObjectId.toHexString();
     // Compare the two hex strings
