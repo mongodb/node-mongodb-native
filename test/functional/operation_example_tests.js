@@ -5145,11 +5145,11 @@ exports.shouldCorrectlyPeformSimpleSorts = {
         test.equal(null, err);
 
         // Do normal ascending sort
-        collection.find().sort([['a', 1]]).nextObject(function(err, item) {
+        collection.find().sort({'a': 1}).nextObject(function(err, item) {
           test.equal(null, err);
           test.equal(1, item.a);
 
-          // Do normal descending sort
+          // Do normal descending sort, with new syntax that enforces ordering of sort keys
           collection.find().sort([['a', -1]]).nextObject(function(err, item) {
             test.equal(null, err);
             test.equal(3, item.a);
