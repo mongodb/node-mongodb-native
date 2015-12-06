@@ -1,6 +1,6 @@
 2.0.50
 -----------------
-* Updated mongodb-core to 1.2.25.
+* Updated mongodb-core to 1.2.26.
 
 2.0.49 11-20-2015
 -----------------
