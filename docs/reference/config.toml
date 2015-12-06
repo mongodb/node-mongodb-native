@@ -1,4 +1,4 @@
-baseurl = "/node-mongodb-native/2.0"
+baseurl = "/node-mongodb-native/2.1"
 languageCode = "en-us"
 title = "MongoDB Node.js Driver"
 theme = "mongodb"
