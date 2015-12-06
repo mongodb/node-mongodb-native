@@ -1178,7 +1178,7 @@ Server.prototype.parserType = function() {
 // }
 
 /**
- * Perform one or more remove operations
+ * Get a new cursor
  * @method
  * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
  * @param {{object}|{Long}} cmd Can be either a command returning a cursor or a cursorId
