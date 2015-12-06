@@ -238,6 +238,25 @@ MongoClient.connect(url, function(err, db) {
     </item>
     
     <item>
+      <title>Management</title>
+      <link>/node-mongodb-native/2.0/reference/management/</link>
+      <pubDate>Thu, 19 Mar 2015 14:27:51 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/reference/management/</guid>
+      <description>
+
+&lt;h2 id=&#34;management&#34;&gt;Management&lt;/h2&gt;
+
+&lt;p&gt;The driver provides two mechanisms for examining its state:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/management/logging/&#34;&gt;Logging&lt;/a&gt;: Comprehensive logging of all operations.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/management/apm/&#34;&gt;Application Performance Monitoring&lt;/a&gt;: The Application Performance Monitoring API is an API developers to tap into the commands issues to MongoDB to record performance metrics and/or inspect the commands sent to MongoDB.&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
       <title>GridStore</title>
       <link>/node-mongodb-native/2.0/reference/gridfs/gridstore/</link>
       <pubDate>Thu, 19 Mar 2015 14:27:51 -0400</pubDate>
@@ -411,25 +430,6 @@ MongoClient.connect(url, function(err, db) {
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;This function moves the internal pointer to the specified position.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Management</title>
-      <link>/node-mongodb-native/2.0/reference/management/</link>
-      <pubDate>Thu, 19 Mar 2015 14:27:51 -0400</pubDate>
-      
-      <guid>/node-mongodb-native/2.0/reference/management/</guid>
-      <description>
-
-&lt;h2 id=&#34;management&#34;&gt;Management&lt;/h2&gt;
-
-&lt;p&gt;The driver provides two mechanisms for examining its state:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/management/logging/&#34;&gt;Logging&lt;/a&gt;: Comprehensive logging of all operations.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/management/apm/&#34;&gt;Application Performance Monitoring&lt;/a&gt;: The Application Performance Monitoring API is an API developers to tap into the commands issues to MongoDB to record performance metrics and/or inspect the commands sent to MongoDB.&lt;/li&gt;
-&lt;/ul&gt;
 </description>
     </item>
     
@@ -2246,6 +2246,25 @@ $ git checkout -b myNewFeature
     </item>
     
     <item>
+      <title>Getting Started</title>
+      <link>/node-mongodb-native/2.0/getting-started/</link>
+      <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/getting-started/</guid>
+      <description>
+
+&lt;h2 id=&#34;getting-started&#34;&gt;Getting Started&lt;/h2&gt;
+
+&lt;p&gt;To help you get started quickly on the new driver, follow:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/getting-started/installation-guide/&#34;&gt;Installation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/getting-started/quick-tour/&#34;&gt;Quick Tour&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
       <title>index</title>
       <link>/node-mongodb-native/2.0/</link>
       <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
@@ -2269,25 +2288,6 @@ information on breaking changes.&lt;/p&gt;
 &lt;p&gt;For MongoDB Driver, the &lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/getting-started/&#34;&gt;Getting Started&lt;/a&gt; guide contains
 installation instructions and a simple tutorial to get up  and running quickly. For more detailed documentation, see the
 &lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/&#34;&gt;Reference&lt;/a&gt; guide.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Getting Started</title>
-      <link>/node-mongodb-native/2.0/getting-started/</link>
-      <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
-      
-      <guid>/node-mongodb-native/2.0/getting-started/</guid>
-      <description>
-
-&lt;h2 id=&#34;getting-started&#34;&gt;Getting Started&lt;/h2&gt;
-
-&lt;p&gt;To help you get started quickly on the new driver, follow:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/getting-started/installation-guide/&#34;&gt;Installation&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/getting-started/quick-tour/&#34;&gt;Quick Tour&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
 </description>
     </item>
     

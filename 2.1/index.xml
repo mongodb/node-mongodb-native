@@ -768,6 +768,26 @@ MongoClient.connect(url, function(err, db) {
     </item>
     
     <item>
+      <title>Connecting</title>
+      <link>/node-mongodb-native/2.1/reference/connecting/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/2.1/reference/connecting/</guid>
+      <description>
+
+&lt;h2 id=&#34;connecting&#34;&gt;Connecting&lt;/h2&gt;
+
+&lt;p&gt;The reference documentation for connecting to a MongoDB server deployment is divided into three sections:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/connecting/connection-settings/&#34;&gt;Connection Settings&lt;/a&gt;: documentation of the various ways to specify the properties of a connection&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/connecting/authenticating/&#34;&gt;Authenticating&lt;/a&gt;: detailed documentation of the various ways to specify authentication credentials&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/connecting/ssl/&#34;&gt;SSL&lt;/a&gt;: Detailed documentation of the various ways to specify the properties of an SSL connection&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
       <title>Connection Settings</title>
       <link>/node-mongodb-native/2.1/reference/connecting/connection-settings/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
@@ -1046,26 +1066,6 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
 });
 
 &lt;/code&gt;&lt;/pre&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Connecting</title>
-      <link>/node-mongodb-native/2.1/reference/connecting/</link>
-      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
-      
-      <guid>/node-mongodb-native/2.1/reference/connecting/</guid>
-      <description>
-
-&lt;h2 id=&#34;connecting&#34;&gt;Connecting&lt;/h2&gt;
-
-&lt;p&gt;The reference documentation for connecting to a MongoDB server deployment is divided into three sections:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/connecting/connection-settings/&#34;&gt;Connection Settings&lt;/a&gt;: documentation of the various ways to specify the properties of a connection&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/connecting/authenticating/&#34;&gt;Authenticating&lt;/a&gt;: detailed documentation of the various ways to specify authentication credentials&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/connecting/ssl/&#34;&gt;SSL&lt;/a&gt;: Detailed documentation of the various ways to specify the properties of an SSL connection&lt;/li&gt;
-&lt;/ul&gt;
 </description>
     </item>
     
@@ -2468,21 +2468,29 @@ $ git checkout -b myNewFeature
     </item>
     
     <item>
-      <title>Getting Started</title>
-      <link>/node-mongodb-native/2.1/getting-started/</link>
+      <title>index</title>
+      <link>/node-mongodb-native/2.1/</link>
       <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
       
-      <guid>/node-mongodb-native/2.1/getting-started/</guid>
+      <guid>/node-mongodb-native/2.1/</guid>
       <description>
 
-&lt;h2 id=&#34;getting-started&#34;&gt;Getting Started&lt;/h2&gt;
+&lt;h2 id=&#34;mongodb-node-js-driver-documentation&#34;&gt;MongoDB Node.js Driver Documentation&lt;/h2&gt;
 
-&lt;p&gt;To help you get started quickly on the new driver, follow:&lt;/p&gt;
+&lt;p&gt;Welcome to the MongoDB Node.js 2.x driver documentation.&lt;/p&gt;
 
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/getting-started/installation-guide/&#34;&gt;Installation&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/getting-started/quick-tour/&#34;&gt;Quick Tour&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
+&lt;h3 id=&#34;what-s-new-in-2-0&#34;&gt;What&amp;rsquo;s New in 2.0&lt;/h3&gt;
+
+&lt;p&gt;The &lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/whats-new/&#34;&gt;What&amp;rsquo;s New&lt;/a&gt; guide explains the major new features of the driver.&lt;/p&gt;
+
+&lt;p&gt;If you are upgrading from the 1.x series of the driver, consult the &lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/whats-new/upgrading/&#34;&gt;Upgrading&lt;/a&gt; documentation for
+information on breaking changes.&lt;/p&gt;
+
+&lt;h3 id=&#34;mongodb-driver&#34;&gt;MongoDB Driver&lt;/h3&gt;
+
+&lt;p&gt;For MongoDB Driver, the &lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/getting-started/&#34;&gt;Getting Started&lt;/a&gt; guide contains
+installation instructions and a simple tutorial to get up  and running quickly. For more detailed documentation, see the
+&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/&#34;&gt;Reference&lt;/a&gt; guide.&lt;/p&gt;
 </description>
     </item>
     

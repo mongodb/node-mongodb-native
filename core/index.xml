@@ -69,97 +69,6 @@
     </item>
     
     <item>
-      <title>Extending Cursors</title>
-      <link>/node-mongodb-native/core/driver/reference/extending/</link>
-      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
-      
-      <guid>/node-mongodb-native/core/driver/reference/extending/</guid>
-      <description>
-
-&lt;h1 id=&#34;extending-the-functionality-of-the-driver-cursor&#34;&gt;Extending the functionality of the Driver Cursor&lt;/h1&gt;
-
-&lt;p&gt;The Core Driver cursor is a very minimalist cursor by design and only supports a single &lt;code&gt;next&lt;/code&gt; method to iterate over the query results. In this tutorial we will examine how we can extend the cursor to support an additional &lt;code&gt;toArray&lt;/code&gt; method and show how we can configure our topology to always return the new extended Cursor on all &lt;code&gt;cursor&lt;/code&gt; method calls.&lt;/p&gt;
-
-&lt;p&gt;Let&amp;rsquo;s look at the code.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var Server = require(&#39;mongodb-core&#39;).Server
-  , Cursor = require(&#39;mongodb-core&#39;).Cursor
-  , inherits = require(&#39;util&#39;).inherits
-
-//
-// Create an extended cursor that adds a toArray function
-var ExtendedCursor = function(bson, ns, cmd, options, connection, callbacks, options) {
-  Cursor.apply(this, Array.prototype.slice.call(arguments, 0));
-  var self = this;
-
-  // Resolve all the next
-  var getAllNexts = function(items, callback) {
-    self.next(function(err, item) {
-      if(err) return callback(err);
-      if(item == null) return callback(null, null);
-      items.push(item);
-      getAllNexts(items, callback);
-    });
-  }
-
-  // Adding a toArray function to the cursor
-  this.toArray = function(callback) {
-    var items = [];
-
-    getAllNexts(items, function(err, r) {
-      if(err) return callback(err, null);          
-      callback(null, items);
-    });
-  }
-}
-
-// Extend the Cursor
-inherits(ExtendedCursor, Cursor);
-
-// Connect using new cursor
-var server = new Server({
-    host: &#39;localhost&#39;
-  , port: 27017
-  , cursorFactory: ExtendedCursor
-});
-
-// Wait for the connection event
-server.on(&#39;connect&#39;, function(_server) {
-  // Execute find
-  var cursor = _server.cursor(&#39;db.test&#39;, {
-      find: f(&amp;quot;%s.inserts_extend_cursors&amp;quot;, configuration.db)
-    , query: {}
-  });
-
-  // Execute next
-  cursor.toArray(function(err, items) {
-    test.equal(null, err);
-
-    // Execute find
-    var cursor = _server.cursor(&#39;db.test&#39;, {
-        find: f(&amp;quot;%s.inserts_extend_cursors&amp;quot;, configuration.db)
-      , query: {}
-    }, {cursorFactory: ExtendedCursor});
-
-    // Execute next
-    cursor.toArray(function(err, items) {
-      test.equal(null, err);
-      server.destroy();
-    });
-  });
-});
-
-// Start connecting
-server.connect();
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;It&amp;rsquo;s fairly straight forward to create the new cursor factory. We extend the &lt;code&gt;Cursor&lt;/code&gt; class and add the new &lt;code&gt;toArray&lt;/code&gt; method. We then specify the new &lt;code&gt;ExtendedCursor&lt;/code&gt; factory as the &lt;code&gt;cursorFactory&lt;/code&gt; when we create the new &lt;code&gt;Server&lt;/code&gt; connection. From then on every time we call the &lt;code&gt;cursor&lt;/code&gt; method we receive an instance of the &lt;code&gt;ExtendedCursor&lt;/code&gt; that we specified. We can even override a specific &lt;code&gt;cursor&lt;/code&gt; method call by passing it a different &lt;code&gt;cursorFactory&lt;/code&gt; in the options allowing for complete flexibility in using different types of cursor.&lt;/p&gt;
-
-&lt;p&gt;That covers how to customize the cursor for your needs.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
       <title>CRUD Operations</title>
       <link>/node-mongodb-native/core/driver/reference/crud/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
@@ -580,6 +489,97 @@ server.connect();
     </item>
     
     <item>
+      <title>Extending Cursors</title>
+      <link>/node-mongodb-native/core/driver/reference/extending/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/core/driver/reference/extending/</guid>
+      <description>
+
+&lt;h1 id=&#34;extending-the-functionality-of-the-driver-cursor&#34;&gt;Extending the functionality of the Driver Cursor&lt;/h1&gt;
+
+&lt;p&gt;The Core Driver cursor is a very minimalist cursor by design and only supports a single &lt;code&gt;next&lt;/code&gt; method to iterate over the query results. In this tutorial we will examine how we can extend the cursor to support an additional &lt;code&gt;toArray&lt;/code&gt; method and show how we can configure our topology to always return the new extended Cursor on all &lt;code&gt;cursor&lt;/code&gt; method calls.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s look at the code.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var Server = require(&#39;mongodb-core&#39;).Server
+  , Cursor = require(&#39;mongodb-core&#39;).Cursor
+  , inherits = require(&#39;util&#39;).inherits
+
+//
+// Create an extended cursor that adds a toArray function
+var ExtendedCursor = function(bson, ns, cmd, options, connection, callbacks, options) {
+  Cursor.apply(this, Array.prototype.slice.call(arguments, 0));
+  var self = this;
+
+  // Resolve all the next
+  var getAllNexts = function(items, callback) {
+    self.next(function(err, item) {
+      if(err) return callback(err);
+      if(item == null) return callback(null, null);
+      items.push(item);
+      getAllNexts(items, callback);
+    });
+  }
+
+  // Adding a toArray function to the cursor
+  this.toArray = function(callback) {
+    var items = [];
+
+    getAllNexts(items, function(err, r) {
+      if(err) return callback(err, null);          
+      callback(null, items);
+    });
+  }
+}
+
+// Extend the Cursor
+inherits(ExtendedCursor, Cursor);
+
+// Connect using new cursor
+var server = new Server({
+    host: &#39;localhost&#39;
+  , port: 27017
+  , cursorFactory: ExtendedCursor
+});
+
+// Wait for the connection event
+server.on(&#39;connect&#39;, function(_server) {
+  // Execute find
+  var cursor = _server.cursor(&#39;db.test&#39;, {
+      find: f(&amp;quot;%s.inserts_extend_cursors&amp;quot;, configuration.db)
+    , query: {}
+  });
+
+  // Execute next
+  cursor.toArray(function(err, items) {
+    test.equal(null, err);
+
+    // Execute find
+    var cursor = _server.cursor(&#39;db.test&#39;, {
+        find: f(&amp;quot;%s.inserts_extend_cursors&amp;quot;, configuration.db)
+      , query: {}
+    }, {cursorFactory: ExtendedCursor});
+
+    // Execute next
+    cursor.toArray(function(err, items) {
+      test.equal(null, err);
+      server.destroy();
+    });
+  });
+});
+
+// Start connecting
+server.connect();
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;It&amp;rsquo;s fairly straight forward to create the new cursor factory. We extend the &lt;code&gt;Cursor&lt;/code&gt; class and add the new &lt;code&gt;toArray&lt;/code&gt; method. We then specify the new &lt;code&gt;ExtendedCursor&lt;/code&gt; factory as the &lt;code&gt;cursorFactory&lt;/code&gt; when we create the new &lt;code&gt;Server&lt;/code&gt; connection. From then on every time we call the &lt;code&gt;cursor&lt;/code&gt; method we receive an instance of the &lt;code&gt;ExtendedCursor&lt;/code&gt; that we specified. We can even override a specific &lt;code&gt;cursor&lt;/code&gt; method call by passing it a different &lt;code&gt;cursorFactory&lt;/code&gt; in the options allowing for complete flexibility in using different types of cursor.&lt;/p&gt;
+
+&lt;p&gt;That covers how to customize the cursor for your needs.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
       <title>Logging</title>
       <link>/node-mongodb-native/core/driver/reference/management/logging/</link>
       <pubDate>Wed, 18 Mar 2015 21:14:20 -0400</pubDate>
@@ -963,33 +963,6 @@ server.connect();
     </item>
     
     <item>
-      <title>MongoDB Core</title>
-      <link>/node-mongodb-native/core/driver/</link>
-      <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
-      
-      <guid>/node-mongodb-native/core/driver/</guid>
-      <description>
-
-&lt;h2 id=&#34;mongodb-driver-core-documentation&#34;&gt;MongoDB Driver Core Documentation&lt;/h2&gt;
-
-&lt;p&gt;Welcome to the MongoDB Core Driver documentation hub.&lt;/p&gt;
-
-&lt;h3 id=&#34;what-s-new-in-2-0&#34;&gt;What&amp;rsquo;s New in 2.0&lt;/h3&gt;
-
-&lt;p&gt;The &lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/whats-new/&#34;&gt;What&amp;rsquo;s New&lt;/a&gt; guide explains the major new features of the driver.&lt;/p&gt;
-
-&lt;h3 id=&#34;getting-started&#34;&gt;Getting Started&lt;/h3&gt;
-
-&lt;p&gt;The &lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/driver/getting-started/&#34;&gt;Getting Started&lt;/a&gt; guide contains installation instructions
-and a simple tutorial to get up and running quickly.&lt;/p&gt;
-
-&lt;h3 id=&#34;reference&#34;&gt;Reference&lt;/h3&gt;
-
-&lt;p&gt;For more detailed documentation, see the &lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/driver/reference/&#34;&gt;Reference&lt;/a&gt; guide.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
       <title>Installation Guide</title>
       <link>/node-mongodb-native/core/driver/getting-started/installation-guide/</link>
       <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
@@ -1086,6 +1059,33 @@ node-gyp rebuild
 &lt;p&gt;Your python installation might be hosed making gyp break. I always recommend that you test your deployment environment first by trying to build node itself on the server in question as this should unearth any issues with broken packages (and there are a lot of broken packages out there).&lt;/p&gt;
 
 &lt;p&gt;Another thing is to ensure your user has write permission to wherever the node modules are being installed.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>MongoDB Core</title>
+      <link>/node-mongodb-native/core/driver/</link>
+      <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
+      
+      <guid>/node-mongodb-native/core/driver/</guid>
+      <description>
+
+&lt;h2 id=&#34;mongodb-driver-core-documentation&#34;&gt;MongoDB Driver Core Documentation&lt;/h2&gt;
+
+&lt;p&gt;Welcome to the MongoDB Core Driver documentation hub.&lt;/p&gt;
+
+&lt;h3 id=&#34;what-s-new-in-2-0&#34;&gt;What&amp;rsquo;s New in 2.0&lt;/h3&gt;
+
+&lt;p&gt;The &lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/whats-new/&#34;&gt;What&amp;rsquo;s New&lt;/a&gt; guide explains the major new features of the driver.&lt;/p&gt;
+
+&lt;h3 id=&#34;getting-started&#34;&gt;Getting Started&lt;/h3&gt;
+
+&lt;p&gt;The &lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/driver/getting-started/&#34;&gt;Getting Started&lt;/a&gt; guide contains installation instructions
+and a simple tutorial to get up and running quickly.&lt;/p&gt;
+
+&lt;h3 id=&#34;reference&#34;&gt;Reference&lt;/h3&gt;
+
+&lt;p&gt;For more detailed documentation, see the &lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/driver/reference/&#34;&gt;Reference&lt;/a&gt; guide.&lt;/p&gt;
 </description>
     </item>
     
