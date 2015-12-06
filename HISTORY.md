@@ -1,14 +1,16 @@
-2.1.0-rc1 11-16-2015
---------------------
+2.1.0 12-06-2015
+----------------
 * Implements the connection string specification, https://github.com/mongodb/specifications/blob/master/source/connection-string/connection-string-spec.rst.
 * Implements the new GridFS specification, https://github.com/mongodb/specifications/blob/master/source/gridfs/gridfs-spec.rst.
 * Full MongoDB 3.2 support.
 * NODE-601 Added maxAwaitTimeMS support for 3.2 getMore to allow for custom timeouts on tailable cursors.
-* Updated mongodb-core to 1.2.22.
+* Updated mongodb-core to 1.2.26.
 * Return destination in GridStore pipe function.
 * NODE-606 better error handling on destroyed topology for db.js methods.
+* Added isDestroyed method to server, replset and mongos topologis.
+* Upgraded test suite to run using mongodb-topology-manager.
 
-2.0.50
+2.0.50 12-06-2015
 -----------------
 * Updated mongodb-core to 1.2.25.
 
