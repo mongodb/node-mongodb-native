@@ -1,0 +1,1459 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="">
+<meta name="author" content="">
+<meta name="keyword" content="">
+
+    <link rel="shortcut icon" href="/node-mongodb-native/2.1//img/favicon.png">
+
+    <title>Connection Settings</title>
+
+    <link rel="stylesheet" href="/node-mongodb-native/2.1//lib/bootstrap.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.1//lib/font-awesome/css/font-awesome.min.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.1//css/mongodb-docs.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.1//css/overrides.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.1//lib/highlight/styles/idea.css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.1//lib/bootstrap-toggle/bootstrap-toggle.min.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.1//css/java.css" type="text/css" />
+
+
+  </head>
+
+  <body>
+  
+  <section id="container" class="">
+      
+      <header id="header-db" class="row" role="navigation">
+  <div class="header-content">
+    <div class="toggle-nav pull-left">
+        <i class="fa fa-bars"></i>
+        <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom"></div>
+    </div>
+    
+    <div class="logo pull-left">
+      <a href="/node-mongodb-native/2.1//../">
+        <img src="/node-mongodb-native/2.1//img/logo-mongodb-header.png", alt="MongoDB.org" />
+      </a>
+    </div>
+    
+    <div>
+<div class="nav-items pull-right">
+  <a href="https://university.mongodb.com" data-toggle="tooltip" data-placement="bottom" title="Free Online Classes">MongoDB University</a>
+  <a href="http://www.mongodb.org/downloads" data-toggle="tooltip" data-placement="bottom" title="Download MongoDB">Downloads</a>
+  <a href="http://www.mongodb.org/get-involved" data-toggle="tooltip" data-placement="bottom" title="Get involved with MongoDB">Community</a>
+  <a href="http://docs.mongodb.org" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Documentation">Docs</a>
+  <a href="http://blog.mongodb.org" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Blog">Blog</a>
+  <div id="search">
+<form method="get" action="//www.google.com/search" target="_blank">
+    <input type="text" name="searchQuery" size="20" value="" autocomplete="off" placeholder="Search docs">
+    <input type="hidden" name="site" value="/node-mongodb-native/2.1/">
+    <input type="hidden" name="q" value="">
+    <label for="searchQuery"><i class="fa fa-search fa-1"></i></label>
+</form>
+</div>
+
+</div>
+</div>
+
+  </div>
+</header>
+
+      
+
+      
+<aside id="sidebar" class="sidebar">
+    <div class="ssidebar nav-collapse">
+      <div class="ssidebarwrapper">
+        <h3>
+          <a class="index-link" href="/node-mongodb-native/2.1//../">MongoDB Node.js Driver</a>
+          <a class="version pull-right" href="/node-mongodb-native/2.1/">2.1</a>
+        </h3>
+
+        
+        <ul class="sidebar-menu">
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+
+          
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+    
+      
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+    
+      
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+
+  
+    
+    
+    
+      
+      
+      
+        
+      
+    
+    
+  
+  
+
+
+        
+      
+    
+      
+      
+        
+      
+    
+      
+      
+    
+    
+  
+
+
+        
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+
+          
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l1 ">
+  <a href="/node-mongodb-native/2.1/whats-new/" class="">
+      <i class='fa fa-cog'></i>
+      <span>What&#39;s New</span>
+      <span class="menu-arrow fa fa-angle-right"></span>
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.1/whats-new/upgrading/">
+        <i class='fa fa-wrench'></i>
+        Upgrading to 2.0
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l1 ">
+  <a href="/node-mongodb-native/2.1/getting-started/" class="">
+      <i class='fa fa-road'></i>
+      <span>Getting Started</span>
+      <span class="menu-arrow fa fa-angle-right"></span>
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.1/getting-started/installation-guide/">
+        <i class='fa'></i>
+        Installation Guide
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.1/getting-started/quick-tour/">
+        <i class='fa'></i>
+        Quick Tour
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<li class="toctree-l1  current">
+  <a href="/node-mongodb-native/2.1/reference/" class="">
+      <i class='fa fa-book'></i>
+      <span>Reference</span>
+      <span class="menu-arrow fa fa-angle-down"></span>
+  </a>
+    <ul  class="current">
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<li class="toctree-l2  current">
+  <a href="/node-mongodb-native/2.1/reference/connecting/" class="">
+      <i class='fa'></i>
+      <span>Connecting</span>
+      
+  </a>
+    <ul  class="current">
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/connecting/connection-settings/">
+        <i class='fa'></i>
+        Connection Settings
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/connecting/ssl/">
+        <i class='fa'></i>
+        SSL
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/connecting/authenticating/">
+        <i class='fa'></i>
+        Authenticating
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.1/reference/crud/">
+        <i class='fa'></i>
+        CRUD Operations
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/2.1/reference/gridfs/" class="">
+      <i class='fa'></i>
+      <span>GridFS</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/gridfs/streaming/">
+        <i class='fa'></i>
+        Grid File System API
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/gridfs/gridstore/">
+        <i class='fa'></i>
+        Legacy GridStore
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/2.1/reference/management/" class="">
+      <i class='fa'></i>
+      <span>Management</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/management/logging/">
+        <i class='fa'></i>
+        Logging
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/management/apm/">
+        <i class='fa'></i>
+        APM
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/2.1/api/">
+        <i class='fa fa-file-text-o'></i>
+        API Documentation
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="https://github.com/mongodb/node-mongodb-native">
+        <i class='fa fa-github'></i>
+        Source Code
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/2.1/issues-help/">
+        <i class='fa fa-life-ring'></i>
+        Issues &amp; Help
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge">
+        <img src='https://badges.gitter.im/Join Chat.svg'/>
+        
+    </a>
+  </li>
+
+
+          
+        </ul>
+        
+    </div>
+  </div>
+  
+</aside>
+
+<div class="option-popup closed hidden" id="optionsVersionsPopup">
+<div class="option-header">
+  <i class="fa fa-gear"></i>
+  <span>OPTIONS</span>
+  <i class="fa fa-angle-up pull-right"></i>
+</div>
+<div class="option-body">
+  <ul>
+      
+      <li>
+        <label>Version</label>
+        <div class="btn-group btn-group-xs pull-right">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+            Select Version <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" role="menu" id="optionsVersionsMenu">
+          </ul>
+        </div>
+      </li>
+
+   
+
+
+    
+
+  </ul>
+</div>
+</div>
+
+
+
+      
+      <section id="main-content" class="content">
+          <section class="main-column pull-left">
+            <div class="document">
+              <div class="documentwrapper">
+                <div class="bodywrapper">
+                  <div class="body">
+
+
+   
+<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/2.1/docs/reference/content/reference/connecting/connection-settings.md" target="_blank" title="Edit reference/connecting/connection-settings.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
+
+
+
+
+
+
+
+
+
+
+<div class="bc">
+<ul>
+  
+  
+  
+  
+  <li><a href="/node-mongodb-native/2.1/reference/">Reference</a> <i class="fa fa-angle-right"></i></li>
+  <li><a href="/node-mongodb-native/2.1/reference/connecting/">Connecting</a> <i class="fa fa-angle-right"></i></li>
+  <li>Connection Settings</li>
+</ul>
+</div>
+
+
+
+
+<h1 id="connecting-to-mongodb">Connecting To MongoDB</h1>
+
+<p>Connecting to MongoDB using the driver is primarily done using the <code>MongoClient.connect</code> method and a URI. Let&rsquo;s look at how we connect to a couple of different server topologies.</p>
+
+<h2 id="single-server-connection">Single Server Connection</h2>
+
+<p>We have a single MongoDB server instance running on the port <em>27017</em> Let&rsquo;s connect using the driver and <em>MongoClient.connect</em></p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
+  , assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://localhost:27017/myproject';
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&quot;Connected correctly to server&quot;);
+
+  db.close();
+});
+</code></pre>
+
+<p>Let&rsquo;s break down the <code>URI</code> string we passed as the first argument to MongoClient.connect.</p>
+
+<ul>
+<li><code>mongodb://</code> is the protocol definition</li>
+<li><code>localhost:27017</code> is the server we are connecting to</li>
+<li><code>/myproject</code> is the database we wish to connect to</li>
+</ul>
+
+<h2 id="replicaset-server-connection">Replicaset Server Connection</h2>
+
+<p>We wish to connect to a ReplicaSet consisting of one primary and 1 or more secondaries. To Do this we need to supply the driver with a seedlist of servers and the name of the ReplicaSet we wish to connect to. Let&rsquo;s take a look at a code example.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
+  , assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://localhost:27017,localhost:27018/myproject?replicaSet=foo';
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&quot;Connected correctly to server&quot;);
+
+  db.close();
+});
+</code></pre>
+
+<p>Let&rsquo;s break down the <code>URI</code> string.</p>
+
+<ul>
+<li><code>mongodb://</code> is the protocol definition</li>
+<li><code>localhost:27017,localhost:27018</code> is the servers we are connecting to to discover the topology of the ReplicaSet.</li>
+<li><code>/myproject</code> is the database we wish to connect to</li>
+<li><code>replicaSet=foo</code> is the name of the ReplicaSet we are connecting to. This ensures we are connecting to the correct Replicaset. <strong>This is a required parameter when using the 2.0 driver</strong></li>
+</ul>
+
+<h2 id="mongos-proxy-connection">Mongos Proxy Connection</h2>
+
+<p>We wish to connect to a set of <code>mongos</code> proxies. Just as in the case of connecting to a ReplicaSet we can provide a seed list of <code>mongos</code> proxies. This allows the driver to perform failover between proxies automatically in case of a proxy process having been shut down. Let&rsquo;s look at an example of code connecting to a set of proxies.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
+  , assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://localhost:50000,localhost:50001/myproject';
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&quot;Connected correctly to server&quot;);
+
+  db.close();
+});
+</code></pre>
+
+<p>Let&rsquo;s break down the <code>URI</code> string.</p>
+
+<ul>
+<li><code>mongodb://</code> is the protocol definition</li>
+<li><code>localhost:50000,localhost:50001</code> is the <em>mongos</em> proxies we are connecting to.</li>
+<li><code>/myproject</code> is the database we wish to connect to</li>
+</ul>
+
+<p>Let&rsquo;s break down the <code>URI</code> string.</p>
+
+<ul>
+<li><code>mongodb://</code> is the protocol definition</li>
+<li><code>dave:password</code> is the user name and password for the database</li>
+<li><code>localhost:27017</code> is the server we are connecting to</li>
+<li><code>/myproject</code> is the database we wish to connect to</li>
+<li><code>authSource=admin</code> is the database we wish to authenticate against</li>
+</ul>
+
+<h1 id="mongoclient-connect-optional-parameters">MongoClient.connect Optional Parameters</h1>
+
+<p>The driver has many more options for tweaking than what&rsquo;s available through the <code>URI</code> specification. These can be passed to the driver using an optional parameters object. The top level fields in the options object are.</p>
+
+<ul>
+<li><code>db</code>, Options that affect the Db instance returned by the MongoClient.connect method.</li>
+<li><code>replSet</code>, Options that modify the Replicaset topology connection behavior. <strong>This is a required parameter when using the 2.0 driver</strong></li>
+<li><code>mongos</code>, Options that modify the Mongos topology connection behavior.</li>
+<li><code>server</code>, Options that modify the Server topology connection behavior.</li>
+</ul>
+
+<p>A simple example connecting to a single server setting all returned queries to be raw BSON buffers and adjusting the poolSize to be 10 connections for this connection.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
+  , assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://dave:password@localhost:27017/myproject';
+// Use connect method to connect to the Server
+MongoClient.connect(url, {
+    db: {
+      raw: true
+    },
+    server: {
+      poolSize: 10
+    }
+  }, function(err, db) {
+  assert.equal(null, err);
+  console.log(&quot;Connected correctly to server&quot;);
+
+  db.close();
+});
+</code></pre>
+
+<p>Let&rsquo;s look at the individual options for each of the top level fields.</p>
+
+<h2 id="data-base-level-options">Data base level options</h2>
+
+<ul>
+<li><code>w</code>, {Number/String, &gt; -1 || &lsquo;majority&rsquo;} the write concern for the operation where &lt; 1 is no acknowledgment of write and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write</li>
+<li><code>wtimeout</code>, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)</li>
+<li><code>fsync</code>, (Boolean, default:false) write waits for fsync before returning</li>
+<li><code>j</code>, (Boolean, default:false) write waits for journal sync before returning</li>
+<li><code>readPreference</code> {String}, the preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</li>
+<li><code>readPreferenceTags</code> {Object, default:null}, the tags object {&lsquo;loc&rsquo;:&lsquo;ny&rsquo;} used with the readPreference.</li>
+<li><code>native_parser</code> {Boolean, default:false}, use c++ bson parser.</li>
+<li><code>forceServerObjectId</code> {Boolean, default:false}, force server to create _id fields instead of client.</li>
+<li><code>pkFactory</code> {Object}, object overriding the basic ObjectID primary key generation.</li>
+<li><code>serializeFunctions</code> {Boolean, default:false}, serialize functions.</li>
+<li><code>raw</code> {Boolean, default:false}, perform operations using raw bson buffers.</li>
+<li><code>retryMiliSeconds</code> {Number, default:5000}, number of milliseconds between retries.</li>
+<li><code>numberOfRetries</code> {Number, default:5}, number of retries off connection.</li>
+<li><code>bufferMaxEntries</code> {Number, default: -1}, sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited.</li>
+</ul>
+
+<p>If you are connecting to a MongoDB replicaset, you pass the parameters using the <code>mongos</code> options field.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient,
+  f = require('util').format,
+  fs = require('fs');
+
+MongoClient.connect(f('mongodb://%s@server:27017/test'), {
+  db: {
+    w:1
+  }
+}, function(err, db) {
+  db.close();
+});
+
+</code></pre>
+
+<h2 id="individual-server-level-options">Individual Server Level Options</h2>
+
+<ul>
+<li><code>poolSize</code>, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.</li>
+<li><code>ssl</code>, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.</li>
+<li><code>sslValidate</code>, {Boolean, default: true} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).</li>
+<li><code>sslCA</code>, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).</li>
+<li><code>sslCert</code>, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).</li>
+<li><code>sslKey</code>, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).</li>
+<li><code>sslPass</code>, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).</li>
+<li><code>autoReconnect</code>, {Boolean, default: true} Reconnect on error.</li>
+<li><code>socketOptions.noDelay</code>, {Boolean, default: true} TCP Socket NoDelay option.</li>
+<li><code>socketOptions.keepAlive</code>, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start.</li>
+<li><code>socketOptions.connectTimeoutMS</code>, {Number, default: 0} TCP Connection timeout setting.</li>
+<li><code>socketOptions.socketTimeoutMS</code>, {Number, default: 0} TCP Socket timeout setting.</li>
+</ul>
+
+<p>If you are connecting to a single MongoDB instance you pass the parameters using the <code>server</code> options field.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient,
+  f = require('util').format,
+  fs = require('fs');
+
+MongoClient.connect(f('mongodb://%s@server:27017/test'), {
+  server: {
+      sslKey:key
+    , sslCert:cert
+  }
+}, function(err, db) {
+  db.close();
+});
+
+</code></pre>
+
+<h2 id="replicaset-level-options">Replicaset Level Options</h2>
+
+<ul>
+<li><code>ha</code> {Boolean, default:true}, turn on high availability.</li>
+<li><code>haInterval</code> {Number, default:5000}, time between each replicaset status check.</li>
+<li><code>replicaSet</code> {String}, the name of the replicaset to connect to. <strong>This is a required parameter when using the 2.0 driver</strong></li>
+<li><code>secondaryAcceptableLatencyMS</code> {Number, default:15}, sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)</li>
+<li><code>connectWithNoPrimary</code> {Boolean, default:false}, Sets if the driver should connect even if no primary is available.</li>
+<li><code>poolSize</code>, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.</li>
+<li><code>ssl</code>, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.</li>
+<li><code>sslValidate</code>, {Boolean, default: true} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).</li>
+<li><code>sslCA</code>, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).</li>
+<li><code>sslCert</code>, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).</li>
+<li><code>sslKey</code>, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).</li>
+<li><code>sslPass</code>, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).</li>
+<li><code>socketOptions.noDelay</code>, {Boolean, default: true} TCP Socket NoDelay option.</li>
+<li><code>socketOptions.keepAlive</code>, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start.</li>
+<li><code>socketOptions.connectTimeoutMS</code>, {Number, default: 0} TCP Connection timeout setting.</li>
+<li><code>socketOptions.socketTimeoutMS</code>, {Number, default: 0} TCP Socket timeout setting.</li>
+</ul>
+
+<p>If you are connecting to a MongoDB replicaset, you pass the parameters using the <code>replset</code> options field.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient,
+  f = require('util').format,
+  fs = require('fs');
+
+MongoClient.connect(f('mongodb://%s@server:27017/test'), {
+  replset: {
+      sslKey:key
+    , sslCert:cert
+  }
+}, function(err, db) {
+  db.close();
+});
+
+</code></pre>
+
+<h2 id="mongos-proxy-level-options">Mongos Proxy Level Options</h2>
+
+<ul>
+<li><code>ha</code> {Boolean, default:true}, turn on high availability.</li>
+<li><code>haInterval</code> {Number, default:5000}, time between each replicaset status check.</li>
+<li><code>secondaryAcceptableLatencyMS</code> {Number, default:15}, sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)</li>
+<li><code>poolSize</code>, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.</li>
+<li><code>ssl</code>, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.</li>
+<li><code>sslValidate</code>, {Boolean, default: true} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).</li>
+<li><code>sslCA</code>, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).</li>
+<li><code>sslCert</code>, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).</li>
+<li><code>sslKey</code>, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).</li>
+<li><code>sslPass</code>, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).</li>
+<li><code>socketOptions.noDelay</code>, {Boolean, default: true} TCP Socket NoDelay option.</li>
+<li><code>socketOptions.keepAlive</code>, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start.</li>
+<li><code>socketOptions.connectTimeoutMS</code>, {Number, default: 0} TCP Connection timeout setting.</li>
+<li><code>socketOptions.socketTimeoutMS</code>, {Number, default: 0} TCP Socket timeout setting.</li>
+</ul>
+
+<p>If you are connecting to a MongoDB replicaset, you pass the parameters using the <code>mongos</code> options field.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient,
+  f = require('util').format,
+  fs = require('fs');
+
+MongoClient.connect(f('mongodb://%s@server:27017/test'), {
+  mongos: {
+      sslKey:key
+    , sslCert:cert
+  }
+}, function(err, db) {
+  db.close();
+});
+
+</code></pre>
+
+
+
+
+
+
+<div id="btnv">
+  
+  
+  <div class="pull-right">
+  <a class="navigation next" href="/node-mongodb-native/2.1/reference/connecting/ssl/">
+    SSL <i class="fa fa-long-arrow-right"> </i>
+  </a>
+  
+</div>
+</div>
+
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+     
+    var disqus_shortname = 'nodejsmongodbdriver'; 
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+</div>
+<div class="right-column">
+<div class="wrapper">
+  
+  <div class="toc">
+    <span class="toc-header">On this page</span>
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#connecting-to-mongodb">Connecting To MongoDB</a>
+<ul>
+<li><a href="#single-server-connection">Single Server Connection</a></li>
+<li><a href="#replicaset-server-connection">Replicaset Server Connection</a></li>
+<li><a href="#mongos-proxy-connection">Mongos Proxy Connection</a></li>
+</ul></li>
+<li><a href="#mongoclient-connect-optional-parameters">MongoClient.connect Optional Parameters</a>
+<ul>
+<li><a href="#data-base-level-options">Data base level options</a></li>
+<li><a href="#individual-server-level-options">Individual Server Level Options</a></li>
+<li><a href="#replicaset-level-options">Replicaset Level Options</a></li>
+<li><a href="#mongos-proxy-level-options">Mongos Proxy Level Options</a></li>
+</ul></li>
+</ul>
+</nav>
+  </div>
+  
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</section>
+</section>
+
+</section>
+
+
+<script type="text/javascript">
+  var DOCUMENTATION_OPTIONS = {
+   URL_ROOT:    "/node-mongodb-native/2.1/",
+   VERSION:     "2.1",
+   COLLAPSE_INDEX: false,
+   FILE_SUFFIX: '.html',
+   HAS_SOURCE:  true
+  };
+</script>
+<script type="text/javascript" src="/node-mongodb-native/2.1//js/jquery.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.1//lib/bootstrap.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.1//js/navbar.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.1//lib/highlight/highlight.pack.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.1//js/scripts.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.1//lib/bootstrap-toggle/bootstrap-toggle.min.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.1//js/java.js"></script>
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-29229787-1', 'auto');
+  ga('send', 'pageview');
+</script>
+</body>
+</html>
+

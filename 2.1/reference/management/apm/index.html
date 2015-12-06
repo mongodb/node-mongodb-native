@@ -1,0 +1,1880 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="">
+<meta name="author" content="">
+<meta name="keyword" content="">
+
+    <link rel="shortcut icon" href="/node-mongodb-native/2.1//img/favicon.png">
+
+    <title>APM</title>
+
+    <link rel="stylesheet" href="/node-mongodb-native/2.1//lib/bootstrap.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.1//lib/font-awesome/css/font-awesome.min.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.1//css/mongodb-docs.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.1//css/overrides.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.1//lib/highlight/styles/idea.css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.1//lib/bootstrap-toggle/bootstrap-toggle.min.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.1//css/java.css" type="text/css" />
+
+
+  </head>
+
+  <body>
+  
+  <section id="container" class="">
+      
+      <header id="header-db" class="row" role="navigation">
+  <div class="header-content">
+    <div class="toggle-nav pull-left">
+        <i class="fa fa-bars"></i>
+        <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom"></div>
+    </div>
+    
+    <div class="logo pull-left">
+      <a href="/node-mongodb-native/2.1//../">
+        <img src="/node-mongodb-native/2.1//img/logo-mongodb-header.png", alt="MongoDB.org" />
+      </a>
+    </div>
+    
+    <div>
+<div class="nav-items pull-right">
+  <a href="https://university.mongodb.com" data-toggle="tooltip" data-placement="bottom" title="Free Online Classes">MongoDB University</a>
+  <a href="http://www.mongodb.org/downloads" data-toggle="tooltip" data-placement="bottom" title="Download MongoDB">Downloads</a>
+  <a href="http://www.mongodb.org/get-involved" data-toggle="tooltip" data-placement="bottom" title="Get involved with MongoDB">Community</a>
+  <a href="http://docs.mongodb.org" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Documentation">Docs</a>
+  <a href="http://blog.mongodb.org" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Blog">Blog</a>
+  <div id="search">
+<form method="get" action="//www.google.com/search" target="_blank">
+    <input type="text" name="searchQuery" size="20" value="" autocomplete="off" placeholder="Search docs">
+    <input type="hidden" name="site" value="/node-mongodb-native/2.1/">
+    <input type="hidden" name="q" value="">
+    <label for="searchQuery"><i class="fa fa-search fa-1"></i></label>
+</form>
+</div>
+
+</div>
+</div>
+
+  </div>
+</header>
+
+      
+
+      
+<aside id="sidebar" class="sidebar">
+    <div class="ssidebar nav-collapse">
+      <div class="ssidebarwrapper">
+        <h3>
+          <a class="index-link" href="/node-mongodb-native/2.1//../">MongoDB Node.js Driver</a>
+          <a class="version pull-right" href="/node-mongodb-native/2.1/">2.1</a>
+        </h3>
+
+        
+        <ul class="sidebar-menu">
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+
+          
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+    
+      
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+    
+      
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+    
+      
+    
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+    
+      
+    
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+
+  
+    
+    
+    
+      
+      
+      
+        
+      
+    
+    
+  
+  
+
+
+        
+      
+    
+    
+  
+
+
+        
+      
+    
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+
+          
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l1 ">
+  <a href="/node-mongodb-native/2.1/whats-new/" class="">
+      <i class='fa fa-cog'></i>
+      <span>What&#39;s New</span>
+      <span class="menu-arrow fa fa-angle-right"></span>
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.1/whats-new/upgrading/">
+        <i class='fa fa-wrench'></i>
+        Upgrading to 2.0
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l1 ">
+  <a href="/node-mongodb-native/2.1/getting-started/" class="">
+      <i class='fa fa-road'></i>
+      <span>Getting Started</span>
+      <span class="menu-arrow fa fa-angle-right"></span>
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.1/getting-started/installation-guide/">
+        <i class='fa'></i>
+        Installation Guide
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.1/getting-started/quick-tour/">
+        <i class='fa'></i>
+        Quick Tour
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<li class="toctree-l1  current">
+  <a href="/node-mongodb-native/2.1/reference/" class="">
+      <i class='fa fa-book'></i>
+      <span>Reference</span>
+      <span class="menu-arrow fa fa-angle-down"></span>
+  </a>
+    <ul  class="current">
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/2.1/reference/connecting/" class="">
+      <i class='fa'></i>
+      <span>Connecting</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/connecting/connection-settings/">
+        <i class='fa'></i>
+        Connection Settings
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/connecting/ssl/">
+        <i class='fa'></i>
+        SSL
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/connecting/authenticating/">
+        <i class='fa'></i>
+        Authenticating
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.1/reference/crud/">
+        <i class='fa'></i>
+        CRUD Operations
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/2.1/reference/gridfs/" class="">
+      <i class='fa'></i>
+      <span>GridFS</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/gridfs/streaming/">
+        <i class='fa'></i>
+        Grid File System API
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/gridfs/gridstore/">
+        <i class='fa'></i>
+        Legacy GridStore
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<li class="toctree-l2  current">
+  <a href="/node-mongodb-native/2.1/reference/management/" class="">
+      <i class='fa'></i>
+      <span>Management</span>
+      
+  </a>
+    <ul  class="current">
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/management/logging/">
+        <i class='fa'></i>
+        Logging
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/management/apm/">
+        <i class='fa'></i>
+        APM
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/2.1/api/">
+        <i class='fa fa-file-text-o'></i>
+        API Documentation
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="https://github.com/mongodb/node-mongodb-native">
+        <i class='fa fa-github'></i>
+        Source Code
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/2.1/issues-help/">
+        <i class='fa fa-life-ring'></i>
+        Issues &amp; Help
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge">
+        <img src='https://badges.gitter.im/Join Chat.svg'/>
+        
+    </a>
+  </li>
+
+
+          
+        </ul>
+        
+    </div>
+  </div>
+  
+</aside>
+
+<div class="option-popup closed hidden" id="optionsVersionsPopup">
+<div class="option-header">
+  <i class="fa fa-gear"></i>
+  <span>OPTIONS</span>
+  <i class="fa fa-angle-up pull-right"></i>
+</div>
+<div class="option-body">
+  <ul>
+      
+      <li>
+        <label>Version</label>
+        <div class="btn-group btn-group-xs pull-right">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+            Select Version <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" role="menu" id="optionsVersionsMenu">
+          </ul>
+        </div>
+      </li>
+
+   
+
+
+    
+
+  </ul>
+</div>
+</div>
+
+
+
+      
+      <section id="main-content" class="content">
+          <section class="main-column pull-left">
+            <div class="document">
+              <div class="documentwrapper">
+                <div class="bodywrapper">
+                  <div class="body">
+
+
+   
+<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/2.1/docs/reference/content/reference/management/apm.md" target="_blank" title="Edit reference/management/apm.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
+
+
+
+
+
+
+
+
+
+
+<div class="bc">
+<ul>
+  
+  
+  
+  
+  <li><a href="/node-mongodb-native/2.1/reference/">Reference</a> <i class="fa fa-angle-right"></i></li>
+  <li><a href="/node-mongodb-native/2.1/reference/management/">Management</a> <i class="fa fa-angle-right"></i></li>
+  <li>APM</li>
+</ul>
+</div>
+
+
+
+
+<h1 id="apm">APM</h1>
+
+<p>Application Performance Monitoring support is a driver feature that allows monitoring services to hook into the driver in a forward compatible and stable way. The API is not applied to the driver unless explicitly initialized to avoid any performance penalties.</p>
+
+<h2 id="api">API</h2>
+
+<p>Let&rsquo;s look at a code example that hooks into all the available features of the APM API.</p>
+
+<pre><code class="language-js">var listener = require('mongodb').instrument({
+  operationIdGenerator: {
+    operationId: 1,
+
+    next: function() {
+      return this.operationId++;
+    }
+  },
+
+  timestampGenerator: {
+    current: function() {
+      return new Date().getTime();
+    },
+
+    duration: function(start, end) {
+      return end - start;
+    }
+  }  
+}, function(err, instrumentations) {
+  // Instrument the driver  
+});
+
+listener.on('started', function(event) {
+  // command start event (see https://github.com/mongodb/specifications/blob/master/source/command-monitoring/command-monitoring.rst)
+});
+
+listener.on('succeeded', function(event) {
+  // command success event (see https://github.com/mongodb/specifications/blob/master/source/command-monitoring/command-monitoring.rst)
+});
+
+listener.on('failed', function(event) {
+  // command failure event (see https://github.com/mongodb/specifications/blob/master/source/command-monitoring/command-monitoring.rst)
+});
+
+</code></pre>
+
+<p>There are two main aspects to the APM API. The first one is the command monitoring specification and the second one is the instrumentation method.</p>
+
+<h2 id="command-monitoring">Command Monitoring</h2>
+
+<p>Command monitoring is based on the cross-driver specification for MongoDB found in the Command monitoring <a href="https://github.com/mongodb/specifications/blob/master/source/command-monitoring/command-monitoring.rst">specification</a>.</p>
+
+<p>The Command monitoring specification is a low level monitoring specification that tells you when a new command is being executed against MongoDb and if it fails or succeeds. For most cases this is straight forward and you will receive a single start and either a success or failure event. Let&rsquo;s look at an example.</p>
+
+<p>The user executes an <code>isMaster</code> command against the server and we receive the following to messages (full objects are abbreviated to simplicities sake.). When the <code>isMaster</code> command starts execution we receive the following event (This result is from <code>JSON.stringify</code>, in the real event the connectionId is the actual connection object the command was executed against).</p>
+
+<pre><code class="language-js">{
+  &quot;command&quot;: {
+    &quot;ismaster&quot;: true
+  },
+  &quot;databaseName&quot;: &quot;system&quot;,
+  &quot;commandName&quot;: &quot;ismaster&quot;,
+  &quot;requestId&quot;: 7,
+  &quot;operationId&quot;: 1,
+  &quot;connectionId&quot;: {
+    &quot;id&quot;: 8,
+    &quot;host&quot;: &quot;localhost&quot;,
+    &quot;port&quot;: 27017
+  }
+}
+</code></pre>
+
+<p>Let&rsquo;s look at the the <code>requestId</code> and <code>operationId</code>. The <code>requestId</code> is the id used for the wire protocol message sent to MongoDB and allows you to correlate the commands executed on MongoDB with the commands from the driver.</p>
+
+<p>The <code>operationId</code> is an id that is used to group commands into a single logical command execution. The use case are queries and batch writes where a single logical operation might be executed as multiple commands to the server. For a query this might mean it gets executed as a <code>find</code> command and <em>n</em> number of <code>getMore</code> commands as well as a <code>killCursors</code> command. For bulk writes the logical grouping might contain <code>n</code> individual write operations. The goal of <code>operationId</code> is to allow APM providers to correlate the breakdown of a cursor or bulk operation with the method called by the user. The typical example is.</p>
+
+<pre><code class="language-js">db.collection('data').find().batchSize(2).toArray(function(err, docs) {
+});
+</code></pre>
+
+<p>That might be translated to <code>1</code> find, <code>n</code> getMores and <code>0|1</code> killCursors.</p>
+
+<p>After the command executed successfully we receive the following result.</p>
+
+<pre><code class="language-js">{
+  &quot;duration&quot;: 0,
+  &quot;commandName&quot;: &quot;ismaster&quot;,
+  &quot;requestId&quot;: 7,
+  &quot;operationId&quot;: 1,
+  &quot;connectionId&quot;: {
+    &quot;id&quot;: 8,
+    &quot;host&quot;: &quot;localhost&quot;,
+    &quot;port&quot;: 27017
+  },
+  &quot;reply&quot;: {
+    &quot;ismaster&quot;: true,
+    &quot;maxBsonObjectSize&quot;: 16777216,
+    &quot;maxMessageSizeBytes&quot;: 48000000,
+    &quot;maxWriteBatchSize&quot;: 1000,
+    &quot;localTime&quot;: &quot;2015-08-04T10:26:01.445Z&quot;,
+    &quot;maxWireVersion&quot;: 3,
+    &quot;minWireVersion&quot;: 0,
+    &quot;ok&quot;: 1
+  }
+}
+</code></pre>
+
+<p>Notice that the <code>requestId</code> and <code>operationId</code> matches up to the start message allowing the user of the API to correlated the two events. Next let&rsquo;s look at a complete <code>find</code> operation that results in <code>getMores</code>.</p>
+
+<pre><code class="language-js">{
+  &quot;command&quot;: {
+    &quot;find&quot;: &quot;apm_test_2&quot;,
+    &quot;filter&quot;: {
+      &quot;a&quot;: 1
+    },
+    &quot;sort&quot;: {
+      &quot;a&quot;: 1
+    },
+    &quot;projection&quot;: {
+      &quot;_id&quot;: 1,
+      &quot;a&quot;: 1
+    },
+    &quot;limit&quot;: 100,
+    &quot;skip&quot;: 1,
+    &quot;hint&quot;: {
+      &quot;_id&quot;: 1
+    },
+    &quot;batchSize&quot;: 2,
+    &quot;comment&quot;: &quot;some comment&quot;,
+    &quot;maxScan&quot;: 1000,
+    &quot;maxTimeMS&quot;: 5000,
+    &quot;noCursorTimeout&quot;: true
+  },
+  &quot;databaseName&quot;: &quot;integration_tests&quot;,
+  &quot;commandName&quot;: &quot;find&quot;,
+  &quot;requestId&quot;: 44,
+  &quot;operationId&quot;: 39,
+  &quot;connectionId&quot;: {
+    &quot;id&quot;: 19,
+    &quot;host&quot;: &quot;localhost&quot;,
+    &quot;port&quot;: 27017
+  }
+}
+{
+  &quot;duration&quot;: 1,
+  &quot;commandName&quot;: &quot;find&quot;,
+  &quot;requestId&quot;: 44,
+  &quot;operationId&quot;: 39,
+  &quot;connectionId&quot;: {
+    &quot;id&quot;: 19,
+    &quot;host&quot;: &quot;localhost&quot;,
+    &quot;port&quot;: 27017
+  },
+  &quot;reply&quot;: [
+    {
+      &quot;_id&quot;: &quot;55c096386e3b2283b70c294d&quot;,
+      &quot;a&quot;: 1
+    },
+    {
+      &quot;_id&quot;: &quot;55c096386e3b2283b70c294e&quot;,
+      &quot;a&quot;: 1
+    }
+  ]
+}
+{
+  &quot;command&quot;: {
+    &quot;getMore&quot;: &quot;104961726686&quot;,
+    &quot;collection&quot;: &quot;apm_test_2&quot;,
+    &quot;batchSize&quot;: 2,
+    &quot;maxTimeMS&quot;: 5000
+  },
+  &quot;databaseName&quot;: &quot;integration_tests&quot;,
+  &quot;commandName&quot;: &quot;getMore&quot;,
+  &quot;requestId&quot;: 44,
+  &quot;operationId&quot;: 39,
+  &quot;connectionId&quot;: {
+    &quot;id&quot;: 19,
+    &quot;host&quot;: &quot;localhost&quot;,
+    &quot;port&quot;: 27017
+  }
+}
+{
+  &quot;duration&quot;: 1,
+  &quot;commandName&quot;: &quot;getMore&quot;,
+  &quot;requestId&quot;: 44,
+  &quot;operationId&quot;: 39,
+  &quot;connectionId&quot;: {
+    &quot;id&quot;: 19,
+    &quot;host&quot;: &quot;localhost&quot;,
+    &quot;port&quot;: 27017
+  },
+  &quot;reply&quot;: [
+    {
+      &quot;_id&quot;: &quot;55c096386e3b2283b70c294f&quot;,
+      &quot;a&quot;: 1
+    },
+    {
+      &quot;_id&quot;: &quot;55c096386e3b2283b70c2950&quot;,
+      &quot;a&quot;: 1
+    }
+  ]
+}
+{
+  &quot;command&quot;: {
+    &quot;getMore&quot;: &quot;104961726686&quot;,
+    &quot;collection&quot;: &quot;apm_test_2&quot;,
+    &quot;batchSize&quot;: 2,
+    &quot;maxTimeMS&quot;: 5000
+  },
+  &quot;databaseName&quot;: &quot;integration_tests&quot;,
+  &quot;commandName&quot;: &quot;getMore&quot;,
+  &quot;requestId&quot;: 45,
+  &quot;operationId&quot;: 39,
+  &quot;connectionId&quot;: {
+    &quot;id&quot;: 19,
+    &quot;host&quot;: &quot;localhost&quot;,
+    &quot;port&quot;: 27017
+  }
+}
+{
+  &quot;duration&quot;: 0,
+  &quot;commandName&quot;: &quot;getMore&quot;,
+  &quot;requestId&quot;: 45,
+  &quot;operationId&quot;: 39,
+  &quot;connectionId&quot;: {
+    &quot;id&quot;: 19,
+    &quot;host&quot;: &quot;localhost&quot;,
+    &quot;port&quot;: 27017
+  },
+  &quot;reply&quot;: [
+    {
+      &quot;_id&quot;: &quot;55c096386e3b2283b70c2951&quot;,
+      &quot;a&quot;: 1
+    }
+  ]
+}
+</code></pre>
+
+<p>The main thing to notice here is that they all share the same <code>operationId</code> allowing the APM API user to correctly map the low level commands to the logical command executed by the user (in this case <code>toArray</code> on a cursor).</p>
+
+<h3 id="operationidgenerator">operationIdGenerator</h3>
+
+<p>The <code>operationIdGenerator</code> option allows the API user to pass in a custom <code>operationId</code> generator object that can be used to synchronize internal request Id&rsquo;s in the APM client with the low level command monitoring API. This makes it possible to tie together the logical method called by the users code with the low level commands issues to MongoDB potentially allowing for a richer APM experience and performance breakdown. Below is a simple <code>operationIdGenerator</code> example.</p>
+
+<pre><code class="language-js">var generator = {
+  operationId: 1,
+
+  next: function() {
+    return this.operationId++;
+  }
+};
+</code></pre>
+
+<h3 id="timestampgenerator">timestampGenerator</h3>
+
+<p>The <code>timestampGenerator</code> option lets the API user override the method used to timestamp the command monitoring events with a custom timestamp type. The generator contains two method. The first one <code>current</code> returns the current <code>timestamp</code> and <code>duration</code> calculates the total operation duration between the <code>start</code> and <code>end</code> time. Below is a simple example generator.</p>
+
+<pre><code class="language-js">var generator = {
+  current: function() {
+    return new Date().getTime();
+  },
+
+  duration: function(start, end) {
+    return end - start;
+  }
+}  
+</code></pre>
+
+<h2 id="instrumentation">Instrumentation</h2>
+
+<p>The instrumentation callback returns the instrumentation points in the driver and it&rsquo;s associated metadata. Let&rsquo;s look at one of the examples. Notice that the result shown is the result from performing <code>JSON.stringify</code>. We will note where there are actual object instances.</p>
+
+<pre><code class="language-js">{
+  &quot;name&quot;: &quot;Gridstore&quot;,
+  &quot;stream&quot;: true,
+  &quot;instrumentations&quot;: [
+    {
+      &quot;methods&quot;: [
+        &quot;open&quot;,
+        &quot;getc&quot;,
+        &quot;puts&quot;,
+        &quot;write&quot;,
+        &quot;writeFile&quot;,
+        &quot;close&quot;,
+        &quot;unlink&quot;,
+        &quot;readlines&quot;,
+        &quot;rewind&quot;,
+        &quot;read&quot;,
+        &quot;tell&quot;,
+        &quot;seek&quot;
+      ],
+      &quot;options&quot;: {
+        &quot;callback&quot;: true,
+        &quot;promise&quot;: true
+      }
+    },
+    {
+      &quot;methods&quot;: [
+        &quot;eof&quot;
+      ],
+      &quot;options&quot;: {
+        &quot;callback&quot;: false,
+        &quot;promise&quot;: false,
+        &quot;returns&quot;: [
+          null
+        ]
+      }
+    },
+    {
+      &quot;methods&quot;: [
+        &quot;stream&quot;
+      ],
+      &quot;options&quot;: {
+        &quot;callback&quot;: false,
+        &quot;promise&quot;: false,
+        &quot;returns&quot;: [
+          null
+        ]
+      }
+    },
+    {
+      &quot;methods&quot;: [
+        &quot;destroy&quot;
+      ],
+      &quot;options&quot;: {
+        &quot;callback&quot;: false,
+        &quot;promise&quot;: false
+      }
+    },
+    {
+      &quot;methods&quot;: [
+        &quot;chunkCollection&quot;,
+        &quot;collection&quot;
+      ],
+      &quot;options&quot;: {
+        &quot;callback&quot;: true,
+        &quot;promise&quot;: false,
+        &quot;returns&quot;: [
+          null
+        ]
+      }
+    },
+    {
+      &quot;methods&quot;: [
+        &quot;exist&quot;,
+        &quot;list&quot;,
+        &quot;read&quot;,
+        &quot;readlines&quot;,
+        &quot;unlink&quot;
+      ],
+      &quot;options&quot;: {
+        &quot;callback&quot;: true,
+        &quot;promise&quot;: true,
+        &quot;static&quot;: true
+      }
+    }
+  ]
+}
+</code></pre>
+
+<p>At the top level we have <code>name</code> of the class exposed for instrumentation. Next we have the <code>stream</code> value that tells the user if the object can operate as a node.js stream. Next the <code>instrumentations</code> array contains all the methods available for instrumentation. The methods are grouped by the method characteristics. All methods that support a callback as well as a promise will be grouped in a single instrumentation. This simplifies the code to perform the actual instrumentation.</p>
+
+<p>Let&rsquo;s look at an example instrumentation in more detail.</p>
+
+<pre><code class="language-js">{
+  &quot;methods&quot;: [
+    &quot;open&quot;,
+    &quot;getc&quot;,
+    &quot;puts&quot;,
+    &quot;write&quot;,
+    &quot;writeFile&quot;,
+    &quot;close&quot;,
+    &quot;unlink&quot;,
+    &quot;readlines&quot;,
+    &quot;rewind&quot;,
+    &quot;read&quot;,
+    &quot;tell&quot;,
+    &quot;seek&quot;
+  ],
+  &quot;options&quot;: {
+    &quot;callback&quot;: true,
+    &quot;promise&quot;: true
+  }
+}
+</code></pre>
+
+<p>The <code>methods</code> array contains all the methods that have the options <code>callback=true</code> and <code>promise=true</code> for the GridStore prototype. The available options are.</p>
+
+<table>
+<thead>
+<tr>
+<th>Options</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>callback</td>
+<td align="left">The method supports a callback</td>
+</tr>
+
+<tr>
+<td>promise</td>
+<td align="left">The method can return a promise</td>
+</tr>
+
+<tr>
+<td>static</td>
+<td align="left">The method is a static method (not on the prototype)</td>
+</tr>
+
+<tr>
+<td>returns</td>
+<td align="left">The method can return one of the types in the array</td>
+</tr>
+</tbody>
+</table>
+
+<p>Let&rsquo;s look at a very basic instrumentation example.</p>
+
+<pre><code class="language-js">var listener = require('../..').instrument(function(err, instrumentations) {
+  instrumentations.forEach(function(obj) {
+    var object = obj.obj;
+
+    // Iterate over all the methods that are just callback with no return
+    obj.instrumentations.forEach(function(instr) {
+      var options = instr.options;
+
+      if(options.callback
+        &amp;&amp; !options.returns &amp;&amp; !options.static) {
+
+        // Method name
+        instr.methods.forEach(function(method) {
+          var applyMethod = function(_method) {
+            var func = object.prototype[_method];
+
+            overrides.push({
+              obj: object.prototype, method: _method, func: func
+            });
+
+            object.prototype[_method] = function() {
+              if(!methodsCalled[_method]) methodsCalled[_method] = 0;
+              methodsCalled[_method] = methodsCalled[_method] + 1;
+              var args = Array.prototype.slice.call(arguments, 0);
+              func.apply(this, args);                
+            }                
+          }
+
+          applyMethod(method);
+        });
+      }
+    });
+  });
+});
+</code></pre>
+
+<p>This instrumentation only overrides methods that have callbacks and ignores promises, so it&rsquo;s not a complete solution, but shows the way a user of the API can structure their code to tap into the exposed surface of the driver.</p>
+
+
+
+
+
+
+<div id="btnv">
+  
+  <div class="pull-left">
+  <a class="navigation prev" href="/node-mongodb-native/2.1/reference/management/logging/">
+      <i class="fa fa-long-arrow-left"> </i> Logging
+  </a>
+  </div>
+  
+  
+</div>
+</div>
+
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+     
+    var disqus_shortname = 'nodejsmongodbdriver'; 
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+</div>
+<div class="right-column">
+<div class="wrapper">
+  
+  <div class="toc">
+    <span class="toc-header">On this page</span>
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#apm">APM</a>
+<ul>
+<li><a href="#api">API</a></li>
+<li><a href="#command-monitoring">Command Monitoring</a>
+<ul>
+<li><a href="#operationidgenerator">operationIdGenerator</a></li>
+<li><a href="#timestampgenerator">timestampGenerator</a></li>
+</ul></li>
+<li><a href="#instrumentation">Instrumentation</a></li>
+</ul></li>
+</ul>
+</nav>
+  </div>
+  
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</section>
+</section>
+
+</section>
+
+
+<script type="text/javascript">
+  var DOCUMENTATION_OPTIONS = {
+   URL_ROOT:    "/node-mongodb-native/2.1/",
+   VERSION:     "2.1",
+   COLLAPSE_INDEX: false,
+   FILE_SUFFIX: '.html',
+   HAS_SOURCE:  true
+  };
+</script>
+<script type="text/javascript" src="/node-mongodb-native/2.1//js/jquery.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.1//lib/bootstrap.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.1//js/navbar.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.1//lib/highlight/highlight.pack.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.1//js/scripts.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.1//lib/bootstrap-toggle/bootstrap-toggle.min.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.1//js/java.js"></script>
+
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-29229787-1', 'auto');
+  ga('send', 'pageview');
+</script>
+</body>
+</html>
+

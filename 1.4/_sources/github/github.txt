@@ -24,7 +24,7 @@ Web frameworks using MongoDB
          * - **Clone Url**
            - https://github.com/nwtjs/nwt.git
          * - **Forks**
-           - 12
+           - 13
          * - **Watchers**
            - 30
 
@@ -191,9 +191,9 @@ Content Management Systems
          * - **Clone Url**
            - https://github.com/cliftonc/calipso.git
          * - **Forks**
-           - 293
+           - 297
          * - **Watchers**
-           - 1615
+           - 1624
 
 Grid FS libraries or tools
 --------------------------
@@ -314,7 +314,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 13
          * - **Watchers**
-           - 51
+           - 52
 
 .. topic:: mdoq-mongodb
 
@@ -471,7 +471,7 @@ Test helpers and libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 20:7:44 on 3/10/2015
+           - 19:13:12 on 4/11/2015
          * - **Homepage**
            - http://
          * - **Url**
@@ -479,9 +479,9 @@ Test helpers and libraries
          * - **Clone Url**
            - https://github.com/emerleite/node-database-cleaner.git
          * - **Forks**
-           - 25
+           - 26
          * - **Watchers**
-           - 76
+           - 78
 
 Tools or applications to manage your MongoDB's
 ----------------------------------------------
@@ -657,7 +657,7 @@ General frameworks over MongoDB
          * - **Forks**
            - 9
          * - **Watchers**
-           - 54
+           - 55
 
 Translation libraries or frameworks
 -----------------------------------
@@ -720,9 +720,9 @@ Libraries or Applications for analytics
          :header-rows: 0
 
          * - **Activity Level**
-           - .. image:: ../static/nonactive.png
+           - .. image:: ../static/active.png
          * - **Last push**
-           - 20:46:53 on 23/3/2015
+           - 14:47:4 on 2/11/2015
          * - **Homepage**
            - http://http://square.github.com/cube
          * - **Url**
@@ -732,7 +732,7 @@ Libraries or Applications for analytics
          * - **Forks**
            - 416
          * - **Watchers**
-           - 3642
+           - 3656
 
 Libraries for the connect middleware
 ------------------------------------
@@ -771,7 +771,7 @@ Libraries for the connect middleware
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 17:24:25 on 28/8/2015
+           - 13:2:27 on 30/10/2015
          * - **Homepage**
            - http://
          * - **Url**
@@ -779,9 +779,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 214
+           - 219
          * - **Watchers**
-           - 849
+           - 861
 
 Libraries or applications for continous integration
 ---------------------------------------------------

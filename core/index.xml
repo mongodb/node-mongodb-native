@@ -781,6 +781,33 @@ $ git checkout -b myNewFeature
     </item>
     
     <item>
+      <title>MongoDB Core</title>
+      <link>/node-mongodb-native/core/driver/</link>
+      <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
+      
+      <guid>/node-mongodb-native/core/driver/</guid>
+      <description>
+
+&lt;h2 id=&#34;mongodb-driver-core-documentation&#34;&gt;MongoDB Driver Core Documentation&lt;/h2&gt;
+
+&lt;p&gt;Welcome to the MongoDB Core Driver documentation hub.&lt;/p&gt;
+
+&lt;h3 id=&#34;what-s-new-in-2-0&#34;&gt;What&amp;rsquo;s New in 2.0&lt;/h3&gt;
+
+&lt;p&gt;The &lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/whats-new/&#34;&gt;What&amp;rsquo;s New&lt;/a&gt; guide explains the major new features of the driver.&lt;/p&gt;
+
+&lt;h3 id=&#34;getting-started&#34;&gt;Getting Started&lt;/h3&gt;
+
+&lt;p&gt;The &lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/driver/getting-started/&#34;&gt;Getting Started&lt;/a&gt; guide contains installation instructions
+and a simple tutorial to get up and running quickly.&lt;/p&gt;
+
+&lt;h3 id=&#34;reference&#34;&gt;Reference&lt;/h3&gt;
+
+&lt;p&gt;For more detailed documentation, see the &lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/driver/reference/&#34;&gt;Reference&lt;/a&gt; guide.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
       <title>Installation Guide</title>
       <link>/node-mongodb-native/core/driver/getting-started/installation-guide/</link>
       <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
@@ -877,33 +904,6 @@ node-gyp rebuild
 &lt;p&gt;Your python installation might be hosed making gyp break. I always recommend that you test your deployment environment first by trying to build node itself on the server in question as this should unearth any issues with broken packages (and there are a lot of broken packages out there).&lt;/p&gt;
 
 &lt;p&gt;Another thing is to ensure your user has write permission to wherever the node modules are being installed.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>MongoDB Core</title>
-      <link>/node-mongodb-native/core/driver/</link>
-      <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
-      
-      <guid>/node-mongodb-native/core/driver/</guid>
-      <description>
-
-&lt;h2 id=&#34;mongodb-driver-core-documentation&#34;&gt;MongoDB Driver Core Documentation&lt;/h2&gt;
-
-&lt;p&gt;Welcome to the MongoDB Core Driver documentation hub.&lt;/p&gt;
-
-&lt;h3 id=&#34;what-s-new-in-2-0&#34;&gt;What&amp;rsquo;s New in 2.0&lt;/h3&gt;
-
-&lt;p&gt;The &lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/whats-new/&#34;&gt;What&amp;rsquo;s New&lt;/a&gt; guide explains the major new features of the driver.&lt;/p&gt;
-
-&lt;h3 id=&#34;getting-started&#34;&gt;Getting Started&lt;/h3&gt;
-
-&lt;p&gt;The &lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/driver/getting-started/&#34;&gt;Getting Started&lt;/a&gt; guide contains installation instructions
-and a simple tutorial to get up and running quickly.&lt;/p&gt;
-
-&lt;h3 id=&#34;reference&#34;&gt;Reference&lt;/h3&gt;
-
-&lt;p&gt;For more detailed documentation, see the &lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/driver/reference/&#34;&gt;Reference&lt;/a&gt; guide.&lt;/p&gt;
 </description>
     </item>
     

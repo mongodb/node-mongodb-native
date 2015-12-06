@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/</loc>
+    <lastmod>2015-10-15T14:27:51-04:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/reference/gridfs/streaming/</loc>
+    <lastmod>2015-10-15T14:27:51-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/reference/gridfs/</loc>
+    <lastmod>2015-08-05T12:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/reference/gridfs/gridstore/</loc>
+    <lastmod>2015-03-19T14:27:51-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/reference/connecting/authenticating/</loc>
+    <lastmod>2015-03-19T14:27:51-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/reference/management/</loc>
+    <lastmod>2015-03-19T14:27:51-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/whats-new/upgrading/</loc>
+    <lastmod>2015-03-19T12:53:39-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/whats-new/</loc>
+    <lastmod>2015-03-19T12:53:35-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/reference/connecting/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/reference/connecting/connection-settings/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/reference/crud/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/reference/connecting/ssl/</loc>
+    <lastmod>2015-03-19T12:53:26-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/reference/management/apm/</loc>
+    <lastmod>2015-03-19T12:53:26-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/reference/management/logging/</loc>
+    <lastmod>2015-03-18T21:14:20-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/issues-help/</loc>
+    <lastmod>2015-03-18T16:56:14+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/getting-started/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/getting-started/installation-guide/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/getting-started/quick-tour/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/reference/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+  </url>
+  
+</urlset>

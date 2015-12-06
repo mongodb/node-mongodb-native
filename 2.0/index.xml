@@ -2,19 +2,19 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>MongoDB Node.js Driver</title>
-    <link>/node-mongodb-native/2.0/</link>
+    <link>/node-mongodb-native/2.1/</link>
     <description>Recent content on MongoDB Node.js Driver</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Wed, 05 Aug 2015 12:00:00 +0000</lastBuildDate>
-    <atom:link href="/node-mongodb-native/2.0/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="/node-mongodb-native/2.1/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>GridFS</title>
-      <link>/node-mongodb-native/2.0/reference/gridfs/</link>
+      <link>/node-mongodb-native/2.1/reference/gridfs/</link>
       <pubDate>Wed, 05 Aug 2015 12:00:00 +0000</pubDate>
       
-      <guid>/node-mongodb-native/2.0/reference/gridfs/</guid>
+      <guid>/node-mongodb-native/2.1/reference/gridfs/</guid>
       <description>
 
 &lt;h2 id=&#34;gridfs&#34;&gt;GridFS&lt;/h2&gt;
@@ -35,17 +35,17 @@
 &lt;p&gt;The Node.js Driver includes the legacy &lt;code&gt;GridStore&lt;/code&gt; API.&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/gridfs/gridstore/&#34;&gt;GridStore&lt;/a&gt;: documentation on how to use the &lt;code&gt;GridStore&lt;/code&gt; API.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/gridfs/gridstore/&#34;&gt;GridStore&lt;/a&gt;: documentation on how to use the &lt;code&gt;GridStore&lt;/code&gt; API.&lt;/li&gt;
 &lt;/ul&gt;
 </description>
     </item>
     
     <item>
       <title>Authenticating</title>
-      <link>/node-mongodb-native/2.0/reference/connecting/authenticating/</link>
+      <link>/node-mongodb-native/2.1/reference/connecting/authenticating/</link>
       <pubDate>Thu, 19 Mar 2015 14:27:51 -0400</pubDate>
       
-      <guid>/node-mongodb-native/2.0/reference/connecting/authenticating/</guid>
+      <guid>/node-mongodb-native/2.1/reference/connecting/authenticating/</guid>
       <description>
 
 &lt;h1 id=&#34;authentication&#34;&gt;Authentication&lt;/h1&gt;
@@ -239,10 +239,10 @@ MongoClient.connect(url, function(err, db) {
     
     <item>
       <title>GridStore</title>
-      <link>/node-mongodb-native/2.0/reference/gridfs/gridstore/</link>
+      <link>/node-mongodb-native/2.1/reference/gridfs/gridstore/</link>
       <pubDate>Thu, 19 Mar 2015 14:27:51 -0400</pubDate>
       
-      <guid>/node-mongodb-native/2.0/reference/gridfs/gridstore/</guid>
+      <guid>/node-mongodb-native/2.1/reference/gridfs/gridstore/</guid>
       <description>
 
 &lt;h2 id=&#34;gridfs&#34;&gt;GridFS&lt;/h2&gt;
@@ -416,10 +416,10 @@ MongoClient.connect(url, function(err, db) {
     
     <item>
       <title>Management</title>
-      <link>/node-mongodb-native/2.0/reference/management/</link>
+      <link>/node-mongodb-native/2.1/reference/management/</link>
       <pubDate>Thu, 19 Mar 2015 14:27:51 -0400</pubDate>
       
-      <guid>/node-mongodb-native/2.0/reference/management/</guid>
+      <guid>/node-mongodb-native/2.1/reference/management/</guid>
       <description>
 
 &lt;h2 id=&#34;management&#34;&gt;Management&lt;/h2&gt;
@@ -427,18 +427,18 @@ MongoClient.connect(url, function(err, db) {
 &lt;p&gt;The driver provides two mechanisms for examining its state:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/management/logging/&#34;&gt;Logging&lt;/a&gt;: Comprehensive logging of all operations.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/management/apm/&#34;&gt;Application Performance Monitoring&lt;/a&gt;: The Application Performance Monitoring API is an API developers to tap into the commands issues to MongoDB to record performance metrics and/or inspect the commands sent to MongoDB.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/management/logging/&#34;&gt;Logging&lt;/a&gt;: Comprehensive logging of all operations.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/management/apm/&#34;&gt;Application Performance Monitoring&lt;/a&gt;: The Application Performance Monitoring API is an API developers to tap into the commands issues to MongoDB to record performance metrics and/or inspect the commands sent to MongoDB.&lt;/li&gt;
 &lt;/ul&gt;
 </description>
     </item>
     
     <item>
       <title>Upgrading to 2.0</title>
-      <link>/node-mongodb-native/2.0/whats-new/upgrading/</link>
+      <link>/node-mongodb-native/2.1/whats-new/upgrading/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:39 -0400</pubDate>
       
-      <guid>/node-mongodb-native/2.0/whats-new/upgrading/</guid>
+      <guid>/node-mongodb-native/2.1/whats-new/upgrading/</guid>
       <description>
 
 &lt;h1 id=&#34;migrating-your-application-to-2-0&#34;&gt;Migrating Your Application To 2.0&lt;/h1&gt;
@@ -518,10 +518,10 @@ MongoClient.connect(url, function(err, db) {
     
     <item>
       <title>What&#39;s New</title>
-      <link>/node-mongodb-native/2.0/whats-new/</link>
+      <link>/node-mongodb-native/2.1/whats-new/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:35 -0400</pubDate>
       
-      <guid>/node-mongodb-native/2.0/whats-new/</guid>
+      <guid>/node-mongodb-native/2.1/whats-new/</guid>
       <description>
 
 &lt;h1 id=&#34;what-s-new-in-2-0&#34;&gt;What&amp;rsquo;s New in 2.0&lt;/h1&gt;
@@ -541,16 +541,16 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;h2 id=&#34;upgrading&#34;&gt;Upgrading&lt;/h2&gt;
 
-&lt;p&gt;See the &lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/whats-new/upgrading/&#34;&gt;upgrading guide&lt;/a&gt; on how to upgrade to 2.0&lt;/p&gt;
+&lt;p&gt;See the &lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/whats-new/upgrading/&#34;&gt;upgrading guide&lt;/a&gt; on how to upgrade to 2.0&lt;/p&gt;
 </description>
     </item>
     
     <item>
       <title>Connection Settings</title>
-      <link>/node-mongodb-native/2.0/reference/connecting/connection-settings/</link>
+      <link>/node-mongodb-native/2.1/reference/connecting/connection-settings/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
       
-      <guid>/node-mongodb-native/2.0/reference/connecting/connection-settings/</guid>
+      <guid>/node-mongodb-native/2.1/reference/connecting/connection-settings/</guid>
       <description>
 
 &lt;h1 id=&#34;connecting-to-mongodb&#34;&gt;Connecting To MongoDB&lt;/h1&gt;
@@ -829,10 +829,10 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
     
     <item>
       <title>Connecting</title>
-      <link>/node-mongodb-native/2.0/reference/connecting/</link>
+      <link>/node-mongodb-native/2.1/reference/connecting/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
       
-      <guid>/node-mongodb-native/2.0/reference/connecting/</guid>
+      <guid>/node-mongodb-native/2.1/reference/connecting/</guid>
       <description>
 
 &lt;h2 id=&#34;connecting&#34;&gt;Connecting&lt;/h2&gt;
@@ -840,24 +840,24 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
 &lt;p&gt;The reference documentation for connecting to a MongoDB server deployment is divided into three sections:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/connection-settings/&#34;&gt;Connection Settings&lt;/a&gt;: documentation of the various ways to specify the properties of a connection&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/authenticating/&#34;&gt;Authenticating&lt;/a&gt;: detailed documentation of the various ways to specify authentication credentials&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/ssl/&#34;&gt;SSL&lt;/a&gt;: Detailed documentation of the various ways to specify the properties of an SSL connection&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/connecting/connection-settings/&#34;&gt;Connection Settings&lt;/a&gt;: documentation of the various ways to specify the properties of a connection&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/connecting/authenticating/&#34;&gt;Authenticating&lt;/a&gt;: detailed documentation of the various ways to specify authentication credentials&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/connecting/ssl/&#34;&gt;SSL&lt;/a&gt;: Detailed documentation of the various ways to specify the properties of an SSL connection&lt;/li&gt;
 &lt;/ul&gt;
 </description>
     </item>
     
     <item>
       <title>CRUD Operations</title>
-      <link>/node-mongodb-native/2.0/reference/crud/</link>
+      <link>/node-mongodb-native/2.1/reference/crud/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
       
-      <guid>/node-mongodb-native/2.0/reference/crud/</guid>
+      <guid>/node-mongodb-native/2.1/reference/crud/</guid>
       <description>
 
 &lt;h1 id=&#34;crud&#34;&gt;CRUD&lt;/h1&gt;
 
-&lt;p&gt;For a walkthrough of the main CRUD operations please refer to the &lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/getting-started/quick-tour/&#34;&gt;Quick Tour&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;For a walkthrough of the main CRUD operations please refer to the &lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/getting-started/quick-tour/&#34;&gt;Quick Tour&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;The driver crud operations are defined as the operations performed to insert/update/remove and query for documents. In this tutorial we will cover both the basic CRUD methods as well as the specialized &lt;em&gt;findAndModify&lt;/em&gt; based methods and the new Bulk API methods allowing for efficient bulk write operations. But let&amp;rsquo;s start with a simple introduction to the insert, update and remove operations that are on the collection class.&lt;/p&gt;
 
@@ -1331,7 +1331,7 @@ collection.find({}).hint(&#39;a_1&#39;)                                // Set th
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;collection.find({}).maxTimeMS(1000).maxScan(100).skip(1).toArray(..)
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;More information can be found in the &lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/api/Cursor.html&#34;&gt;Cursor API documentation&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;More information can be found in the &lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.0/api/Cursor.html&#34;&gt;Cursor API documentation&lt;/a&gt;.&lt;/p&gt;
 
 &lt;p&gt;We already looked at &lt;em&gt;toArray&lt;/em&gt; method above. Let&amp;rsquo;s take a look at the &lt;em&gt;next&lt;/em&gt; method.&lt;/p&gt;
 
@@ -1397,10 +1397,10 @@ MongoClient.connect(url, function(err, db) {
     
     <item>
       <title>SSL</title>
-      <link>/node-mongodb-native/2.0/reference/connecting/ssl/</link>
+      <link>/node-mongodb-native/2.1/reference/connecting/ssl/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:26 -0400</pubDate>
       
-      <guid>/node-mongodb-native/2.0/reference/connecting/ssl/</guid>
+      <guid>/node-mongodb-native/2.1/reference/connecting/ssl/</guid>
       <description>
 
 &lt;h1 id=&#34;ssl&#34;&gt;SSL&lt;/h1&gt;
@@ -1588,10 +1588,10 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
     
     <item>
       <title>APM</title>
-      <link>/node-mongodb-native/2.0/reference/management/apm/</link>
+      <link>/node-mongodb-native/2.1/reference/management/apm/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:26 -0400</pubDate>
       
-      <guid>/node-mongodb-native/2.0/reference/management/apm/</guid>
+      <guid>/node-mongodb-native/2.1/reference/management/apm/</guid>
       <description>
 
 &lt;h1 id=&#34;apm&#34;&gt;APM&lt;/h1&gt;
@@ -2055,10 +2055,10 @@ listener.on(&#39;failed&#39;, function(event) {
     
     <item>
       <title>Logging</title>
-      <link>/node-mongodb-native/2.0/reference/management/logging/</link>
+      <link>/node-mongodb-native/2.1/reference/management/logging/</link>
       <pubDate>Wed, 18 Mar 2015 21:14:20 -0400</pubDate>
       
-      <guid>/node-mongodb-native/2.0/reference/management/logging/</guid>
+      <guid>/node-mongodb-native/2.1/reference/management/logging/</guid>
       <description>
 
 &lt;h1 id=&#34;logging&#34;&gt;Logging&lt;/h1&gt;
@@ -2191,10 +2191,10 @@ MongoClient.connect(url, function(err, db) {
     
     <item>
       <title>Issues &amp; Help</title>
-      <link>/node-mongodb-native/2.0/issues-help/</link>
+      <link>/node-mongodb-native/2.1/issues-help/</link>
       <pubDate>Wed, 18 Mar 2015 16:56:14 +0000</pubDate>
       
-      <guid>/node-mongodb-native/2.0/issues-help/</guid>
+      <guid>/node-mongodb-native/2.1/issues-help/</guid>
       <description>
 
 &lt;h1 id=&#34;issues-help&#34;&gt;Issues &amp;amp; Help&lt;/h1&gt;
@@ -2246,124 +2246,30 @@ $ git checkout -b myNewFeature
     </item>
     
     <item>
-      <title>Installation Guide</title>
-      <link>/node-mongodb-native/2.0/getting-started/installation-guide/</link>
+      <title>Getting Started</title>
+      <link>/node-mongodb-native/2.1/getting-started/</link>
       <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
       
-      <guid>/node-mongodb-native/2.0/getting-started/installation-guide/</guid>
+      <guid>/node-mongodb-native/2.1/getting-started/</guid>
       <description>
 
-&lt;h1 id=&#34;installation&#34;&gt;Installation&lt;/h1&gt;
+&lt;h2 id=&#34;getting-started&#34;&gt;Getting Started&lt;/h2&gt;
 
-&lt;p&gt;The recommended way to get started using the Node.js 2.0 driver is by using the &lt;code&gt;NPM&lt;/code&gt; (Node Package Manager) to install the dependency in your project.&lt;/p&gt;
-
-&lt;h2 id=&#34;mongodb-driver&#34;&gt;MongoDB Driver&lt;/h2&gt;
-
-&lt;p&gt;Given that you have created your own project using &lt;code&gt;npm init&lt;/code&gt; we install the mongodb driver and it&amp;rsquo;s dependencies by executing the following &lt;code&gt;NPM&lt;/code&gt; command.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install mongodb --save
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This will download the MongoDB driver and add a dependency entry in your &lt;code&gt;package.json&lt;/code&gt; file.&lt;/p&gt;
-
-&lt;h2 id=&#34;troubleshooting&#34;&gt;Troubleshooting&lt;/h2&gt;
-
-&lt;p&gt;The MongoDB driver depends on several other packages. These are.&lt;/p&gt;
+&lt;p&gt;To help you get started quickly on the new driver, follow:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;mongodb-core&lt;/li&gt;
-&lt;li&gt;bson&lt;/li&gt;
-&lt;li&gt;kerberos&lt;/li&gt;
-&lt;li&gt;node-gyp&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/getting-started/installation-guide/&#34;&gt;Installation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/getting-started/quick-tour/&#34;&gt;Quick Tour&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
-
-&lt;p&gt;The only native extension is the &lt;code&gt;kerberos&lt;/code&gt; extension. This is a &lt;code&gt;peerDependency&lt;/code&gt; for the &lt;code&gt;mongodb&lt;/code&gt; module. This means that if you need to use &lt;code&gt;kerberos&lt;/code&gt; you will need to add the &lt;code&gt;kerberos&lt;/code&gt; module to your modules dependencies.&lt;/p&gt;
-
-&lt;p&gt;If you have &lt;strong&gt;NPM 2.0&lt;/strong&gt; or earlier NPM will attempt to download and build the &lt;code&gt;kerberos&lt;/code&gt; module if you do not have it defined as a dependency in your module. However from &lt;strong&gt;NPM 3.0&lt;/strong&gt; onwards NPM will not attempt to build the &lt;code&gt;kerberos&lt;/code&gt; module but instead print a warning in your install log that looks something like the following.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm WARN EPEERINVALID mongodb-core@1.2.21 requires a peer of kerberos@~0.0 but none was installed.
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This tells you that the driver could not resolve it&amp;rsquo;s &lt;code&gt;peerDependency&lt;/code&gt;. However don&amp;rsquo;t worry. You only need the &lt;code&gt;kerberos&lt;/code&gt; module if intend to use &lt;code&gt;kerberos&lt;/code&gt;. In the case you need to you can add it to your package.json by doing the following for the case of the line above.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install kerberos@0.0.x
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;kerberos&lt;/code&gt; package is a C++ extension that requires a build environment to be installed on your system. You must be able to build node.js itself to be able to compile and install the &lt;code&gt;kerberos&lt;/code&gt; module. Furthermore the &lt;code&gt;kerberos&lt;/code&gt; module requires the MIT Kerberos package to correctly compile on UNIX operating systems. Consult your UNIX operation system package manager what libraries to install.&lt;/p&gt;
-
-&lt;p&gt;&lt;div class=&#34;admonition important&#34;&gt;
-&lt;h5 class=&#34;admonition-title&#34;&gt;important&lt;/h5&gt;
-&lt;p&gt;Windows already contains the SSPI API used for Kerberos authentication. However you will need to install a full compiler tool chain using visual studio C++ to correctly install the kerberos extension.&lt;/p&gt;
-
-&lt;/div&gt;
-&lt;/p&gt;
-
-&lt;h3 id=&#34;diagnosing-on-unix&#34;&gt;Diagnosing on UNIX&lt;/h3&gt;
-
-&lt;p&gt;If you don’t have the build essentials it won’t build. In the case of linux you will need gcc and g++, node.js with all the headers and python. The easiest way to figure out what’s missing is by trying to build the kerberos project. You can do this by performing the following steps.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;git clone https://github.com/christkv/kerberos.git
-cd kerberos
-npm install
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If all the steps complete you have the right toolchain installed. If you get node-gyp not found you need to install it globally by doing.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install -g node-gyp
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If correctly compiles and runs the tests you are golden. We can now try to install the mongod driver by performing the following command.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;cd yourproject
-npm install mongodb --save
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;If it still fails the next step is to examine the npm log. Rerun the command but in this case in verbose mode.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm --loglevel verbose install mongodb
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This will print out all the steps npm is performing while trying to install the module.&lt;/p&gt;
-
-&lt;h3 id=&#34;diagnosing-on-windows&#34;&gt;Diagnosing on Windows&lt;/h3&gt;
-
-&lt;p&gt;A known compiler tool chain known to work for compiling &lt;code&gt;kerberos&lt;/code&gt; on windows is the following.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;Visual Studio c++ 2010 (do not use higher versions)&lt;/li&gt;
-&lt;li&gt;Windows 7 64bit SDK&lt;/li&gt;
-&lt;li&gt;Python 2.7 or higher&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Open visual studio command prompt. Ensure node.exe is in your path and install node-gyp.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;npm install -g node-gyp
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Next you will have to build the project manually to test it. Use any tool you use with git and grab the repo.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;git clone https://github.com/christkv/kerberos.git
-cd kerberos
-npm install
-node-gyp rebuild
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This should rebuild the driver successfully if you have everything set up correctly.&lt;/p&gt;
-
-&lt;h3 id=&#34;other-possible-issues&#34;&gt;Other possible issues&lt;/h3&gt;
-
-&lt;p&gt;Your python installation might be hosed making gyp break. I always recommend that you test your deployment environment first by trying to build node itself on the server in question as this should unearth any issues with broken packages (and there are a lot of broken packages out there).&lt;/p&gt;
-
-&lt;p&gt;Another thing is to ensure your user has write permission to wherever the node modules are being installed.&lt;/p&gt;
 </description>
     </item>
     
     <item>
       <title>Quick Tour</title>
-      <link>/node-mongodb-native/2.0/getting-started/quick-tour/</link>
+      <link>/node-mongodb-native/2.1/getting-started/quick-tour/</link>
       <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
       
-      <guid>/node-mongodb-native/2.0/getting-started/quick-tour/</guid>
+      <guid>/node-mongodb-native/2.1/getting-started/quick-tour/</guid>
       <description>
 
 &lt;h1 id=&#34;quickstart&#34;&gt;QuickStart&lt;/h1&gt;
