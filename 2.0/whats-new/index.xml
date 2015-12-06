@@ -2,19 +2,19 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Whats-News on MongoDB Node.js Driver</title>
-    <link>/node-mongodb-native/2.1/whats-new/</link>
+    <link>/node-mongodb-native/2.0/whats-new/</link>
     <description>Recent content in Whats-News on MongoDB Node.js Driver</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Thu, 19 Mar 2015 12:53:39 -0400</lastBuildDate>
-    <atom:link href="/node-mongodb-native/2.1/whats-new/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="/node-mongodb-native/2.0/whats-new/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Upgrading to 2.0</title>
-      <link>/node-mongodb-native/2.1/whats-new/upgrading/</link>
+      <link>/node-mongodb-native/2.0/whats-new/upgrading/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:39 -0400</pubDate>
       
-      <guid>/node-mongodb-native/2.1/whats-new/upgrading/</guid>
+      <guid>/node-mongodb-native/2.0/whats-new/upgrading/</guid>
       <description>
 
 &lt;h1 id=&#34;migrating-your-application-to-2-0&#34;&gt;Migrating Your Application To 2.0&lt;/h1&gt;
@@ -94,10 +94,10 @@
     
     <item>
       <title>What&#39;s New</title>
-      <link>/node-mongodb-native/2.1/whats-new/</link>
+      <link>/node-mongodb-native/2.0/whats-new/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:35 -0400</pubDate>
       
-      <guid>/node-mongodb-native/2.1/whats-new/</guid>
+      <guid>/node-mongodb-native/2.0/whats-new/</guid>
       <description>
 
 &lt;h1 id=&#34;what-s-new-in-2-0&#34;&gt;What&amp;rsquo;s New in 2.0&lt;/h1&gt;
@@ -117,7 +117,7 @@
 
 &lt;h2 id=&#34;upgrading&#34;&gt;Upgrading&lt;/h2&gt;
 
-&lt;p&gt;See the &lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/whats-new/upgrading/&#34;&gt;upgrading guide&lt;/a&gt; on how to upgrade to 2.0&lt;/p&gt;
+&lt;p&gt;See the &lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/whats-new/upgrading/&#34;&gt;upgrading guide&lt;/a&gt; on how to upgrade to 2.0&lt;/p&gt;
 </description>
     </item>
     

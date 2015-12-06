@@ -252,194 +252,6 @@ API so can &lt;code&gt;pipe()&lt;/code&gt; files to and from MongoDB.&lt;/p&gt;
     </item>
     
     <item>
-      <title>Legacy GridStore</title>
-      <link>/node-mongodb-native/2.1/reference/gridfs/gridstore/</link>
-      <pubDate>Thu, 19 Mar 2015 14:27:51 -0400</pubDate>
-      
-      <guid>/node-mongodb-native/2.1/reference/gridfs/gridstore/</guid>
-      <description>
-
-&lt;p&gt;&lt;div class=&#34;admonition warning&#34;&gt;
-&lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
-&lt;p&gt;The GridStore API is deprecated as all official drivers are moving to a new shared API model.&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/gridfs/streaming/&#34;&gt;Grid File System API&lt;/a&gt;: documentation on how to use the new &lt;code&gt;GridFS&lt;/code&gt; API.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;/div&gt;
-&lt;/p&gt;
-
-&lt;h2 id=&#34;gridfs&#34;&gt;GridFS&lt;/h2&gt;
-
-&lt;p&gt;GridFS is a specification for storing and retrieving files that exceed the BSON-document size limit of 16MB.&lt;/p&gt;
-
-&lt;p&gt;Instead of storing a file in a single document, GridFS divides a file into parts, or chunks, and stores each of those chunks as a separate document. By default GridFS limits chunk size to 255k. GridFS uses two collections to store files. The chunks collection stores the file chunks, and the files collection stores the file metadata.&lt;/p&gt;
-
-&lt;p&gt;When you query a GridFS store for a file, the driver or client will reassemble the chunks as needed. GridFS is useful not only for storing files that exceed 16MB but also for storing any files for which you want access without having to load the entire file into memory.&lt;/p&gt;
-
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
-&lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
-&lt;p&gt;For more information about GridFS see the &lt;a href=&#34;http://docs.mongodb.org/manual/core/gridfs/&#34;&gt;MongoDB GridFS documentation&lt;/a&gt;.&lt;/p&gt;
-
-&lt;/div&gt;
-&lt;/p&gt;
-
-&lt;p&gt;GridStore is a single file inside GridFS that can be managed by the script.&lt;/p&gt;
-
-&lt;h2 id=&#34;open-a-gridfs-file&#34;&gt;Open a GridFS file&lt;/h2&gt;
-
-&lt;p&gt;Opening a GridStore (a single file in GridFS) is a bit similar to opening a database. At first you need to create a GridStore object and then &lt;code&gt;open&lt;/code&gt; it.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var gs = new GridStore(db, filename, mode[, options])
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Where&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;db&lt;/code&gt; is the database object&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;filename&lt;/code&gt; is the name of the file in GridFS that needs to be accessed/created&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;mode&lt;/code&gt; indicated the operation, can be one of:
-
-&lt;ul&gt;
-&lt;li&gt;&amp;ldquo;r&amp;rdquo; (Read): Looks for the file information in fs.files collection, or creates a new id for this object.&lt;/li&gt;
-&lt;li&gt;&amp;ldquo;w&amp;rdquo; (Write): Erases all chunks if the file already exist.&lt;/li&gt;
-&lt;/ul&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;options&lt;/code&gt; can be used to specify some metadata for the file, for example &lt;code&gt;content_type&lt;/code&gt;, &lt;code&gt;metadata&lt;/code&gt; and &lt;code&gt;chunk_size&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Example:&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var gs = new GridStore(db, &amp;quot;test.png&amp;quot;, &amp;quot;w&amp;quot;, {
-  &amp;quot;content_type&amp;quot;: &amp;quot;image/png&amp;quot;,
-  &amp;quot;metadata&amp;quot;:{
-      &amp;quot;author&amp;quot;: &amp;quot;Daniel&amp;quot;
-  },
-  &amp;quot;chunk_size&amp;quot;: 1024*4
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;After a GridStore object is created, it needs to be opened.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;gs.open(function(err, gs) {
-  // gs is the intialized GridStore object
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Opened GridStore objects have a set of useful exposed properties&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;gs.length&lt;/code&gt; - length of the file in bytes&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;gs.contentType&lt;/code&gt; - the content type for the file&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;gs.uploadDate&lt;/code&gt; - when the file was uploaded&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;gs.metadata&lt;/code&gt; - metadata that was saved with the file&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;gs.chunkSize&lt;/code&gt; - chunk size&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;Example&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;gs.open(function(err, gs){
-  console.log(&amp;quot;this file was uploaded at &amp;quot;+gs.uploadDate);
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;writing-to-gridfs&#34;&gt;Writing to GridFS&lt;/h2&gt;
-
-&lt;p&gt;Writing can be done with &lt;code&gt;write&lt;/code&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;gs.write(data, callback)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;where &lt;code&gt;data&lt;/code&gt; is a &lt;code&gt;Buffer&lt;/code&gt; or a string, callback gets two parameters - an error object (if error occured) and result value which indicates if the write was successful or not.&lt;/p&gt;
-
-&lt;p&gt;While the GridStore is not closed, every write is appended to the opened GridStore.&lt;/p&gt;
-
-&lt;h2 id=&#34;writing-a-file-to-gridfs&#34;&gt;Writing a file to GridFS&lt;/h2&gt;
-
-&lt;p&gt;This function opens the GridStore, streams the contents of the file into GridStore, and closes the GridStore.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;gs.writeFile( file, callback )
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;where&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;file&lt;/code&gt; is a file descriptor, or a string file path&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;callback&lt;/code&gt; is a function with two parameters - error object (if error occured) and the GridStore object.&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;reading-from-a-gridfs-file&#34;&gt;Reading from a GridFS file&lt;/h2&gt;
-
-&lt;p&gt;Reading from GridStore can be done with &lt;code&gt;read&lt;/code&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;gs.read([size], callback)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;where&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;size&lt;/code&gt; is the length of the data to be read&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;callback&lt;/code&gt; is a callback function with two parameters - error object (if an error occured) and data (binary string)&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;streaming-from-gridfs&#34;&gt;Streaming from GridFS&lt;/h2&gt;
-
-&lt;p&gt;You can stream data as it comes from the database using &lt;code&gt;stream&lt;/code&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;gs.stream()
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The function returns &lt;a href=&#34;http://nodejs.org/docs/v0.4.12/api/streams.html#readable_Stream&#34;&gt;read stream&lt;/a&gt; based on this GridStore file. It supports the events &amp;lsquo;read&amp;rsquo;, &amp;lsquo;error&amp;rsquo;, &amp;lsquo;close&amp;rsquo; and &amp;lsquo;end&amp;rsquo;.&lt;/p&gt;
-
-&lt;h2 id=&#34;delete-a-gridfs-file&#34;&gt;Delete a GridFS file&lt;/h2&gt;
-
-&lt;p&gt;GridStore files can be unlinked with &lt;code&gt;unlink&lt;/code&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;GridStore.unlink(db, name, callback)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Where&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;db&lt;/code&gt; is the database object&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;name&lt;/code&gt; is either the name of a GridStore object or an array of GridStore object names&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;callback&lt;/code&gt; is the callback function&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;closing-a-gridfs-file&#34;&gt;Closing a GridFS file&lt;/h2&gt;
-
-&lt;p&gt;GridStore needs to be closed after usage. This can be done with &lt;code&gt;close&lt;/code&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;gs.close(callback)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;check-if-a-gridfs-file-exists&#34;&gt;Check if a GridFS file exists&lt;/h2&gt;
-
-&lt;p&gt;Checking if a file exists in GridFS can be done with &lt;code&gt;exist&lt;/code&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;GridStore.exist(db, filename, callback)
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Where&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;db&lt;/code&gt; is the database object&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;filename&lt;/code&gt; is the name of the file to be checked or a regular expression&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;callback&lt;/code&gt; is a callback function with two parameters - an error object (if an error occured) and a boolean value indicating if the file exists or not&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;h2 id=&#34;seek-to-a-specific-position-for-reading&#34;&gt;Seek to a Specific position for Reading&lt;/h2&gt;
-
-&lt;p&gt;Seeking can be done with &lt;code&gt;seek&lt;/code&gt;&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;gs.seek(position);
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;This function moves the internal pointer to the specified position.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
       <title>Authenticating</title>
       <link>/node-mongodb-native/2.1/reference/connecting/authenticating/</link>
       <pubDate>Thu, 19 Mar 2015 14:27:51 -0400</pubDate>
@@ -637,6 +449,194 @@ MongoClient.connect(url, function(err, db) {
     </item>
     
     <item>
+      <title>Legacy GridStore</title>
+      <link>/node-mongodb-native/2.1/reference/gridfs/gridstore/</link>
+      <pubDate>Thu, 19 Mar 2015 14:27:51 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/2.1/reference/gridfs/gridstore/</guid>
+      <description>
+
+&lt;p&gt;&lt;div class=&#34;admonition warning&#34;&gt;
+&lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
+&lt;p&gt;The GridStore API is deprecated as all official drivers are moving to a new shared API model.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/gridfs/streaming/&#34;&gt;Grid File System API&lt;/a&gt;: documentation on how to use the new &lt;code&gt;GridFS&lt;/code&gt; API.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;h2 id=&#34;gridfs&#34;&gt;GridFS&lt;/h2&gt;
+
+&lt;p&gt;GridFS is a specification for storing and retrieving files that exceed the BSON-document size limit of 16MB.&lt;/p&gt;
+
+&lt;p&gt;Instead of storing a file in a single document, GridFS divides a file into parts, or chunks, and stores each of those chunks as a separate document. By default GridFS limits chunk size to 255k. GridFS uses two collections to store files. The chunks collection stores the file chunks, and the files collection stores the file metadata.&lt;/p&gt;
+
+&lt;p&gt;When you query a GridFS store for a file, the driver or client will reassemble the chunks as needed. GridFS is useful not only for storing files that exceed 16MB but also for storing any files for which you want access without having to load the entire file into memory.&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
+&lt;p&gt;For more information about GridFS see the &lt;a href=&#34;http://docs.mongodb.org/manual/core/gridfs/&#34;&gt;MongoDB GridFS documentation&lt;/a&gt;.&lt;/p&gt;
+
+&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;p&gt;GridStore is a single file inside GridFS that can be managed by the script.&lt;/p&gt;
+
+&lt;h2 id=&#34;open-a-gridfs-file&#34;&gt;Open a GridFS file&lt;/h2&gt;
+
+&lt;p&gt;Opening a GridStore (a single file in GridFS) is a bit similar to opening a database. At first you need to create a GridStore object and then &lt;code&gt;open&lt;/code&gt; it.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var gs = new GridStore(db, filename, mode[, options])
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Where&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;db&lt;/code&gt; is the database object&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;filename&lt;/code&gt; is the name of the file in GridFS that needs to be accessed/created&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;mode&lt;/code&gt; indicated the operation, can be one of:
+
+&lt;ul&gt;
+&lt;li&gt;&amp;ldquo;r&amp;rdquo; (Read): Looks for the file information in fs.files collection, or creates a new id for this object.&lt;/li&gt;
+&lt;li&gt;&amp;ldquo;w&amp;rdquo; (Write): Erases all chunks if the file already exist.&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;options&lt;/code&gt; can be used to specify some metadata for the file, for example &lt;code&gt;content_type&lt;/code&gt;, &lt;code&gt;metadata&lt;/code&gt; and &lt;code&gt;chunk_size&lt;/code&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Example:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var gs = new GridStore(db, &amp;quot;test.png&amp;quot;, &amp;quot;w&amp;quot;, {
+  &amp;quot;content_type&amp;quot;: &amp;quot;image/png&amp;quot;,
+  &amp;quot;metadata&amp;quot;:{
+      &amp;quot;author&amp;quot;: &amp;quot;Daniel&amp;quot;
+  },
+  &amp;quot;chunk_size&amp;quot;: 1024*4
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;After a GridStore object is created, it needs to be opened.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;gs.open(function(err, gs) {
+  // gs is the intialized GridStore object
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Opened GridStore objects have a set of useful exposed properties&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;gs.length&lt;/code&gt; - length of the file in bytes&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;gs.contentType&lt;/code&gt; - the content type for the file&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;gs.uploadDate&lt;/code&gt; - when the file was uploaded&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;gs.metadata&lt;/code&gt; - metadata that was saved with the file&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;gs.chunkSize&lt;/code&gt; - chunk size&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Example&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;gs.open(function(err, gs){
+  console.log(&amp;quot;this file was uploaded at &amp;quot;+gs.uploadDate);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;writing-to-gridfs&#34;&gt;Writing to GridFS&lt;/h2&gt;
+
+&lt;p&gt;Writing can be done with &lt;code&gt;write&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;gs.write(data, callback)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;where &lt;code&gt;data&lt;/code&gt; is a &lt;code&gt;Buffer&lt;/code&gt; or a string, callback gets two parameters - an error object (if error occured) and result value which indicates if the write was successful or not.&lt;/p&gt;
+
+&lt;p&gt;While the GridStore is not closed, every write is appended to the opened GridStore.&lt;/p&gt;
+
+&lt;h2 id=&#34;writing-a-file-to-gridfs&#34;&gt;Writing a file to GridFS&lt;/h2&gt;
+
+&lt;p&gt;This function opens the GridStore, streams the contents of the file into GridStore, and closes the GridStore.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;gs.writeFile( file, callback )
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;where&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;file&lt;/code&gt; is a file descriptor, or a string file path&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;callback&lt;/code&gt; is a function with two parameters - error object (if error occured) and the GridStore object.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;reading-from-a-gridfs-file&#34;&gt;Reading from a GridFS file&lt;/h2&gt;
+
+&lt;p&gt;Reading from GridStore can be done with &lt;code&gt;read&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;gs.read([size], callback)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;where&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;size&lt;/code&gt; is the length of the data to be read&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;callback&lt;/code&gt; is a callback function with two parameters - error object (if an error occured) and data (binary string)&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;streaming-from-gridfs&#34;&gt;Streaming from GridFS&lt;/h2&gt;
+
+&lt;p&gt;You can stream data as it comes from the database using &lt;code&gt;stream&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;gs.stream()
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The function returns &lt;a href=&#34;http://nodejs.org/docs/v0.4.12/api/streams.html#readable_Stream&#34;&gt;read stream&lt;/a&gt; based on this GridStore file. It supports the events &amp;lsquo;read&amp;rsquo;, &amp;lsquo;error&amp;rsquo;, &amp;lsquo;close&amp;rsquo; and &amp;lsquo;end&amp;rsquo;.&lt;/p&gt;
+
+&lt;h2 id=&#34;delete-a-gridfs-file&#34;&gt;Delete a GridFS file&lt;/h2&gt;
+
+&lt;p&gt;GridStore files can be unlinked with &lt;code&gt;unlink&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;GridStore.unlink(db, name, callback)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Where&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;db&lt;/code&gt; is the database object&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;name&lt;/code&gt; is either the name of a GridStore object or an array of GridStore object names&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;callback&lt;/code&gt; is the callback function&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;closing-a-gridfs-file&#34;&gt;Closing a GridFS file&lt;/h2&gt;
+
+&lt;p&gt;GridStore needs to be closed after usage. This can be done with &lt;code&gt;close&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;gs.close(callback)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;check-if-a-gridfs-file-exists&#34;&gt;Check if a GridFS file exists&lt;/h2&gt;
+
+&lt;p&gt;Checking if a file exists in GridFS can be done with &lt;code&gt;exist&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;GridStore.exist(db, filename, callback)
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Where&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;db&lt;/code&gt; is the database object&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;filename&lt;/code&gt; is the name of the file to be checked or a regular expression&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;callback&lt;/code&gt; is a callback function with two parameters - an error object (if an error occured) and a boolean value indicating if the file exists or not&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&#34;seek-to-a-specific-position-for-reading&#34;&gt;Seek to a Specific position for Reading&lt;/h2&gt;
+
+&lt;p&gt;Seeking can be done with &lt;code&gt;seek&lt;/code&gt;&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;gs.seek(position);
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This function moves the internal pointer to the specified position.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
       <title>Management</title>
       <link>/node-mongodb-native/2.1/reference/management/</link>
       <pubDate>Thu, 19 Mar 2015 14:27:51 -0400</pubDate>
@@ -764,26 +764,6 @@ MongoClient.connect(url, function(err, db) {
 &lt;h2 id=&#34;upgrading&#34;&gt;Upgrading&lt;/h2&gt;
 
 &lt;p&gt;See the &lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/whats-new/upgrading/&#34;&gt;upgrading guide&lt;/a&gt; on how to upgrade to 2.0&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Connecting</title>
-      <link>/node-mongodb-native/2.1/reference/connecting/</link>
-      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
-      
-      <guid>/node-mongodb-native/2.1/reference/connecting/</guid>
-      <description>
-
-&lt;h2 id=&#34;connecting&#34;&gt;Connecting&lt;/h2&gt;
-
-&lt;p&gt;The reference documentation for connecting to a MongoDB server deployment is divided into three sections:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/connecting/connection-settings/&#34;&gt;Connection Settings&lt;/a&gt;: documentation of the various ways to specify the properties of a connection&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/connecting/authenticating/&#34;&gt;Authenticating&lt;/a&gt;: detailed documentation of the various ways to specify authentication credentials&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/connecting/ssl/&#34;&gt;SSL&lt;/a&gt;: Detailed documentation of the various ways to specify the properties of an SSL connection&lt;/li&gt;
-&lt;/ul&gt;
 </description>
     </item>
     
@@ -1066,6 +1046,26 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
 });
 
 &lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Connecting</title>
+      <link>/node-mongodb-native/2.1/reference/connecting/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/2.1/reference/connecting/</guid>
+      <description>
+
+&lt;h2 id=&#34;connecting&#34;&gt;Connecting&lt;/h2&gt;
+
+&lt;p&gt;The reference documentation for connecting to a MongoDB server deployment is divided into three sections:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/connecting/connection-settings/&#34;&gt;Connection Settings&lt;/a&gt;: documentation of the various ways to specify the properties of a connection&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/connecting/authenticating/&#34;&gt;Authenticating&lt;/a&gt;: detailed documentation of the various ways to specify authentication credentials&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/connecting/ssl/&#34;&gt;SSL&lt;/a&gt;: Detailed documentation of the various ways to specify the properties of an SSL connection&lt;/li&gt;
+&lt;/ul&gt;
 </description>
     </item>
     

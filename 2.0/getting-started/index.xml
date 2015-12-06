@@ -2,19 +2,19 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Getting-Starteds on MongoDB Node.js Driver</title>
-    <link>/node-mongodb-native/2.1/getting-started/</link>
+    <link>/node-mongodb-native/2.0/getting-started/</link>
     <description>Recent content in Getting-Starteds on MongoDB Node.js Driver</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Tue, 17 Mar 2015 15:36:56 +0000</lastBuildDate>
-    <atom:link href="/node-mongodb-native/2.1/getting-started/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="/node-mongodb-native/2.0/getting-started/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
       <title>Getting Started</title>
-      <link>/node-mongodb-native/2.1/getting-started/</link>
+      <link>/node-mongodb-native/2.0/getting-started/</link>
       <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
       
-      <guid>/node-mongodb-native/2.1/getting-started/</guid>
+      <guid>/node-mongodb-native/2.0/getting-started/</guid>
       <description>
 
 &lt;h2 id=&#34;getting-started&#34;&gt;Getting Started&lt;/h2&gt;
@@ -22,18 +22,18 @@
 &lt;p&gt;To help you get started quickly on the new driver, follow:&lt;/p&gt;
 
 &lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/getting-started/installation-guide/&#34;&gt;Installation&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/getting-started/quick-tour/&#34;&gt;Quick Tour&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/getting-started/installation-guide/&#34;&gt;Installation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/getting-started/quick-tour/&#34;&gt;Quick Tour&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 </description>
     </item>
     
     <item>
       <title>Installation Guide</title>
-      <link>/node-mongodb-native/2.1/getting-started/installation-guide/</link>
+      <link>/node-mongodb-native/2.0/getting-started/installation-guide/</link>
       <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
       
-      <guid>/node-mongodb-native/2.1/getting-started/installation-guide/</guid>
+      <guid>/node-mongodb-native/2.0/getting-started/installation-guide/</guid>
       <description>
 
 &lt;h1 id=&#34;installation&#34;&gt;Installation&lt;/h1&gt;
@@ -143,10 +143,10 @@ node-gyp rebuild
     
     <item>
       <title>Quick Tour</title>
-      <link>/node-mongodb-native/2.1/getting-started/quick-tour/</link>
+      <link>/node-mongodb-native/2.0/getting-started/quick-tour/</link>
       <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
       
-      <guid>/node-mongodb-native/2.1/getting-started/quick-tour/</guid>
+      <guid>/node-mongodb-native/2.0/getting-started/quick-tour/</guid>
       <description>
 
 &lt;h1 id=&#34;quickstart&#34;&gt;QuickStart&lt;/h1&gt;
