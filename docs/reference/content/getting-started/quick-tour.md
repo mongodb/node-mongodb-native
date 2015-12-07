@@ -10,7 +10,7 @@ title = "Quick Tour"
 
 QuickStart
 ==========
-The quick start guide will show you how to set up a simple application using node.js and MongoDB. It scope is only how to set up the driver and perform the simple crud operations. For more inn depth coverage we encourage reading the tutorials.
+The quick start guide will show you how to set up a simple application using node.js and MongoDB. Its scope is only how to set up the driver and perform the simple crud operations. For more in depth coverage we encourage reading the tutorials.
 
 Installing MongoDB Node.js driver using NPM
 -------------------------------------------
