@@ -6,14 +6,14 @@
 
 # Description
 
-The MongoDB driver is the high level part of the 2.0 or higher MongoDB driver and is meant for end users.
+The MongoDB driver is the high level part of the 2.1 or higher MongoDB driver and is meant for end users.
 
 ## MongoDB Node.JS Driver
 
 | what          | where                                          |
 |---------------|------------------------------------------------|
 | documentation | http://mongodb.github.io/node-mongodb-native/  |
-| api-doc        | http://mongodb.github.io/node-mongodb-native/2.0/api/  |
+| api-doc        | http://mongodb.github.io/node-mongodb-native/2.1/api/  |
 | source        | https://github.com/mongodb/node-mongodb-native |
 | mongodb       | http://www.mongodb.org/                        |
 
@@ -380,7 +380,7 @@ var findDocuments = function(db, callback) {
 }
 ```
 
-This query will return all the documents in the **documents** collection. Since we deleted a document the total 
+This query will return all the documents in the **documents** collection. Since we deleted a document the total
 documents returned is **2**. Finally let's add the findDocument method to the **MongoClient.connect** callback.
 
 ```js
