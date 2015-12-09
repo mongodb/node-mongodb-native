@@ -19,106 +19,73 @@ var BSON = require('bson').native().BSON;
 
 // Create a suite
 var suite = new Suite('feather weight test suite', {
-  warmup: 10, cycles: 1, iterations: 10, async:true
+  warmup: 100, cycles: 10, iterations: 1000, async:true
 });
 
 // Add the MB reporter
 suite.addReporter(new MBSimpleReporter());
 
-// // -----------------------------------------------------------------------------
-// //
-// // RUN COMMAND BENCHMARK
-// //
-// // -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 //
-// // // Add the flat json parsing test
-// // suite.addTest(new Benchmark('ismaster command benchmark performance microseconds')
-// //   // The benchmark function
-// //   .set(function(context, callback) {
-// //     context.db.command({ismaster:true}, function(e, r) {
-// //       callback();
-// //     });
-// //   })
-// //   .setup(function(context, options, callback) {
-// //     co(function*(){
-// //       // Create a bson serializer
-// //       var bson = new BSON();
-// //       // Start up the server
-// //       context.manager = yield globalSetup();
-// //       // Get db connection
-// //       context.db = yield getDb('benchmark', 10);
-// //       // Finish up
-// //       callback();
-// //     }).catch(function(e) {
-// //       console.log(e.stack);
-// //     });
-// //   })
-// //   .teardown(function(context, stats, options, callback) {
-// //     co(function*(){
-// //       // Stop the db connection
-// //       yield context.db.close();
-// //       // Start up the server
-// //       context.manager.stop();
-// //       // Finish up
-// //       callback();
-// //     }).catch(function(e) {
-// //       console.log(e.stack);
-// //     });
-// //   })
-// // );
+// RUN COMMAND BENCHMARK
 //
-// // Add the flat json parsing test
-// suite.addTest(new Benchmark('ismaster command benchmark mb/s')
-//   // Add custom method (we are responsible for marking the demarkation)
-//   .custom(function(context, stats, callback) {
-//     // Commands left to do
-//     var left = suite.options.iterations;
-//
-//     // Run a single iteration
-//     stats.startIteration();
-//
-//     // Fire of all the messages in parallel
-//     for(var i = 0; i < suite.options.iterations; i++) {
-//       context.db.command({ismaster:true}, function() {
-//         left = left - 1;
-//
-//         if(left == 0) {
-//           stats.endIteration();
-//           callback();
-//         }
-//       });
-//     }
-//   })
-//   .setup(function(context, options, callback) {
-//     co(function*(){
-//       // Create a bson serializer
-//       var bson = new BSON();
-//       // Start up the server
-//       context.manager = yield globalSetup();
-//       // Total size
-//       context.size = bson.calculateObjectSize({ismaster:true}) * suite.options.iterations;
-//       // Get db connection
-//       context.db = yield getDb('benchmark', 10);
-//       // Finish up
-//       callback();
-//     }).catch(function(e) {
-//       console.log(e.stack);
-//     });
-//   })
-//   .teardown(function(context, stats, options, callback) {
-//     co(function*(){
-//       // Stop the db connection
-//       yield context.db.close();
-//       // Start up the server
-//       context.manager.stop();
-//       // Finish up
-//       callback();
-//     }).catch(function(e) {
-//       console.log(e.stack);
-//     });
-//   })
-// );
-//
+// -----------------------------------------------------------------------------
+
+// Add the flat json parsing test
+suite.addTest(new Benchmark('ismaster command benchmark mb/s')
+  // Add custom method (we are responsible for marking the demarkation)
+  .custom(function(context, stats, callback) {
+    // Commands left to do
+    var left = suite.options.iterations;
+    // Fire of all the messages in parallel
+    for(var i = 0; i < suite.options.iterations; i++) {
+      // Run a single iteration
+      stats.startIteration();
+
+      // Execute the ismaster command
+      context.db.command({ismaster:true}, function() {
+        stats.endIteration();
+        left = left - 1;
+
+        if(left == 0) {
+          callback();
+        }
+      });
+    }
+  })
+  .addMetadata({
+    custom:true
+  })
+  .setup(function(context, options, callback) {
+    co(function*(){
+      // Create a bson serializer
+      var bson = new BSON();
+      // Start up the server
+      context.manager = yield globalSetup();
+      // Total size
+      context.size = bson.calculateObjectSize({ismaster:true}) * suite.options.iterations;
+      // Get db connection
+      context.db = yield getDb('benchmark', 10);
+      // Finish up
+      callback();
+    }).catch(function(e) {
+      console.log(e.stack);
+    });
+  })
+  .teardown(function(context, stats, options, callback) {
+    co(function*(){
+      // Stop the db connection
+      yield context.db.close();
+      // Start up the server
+      context.manager.stop();
+      // Finish up
+      callback();
+    }).catch(function(e) {
+      console.log(e.stack);
+    });
+  })
+);
+
 // // -----------------------------------------------------------------------------
 // //
 // // FIND ONE BY ID
@@ -423,6 +390,7 @@ suite.addReporter(new MBSimpleReporter());
 //     filestream
 //       .pipe(pipe)
 //       .on('data', function(doc) {
+//         console.log("------------------------------------ data")
 //         pipe.pause();
 //         // Calculate the total size
 //         if(!context.firstPass) {
@@ -437,13 +405,13 @@ suite.addReporter(new MBSimpleReporter());
 //         });
 //       })
 //       .on('end', function() {
+//         console.log("------------------------------------ end")
 //         context.firstPass = true;
 //         callback();
 //       });
 //   })
 //   .cycle().setup(function(context, options, callback) {
 //     context.collection.drop(function() {
-//       console.dir(context.size)
 //       callback();
 //     });
 //   })
@@ -559,7 +527,6 @@ suite.addReporter(new MBSimpleReporter());
 // suite.addTest(new Benchmark('small doc bulk insert MB/s')
 //   // Add custom method (we are responsible for marking the demarkation)
 //   .custom(function(context, stats, callback) {
-//
 //     // Commands left to do
 //     var left = context.documents.length;
 //
@@ -571,6 +538,9 @@ suite.addReporter(new MBSimpleReporter());
 //       stats.endIteration();
 //       callback();
 //     });
+//   })
+//   .addMetadata({
+//     custom:true
 //   })
 //   .cycle().setup(function(context, options, callback) {
 //     context.collection.drop(function() {
@@ -641,6 +611,9 @@ suite.addReporter(new MBSimpleReporter());
 //       stats.endIteration();
 //       callback();
 //     });
+//   })
+//   .addMetadata({
+//     custom:true
 //   })
 //   .cycle().setup(function(context, options, callback) {
 //     context.collection.drop(function() {
@@ -721,6 +694,7 @@ suite.addReporter(new MBSimpleReporter());
 //       readStream.push(null);
 //       // Create an upload stream
 //       var uploadStream = bucket.openUploadStream(f('file%s.txt', index++));
+//       var s = new Date();
 //       // Wait for stream to finish
 //       uploadStream.once('finish', function() {
 //         stats.endIteration()
@@ -732,6 +706,9 @@ suite.addReporter(new MBSimpleReporter());
 //     }
 //
 //     execute(context.numberOfDocs, callback);
+//   })
+//   .addMetadata({
+//     custom:true
 //   })
 //   .cycle().setup(function(context, options, callback) {
 //     context.collection.drop(function() {
@@ -748,8 +725,6 @@ suite.addReporter(new MBSimpleReporter());
 //       context.db = yield getDb('benchmark', 10);
 //       // Get the corpus collection
 //       context.collection = context.db.collection('corpus');
-//       // Size used to calculate the
-//       context.size = 0;
 //       // Number of docs
 //       context.numberOfDocs = 50;
 //       // Document
@@ -775,91 +750,190 @@ suite.addReporter(new MBSimpleReporter());
 //   })
 // );
 
-// -----------------------------------------------------------------------------
+// // -----------------------------------------------------------------------------
+// //
+// // GridFS download
+// //
+// // -----------------------------------------------------------------------------
 //
-// GridFS download
+// // Add the flat json parsing test
+// suite.addTest(new Benchmark('GridFS download MB/s')
+//   // Add custom method (we are responsible for marking the demarkation)
+//   .custom(function(context, stats, callback) {
+//     var bucket = new GridFSBucket(context.db);
 //
-// -----------------------------------------------------------------------------
+//     // Execute
+//     var execute = function(left, _callback) {
+//       if(left == 0) return callback();
+//       // Create a simple read stream
+//       var downloadStream = bucket.openDownloadStream(context.id);
+//       downloadStream.on('data', function(data) {});
+//
+//       stats.startIteration();
+//
+//       downloadStream.once('end', function() {
+//         stats.endIteration();
+//         execute(left - 1, callback);
+//       });
+//     }
+//
+//     execute(context.numberOfDocs, callback);
+//   })
+//   .cycle().setup(function(context, options, callback) {
+//     context.collection.drop(function() {
+//       callback();
+//     });
+//   })
+//   .addMetadata({
+//     custom:true
+//   })
+//   .setup(function(context, options, callback) {
+//     co(function*(){
+//       // Create a bson serializer
+//       var bson = new BSON();
+//       // Start up the server
+//       context.manager = yield globalSetup();
+//       // Get db connection
+//       context.db = yield getDb('benchmark', 10);
+//       // Get the corpus collection
+//       context.collection = context.db.collection('corpus');
+//       // Number of docs
+//       context.numberOfDocs = 50;
+//       // Document
+//       context.document = new Buffer(50 * 1024 * 1024).toString('utf8');
+//       // Set the file size
+//       context.size = context.document.length;
+//
+//       // Create a simple read stream
+//       var readStream = new stream.Readable();
+//       readStream._read = function noop() {}; // redundant? see update below
+//       readStream.push(context.document);
+//       readStream.push(null);
+//       // Open the bucket
+//       var bucket = new GridFSBucket(context.db);
+//       // Create an upload stream
+//       var uploadStream = bucket.openUploadStream(f('file0.txt'));
+//       context.id = uploadStream.id;
+//       // Wait for stream to finish
+//       uploadStream.once('finish', function() {
+//         callback();
+//       });
+//
+//       readStream.pipe(uploadStream);
+//     }).catch(function(e) {
+//       console.log(e.stack);
+//     });
+//   })
+//   .teardown(function(context, stats, options, callback) {
+//     co(function*(){
+//       // Stop the db connection
+//       yield context.db.close();
+//       // Start up the server
+//       context.manager.stop();
+//       // Finish up
+//       callback();
+//     }).catch(function(e) {
+//       console.log(e.stack);
+//     });
+//   })
+// );
 
-// Add the flat json parsing test
-suite.addTest(new Benchmark('GridFS upload MB/s')
-  // Add custom method (we are responsible for marking the demarkation)
-  .custom(function(context, stats, callback) {
-    var bucket = new GridFSBucket(context.db);
-
-    // Execute
-    var execute = function(left, _callback) {
-      if(left == 0) return callback();
-      // Create a simple read stream
-      var downloadStream = bucket.openDownloadStream(context.id);
-      downloadStream.on('data', function() {});
-
-      stats.startIteration();
-
-      downloadStream.once('end', function() {
-        stats.endIteration();
-        execute(left - 1, callback);
-      });
-    }
-
-    execute(context.numberOfDocs, callback);
-  })
-  .cycle().setup(function(context, options, callback) {
-    context.collection.drop(function() {
-      callback();
-    });
-  })
-  .setup(function(context, options, callback) {
-    co(function*(){
-      // Create a bson serializer
-      var bson = new BSON();
-      // Start up the server
-      context.manager = yield globalSetup();
-      // Get db connection
-      context.db = yield getDb('benchmark', 10);
-      // Get the corpus collection
-      context.collection = context.db.collection('corpus');
-      // Size used to calculate the
-      context.size = 0;
-      // Number of docs
-      context.numberOfDocs = 50;
-      // Document
-      context.document = new Buffer(50 * 1024 * 1024).toString('utf8');
-      // Set the file size
-      context.size = context.document.length;
-
-      // Create a simple read stream
-      var readStream = new stream.Readable();
-      readStream._read = function noop() {}; // redundant? see update below
-      readStream.push(context.document);
-      readStream.push(null);
-      // Open the bucket
-      var bucket = new GridFSBucket(context.db);
-      // Create an upload stream
-      var uploadStream = bucket.openUploadStream(f('file0.txt'));
-      context.id = uploadStream.id;
-      // Wait for stream to finish
-      uploadStream.once('finish', function() {
-        callback();
-      });
-
-      readStream.pipe(uploadStream);
-    }).catch(function(e) {
-      console.log(e.stack);
-    });
-  })
-  .teardown(function(context, stats, options, callback) {
-    co(function*(){
-      // Stop the db connection
-      yield context.db.close();
-      // Start up the server
-      context.manager.stop();
-      // Finish up
-      callback();
-    }).catch(function(e) {
-      console.log(e.stack);
-    });
-  })
-);
+// // -----------------------------------------------------------------------------
+// //
+// // LDJSON multi-file import
+// //
+// // -----------------------------------------------------------------------------
+//
+// // Add the flat json parsing test
+// suite.addTest(new Benchmark('LDJSON multi-file import MB/s')
+//   // Add custom method (we are responsible for marking the demarkation)
+//   .custom(function(context, stats, callback) {
+//     var bucket = new GridFSBucket(context.db);
+//     var index = 0;
+//
+//     // Execute
+//     var execute = function(left, _callback) {
+//       if(left == 0) return callback();
+//
+//       // Deserialize the whole set of documents
+//       var pipe = ldj.parse();
+//       var docs = [];
+//
+//       // Create a simple read stream
+//       var readStream = new stream.Readable();
+//       readStream._read = function noop() {}; // redundant? see update below
+//       readStream.push(context.documents[index++]);
+//       readStream.push(null);
+//
+//       // All documents
+//       pipe.on('data', function(doc) {
+//         docs.push(doc);
+//       });
+//
+//       pipe.once('end', function() {
+//         // Perform unordered insert
+//         stats.startIteration();
+//
+//         // Inset all the documents
+//         context.collection.insertMany(docs, {ordered:false}, function() {
+//           stats.endIteration();
+//           execute(left - 1, callback);
+//         });
+//       });
+//
+//       readStream.pipe(pipe);
+//     }
+//
+//     execute(context.documents.length, callback);
+//   })
+//   .addMetadata({
+//     custom:true
+//   })
+//   .cycle().setup(function(context, options, callback) {
+//     context.collection.drop(function() {
+//       callback();
+//     });
+//   })
+//   .setup(function(context, options, callback) {
+//     co(function*(){
+//       // Create a bson serializer
+//       var bson = new BSON();
+//       // Start up the server
+//       context.manager = yield globalSetup();
+//       // Get db connection
+//       context.db = yield getDb('benchmark', 10);
+//       // Get the corpus collection
+//       context.collection = context.db.collection('corpus');
+//       // Read in all the ldjson documents
+//       var files = fs.readdirSync(f('%s/performance-data/LDJSON_data_file_directory', __dirname));
+//       files = files.slice(0, 1);
+//       context.documents = files.filter(function(x) {
+//         return x.indexOf('.txt');
+//       }).map(function(x) {
+//         return fs.readFileSync(f('%s/performance-data/LDJSON_data_file_directory/%s', __dirname, x));
+//       });
+//
+//       // Get the size
+//       context.size = context.documents[0].length;
+//
+//       // Finish up
+//       callback();
+//     }).catch(function(e) {
+//       console.log(e.stack);
+//     });
+//   })
+//   .teardown(function(context, stats, options, callback) {
+//     co(function*(){
+//       // Stop the db connection
+//       yield context.db.close();
+//       // Start up the server
+//       context.manager.stop();
+//       // Finish up
+//       callback();
+//     }).catch(function(e) {
+//       console.log(e.stack);
+//     });
+//   })
+// );
 
 module.exports = suite;
