@@ -1,5 +1,7 @@
 var MongoClient = require('../../').MongoClient,
   ServerManager = require('mongodb-topology-manager').Server,
+  co = require('co'),
+  f = require('util').format,
   bson = require('../../');
 
 // Stand up a single mongodb instance

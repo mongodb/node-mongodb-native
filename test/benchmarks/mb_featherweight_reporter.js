@@ -50,19 +50,24 @@ class MBSimpleReporter {
       durations.push((duration[0] * 1e9 + duration[1]) / (1000));
     }
 
+    // Convert duration to seconds
+    durations = durations.map(function(x) {
+      return (x/1000)/1000;
+    })
+
     // Get the size of the context
     var size = benchmark.context.size;
-    // Number of bytes per miliseconds
-    var bytesPerSeconds = durations.map(function(x) {
-      return Math.round((size/x) * 1000 * 1000);
+    // Calculate MB/s
+    var mbs = durations.map(function(x) {
+      return ((size/x) / 1024) / 1024;
     });
 
     // Add the bytes per second to the finalStats
-    finalStats.push(bytesPerSeconds);
+    finalStats.push(mbs);
 
     // Convert to MB/s
     var convert = function(x) {
-      return Math.round(((x / 1024) / 1024) * 100) / 100;
+      return Math.round((x * 100) / 100);
     }
 
     // Push the sute and benchmark title as well as Median value

@@ -33,6 +33,7 @@
     "betterbenchmarks": "^1.0.0",
     "JSONStream": "^1.0.7",
     "event-stream": "^3.3.2",
+    "ldjson-stream": "^1.2.1",
     "cli-table": "^0.3.1",
     "colors": "^1.1.2"
   },
