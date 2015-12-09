@@ -17,11 +17,15 @@ class MBSimpleReporter {
   }
 
   benchmarkSetup(suite, benchmark) {
-    // console.log("  starting benchmark : " + benchmark.title)
+    console.log("  starting benchmark : " + benchmark.title)
     table = new Table({
       head: ['Suite'.white.bold, 'Benchmark'.white.bold, 'Measure'.white.bold, 'Value'.white.bold],
       colWidth: [100, 200, 200, 300]
     })
+  }
+
+  benchmarkCycle(cycle, suite, benchmark) {
+    console.log("    execute cycle " + cycle);
   }
 
   benchmarkTeardown(suite, benchmark) {
@@ -47,7 +51,7 @@ class MBSimpleReporter {
     }
 
     // Get the size of the context
-    var size = suite.context.size;
+    var size = benchmark.context.size;
     // Number of bytes per miliseconds
     var bytesPerSeconds = durations.map(function(x) {
       return Math.round((size/x) * 1000 * 1000);
