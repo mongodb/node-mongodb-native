@@ -191,9 +191,9 @@ Content Management Systems
          * - **Clone Url**
            - https://github.com/cliftonc/calipso.git
          * - **Forks**
-           - 297
+           - 296
          * - **Watchers**
-           - 1624
+           - 1627
 
 Grid FS libraries or tools
 --------------------------
@@ -471,7 +471,7 @@ Test helpers and libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 19:13:12 on 4/11/2015
+           - 19:18:51 on 7/11/2015
          * - **Homepage**
            - http://
          * - **Url**
@@ -479,7 +479,7 @@ Test helpers and libraries
          * - **Clone Url**
            - https://github.com/emerleite/node-database-cleaner.git
          * - **Forks**
-           - 26
+           - 27
          * - **Watchers**
            - 78
 
@@ -732,7 +732,7 @@ Libraries or Applications for analytics
          * - **Forks**
            - 416
          * - **Watchers**
-           - 3656
+           - 3657
 
 Libraries for the connect middleware
 ------------------------------------
@@ -805,7 +805,7 @@ Libraries or applications for continous integration
          * - **Clone Url**
            - https://github.com/ryankee/concrete.git
          * - **Forks**
-           - 69
+           - 70
          * - **Watchers**
            - 500
 
