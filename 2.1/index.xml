@@ -1618,6 +1618,197 @@ MongoClient.connect(url, function(err, db) {
     </item>
     
     <item>
+      <title>SSL</title>
+      <link>/node-mongodb-native/2.1/reference/connecting/ssl/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:26 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/2.1/reference/connecting/ssl/</guid>
+      <description>
+
+&lt;h1 id=&#34;ssl&#34;&gt;SSL&lt;/h1&gt;
+
+&lt;p&gt;The Node.js driver supports SSL connections to MongoDB when using the Enterprise edition off MongoDB or the open source edition with SSL support compiled in.&lt;/p&gt;
+
+&lt;h2 id=&#34;no-validation-of-certificate-chain&#34;&gt;No validation of certificate chain&lt;/h2&gt;
+
+&lt;p&gt;If the server does not perform any validation of the certificate chain connecting to the server is straightforward.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient;
+
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/test?ssl=true&amp;quot;, function(err, db) {
+  db.close();
+});
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;driver-should-validate-server-certificate&#34;&gt;Driver should validate Server certificate&lt;/h2&gt;
+
+&lt;p&gt;If the server presents a certificate that we wish to validate client side we need a couple more parameters.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  f = require(&#39;util&#39;).format,
+  fs = require(&#39;fs&#39;);
+
+// Read the certificate authority
+var ca = [fs.readFileSync(__dirname + &amp;quot;/ssl/ca.pem&amp;quot;)];
+
+// Connect validating the returned certificates from the server
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/test?ssl=true&amp;quot;, {
+  server: {
+      sslValidate:true
+    , sslCA:ca
+  }
+}, function(err, db) {
+  db.close();
+});
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;driver-should-validate-server-certificate-and-present-valid-certificate&#34;&gt;Driver should validate Server certificate and present valid Certificate&lt;/h2&gt;
+
+&lt;p&gt;If the server is configured to perform certificate validation we need to pass a certificate through the driver as well as verify the one retrieved. In this case our certificate password is &lt;code&gt;10gen&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  f = require(&#39;util&#39;).format,
+  fs = require(&#39;fs&#39;);
+
+// Read the certificate authority
+var ca = [fs.readFileSync(__dirname + &amp;quot;/ssl/ca.pem&amp;quot;)];
+var cert = fs.readFileSync(__dirname + &amp;quot;/ssl/client.pem&amp;quot;);
+var key = fs.readFileSync(__dirname + &amp;quot;/ssl/client.pem&amp;quot;);
+
+// Connect validating the returned certificates from the server
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/test?ssl=true&amp;quot;, {
+  server: {
+      sslValidate:true
+    , sslCA:ca
+    , sslKey:key
+    , sslCert:cert
+    , sslPass:&#39;10gen&#39;
+  }
+}, function(err, db) {
+  db.close();
+});
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;connecting-using-x509&#34;&gt;Connecting using X509&lt;/h2&gt;
+
+&lt;p&gt;X509 is a certification validation process similar to normal SSL validation but it also includes specific user information that can be used for authorization. Connecting is very similar to the previous SSL examples.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  f = require(&#39;util&#39;).format,
+  fs = require(&#39;fs&#39;);
+
+// Read the cert and key
+var cert = fs.readFileSync(__dirname + &amp;quot;/ssl/x509/client.pem&amp;quot;);
+var key = fs.readFileSync(__dirname + &amp;quot;/ssl/x509/client.pem&amp;quot;);
+
+// User name
+var userName = &amp;quot;CN=client,OU=kerneluser,O=10Gen,L=New York City,ST=New York,C=US&amp;quot;;
+
+// Connect using the MONGODB-X509 authentication mechanism
+MongoClient.connect(f(&#39;mongodb://%s@server:27017/test?authMechanism=%s&amp;amp;ssl=true&#39;
+    , encodeURIComponent(userName), &#39;MONGODB-X509&#39;), {
+  server: {
+      sslKey:key
+    , sslCert:cert
+  }
+}, function(err, db) {
+  db.close();
+});
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;topology-options-related-to-ssl&#34;&gt;Topology Options Related to SSL&lt;/h2&gt;
+
+&lt;h3 id=&#34;individual-server-level-options&#34;&gt;Individual Server Level Options&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;ssl&lt;/code&gt;, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslValidate&lt;/code&gt;, {Boolean, default: true} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslCA&lt;/code&gt;, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslCert&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslKey&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslPass&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;If you are connecting to a single MongoDB instance you pass the parameters using the &lt;code&gt;server&lt;/code&gt; options field.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  f = require(&#39;util&#39;).format,
+  fs = require(&#39;fs&#39;);
+
+MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
+  server: {
+      sslKey:key
+    , sslCert:cert
+  }
+}, function(err, db) {
+  db.close();
+});
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;replicaset-level-options&#34;&gt;Replicaset Level Options&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;ssl&lt;/code&gt;, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslValidate&lt;/code&gt;, {Boolean, default: true} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslCA&lt;/code&gt;, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslCert&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslKey&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslPass&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;If you are connecting to a MongoDB replicaset, you pass the parameters using the &lt;code&gt;replset&lt;/code&gt; options field.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  f = require(&#39;util&#39;).format,
+  fs = require(&#39;fs&#39;);
+
+MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
+  replset: {
+      sslKey:key
+    , sslCert:cert
+  }
+}, function(err, db) {
+  db.close();
+});
+
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;mongos-proxy-level-options&#34;&gt;Mongos Proxy Level Options&lt;/h3&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;ssl&lt;/code&gt;, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslValidate&lt;/code&gt;, {Boolean, default: true} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslCA&lt;/code&gt;, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslCert&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslKey&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sslPass&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;If you are connecting to a MongoDB replicaset, you pass the parameters using the &lt;code&gt;mongos&lt;/code&gt; options field.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  f = require(&#39;util&#39;).format,
+  fs = require(&#39;fs&#39;);
+
+MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
+  mongos: {
+      sslKey:key
+    , sslCert:cert
+  }
+}, function(err, db) {
+  db.close();
+});
+
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
+    
+    <item>
       <title>APM</title>
       <link>/node-mongodb-native/2.1/reference/management/apm/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:26 -0400</pubDate>
@@ -2081,197 +2272,6 @@ listener.on(&#39;failed&#39;, function(event) {
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;This instrumentation only overrides methods that have callbacks and ignores promises, so it&amp;rsquo;s not a complete solution, but shows the way a user of the API can structure their code to tap into the exposed surface of the driver.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>SSL</title>
-      <link>/node-mongodb-native/2.1/reference/connecting/ssl/</link>
-      <pubDate>Thu, 19 Mar 2015 12:53:26 -0400</pubDate>
-      
-      <guid>/node-mongodb-native/2.1/reference/connecting/ssl/</guid>
-      <description>
-
-&lt;h1 id=&#34;ssl&#34;&gt;SSL&lt;/h1&gt;
-
-&lt;p&gt;The Node.js driver supports SSL connections to MongoDB when using the Enterprise edition off MongoDB or the open source edition with SSL support compiled in.&lt;/p&gt;
-
-&lt;h2 id=&#34;no-validation-of-certificate-chain&#34;&gt;No validation of certificate chain&lt;/h2&gt;
-
-&lt;p&gt;If the server does not perform any validation of the certificate chain connecting to the server is straightforward.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient;
-
-MongoClient.connect(&amp;quot;mongodb://localhost:27017/test?ssl=true&amp;quot;, function(err, db) {
-  db.close();
-});
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;driver-should-validate-server-certificate&#34;&gt;Driver should validate Server certificate&lt;/h2&gt;
-
-&lt;p&gt;If the server presents a certificate that we wish to validate client side we need a couple more parameters.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
-  f = require(&#39;util&#39;).format,
-  fs = require(&#39;fs&#39;);
-
-// Read the certificate authority
-var ca = [fs.readFileSync(__dirname + &amp;quot;/ssl/ca.pem&amp;quot;)];
-
-// Connect validating the returned certificates from the server
-MongoClient.connect(&amp;quot;mongodb://localhost:27017/test?ssl=true&amp;quot;, {
-  server: {
-      sslValidate:true
-    , sslCA:ca
-  }
-}, function(err, db) {
-  db.close();
-});
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;driver-should-validate-server-certificate-and-present-valid-certificate&#34;&gt;Driver should validate Server certificate and present valid Certificate&lt;/h2&gt;
-
-&lt;p&gt;If the server is configured to perform certificate validation we need to pass a certificate through the driver as well as verify the one retrieved. In this case our certificate password is &lt;code&gt;10gen&lt;/code&gt;.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
-  f = require(&#39;util&#39;).format,
-  fs = require(&#39;fs&#39;);
-
-// Read the certificate authority
-var ca = [fs.readFileSync(__dirname + &amp;quot;/ssl/ca.pem&amp;quot;)];
-var cert = fs.readFileSync(__dirname + &amp;quot;/ssl/client.pem&amp;quot;);
-var key = fs.readFileSync(__dirname + &amp;quot;/ssl/client.pem&amp;quot;);
-
-// Connect validating the returned certificates from the server
-MongoClient.connect(&amp;quot;mongodb://localhost:27017/test?ssl=true&amp;quot;, {
-  server: {
-      sslValidate:true
-    , sslCA:ca
-    , sslKey:key
-    , sslCert:cert
-    , sslPass:&#39;10gen&#39;
-  }
-}, function(err, db) {
-  db.close();
-});
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;connecting-using-x509&#34;&gt;Connecting using X509&lt;/h2&gt;
-
-&lt;p&gt;X509 is a certification validation process similar to normal SSL validation but it also includes specific user information that can be used for authorization. Connecting is very similar to the previous SSL examples.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
-  f = require(&#39;util&#39;).format,
-  fs = require(&#39;fs&#39;);
-
-// Read the cert and key
-var cert = fs.readFileSync(__dirname + &amp;quot;/ssl/x509/client.pem&amp;quot;);
-var key = fs.readFileSync(__dirname + &amp;quot;/ssl/x509/client.pem&amp;quot;);
-
-// User name
-var userName = &amp;quot;CN=client,OU=kerneluser,O=10Gen,L=New York City,ST=New York,C=US&amp;quot;;
-
-// Connect using the MONGODB-X509 authentication mechanism
-MongoClient.connect(f(&#39;mongodb://%s@server:27017/test?authMechanism=%s&amp;amp;ssl=true&#39;
-    , encodeURIComponent(userName), &#39;MONGODB-X509&#39;), {
-  server: {
-      sslKey:key
-    , sslCert:cert
-  }
-}, function(err, db) {
-  db.close();
-});
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h2 id=&#34;topology-options-related-to-ssl&#34;&gt;Topology Options Related to SSL&lt;/h2&gt;
-
-&lt;h3 id=&#34;individual-server-level-options&#34;&gt;Individual Server Level Options&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;ssl&lt;/code&gt;, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslValidate&lt;/code&gt;, {Boolean, default: true} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslCA&lt;/code&gt;, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslCert&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslKey&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslPass&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;If you are connecting to a single MongoDB instance you pass the parameters using the &lt;code&gt;server&lt;/code&gt; options field.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
-  f = require(&#39;util&#39;).format,
-  fs = require(&#39;fs&#39;);
-
-MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
-  server: {
-      sslKey:key
-    , sslCert:cert
-  }
-}, function(err, db) {
-  db.close();
-});
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&#34;replicaset-level-options&#34;&gt;Replicaset Level Options&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;ssl&lt;/code&gt;, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslValidate&lt;/code&gt;, {Boolean, default: true} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslCA&lt;/code&gt;, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslCert&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslKey&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslPass&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;If you are connecting to a MongoDB replicaset, you pass the parameters using the &lt;code&gt;replset&lt;/code&gt; options field.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
-  f = require(&#39;util&#39;).format,
-  fs = require(&#39;fs&#39;);
-
-MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
-  replset: {
-      sslKey:key
-    , sslCert:cert
-  }
-}, function(err, db) {
-  db.close();
-});
-
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;h3 id=&#34;mongos-proxy-level-options&#34;&gt;Mongos Proxy Level Options&lt;/h3&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;ssl&lt;/code&gt;, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslValidate&lt;/code&gt;, {Boolean, default: true} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslCA&lt;/code&gt;, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslCert&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslKey&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslPass&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;p&gt;If you are connecting to a MongoDB replicaset, you pass the parameters using the &lt;code&gt;mongos&lt;/code&gt; options field.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
-  f = require(&#39;util&#39;).format,
-  fs = require(&#39;fs&#39;);
-
-MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
-  mongos: {
-      sslKey:key
-    , sslCert:cert
-  }
-}, function(err, db) {
-  db.close();
-});
-
-&lt;/code&gt;&lt;/pre&gt;
 </description>
     </item>
     
