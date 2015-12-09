@@ -36,7 +36,7 @@ class MBSimpleReporter {
     var durations = [];
 
     // We don't have a custom method
-    if(benchmark.metadata && !benchmark.metadata.custom) {
+    if(!benchmark.metadata || !benchmark.metadata.custom) {
       // For each of the recorded stats add the timings together
       for(var i = 0; i < benchmark.stats.length; i++) {
         // For each of the runs add up all the values
@@ -69,14 +69,14 @@ class MBSimpleReporter {
     // console.log("--------------------------------------------------- metadata")
     // console.dir(benchmark.metadata)
 
-    // console.log("--------------------------------------------------- durations")
-    // console.dir(durations)
+    console.log("--------------------------------------------------- durations")
+    console.dir(durations)
 
     // Get the size of the context
     var size = benchmark.context.size;
 
-    // console.log("--------------------------------------------------- size")
-    // console.dir(size)
+    console.log("--------------------------------------------------- size")
+    console.dir(size)
 
     // Calculate MB/s
     var mbs = durations.map(function(x) {

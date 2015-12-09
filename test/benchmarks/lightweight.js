@@ -19,11 +19,11 @@ var BSON = require('bson').native().BSON;
 
 // Create a suite
 var suite = new Suite('feather weight test suite', {
-  warmup: 100, cycles: 10, iterations: 1000, async:true
+  warmup: 1, cycles: 1, iterations: 100, async:true
 });
 
-// Add the MB reporter
-suite.addReporter(new MBSimpleReporter());
+// // Add the MB reporter
+// suite.addReporter(new MBSimpleReporter());
 
 // -----------------------------------------------------------------------------
 //
@@ -31,20 +31,56 @@ suite.addReporter(new MBSimpleReporter());
 //
 // -----------------------------------------------------------------------------
 
+// ismaster run in serial mode
+suite.addTest(new Benchmark('ismaster command benchmark in serial mode')
+  .set(function(context, callback) {
+    context.db.command({ismaster:true}, function() {
+      callback();
+    });
+  })
+  .setup(function(context, options, callback) {
+    co(function*(){
+      // Create a bson serializer
+      var bson = new BSON();
+      // Start up the server
+      context.manager = yield globalSetup();
+      // Total size
+      context.size = bson.calculateObjectSize({ismaster:true}) * suite.options.iterations;
+      // Get db connection
+      context.db = yield getDb('benchmark', 10);
+      // Finish up
+      callback();
+    }).catch(function(e) {
+      console.log(e.stack);
+    });
+  })
+  .teardown(function(context, stats, options, callback) {
+    co(function*(){
+      // Stop the db connection
+      yield context.db.close();
+      // Start up the server
+      context.manager.stop();
+      // Finish up
+      callback();
+    }).catch(function(e) {
+      console.log(e.stack);
+    });
+  })
+);
+
 // Add the flat json parsing test
-suite.addTest(new Benchmark('ismaster command benchmark mb/s')
+suite.addTest(new Benchmark('ismaster command benchmark parallel')
   // Add custom method (we are responsible for marking the demarkation)
   .custom(function(context, stats, callback) {
     // Commands left to do
     var left = suite.options.iterations;
-    // Fire of all the messages in parallel
-    for(var i = 0; i < suite.options.iterations; i++) {
-      // Run a single iteration
-      stats.startIteration();
 
-      // Execute the ismaster command
-      context.db.command({ismaster:true}, function() {
-        stats.endIteration();
+    // Keep scope local for stat object
+    var execute = function() {
+      var stat = stats.startParallelIteration();
+      // Execute the command
+      context.db.command({ismaster:true}, function(err, r) {
+        stat.end();
         left = left - 1;
 
         if(left == 0) {
@@ -52,10 +88,13 @@ suite.addTest(new Benchmark('ismaster command benchmark mb/s')
         }
       });
     }
+
+    // Fire of all the messages in parallel
+    for(var i = 0; i < suite.options.iterations; i++) {
+      execute()
+    }
   })
-  .addMetadata({
-    custom:true
-  })
+  .addMetadata({custom:true})
   .setup(function(context, options, callback) {
     co(function*(){
       // Create a bson serializer
