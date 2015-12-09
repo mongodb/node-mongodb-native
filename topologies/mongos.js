@@ -564,7 +564,7 @@ Mongos.prototype.command = function(ns, cmd, options, callback) {
         // Finished executing command
         if(count == 0) {
           // Was it a logout command clear any credentials
-          if(cmd.logout) clearCredentials(state, ns);
+          if(cmd.logout) clearCredentials(self.s, ns);
           // Return the error
           callback(err, r);
         }
