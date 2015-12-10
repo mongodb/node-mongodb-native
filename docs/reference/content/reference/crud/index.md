@@ -221,7 +221,7 @@ MongoClient.connect(url, function(err, db) {
         returnOriginal: false
       , sort: [[a,1]]
       , upsert: true
-    }, function(err, doc) {
+    }, function(err, r) {
       assert.equal(null, err);
       assert.equal(1, r.value.b);
 
@@ -271,7 +271,7 @@ MongoClient.connect(url, function(err, db) {
     col.findOneAndDelete({a:1}, {
         sort: [[a,1]]
       }
-      , function(err, doc) {
+      , function(err, r) {
         assert.equal(null, err);
         assert.ok(r.value.b == null);
         db.close();

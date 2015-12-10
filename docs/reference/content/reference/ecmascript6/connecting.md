@@ -8,4 +8,25 @@ title = "Connecting"
   pre = "<i class='fa'></i>"
 +++
 
-# Connection
+# Connecting
+
+The MongoClient connection method returns a Promise if no callback is passed to it. Below is an example using the [co](https://www.npmjs.com/package/co) package to run the `generator` functions that is one of the most exiting innovations of ECMAScript 6.
+
+```js
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co'),
+  assert = require('assert');
+
+co(function*() {
+  // Connection URL
+  var url = 'mongodb://localhost:27017/myproject';
+  // Use connect method to connect to the Server
+  var db = yield MongoClient.connect(url);
+  // Close the connection
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+```
+
+The `MongoClient.connect` function returns a `Promise` that we then execute using the `yield` keyword of the `generator` function. If an error happens during the `MongoClient.connect` the error is caught by `co` and can be inspected by attaching a function to the `catch` method as shown above.
