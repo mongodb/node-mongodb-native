@@ -10,7 +10,7 @@ title = "SSL"
 
 # SSL
 
-The Node.js driver supports SSL connections to MongoDB when using the Enterprise edition off MongoDB or the open source edition with SSL support compiled in.
+The Node.js driver supports SSL connections to MongoDB when using the Enterprise edition of MongoDB or the open source edition with SSL support compiled in.
 
 ## No validation of certificate chain
 
