@@ -7,7 +7,7 @@
 * Updated mongodb-core to 1.2.26.
 * Return destination in GridStore pipe function.
 * NODE-606 better error handling on destroyed topology for db.js methods.
-* Added isDestroyed method to server, replset and mongos topologis.
+* Added isDestroyed method to server, replset and mongos topologies.
 * Upgraded test suite to run using mongodb-topology-manager.
 
 2.0.50 12-06-2015
