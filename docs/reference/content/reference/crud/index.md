@@ -50,11 +50,13 @@ The first insert inserts a single document into the *inserts* collection. Notice
 
 The *insertOne* and *insertMany* methods also accepts an second argument that can be an options object. This object can have the following fields.
 
-*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 returns an acknowledgment of the write with not results `{ok:1}` and w >= 1 or w = 'majority' acknowledges the write with full write results.
-*  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
-*  `j`, (Boolean, default:false) write waits for journal sync.
-*  `serializeFunctions`, (Boolean, default:false) serialize functions on an object to mongodb, by default the driver does not serialize any functions on the passed in documents.
-*  `forceServerObjectId`, (Boolean, default:false) Force server to assign _id values instead of driver.
+| Parameter | Type | Description |
+| :----------| :------------- | :------------- |
+| `w` | {Number/String, > -1 \|\| 'majority'} | the write concern for the operation where < 1 returns an acknowledgment of the write with not results `{ok:1}` and w >= 1 or w = 'majority' acknowledges the write with full write results. |
+| `wtimeout` | {Number, 0} | set the timeout for waiting for write concern to finish (combines with w option). |
+| `j` | (Boolean, default:false) | write waits for journal sync. |
+| `serializeFunctions` | (Boolean, default:false) | serialize functions on an object to mongodb, by default the driver does not serialize any functions on the passed in documents. |
+| `forceServerObjectId` | (Boolean, default:false) | Force server to assign _id values instead of driver. |
 
 Let's look at a simple example where we are writing to a replicaset and we wish to ensure that we serialize a passed in function as well as have the server assign the *_id* for each document.
 
@@ -137,11 +139,13 @@ MongoClient.connect(url, function(err, db) {
 
 The *update* method also accepts a third argument that can be an options object. This object can have the following fields.
 
-*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 returns an acknowledgment of the write with not results `{ok:1}` and w >= 1 or w = 'majority' acknowledges the write with full write results.
-*  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
-*  `j`, (Boolean, default:false) write waits for journal sync.
-*  `multi`, (Boolean, default:false) Update one/all documents with operation.
-*  `upsert`, (Boolean, default:false) Update operation is an upsert.
+| Parameter | Type | Description |
+| :----------| :------------- | :------------- |
+| `w` | {Number/String, > -1 \|\| 'majority'} | the write concern for the operation where < 1 returns an acknowledgment of the write with not results `{ok:1}` and w >= 1 or w = 'majority' acknowledges the write with full write results. |
+| `wtimeout` | {Number, 0} | set the timeout for waiting for write concern to finish (combines with w option). |
+| `j` | (Boolean, default:false) | write waits for journal sync. |
+| `multi` | (Boolean, default:false) | Update one/all documents with operation. |
+| `upsert` | (Boolean, default:false) | Update operation is an upsert. |
 
 Just as for *insert* the *update* method allows you to specify a per operation write concern using the *w*, *wtimeout* and *fsync* parameters
 
@@ -183,10 +187,12 @@ MongoClient.connect(url, function(err, db) {
 
 The *deleteOne* and *deleteMany* methods also accepts a second argument that can be an options object. This object can have the following fields.
 
-*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 returns an acknowledgment of the write with not results `{ok:1}` and w >= 1 or w = 'majority' acknowledges the write with full write results.
-*  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
-*  `j`, (Boolean, default:false) write waits for journal sync.
-*  `single`, (Boolean, default:false) Removes the first document found.
+| Parameter | Type | Description |
+| :----------| :------------- | :------------- |
+| `w` | {Number/String, > -1 \|\| 'majority'} | the write concern for the operation where < 1 returns an acknowledgment of the write with not results `{ok:1}` and w >= 1 or w = 'majority' acknowledges the write with full write results. |
+| `wtimeout` | {Number, 0} | set the timeout for waiting for write concern to finish (combines with w option). |
+| `j` | (Boolean, default:false) | write waits for journal sync. |
+| `single` | (Boolean, default:false) | Removes the first document found. |
 
 Just as for *updateOne/updateMany* and *insertOne/insertMany* the *deleteOne/deleteMany* method allows you to specify a per operation write concern using the *w*, *wtimeout* and *fsync* parameters
 
@@ -232,13 +238,15 @@ MongoClient.connect(url, function(err, db) {
 
 The *findOneAndUpdate* method also accepts a third argument that can be an options object. This object can have the following fields.
 
-*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 returns an acknowledgment of the write with not results `{ok:1}` and w >= 1 or w = 'majority' acknowledges the write with full write results.
-*  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
-*  `j`, (Boolean, default:false) write waits for journal sync.
-*  `upsert`, (Boolean, default:false) Perform an upsert operation.
-*  `sort`, (Object, default:null) Sort for find operation.
-*  `projection`, (Object, default:null) Projection for returned result
-*  `returnOriginal`, (Boolean, default:true) Set to false if you want to return the modified object rather than the original. Ignored for remove.
+| Parameter | Type | Description |
+| :----------| :------------- | :------------- |
+| `w` | {Number/String, > -1 \|\| 'majority'} | the write concern for the operation where < 1 returns an acknowledgment of the write with not results `{ok:1}` and w >= 1 or w = 'majority' acknowledges the write with full write results. |
+| `wtimeout` | {Number, 0} | set the timeout for waiting for write concern to finish (combines with w option). |
+| `j` | (Boolean, default:false) | write waits for journal sync. |
+| `upsert` | (Boolean, default:false) | Perform an upsert operation. |
+| `sort` | (Object, default:null) | Sort for find operation. |
+| `projection` | (Object, default:null) | Projection for returned result |
+| `returnOriginal` | (Boolean, default:true) | Set to false if you want to return the modified object rather than the original. Ignored for remove. |
 
 The *findOneAndDelete* function is a function especially defined to help remove a document. Let's look at an example of usage.
 
@@ -274,10 +282,12 @@ MongoClient.connect(url, function(err, db) {
 
 Just as for *findOneAndUpdate* it allows for an object of options to be passed in that can have the following fields.
 
-*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 returns an acknowledgment of the write with not results `{ok:1}` and w >= 1 or w = 'majority' acknowledges the write with full write results.
-*  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
-*  `j`, (Boolean, default:false) write waits for journal sync.
-*  `sort`, (Object, default:null) Sort for find operation.
+| Parameter | Type | Description |
+| :----------| :------------- | :------------- |
+| `w` | {Number/String, > -1 \|\| 'majority'} | the write concern for the operation where < 1 returns an acknowledgment of the write with not results `{ok:1}` and w >= 1 or w = 'majority' acknowledges the write with full write results. |
+| `wtimeout` | {Number, 0} | set the timeout for waiting for write concern to finish (combines with w option). |
+| `j` | (Boolean, default:false) | write waits for journal sync. |
+| `sort` | (Object, default:null) | Sort for find operation. |
 
 ### BulkWrite
 The *bulkWrite* function allows for a simple set of bulk operations to be done in a non fluent way as in comparison to the bulk API discussed next. Let's look at an example.
@@ -320,10 +330,12 @@ MongoClient.connect(url, function(err, db) {
 
 As we can see the *bulkWrite* function takes an array of operation that can be objects of either *insertOne*, *insertMany*, *updateOne*, *updateMany*, *deleteOne* or *deleteMany*. It also takes a second parameter that takes the following options.
 
-*  `ordered`, (Boolean, default:true) Execute in order or out of order.
-*  `w`, {Number/String, > -1 || 'majority'} the write concern for the operation where < 1 returns an acknowledgment of the write with not results `{ok:1}` and w >= 1 or w = 'majority' acknowledges the write with full write results.
-*  `wtimeout`, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).
-*  `j`, (Boolean, default:false) write waits for journal sync.
+| Parameter | Type | Description |
+| :----------| :------------- | :------------- |
+| `ordered` | (Boolean, default:true) | Execute in order or out of order. |
+| `w` | {Number/String, > -1 \|\| 'majority'} | the write concern for the operation where < 1 returns an acknowledgment of the write with not results `{ok:1}` and w >= 1 or w = 'majority' acknowledges the write with full write results. |
+| `wtimeout` | {Number, 0} | set the timeout for waiting for write concern to finish (combines with w option). |
+| `j` | (Boolean, default:false) | write waits for journal sync. |
 
 This covers the basic write operations. Let's have a look at the Bulk write operations next.
 
@@ -439,10 +451,10 @@ MongoClient.connect(url, function(err, db) {
 
 The cursor returned by the *find* method has a lot of methods that allow for chaining of options for a query. Once the query is ready to be executed you can retrieve the documents using the *next*, *each* and *toArray* methods. If the query returns a lot of documents it's preferable to use the *next* or *each* methods as the *toArray* method will materialize all the documents into memory before calling the callback function potentially using a lot of memory if the query returns a lot of documents.
 
-Let's look at some of the options we can set on the cursor. 
+Let's look at some of the options we can set on the cursor.
 
 ```js
-collection.find({}).project({a:1})                             // Create a projection of field a 
+collection.find({}).project({a:1})                             // Create a projection of field a
 collection.find({}).skip(1).limit(10)                          // Skip 1 and limit 10
 collection.find({}).batchSize(5)                               // Set batchSize on cursor to 5
 collection.find({}).filter({a:1})                              // Set query on the cursor
