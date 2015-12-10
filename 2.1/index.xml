@@ -2285,6 +2285,38 @@ MongoClient.connect(url, function(err, db) {
     </item>
     
     <item>
+      <title>Connecting</title>
+      <link>/node-mongodb-native/2.1/reference/ecmascript6/connecting/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/2.1/reference/ecmascript6/connecting/</guid>
+      <description>
+
+&lt;h1 id=&#34;connecting&#34;&gt;Connecting&lt;/h1&gt;
+
+&lt;p&gt;The MongoClient connection method returns a Promise if no callback is passed to it. Below is an example using the &lt;a href=&#34;https://www.npmjs.com/package/co&#34;&gt;co&lt;/a&gt; package to run the &lt;code&gt;generator&lt;/code&gt; functions that is one of the most exiting innovations of ECMAScript 6.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var url = &#39;mongodb://localhost:27017/myproject&#39;;
+  // Use connect method to connect to the Server
+  var db = yield MongoClient.connect(url);
+  // Close the connection
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;MongoClient.connect&lt;/code&gt; function returns a &lt;code&gt;Promise&lt;/code&gt; that we then execute using the &lt;code&gt;yield&lt;/code&gt; keyword of the &lt;code&gt;generator&lt;/code&gt; function. If an error happens during the &lt;code&gt;MongoClient.connect&lt;/code&gt; the error is caught by &lt;code&gt;co&lt;/code&gt; and can be inspected by attaching a function to the &lt;code&gt;catch&lt;/code&gt; method as shown above.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
       <title>CRUD Operations</title>
       <link>/node-mongodb-native/2.1/reference/ecmascript6/crud/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
@@ -2733,38 +2765,6 @@ co(function*() {
 &lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/ecmascript6/connecting/&#34;&gt;Connecting&lt;/a&gt;: how to connect leveraging ECMASdcript 6.&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/reference/ecmascript6/crud/&#34;&gt;CRUD&lt;/a&gt;: perform CRUD operations leveraging ECMAScript 6.&lt;/li&gt;
 &lt;/ul&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Connecting</title>
-      <link>/node-mongodb-native/2.1/reference/ecmascript6/connecting/</link>
-      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
-      
-      <guid>/node-mongodb-native/2.1/reference/ecmascript6/connecting/</guid>
-      <description>
-
-&lt;h1 id=&#34;connecting&#34;&gt;Connecting&lt;/h1&gt;
-
-&lt;p&gt;The MongoClient connection method returns a Promise if no callback is passed to it. Below is an example using the &lt;a href=&#34;https://www.npmjs.com/package/co&#34;&gt;co&lt;/a&gt; package to run the &lt;code&gt;generator&lt;/code&gt; functions that is one of the most exiting innovations of ECMAScript 6.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
-  co = require(&#39;co&#39;),
-  assert = require(&#39;assert&#39;);
-
-co(function*() {
-  // Connection URL
-  var url = &#39;mongodb://localhost:27017/myproject&#39;;
-  // Use connect method to connect to the Server
-  var db = yield MongoClient.connect(url);
-  // Close the connection
-  db.close();
-}).catch(function(err) {
-  console.log(err.stack);
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;MongoClient.connect&lt;/code&gt; function returns a &lt;code&gt;Promise&lt;/code&gt; that we then execute using the &lt;code&gt;yield&lt;/code&gt; keyword of the &lt;code&gt;generator&lt;/code&gt; function. If an error happens during the &lt;code&gt;MongoClient.connect&lt;/code&gt; the error is caught by &lt;code&gt;co&lt;/code&gt; and can be inspected by attaching a function to the &lt;code&gt;catch&lt;/code&gt; method as shown above.&lt;/p&gt;
 </description>
     </item>
     

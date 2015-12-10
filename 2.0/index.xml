@@ -1249,6 +1249,26 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
     
     <item>
       <title>Connecting</title>
+      <link>/node-mongodb-native/2.0/reference/connecting/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/reference/connecting/</guid>
+      <description>
+
+&lt;h2 id=&#34;connecting&#34;&gt;Connecting&lt;/h2&gt;
+
+&lt;p&gt;The reference documentation for connecting to a MongoDB server deployment is divided into three sections:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/connection-settings/&#34;&gt;Connection Settings&lt;/a&gt;: documentation of the various ways to specify the properties of a connection&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/authenticating/&#34;&gt;Authenticating&lt;/a&gt;: detailed documentation of the various ways to specify authentication credentials&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/ssl/&#34;&gt;SSL&lt;/a&gt;: Detailed documentation of the various ways to specify the properties of an SSL connection&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Connecting</title>
       <link>/node-mongodb-native/2.0/reference/ecmascript6/connecting/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
       
@@ -2023,26 +2043,6 @@ MongoClient.connect(url, function(err, db) {
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;The &lt;em&gt;each&lt;/em&gt; method will call the supplied callback until there are no more documents available that satisfy the query. Once the available documents is exhausted it will return &lt;em&gt;null&lt;/em&gt; for the second parameter in the callback. If you wish to terminate the each early you should return false in your &lt;em&gt;each&lt;/em&gt; callback. This will stop the cursor from returning documents.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Connecting</title>
-      <link>/node-mongodb-native/2.0/reference/connecting/</link>
-      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
-      
-      <guid>/node-mongodb-native/2.0/reference/connecting/</guid>
-      <description>
-
-&lt;h2 id=&#34;connecting&#34;&gt;Connecting&lt;/h2&gt;
-
-&lt;p&gt;The reference documentation for connecting to a MongoDB server deployment is divided into three sections:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/connection-settings/&#34;&gt;Connection Settings&lt;/a&gt;: documentation of the various ways to specify the properties of a connection&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/authenticating/&#34;&gt;Authenticating&lt;/a&gt;: detailed documentation of the various ways to specify authentication credentials&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/ssl/&#34;&gt;SSL&lt;/a&gt;: Detailed documentation of the various ways to specify the properties of an SSL connection&lt;/li&gt;
-&lt;/ul&gt;
 </description>
     </item>
     
