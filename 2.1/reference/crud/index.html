@@ -389,6 +389,12 @@
       
       
     
+      
+      
+    
+      
+      
+    
     
   
 
@@ -806,6 +812,97 @@
 
 
 <li class="toctree-l2 ">
+  <a href="/node-mongodb-native/2.1/reference/ecmascript6/" class="">
+      <i class='fa'></i>
+      <span>ECMAScript 6</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/ecmascript6/connecting/">
+        <i class='fa'></i>
+        Connecting
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/ecmascript6/crud/">
+        <i class='fa'></i>
+        CRUD Operations
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
   <a href="/node-mongodb-native/2.1/reference/gridfs/" class="">
       <i class='fa'></i>
       <span>GridFS</span>
@@ -963,6 +1060,35 @@
         
         
     </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.1/reference/faq/">
+        <i class='fa'></i>
+        Frequently Asked Questions
+    </a>
   </li>
 
 
@@ -1197,13 +1323,47 @@ MongoClient.connect(url, function(err, db) {
 
 <p>The <em>insertOne</em> and <em>insertMany</em> methods also accepts an second argument that can be an options object. This object can have the following fields.</p>
 
-<ul>
-<li><code>w</code>, {Number/String, &gt; -1 || &lsquo;majority&rsquo;} the write concern for the operation where &lt; 1 returns an acknowledgment of the write with not results <code>{ok:1}</code> and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write with full write results.</li>
-<li><code>wtimeout</code>, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).</li>
-<li><code>j</code>, (Boolean, default:false) write waits for journal sync.</li>
-<li><code>serializeFunctions</code>, (Boolean, default:false) serialize functions on an object to mongodb, by default the driver does not serialize any functions on the passed in documents.</li>
-<li><code>forceServerObjectId</code>, (Boolean, default:false) Force server to assign _id values instead of driver.</li>
-</ul>
+<table>
+<thead>
+<tr>
+<th align="left">Parameter</th>
+<th align="left">Type</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left"><code>w</code></td>
+<td align="left">{Number/String, &gt; -1 || &lsquo;majority&rsquo;}</td>
+<td align="left">the write concern for the operation where &lt; 1 returns an acknowledgment of the write with not results <code>{ok:1}</code> and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write with full write results.</td>
+</tr>
+
+<tr>
+<td align="left"><code>wtimeout</code></td>
+<td align="left">{Number, 0}</td>
+<td align="left">set the timeout for waiting for write concern to finish (combines with w option).</td>
+</tr>
+
+<tr>
+<td align="left"><code>j</code></td>
+<td align="left">(Boolean, default:false)</td>
+<td align="left">write waits for journal sync.</td>
+</tr>
+
+<tr>
+<td align="left"><code>serializeFunctions</code></td>
+<td align="left">(Boolean, default:false)</td>
+<td align="left">serialize functions on an object to mongodb, by default the driver does not serialize any functions on the passed in documents.</td>
+</tr>
+
+<tr>
+<td align="left"><code>forceServerObjectId</code></td>
+<td align="left">(Boolean, default:false)</td>
+<td align="left">Force server to assign _id values instead of driver.</td>
+</tr>
+</tbody>
+</table>
 
 <p>Let&rsquo;s look at a simple example where we are writing to a replicaset and we wish to ensure that we serialize a passed in function as well as have the server assign the <em>_id</em> for each document.</p>
 
@@ -1285,13 +1445,47 @@ MongoClient.connect(url, function(err, db) {
 
 <p>The <em>update</em> method also accepts a third argument that can be an options object. This object can have the following fields.</p>
 
-<ul>
-<li><code>w</code>, {Number/String, &gt; -1 || &lsquo;majority&rsquo;} the write concern for the operation where &lt; 1 returns an acknowledgment of the write with not results <code>{ok:1}</code> and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write with full write results.</li>
-<li><code>wtimeout</code>, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).</li>
-<li><code>j</code>, (Boolean, default:false) write waits for journal sync.</li>
-<li><code>multi</code>, (Boolean, default:false) Update one/all documents with operation.</li>
-<li><code>upsert</code>, (Boolean, default:false) Update operation is an upsert.</li>
-</ul>
+<table>
+<thead>
+<tr>
+<th align="left">Parameter</th>
+<th align="left">Type</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left"><code>w</code></td>
+<td align="left">{Number/String, &gt; -1 || &lsquo;majority&rsquo;}</td>
+<td align="left">the write concern for the operation where &lt; 1 returns an acknowledgment of the write with not results <code>{ok:1}</code> and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write with full write results.</td>
+</tr>
+
+<tr>
+<td align="left"><code>wtimeout</code></td>
+<td align="left">{Number, 0}</td>
+<td align="left">set the timeout for waiting for write concern to finish (combines with w option).</td>
+</tr>
+
+<tr>
+<td align="left"><code>j</code></td>
+<td align="left">(Boolean, default:false)</td>
+<td align="left">write waits for journal sync.</td>
+</tr>
+
+<tr>
+<td align="left"><code>multi</code></td>
+<td align="left">(Boolean, default:false)</td>
+<td align="left">Update one/all documents with operation.</td>
+</tr>
+
+<tr>
+<td align="left"><code>upsert</code></td>
+<td align="left">(Boolean, default:false)</td>
+<td align="left">Update operation is an upsert.</td>
+</tr>
+</tbody>
+</table>
 
 <p>Just as for <em>insert</em> the <em>update</em> method allows you to specify a per operation write concern using the <em>w</em>, <em>wtimeout</em> and <em>fsync</em> parameters</p>
 
@@ -1333,12 +1527,41 @@ MongoClient.connect(url, function(err, db) {
 
 <p>The <em>deleteOne</em> and <em>deleteMany</em> methods also accepts a second argument that can be an options object. This object can have the following fields.</p>
 
-<ul>
-<li><code>w</code>, {Number/String, &gt; -1 || &lsquo;majority&rsquo;} the write concern for the operation where &lt; 1 returns an acknowledgment of the write with not results <code>{ok:1}</code> and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write with full write results.</li>
-<li><code>wtimeout</code>, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).</li>
-<li><code>j</code>, (Boolean, default:false) write waits for journal sync.</li>
-<li><code>single</code>, (Boolean, default:false) Removes the first document found.</li>
-</ul>
+<table>
+<thead>
+<tr>
+<th align="left">Parameter</th>
+<th align="left">Type</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left"><code>w</code></td>
+<td align="left">{Number/String, &gt; -1 || &lsquo;majority&rsquo;}</td>
+<td align="left">the write concern for the operation where &lt; 1 returns an acknowledgment of the write with not results <code>{ok:1}</code> and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write with full write results.</td>
+</tr>
+
+<tr>
+<td align="left"><code>wtimeout</code></td>
+<td align="left">{Number, 0}</td>
+<td align="left">set the timeout for waiting for write concern to finish (combines with w option).</td>
+</tr>
+
+<tr>
+<td align="left"><code>j</code></td>
+<td align="left">(Boolean, default:false)</td>
+<td align="left">write waits for journal sync.</td>
+</tr>
+
+<tr>
+<td align="left"><code>single</code></td>
+<td align="left">(Boolean, default:false)</td>
+<td align="left">Removes the first document found.</td>
+</tr>
+</tbody>
+</table>
 
 <p>Just as for <em>updateOne/updateMany</em> and <em>insertOne/insertMany</em> the <em>deleteOne/deleteMany</em> method allows you to specify a per operation write concern using the <em>w</em>, <em>wtimeout</em> and <em>fsync</em> parameters</p>
 
@@ -1367,7 +1590,7 @@ MongoClient.connect(url, function(err, db) {
         returnOriginal: false
       , sort: [[a,1]]
       , upsert: true
-    }, function(err, doc) {
+    }, function(err, r) {
       assert.equal(null, err);
       assert.equal(1, r.value.b);
 
@@ -1384,15 +1607,59 @@ MongoClient.connect(url, function(err, db) {
 
 <p>The <em>findOneAndUpdate</em> method also accepts a third argument that can be an options object. This object can have the following fields.</p>
 
-<ul>
-<li><code>w</code>, {Number/String, &gt; -1 || &lsquo;majority&rsquo;} the write concern for the operation where &lt; 1 returns an acknowledgment of the write with not results <code>{ok:1}</code> and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write with full write results.</li>
-<li><code>wtimeout</code>, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).</li>
-<li><code>j</code>, (Boolean, default:false) write waits for journal sync.</li>
-<li><code>upsert</code>, (Boolean, default:false) Perform an upsert operation.</li>
-<li><code>sort</code>, (Object, default:null) Sort for find operation.</li>
-<li><code>projection</code>, (Object, default:null) Projection for returned result</li>
-<li><code>returnOriginal</code>, (Boolean, default:true) Set to false if you want to return the modified object rather than the original. Ignored for remove.</li>
-</ul>
+<table>
+<thead>
+<tr>
+<th align="left">Parameter</th>
+<th align="left">Type</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left"><code>w</code></td>
+<td align="left">{Number/String, &gt; -1 || &lsquo;majority&rsquo;}</td>
+<td align="left">the write concern for the operation where &lt; 1 returns an acknowledgment of the write with not results <code>{ok:1}</code> and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write with full write results.</td>
+</tr>
+
+<tr>
+<td align="left"><code>wtimeout</code></td>
+<td align="left">{Number, 0}</td>
+<td align="left">set the timeout for waiting for write concern to finish (combines with w option).</td>
+</tr>
+
+<tr>
+<td align="left"><code>j</code></td>
+<td align="left">(Boolean, default:false)</td>
+<td align="left">write waits for journal sync.</td>
+</tr>
+
+<tr>
+<td align="left"><code>upsert</code></td>
+<td align="left">(Boolean, default:false)</td>
+<td align="left">Perform an upsert operation.</td>
+</tr>
+
+<tr>
+<td align="left"><code>sort</code></td>
+<td align="left">(Object, default:null)</td>
+<td align="left">Sort for find operation.</td>
+</tr>
+
+<tr>
+<td align="left"><code>projection</code></td>
+<td align="left">(Object, default:null)</td>
+<td align="left">Projection for returned result</td>
+</tr>
+
+<tr>
+<td align="left"><code>returnOriginal</code></td>
+<td align="left">(Boolean, default:true)</td>
+<td align="left">Set to false if you want to return the modified object rather than the original. Ignored for remove.</td>
+</tr>
+</tbody>
+</table>
 
 <p>The <em>findOneAndDelete</em> function is a function especially defined to help remove a document. Let&rsquo;s look at an example of usage.</p>
 
@@ -1416,7 +1683,7 @@ MongoClient.connect(url, function(err, db) {
     col.findOneAndDelete({a:1}, {
         sort: [[a,1]]
       }
-      , function(err, doc) {
+      , function(err, r) {
         assert.equal(null, err);
         assert.ok(r.value.b == null);
         db.close();
@@ -1427,12 +1694,41 @@ MongoClient.connect(url, function(err, db) {
 
 <p>Just as for <em>findOneAndUpdate</em> it allows for an object of options to be passed in that can have the following fields.</p>
 
-<ul>
-<li><code>w</code>, {Number/String, &gt; -1 || &lsquo;majority&rsquo;} the write concern for the operation where &lt; 1 returns an acknowledgment of the write with not results <code>{ok:1}</code> and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write with full write results.</li>
-<li><code>wtimeout</code>, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).</li>
-<li><code>j</code>, (Boolean, default:false) write waits for journal sync.</li>
-<li><code>sort</code>, (Object, default:null) Sort for find operation.</li>
-</ul>
+<table>
+<thead>
+<tr>
+<th align="left">Parameter</th>
+<th align="left">Type</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left"><code>w</code></td>
+<td align="left">{Number/String, &gt; -1 || &lsquo;majority&rsquo;}</td>
+<td align="left">the write concern for the operation where &lt; 1 returns an acknowledgment of the write with not results <code>{ok:1}</code> and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write with full write results.</td>
+</tr>
+
+<tr>
+<td align="left"><code>wtimeout</code></td>
+<td align="left">{Number, 0}</td>
+<td align="left">set the timeout for waiting for write concern to finish (combines with w option).</td>
+</tr>
+
+<tr>
+<td align="left"><code>j</code></td>
+<td align="left">(Boolean, default:false)</td>
+<td align="left">write waits for journal sync.</td>
+</tr>
+
+<tr>
+<td align="left"><code>sort</code></td>
+<td align="left">(Object, default:null)</td>
+<td align="left">Sort for find operation.</td>
+</tr>
+</tbody>
+</table>
 
 <h3 id="bulkwrite">BulkWrite</h3>
 
@@ -1475,12 +1771,41 @@ MongoClient.connect(url, function(err, db) {
 
 <p>As we can see the <em>bulkWrite</em> function takes an array of operation that can be objects of either <em>insertOne</em>, <em>insertMany</em>, <em>updateOne</em>, <em>updateMany</em>, <em>deleteOne</em> or <em>deleteMany</em>. It also takes a second parameter that takes the following options.</p>
 
-<ul>
-<li><code>ordered</code>, (Boolean, default:true) Execute in order or out of order.</li>
-<li><code>w</code>, {Number/String, &gt; -1 || &lsquo;majority&rsquo;} the write concern for the operation where &lt; 1 returns an acknowledgment of the write with not results <code>{ok:1}</code> and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write with full write results.</li>
-<li><code>wtimeout</code>, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).</li>
-<li><code>j</code>, (Boolean, default:false) write waits for journal sync.</li>
-</ul>
+<table>
+<thead>
+<tr>
+<th align="left">Parameter</th>
+<th align="left">Type</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left"><code>ordered</code></td>
+<td align="left">(Boolean, default:true)</td>
+<td align="left">Execute in order or out of order.</td>
+</tr>
+
+<tr>
+<td align="left"><code>w</code></td>
+<td align="left">{Number/String, &gt; -1 || &lsquo;majority&rsquo;}</td>
+<td align="left">the write concern for the operation where &lt; 1 returns an acknowledgment of the write with not results <code>{ok:1}</code> and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write with full write results.</td>
+</tr>
+
+<tr>
+<td align="left"><code>wtimeout</code></td>
+<td align="left">{Number, 0}</td>
+<td align="left">set the timeout for waiting for write concern to finish (combines with w option).</td>
+</tr>
+
+<tr>
+<td align="left"><code>j</code></td>
+<td align="left">(Boolean, default:false)</td>
+<td align="left">write waits for journal sync.</td>
+</tr>
+</tbody>
+</table>
 
 <p>This covers the basic write operations. Let&rsquo;s have a look at the Bulk write operations next.</p>
 
@@ -1602,7 +1927,7 @@ MongoClient.connect(url, function(err, db) {
 
 <p>Let&rsquo;s look at some of the options we can set on the cursor.</p>
 
-<pre><code class="language-js">collection.find({}).project({a:1})                             // Create a projection of field a 
+<pre><code class="language-js">collection.find({}).project({a:1})                             // Create a projection of field a
 collection.find({}).skip(1).limit(10)                          // Skip 1 and limit 10
 collection.find({}).batchSize(5)                               // Set batchSize on cursor to 5
 collection.find({}).filter({a:1})                              // Set query on the cursor
@@ -1708,8 +2033,8 @@ MongoClient.connect(url, function(err, db) {
   
   
   <div class="pull-right">
-  <a class="navigation next" href="/node-mongodb-native/2.1/reference/gridfs/">
-    GridFS <i class="fa fa-long-arrow-right"> </i>
+  <a class="navigation next" href="/node-mongodb-native/2.1/reference/ecmascript6/">
+    ECMAScript 6 <i class="fa fa-long-arrow-right"> </i>
   </a>
   
 </div>

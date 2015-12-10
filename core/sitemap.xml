@@ -23,12 +23,12 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/core/driver/reference/extending/</loc>
+    <loc>/node-mongodb-native/core/driver/reference/connecting/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/core/driver/reference/connecting/</loc>
+    <loc>/node-mongodb-native/core/driver/reference/extending/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
@@ -48,7 +48,7 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/core/driver/getting-started/installation-guide/</loc>
+    <loc>/node-mongodb-native/core/driver/</loc>
     <lastmod>2015-03-17T15:36:56+00:00</lastmod>
   </url>
   
@@ -63,7 +63,7 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/core/driver/</loc>
+    <loc>/node-mongodb-native/core/driver/getting-started/installation-guide/</loc>
     <lastmod>2015-03-17T15:36:56+00:00</lastmod>
   </url>
   

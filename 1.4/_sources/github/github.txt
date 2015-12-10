@@ -193,7 +193,7 @@ Content Management Systems
          * - **Forks**
            - 296
          * - **Watchers**
-           - 1627
+           - 1628
 
 Grid FS libraries or tools
 --------------------------
@@ -384,7 +384,7 @@ REST api's around MongoDB or resource based libraries
          * - **Clone Url**
            - https://github.com/tdegrunt/mongodb-rest.git
          * - **Forks**
-           - 127
+           - 128
          * - **Watchers**
            - 347
 
@@ -781,7 +781,7 @@ Libraries for the connect middleware
          * - **Forks**
            - 219
          * - **Watchers**
-           - 861
+           - 864
 
 Libraries or applications for continous integration
 ---------------------------------------------------

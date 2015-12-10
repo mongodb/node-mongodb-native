@@ -342,6 +342,12 @@
       
       
     
+      
+      
+    
+      
+      
+    
     
   
 
@@ -761,6 +767,97 @@
 
 
 <li class="toctree-l2 ">
+  <a href="/node-mongodb-native/2.1/reference/ecmascript6/" class="">
+      <i class='fa'></i>
+      <span>ECMAScript 6</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/ecmascript6/connecting/">
+        <i class='fa'></i>
+        Connecting
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/ecmascript6/crud/">
+        <i class='fa'></i>
+        CRUD Operations
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
   <a href="/node-mongodb-native/2.1/reference/gridfs/" class="">
       <i class='fa'></i>
       <span>GridFS</span>
@@ -918,6 +1015,35 @@
         
         
     </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.1/reference/faq/">
+        <i class='fa'></i>
+        Frequently Asked Questions
+    </a>
   </li>
 
 
@@ -1112,7 +1238,7 @@
 
 <h1 id="ssl">SSL</h1>
 
-<p>The Node.js driver supports SSL connections to MongoDB when using the Enterprise edition off MongoDB or the open source edition with SSL support compiled in.</p>
+<p>The Node.js driver supports SSL connections to MongoDB when using the Enterprise edition of MongoDB or the open source edition with SSL support compiled in.</p>
 
 <h2 id="no-validation-of-certificate-chain">No validation of certificate chain</h2>
 
@@ -1209,14 +1335,53 @@ MongoClient.connect(f('mongodb://%s@server:27017/test?authMechanism=%s&amp;ssl=t
 
 <h3 id="individual-server-level-options">Individual Server Level Options</h3>
 
-<ul>
-<li><code>ssl</code>, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.</li>
-<li><code>sslValidate</code>, {Boolean, default: true} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).</li>
-<li><code>sslCA</code>, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).</li>
-<li><code>sslCert</code>, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).</li>
-<li><code>sslKey</code>, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).</li>
-<li><code>sslPass</code>, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).</li>
-</ul>
+<table>
+<thead>
+<tr>
+<th align="left">Parameter</th>
+<th align="left">Type</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left"><code>ssl</code></td>
+<td align="left">{Boolean, default: false}</td>
+<td align="left">Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.</td>
+</tr>
+
+<tr>
+<td align="left"><code>sslValidate</code></td>
+<td align="left">{Boolean, default: true}</td>
+<td align="left">Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).</td>
+</tr>
+
+<tr>
+<td align="left"><code>sslCA</code></td>
+<td align="left">{Buffer[]|string[], default: null}</td>
+<td align="left">Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).</td>
+</tr>
+
+<tr>
+<td align="left"><code>sslCert</code></td>
+<td align="left">{Buffer|string, default: null}</td>
+<td align="left">String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).</td>
+</tr>
+
+<tr>
+<td align="left"><code>sslKey</code></td>
+<td align="left">{Buffer|string, default: null}</td>
+<td align="left">String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).</td>
+</tr>
+
+<tr>
+<td align="left"><code>sslPass</code></td>
+<td align="left">{Buffer|string, default: null}</td>
+<td align="left">String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).</td>
+</tr>
+</tbody>
+</table>
 
 <p>If you are connecting to a single MongoDB instance you pass the parameters using the <code>server</code> options field.</p>
 
@@ -1237,14 +1402,53 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 
 <h3 id="replicaset-level-options">Replicaset Level Options</h3>
 
-<ul>
-<li><code>ssl</code>, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.</li>
-<li><code>sslValidate</code>, {Boolean, default: true} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).</li>
-<li><code>sslCA</code>, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).</li>
-<li><code>sslCert</code>, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).</li>
-<li><code>sslKey</code>, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).</li>
-<li><code>sslPass</code>, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).</li>
-</ul>
+<table>
+<thead>
+<tr>
+<th align="left">Parameter</th>
+<th align="left">Type</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left"><code>ssl</code></td>
+<td align="left">{Boolean, default: false}</td>
+<td align="left">Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.</td>
+</tr>
+
+<tr>
+<td align="left"><code>sslValidate</code></td>
+<td align="left">{Boolean, default: true}</td>
+<td align="left">Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).</td>
+</tr>
+
+<tr>
+<td align="left"><code>sslCA</code></td>
+<td align="left">{Buffer[]|string[], default: null}</td>
+<td align="left">Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).</td>
+</tr>
+
+<tr>
+<td align="left"><code>sslCert</code></td>
+<td align="left">{Buffer|string, default: null}</td>
+<td align="left">String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).</td>
+</tr>
+
+<tr>
+<td align="left"><code>sslKey</code></td>
+<td align="left">{Buffer|string, default: null}</td>
+<td align="left">String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).</td>
+</tr>
+
+<tr>
+<td align="left"><code>sslPass</code></td>
+<td align="left">{Buffer|string, default: null}</td>
+<td align="left">String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).</td>
+</tr>
+</tbody>
+</table>
 
 <p>If you are connecting to a MongoDB replicaset, you pass the parameters using the <code>replset</code> options field.</p>
 
@@ -1265,14 +1469,53 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 
 <h3 id="mongos-proxy-level-options">Mongos Proxy Level Options</h3>
 
-<ul>
-<li><code>ssl</code>, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.</li>
-<li><code>sslValidate</code>, {Boolean, default: true} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).</li>
-<li><code>sslCA</code>, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).</li>
-<li><code>sslCert</code>, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).</li>
-<li><code>sslKey</code>, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).</li>
-<li><code>sslPass</code>, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).</li>
-</ul>
+<table>
+<thead>
+<tr>
+<th align="left">Parameter</th>
+<th align="left">Type</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left"><code>ssl</code></td>
+<td align="left">{Boolean, default: false}</td>
+<td align="left">Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.</td>
+</tr>
+
+<tr>
+<td align="left"><code>sslValidate</code></td>
+<td align="left">{Boolean, default: true}</td>
+<td align="left">Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).</td>
+</tr>
+
+<tr>
+<td align="left"><code>sslCA</code></td>
+<td align="left">{Buffer[]|string[], default: null}</td>
+<td align="left">Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).</td>
+</tr>
+
+<tr>
+<td align="left"><code>sslCert</code></td>
+<td align="left">{Buffer|string, default: null}</td>
+<td align="left">String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).</td>
+</tr>
+
+<tr>
+<td align="left"><code>sslKey</code></td>
+<td align="left">{Buffer|string, default: null}</td>
+<td align="left">String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).</td>
+</tr>
+
+<tr>
+<td align="left"><code>sslPass</code></td>
+<td align="left">{Buffer|string, default: null}</td>
+<td align="left">String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).</td>
+</tr>
+</tbody>
+</table>
 
 <p>If you are connecting to a MongoDB replicaset, you pass the parameters using the <code>mongos</code> options field.</p>
 

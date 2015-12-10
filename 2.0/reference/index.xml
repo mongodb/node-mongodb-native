@@ -483,13 +483,47 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;The &lt;em&gt;insertOne&lt;/em&gt; and &lt;em&gt;insertMany&lt;/em&gt; methods also accepts an second argument that can be an options object. This object can have the following fields.&lt;/p&gt;
 
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;wtimeout&lt;/code&gt;, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;j&lt;/code&gt;, (Boolean, default:false) write waits for journal sync.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;serializeFunctions&lt;/code&gt;, (Boolean, default:false) serialize functions on an object to mongodb, by default the driver does not serialize any functions on the passed in documents.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;forceServerObjectId&lt;/code&gt;, (Boolean, default:false) Force server to assign _id values instead of driver.&lt;/li&gt;
-&lt;/ul&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;w&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;wtimeout&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;set the timeout for waiting for write concern to finish (combines with w option).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;j&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:false)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;write waits for journal sync.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;serializeFunctions&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:false)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;serialize functions on an object to mongodb, by default the driver does not serialize any functions on the passed in documents.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;forceServerObjectId&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:false)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Force server to assign _id values instead of driver.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 
 &lt;p&gt;Let&amp;rsquo;s look at a simple example where we are writing to a replicaset and we wish to ensure that we serialize a passed in function as well as have the server assign the &lt;em&gt;_id&lt;/em&gt; for each document.&lt;/p&gt;
 
@@ -571,13 +605,47 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;The &lt;em&gt;update&lt;/em&gt; method also accepts a third argument that can be an options object. This object can have the following fields.&lt;/p&gt;
 
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;wtimeout&lt;/code&gt;, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;j&lt;/code&gt;, (Boolean, default:false) write waits for journal sync.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;multi&lt;/code&gt;, (Boolean, default:false) Update one/all documents with operation.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;upsert&lt;/code&gt;, (Boolean, default:false) Update operation is an upsert.&lt;/li&gt;
-&lt;/ul&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;w&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;wtimeout&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;set the timeout for waiting for write concern to finish (combines with w option).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;j&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:false)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;write waits for journal sync.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;multi&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:false)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Update one/all documents with operation.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;upsert&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:false)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Update operation is an upsert.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 
 &lt;p&gt;Just as for &lt;em&gt;insert&lt;/em&gt; the &lt;em&gt;update&lt;/em&gt; method allows you to specify a per operation write concern using the &lt;em&gt;w&lt;/em&gt;, &lt;em&gt;wtimeout&lt;/em&gt; and &lt;em&gt;fsync&lt;/em&gt; parameters&lt;/p&gt;
 
@@ -619,12 +687,41 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;The &lt;em&gt;deleteOne&lt;/em&gt; and &lt;em&gt;deleteMany&lt;/em&gt; methods also accepts a second argument that can be an options object. This object can have the following fields.&lt;/p&gt;
 
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;wtimeout&lt;/code&gt;, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;j&lt;/code&gt;, (Boolean, default:false) write waits for journal sync.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;single&lt;/code&gt;, (Boolean, default:false) Removes the first document found.&lt;/li&gt;
-&lt;/ul&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;w&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;wtimeout&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;set the timeout for waiting for write concern to finish (combines with w option).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;j&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:false)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;write waits for journal sync.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;single&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:false)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Removes the first document found.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 
 &lt;p&gt;Just as for &lt;em&gt;updateOne/updateMany&lt;/em&gt; and &lt;em&gt;insertOne/insertMany&lt;/em&gt; the &lt;em&gt;deleteOne/deleteMany&lt;/em&gt; method allows you to specify a per operation write concern using the &lt;em&gt;w&lt;/em&gt;, &lt;em&gt;wtimeout&lt;/em&gt; and &lt;em&gt;fsync&lt;/em&gt; parameters&lt;/p&gt;
 
@@ -653,7 +750,7 @@ MongoClient.connect(url, function(err, db) {
         returnOriginal: false
       , sort: [[a,1]]
       , upsert: true
-    }, function(err, doc) {
+    }, function(err, r) {
       assert.equal(null, err);
       assert.equal(1, r.value.b);
 
@@ -670,15 +767,59 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;The &lt;em&gt;findOneAndUpdate&lt;/em&gt; method also accepts a third argument that can be an options object. This object can have the following fields.&lt;/p&gt;
 
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;wtimeout&lt;/code&gt;, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;j&lt;/code&gt;, (Boolean, default:false) write waits for journal sync.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;upsert&lt;/code&gt;, (Boolean, default:false) Perform an upsert operation.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sort&lt;/code&gt;, (Object, default:null) Sort for find operation.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;projection&lt;/code&gt;, (Object, default:null) Projection for returned result&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;returnOriginal&lt;/code&gt;, (Boolean, default:true) Set to false if you want to return the modified object rather than the original. Ignored for remove.&lt;/li&gt;
-&lt;/ul&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;w&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;wtimeout&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;set the timeout for waiting for write concern to finish (combines with w option).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;j&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:false)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;write waits for journal sync.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;upsert&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:false)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Perform an upsert operation.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sort&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Object, default:null)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Sort for find operation.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;projection&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Object, default:null)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Projection for returned result&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;returnOriginal&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:true)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Set to false if you want to return the modified object rather than the original. Ignored for remove.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 
 &lt;p&gt;The &lt;em&gt;findOneAndDelete&lt;/em&gt; function is a function especially defined to help remove a document. Let&amp;rsquo;s look at an example of usage.&lt;/p&gt;
 
@@ -702,7 +843,7 @@ MongoClient.connect(url, function(err, db) {
     col.findOneAndDelete({a:1}, {
         sort: [[a,1]]
       }
-      , function(err, doc) {
+      , function(err, r) {
         assert.equal(null, err);
         assert.ok(r.value.b == null);
         db.close();
@@ -713,12 +854,41 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;Just as for &lt;em&gt;findOneAndUpdate&lt;/em&gt; it allows for an object of options to be passed in that can have the following fields.&lt;/p&gt;
 
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;wtimeout&lt;/code&gt;, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;j&lt;/code&gt;, (Boolean, default:false) write waits for journal sync.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sort&lt;/code&gt;, (Object, default:null) Sort for find operation.&lt;/li&gt;
-&lt;/ul&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;w&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;wtimeout&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;set the timeout for waiting for write concern to finish (combines with w option).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;j&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:false)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;write waits for journal sync.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sort&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Object, default:null)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Sort for find operation.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 
 &lt;h3 id=&#34;bulkwrite&#34;&gt;BulkWrite&lt;/h3&gt;
 
@@ -761,12 +931,41 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;As we can see the &lt;em&gt;bulkWrite&lt;/em&gt; function takes an array of operation that can be objects of either &lt;em&gt;insertOne&lt;/em&gt;, &lt;em&gt;insertMany&lt;/em&gt;, &lt;em&gt;updateOne&lt;/em&gt;, &lt;em&gt;updateMany&lt;/em&gt;, &lt;em&gt;deleteOne&lt;/em&gt; or &lt;em&gt;deleteMany&lt;/em&gt;. It also takes a second parameter that takes the following options.&lt;/p&gt;
 
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;ordered&lt;/code&gt;, (Boolean, default:true) Execute in order or out of order.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;wtimeout&lt;/code&gt;, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;j&lt;/code&gt;, (Boolean, default:false) write waits for journal sync.&lt;/li&gt;
-&lt;/ul&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;ordered&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:true)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Execute in order or out of order.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;w&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;the write concern for the operation where &amp;lt; 1 returns an acknowledgment of the write with not results &lt;code&gt;{ok:1}&lt;/code&gt; and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write with full write results.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;wtimeout&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;set the timeout for waiting for write concern to finish (combines with w option).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;j&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:false)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;write waits for journal sync.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 
 &lt;p&gt;This covers the basic write operations. Let&amp;rsquo;s have a look at the Bulk write operations next.&lt;/p&gt;
 
@@ -888,7 +1087,7 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;Let&amp;rsquo;s look at some of the options we can set on the cursor.&lt;/p&gt;
 
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;collection.find({}).project({a:1})                             // Create a projection of field a 
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;collection.find({}).project({a:1})                             // Create a projection of field a
 collection.find({}).skip(1).limit(10)                          // Skip 1 and limit 10
 collection.find({}).batchSize(5)                               // Set batchSize on cursor to 5
 collection.find({}).filter({a:1})                              // Set query on the cursor
@@ -982,6 +1181,460 @@ MongoClient.connect(url, function(err, db) {
     </item>
     
     <item>
+      <title>CRUD Operations</title>
+      <link>/node-mongodb-native/2.0/reference/ecmascript6/crud/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/reference/ecmascript6/crud/</guid>
+      <description>
+
+&lt;h1 id=&#34;ecmascript-6-crud&#34;&gt;ECMAScript 6 CRUD&lt;/h1&gt;
+
+&lt;p&gt;Let&amp;rsquo;s take a look at the CRUD operations from the perspective of ECMAScript 6. In this guide we will be using the same examples as in the general CRUD specification overview but rewrite them to use the new ECMAScript 6 features. For all method options refer to the main CRUD tutorial.&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/crud/&#34;&gt;CRUD&lt;/a&gt;: CRUD Specification.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This reference also obmits methods that no longer make sense when using ECMAScript 6 such as the &lt;code&gt;each&lt;/code&gt; and &lt;code&gt;forEach&lt;/code&gt; methods.&lt;/p&gt;
+
+&lt;h2 id=&#34;inserting-documents&#34;&gt;Inserting Documents&lt;/h2&gt;
+
+&lt;p&gt;The &lt;em&gt;insertOne&lt;/em&gt; and &lt;em&gt;insertMany&lt;/em&gt; methods exists on the &lt;em&gt;Collection&lt;/em&gt; class and is used to insert documents into MongoDB. Code speaks a thousand words so let&amp;rsquo;s see two simple examples of inserting documents.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Insert a single document
+  var r = yield db.collection(&#39;inserts&#39;).insertOne({a:1});
+  assert.equal(1, r.insertedCount);
+
+  // Insert multiple documents
+  var r = yield db.collection(&#39;inserts&#39;).insertMany([{a:2}, {a:3}]);
+  assert.equal(2, r.insertedCount);
+
+  // Close connection
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Let&amp;rsquo;s look at a simple example where we are writing to a replicaset and we wish to ensure that we serialize a passed in function as well as have the server assign the &lt;em&gt;_id&lt;/em&gt; for each document.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Insert a single document
+  var r = yield db.collection(&#39;inserts&#39;).insertOne({
+        a:1
+      , b: function() { return &#39;hello&#39;; }
+    }, {
+        w: &#39;majority&#39;
+      , wtimeout: 10000
+      , serializeFunctions: true
+      , forceServerObjectId: true
+    });
+
+  assert.equal(1, r.insertedCount);
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;That wraps up the &lt;em&gt;insert&lt;/em&gt; methods. Next let&amp;rsquo;s look at the &lt;em&gt;update&lt;/em&gt; methods.&lt;/p&gt;
+
+&lt;h2 id=&#34;updating-documents&#34;&gt;Updating Documents&lt;/h2&gt;
+
+&lt;p&gt;The &lt;em&gt;updateOne&lt;/em&gt; and &lt;em&gt;updateMany&lt;/em&gt; methods exists on the &lt;em&gt;Collection&lt;/em&gt; class and is used to update and upsert documents into MongoDB. Let&amp;rsquo;s look at a couple of usage examples.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Get the updates collection
+  var col = db.collection(&#39;updates&#39;);
+  // Insert a single document
+  var r = yield col.insertMany([{a:1}, {a:2}, {a:2}]);
+  assert.equal(3, r.insertedCount);
+
+  // Update a single document
+  var r = yield col.updateOne({a:1}, {$set: {b: 1}});
+  assert.equal(1, r.matchedCount);
+  assert.equal(1, r.modifiedCount);
+
+  // Update multiple documents
+  var r = yield col.updateMany({a:2}, {$set: {b: 1}});
+  assert.equal(2, r.matchedCount);
+  assert.equal(2, r.modifiedCount);
+
+  // Upsert a single document
+  var r = yield col.updateOne({a:3}, {$set: {b: 1}}, {
+    upsert: true
+  });
+  assert.equal(0, r.matchedCount);
+  assert.equal(1, r.upsertedCount);
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;removing-documents&#34;&gt;Removing Documents&lt;/h2&gt;
+
+&lt;p&gt;The &lt;em&gt;deleteOne&lt;/em&gt; and &lt;em&gt;deleteMany&lt;/em&gt; methods exist on the &lt;em&gt;Collection&lt;/em&gt; class and is used to remove documents from MongoDB. Let&amp;rsquo;s look at a couple of usage examples.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Get the removes collection
+  var col = db.collection(&#39;removes&#39;);
+  // Insert a single document
+  var r = yield col.insertMany([{a:1}, {a:2}, {a:2}]);
+  assert.equal(3, r.insertedCount);
+
+  // Remove a single document
+  var r = yield col.deleteOne({a:1});
+  assert.equal(1, r.deletedCount);
+
+  // Update multiple documents
+  var r = yield col.deleteMany({a:2});
+  assert.equal(2, r.deletedCount);
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;findoneandupdate-findoneanddelete-and-findoneandreplace&#34;&gt;findOneAndUpdate, findOneAndDelete and findOneAndReplace&lt;/h2&gt;
+
+&lt;p&gt;The three methods &lt;em&gt;findOneAndUpdate&lt;/em&gt;, &lt;em&gt;findOneAndDelete&lt;/em&gt; and &lt;em&gt;findOneAndReplace&lt;/em&gt; are special commands that allows the user to update or upsert a document and have the modified or existing document returned. It comes at a cost as the operation takes a write lock for the duration of the operation as it needs to ensure the modification is &lt;em&gt;atomic&lt;/em&gt;. Let&amp;rsquo;s look at &lt;em&gt;findOneAndUpdate&lt;/em&gt; first using an example.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Get the findAndModify collection
+  var col = db.collection(&#39;findAndModify&#39;);
+  // Insert a single document
+  var r = yield col.insert([{a:1}, {a:2}, {a:2}]);
+  assert.equal(3, r.result.n);
+
+  // Modify and return the modified document
+  var r = yield col.findOneAndUpdate({a:1}, {$set: {b: 1}}, {
+      returnOriginal: false
+    , sort: [[a,1]]
+    , upsert: true
+  });
+  assert.equal(1, r.value.b);
+
+  // Remove and return a document
+  var r = yield col.findOneAndDelete({a:2});
+  assert.ok(r.value.b == null);
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;em&gt;findOneAndDelete&lt;/em&gt; function is a function especially defined to help remove a document. Let&amp;rsquo;s look at an example of usage.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Get the findAndModify collection
+  var col = db.collection(&#39;findAndModify&#39;);
+  // Insert a single document
+  var r = yield col.insert([{a:1}, {a:2}, {a:2}]);
+  assert.equal(3, r.result.n);
+
+  // Remove a document from MongoDB and return it
+  var r = yield col.findOneAndDelete({a:1}, {
+      sort: [[a,1]]
+    });
+  assert.ok(r.value.b == null);
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;bulkwrite&#34;&gt;BulkWrite&lt;/h2&gt;
+
+&lt;p&gt;The &lt;em&gt;bulkWrite&lt;/em&gt; function allows for a simple set of bulk operations to be done in a non fluent way as in comparison to the bulk API discussed next. Let&amp;rsquo;s look at an example.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Get the collection
+  var col = db.collection(&#39;bulk_write&#39;);
+  var r = yield col.bulkWrite([
+      { insertOne: { document: { a: 1 } } }
+    , { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+    , { updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
+    , { deleteOne: { filter: {c:1} } }
+    , { deleteMany: { filter: {c:1} } }
+    , { replaceOne: { filter: {c:3}, replacement: {c:4}, upsert:true}}]
+  , {ordered:true, w:1});
+  assert.equal(1, r.insertedCount);
+  assert.equal(1, Object.keys(r.insertedIds).length);
+  assert.equal(1, r.matchedCount);
+  assert.equal(0, r.modifiedCount);
+  assert.equal(0, r.deletedCount);
+  assert.equal(2, r.upsertedCount);
+  assert.equal(2, Object.keys(r.upsertedIds).length);
+
+  // Ordered bulk operation
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This covers the basic write operations. Let&amp;rsquo;s have a look at the Bulk write operations next.&lt;/p&gt;
+
+&lt;h2 id=&#34;bulk-write-operations&#34;&gt;Bulk Write Operations&lt;/h2&gt;
+
+&lt;p&gt;The bulk write operations make it easy to write groups of operations together to MongoDB. There are some caveats and to get the best performance you need to be running against MongoDB &lt;em&gt;2.6&lt;/em&gt; or higher that support the new write commands. Bulk operations are split into &lt;em&gt;ordered&lt;/em&gt; and &lt;em&gt;unordered&lt;/em&gt; bulk operations. An &lt;em&gt;ordered&lt;/em&gt; bulk operation guarantees the order of execution of writes while the &lt;em&gt;unordered&lt;/em&gt; bulk operation makes no assumptions about the order of execution. In the Node.js driver the &lt;em&gt;unordered&lt;/em&gt; bulk operations will group operations according to type and write them in parallel. Let&amp;rsquo;s have a look at how to build an ordered bulk operation.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Get the collection
+  var col = db.collection(&#39;bulkops&#39;);
+  // Create ordered bulk, for unordered initializeUnorderedBulkOp()
+  var bulk = col.initializeOrderedBulkOp();
+  // Insert 10 documents
+  for(var i = 0; i &amp;lt; 10; i++) {
+    bulk.insert({a: i});
+  }
+
+  // Next perform some upserts
+  for(var i = 0; i &amp;lt; 10; i++) {
+    bulk.find({b:i}).upsert().updateOne({b:1});
+  }
+
+  // Finally perform a remove operation
+  bulk.find({b:1}).deleteOne();
+
+  // Execute the bulk with a journal write concern
+  var result = yield bulk.execute();
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;We will not cover the results object here as it&amp;rsquo;s documented in the driver API. The Bulk API handles all the splitting of operations into multiple writes and also emulates 2.6 and higher write commands for 2.4 and earlier servers.&lt;/p&gt;
+
+&lt;p&gt;There are some important things to keep in mind when using the bulk API and especially the &lt;em&gt;ordered&lt;/em&gt; bulk API mode. The write commands are single operation type. That means they can only do insert/update and remove. If you f.ex do the following combination of operations.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Insert {a:1}
+Update {a:1} to {a:1, b:1}
+Insert {a:2}
+Remove {b:1}
+Insert {a:3}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will result in the driver issuing 4 write commands to the server.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Insert Command with {a:1}
+Update Command {a:1} to {a:1, b:1}
+Insert Command with {a:2}
+Remove Command with {b:1}
+Insert Command with {a:3}    
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If you instead organize your &lt;em&gt;ordered&lt;/em&gt; in the following manner.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Insert {a:1}
+Insert {a:2}
+Insert {a:3}
+Update {a:1} to {a:1, b:1}
+Remove {b:1}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The number of write commands issued by the driver will be.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Insert Command with {a:1}, {a:2}, {a:3}
+Update Command {a:1} to {a:1, b:1}
+Remove Command with {b:1}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Allowing for more efficient and faster bulk write operation.&lt;/p&gt;
+
+&lt;p&gt;For &lt;em&gt;unordered&lt;/em&gt; bulk operations this is not important as the driver sorts operations by type and executes them in parallel.&lt;/p&gt;
+
+&lt;p&gt;This covers write operations for MongoDB. Let&amp;rsquo;s look at querying for documents next.&lt;/p&gt;
+
+&lt;h2 id=&#34;read-methods&#34;&gt;Read Methods&lt;/h2&gt;
+
+&lt;p&gt;The main method for querying the database are the &lt;em&gt;find&lt;/em&gt; and the &lt;em&gt;aggregate&lt;/em&gt; method. In this CRUD tutorial we will focus on &lt;em&gt;find&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;The &lt;em&gt;method&lt;/em&gt; return a cursor that allows us to operate on the data. The &lt;em&gt;cursor&lt;/em&gt; also implements the Node.js 0.10.x or higher stream interface allowing us to pipe the results to other streams.&lt;/p&gt;
+
+&lt;p&gt;Let&amp;rsquo;s look at a simple find example that materializes all the documents from a query using the toArray but limits the number of returned results to 2 documents.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Get the collection
+  var col = db.collection(&#39;find&#39;);
+  // Insert a single document
+  var r = yield col.insertMany([{a:1}, {a:1}, {a:1}]);
+  assert.equal(3, r.insertedCount);
+
+  // Get first two documents that match the query
+  var docs = yield col.find({a:1}).limit(2).toArray();
+  assert.equal(2, docs.length);
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next lets take a look at the &lt;em&gt;next&lt;/em&gt; method and how we can iterate over the cursor in ECMAScript 6. The new &lt;code&gt;generator&lt;/code&gt; functions allow for what is arguably a much cleaner and easier to read iteration code.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  // Get the collection
+  var col = db.collection(&#39;find&#39;);
+  // Insert a single document
+  var r = yield col.insertMany([{a:1}, {a:1}, {a:1}]);
+  assert.equal(3, r.insertedCount);
+
+  // Get the cursor
+  var cursor = col.find({a:1}).limit(2);
+
+  // Iterate over the cursor
+  while(yield cursor.hasNext()) {
+    var doc = yield cursor.next();
+    console.dir(doc);
+  }
+
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;executing-commands&#34;&gt;Executing Commands&lt;/h2&gt;
+
+&lt;p&gt;The &lt;code&gt;Db.command&lt;/code&gt; method also returns a &lt;code&gt;Promise&lt;/code&gt; allowing us to leverage &lt;code&gt;generators&lt;/code&gt; to get clear and concise code. Below is an example calling the &lt;code&gt;buildInfo&lt;/code&gt; method.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect(&#39;mongodb://localhost:27017/myproject&#39;);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+  // Use the admin database for the operation
+  var adminDb = db.admin();
+  // Retrive the build information using the admin command
+  yield adminDb.command({buildInfo:1})
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Connecting</title>
+      <link>/node-mongodb-native/2.0/reference/ecmascript6/connecting/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/reference/ecmascript6/connecting/</guid>
+      <description>
+
+&lt;h1 id=&#34;connecting&#34;&gt;Connecting&lt;/h1&gt;
+
+&lt;p&gt;The MongoClient connection method returns a Promise if no callback is passed to it. Below is an example using the &lt;a href=&#34;https://www.npmjs.com/package/co&#34;&gt;co&lt;/a&gt; package to run the &lt;code&gt;generator&lt;/code&gt; functions that is one of the most exiting innovations of ECMAScript 6.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var url = &#39;mongodb://localhost:27017/myproject&#39;;
+  // Use connect method to connect to the Server
+  var db = yield MongoClient.connect(url);
+  // Close the connection
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;MongoClient.connect&lt;/code&gt; function returns a &lt;code&gt;Promise&lt;/code&gt; that we then execute using the &lt;code&gt;yield&lt;/code&gt; keyword of the &lt;code&gt;generator&lt;/code&gt; function. If an error happens during the &lt;code&gt;MongoClient.connect&lt;/code&gt; the error is caught by &lt;code&gt;co&lt;/code&gt; and can be inspected by attaching a function to the &lt;code&gt;catch&lt;/code&gt; method as shown above.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
       <title>Connecting</title>
       <link>/node-mongodb-native/2.0/reference/connecting/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
@@ -1033,11 +1686,31 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;Let&amp;rsquo;s break down the &lt;code&gt;URI&lt;/code&gt; string we passed as the first argument to MongoClient.connect.&lt;/p&gt;
 
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;mongodb://&lt;/code&gt; is the protocol definition&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;localhost:27017&lt;/code&gt; is the server we are connecting to&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;/myproject&lt;/code&gt; is the database we wish to connect to&lt;/li&gt;
-&lt;/ul&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;mongodb://&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;is the protocol definition&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;localhost:27017&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;is the server we are connecting to&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;/myproject&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;is the database we wish to connect to&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 
 &lt;h2 id=&#34;replicaset-server-connection&#34;&gt;Replicaset Server Connection&lt;/h2&gt;
 
@@ -1059,12 +1732,36 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;Let&amp;rsquo;s break down the &lt;code&gt;URI&lt;/code&gt; string.&lt;/p&gt;
 
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;mongodb://&lt;/code&gt; is the protocol definition&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;localhost:27017,localhost:27018&lt;/code&gt; is the servers we are connecting to to discover the topology of the ReplicaSet.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;/myproject&lt;/code&gt; is the database we wish to connect to&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;replicaSet=foo&lt;/code&gt; is the name of the ReplicaSet we are connecting to. This ensures we are connecting to the correct Replicaset. &lt;strong&gt;This is a required parameter when using the 2.0 driver&lt;/strong&gt;&lt;/li&gt;
-&lt;/ul&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;mongodb://&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;is the protocol definition&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;localhost:27017,localhost:27018&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;is the servers we are connecting to to discover the topology of the ReplicaSet.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;/myproject&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;is the database we wish to connect to&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;replicaSet=foo&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;is the name of the ReplicaSet we are connecting to. This ensures we are connecting to the correct Replicaset. &lt;strong&gt;This is a required parameter when using the 2.0 driver&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 
 &lt;h2 id=&#34;mongos-proxy-connection&#34;&gt;Mongos Proxy Connection&lt;/h2&gt;
 
@@ -1086,32 +1783,104 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;Let&amp;rsquo;s break down the &lt;code&gt;URI&lt;/code&gt; string.&lt;/p&gt;
 
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;mongodb://&lt;/code&gt; is the protocol definition&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;localhost:50000,localhost:50001&lt;/code&gt; is the &lt;em&gt;mongos&lt;/em&gt; proxies we are connecting to.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;/myproject&lt;/code&gt; is the database we wish to connect to&lt;/li&gt;
-&lt;/ul&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;mongodb://&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;is the protocol definition&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;localhost:50000,localhost:50001&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;is the &lt;em&gt;mongos&lt;/em&gt; proxies we are connecting to.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;/myproject&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;is the database we wish to connect to&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 
 &lt;p&gt;Let&amp;rsquo;s break down the &lt;code&gt;URI&lt;/code&gt; string.&lt;/p&gt;
 
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;mongodb://&lt;/code&gt; is the protocol definition&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;dave:password&lt;/code&gt; is the user name and password for the database&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;localhost:27017&lt;/code&gt; is the server we are connecting to&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;/myproject&lt;/code&gt; is the database we wish to connect to&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;authSource=admin&lt;/code&gt; is the database we wish to authenticate against&lt;/li&gt;
-&lt;/ul&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;mongodb://&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;is the protocol definition&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;dave:password&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;is the user name and password for the database&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;localhost:27017&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;is the server we are connecting to&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;/myproject&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;is the database we wish to connect to&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;authSource=admin&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;is the database we wish to authenticate against&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 
 &lt;h1 id=&#34;mongoclient-connect-optional-parameters&#34;&gt;MongoClient.connect Optional Parameters&lt;/h1&gt;
 
 &lt;p&gt;The driver has many more options for tweaking than what&amp;rsquo;s available through the &lt;code&gt;URI&lt;/code&gt; specification. These can be passed to the driver using an optional parameters object. The top level fields in the options object are.&lt;/p&gt;
 
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;db&lt;/code&gt;, Options that affect the Db instance returned by the MongoClient.connect method.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;replSet&lt;/code&gt;, Options that modify the Replicaset topology connection behavior. &lt;strong&gt;This is a required parameter when using the 2.0 driver&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;mongos&lt;/code&gt;, Options that modify the Mongos topology connection behavior.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;server&lt;/code&gt;, Options that modify the Server topology connection behavior.&lt;/li&gt;
-&lt;/ul&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;db&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Options that affect the Db instance returned by the MongoClient.connect method.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;replSet&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Options that modify the Replicaset topology connection behavior. &lt;strong&gt;This is a required parameter when using the 2.0 driver&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;mongos&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Options that modify the Mongos topology connection behavior.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;server&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Options that modify the Server topology connection behavior.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 
 &lt;p&gt;A simple example connecting to a single server setting all returned queries to be raw BSON buffers and adjusting the poolSize to be 10 connections for this connection.&lt;/p&gt;
 
@@ -1140,24 +1909,91 @@ MongoClient.connect(url, {
 
 &lt;h2 id=&#34;data-base-level-options&#34;&gt;Data base level options&lt;/h2&gt;
 
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;w&lt;/code&gt;, {Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;} the write concern for the operation where &amp;lt; 1 is no acknowledgment of write and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;wtimeout&lt;/code&gt;, {Number, 0} set the timeout for waiting for write concern to finish (combines with w option)&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;fsync&lt;/code&gt;, (Boolean, default:false) write waits for fsync before returning&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;j&lt;/code&gt;, (Boolean, default:false) write waits for journal sync before returning&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;readPreference&lt;/code&gt; {String}, the preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;readPreferenceTags&lt;/code&gt; {Object, default:null}, the tags object {&amp;lsquo;loc&amp;rsquo;:&amp;lsquo;ny&amp;rsquo;} used with the readPreference.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;native_parser&lt;/code&gt; {Boolean, default:false}, use c++ bson parser.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;forceServerObjectId&lt;/code&gt; {Boolean, default:false}, force server to create _id fields instead of client.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;pkFactory&lt;/code&gt; {Object}, object overriding the basic ObjectID primary key generation.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;serializeFunctions&lt;/code&gt; {Boolean, default:false}, serialize functions.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;raw&lt;/code&gt; {Boolean, default:false}, perform operations using raw bson buffers.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;retryMiliSeconds&lt;/code&gt; {Number, default:5000}, number of milliseconds between retries.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;numberOfRetries&lt;/code&gt; {Number, default:5}, number of retries off connection.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;bufferMaxEntries&lt;/code&gt; {Number, default: -1}, sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited.&lt;/li&gt;
-&lt;/ul&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
 
-&lt;p&gt;If you are connecting to a MongoDB replicaset, you pass the parameters using the &lt;code&gt;mongos&lt;/code&gt; options field.&lt;/p&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;w&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number/String, &amp;gt; -1 || &amp;lsquo;majority&amp;rsquo;}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;the write concern for the operation where &amp;lt; 1 is no acknowledgment of write and w &amp;gt;= 1 or w = &amp;lsquo;majority&amp;rsquo; acknowledges the write&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;wtimeout&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;set the timeout for waiting for write concern to finish (combines with w option)&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;fsync&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:false)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;write waits for fsync before returning&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;j&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;(Boolean, default:false)&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;write waits for journal sync before returning&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;readPreference&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{String}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;the preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;readPreferenceTags&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Object, default:null}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;the tags object {&amp;lsquo;loc&amp;rsquo;:&amp;lsquo;ny&amp;rsquo;} used with the readPreference.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;native_parser&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean, default:false}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;use c++ bson parser.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;forceServerObjectId&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean, default:false}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;force server to create _id fields instead of client.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;pkFactory&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Object}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;object overriding the basic ObjectID primary key generation.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;serializeFunctions&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean, default:false}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;serialize functions.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;raw&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean, default:false}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;perform operations using raw bson buffers.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;bufferMaxEntries&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default: -1}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;If you are connecting to a MongoDB replicaset, you pass the parameters using the &lt;code&gt;replset&lt;/code&gt; options field.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
   f = require(&#39;util&#39;).format,
@@ -1175,20 +2011,89 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
 
 &lt;h2 id=&#34;individual-server-level-options&#34;&gt;Individual Server Level Options&lt;/h2&gt;
 
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;poolSize&lt;/code&gt;, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ssl&lt;/code&gt;, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslValidate&lt;/code&gt;, {Boolean, default: true} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslCA&lt;/code&gt;, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslCert&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslKey&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslPass&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;autoReconnect&lt;/code&gt;, {Boolean, default: true} Reconnect on error.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;socketOptions.noDelay&lt;/code&gt;, {Boolean, default: true} TCP Socket NoDelay option.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;socketOptions.keepAlive&lt;/code&gt;, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;socketOptions.connectTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Connection timeout setting.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;socketOptions.socketTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Socket timeout setting.&lt;/li&gt;
-&lt;/ul&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;poolSize&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default: 5}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;ssl&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean, default: false}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Use ssl connection (needs to have a mongod server with ssl support).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslValidate&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean, default: true}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslCA&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Buffer[]|string[], default: null}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslCert&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Buffer|string, default: null}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslKey&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Buffer|string, default: null}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslPass&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Buffer|string, default: null}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;autoReconnect&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean, default: true}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Reconnect on error.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;socketOptions.noDelay&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean, default: true}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;TCP Socket NoDelay option.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;socketOptions.keepAlive&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default: 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;The number of milliseconds to wait before initiating keepAlive on the TCP socket.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;socketOptions.connectTimeoutMS&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default: 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;TCP Connection timeout setting.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;socketOptions.socketTimeoutMS&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default: 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;TCP Socket timeout setting.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 
 &lt;p&gt;If you are connecting to a single MongoDB instance you pass the parameters using the &lt;code&gt;server&lt;/code&gt; options field.&lt;/p&gt;
 
@@ -1209,24 +2114,113 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
 
 &lt;h2 id=&#34;replicaset-level-options&#34;&gt;Replicaset Level Options&lt;/h2&gt;
 
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;ha&lt;/code&gt; {Boolean, default:true}, turn on high availability.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;haInterval&lt;/code&gt; {Number, default:5000}, time between each replicaset status check.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;replicaSet&lt;/code&gt; {String}, the name of the replicaset to connect to. &lt;strong&gt;This is a required parameter when using the 2.0 driver&lt;/strong&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;secondaryAcceptableLatencyMS&lt;/code&gt; {Number, default:15}, sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;connectWithNoPrimary&lt;/code&gt; {Boolean, default:false}, Sets if the driver should connect even if no primary is available.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;poolSize&lt;/code&gt;, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ssl&lt;/code&gt;, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslValidate&lt;/code&gt;, {Boolean, default: true} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslCA&lt;/code&gt;, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslCert&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslKey&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslPass&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;socketOptions.noDelay&lt;/code&gt;, {Boolean, default: true} TCP Socket NoDelay option.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;socketOptions.keepAlive&lt;/code&gt;, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;socketOptions.connectTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Connection timeout setting.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;socketOptions.socketTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Socket timeout setting.&lt;/li&gt;
-&lt;/ul&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;ha&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean, default:true}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Controls if the replicaset monitoring runs or not.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;haInterval&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default:5000}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;The number of milliseconds between each ping of the replicaset members. The replicaset monitoring process, is the process monitoring the replicaset, detecting new members and reconnecting to existing members.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;replicaSet&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{String}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;the name of the replicaset to connect to. &lt;strong&gt;This is a required parameter when using the 2.0 driver&lt;/strong&gt;&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;secondaryAcceptableLatencyMS&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default:15}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;connectWithNoPrimary&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean, default:false}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Sets if the driver should connect even if no primary is available.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;poolSize&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default: 5}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;ssl&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean, default: false}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Use ssl connection (needs to have a mongod server with ssl support).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslValidate&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean, default: true}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslCA&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Buffer[]|string[], default: null}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslCert&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Buffer|string, default: null}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslKey&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Buffer|string, default: null}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslPass&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Buffer|string, default: null}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;socketOptions.noDelay&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean, default: true}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;TCP Socket NoDelay option.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;socketOptions.keepAlive&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default: 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;The number of milliseconds to wait before initiating keepAlive on the TCP socket.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;socketOptions.connectTimeoutMS&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default: 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;TCP Connection timeout setting.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;socketOptions.socketTimeoutMS&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default: 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;TCP Socket timeout setting.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 
 &lt;p&gt;If you are connecting to a MongoDB replicaset, you pass the parameters using the &lt;code&gt;replset&lt;/code&gt; options field.&lt;/p&gt;
 
@@ -1247,22 +2241,101 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
 
 &lt;h2 id=&#34;mongos-proxy-level-options&#34;&gt;Mongos Proxy Level Options&lt;/h2&gt;
 
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;ha&lt;/code&gt; {Boolean, default:true}, turn on high availability.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;haInterval&lt;/code&gt; {Number, default:5000}, time between each replicaset status check.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;secondaryAcceptableLatencyMS&lt;/code&gt; {Number, default:15}, sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;poolSize&lt;/code&gt;, {Number, default: 5} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ssl&lt;/code&gt;, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslValidate&lt;/code&gt;, {Boolean, default: true} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslCA&lt;/code&gt;, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslCert&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslKey&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslPass&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;socketOptions.noDelay&lt;/code&gt;, {Boolean, default: true} TCP Socket NoDelay option.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;socketOptions.keepAlive&lt;/code&gt;, {Number, default: 0} TCP KeepAlive on the socket with a X ms delay before start.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;socketOptions.connectTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Connection timeout setting.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;socketOptions.socketTimeoutMS&lt;/code&gt;, {Number, default: 0} TCP Socket timeout setting.&lt;/li&gt;
-&lt;/ul&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;ha&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean, default:true}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;turn on high availability.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;haInterval&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default:5000}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;time between each replicaset status check.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;secondaryAcceptableLatencyMS&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default:15}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;poolSize&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default: 5}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;ssl&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean, default: false}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Use ssl connection (needs to have a mongod server with ssl support).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslValidate&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean, default: true}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslCA&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Buffer[]|string[], default: null}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslCert&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Buffer|string, default: null}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslKey&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Buffer|string, default: null}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslPass&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Buffer|string, default: null}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;socketOptions.noDelay&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean, default: true}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;TCP Socket NoDelay option.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;socketOptions.keepAlive&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default: 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;The number of milliseconds to wait before initiating keepAlive on the TCP socket.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;socketOptions.connectTimeoutMS&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default: 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;TCP Connection timeout setting.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;socketOptions.socketTimeoutMS&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default: 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;TCP Socket timeout setting.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 
 &lt;p&gt;If you are connecting to a MongoDB replicaset, you pass the parameters using the &lt;code&gt;mongos&lt;/code&gt; options field.&lt;/p&gt;
 
@@ -1280,6 +2353,183 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
 });
 
 &lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>ECMAScript 6</title>
+      <link>/node-mongodb-native/2.0/reference/ecmascript6/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/reference/ecmascript6/</guid>
+      <description>
+
+&lt;h1 id=&#34;ecmascript-6&#34;&gt;ECMAScript 6&lt;/h1&gt;
+
+&lt;p&gt;ECMAScript 6 or JavaScript 6 as it&amp;rsquo;s more commonly known is the new future of the Javascript language. It introduces fundamental changes in JavaScript while maintaining backward compatibility with ECMAScript 5.&lt;/p&gt;
+
+&lt;p&gt;The MongoDB Node.js driver embraces the new JavaScript version to provide the end user with much improved functionality. We do this primarily by exposing Promises for all &lt;code&gt;async&lt;/code&gt; methods without breaking backward compatibility with existing code using the driver.&lt;/p&gt;
+
+&lt;p&gt;This section exposes how to use the MongoDB Node.js driver with ECMAScript 6, leveraging all the productivity gains you get from the new Generators.&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
+&lt;p&gt;For more information about ECMAScript 6 see the &lt;a href=&#34;http://es6-features.org/&#34;&gt;ECMAScript 6 features&lt;/a&gt;.&lt;/p&gt;
+
+&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/ecmascript6/connecting/&#34;&gt;Connecting&lt;/a&gt;: how to connect leveraging ECMASdcript 6.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/ecmascript6/crud/&#34;&gt;CRUD&lt;/a&gt;: perform CRUD operations leveraging ECMAScript 6.&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Frequently Asked Questions</title>
+      <link>/node-mongodb-native/2.0/reference/faq/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/reference/faq/</guid>
+      <description>
+
+&lt;h1 id=&#34;what-is-the-difference-between-connecttimeoutms-sockettimeoutms-and-maxtimems&#34;&gt;What is the difference between connectTimeoutMS, socketTimeoutMS and maxTimeMS ?&lt;/h1&gt;
+
+&lt;p&gt;A lof of people run into a similar issue wich is what is the difference between &lt;code&gt;connectTimeoutMS&lt;/code&gt;, &lt;code&gt;socketTimeoutMS&lt;/code&gt; and &lt;code&gt;maxTimeMS&lt;/code&gt; and what values should be used for the different ones. Let&amp;rsquo;s first explain each setting individually setting before discussing the values they should be set to.&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Setting&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Default Value MongoClient.connect&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;connectTimeoutMS&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;30000&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;The connectTimeoutMS sets the number of milliseconds a socket will stay inactive before closing during the connection phase of the driver. That is to say when the application initiates a connection or when a Replicaset conntects to new members or re-connect to new members. A value of &lt;code&gt;10000&lt;/code&gt; milliseconds would mean the driver would wait up to 10 seconds for a response from a MongoDB server.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;socketTimeoutMS&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;30000&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;The socketTimeoutMS sets the number of milliseconds a socket will stay inactive after the driver has successfully connected before closing. That is to say that if the value was set to &lt;code&gt;30000&lt;/code&gt; milliseconds the socket would close if there was no activity during a 30 seconds window.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;maxTimeMS&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;N/A&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;The maxTimeMS setting specifies how long MongoDB should run an operation before cancelling it. If you set the the maxTimeMS to &lt;code&gt;10000&lt;/code&gt; milliseconds, any operation that ran over that limit would return an timeout error&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;p&gt;Now let&amp;rsquo;s look at how the different settings affect your experience of using the driver using some example scenarios and what resonable values might be for the settings outlined.&lt;/p&gt;
+
+&lt;h4 id=&#34;fail-fast-during-connection&#34;&gt;Fail fast during connection&lt;/h4&gt;
+
+&lt;p&gt;We want to ensure that the driver does not hang during the connection phase or spend an unnecessarily long time attempting to connect to Replicaset members who are not reachable.&lt;/p&gt;
+
+&lt;p&gt;As a general rule you need to ensure that the &lt;code&gt;connectTimeoutMS&lt;/code&gt; setting is not lower than the largest network latency you have to a member of the set. Say one of the &lt;code&gt;secondary&lt;/code&gt; members is on the other side of the planet and has a latency of &lt;code&gt;10000&lt;/code&gt; milliseconds setting the &lt;code&gt;connectTimeoutMS&lt;/code&gt; to anything lower will ensure the driver can never correctly connect to that member.&lt;/p&gt;
+
+&lt;h3 id=&#34;sockettimeoutms-as-a-way-to-abort-operations&#34;&gt;socketTimeoutMS as a way to abort operations&lt;/h3&gt;
+
+&lt;p&gt;One of the main ways people use socketTimeoutMS is to abort operations. This is in general a very bad idea. And there are a couple of reasons.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Closing the socket, will force a reconnect of the connection pool of the driver and introduce latency to any other operations queued up. Chronically slow operations will thus cause a reconnect storm impacting throughput and performance.&lt;/li&gt;
+&lt;li&gt;Closing the socket does not terminate the operation, it will still be running on MongoDB. This could cause data inconsistencies if your application retries the operation on failure for example.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;That said the there is a very important usage for &lt;code&gt;socketTimeoutMS&lt;/code&gt;. If the MongoDB process dies or a misconfigured &lt;code&gt;firewall&lt;/code&gt; closes socket connections without sending a &lt;code&gt;FIN&lt;/code&gt; packet dropping all subsequent packets on the floor there is no way for the driver to detect if the connection has died. In this case the socketTimeoutMS is essential to ensure the sockets are closed correctly.&lt;/p&gt;
+
+&lt;p&gt;A general rule of thumb is to set &lt;code&gt;socketTimeoutMS&lt;/code&gt; to &lt;code&gt;2-3x&lt;/code&gt; the time of the slowest operation run through the driver.&lt;/p&gt;
+
+&lt;h3 id=&#34;sockettimeoutms-and-big-connection-pools&#34;&gt;socketTimeoutMS and big connection pools&lt;/h3&gt;
+
+&lt;p&gt;One of the gotchas around socketTimeoutMS and a big pool seems to be experienced by a lot of people. Say you are performing a backend batch operation and storing the data in MongoDB. You &lt;code&gt;pool&lt;/code&gt; size if 5 sockets and you have set &lt;code&gt;socketTimeoutMS&lt;/code&gt; to &lt;code&gt;5000&lt;/code&gt; milliseconds. You have an operation happening on average every &lt;code&gt;3000&lt;/code&gt; milliseconds. You still get constant reconnects. Why ?&lt;/p&gt;
+
+&lt;p&gt;Well each socket will timeout after &lt;code&gt;5000&lt;/code&gt; milliseconds. That means that all sockets must be exercised during that &lt;code&gt;5000&lt;/code&gt; milliseconds period to avoid them closing. One message every &lt;code&gt;3000&lt;/code&gt; milliseconds is not enough to keep the sockets active, meaning several of the sockets will timeout after &lt;code&gt;5000&lt;/code&gt; milliseconds.&lt;/p&gt;
+
+&lt;p&gt;In this case you should reduce the pool size to &lt;code&gt;1&lt;/code&gt; to get the desired effect.&lt;/p&gt;
+
+&lt;h3 id=&#34;the-special-meaning-of-0&#34;&gt;The special meaning of 0&lt;/h3&gt;
+
+&lt;p&gt;Setting &lt;code&gt;connectTimeoutMS&lt;/code&gt; and &lt;code&gt;socketTimeoutMS&lt;/code&gt; to the value &lt;code&gt;0&lt;/code&gt; has a special meaning. On the face of it, it means never timeout. However this is a truth with some modifications. Setting it to &lt;code&gt;0&lt;/code&gt; actually means apply the operating system default socket timeout value.&lt;/p&gt;
+
+&lt;h3 id=&#34;maxtimems-is-the-option-you-are-looking-for&#34;&gt;maxTimeMS is the option you are looking for&lt;/h3&gt;
+
+&lt;p&gt;Most people try to set a low &lt;code&gt;socketTimeoutMS&lt;/code&gt; value to abort server operations. As we have proved above this does not work. To work correctly you want to use the &lt;code&gt;maxTimeMS&lt;/code&gt; setting on server operations. This will make MongoDB itself abort the operation if it runs for more than &lt;code&gt;maxTimeMS&lt;/code&gt; milliseconds. A simple example is below performing a &lt;code&gt;find&lt;/code&gt; operation.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;// Execute a find command
+col.find({&amp;quot;$where&amp;quot;: &amp;quot;sleep(100) || true&amp;quot;})
+  .maxTimeMS(50)
+  .count(function(err, count) {
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;what-does-the-keepalive-setting-do&#34;&gt;What does the keepAlive setting do ?&lt;/h3&gt;
+
+&lt;p&gt;Keep alive is a setting on the sockets available from Node.js that in theory will keep a socket alive by sending probes every once in a while to MongoDB keeping the connection alive.&lt;/p&gt;
+
+&lt;p&gt;However this only works if the operating system supports &lt;code&gt;SO_KEEPALIVE&lt;/code&gt; and might still not solve the issue of firewalls as they might still ignore or drop these packets meaning it has no effect.&lt;/p&gt;
+
+&lt;h3 id=&#34;on-misconfigured-firewalls&#34;&gt;On misconfigured firewalls&lt;/h3&gt;
+
+&lt;p&gt;Internal firewalls in between applications servers and MongoDB are in many cases misconfigured, being to aggressive in their culling of sockets connections. Many a problem have been diagnosed to a misconfiguration in a firewall between a DMC and internal MongoDB databases. If you are experiencing weird behavior it might be wise to investigate the settings on said firewall. Things to check for are.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;The firewall should send a FIN packet when closing a socket allowing the driver to detect the socket as closed.&lt;/li&gt;
+&lt;li&gt;The firewall should allow keepAlive probes to allow for persistent connections.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h1 id=&#34;i-m-getting-econnreset-when-calling-mongoclient-connect&#34;&gt;I&amp;rsquo;m getting ECONNRESET when calling MongoClient.connect&lt;/h1&gt;
+
+&lt;p&gt;You might have decided to use a big connection pool with your node project.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;MongoClient.connect(&#39;mongodb://localhost:27017/test?maxPoolSize=5000&#39;,
+  function(err, db) {
+    // connection
+  });
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;When executing the operation you receive an error containg the &lt;code&gt;ECONNRESET&lt;/code&gt; message. You have run into the file descriptor limit for your node.js process.&lt;/p&gt;
+
+&lt;p&gt;In most operating systems each socket connection is associated with a file descriptor. Many operating systems have a limit on how many such file descriptors can be used by a single process.&lt;/p&gt;
+
+&lt;p&gt;For the example above let&amp;rsquo;s assume the limit of file descriptors for each process is &lt;code&gt;1000&lt;/code&gt;. Once the driver attempts to open it&amp;rsquo;s &lt;code&gt;1001&lt;/code&gt; socket the operating system returns an error as the process has exceeded the maximum file descriptors allowed for a single process.&lt;/p&gt;
+
+&lt;p&gt;The way to fix this issue is to increase the number of file descriptors for the Node.js process. On OSX and Linux you do this using the &lt;code&gt;ulimit&lt;/code&gt; method.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;ulimit -n 6000
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The command above will set the maximum number of file descriptors for the process to &lt;code&gt;6000&lt;/code&gt; descriptors allowing us to correctly connect with a pool size of &lt;code&gt;5000&lt;/code&gt; sockets.&lt;/p&gt;
+
+&lt;h1 id=&#34;how-can-i-avoid-a-very-slow-operation-delaying-other-operations&#34;&gt;How can I avoid a very slow operation delaying other operations ?&lt;/h1&gt;
+
+&lt;p&gt;You have an operation that takes a fair bit of time to execute. As you execute them you find that other fast operations are affected due to the round-robin nature of the driver pool in the end leaving all the fast operations trapped behind slow executing operations.&lt;/p&gt;
+
+&lt;p&gt;You have run into the &lt;code&gt;Slow Train&lt;/code&gt; problem. It&amp;rsquo;s tied to the fact that although the driver is Async, MongoDB is not. MongoDB as of 3.2 uses a single execution thread per socket. This means that it will only execute a single operation on a socket at any given point in time. Any operations sent to that socket will have to wait until the current operation is finished. This causes a slow train effect.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;Socket 1 &amp;lt;- [S, F, F, F]
+Socket 2 &amp;lt;- [S, F, F, F]
+...
+Socket N &amp;lt;- [S, F, F, F]
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Unfortunately until MongoDB starts multiplexing threads on sockets or becomes an asynchronous there is only one reasonable strategy to avoid this problem.&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
+&lt;p&gt;Create a separate connection pool for the slow executing operations, thus isolating the slow operations from the fast operations.&lt;/p&gt;
+
+&lt;/div&gt;
+&lt;/p&gt;
 </description>
     </item>
     
@@ -1760,7 +3010,7 @@ listener.on(&#39;failed&#39;, function(event) {
 
 &lt;h1 id=&#34;ssl&#34;&gt;SSL&lt;/h1&gt;
 
-&lt;p&gt;The Node.js driver supports SSL connections to MongoDB when using the Enterprise edition off MongoDB or the open source edition with SSL support compiled in.&lt;/p&gt;
+&lt;p&gt;The Node.js driver supports SSL connections to MongoDB when using the Enterprise edition of MongoDB or the open source edition with SSL support compiled in.&lt;/p&gt;
 
 &lt;h2 id=&#34;no-validation-of-certificate-chain&#34;&gt;No validation of certificate chain&lt;/h2&gt;
 
@@ -1857,14 +3107,53 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test?authMechanism=%s&amp;a
 
 &lt;h3 id=&#34;individual-server-level-options&#34;&gt;Individual Server Level Options&lt;/h3&gt;
 
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;ssl&lt;/code&gt;, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslValidate&lt;/code&gt;, {Boolean, default: true} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslCA&lt;/code&gt;, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslCert&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslKey&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslPass&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;/ul&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;ssl&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean, default: false}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslValidate&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean, default: true}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslCA&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Buffer[]|string[], default: null}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslCert&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Buffer|string, default: null}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslKey&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Buffer|string, default: null}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslPass&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Buffer|string, default: null}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 
 &lt;p&gt;If you are connecting to a single MongoDB instance you pass the parameters using the &lt;code&gt;server&lt;/code&gt; options field.&lt;/p&gt;
 
@@ -1885,14 +3174,53 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
 
 &lt;h3 id=&#34;replicaset-level-options&#34;&gt;Replicaset Level Options&lt;/h3&gt;
 
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;ssl&lt;/code&gt;, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslValidate&lt;/code&gt;, {Boolean, default: true} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslCA&lt;/code&gt;, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslCert&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslKey&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslPass&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;/ul&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;ssl&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean, default: false}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslValidate&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean, default: true}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslCA&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Buffer[]|string[], default: null}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslCert&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Buffer|string, default: null}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslKey&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Buffer|string, default: null}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslPass&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Buffer|string, default: null}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 
 &lt;p&gt;If you are connecting to a MongoDB replicaset, you pass the parameters using the &lt;code&gt;replset&lt;/code&gt; options field.&lt;/p&gt;
 
@@ -1913,14 +3241,53 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
 
 &lt;h3 id=&#34;mongos-proxy-level-options&#34;&gt;Mongos Proxy Level Options&lt;/h3&gt;
 
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;ssl&lt;/code&gt;, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslValidate&lt;/code&gt;, {Boolean, default: true} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslCA&lt;/code&gt;, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslCert&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslKey&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;sslPass&lt;/code&gt;, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/li&gt;
-&lt;/ul&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Parameter&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;ssl&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean, default: false}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslValidate&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean, default: true}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslCA&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Buffer[]|string[], default: null}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslCert&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Buffer|string, default: null}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslKey&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Buffer|string, default: null}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslPass&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Buffer|string, default: null}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 
 &lt;p&gt;If you are connecting to a MongoDB replicaset, you pass the parameters using the &lt;code&gt;mongos&lt;/code&gt; options field.&lt;/p&gt;
 
@@ -2092,6 +3459,7 @@ MongoClient.connect(url, function(err, db) {
 &lt;ul&gt;
 &lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/connecting/&#34;&gt;Connecting&lt;/a&gt;: Documentation of the driver&amp;rsquo;s support for connecting to MongoDB servers&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/crud/&#34;&gt;CRUD&lt;/a&gt;: Documentation of the driver&amp;rsquo;s support for CRUD operations&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/ecmascript6/&#34;&gt;ECMAScript 6&lt;/a&gt;: Using the driver with Javascript 6.&lt;/li&gt;
 &lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/management/&#34;&gt;Management&lt;/a&gt;: Documentation of the driver&amp;rsquo;s support for logging and monitoring of its
 internal state&lt;/li&gt;
 &lt;/ul&gt;

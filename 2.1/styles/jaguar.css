@@ -27,6 +27,7 @@ li {
   width: 250px;
   height: 100%;
   background-color: #1a1a1a;
+  position: fixed;
 }
 .navigation .applicationName {
   margin: 0;
@@ -99,6 +100,9 @@ li {
   display: none;
 }
 .main {
+  position: relative;
+  left: 250px;
+  width: calc(100% - 250px);
   padding: 20px 20px;
 }
 .main .page-title {

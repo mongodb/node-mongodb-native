@@ -151,7 +151,7 @@ node-gyp rebuild
 
 &lt;h1 id=&#34;quickstart&#34;&gt;QuickStart&lt;/h1&gt;
 
-&lt;p&gt;The quick start guide will show you how to set up a simple application using node.js and MongoDB. It scope is only how to set up the driver and perform the simple crud operations. For more inn depth coverage we encourage reading the tutorials.&lt;/p&gt;
+&lt;p&gt;The quick start guide will show you how to set up a simple application using node.js and MongoDB. Its scope is only how to set up the driver and perform the simple crud operations. For more in depth coverage we encourage reading the tutorials.&lt;/p&gt;
 
 &lt;h2 id=&#34;installing-mongodb-node-js-driver-using-npm&#34;&gt;Installing MongoDB Node.js driver using NPM&lt;/h2&gt;
 
