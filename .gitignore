@@ -21,6 +21,7 @@ public/
 test_boot/
 t.js
 .DS_Store
+test/benchmarks/performance-data
 
 # Directory for dbs
 db
