@@ -2262,6 +2262,18 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
 &lt;/tr&gt;
 
 &lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;checkServerIdentity&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;|Function, default: true}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
 &lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslCA&lt;/code&gt;&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;{Buffer[]|string[], default: null}&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
@@ -2411,6 +2423,18 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
 &lt;/tr&gt;
 
 &lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;checkServerIdentity&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;|Function, default: true}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
 &lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslCA&lt;/code&gt;&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;{Buffer[]|string[], default: null}&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
@@ -2539,6 +2563,18 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
 &lt;td align=&#34;left&#34;&gt;&lt;code&gt;sslValidate&lt;/code&gt;&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;{Boolean, default: true}&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;code&gt;checkServerIdentity&lt;/code&gt;&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;|Function, default: true}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
@@ -3314,7 +3350,29 @@ MongoClient.connect(&amp;quot;mongodb://localhost:27017/test?ssl=true&amp;quot;,
 }, function(err, db) {
   db.close();
 });
+&lt;/code&gt;&lt;/pre&gt;
 
+&lt;h2 id=&#34;driver-should-ignore-host-name-validation&#34;&gt;Driver should ignore host name validation&lt;/h2&gt;
+
+&lt;p&gt;We want to validate the certificate but ignore the host name validation aspect. We can do so by setting the option &lt;code&gt;checkServerIdentity&lt;/code&gt; to false.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  f = require(&#39;util&#39;).format,
+  fs = require(&#39;fs&#39;);
+
+// Read the certificate authority
+var ca = [fs.readFileSync(__dirname + &amp;quot;/ssl/ca.pem&amp;quot;)];
+
+// Connect validating the returned certificates from the server
+MongoClient.connect(&amp;quot;mongodb://localhost:27017/test?ssl=true&amp;quot;, {
+  server: {
+      sslValidate:true
+    , checkServerIdentity:false
+    , sslCA:ca
+  }
+}, function(err, db) {
+  db.close();
+});
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;h2 id=&#34;driver-should-validate-server-certificate-and-present-valid-certificate&#34;&gt;Driver should validate Server certificate and present valid Certificate&lt;/h2&gt;

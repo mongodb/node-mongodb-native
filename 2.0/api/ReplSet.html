@@ -515,6 +515,8 @@
             
                 <li data-name="CommandCursor#setEncoding"><a href="CommandCursor.html#setEncoding">setEncoding</a></li>
             
+                <li data-name="CommandCursor#setReadPreference"><a href="CommandCursor.html#setReadPreference">setReadPreference</a></li>
+            
                 <li data-name="CommandCursor#toArray"><a href="CommandCursor.html#toArray">toArray</a></li>
             
                 <li data-name="CommandCursor#unpipe"><a href="CommandCursor.html#unpipe">unpipe</a></li>
@@ -1702,7 +1704,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line76">line 76</a>
+            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line77">line 77</a>
         </div>
         
     </div>
@@ -2074,6 +2076,45 @@
                     
                 
                 <p>Use ssl connection (needs to have a mongod server with ssl support)</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>checkServerIdentity</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+|
+
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    true
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.</p></td>
         </tr>
 	
 	
@@ -2582,7 +2623,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line471">line 471</a>
+            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line473">line 473</a>
         </div>
         
     </div>
@@ -2666,7 +2707,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line527">line 527</a>
+            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line529">line 529</a>
         </div>
         
     </div>
@@ -2747,7 +2788,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line477">line 477</a>
+            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line479">line 479</a>
         </div>
         
     </div>
@@ -2828,7 +2869,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line534">line 534</a>
+            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line536">line 536</a>
         </div>
         
     </div>
@@ -2909,7 +2950,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line520">line 520</a>
+            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line522">line 522</a>
         </div>
         
     </div>
@@ -2990,7 +3031,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line484">line 484</a>
+            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line486">line 486</a>
         </div>
         
     </div>
@@ -3185,7 +3226,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line504">line 504</a>
+            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line506">line 506</a>
         </div>
         
     </div>
@@ -3334,7 +3375,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line495">line 495</a>
+            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line497">line 497</a>
         </div>
         
     </div>
@@ -3483,7 +3524,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line513">line 513</a>
+            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line515">line 515</a>
         </div>
         
     </div>
@@ -3564,7 +3605,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line548">line 548</a>
+            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line550">line 550</a>
         </div>
         
     </div>
@@ -3645,7 +3686,7 @@ ReplSet instance.
     
         
         <div class="tag-source">
-            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line541">line 541</a>
+            <a href="lib_replset.js.html">lib/replset.js</a>, <a href="lib_replset.js.html#line543">line 543</a>
         </div>
         
     </div>
@@ -3745,7 +3786,7 @@ ReplSet instance.
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Dec 10 2015 21:20:28 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Sun Dec 13 2015 20:57:49 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

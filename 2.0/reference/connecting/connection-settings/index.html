@@ -1561,6 +1561,18 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 </tr>
 
 <tr>
+<td align="left"><code>checkServerIdentity</code></td>
+<td align="left">{Boolean</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">|Function, default: true}</td>
+<td align="left">Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.</td>
+<td align="left"></td>
+</tr>
+
+<tr>
 <td align="left"><code>sslCA</code></td>
 <td align="left">{Buffer[]|string[], default: null}</td>
 <td align="left">Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).</td>
@@ -1694,6 +1706,18 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 </tr>
 
 <tr>
+<td align="left"><code>checkServerIdentity</code></td>
+<td align="left">{Boolean</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">|Function, default: true}</td>
+<td align="left">Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.</td>
+<td align="left"></td>
+</tr>
+
+<tr>
 <td align="left"><code>sslCA</code></td>
 <td align="left">{Buffer[]|string[], default: null}</td>
 <td align="left">Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).</td>
@@ -1806,6 +1830,18 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 <td align="left"><code>sslValidate</code></td>
 <td align="left">{Boolean, default: true}</td>
 <td align="left">Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).</td>
+</tr>
+
+<tr>
+<td align="left"><code>checkServerIdentity</code></td>
+<td align="left">{Boolean</td>
+<td align="left"></td>
+</tr>
+
+<tr>
+<td align="left">|Function, default: true}</td>
+<td align="left">Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.</td>
+<td align="left"></td>
 </tr>
 
 <tr>

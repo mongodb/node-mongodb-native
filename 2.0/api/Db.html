@@ -515,6 +515,8 @@
             
                 <li data-name="CommandCursor#setEncoding"><a href="CommandCursor.html#setEncoding">setEncoding</a></li>
             
+                <li data-name="CommandCursor#setReadPreference"><a href="CommandCursor.html#setReadPreference">setReadPreference</a></li>
+            
                 <li data-name="CommandCursor#toArray"><a href="CommandCursor.html#toArray">toArray</a></li>
             
                 <li data-name="CommandCursor#unpipe"><a href="CommandCursor.html#unpipe">unpipe</a></li>
@@ -2772,7 +2774,7 @@ Db instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1205">line 1205</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1211">line 1211</a>
         </div>
         
     </div>
@@ -3379,7 +3381,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1392">line 1392</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1398">line 1398</a>
         </div>
         
     </div>
@@ -4715,7 +4717,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line827">line 827</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line833">line 833</a>
         </div>
         
     </div>
@@ -6111,7 +6113,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line900">line 900</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line906">line 906</a>
         </div>
         
     </div>
@@ -6918,7 +6920,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1032">line 1032</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1038">line 1038</a>
         </div>
         
     </div>
@@ -7291,7 +7293,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line740">line 740</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line746">line 746</a>
         </div>
         
     </div>
@@ -7554,7 +7556,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line773">line 773</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line779">line 779</a>
         </div>
         
     </div>
@@ -7819,7 +7821,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line974">line 974</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line980">line 980</a>
         </div>
         
     </div>
@@ -8628,7 +8630,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line677">line 677</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line683">line 683</a>
         </div>
         
     </div>
@@ -9245,7 +9247,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line853">line 853</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line859">line 859</a>
         </div>
         
     </div>
@@ -9550,7 +9552,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1490">line 1490</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1496">line 1496</a>
         </div>
         
     </div>
@@ -9855,7 +9857,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line577">line 577</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line578">line 578</a>
         </div>
         
     </div>
@@ -10015,6 +10017,45 @@ Promise if no callback passed
                     
                 
                 <p>The batchSize for the returned command cursor or if pre 2.8 the systems batch collection</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>readPreference</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="ReadPreference.html">ReadPreference</a></span>
+|
+
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</p></td>
         </tr>
 	
 	
@@ -10178,7 +10219,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1440">line 1440</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1446">line 1446</a>
         </div>
         
     </div>
@@ -10683,7 +10724,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1298">line 1298</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1304">line 1304</a>
         </div>
         
     </div>
@@ -11138,7 +11179,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line709">line 709</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line715">line 715</a>
         </div>
         
     </div>
@@ -12001,7 +12042,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line798">line 798</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line804">line 804</a>
         </div>
         
     </div>
@@ -12563,7 +12604,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1663">line 1663</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1669">line 1669</a>
         </div>
         
     </div>
@@ -12645,7 +12686,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1654">line 1654</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1660">line 1660</a>
         </div>
         
     </div>
@@ -12727,7 +12768,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1683">line 1683</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1689">line 1689</a>
         </div>
         
     </div>
@@ -12809,7 +12850,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1710">line 1710</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1716">line 1716</a>
         </div>
         
     </div>
@@ -12895,7 +12936,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1701">line 1701</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1707">line 1707</a>
         </div>
         
     </div>
@@ -12977,7 +13018,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1672">line 1672</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1678">line 1678</a>
         </div>
         
     </div>
@@ -13063,7 +13104,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1692">line 1692</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1698">line 1698</a>
         </div>
         
     </div>
@@ -13164,7 +13205,7 @@ co(function*() {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Dec 10 2015 21:20:28 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Sun Dec 13 2015 20:57:49 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

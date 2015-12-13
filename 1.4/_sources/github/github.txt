@@ -732,7 +732,7 @@ Libraries or Applications for analytics
          * - **Forks**
            - 416
          * - **Watchers**
-           - 3657
+           - 3658
 
 Libraries for the connect middleware
 ------------------------------------
@@ -756,7 +756,7 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/bartt/connect-session-mongo.git
          * - **Forks**
-           - 6
+           - 7
          * - **Watchers**
            - 14
 
@@ -779,9 +779,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 219
+           - 220
          * - **Watchers**
-           - 865
+           - 866
 
 Libraries or applications for continous integration
 ---------------------------------------------------

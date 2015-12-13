@@ -1272,7 +1272,29 @@ MongoClient.connect(&quot;mongodb://localhost:27017/test?ssl=true&quot;, {
 }, function(err, db) {
   db.close();
 });
+</code></pre>
 
+<h2 id="driver-should-ignore-host-name-validation">Driver should ignore host name validation</h2>
+
+<p>We want to validate the certificate but ignore the host name validation aspect. We can do so by setting the option <code>checkServerIdentity</code> to false.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient,
+  f = require('util').format,
+  fs = require('fs');
+
+// Read the certificate authority
+var ca = [fs.readFileSync(__dirname + &quot;/ssl/ca.pem&quot;)];
+
+// Connect validating the returned certificates from the server
+MongoClient.connect(&quot;mongodb://localhost:27017/test?ssl=true&quot;, {
+  server: {
+      sslValidate:true
+    , checkServerIdentity:false
+    , sslCA:ca
+  }
+}, function(err, db) {
+  db.close();
+});
 </code></pre>
 
 <h2 id="driver-should-validate-server-certificate-and-present-valid-certificate">Driver should validate Server certificate and present valid Certificate</h2>
@@ -1584,6 +1606,7 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 <ul>
 <li><a href="#no-validation-of-certificate-chain">No validation of certificate chain</a></li>
 <li><a href="#driver-should-validate-server-certificate">Driver should validate Server certificate</a></li>
+<li><a href="#driver-should-ignore-host-name-validation">Driver should ignore host name validation</a></li>
 <li><a href="#driver-should-validate-server-certificate-and-present-valid-certificate">Driver should validate Server certificate and present valid Certificate</a></li>
 <li><a href="#connecting-using-x509">Connecting using X509</a></li>
 <li><a href="#topology-options-related-to-ssl">Topology Options Related to SSL</a>

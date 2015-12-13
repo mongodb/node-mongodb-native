@@ -515,6 +515,8 @@
             
                 <li data-name="CommandCursor#setEncoding"><a href="CommandCursor.html#setEncoding">setEncoding</a></li>
             
+                <li data-name="CommandCursor#setReadPreference"><a href="CommandCursor.html#setReadPreference">setReadPreference</a></li>
+            
                 <li data-name="CommandCursor#toArray"><a href="CommandCursor.html#toArray">toArray</a></li>
             
                 <li data-name="CommandCursor#unpipe"><a href="CommandCursor.html#unpipe">unpipe</a></li>
@@ -1747,7 +1749,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line69">line 69</a>
+            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line70">line 70</a>
         </div>
         
     </div>
@@ -2015,6 +2017,45 @@
                     
                 
                 <p>Use ssl connection (needs to have a mongod server with ssl support)</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>checkServerIdentity</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">boolean</span>
+|
+
+<span class="param-type">function</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    true
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.</p></td>
         </tr>
 	
 	
@@ -2523,7 +2564,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line413">line 413</a>
+            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line415">line 415</a>
         </div>
         
     </div>
@@ -2607,7 +2648,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line469">line 469</a>
+            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line471">line 471</a>
         </div>
         
     </div>
@@ -2688,7 +2729,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line419">line 419</a>
+            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line421">line 421</a>
         </div>
         
     </div>
@@ -2769,7 +2810,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line476">line 476</a>
+            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line478">line 478</a>
         </div>
         
     </div>
@@ -2850,7 +2891,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line455">line 455</a>
+            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line457">line 457</a>
         </div>
         
     </div>
@@ -2931,7 +2972,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line426">line 426</a>
+            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line428">line 428</a>
         </div>
         
     </div>
@@ -3126,7 +3167,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line446">line 446</a>
+            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line448">line 448</a>
         </div>
         
     </div>
@@ -3275,7 +3316,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line437">line 437</a>
+            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line439">line 439</a>
         </div>
         
     </div>
@@ -3424,7 +3465,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line462">line 462</a>
+            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line464">line 464</a>
         </div>
         
     </div>
@@ -3505,7 +3546,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line490">line 490</a>
+            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line492">line 492</a>
         </div>
         
     </div>
@@ -3586,7 +3627,7 @@ Mongos instance.
     
         
         <div class="tag-source">
-            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line483">line 483</a>
+            <a href="lib_mongos.js.html">lib/mongos.js</a>, <a href="lib_mongos.js.html#line485">line 485</a>
         </div>
         
     </div>
@@ -3686,7 +3727,7 @@ Mongos instance.
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Dec 10 2015 21:20:24 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Sun Dec 13 2015 20:57:45 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>
