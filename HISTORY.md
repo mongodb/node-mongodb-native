@@ -1,3 +1,7 @@
+1.2.28 12-13-2015
+-----------------
+- Backed out Prevent Maximum call stack exceeded by calling all callbacks on nextTick, (Issue #64, https://github.com/iamruinous) as it breaks node 0.10.x support.
+
 1.2.27 12-13-2015
 -----------------
 - Added [options.checkServerIdentity=true] {boolean|function}. Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function, (Issue #29).
