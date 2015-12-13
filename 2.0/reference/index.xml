@@ -2041,14 +2041,8 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
 
 &lt;tr&gt;
 &lt;td align=&#34;left&#34;&gt;&lt;code&gt;checkServerIdentity&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;{Boolean&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;|Function, default: true}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean|Function, default: true}&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
@@ -2186,14 +2180,8 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
 
 &lt;tr&gt;
 &lt;td align=&#34;left&#34;&gt;&lt;code&gt;checkServerIdentity&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;{Boolean&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;|Function, default: true}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean|Function, default: true}&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
@@ -2313,14 +2301,8 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
 
 &lt;tr&gt;
 &lt;td align=&#34;left&#34;&gt;&lt;code&gt;checkServerIdentity&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;{Boolean&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;/td&gt;
-&lt;/tr&gt;
-
-&lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;|Function, default: true}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Boolean|Function, default: true}&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
