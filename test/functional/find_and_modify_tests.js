@@ -55,7 +55,7 @@ exports['should pass through writeConcern to all findAndModify commands at comma
 
             listener.uninstrument();
             db.close();
-            test.done();                
+            test.done();
           });
         });
       });
@@ -116,7 +116,7 @@ exports['should pass through writeConcern to all findAndModify at collection lev
 
             listener.uninstrument();
             db.close();
-            test.done();                
+            test.done();
           });
         });
       });
@@ -153,7 +153,7 @@ exports['should pass through writeConcern to all findAndModify at db level'] = {
       : f('%s?%s', url, 'fsync=true');
 
     // Establish connection to db
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url, {server: {sslValidate: false}}, function(err, db) {
       test.equal(null, err);
 
       var collection = db.collection('findAndModifyTEST');
@@ -182,7 +182,7 @@ exports['should pass through writeConcern to all findAndModify at db level'] = {
 
             listener.uninstrument();
             db.close();
-            test.done();                
+            test.done();
           });
         });
       });
