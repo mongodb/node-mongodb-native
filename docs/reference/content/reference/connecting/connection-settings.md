@@ -182,8 +182,7 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 | `poolSize` | {Number, default: 5} | Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons. |
 | `ssl` | {Boolean, default: false} | Use ssl connection (needs to have a mongod server with ssl support). |
 | `sslValidate` | {Boolean, default: true} | Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher). |
-| `checkServerIdentity` | {Boolean
-\|Function, default: true} | Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function. |
+| `checkServerIdentity` | {Boolean\|Function, default: true} | Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function. |
 | `sslCA` | {Buffer[]\|string[], default: null} | Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher). |
 | `sslCert` | {Buffer\|string, default: null} | String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher). |
 | `sslKey` | {Buffer\|string, default: null} | String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher). |
@@ -224,8 +223,7 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 | `poolSize` | {Number, default: 5} | Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons. |
 | `ssl` | {Boolean, default: false} | Use ssl connection (needs to have a mongod server with ssl support). |
 | `sslValidate` | {Boolean, default: true} | Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher). |
-| `checkServerIdentity` | {Boolean
-\|Function, default: true} | Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function. |
+| `checkServerIdentity` | {Boolean\|Function, default: true} | Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function. |
 | `sslCA` | {Buffer[]\|string[], default: null} | Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher). |
 | `sslCert` | {Buffer\|string, default: null} | String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher). |
 | `sslKey` | {Buffer\|string, default: null} | String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher). |
@@ -263,8 +261,7 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 | `poolSize` | {Number, default: 5} | Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons. |
 | `ssl` | {Boolean, default: false} | Use ssl connection (needs to have a mongod server with ssl support). |
 | `sslValidate` | {Boolean, default: true} | Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher). |
-| `checkServerIdentity` | {Boolean
-\|Function, default: true} | Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function. |
+| `checkServerIdentity` | {Boolean\|Function, default: true} | Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function. |
 | `sslCA` | {Buffer[]\|string[], default: null} | Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher). |
 | `sslCert` | {Buffer\|string, default: null} | String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher). |
 | `sslKey` | {Buffer\|string, default: null} | String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher). |
