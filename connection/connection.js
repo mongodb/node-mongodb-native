@@ -92,7 +92,8 @@ var Connection = function(options) {
   this.passphrase = options.passphrase || null;
   this.ssl = typeof options.ssl == 'boolean' ? options.ssl : false;
   this.rejectUnauthorized = typeof options.rejectUnauthorized == 'boolean' ? options.rejectUnauthorized : true;
-  this.checkServerIdentity = typeof options.checkServerIdentity == 'boolean' ? options.checkServerIdentity : true;
+  this.checkServerIdentity = typeof options.checkServerIdentity == 'boolean'
+    || typeof options.checkServerIdentity == 'function' ? options.checkServerIdentity : true;
 
   // If ssl not enabled
   if(!this.ssl) this.rejectUnauthorized = false;
