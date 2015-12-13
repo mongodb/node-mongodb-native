@@ -1682,39 +1682,6 @@ exports.shouldPerformQueryWithBatchSizeDifferentToStandard = {
   }
 }
 
-// /**
-//  * A simple query with a different batchSize
-//  */
-// exports.shouldQueryCurrentOperation = {
-//   metadata: {
-//     requires: {
-//       topology: ["single", "replicaset"]
-//     }
-//   },
-//
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-//
-//     // Establish connection to db
-//     db.open(function(err, db) {
-//
-//       // Create a collection we want to drop later
-//       db.collection('$cmd.sys.inprog', function(err, collection) {
-//         // Peform a simple find and return all the documents
-//         collection.find({}).toArray(function(err, docs) {
-//           console.log("============================================")
-//           console.dir(err)
-//           console.dir(docs)
-//           test.ok(Array.isArray(docs[0].inprog));
-//           db.close();
-//           test.done();
-//         });
-//       });
-//     });
-//   }
-// }
-
 /**
  * A simple query with negative limit
  */
@@ -2351,7 +2318,6 @@ exports['should execute query using batchSize of 0'] = {
 
           // Ensure correct insertion testing via the cursor and the count function
           collection.find().batchSize(-5).toArray(function(err, documents) {
-            console.dir(err)
             test.equal(null, err);
             test.equal(3, documents.length);
             // Let's close the db

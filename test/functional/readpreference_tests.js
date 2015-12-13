@@ -4,8 +4,8 @@
  * @ignore
  */
 exports['Should correctly apply collection level read Preference to count'] = {
-  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },  
-  
+  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -31,7 +31,7 @@ exports['Should correctly apply collection level read Preference to count'] = {
         db.close();
         test.done();
       });
-    });  
+    });
   }
 }
 
@@ -39,8 +39,8 @@ exports['Should correctly apply collection level read Preference to count'] = {
  * @ignore
  */
 exports['Should correctly apply collection level read Preference to group'] = {
-  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },  
-  
+  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -67,7 +67,7 @@ exports['Should correctly apply collection level read Preference to group'] = {
         db.close();
         test.done();
       });
-    });  
+    });
   }
 }
 
@@ -80,15 +80,15 @@ exports['Should correctly apply collection level read Preference to group'] = {
  * @ignore
  */
 exports['shouldNotAllowUserToClobberGeoNearWithOptions'] = {
-  metadata: { requires: { topology: ['single', 'ssl'] } },  
-  
+  metadata: { requires: { topology: ['single', 'ssl'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1});
 
     // Establish connection to db
     db.open(function(err, db) {
-     
+
       // Fetch the collection
       var collection = db.collection("simple_geo_near_command");
 
@@ -117,8 +117,8 @@ exports['shouldNotAllowUserToClobberGeoNearWithOptions'] = {
  * @ignore
  */
 exports['Should correctly apply collection level read Preference to geoNear'] = {
-  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },  
-  
+  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -145,7 +145,7 @@ exports['Should correctly apply collection level read Preference to geoNear'] = 
         db.close();
         test.done();
       });
-    });  
+    });
   }
 }
 
@@ -153,8 +153,8 @@ exports['Should correctly apply collection level read Preference to geoNear'] = 
  * @ignore
  */
 exports['Should correctly apply collection level read Preference to geoHaystackSearch'] = {
-  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },  
-  
+  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -180,7 +180,7 @@ exports['Should correctly apply collection level read Preference to geoHaystackS
         db.close();
         test.done();
       });
-    });  
+    });
   }
 }
 
@@ -188,8 +188,8 @@ exports['Should correctly apply collection level read Preference to geoHaystackS
  * @ignore
  */
 exports['Should correctly apply collection level read Preference to mapReduce'] = {
-  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },  
-  
+  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -220,7 +220,7 @@ exports['Should correctly apply collection level read Preference to mapReduce'] 
         db.close();
         test.done();
       });
-    });  
+    });
   }
 }
 
@@ -228,8 +228,8 @@ exports['Should correctly apply collection level read Preference to mapReduce'] 
  * @ignore
  */
 exports['Should correctly apply collection level read Preference to mapReduce backward compatibility'] = {
-  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },  
-  
+  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -260,7 +260,7 @@ exports['Should correctly apply collection level read Preference to mapReduce ba
         db.close();
         test.done();
       });
-    });  
+    });
   }
 }
 
@@ -268,8 +268,8 @@ exports['Should correctly apply collection level read Preference to mapReduce ba
  * @ignore
  */
 exports['Should fail due to not using mapreduce inline with read preference'] = {
-  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },  
-  
+  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -286,13 +286,13 @@ exports['Should fail due to not using mapreduce inline with read preference'] = 
 
       try {
         // Peform the map reduce
-        collection.mapReduce(map, reduce, {out: {append: "test"}}, function(err, collection) {});      
+        collection.mapReduce(map, reduce, {out: {append: "test"}}, function(err, collection) {});
         test.fail();
       } catch(err) {
         db.close();
-        test.done();      
+        test.done();
       }
-    });  
+    });
   }
 }
 
@@ -300,8 +300,8 @@ exports['Should fail due to not using mapreduce inline with read preference'] = 
  * @ignore
  */
 exports['Should correctly apply collection level read Preference to aggregate'] = {
-  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },  
-  
+  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -342,7 +342,7 @@ exports['Should correctly apply collection level read Preference to aggregate'] 
         db.close();
         test.done();
       });
-    });  
+    });
   }
 }
 
@@ -350,8 +350,8 @@ exports['Should correctly apply collection level read Preference to aggregate'] 
  * @ignore
  */
 exports['Should correctly apply collection level read Preference to stats'] = {
-  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },  
-  
+  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
@@ -382,7 +382,7 @@ exports['Should correctly apply collection level read Preference to stats'] = {
         db.close();
         test.done();
       });
-    });  
+    });
   }
 }
 
@@ -390,8 +390,8 @@ exports['Should correctly apply collection level read Preference to stats'] = {
  * @ignore
  */
 exports['Should correctly honor the readPreferences at DB and individual command level'] = {
-  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },  
-  
+  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var mongo = configuration.require
