@@ -1,8 +1,9 @@
-1.2.27 12-12-2015
+1.2.27 12-13-2015
 -----------------
 - Added [options.checkServerIdentity=true] {boolean|function}. Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function, (Issue #29).
 - Prevent Maximum call stack exceeded by calling all callbacks on nextTick, (Issue #64, https://github.com/iamruinous).
 - State is not defined in mongos, (Issue #63, https://github.com/flyingfisher).
+- Fixed corner case issue on exhaust cursors on pre 3.0.x MongoDB.
 
 1.2.26 11-23-2015
 -----------------
