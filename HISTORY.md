@@ -1,3 +1,9 @@
+2.1.1 12-13-2015
+----------------
+* Surfaced checkServerIdentity options for MongoClient, Server, ReplSet and Mongos to allow for control of the checkServerIdentity method available in Node.s 0.12.x or higher.
+* Added readPreference support to listCollections and listIndexes helpers.
+* Updated mongodb-core to 1.2.28.
+
 2.1.0 12-06-2015
 ----------------
 * Implements the connection string specification, https://github.com/mongodb/specifications/blob/master/source/connection-string/connection-string-spec.rst.
@@ -10,10 +16,11 @@
 * Added isDestroyed method to server, replset and mongos topologies.
 * Upgraded test suite to run using mongodb-topology-manager.
 
-2.0.51
+2.0.51 12-13-2015
 -----------------
 * Surfaced checkServerIdentity options for MongoClient, Server, ReplSet and Mongos to allow for control of the checkServerIdentity method available in Node.s 0.12.x or higher.
 * Added readPreference support to listCollections and listIndexes helpers.
+* Updated mongodb-core to 1.2.28.
 
 2.0.50 12-06-2015
 -----------------
