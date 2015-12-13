@@ -46,7 +46,30 @@ MongoClient.connect("mongodb://localhost:27017/test?ssl=true", {
 }, function(err, db) {
   db.close();
 });
+```
 
+## Driver should ignore host name validation
+
+We want to validate the certificate but ignore the host name validation aspect. We can do so by setting the option `checkServerIdentity` to false.
+
+```js
+var MongoClient = require('mongodb').MongoClient,
+  f = require('util').format,
+  fs = require('fs');
+
+// Read the certificate authority
+var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
+
+// Connect validating the returned certificates from the server
+MongoClient.connect("mongodb://localhost:27017/test?ssl=true", {
+  server: {
+      sslValidate:true
+    , checkServerIdentity:false
+    , sslCA:ca
+  }
+}, function(err, db) {
+  db.close();
+});
 ```
 
 ## Driver should validate Server certificate and present valid Certificate

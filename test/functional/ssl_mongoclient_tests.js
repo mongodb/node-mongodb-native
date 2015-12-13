@@ -113,6 +113,70 @@ exports.shouldCorrectlyValidateServerCertificate = {
 /**
  * @ignore
  */
+exports['should correctly validate ssl certificate and ignore server certificate host name validation'] = {
+  metadata: { requires: { topology: 'ssl' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var ServerManager = require('mongodb-topology-manager').Server
+      , MongoClient = configuration.require.MongoClient;
+
+    // All inserted docs
+    var docs = [];
+    var errs = [];
+    var insertDocs = [];
+
+    // Did we get checkServerIdentity called
+    var checkServerIdentityCalled = false;
+
+    // Read the ca
+    var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
+
+    // Start server
+    var serverManager = new ServerManager('mongod', {
+        journal:null
+      , sslOnNormalPorts: null
+      , sslPEMKeyFile: __dirname + "/ssl/server.pem"
+      // EnsureUp options
+      , dbpath: path.join(path.resolve('db'), f("data-%d", 27019))
+      , bind_ip: 'server'
+      , port: 27019
+    });
+
+    serverManager.purge().then(function() {
+      // Start the server
+      serverManager.start().then(function() {
+        setTimeout(function() {
+          // Connect and validate the server certificate
+          MongoClient.connect("mongodb://server:27019/test?ssl=true&maxPoolSize=1", {
+            server: {
+                sslValidate:true
+              , checkServerIdentity: function() {
+                checkServerIdentityCalled = true;
+                return undefined;
+              }
+              , sslCA:ca
+            }
+          }, function(err, db) {
+            test.equal(null, err);
+            test.ok(db != null);
+            test.ok(checkServerIdentityCalled);
+
+            db.close();
+
+            serverManager.stop().then(function() {
+              test.done();
+            });
+          });
+        }, 10000);
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
 exports['should fail to validate certificate due to illegal host name'] = {
   metadata: { requires: { topology: 'ssl' } },
 
