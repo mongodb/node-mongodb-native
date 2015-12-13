@@ -2,7 +2,7 @@
 -----------------
 * Surfaced checkServerIdentity options for MongoClient, Server, ReplSet and Mongos to allow for control of the checkServerIdentity method available in Node.s 0.12.x or higher.
 * Added readPreference support to listCollections and listIndexes helpers.
-* Updated mongodb-core to 1.2.27.
+* Updated mongodb-core to 1.2.28.
 
 2.0.50 12-06-2015
 -----------------
