@@ -211,31 +211,6 @@ var Configuration = function(options) {
         return f(url, auth);
       },
 
-      // newTopology: function(options, callback) {
-      //   if(typeof options == 'function') {
-      //     callback = options;
-      //     options = {};
-      //   }
-      //
-      //   callback(null, topology(this, mongo));
-      // },
-      //
-      // newConnection: function(options, callback) {
-      //   if(typeof options == 'function') {
-      //     callback = options;
-      //     options = {};
-      //   }
-      //
-      //   var server = topology(this, mongo);
-      //   // Set up connect
-      //   server.once('connect', function() {
-      //     callback(null, server);
-      //   });
-      //
-      //   // Connect
-      //   server.connect();
-      // },
-
       // Additional parameters needed
       database: db || options.db,
       require: mongo,

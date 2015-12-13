@@ -142,7 +142,7 @@ exports['should not leak listeners'] = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
-    MongoClient.connect(configuration.url(), function(err, db) {
+    MongoClient.connect(configuration.url(), {server: {sslValidate: false}}, function(err, db) {
       for (var i = 0; i < 100; i++) {
         db.db("test");
       }
