@@ -1,3 +1,7 @@
+2.0.52 12-14-2015
+-----------------
+* removed remove from Gridstore.close.
+
 2.0.51 12-13-2015
 -----------------
 * Surfaced checkServerIdentity options for MongoClient, Server, ReplSet and Mongos to allow for control of the checkServerIdentity method available in Node.s 0.12.x or higher.
