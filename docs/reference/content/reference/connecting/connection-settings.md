@@ -192,7 +192,6 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 | `socketOptions.keepAlive` | {Number, default: 0} | The number of milliseconds to wait before initiating keepAlive on the TCP socket. |
 | `socketOptions.connectTimeoutMS` | {Number, default: 0} | TCP Connection timeout setting. |
 | `socketOptions.socketTimeoutMS` | {Number, default: 0} | TCP Socket timeout setting. |
->>>>>>> 2.0
 
 If you are connecting to a single MongoDB instance you pass the parameters using the `server` options field.
 
@@ -233,7 +232,6 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 | `socketOptions.keepAlive` | {Number, default: 0} | The number of milliseconds to wait before initiating keepAlive on the TCP socket. |
 | `socketOptions.connectTimeoutMS` | {Number, default: 0} | TCP Connection timeout setting. |
 | `socketOptions.socketTimeoutMS` | {Number, default: 0} | TCP Socket timeout setting. |
->>>>>>> 2.0
 
 If you are connecting to a MongoDB replicaset, you pass the parameters using the `replset` options field.
 
@@ -272,7 +270,6 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 | `socketOptions.keepAlive` | {Number, default: 0} | The number of milliseconds to wait before initiating keepAlive on the TCP socket. |
 | `socketOptions.connectTimeoutMS` | {Number, default: 0} | TCP Connection timeout setting. |
 | `socketOptions.socketTimeoutMS` | {Number, default: 0} | TCP Socket timeout setting. |
->>>>>>> 2.0
 
 If you are connecting to a MongoDB replicaset, you pass the parameters using the `mongos` options field.
 
