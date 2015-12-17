@@ -1,3 +1,7 @@
+1.2.29 12-17-2015
+-----------------
+- Correctly emit close event when calling destroy on server topology.
+
 1.2.28 12-13-2015
 -----------------
 - Backed out Prevent Maximum call stack exceeded by calling all callbacks on nextTick, (Issue #64, https://github.com/iamruinous) as it breaks node 0.10.x support.
