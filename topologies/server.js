@@ -664,8 +664,11 @@ Server.prototype.connect = function(_options) {
 Server.prototype.destroy = function(emitClose, emitDestroy) {
   var self = this;
   if(self.s.logger.isDebug()) self.s.logger.debug(f('destroy called on server %s', self.name));
+
   // Emit close
-  if(emitClose && self.listeners('close').length > 0) self.emit('close', self);
+  if(emitClose && self.listeners('close').length > 0) {
+    self.emit('close', null, self);
+  }
 
   // Emit destroy event
   if(emitDestroy) self.emit('destroy', self);
