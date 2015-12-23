@@ -98,7 +98,7 @@ exports['Correctly receive the APM events for a listCollections command'] = {
 }
 
 exports['Correctly receive the APM events for a listIndexes command'] = {
-  metadata: { requires: { topology: ['single'], mongodb:">=3.0.0" } },
+  metadata: { requires: { topology: ['replicaset'], mongodb:">=3.0.0" } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
