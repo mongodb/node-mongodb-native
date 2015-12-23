@@ -48,7 +48,7 @@ exports['Correctly receive the APM events for an insert'] = {
 }
 
 exports['Correctly receive the APM events for a listCollections command'] = {
-  metadata: { requires: { topology: ['replicaset'] } },
+  metadata: { requires: { topology: ['replicaset'], mongodb:">=3.0.0" } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -98,7 +98,7 @@ exports['Correctly receive the APM events for a listCollections command'] = {
 }
 
 exports['Correctly receive the APM events for a listIndexes command'] = {
-  metadata: { requires: { topology: ['replicaset'] } },
+  metadata: { requires: { topology: ['single'], mongodb:">=3.0.0" } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -117,13 +117,13 @@ exports['Correctly receive the APM events for a listIndexes command'] = {
         var listener = require('../..').instrument(function(err, instrumentations) {});
 
         listener.on('started', function(event) {
-          if(event.commandName == 'listCollections' || event.commandName == 'find') {
+          if(event.commandName == 'listIndexes' || event.commandName == 'find') {
             started.push(event);
           }
         });
 
         listener.on('succeeded', function(event) {
-          if(event.commandName == 'listCollections' || event.commandName == 'find') {
+          if(event.commandName == 'listIndexes' || event.commandName == 'find') {
             succeeded.push(event);
           }
         });

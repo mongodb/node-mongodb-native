@@ -4,7 +4,7 @@ var format = require('util').format,
   f = require('util').format;
 
 var restartAndDone = function(configuration, test) {
-  configuration.manager.restart().then(function() {
+  configuration.manager.restart(9, {waitMS: 5000}).then(function() {
     test.done();
   });
 }

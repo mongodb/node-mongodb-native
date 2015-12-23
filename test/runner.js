@@ -390,7 +390,7 @@ if(argv.t == 'functional') {
 
   //
   // Execute the final code
-  var executeTestSuite = function() {
+  var executeTestSuite = function(_config) {
     // If we have a test we are filtering by
     if(argv.f) {
       runner.plugin(new FileFilter(argv.f));
@@ -405,12 +405,12 @@ if(argv.t == 'functional') {
 
     // Skip startup
     if(startupOptions.skipStartup) {
-      return runner.run(Configuration(config));
+      return runner.run(Configuration(_config));
     }
 
     // Skip the version download and use local mongod in PATH
     if(argv.l) {
-      return runner.run(Configuration(config));
+      return runner.run(Configuration(_config));
     }
 
     // Kill any running MongoDB processes and
@@ -422,7 +422,7 @@ if(argv.t == 'functional') {
         if(err) return console.error(err) && process.exit(1);
         console.log('Running tests against MongoDB version `%s`', version);
         // Run the configuration
-        runner.run(Configuration(config));
+        runner.run(Configuration(_config));
       });
     });
   }
@@ -491,6 +491,8 @@ if(argv.t == 'functional') {
         , url: "mongodb://%slocalhost:31000/integration_tests?rs_name=rs"
         , writeConcernMax: {w: 'majority', wtimeout: 30000}
         , replicasetName: 'rs'
+        , skipStart: startupOptions.skipStartup
+        , skipTermination: startupOptions.skipShutdown
         , topology: function(host, port, serverOptions) {
             host = host || 'localhost'; port = port || 31000;
             serverOptions = clone(serverOptions);
@@ -506,7 +508,7 @@ if(argv.t == 'functional') {
       }
 
       // Execute test suite
-      executeTestSuite();
+      executeTestSuite(config);
     });
   }
 
@@ -530,7 +532,7 @@ if(argv.t == 'functional') {
       })
     }
 
-    executeTestSuite();
+    executeTestSuite(config);
   }
 
   //
@@ -558,7 +560,7 @@ if(argv.t == 'functional') {
       })
     }
 
-    executeTestSuite();
+    executeTestSuite(config);
   }
 
   //
@@ -579,7 +581,7 @@ if(argv.t == 'functional') {
       })
     }
 
-    executeTestSuite();
+    executeTestSuite(config);
   }
 
   //
@@ -600,7 +602,7 @@ if(argv.t == 'functional') {
       })
     }
 
-    executeTestSuite();
+    executeTestSuite(config);
   }
 
   //
@@ -609,12 +611,14 @@ if(argv.t == 'functional') {
     config = {
         host: 'localhost'
       , port: 27017
+      , skipStart: startupOptions.skipStartup
+      , skipTermination: startupOptions.skipShutdown
       , manager: new ServerManager('mongod', {
         dbpath: path.join(path.resolve('db'), f("data-%d", 27017)),
         setParameter: ['enableTestCommands=1']
       })
     }
 
-    executeTestSuite();
+    executeTestSuite(config);
   }
 }
