@@ -567,7 +567,9 @@ exports['Attempt to change read preference at cursor level after object read leg
               // Try to change the read preference it should not work as the query was executed
               cursor.setReadPreference(ReadPreference.PRIMARY);
               test.ok(false);
-            } catch(err) {}
+            } catch(err) {
+              console.log(err.stack)
+            }
 
             test.equal(ReadPreference.SECONDARY, cursor.readPreference.preference);
           }
