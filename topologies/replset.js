@@ -94,6 +94,8 @@ var bsonInstance = null;
 var ReplSet = function(seedlist, options) {
   var self = this;
   options = options || {};
+  // Clone the options
+  options = cloneOptions(options);
 
   // Validate seedlist
   if(!Array.isArray(seedlist)) throw new MongoError("seedlist must be an array");
@@ -636,6 +638,10 @@ ReplSet.prototype.connect = function(_options) {
     opts.reconnect = false;
     opts.readPreferenceStrategies = self.s.readPreferenceStrategies;
     opts.emitError = true;
+    // Add a reserved connection for monitoring
+    opts.size = opts.size + 1;
+    opts.monitoring = true;
+    // Set up tags if any
     if(self.s.tag) opts.tag = self.s.tag;
     // Share the auth store
     opts.authProviders = self.s.authProviders;
@@ -909,9 +915,45 @@ var setHaTimer = function(self, state) {
   return self.s.haTimer;
 }
 
+var haveAvailableServers = function(state) {
+  if(state.disconnectedServers.length == 0
+    && state.replState.secondaries.length == 0
+    && state.replState.arbiters.length == 0
+    && state.replState.primary == null) return false;
+    return true;
+}
+
 var replicasetInquirer = function(self, state, norepeat) {
   return function() {
     if(state.replState.state == DESTROYED) return
+
+    // We have no connections we need to reseed the disconnected list
+    if(!haveAvailableServers(state)) {
+      // For all entries in the seedlist build a server instance
+      state.disconnectedServers = state.seedlist.map(function(e) {
+        // Clone options
+        var opts = cloneOptions(state.options);
+        // Add host and port
+        opts.host = e.host;
+        opts.port = e.port;
+        opts.reconnect = false;
+        opts.readPreferenceStrategies = state.readPreferenceStrategies;
+        opts.emitError = true;
+        // Add a reserved connection for monitoring
+        opts.size = opts.size + 1;
+        opts.monitoring = true;
+        // Set up tags if any
+        if(state.tag) opts.tag = stage.tag;
+        // Share the auth store
+        opts.authProviders = state.authProviders;
+        // Create a new Server
+        var server = new Server(opts);
+        // Handle the ismaster
+        server.on('ismaster', handleIsmaster(self));
+        return server;
+      });
+    }
+
     // Process already running don't rerun
     if(state.highAvailabilityProcessRunning) return;
     // Started processes
@@ -963,7 +1005,7 @@ var replicasetInquirer = function(self, state, norepeat) {
     state.replState.clean();
 
     // We need to query all servers
-    var servers = state.replState.getAll();
+    var servers = state.replState.getAll({includeArbiters:true});
     var serversLeft = servers.length;
 
     // If no servers and we are not destroyed keep pinging
@@ -999,7 +1041,7 @@ var replicasetInquirer = function(self, state, norepeat) {
         // Get the timeout id
         var timeoutId = timeoutServer(server);
         // Execute ismaster
-        server.command('admin.$cmd', {ismaster:true}, function(err, r) {
+        server.command('admin.$cmd', { ismaster:true },  { monitoring:true }, function(err, r) {
           // Clear out the timeoutServer
           clearTimeout(timeoutId);
 
@@ -1323,6 +1365,9 @@ var connectToServer = function(self, state, host, port, options) {
   // Share the auth store
   opts.authProviders = state.authProviders;
   opts.emitError = true;
+  // Set the size to size + 1 and mark monitoring
+  opts.size = opts.size + 1;
+  opts.monitoring = true;
 
   // Do we have an arbiter set the poolSize to 1
   if(options.arbiter) {

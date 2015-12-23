@@ -269,7 +269,6 @@ var errorHandler = function(self, state) {
     if(state.emitError && self.listeners('error').length > 0) self.emit('error', err, self);
     // If we specified the driver to reconnect perform it
     if(state.reconnect) setTimeout(function() {
-      // state.currentReconnectRetry = state.reconnectTries,
       reconnectServer(self, state)
     }, state.reconnectInterval);
   }
@@ -703,7 +702,6 @@ Server.prototype.isDestroyed = function() {
 var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAll, callback) {
   // Create a query instance
   var query = new Query(self.s.bson, ns, cmd, queryOptions);
-
   // Set slave OK
   query.slaveOk = slaveOk(options.readPreference);
 
@@ -712,7 +710,7 @@ var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAl
     notifyStrategies(self, self.s, 'startOperation', [self, query, new Date()]);
 
   // Get a connection (either passed or from the pool)
-  var connection = options.connection || self.s.pool.get();
+  var connection = options.connection || self.s.pool.get(options);
 
   // Double check if we have a valid connection
   // Checking that the connection exists to avoid an uncaught exception in case there is an issue with the pool
@@ -819,7 +817,9 @@ Server.prototype.command = function(ns, cmd, options, callback) {
   }
 
   // If we have no connection error
-  if(!self.s.pool.isConnected()) return callback(new MongoError(f("no connection available to server %s", self.name)));
+  if(!self.s.pool.isConnected()) {
+    return callback(new MongoError(f("no connection available to server %s", self.name)));
+  }
 
   // Execute on all connections
   var onAll = typeof options.onAll == 'boolean' ? options.onAll : false;
@@ -855,11 +855,12 @@ Server.prototype.command = function(ns, cmd, options, callback) {
   }
 
   // Notify query start to any read Preference strategies
-  if(self.s.readPreferenceStrategies != null)
+  if(self.s.readPreferenceStrategies != null) {
     notifyStrategies(self, self.s, 'startOperation', [self, queries, new Date()]);
+  }
 
   // Get a connection (either passed or from the pool)
-  var connection = options.connection || self.s.pool.get();
+  var connection = options.connection || self.s.pool.get(options);
 
   // Double check if we have a valid connection
   if(!connection.isConnected()) {
