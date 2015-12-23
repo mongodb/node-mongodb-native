@@ -1,6 +1,6 @@
 {
   "name": "mongodb",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "MongoDB legacy driver emulation layer on top of mongodb-core",
   "main": "index.js",
   "repository": {
