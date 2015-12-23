@@ -1,3 +1,9 @@
+2.0.53 12-23-2015
+-----------------
+* Updated mongodb-core to 1.2.30.
+* Pool allocates size + 1 connections when using replicasets, reserving additional pool connection for monitoring exclusively.
+* Fixes bug when all replicaset members are down, that would cause it to fail to reconnect using the originally provided seedlist.
+
 2.0.52 12-14-2015
 -----------------
 * removed remove from Gridstore.close.
