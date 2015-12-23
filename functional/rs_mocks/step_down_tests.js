@@ -7,7 +7,6 @@
 // 3. Step down primary and re-elect new primary before query finishes.
 // 4. No disconnected servers detected (new primary never detected).
 
-
 // Extend the object
 var extend = function(template, fields) {
   var object = {};
@@ -16,21 +15,7 @@ var extend = function(template, fields) {
   }
 
   for(var name in fields) {
-   object[name] = fields[name]; 
-  }
-
-  return object;
-}
-
-// Extend the object
-var extend = function(template, fields) {
-  var object = {};
-  for(var name in template) {
-    object[name] = template[name];
-  }
-
-  for(var name in fields) {
-   object[name] = fields[name]; 
+   object[name] = fields[name];
   }
 
   return object;
@@ -53,7 +38,7 @@ var extend = function(template, fields) {
 //       co = require('co'),
 //       f = require('util').format,
 //       mockupdb = require('../../../mock');
-    
+
 //     // Set info level for debugging
 //     Logger.setLevel('info')
 
@@ -259,7 +244,7 @@ var extend = function(template, fields) {
 
 //       setTimeout(function() {
 //         currentState = currentState + 1;
-  
+
 //         setTimeout(function() {
 //           currentState = currentState + 1;
 //         }, 500);
