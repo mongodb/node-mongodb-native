@@ -70,7 +70,8 @@ Server.prototype.start = function() {
     });
 
     self.on('message', function(message, connection) {
-      self.messages.push(new Request(self, connection, message));
+      var request = new Request(self, connection, message);
+      self.messages.push(request);
     });
 
     self.state = 'running';
@@ -85,7 +86,8 @@ Server.prototype.receive = function() {
       if(self.state == 'destroyed') return reject();
       // If we have a message return it
       if(self.messages.length > 0) {
-        return resolve(self.messages.shift());
+        var message = self.messages.shift();
+        return resolve(message);
       }
 
       setTimeout(waiting, 10);

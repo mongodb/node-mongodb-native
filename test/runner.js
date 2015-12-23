@@ -101,10 +101,14 @@ var Configuration = function(options) {
             // Logger.setLevel('info');
             // Create an instance
             var server = topology(self, mongo);
+            console.log("[get connection to topology]");
+            console.dir(server)
             // Set up connect
             server.once('connect', function() {
+              console.log("[connected to topology]");
               // Drop the database
               server.command(f("%s.$cmd", self.db), {dropDatabase: 1}, function(err, r) {
+                console.log("[dropped database]");
                 server.destroy();
                 callback();
               });
@@ -221,6 +225,7 @@ try {
   testFiles.push('/test/tests/functional/rs_mocks/monitoring_tests.js');
   testFiles.push('/test/tests/functional/rs_mocks/read_preferences_tests.js');
   testFiles.push('/test/tests/functional/rs_mocks/step_down_tests.js');
+  testFiles.push('/test/tests/functional/rs_mocks/all_servers_close_tests.js');
 
   // Mongos Mock Tests
   testFiles.push('/test/tests/functional/mongos_mocks/single_proxy_connection_tests.js');
@@ -301,6 +306,8 @@ if(argv.t == 'functional') {
   var config = {
       host: 'localhost'
     , port: 27017
+    , skipStart: startupOptions.skipStartup
+    , skipTermination: startupOptions.skipShutdown
     , manager: new ServerManager('mongod', {
       dbpath: path.join(path.resolve('db'), f("data-%d", 27017))
     })

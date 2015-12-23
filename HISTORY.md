@@ -1,3 +1,8 @@
+1.2.30 12-23-2015
+-----------------
+- Pool allocates size + 1 connections when using replicasets, reserving additional pool connection for monitoring exclusively.
+- Fixes bug when all replicaset members are down, that would cause it to fail to reconnect using the originally provided seedlist.
+
 1.2.29 12-17-2015
 -----------------
 - Correctly emit close event when calling destroy on server topology.
