@@ -817,3 +817,29 @@ exports['should correctly pass partialIndexes through to createIndexCommand'] = 
     });
   }
 }
+
+/**
+ * @ignore
+ */
+exports['should correctly error out due to driver close'] = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      db.close(function() {
+        db.createCollection('nonexisting', {w:1}, function(err, collection) {
+          test.ok(err != null);
+          db.collection('nonexisting', {strict: true}, function(err, collection) {
+            test.ok(err != null);
+            db.collection('nonexisting', {strict: false}, function(err, collection) {
+              test.ok(err != null);
+              test.done();
+            });
+          });
+        });
+      });
+    });
+  }
+}

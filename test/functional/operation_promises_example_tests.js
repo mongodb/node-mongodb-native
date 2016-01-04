@@ -2731,7 +2731,6 @@ exports.shouldCorrectlyAccessACollectionWithPromises = {
         db.collection('test_correctly_access_collections_with_promise', {strict:true}, function(err, col3) {
           // Create the collection
           db.createCollection('test_correctly_access_collections_with_promise').then(function(err, result) {
-
             // Retry to get the collection, should work as it's now created
             db.collection('test_correctly_access_collections_with_promise', {strict:true}, function(err, col3) {
               db.close();

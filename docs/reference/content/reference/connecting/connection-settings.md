@@ -190,8 +190,8 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 | `autoReconnect` | {Boolean, default: true} | Reconnect on error. |
 | `socketOptions.noDelay` | {Boolean, default: true} | TCP Socket NoDelay option. |
 | `socketOptions.keepAlive` | {Number, default: 0} | The number of milliseconds to wait before initiating keepAlive on the TCP socket. |
-| `socketOptions.connectTimeoutMS` | {Number, default: 0} | TCP Connection timeout setting. |
-| `socketOptions.socketTimeoutMS` | {Number, default: 0} | TCP Socket timeout setting. |
+| `socketOptions.connectTimeoutMS` | {Number, default: 30000} | TCP Connection timeout setting. |
+| `socketOptions.socketTimeoutMS` | {Number, default: 30000} | TCP Socket timeout setting. |
 
 If you are connecting to a single MongoDB instance you pass the parameters using the `server` options field.
 
