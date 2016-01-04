@@ -905,3 +905,67 @@ exports['should correctly execute crud operations using w:0'] = {
     });
   }
 }
+
+exports['should correctly throw error on illegal callback when unordered bulkWrite encounters error'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    process.once("uncaughtException", function(err) {
+      db.close();
+      test.done();
+    })
+
+    var ops = [];
+    // Create a set of operations that go over the 1000 limit causing two messages
+    for(var i = 0; i < 1005; i++) {
+      ops.push({insertOne: {_id: i, a: i}});
+    }
+
+    ops.push({insertOne: {_id: 0, a: i}});
+
+    // Establish connection to db
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      db.collection('t20_1').bulkWrite(ops, {ordered:false, w:1}, function(err, r) {
+        throw err;
+      });
+    });
+  }
+}
+
+exports['should correctly throw error on illegal callback when ordered bulkWrite encounters error'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    process.once("uncaughtException", function(err) {
+      db.close();
+      test.done();
+    })
+
+    var ops = [];
+    // Create a set of operations that go over the 1000 limit causing two messages
+    for(var i = 0; i < 1005; i++) {
+      ops.push({insertOne: {_id: i, a: i}});
+    }
+
+    ops.push({insertOne: {_id: 0, a: i}});
+
+    // Establish connection to db
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      db.collection('t20_1').bulkWrite(ops, {ordered:true, w:1}, function(err, r) {
+        throw err;
+      });
+    });
+  }
+}
