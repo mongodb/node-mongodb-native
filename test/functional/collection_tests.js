@@ -999,3 +999,98 @@ exports['Should correctly list multipleCollections'] = {
     });
   }
 }
+
+/**
+ * @ignore
+ */
+exports['Should correctly list multipleCollections'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, client) {
+      test.equal(null, err);
+
+      var emptyDb = db.db('listCollectionsDb');
+      emptyDb.createCollection('test1', function(err) {
+        test.equal(null, err);
+
+        emptyDb.createCollection('test2', function(err) {
+          test.equal(null, err);
+
+          emptyDb.createCollection('test3', function(err) {
+            test.equal(null, err);
+
+            emptyDb.listCollections().toArray(function(err, collections) {
+              test.equal(null, err);
+              // By name
+              var names = {};
+
+              for(var i = 0; i < collections.length; i++) {
+                names[collections[i].name] = collections[i];
+              }
+
+              test.ok(names['test1'] != null);
+              test.ok(names['test2'] != null);
+              test.ok(names['test3'] != null);
+
+              db.close();
+              test.done();
+            });
+          });
+        });
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['Should correctly handle namespace when using collections method'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, client) {
+      test.equal(null, err);
+
+      var emptyDb = db.db('listCollectionsDb2');
+      emptyDb.createCollection('test1', function(err) {
+        test.equal(null, err);
+
+        emptyDb.createCollection('test.test', function(err) {
+          test.equal(null, err);
+
+          emptyDb.createCollection('test3', function(err) {
+            test.equal(null, err);
+
+            emptyDb.collections(function(err, collections) {
+
+              collections = collections.map(function(collection){
+                return {
+                  "collectionName": collection.collectionName,
+                  "namespace": collection.namespace
+                };
+              })
+
+              var foundCollection = false;
+              collections.forEach(function(x) {
+                if(x.namespace == 'listCollectionsDb2.test.test'
+                  && x.collectionName == 'test.test') {
+                  foundCollection = true;
+                }
+              });
+
+              test.ok(foundCollection);
+              db.close();
+              test.done();
+            });
+          });
+        });
+      });
+    });
+  }
+}
