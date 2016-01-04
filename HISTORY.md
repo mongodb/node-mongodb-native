@@ -1,7 +1,10 @@
-2.0.54 01-04-2016
+2.0.55 01-04-2016
 -----------------
 * Updated mongodb-core to 1.2.31.
 * Allow connection to secondary if primaryPreferred or secondaryPreferred (Issue #70, https://github.com/leichter)
+
+2.0.54 01-04-2016
+-----------------
 
 2.0.53 12-23-2015
 -----------------
