@@ -1393,6 +1393,100 @@ exports.shouldCorrectlyAuthAgainstNormalDbUsingMongoClient = {
   }
 }
 
+/**
+ * @ignore
+ */
+exports['Should correctly reauthenticating against multiple databases'] = {
+  metadata: { requires: { topology: ['auth'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
+      , Server = configuration.require.Server
+      , ReplSet = configuration.require.ReplSet;
+
+    setUp(configuration, function(err, replicasetManager) {
+      var replSet = new ReplSet( [
+          new Server( 'localhost', 31000),
+          new Server( 'localhost', 31001)
+        ],
+        {rs_name: 'rs', poolSize:1}
+      );
+
+      // Connect
+      new Db('replicaset_test_auth', replSet, {w:1}).open(function(err, db) {
+        // Add a user
+        db.admin().addUser("root", "root", {w:3, wtimeout: 25000}, function(err, result) {
+          test.equal(null, err);
+
+          db.admin().authenticate("root", "root", function(err, result) {
+            test.equal(null, err);
+            test.ok(result);
+
+            // Create a new collection level user
+            db.db('test').addUser("test", "test", {w:3, wtimeout: 25000}, function(err, result) {
+              test.equal(null, err);
+
+              db.db('test2').addUser("test2", "test2", {w:3, wtimeout: 25000}, function(err, result) {
+                test.equal(null, err);
+
+                db.close();
+
+                // Create a new MongoClient connection
+                MongoClient.connect('mongodb://test:test@localhost:31000,localhost:31001/test?replicaSet=rs', function(err, db) {
+                  test.equal(null, err);
+
+                  db.db('test2').authenticate('test2', 'test2', function(err, r) {
+                    test.equal(null, err);
+                    test.ok(r);
+
+                    db.collection('test').findOne({}, function(e, r1) {
+                      test.equal(null, err);
+
+                      db.db('test2').collection('test').findOne({}, function(e, r2) {
+                        test.equal(null, e);
+
+                        db.serverConfig.on('joined', function(t, s) {
+                          if(t == 'primary') {
+                            db.collection('test').findOne({}, function(e, r2) {
+                              test.equal(null, err);
+
+                              db.db('test2').collection('test').findOne({}, function(e, r2) {
+                                test.equal(null, err);
+
+                                db.close();
+
+                                replicasetManager.stop().then(function() {
+                                  test.done();
+                                });
+                              });
+                            });
+                          }
+                        })
+
+                        replicasetManager.stepDownPrimary(false, {stepDownSecs: 1, force:true}, {
+                          provider: 'default',
+                          db: 'admin',
+                          user: 'root',
+                          password: 'root'
+                        }).then(function() {
+                        }).catch(function(e) {
+                          console.log(e.stack);
+                        });
+                      });
+                    });
+                  });
+                });
+              })
+            });
+          });
+        });
+      });
+    })
+  }
+}
+
 // /*************************************************************************************
 //
 //   sMong       sMong    ngosMo   sMong   ongosM    sMong         ongosM       ngos  n
