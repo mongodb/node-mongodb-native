@@ -54,6 +54,8 @@ exports.shouldCorrectlyPerformSingleInsert = {
     db.open(function(err, db) {
       var collection = db.collection('shouldCorrectlyPerformSingleInsert');
       collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
+        test.equal(null, err);
+
         collection.findOne(function(err, item) {
           test.equal(1, item.a);
           db.close();
@@ -81,6 +83,13 @@ exports.shouldCorrectlyHandleMultipleDocumentInsert = {
       var docs = [{a:1}, {a:2}];
 
       collection.insert(docs, configuration.writeConcernMax(), function(err, r) {
+        test.equal(2, r.result.n);
+        test.equal(2, r.ops.length);
+        test.equal(2, r.insertedCount);
+        test.equal(2, r.insertedIds.length);
+        test.ok(r.insertedIds[0] instanceof ObjectID);
+        test.ok(r.insertedIds[1] instanceof ObjectID);
+
         r.ops.forEach(function(doc) {
           test.ok(((doc['_id']) instanceof ObjectID || Object.prototype.toString.call(doc['_id']) === '[object ObjectID]'));
         });
