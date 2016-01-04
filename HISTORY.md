@@ -1,4 +1,4 @@
-1.2.31
+1.2.31 01-04-2016
 -----------------
 - Allow connection to secondary if primaryPreferred or secondaryPreferred (Issue #70, https://github.com/leichter)
 
