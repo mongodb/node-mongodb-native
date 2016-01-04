@@ -706,7 +706,7 @@ ReplSet.prototype.isConnected = function(options) {
 
   if(this.s.secondaryOnlyConnectionAllowed
     && this.s.replState.isSecondaryConnected()) return true;
-    
+
   return this.s.replState.isPrimaryConnected();
 }
 
@@ -935,7 +935,6 @@ var haveAvailableServers = function(state) {
 var replicasetInquirer = function(self, state, norepeat) {
   return function() {
     if(state.replState.state == DESTROYED) return
-
     // We have no connections we need to reseed the disconnected list
     if(!haveAvailableServers(state)) {
       // For all entries in the seedlist build a server instance
