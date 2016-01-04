@@ -4,7 +4,6 @@
 * Pool allocates size + 1 connections when using replicasets, reserving additional pool connection for monitoring exclusively.
 * Fixes bug when all replicaset members are down, that would cause it to fail to reconnect using the originally provided seedlist.
 
-
 2.1.1 12-13-2015
 ----------------
 * Surfaced checkServerIdentity options for MongoClient, Server, ReplSet and Mongos to allow for control of the checkServerIdentity method available in Node.s 0.12.x or higher.
@@ -22,6 +21,16 @@
 * NODE-606 better error handling on destroyed topology for db.js methods.
 * Added isDestroyed method to server, replset and mongos topologies.
 * Upgraded test suite to run using mongodb-topology-manager.
+
+2.0.53 12-23-2015
+-----------------
+* Updated mongodb-core to 1.2.30.
+* Pool allocates size + 1 connections when using replicasets, reserving additional pool connection for monitoring exclusively.
+* Fixes bug when all replicaset members are down, that would cause it to fail to reconnect using the originally provided seedlist.
+
+2.0.52 12-14-2015
+-----------------
+* removed remove from Gridstore.close.
 
 2.0.51 12-13-2015
 -----------------
