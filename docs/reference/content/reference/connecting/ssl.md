@@ -10,7 +10,7 @@ title = "SSL"
 
 # SSL
 
-The Node.js driver supports SSL connections to MongoDB when using the Enterprise edition off MongoDB or the open source edition with SSL support compiled in.
+The Node.js driver supports SSL connections to MongoDB when using the Enterprise edition of MongoDB or the open source edition with SSL support compiled in.
 
 ## No validation of certificate chain
 
@@ -46,7 +46,30 @@ MongoClient.connect("mongodb://localhost:27017/test?ssl=true", {
 }, function(err, db) {
   db.close();
 });
+```
 
+## Driver should ignore host name validation
+
+We want to validate the certificate but ignore the host name validation aspect. We can do so by setting the option `checkServerIdentity` to false.
+
+```js
+var MongoClient = require('mongodb').MongoClient,
+  f = require('util').format,
+  fs = require('fs');
+
+// Read the certificate authority
+var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
+
+// Connect validating the returned certificates from the server
+MongoClient.connect("mongodb://localhost:27017/test?ssl=true", {
+  server: {
+      sslValidate:true
+    , checkServerIdentity:false
+    , sslCA:ca
+  }
+}, function(err, db) {
+  db.close();
+});
 ```
 
 ## Driver should validate Server certificate and present valid Certificate
@@ -111,12 +134,14 @@ MongoClient.connect(f('mongodb://%s@server:27017/test?authMechanism=%s&ssl=true'
 
 ### Individual Server Level Options
 
-* `ssl`, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.
-* `sslValidate`, {Boolean, default: true} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).
-* `sslCA`, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).
-* `sslCert`, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).
-* `sslKey`, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).
-* `sslPass`, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).
+| Parameter | Type | Description |
+| :----------| :------------- | :------------- |
+| `ssl` | {Boolean, default: false} |Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons. |
+| `sslValidate` | {Boolean, default: true} | Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher). |
+| `sslCA` | {Buffer[]\|string[], default: null} | Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher). |
+| `sslCert` | {Buffer\|string, default: null} | String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher). |
+| `sslKey` | {Buffer\|string, default: null} | String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher). |
+| `sslPass` | {Buffer\|string, default: null} | String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher). |
 
 If you are connecting to a single MongoDB instance you pass the parameters using the `server` options field.
 
@@ -138,12 +163,14 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 
 ### Replicaset Level Options
 
-* `ssl`, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.
-* `sslValidate`, {Boolean, default: true} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).
-* `sslCA`, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).
-* `sslCert`, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).
-* `sslKey`, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).
-* `sslPass`, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).
+| Parameter | Type | Description |
+| :----------| :------------- | :------------- |
+| `ssl` | {Boolean, default: false} | Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons. |
+| `sslValidate` | {Boolean, default: true} | Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher). |
+| `sslCA` | {Buffer[]\|string[], default: null} | Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher). |
+| `sslCert` | {Buffer\|string, default: null} | String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher). |
+| `sslKey` | {Buffer\|string, default: null} | String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher). |
+| `sslPass` | {Buffer\|string, default: null} | String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher). |
 
 If you are connecting to a MongoDB replicaset, you pass the parameters using the `replset` options field.
 
@@ -165,12 +192,14 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 
 ### Mongos Proxy Level Options
 
-* `ssl`, {Boolean, default: false} Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.
-* `sslValidate`, {Boolean, default: true} Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).
-* `sslCA`, {Buffer[]|string[], default: null} Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher).
-* `sslCert`, {Buffer|string, default: null} String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).
-* `sslKey`, {Buffer|string, default: null} String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher).
-* `sslPass`, {Buffer|string, default: null} String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).
+| Parameter | Type | Description |
+| :----------| :------------- | :------------- |
+| `ssl` | {Boolean, default: false} | Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons. |
+| `sslValidate` | {Boolean, default: true} | Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher). |
+| `sslCA` | {Buffer[]\|string[], default: null} | Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher). |
+| `sslCert` | {Buffer\|string, default: null} | String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher). |
+| `sslKey` | {Buffer\|string, default: null} | String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher). |
+| `sslPass` | {Buffer\|string, default: null} | String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher). |
 
 If you are connecting to a MongoDB replicaset, you pass the parameters using the `mongos` options field.
 

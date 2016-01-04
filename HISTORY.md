@@ -1,3 +1,20 @@
+2.1.3 01-04-2015
+----------------
+* Updated mongodb-core to 1.2.31.
+- Allow connection to secondary if primaryPreferred or secondaryPreferred (Issue #70, https://github.com/leichter)
+
+2.1.2 12-23-2015
+----------------
+* Updated mongodb-core to 1.2.30.
+* Pool allocates size + 1 connections when using replicasets, reserving additional pool connection for monitoring exclusively.
+* Fixes bug when all replicaset members are down, that would cause it to fail to reconnect using the originally provided seedlist.
+
+2.1.1 12-13-2015
+----------------
+* Surfaced checkServerIdentity options for MongoClient, Server, ReplSet and Mongos to allow for control of the checkServerIdentity method available in Node.s 0.12.x or higher.
+* Added readPreference support to listCollections and listIndexes helpers.
+* Updated mongodb-core to 1.2.28.
+
 2.1.0 12-06-2015
 ----------------
 * Implements the connection string specification, https://github.com/mongodb/specifications/blob/master/source/connection-string/connection-string-spec.rst.
@@ -7,12 +24,28 @@
 * Updated mongodb-core to 1.2.26.
 * Return destination in GridStore pipe function.
 * NODE-606 better error handling on destroyed topology for db.js methods.
-* Added isDestroyed method to server, replset and mongos topologis.
+* Added isDestroyed method to server, replset and mongos topologies.
 * Upgraded test suite to run using mongodb-topology-manager.
+
+2.0.53 12-23-2015
+-----------------
+* Updated mongodb-core to 1.2.30.
+* Pool allocates size + 1 connections when using replicasets, reserving additional pool connection for monitoring exclusively.
+* Fixes bug when all replicaset members are down, that would cause it to fail to reconnect using the originally provided seedlist.
+
+2.0.52 12-14-2015
+-----------------
+* removed remove from Gridstore.close.
+
+2.0.51 12-13-2015
+-----------------
+* Surfaced checkServerIdentity options for MongoClient, Server, ReplSet and Mongos to allow for control of the checkServerIdentity method available in Node.s 0.12.x or higher.
+* Added readPreference support to listCollections and listIndexes helpers.
+* Updated mongodb-core to 1.2.28.
 
 2.0.50 12-06-2015
 -----------------
-* Updated mongodb-core to 1.2.25.
+* Updated mongodb-core to 1.2.26.
 
 2.0.49 11-20-2015
 -----------------

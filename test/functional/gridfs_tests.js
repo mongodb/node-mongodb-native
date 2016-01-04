@@ -2886,7 +2886,7 @@ exports['should correctly pipe through multiple pipelines'] = {
     // Connection URL
     var url = 'mongodb://localhost:27017/myproject';
     // Use connect method to connect to the Server
-    MongoClient.connect(configuration.url(), function(err, db) {
+    MongoClient.connect(configuration.url(), {server: {sslValidate: false}}, function(err, db) {
       assert.equal(null, err);
 
       // Set up gridStore
@@ -2932,7 +2932,7 @@ exports['should correctly seek on file where size of file is a multiple of the c
     // Connection URL
     var url = 'mongodb://localhost:27017/myproject';
     // Use connect method to connect to the Server
-    MongoClient.connect(configuration.url(), function(err, db) {
+    MongoClient.connect(configuration.url(), {server: {sslValidate: false}}, function(err, db) {
       assert.equal(null, err);
 
       var gridStore = new GridStore(db, "test_gs_multi_chunk_exact_size", "w");
@@ -3002,7 +3002,7 @@ exports['should correctly seek on file where size of file is a multiple of the c
     var id = new ObjectID();
 
     // Use connect method to connect to the Server
-    MongoClient.connect(configuration.url(), function(err, db) {
+    MongoClient.connect(configuration.url(), {server: {sslValidate: false}}, function(err, db) {
       assert.equal(null, err);
 
       var gridStore = new GridStore(db, id, "w");
@@ -3088,7 +3088,7 @@ exports['should correctly write fake png to gridstore'] = {
     var buffer = new Buffer(200033);
 
     // Use connect method to connect to the Server
-    MongoClient.connect(configuration.url(), function(err, db) {
+    MongoClient.connect(configuration.url(), {server: {sslValidate: false}}, function(err, db) {
       assert.equal(null, err);
 
       var gridStore = new GridStore(db, new ObjectID(), 'w', { "content_type": "image/png", "chunk_size": 1024*4 });

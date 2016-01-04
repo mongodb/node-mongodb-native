@@ -47,6 +47,106 @@ exports['Correctly receive the APM events for an insert'] = {
   }
 }
 
+exports['Correctly receive the APM events for a listCollections command'] = {
+  metadata: { requires: { topology: ['replicaset'], mongodb:">=3.0.0" } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var ReadPreference = configuration.require.ReadPreference;
+    var started = [];
+    var succeeded = [];
+    var failed = [];
+
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      db.collection('apm_test_list_collections').insertOne({a:1}).then(function(r) {
+        test.equal(1, r.insertedCount);
+
+        var listener = require('../..').instrument(function(err, instrumentations) {});
+
+        listener.on('started', function(event) {
+          if(event.commandName == 'listCollections' || event.commandName == 'find') {
+            started.push(event);
+          }
+        });
+
+        listener.on('succeeded', function(event) {
+          if(event.commandName == 'listCollections' || event.commandName == 'find') {
+            succeeded.push(event);
+          }
+        });
+
+        db.listCollections({}, {readPeference: ReadPreference.PRIMARY}).toArray(function(err, cols) {
+          test.equal(null, err);
+
+          db.listCollections({}, {readPeference: ReadPreference.SECONDARY}).toArray(function(err, cols) {
+            test.equal(null, err);
+
+            // Ensure command was not sent to the primary
+            test.ok(started[0].connectionId.port != started[1].connectionId.port);
+
+            listener.uninstrument();
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
+  }
+}
+
+exports['Correctly receive the APM events for a listIndexes command'] = {
+  metadata: { requires: { topology: ['replicaset'], mongodb:">=3.0.0" } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var ReadPreference = configuration.require.ReadPreference;
+    var started = [];
+    var succeeded = [];
+    var failed = [];
+
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      db.collection('apm_test_list_collections').insertOne({a:1}).then(function(r) {
+        test.equal(1, r.insertedCount);
+
+        var listener = require('../..').instrument(function(err, instrumentations) {});
+
+        listener.on('started', function(event) {
+          if(event.commandName == 'listIndexes' || event.commandName == 'find') {
+            started.push(event);
+          }
+        });
+
+        listener.on('succeeded', function(event) {
+          if(event.commandName == 'listIndexes' || event.commandName == 'find') {
+            succeeded.push(event);
+          }
+        });
+
+        db.collection('apm_test_list_collections').listIndexes({readPeference: ReadPreference.PRIMARY}).toArray(function(err, cols) {
+          test.equal(null, err);
+
+          db.collection('apm_test_list_collections').listIndexes({readPeference: ReadPreference.SECONDARY}).toArray(function(err, cols) {
+            test.equal(null, err);
+
+            // Ensure command was not sent to the primary
+            test.ok(started[0].connectionId.port != started[1].connectionId.port);
+
+            listener.uninstrument();
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
+  }
+}
+
 exports['Correctly receive the APM events for an insert using custom operationId and time generator'] = {
   metadata: { requires: { topology: ['single', 'replicaset'] } },
 
@@ -62,7 +162,7 @@ exports['Correctly receive the APM events for an insert using custom operationId
         next: function() {
           return 10000;
         }
-      }, 
+      },
       timestampGenerator: {
         current: function() {
           return 1;
@@ -140,7 +240,7 @@ var validateExpecations = function(test, expectation, results) {
     // Validate the test
     test.equal(commandName, result.commandName);
     // Do we have a getMore command
-    if(commandName.toLowerCase() == 'getmore' || 
+    if(commandName.toLowerCase() == 'getmore' ||
       commandName.toLowerCase() == 'find') {
       reply.cursor.id = result.reply.cursor.id;
       test.deepEqual(reply, result.reply);
@@ -216,15 +316,15 @@ var executeOperation = function(assert, client, listener, scenario, test, callba
 
       if(args.deletes) {
         params.push(args.deletes);
-      } 
+      }
 
       if(args.document) {
         params.push(args.document);
-      } 
+      }
 
       if(args.documents) {
         params.push(args.documents);
-      } 
+      }
 
       if(args.update) {
         params.push(args.update);
@@ -258,7 +358,7 @@ var executeOperation = function(assert, client, listener, scenario, test, callba
         } else {
           options.upsert = args.upsert;
         }
-      }      
+      }
 
       // Find command is special needs to executed using toArray
       if(operation.name == 'find') {
@@ -328,7 +428,7 @@ var executeTests = function(assert, client, listener, scenario, tests, callback)
 
   // Setup and execute the operation
   executeOperation(assert, client, listener, scenario, test, function() {
-    
+
     // Execute the next test
     executeTests(assert, client, listener, scenario, tests, callback);
   });
@@ -343,12 +443,12 @@ var executeSuite = function(assert, client, listener, scenarios, callback) {
   // Get the database
   var db = client.db(scenario.database_name);
   // Insert into the db
-  var collection = db.collection(scenario.collection_name);    
+  var collection = db.collection(scenario.collection_name);
   // Execute the tests
   executeTests(assert, client, listener, scenario, scenario.tests.slice(0), function() {
     // Execute the next suite
     executeSuite(assert, client, listener, scenarios, callback);
-  });    
+  });
 }
 
 exports['Correctly run all JSON APM Tests'] = {
@@ -388,7 +488,7 @@ exports['Correctly run all JSON APM Tests'] = {
 
         listener.uninstrument();
         client.close();
-        test.done();      
+        test.done();
       });
     });
   }

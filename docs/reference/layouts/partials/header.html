@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {{ partial "meta.html"}}
+    <link rel="shortcut icon" href="{{.Site.BaseURL}}/img/favicon.png">
+
+    <title>{{.Title}}</title>
+
+    {{ partial "assets/css.html" . }}
+  </head>
+
+  <body>
+  <!-- container section start -->
+  <section id="container" class="">
+      <!--header start-->
+      {{ partial "header/main.html" . }}
+      <!--header end-->
+
+      {{ partial "menu.html" . }}
+
+      <!--main content start-->
+      <section id="main-content" class="content">
+          <section class="main-column pull-left">
+            <div class="document">
+              <div class="documentwrapper">
+                <div class="bodywrapper">
+                  <div class="body">
+                    <p><div class="admonition note">
+                    <h5 class="admonition-title">Survey</h5>
+                    <p>Please help up improve by answering a few questions by following the link to the survey
+                      <a href="https://www.research.net/r/BPJSGJC"><strong>https://www.research.net/r/BPJSGJC</strong></a>
+                    </p>
+                    </div>
+                    </p>

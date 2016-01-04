@@ -831,7 +831,13 @@ exports['should correctly error out due to driver close'] = {
       db.close(function() {
         db.createCollection('nonexisting', {w:1}, function(err, collection) {
           test.ok(err != null);
-          test.done();
+          db.collection('nonexisting', {strict: true}, function(err, collection) {
+            test.ok(err != null);
+            db.collection('nonexisting', {strict: false}, function(err, collection) {
+              test.ok(err != null);
+              test.done();
+            });
+          });
         });
       });
     });
