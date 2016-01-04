@@ -1,3 +1,7 @@
+1.2.31
+-----------------
+- Allow connection to secondary if primaryPreferred or secondaryPreferred (Issue #70, https://github.com/leichter)
+
 1.2.30 12-23-2015
 -----------------
 - Pool allocates size + 1 connections when using replicasets, reserving additional pool connection for monitoring exclusively.

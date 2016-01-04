@@ -155,6 +155,10 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
       function schedule() {
         setTimeout(function() {
           _server.insert('test.test', [{created:new Date()}], function(err, r) {
+            // console.log("=============================================== ping")
+            // console.dir(err)
+            // if(r) console.log(r.connection.port)
+
             // Did we switch servers
             if(r && r.connection.port == 32001) {
               test.ok(stopRespondingPrimary);
@@ -171,7 +175,7 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
               secondSecondaryServer.destroy();
               server.destroy();
               running = false;
-              
+
               test.done();
               return;
             }
@@ -188,11 +192,13 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
     server.on('error', function(){});
 
     server.on('joined', function(type, server) {
+      // console.log("--- joined :: " + type + " :: " + server.name)
       if(type == 'primary') joinedPrimaries[server.name] = 1;
       if(type == 'secondary') joinedSecondaries[server.name] = 1;
     });
 
     server.on('left', function(type, server) {
+      // console.log("--- left :: " + type + " :: " + server.name)
       if(type == 'primary') leftPrimaries[server.name] = 1;
     })
 
