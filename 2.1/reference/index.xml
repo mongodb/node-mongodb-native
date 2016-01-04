@@ -2311,13 +2311,13 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
 
 &lt;tr&gt;
 &lt;td align=&#34;left&#34;&gt;&lt;code&gt;socketOptions.connectTimeoutMS&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;{Number, default: 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default: 30000}&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;TCP Connection timeout setting.&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
 &lt;td align=&#34;left&#34;&gt;&lt;code&gt;socketOptions.socketTimeoutMS&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;{Number, default: 0}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default: 30000}&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;TCP Socket timeout setting.&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;

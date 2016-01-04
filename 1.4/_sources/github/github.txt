@@ -191,9 +191,9 @@ Content Management Systems
          * - **Clone Url**
            - https://github.com/cliftonc/calipso.git
          * - **Forks**
-           - 296
+           - 294
          * - **Watchers**
-           - 1628
+           - 1632
 
 Grid FS libraries or tools
 --------------------------
@@ -358,9 +358,9 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Clone Url**
            - https://github.com/meritt/easymongo.git
          * - **Forks**
-           - 15
+           - 14
          * - **Watchers**
-           - 98
+           - 99
 
 REST api's around MongoDB or resource based libraries
 -----------------------------------------------------
@@ -384,7 +384,7 @@ REST api's around MongoDB or resource based libraries
          * - **Clone Url**
            - https://github.com/tdegrunt/mongodb-rest.git
          * - **Forks**
-           - 128
+           - 129
          * - **Watchers**
            - 347
 
@@ -481,7 +481,7 @@ Test helpers and libraries
          * - **Forks**
            - 27
          * - **Watchers**
-           - 78
+           - 79
 
 Tools or applications to manage your MongoDB's
 ----------------------------------------------
@@ -681,7 +681,7 @@ Translation libraries or frameworks
          * - **Clone Url**
            - https://github.com/masylum/dialect-http.git
          * - **Forks**
-           - 8
+           - 9
          * - **Watchers**
            - 27
 
@@ -730,9 +730,9 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 416
+           - 419
          * - **Watchers**
-           - 3657
+           - 3665
 
 Libraries for the connect middleware
 ------------------------------------
@@ -771,7 +771,7 @@ Libraries for the connect middleware
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 13:2:27 on 30/10/2015
+           - 13:51:59 on 28/11/2015
          * - **Homepage**
            - http://
          * - **Url**
@@ -779,9 +779,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 220
+           - 222
          * - **Watchers**
-           - 866
+           - 879
 
 Libraries or applications for continous integration
 ---------------------------------------------------
@@ -805,9 +805,9 @@ Libraries or applications for continous integration
          * - **Clone Url**
            - https://github.com/ryankee/concrete.git
          * - **Forks**
-           - 70
+           - 69
          * - **Watchers**
-           - 500
+           - 502
 
 Exampe applications
 -------------------
