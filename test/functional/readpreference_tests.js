@@ -424,3 +424,27 @@ exports['Should correctly honor the readPreferences at DB and individual command
     });
   }
 }
+
+/**
+ * @ignore
+ */
+exports['Should correctly apply readPreferences specified as objects'] = {
+  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var mongo = configuration.require
+      , ReadPreference = mongo.ReadPreference;
+
+    configuration.newDbInstance({w:1}, {poolSize:1}).open(function(err, db) {
+      test.equal(null, err);
+      // Create read preference object.
+      var mySecondaryPreferred = {mode:'secondaryPreferred', tags:[]};
+      db.command({dbStats:true}, {readPreference:mySecondaryPreferred}, function(err, result) {
+        test.equal(null, err);
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
