@@ -11,6 +11,7 @@ var Suite = require('betterbenchmarks').Suite,
   ldj = require('ldjson-stream'),
   globalSetup = require('./shared').globalSetup,
   getDb = require('./shared').getDb,
+  deflate = require('./shared').deflate,
   MongoClient = require('../../').MongoClient,
   GridFSBucket = require('../../').GridFSBucket;
 
@@ -19,111 +20,111 @@ var BSON = require('bson').native().BSON;
 
 // Create a suite
 var suite = new Suite('feather weight test suite', {
-  warmup: 1, cycles: 1, iterations: 100, async:true
+  warmup: 1, cycles: 1, iterations: 10000, async:true
 });
 
 // // Add the MB reporter
 // suite.addReporter(new MBSimpleReporter());
 
-// -----------------------------------------------------------------------------
+// // -----------------------------------------------------------------------------
+// //
+// // RUN COMMAND BENCHMARK
+// //
+// // -----------------------------------------------------------------------------
 //
-// RUN COMMAND BENCHMARK
+// // ismaster run in serial mode
+// suite.addTest(new Benchmark('ismaster command benchmark in serial mode')
+//   .set(function(context, callback) {
+//     context.db.command({ismaster:true}, function() {
+//       callback();
+//     });
+//   })
+//   .setup(function(context, options, callback) {
+//     co(function*(){
+//       // Create a bson serializer
+//       var bson = new BSON();
+//       // Start up the server
+//       context.manager = yield globalSetup();
+//       // Total size
+//       context.size = bson.calculateObjectSize({ismaster:true}) * suite.options.iterations;
+//       // Get db connection
+//       context.db = yield getDb('benchmark', 10);
+//       // Finish up
+//       callback();
+//     }).catch(function(e) {
+//       console.log(e.stack);
+//     });
+//   })
+//   .teardown(function(context, stats, options, callback) {
+//     co(function*(){
+//       // Stop the db connection
+//       yield context.db.close();
+//       // Start up the server
+//       context.manager.stop();
+//       // Finish up
+//       callback();
+//     }).catch(function(e) {
+//       console.log(e.stack);
+//     });
+//   })
+// );
+
+// // Add the flat json parsing test
+// suite.addTest(new Benchmark('ismaster command benchmark parallel')
+//   // Add custom method (we are responsible for marking the demarkation)
+//   .custom(function(context, stats, callback) {
+//     // Commands left to do
+//     var left = suite.options.iterations;
 //
-// -----------------------------------------------------------------------------
-
-// ismaster run in serial mode
-suite.addTest(new Benchmark('ismaster command benchmark in serial mode')
-  .set(function(context, callback) {
-    context.db.command({ismaster:true}, function() {
-      callback();
-    });
-  })
-  .setup(function(context, options, callback) {
-    co(function*(){
-      // Create a bson serializer
-      var bson = new BSON();
-      // Start up the server
-      context.manager = yield globalSetup();
-      // Total size
-      context.size = bson.calculateObjectSize({ismaster:true}) * suite.options.iterations;
-      // Get db connection
-      context.db = yield getDb('benchmark', 10);
-      // Finish up
-      callback();
-    }).catch(function(e) {
-      console.log(e.stack);
-    });
-  })
-  .teardown(function(context, stats, options, callback) {
-    co(function*(){
-      // Stop the db connection
-      yield context.db.close();
-      // Start up the server
-      context.manager.stop();
-      // Finish up
-      callback();
-    }).catch(function(e) {
-      console.log(e.stack);
-    });
-  })
-);
-
-// Add the flat json parsing test
-suite.addTest(new Benchmark('ismaster command benchmark parallel')
-  // Add custom method (we are responsible for marking the demarkation)
-  .custom(function(context, stats, callback) {
-    // Commands left to do
-    var left = suite.options.iterations;
-
-    // Keep scope local for stat object
-    var execute = function() {
-      var stat = stats.startParallelIteration();
-      // Execute the command
-      context.db.command({ismaster:true}, function(err, r) {
-        stat.end();
-        left = left - 1;
-
-        if(left == 0) {
-          callback();
-        }
-      });
-    }
-
-    // Fire of all the messages in parallel
-    for(var i = 0; i < suite.options.iterations; i++) {
-      execute()
-    }
-  })
-  .addMetadata({custom:true})
-  .setup(function(context, options, callback) {
-    co(function*(){
-      // Create a bson serializer
-      var bson = new BSON();
-      // Start up the server
-      context.manager = yield globalSetup();
-      // Total size
-      context.size = bson.calculateObjectSize({ismaster:true}) * suite.options.iterations;
-      // Get db connection
-      context.db = yield getDb('benchmark', 10);
-      // Finish up
-      callback();
-    }).catch(function(e) {
-      console.log(e.stack);
-    });
-  })
-  .teardown(function(context, stats, options, callback) {
-    co(function*(){
-      // Stop the db connection
-      yield context.db.close();
-      // Start up the server
-      context.manager.stop();
-      // Finish up
-      callback();
-    }).catch(function(e) {
-      console.log(e.stack);
-    });
-  })
-);
+//     // Keep scope local for stat object
+//     var execute = function() {
+//       var stat = stats.startParallelIteration();
+//       // Execute the command
+//       context.db.command({ismaster:true}, function(err, r) {
+//         stat.end();
+//         left = left - 1;
+//
+//         if(left == 0) {
+//           callback();
+//         }
+//       });
+//     }
+//
+//     // Fire of all the messages in parallel
+//     for(var i = 0; i < suite.options.iterations; i++) {
+//       execute()
+//     }
+//   })
+//   .addMetadata({custom:true})
+//   .setup(function(context, options, callback) {
+//     co(function*(){
+//       // Create a bson serializer
+//       var bson = new BSON();
+//       // Start up the server
+//       context.manager = yield globalSetup();
+//       // Total size
+//       context.size = bson.calculateObjectSize({ismaster:true}) * suite.options.iterations;
+//       // Get db connection
+//       context.db = yield getDb('benchmark', 10);
+//       // Finish up
+//       callback();
+//     }).catch(function(e) {
+//       console.log(e.stack);
+//     });
+//   })
+//   .teardown(function(context, stats, options, callback) {
+//     co(function*(){
+//       // Stop the db connection
+//       yield context.db.close();
+//       // Start up the server
+//       context.manager.stop();
+//       // Finish up
+//       callback();
+//     }).catch(function(e) {
+//       console.log(e.stack);
+//     });
+//   })
+// );
 
 // // -----------------------------------------------------------------------------
 // //
@@ -131,65 +132,64 @@ suite.addTest(new Benchmark('ismaster command benchmark parallel')
 // //
 // // -----------------------------------------------------------------------------
 //
-// // // Add the flat json parsing test
-// // suite.addTest(new Benchmark('find one by id')
-// //   // The benchmark function
-// //   .set(function(context, callback) {
-// //     context.collection.findOne({_id: context.queryId++}, function(e, r) {
-// //       // console.dir(r)
-// //       callback();
-// //     });
-// //   })
-// //   .setup(function(context, options, callback) {
-// //     co(function*(){
-// //       // Create a bson serializer
-// //       var bson = new BSON();
-// //       // Start up the server
-// //       context.manager = yield globalSetup();
-// //       // Get db connection
-// //       context.db = yield getDb('benchmark', 10);
-// //       // Get the corpus collection
-// //       context.collection = context.db.collection('corpus');
-// //       // Id used for the docs
-// //       context.id = 1;
-// //       // Context query id
-// //       context.queryId = 1;
-// //       // Insert all the documents
-// //       var filestream = fs.createReadStream(f('%s/performance-data/TWITTER', __dirname));
-// //       filestream
-// //       .pipe(ldj.parse())
-// //       .on('data', function(doc) {
-// //         filestream.pause();
-// //         // Add _id value
-// //         doc._id = context.id++;
-// //         // Perform an insert
-// //         context.collection.insertOne(doc, {w:1}, function(err, r) {
-// //           filestream.resume();
-// //         });
-// //       })
-// //       .on('end', function() {
-// //         callback();
-// //       });
-// //     }).catch(function(e) {
-// //       console.log(e.stack);
-// //     });
-// //   })
-// //   .teardown(function(context, stats, options, callback) {
-// //     co(function*(){
-// //       // Stop the db connection
-// //       yield context.db.close();
-// //       // Start up the server
-// //       context.manager.stop();
-// //       // Finish up
-// //       callback();
-// //     }).catch(function(e) {
-// //       console.log(e.stack);
-// //     });
-// //   })
-// // );
-//
 // // Add the flat json parsing test
-// suite.addTest(new Benchmark('find one by id MB/s')
+// suite.addTest(new Benchmark('find one by id')
+//   // The benchmark function
+//   .set(function(context, callback) {
+//     context.collection.findOne({_id: context.queryId++}, function(e, r) {
+//       callback();
+//     });
+//   })
+//   .setup(function(context, options, callback) {
+//     co(function*(){
+//       // Create a bson serializer
+//       var bson = new BSON();
+//       // Start up the server
+//       context.manager = yield globalSetup();
+//       // Get db connection
+//       context.db = yield getDb('benchmark', 10);
+//       // Get the corpus collection
+//       context.collection = context.db.collection('corpus');
+//       // Id used for the docs
+//       context.id = 1;
+//       // Context query id
+//       context.queryId = 1;
+//       // Insert all the documents
+//       var filestream = fs.createReadStream(f('%s/performance-data/TWITTER', __dirname));
+//       filestream
+//       .pipe(ldj.parse())
+//       .on('data', function(doc) {
+//         filestream.pause();
+//         // Add _id value
+//         doc._id = context.id++;
+//         // Perform an insert
+//         context.collection.insertOne(doc, {w:1}, function(err, r) {
+//           filestream.resume();
+//         });
+//       })
+//       .on('end', function() {
+//         callback();
+//       });
+//     }).catch(function(e) {
+//       console.log(e.stack);
+//     });
+//   })
+//   .teardown(function(context, stats, options, callback) {
+//     co(function*(){
+//       // Stop the db connection
+//       yield context.db.close();
+//       // Start up the server
+//       context.manager.stop();
+//       // Finish up
+//       callback();
+//     }).catch(function(e) {
+//       console.log(e.stack);
+//     });
+//   })
+// );
+
+// // Add the flat json parsing test
+// suite.addTest(new Benchmark('find one by id MB/s parallel')
 //   // Add custom method (we are responsible for marking the demarkation)
 //   .custom(function(context, stats, callback) {
 //     // Commands left to do
@@ -275,54 +275,37 @@ suite.addTest(new Benchmark('ismaster command benchmark parallel')
 // // Add the flat json parsing test
 // suite.addTest(new Benchmark('small doc insert MB/s 1')
 //   // Add custom method (we are responsible for marking the demarkation)
-//   .custom(function(context, stats, callback) {
-//     var pipe = ldj.parse();
-//     // Insert all the documents
-//     var filestream = fs.createReadStream(f('%s/performance-data/SMALL_DOC', __dirname));
-//     filestream
-//       .pipe(pipe)
-//       .on('data', function(doc) {
-//         pipe.pause();
-//
-//         // Calculate the total size
-//         if(!context.firstPass) {
-//           context.size = context.size + context.bson.calculateObjectSize(doc);
-//         }
-//
-//         // Start timing
-//         stats.startIteration();
-//         // Peform a document insert
-//         context.collection.insertOne(doc, function() {
-//           stats.endIteration();
-//           pipe.resume();
-//         });
-//       })
-//       .on('end', function() {
-//         context.firstPass = true;
-//         callback();
-//       });
+//   .set(function(context, callback) {
+//     context.collection.insertOne(context.json, function(err, r) {
+//       callback();
+//     });
+//   })
+//   .iteration().setup(function(context, options, callback) {
+//     delete context.json['_id'];
+//     callback();
 //   })
 //   .cycle().setup(function(context, options, callback) {
 //     context.collection.drop(function() {
-//       console.dir(context.size)
 //       callback();
 //     });
 //   })
 //   .setup(function(context, options, callback) {
 //     co(function*(){
 //       // Create a bson serializer
-//       context.bson = new BSON();
+//       var bson = new BSON();
 //       // Start up the server
 //       context.manager = yield globalSetup();
 //       // Get db connection
 //       context.db = yield getDb('benchmark', 10);
 //       // Get the corpus collection
 //       context.collection = context.db.collection('corpus');
-//       // Size used to calculate the
-//       context.size = 0;
-//       // Calculate size
-//       context.firstPass = false;
-//       // Wrap up callback
+//       // Get the json document
+//       var json = fs.readFileSync(f('%s/performance-data/SINGLE_DOCUMENT/SMALL_DOC.json', __dirname), 'utf8');
+//       json = JSON.parse(json);
+//       json = deflate(json);
+//       // Add to the context
+//       context.json = json;
+//       // Finish up the setup
 //       callback();
 //     }).catch(function(e) {
 //       console.log(e.stack);
@@ -341,28 +324,32 @@ suite.addTest(new Benchmark('ismaster command benchmark parallel')
 //     });
 //   })
 // );
-//
+
 // // Add the flat json parsing test
 // suite.addTest(new Benchmark('small doc insert MB/s parallel')
 //   // Add custom method (we are responsible for marking the demarkation)
 //   .custom(function(context, stats, callback) {
+//     var left = suite.options.iterations;
 //
-//     // Commands left to do
-//     var left = context.documents.length;
-//
-//     // Run a single iteration
-//     stats.startIteration();
-//
-//     // Fire of all the messages in parallel
-//     for(var i = 0; i < context.documents.length; i++) {
-//       context.collection.insertOne(context.documents[i], function() {
+//     // Keep scope local for stat object
+//     var execute = function() {
+//       delete context.json['_id'];
+//       var stat = stats.startParallelIteration();
+//       // Execute the command
+//       context.collection.insertOne(context.json, function(err, r) {
+//         console.dir(r)
+//         stat.end();
 //         left = left - 1;
 //
 //         if(left == 0) {
-//           stats.endIteration();
 //           callback();
 //         }
 //       });
+//     }
+//
+//     // Fire of all the messages in parallel
+//     for(var i = 0; i < suite.options.iterations; i++) {
+//       execute(context.json);
 //     }
 //   })
 //   .cycle().setup(function(context, options, callback) {
@@ -380,21 +367,14 @@ suite.addTest(new Benchmark('ismaster command benchmark parallel')
 //       context.db = yield getDb('benchmark', 10);
 //       // Get the corpus collection
 //       context.collection = context.db.collection('corpus');
-//       // Size used to calculate the
-//       context.size = 0;
-//       // Documents
-//       context.documents = [];
-//       // Insert all the documents
-//       var filestream = fs.createReadStream(f('%s/performance-data/SMALL_DOC', __dirname));
-//       filestream
-//       .pipe(ldj.parse())
-//       .on('data', function(doc) {
-//         context.documents.push(doc);
-//         context.size = context.size + bson.calculateObjectSize(doc);
-//       })
-//       .on('end', function() {
-//         callback();
-//       });
+//       // Get the json document
+//       var json = fs.readFileSync(f('%s/performance-data/SINGLE_DOCUMENT/SMALL_DOC.json', __dirname), 'utf8');
+//       json = JSON.parse(json);
+//       json = deflate(json);
+//       // Add to the context
+//       context.json = json;
+//       // Finish up the setup
+//       callback();
 //     }).catch(function(e) {
 //       console.log(e.stack);
 //     });
@@ -420,34 +400,18 @@ suite.addTest(new Benchmark('ismaster command benchmark parallel')
 // // -----------------------------------------------------------------------------
 //
 // // Add the flat json parsing test
-// suite.addTest(new Benchmark('large doc insert MB/s')
+// suite.addTest(new Benchmark('large doc insert', {
+//     iterations:10
+//   })
 //   // Add custom method (we are responsible for marking the demarkation)
-//   .custom(function(context, stats, callback) {
-//     var pipe = ldj.parse();
-//     // Insert all the documents
-//     var filestream = fs.createReadStream(f('%s/performance-data/LARGE_DOC', __dirname));
-//     filestream
-//       .pipe(pipe)
-//       .on('data', function(doc) {
-//         console.log("------------------------------------ data")
-//         pipe.pause();
-//         // Calculate the total size
-//         if(!context.firstPass) {
-//           context.size = context.size + context.bson.calculateObjectSize(doc);
-//         }
-//         // Start timing
-//         stats.startIteration();
-//         // Peform a document insert
-//         context.collection.insertOne(doc, function() {
-//           stats.endIteration();
-//           pipe.resume();
-//         });
-//       })
-//       .on('end', function() {
-//         console.log("------------------------------------ end")
-//         context.firstPass = true;
-//         callback();
-//       });
+//   .set(function(context, callback) {
+//     context.collection.insertOne(context.json, function(err, r) {
+//       callback();
+//     });
+//   })
+//   .iteration().setup(function(context, options, callback) {
+//     delete context.json['_id'];
+//     callback();
 //   })
 //   .cycle().setup(function(context, options, callback) {
 //     context.collection.drop(function() {
@@ -457,18 +421,89 @@ suite.addTest(new Benchmark('ismaster command benchmark parallel')
 //   .setup(function(context, options, callback) {
 //     co(function*(){
 //       // Create a bson serializer
-//       context.bson = new BSON();
+//       var bson = new BSON();
 //       // Start up the server
 //       context.manager = yield globalSetup();
 //       // Get db connection
 //       context.db = yield getDb('benchmark', 10);
 //       // Get the corpus collection
 //       context.collection = context.db.collection('corpus');
-//       // Size used to calculate the
-//       context.size = 0;
-//       // Calculate size
-//       context.firstPass = false;
-//       // Wrap up callback
+//       // Get the json document
+//       var json = fs.readFileSync(f('%s/performance-data/SINGLE_DOCUMENT/LARGE_DOC.json', __dirname), 'utf8');
+//       json = JSON.parse(json);
+//       json = deflate(json);
+//       // Add to the context
+//       context.json = json;
+//       // Finish up the setup
+//       callback();
+//     }).catch(function(e) {
+//       console.log(e.stack);
+//     });
+//   })
+//   .teardown(function(context, stats, options, callback) {
+//     co(function*(){
+//       // Stop the db connection
+//       yield context.db.close();
+//       // Start up the server
+//       context.manager.stop();
+//       // Finish up
+//       callback();
+//     }).catch(function(e) {
+//       console.log(e.stack);
+//     });
+//   })
+// );
+//
+// // Add the flat json parsing test
+// suite.addTest(new Benchmark('large doc insert parallell', {
+//     iterations:10
+//   })
+//   // Add custom method (we are responsible for marking the demarkation)
+//   .custom(function(context, stats, options, callback) {
+//     var left = options.iterations;
+//
+//     // Keep scope local for stat object
+//     var execute = function() {
+//       delete context.json['_id'];
+//       var stat = stats.startParallelIteration();
+//       // Execute the command
+//       context.collection.insertOne(context.json, function(err, r) {
+//         stat.end();
+//         left = left - 1;
+//
+//         if(left == 0) {
+//           callback();
+//         }
+//       });
+//     }
+//
+//     // Fire of all the messages in parallel
+//     for(var i = 0; i < options.iterations; i++) {
+//       execute(context.json);
+//     }
+//   })
+//   .cycle().setup(function(context, options, callback) {
+//     context.collection.drop(function() {
+//       callback();
+//     });
+//   })
+//   .setup(function(context, options, callback) {
+//     co(function*(){
+//       // Create a bson serializer
+//       var bson = new BSON();
+//       // Start up the server
+//       context.manager = yield globalSetup();
+//       // Get db connection
+//       context.db = yield getDb('benchmark', 10);
+//       // Get the corpus collection
+//       context.collection = context.db.collection('corpus');
+//       // Get the json document
+//       var json = fs.readFileSync(f('%s/performance-data/SINGLE_DOCUMENT/LARGE_DOC.json', __dirname), 'utf8');
+//       json = JSON.parse(json);
+//       json = deflate(json);
+//       // Add to the context
+//       context.json = json;
+//       // Finish up the setup
 //       callback();
 //     }).catch(function(e) {
 //       console.log(e.stack);
@@ -488,73 +523,73 @@ suite.addTest(new Benchmark('ismaster command benchmark parallel')
 //   })
 // );
 
-// // -----------------------------------------------------------------------------
-// //
-// // Find many and empty the cursor
-// //
-// // -----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 //
-// // Add the flat json parsing test
-// suite.addTest(new Benchmark('find many and empty the cursor')
-//   // The benchmark function
-//   .set(function(context, callback) {
-//     context.collection.find({}).each(function(e, r) {
-//       if(r == null) callback();
-//     });
-//   })
-//   .setup(function(context, options, callback) {
-//     co(function*(){
-//       // Create a bson serializer
-//       var bson = new BSON();
-//       // Start up the server
-//       context.manager = yield globalSetup();
-//       // Get db connection
-//       context.db = yield getDb('benchmark', 10);
-//       // Get the corpus collection
-//       context.collection = context.db.collection('corpus');
-//       // Id used for the docs
-//       context.id = 1;
-//       // Total size of query
-//       context.size = 0;
-//       // Context query id
-//       context.queryId = 1;
-//       // Contains pipe
-//       var pipe = ldj.parse();
-//       // Insert all the documents
-//       var filestream = fs.createReadStream(f('%s/performance-data/TWITTER', __dirname));
-//       filestream
-//         .pipe(pipe)
-//         .on('data', function(doc) {
-//           pipe.pause();
-//           // Add _id value
-//           doc._id = context.id++;
-//           // Calculate size of entire query
-//           context.size = context.size + bson.calculateObjectSize(doc);
-//           // Perform an insert
-//           context.collection.insertOne(doc, {w:1}, function(err, r) {
-//             pipe.resume();
-//           });
-//         })
-//         .on('end', function() {
-//           callback();
-//         });
-//     }).catch(function(e) {
-//       console.log(e.stack);
-//     });
-//   })
-//   .teardown(function(context, stats, options, callback) {
-//     co(function*(){
-//       // Stop the db connection
-//       yield context.db.close();
-//       // Start up the server
-//       context.manager.stop();
-//       // Finish up
-//       callback();
-//     }).catch(function(e) {
-//       console.log(e.stack);
-//     });
-//   })
-// );
+// Find many and empty the cursor
+//
+// -----------------------------------------------------------------------------
+
+// Add the flat json parsing test
+suite.addTest(new Benchmark('find many and empty the cursor')
+  // The benchmark function
+  .set(function(context, callback) {
+    context.collection.find({}).each(function(e, r) {
+      if(r == null) callback();
+    });
+  })
+  .setup(function(context, options, callback) {
+    co(function*(){
+      // Create a bson serializer
+      var bson = new BSON();
+      // Start up the server
+      context.manager = yield globalSetup();
+      // Get db connection
+      context.db = yield getDb('benchmark', 10);
+      // Get the corpus collection
+      context.collection = context.db.collection('corpus');
+      // Id used for the docs
+      context.id = 1;
+      // Total size of query
+      context.size = 0;
+      // Context query id
+      context.queryId = 1;
+      // Contains pipe
+      var pipe = ldj.parse();
+      // Insert all the documents
+      var filestream = fs.createReadStream(f('%s/performance-data/TWITTER', __dirname));
+      filestream
+        .pipe(pipe)
+        .on('data', function(doc) {
+          pipe.pause();
+          // Add _id value
+          doc._id = context.id++;
+          // Calculate size of entire query
+          context.size = context.size + bson.calculateObjectSize(doc);
+          // Perform an insert
+          context.collection.insertOne(doc, {w:1}, function(err, r) {
+            pipe.resume();
+          });
+        })
+        .on('end', function() {
+          callback();
+        });
+    }).catch(function(e) {
+      console.log(e.stack);
+    });
+  })
+  .teardown(function(context, stats, options, callback) {
+    co(function*(){
+      // Stop the db connection
+      yield context.db.close();
+      // Start up the server
+      context.manager.stop();
+      // Finish up
+      callback();
+    }).catch(function(e) {
+      console.log(e.stack);
+    });
+  })
+);
 
 // // -----------------------------------------------------------------------------
 // //
