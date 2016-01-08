@@ -448,3 +448,24 @@ exports['Should correctly apply readPreferences specified as objects'] = {
     });
   }
 }
+
+/**
+ * @ignore
+ */
+exports['Should correctly pass readPreferences specified as objects to cursors'] = {
+  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    configuration.newDbInstance({w:1}, {poolSize:1}).open(function(err, db) {
+      test.equal(null, err);
+      // Create read preference object.
+      var mySecondaryPreferred = {mode:'secondaryPreferred', tags:[]};
+      db.listCollections({}, {readPreference:mySecondaryPreferred}).toArray(function(err, result) {
+        test.equal(null, err);
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
