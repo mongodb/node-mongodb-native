@@ -39,7 +39,7 @@ If you have **NPM 2.0** or earlier NPM will attempt to download and build the `k
 npm WARN EPEERINVALID mongodb-core@1.2.21 requires a peer of kerberos@~0.0 but none was installed.
 ```
 
-This tells you that the driver could not resolve it's `peerDependency`. However don't worry. You only need the `kerberos` module if intend to use `kerberos`. In the case you need to you can add it to your package.json by doing the following for the case of the line above.
+This tells you that the driver could not resolve it's `peerDependency`. However don't worry. You only need the `kerberos` module if you intend to use `kerberos`. In case you need to you can add it to your package.json by doing the following for the case of the line above.
 
 ```
 npm install kerberos@0.0.x
