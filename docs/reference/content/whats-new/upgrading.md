@@ -10,7 +10,7 @@ title = "Upgrading to 2.0"
 
 # Migrating Your Application To 2.0
 
-There are some key changes in the driver going from 1.X to 2.X that one needs to be aware off before changing your application to using the new 2.X versions. There has been some cleanup of API's and some deprecations of 1.X features.
+There are some key changes in the driver going from 1.X to 2.X that one needs to be aware of before changing your application to using the new 2.X versions. There has been some cleanup of API's and some deprecations of 1.X features.
 
 ## Design differences in 2.X
 
@@ -32,7 +32,7 @@ The grid object has been removed as it's not widely used and offers very limited
 
 ### Db Object
 
-The db instance object have had several changes made to it. We've removed the following methods.
+The db instance object has had several changes made to it. We've removed the following methods.
 
 * `db.dereference` due to db references being deprecated in the server.
 * `db.cursorInfo` removed as it never worked reliably.
