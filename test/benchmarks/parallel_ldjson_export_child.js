@@ -10,14 +10,16 @@ module.exports = function(o, callback) {
     var collection = client.collection('corpus');
     // Calculate the skip and limit
     var skip = indexes[0] * 5000;
+    var end = indexes[1] * 5000;
     var limit = (indexes[1] - indexes[0]) * 5000;
     var docs = [];
     var index = indexes[0];
     var left = indexes[1] - indexes[0];
     var totalDocs = 0;
 
+    // console.dir({$gte: {_i: skip}, $lte: {_i: end}})
     // Peform the query
-    collection.find().skip(skip).limit(limit).each(function(err, doc) {
+    collection.find({_i : {$gte: skip, $lte: end}}).each(function(err, doc) {
       if(doc == null) return callback();
       docs.push(doc);
       totalDocs++;

@@ -1,9 +1,11 @@
-module.exports = function(files, callback) {
+module.exports = function(o, callback) {
   var MongoClient = require('../../').MongoClient,
     fs = require('fs');
 
   // Connect to db
   MongoClient.connect('mongodb://localhost:27017/benchmark?maxPoolSize=10', function(e, client) {
+    var files = o.files;
+    var index = o.index;
     // Files left
     var left = files.length;
     // Collection
@@ -17,7 +19,9 @@ module.exports = function(files, callback) {
 
         // Insert docs
         collection.insertMany(entries.map(function(x) {
-          return JSON.parse(x);
+          var obj = JSON.parse(x);
+          obj._i = index++;
+          return obj;
         }), {ordered:false}, function() {
           left = left - 1;
 

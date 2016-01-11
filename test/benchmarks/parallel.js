@@ -55,7 +55,10 @@ suite.addTest(new Benchmark('LDJSON multi-file import', {
 
     // Go over all the workers
     for(var i = 0; i < workers; i++) {
-      processes(files.slice(index, index + range), function(err, outp) {
+      processes({
+        index: index,
+        files: files.slice(index, index + range)
+      }), function(err, outp) {
         workersleft = workersleft - 1;
 
         if(workersleft == 0) {
@@ -159,24 +162,25 @@ suite.addTest(new Benchmark('LDJSON multi-file export', {
       context.db = yield getDb('benchmark', 50);
       // Get the corpus collection
       context.collection = context.db.collection('corpus');
+      // Create an index for _i field
+      yield context.collection.ensureIndex({_i:1});
       // Total number of docs
       context.docs = 0;
 
       // Number of workers
       var workers = 10;
-      // var workers = 1;
+      // workers = 1;
 
       // Worker farm
       var workerFarm = require('worker-farm'),
         processes = workerFarm({
           maxConcurrentWorkers: workers,
           autoStart: true
-        }, require.resolve(f('%s/parallel_ldjson_child', __dirname)));
+        }, require.resolve(f('%s/parallel_ldjson_import_child', __dirname)));
 
       // Read in all the ldjson documents
       var files = fs.readdirSync(f('%s/performance-data/LDJSON_MULTI', __dirname));
-      // files = files.slice(0, 1);
-
+      // files = files.slice(0, 1)
       // Process all the files
       files = files.filter(function(x) {
         return x.indexOf('.txt');
@@ -191,7 +195,10 @@ suite.addTest(new Benchmark('LDJSON multi-file export', {
 
       // Go over all the workers
       for(var i = 0; i < workers; i++) {
-        processes(files.slice(index, index + range), function(err, outp) {
+        processes({
+          index: index,
+          files: files.slice(index, index + range)
+        }, function(err, outp) {
           workersleft = workersleft - 1;
           context.docs += 5000;
 
