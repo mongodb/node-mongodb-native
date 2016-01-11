@@ -6,7 +6,7 @@
 
 # Description
 
-The MongoDB driver is the high level part of the 2.1 or higher MongoDB driver and is meant for end users.
+The official [MongoDB](https://www.mongodb.com/) driver for Node.js. Provides a high-level API on top of [mongodb-core](https://www.npmjs.com/package/mongodb-core) that is meant for end users.
 
 ## MongoDB Node.JS Driver
 
