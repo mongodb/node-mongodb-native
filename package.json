@@ -30,7 +30,7 @@
     "mongodb-topology-manager": "1.0.x",
     "co": "4.5.4",
     "bluebird": "2.9.27",
-    "betterbenchmarks": "^1.0.0",
+    "betterbenchmarks": "^0.1.0",
     "JSONStream": "^1.0.7",
     "event-stream": "^3.3.2",
     "ldjson-stream": "^1.2.1",
