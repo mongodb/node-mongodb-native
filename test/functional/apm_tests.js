@@ -78,10 +78,10 @@ exports['Correctly receive the APM events for a listCollections command'] = {
           }
         });
 
-        db.listCollections({}, {readPeference: ReadPreference.PRIMARY}).toArray(function(err, cols) {
+        db.listCollections({}, {readPreference: ReadPreference.PRIMARY}).toArray(function(err, cols) {
           test.equal(null, err);
 
-          db.listCollections({}, {readPeference: ReadPreference.SECONDARY}).toArray(function(err, cols) {
+          db.listCollections({}, {readPreference: ReadPreference.SECONDARY}).toArray(function(err, cols) {
             test.equal(null, err);
 
             // Ensure command was not sent to the primary
@@ -128,10 +128,10 @@ exports['Correctly receive the APM events for a listIndexes command'] = {
           }
         });
 
-        db.collection('apm_test_list_collections').listIndexes({readPeference: ReadPreference.PRIMARY}).toArray(function(err, cols) {
+        db.collection('apm_test_list_collections').listIndexes({readPreference: ReadPreference.PRIMARY}).toArray(function(err, cols) {
           test.equal(null, err);
 
-          db.collection('apm_test_list_collections').listIndexes({readPeference: ReadPreference.SECONDARY}).toArray(function(err, cols) {
+          db.collection('apm_test_list_collections').listIndexes({readPreference: ReadPreference.SECONDARY}).toArray(function(err, cols) {
             test.equal(null, err);
 
             // Ensure command was not sent to the primary
