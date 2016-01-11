@@ -9,7 +9,8 @@ function globalSetup() {
   return new Promise(function(resolve, reject) {
     co(function*() {
       var manager = new ServerManager('mongod', {
-        bind_ip: 'localhost', port: 27017, dbpath: f('%s/../db/27017', __dirname)
+          bind_ip: 'localhost', port: 27017, dbpath: f('%s/../db/27017', __dirname)
+        , storageEngine: 'inMemory', quiet: null
       });
 
       // Purge the directory

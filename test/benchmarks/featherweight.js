@@ -1,7 +1,6 @@
 var Suite = require('betterbenchmarks').Suite,
   Benchmark = require('betterbenchmarks').Benchmark,
   JSONStream = require('JSONStream'),
-  // MBSimpleReporter = require('./mb_featherweight_reporter'),
   es = require('event-stream'),
   co = require('co'),
   f = require('util').format,
