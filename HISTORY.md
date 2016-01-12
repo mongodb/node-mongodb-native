@@ -1,3 +1,7 @@
+1.2.32 01-12-2016
+-----------------
+- Bumped bson to V0.4.21 to allow using minor optimizations.
+
 1.2.31 01-04-2016
 -----------------
 - Allow connection to secondary if primaryPreferred or secondaryPreferred (Issue #70, https://github.com/leichter)

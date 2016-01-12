@@ -1,6 +1,6 @@
 {
   "name": "mongodb-core",
-  "version": "1.2.31",
+  "version": "1.2.32",
   "description": "Core MongoDB driver functionality, no bells and whistles and meant for integration not end applications",
   "main": "index.js",
   "scripts": {
@@ -15,7 +15,7 @@
     "core"
   ],
   "dependencies": {
-    "bson": "~0.4.20"
+    "bson": "~0.4.21"
   },
   "devDependencies": {
     "mongodb-topology-manager": "1.0.x",
