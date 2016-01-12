@@ -206,6 +206,42 @@
             "uri": "mongodb://alice@foo:bar@127.0.0.1", 
             "valid": false, 
             "warning": null
+        },  
+        {
+            "auth": null, 
+            "description": "Illegal backslash at the end", 
+            "hosts": null, 
+            "options": null, 
+            "uri": "mongodb://localhost:27107/admin/", 
+            "valid": false, 
+            "warning": null
+        }, 
+        {
+            "auth": null, 
+            "description": "More than 1 database name in URL", 
+            "hosts": null, 
+            "options": null, 
+            "uri": "mongodb://localhost:27107/admin/admin2", 
+            "valid": false, 
+            "warning": null
+        }, 
+        {
+            "auth": null, 
+            "description": "Illegal backslash at the end (Unix socket)", 
+            "hosts": null, 
+            "options": null, 
+            "uri": "mongodb://%2Ftmp%2Fmongodb-27017.sock/admin/", 
+            "valid": false, 
+            "warning": null
+        }, 
+        {
+            "auth": null, 
+            "description": "More than 1 database name in URL (Unix socket)", 
+            "hosts": null, 
+            "options": null, 
+            "uri": "mongodb://%2Ftmp%2Fmongodb-27017.sock/admin/admin2", 
+            "valid": false, 
+            "warning": null
         }
     ]
 }

@@ -191,3 +191,35 @@ tests:
         hosts: ~
         auth: ~
         options: ~
+    -
+        description: "Illegal backslash at the end"
+        uri: "mongodb://localhost:27107/admin/"
+        valid: false
+        warning: ~
+        hosts: ~
+        auth: ~
+        options: ~
+    -
+        description: "More than 1 database name in URL"
+        uri: "mongodb://localhost:27107/admin/admin2"
+        valid: false
+        warning: ~
+        hosts: ~
+        auth: ~
+        options: ~
+    -
+        description: "Illegal backslash at the end (Unix socket)"
+        uri: "mongodb://%2Ftmp%2Fmongodb-27017.sock/admin/"
+        valid: false
+        warning: ~
+        hosts: ~
+        auth: ~
+        options: ~
+    -
+        description: "More than 1 database name in URL (Unix socket)"
+        uri: "mongodb://%2Ftmp%2Fmongodb-27017.sock/admin/admin2"
+        valid: false
+        warning: ~
+        hosts: ~
+        auth: ~
+        options: ~
