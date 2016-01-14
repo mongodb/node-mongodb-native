@@ -1,3 +1,9 @@
+2.1.4 01-12-2015
+----------------
+- Restricted node engine to >0.10.3 (https://jira.mongodb.org/browse/NODE-635).
+- Multiple database names ignored without a warning (https://jira.mongodb.org/browse/NODE-636, Issue #1324, https://github.com/yousefhamza).
+- Convert custom readPreference objects in collection.js (Issue #1326, https://github.com/Machyne).
+
 2.1.3 01-04-2015
 ----------------
 * Updated mongodb-core to 1.2.31.
