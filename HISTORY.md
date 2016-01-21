@@ -1,3 +1,9 @@
+1.2.33
+-----------------
+- Added raw support for the command function on topologies.
+- Fixed issue where raw results that fell on batchSize boundaries failed (Issue #72)
+- Added connection hash id to be able to reference connection host/name without leaking it outside of driver.
+
 1.2.32 01-12-2016
 -----------------
 - Bumped bson to V0.4.21 to allow using minor optimizations.
