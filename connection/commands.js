@@ -107,11 +107,11 @@ Query.prototype.toBin = function() {
   if(this.oplogReplay) {
     flags |= OPTS_OPLOG_REPLAY;
   }
-  
+
   if(this.noCursorTimeout) {
     flags |= OPTS_NO_CURSOR_TIMEOUT;
   }
-  
+
   if(this.awaitData) {
     flags |= OPTS_AWAIT_DATA;
   }
@@ -119,7 +119,7 @@ Query.prototype.toBin = function() {
   if(this.exhaust) {
     flags |= OPTS_EXHAUST;
   }
-  
+
   if(this.partial) {
     flags |= OPTS_PARTIAL;
   }
