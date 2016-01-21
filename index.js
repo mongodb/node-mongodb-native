@@ -1,5 +1,6 @@
 // Core module
-var core = require('mongodb-core');
+var core = require('mongodb-core'),
+  Instrumentation = require('./lib/apm');
 
 // Set up the connect function
 var connect = require('./lib/mongo_client').connect;
@@ -8,6 +9,7 @@ var connect = require('./lib/mongo_client').connect;
 connect.MongoError = core.MongoError;
 
 // Actual driver classes exported
+connect.Admin = require('./lib/admin');
 connect.MongoClient = require('./lib/mongo_client');
 connect.Db = require('./lib/db');
 connect.Collection = require('./lib/collection');
@@ -19,10 +21,12 @@ connect.GridStore = require('./lib/gridfs/grid_store');
 connect.Chunk = require('./lib/gridfs/chunk');
 connect.Logger = core.Logger;
 connect.Cursor = require('./lib/cursor');
+connect.GridFSBucket = require('./lib/gridfs-stream');
 
 // BSON types exported
 connect.Binary = core.BSON.Binary;
 connect.Code = core.BSON.Code;
+connect.Map = core.BSON.Map;
 connect.DBRef = core.BSON.DBRef;
 connect.Double = core.BSON.Double;
 connect.Long = core.BSON.Long;
@@ -35,5 +39,12 @@ connect.Timestamp = core.BSON.Timestamp;
 
 // Add connect method
 connect.connect = connect;
+
+// Set up the instrumentation method
+connect.instrument = function(options, callback) {
+  if(typeof options == 'function') callback = options, options = {};
+  return new Instrumentation(core, options, callback);
+}
+
 // Set our exports to be the connect function
 module.exports = connect;

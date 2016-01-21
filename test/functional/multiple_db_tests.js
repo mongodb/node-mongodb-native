@@ -7,7 +7,7 @@ exports.shouldCorrectlyEmitErrorOnAllDbsOnPoolClose = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: {topology: 'single'} },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     if(process.platform !== 'linux') {
@@ -22,7 +22,7 @@ exports.shouldCorrectlyEmitErrorOnAllDbsOnPoolClose = {
       db.on("close", function(err) {
         numberOfCloses = numberOfCloses + 1;
       })
-      
+
       db.open(function(err, db) {
         db.createCollection('shouldCorrectlyErrorOnAllDbs', function(err, collection) {
           test.equal(null, err);
@@ -49,7 +49,7 @@ exports.shouldCorrectlyEmitErrorOnAllDbsOnPoolClose = {
             db.close();
           });
         });
-      });      
+      });
     } else {
       test.done();
     }
@@ -58,12 +58,12 @@ exports.shouldCorrectlyEmitErrorOnAllDbsOnPoolClose = {
 
 /**
  * Test the auto connect functionality of the db
- * 
+ *
  * @ignore
  */
 exports.shouldCorrectlyUseSameConnectionsForTwoDifferentDbs = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var client = configuration.newDbInstance({w:1}, {poolSize:1});
@@ -77,7 +77,7 @@ exports.shouldCorrectlyUseSameConnectionsForTwoDifferentDbs = {
         var secondDb = client.db(configuration.db_name + "_2");
         secondDb.createCollection('shouldCorrectlyUseSameConnectionsForTwoDifferentDbs', function(err, collection) {
           // Insert a dummy document
-          collection.insert({a:20}, {safe: true}, function(err, r) {            
+          collection.insert({a:20}, {safe: true}, function(err, r) {
             test.equal(null, err);
 
             // Query it
@@ -87,8 +87,8 @@ exports.shouldCorrectlyUseSameConnectionsForTwoDifferentDbs = {
               // Use the other db
               client.createCollection('shouldCorrectlyUseSameConnectionsForTwoDifferentDbs', function(err, collection) {
                 // Insert a dummy document
-                collection.insert({b:20}, {safe: true}, function(err, r) {            
-                  test.equal(null, err);            
+                collection.insert({b:20}, {safe: true}, function(err, r) {
+                  test.equal(null, err);
 
                   // Query it
                   collection.findOne({}, function(err, item) {
@@ -96,12 +96,12 @@ exports.shouldCorrectlyUseSameConnectionsForTwoDifferentDbs = {
 
                     test.equal(null, err);
                     client.close();
-                    second_test_database.close();            
-                    test.done();                
-                  });              
+                    second_test_database.close();
+                    test.done();
+                  });
                 });
               });
-            });              
+            });
           });
         });
       });
@@ -114,7 +114,7 @@ exports.shouldCorrectlyUseSameConnectionsForTwoDifferentDbs = {
  */
 exports.shouldCorrectlyHandleMultipleDbsFindAndModifies = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1});
@@ -138,11 +138,11 @@ exports.shouldCorrectlyHandleMultipleDbsFindAndModifies = {
  */
 exports['should not leak listeners'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
-    var MongoClient = configuration.require.MongoClient;     
-    MongoClient.connect(configuration.url(), function(err, db) {
+    var MongoClient = configuration.require.MongoClient;
+    MongoClient.connect(configuration.url(), {server: {sslValidate: false}}, function(err, db) {
       for (var i = 0; i < 100; i++) {
         db.db("test");
       }

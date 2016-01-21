@@ -7,7 +7,7 @@ var f = require('util').format;
  */
 exports['Should correctly connect and then handle a mongos failure'] = {
   metadata: { requires: { topology: 'sharded' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Mongos = configuration.require.Mongos
@@ -28,7 +28,6 @@ exports['Should correctly connect and then handle a mongos failure'] = {
       db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
         test.equal(null, err);
         test.equal(1, result.result.n);
-        // process.exit(0)
         var numberOfTicks = 10;
 
         var ticker = function() {
@@ -36,7 +35,7 @@ exports['Should correctly connect and then handle a mongos failure'] = {
 
           db.collection('replicaset_mongo_client_collection').findOne(function(err, doc) {
             if(numberOfTicks == 0) {
-              manager.add(serverDetails, function(err, result) {
+              mongos.start().then(function() {
                 db.close();
                 test.done();
               });
@@ -46,12 +45,13 @@ exports['Should correctly connect and then handle a mongos failure'] = {
           });
         }
 
-        // Kill the mongos proxy
-        manager.remove('mongos', {index: 0}, function(err, details) {
-          serverDetails = details;
+        // Get first proxy
+        var mongos = manager.proxies()[0];
+        mongos.stop().then(function() {
+          serverDetails = mongos;
           setTimeout(ticker, 1000);
         });
-      });    
+      });
     });
   }
 }
@@ -61,7 +61,7 @@ exports['Should correctly connect and then handle a mongos failure'] = {
  */
 exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = {
   metadata: { requires: { topology: 'sharded' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Mongos = configuration.require.Mongos
@@ -76,7 +76,7 @@ exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = {
     var mongos = new Mongos([
         new Server(configuration.host, configuration.port, { auto_reconnect: true }),
         new Server(configuration.host, configuration.port + 1, { auto_reconnect: true })
-      ], {ha:true, poolSize:1})
+      ], {ha:true, haInterval: 500, poolSize:1})
 
     // Counters to track emitting of events
     var numberOfJoins = 0;
@@ -103,8 +103,11 @@ exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = {
       collection.insert({test:1}, {w:1}, function(err, result) {
         test.equal(null, err);
 
+        // Server managers
+        var proxies = manager.proxies();
+
         // Kill the mongos proxy
-        manager.remove('mongos', {index: 0}, function(err, serverDetails1) {
+        proxies[0].stop().then(function() {
 
           // Attempt another insert
           collection.insert({test:2}, {w:1}, function(err, result) {
@@ -112,41 +115,42 @@ exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = {
             test.equal(1, mongos.connections().length);
 
             // Restart the other mongos
-            manager.add(serverDetails1, function(err, result) {
+            proxies[0].start().then(function() {
 
               // Wait for the ha process to pick up the existing new server
               setTimeout(function() {
                 test.equal(2, mongos.connections().length);
 
-                // Kill the mongos proxy
-                manager.remove('mongos', {index: 1}, function(err, serverDetails2) {
+                // // Kill the mongos proxy
+                // manager.remove('mongos', {index: 1}, function(err, serverDetails2) {
+                proxies[1].stop().then(function() {
                   // Attempt another insert
                   collection.insert({test:3}, {w:1}, function(err, result) {
                     test.equal(null, err);
                     test.equal(1, mongos.connections().length);
 
                     // Restart the other mongos
-                    manager.add(serverDetails2, function(err, result) {
+                    proxies[1].start().then(function() {
                       // Wait for the ha process to pick up the existing new server
                       setTimeout(function() {
                         // Kill the mongos proxy
-                        manager.remove('mongos', {index: 1}, function(err, serverDetails3) {
+                        proxies[1].stop().then(function() {
                           // Attempt another insert
                           collection.insert({test:4}, {w:1}, function(err, result) {
                             test.equal(null, err);
+                            test.equal(1, mongos.connections().length);
 
-                            // Wait for the ha process to pick up the existing new server
-                            setTimeout(function() {
-                              test.equal(1, mongos.connections().length);
-
-                              manager.add(serverDetails3, function(err, result) {
+                            // manager.add(serverDetails3, function(err, result) {
+                            proxies[1].start().then(function() {
+                              // Wait for the ha process to pick up the existing new server
+                              setTimeout(function() {
                                 test.equal(2, mongos.connections().length);
                                 test.equal(4, numberOfJoins);
                                 test.equal(3, numberLeaving);
                                 db.close();
                                 test.done();
-                              });
-                            }, 10000);
+                              }, 10000);
+                            });
                           });
                         });
                       }, 10000);
@@ -167,7 +171,7 @@ exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = {
  */
 exports['Should correctly connect and emit a reconnect event after mongos failover'] = {
   metadata: { requires: { topology: 'sharded' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Mongos = configuration.require.Mongos
@@ -191,21 +195,24 @@ exports['Should correctly connect and emit a reconnect event after mongos failov
         reconnectCalled = true;
       });
 
-      // Kill first mongos
-      manager.remove('mongos', {index: 0}, function(err, serverDetails1) {
-    
-        // Kill second mongos
-        manager.remove('mongos', {index: 1}, function(err, serverDetails2) {
+      // Server managers
+      var proxies = manager.proxies();
+
+      // Kill the mongos proxy
+      proxies[0].stop().then(function() {
+
+        // Kill the mongos proxy
+        proxies[1].stop().then(function() {
+
           // Cause an insert to be buffered
           db.collection("replicaset_mongo_client_collection").insert({c:1}, function(err, db) {
           });
 
-          // Restart the mongos 
-          manager.add(serverDetails1, function(err, result) {
+          // Kill the mongos proxy
+          proxies[0].start().then(function() {
 
-            // Restart the mongos 
-            manager.add(serverDetails2, function(err, result) {
-
+            // Kill the mongos proxy
+            proxies[1].start().then(function() {
               db.collection("replicaset_mongo_client_collection").insert({c:1}, function(err) {
                 test.equal(null, err);
                 test.ok(reconnectCalled);

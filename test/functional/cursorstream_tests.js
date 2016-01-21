@@ -2,7 +2,7 @@
 
 exports.shouldStreamDocumentsWithPauseAndResumeForFetching = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var docs = []
@@ -49,7 +49,7 @@ exports.shouldStreamDocumentsWithPauseAndResumeForFetching = {
                 test.equal(3000, data.length);
                 db.close();
                 test.done();
-              });              
+              });
             }
           });
         }
@@ -60,7 +60,7 @@ exports.shouldStreamDocumentsWithPauseAndResumeForFetching = {
 
 exports.shouldStream10KDocuments = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Binary = configuration.require.Binary;
@@ -119,7 +119,7 @@ exports.shouldStream10KDocuments = {
 
 exports.shouldTriggerMassiveAmountOfGetMores = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Binary = configuration.require.Binary;
@@ -165,7 +165,7 @@ exports.shouldTriggerMassiveAmountOfGetMores = {
 
 exports.shouldStreamDocumentsAcrossGetMoreCommandAndCountCorrectly = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID
@@ -186,7 +186,7 @@ exports.shouldStreamDocumentsAcrossGetMoreCommandAndCountCorrectly = {
 
       var collection = db.collection('test_streaming_function_with_limit_for_fetching');
       var updateCollection = db.collection('test_streaming_function_with_limit_for_fetching_update');
-      
+
       var left = allDocs.length;
       for(var i = 0; i < allDocs.length; i++) {
         collection.insert(allDocs[i], {w:1}, function(err, docs) {
@@ -195,9 +195,9 @@ exports.shouldStreamDocumentsAcrossGetMoreCommandAndCountCorrectly = {
           if(left == 0) {
             var cursor = collection.find({});
             // Execute find on all the documents
-            var stream = cursor.stream(); 
+            var stream = cursor.stream();
 
-            stream.on('end', function() { 
+            stream.on('end', function() {
               updateCollection.findOne({id:1}, function(err, doc) {
                 test.equal(null, err);
                 test.equal(2000, doc.count);
@@ -207,13 +207,13 @@ exports.shouldStreamDocumentsAcrossGetMoreCommandAndCountCorrectly = {
               })
             });
 
-            stream.on('data',function(data){ 
+            stream.on('data',function(data){
               stream.pause();
 
               updateCollection.update({id: 1}, {$inc: {count: 1}}, {w:1, upsert:true}, function(err, result) {
                 stream.resume();
               });
-            }); 
+            });
           }
         });
       }

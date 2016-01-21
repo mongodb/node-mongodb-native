@@ -10,11 +10,11 @@ var parse = require('../../lib/url_parser');
  */
 exports['Should correctly parse mongodb://localhost'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://localhost");
+    var object = parse("mongodb://localhost/");
     test.equal(1, object.servers.length);
     test.equal('localhost', object.servers[0].host);
     test.equal('27017', object.servers[0].port);
@@ -28,11 +28,11 @@ exports['Should correctly parse mongodb://localhost'] = {
  */
 exports['Should correctly parse mongodb://localhost:27017'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://localhost:27017");
+    var object = parse("mongodb://localhost:27017/");
     test.equal(1, object.servers.length);
     test.equal('localhost', object.servers[0].host);
     test.equal('27017', object.servers[0].port);
@@ -44,13 +44,13 @@ exports['Should correctly parse mongodb://localhost:27017'] = {
 /**
  * @ignore
  */
-exports['Should correctly parse mongodb://localhost?safe=true&readPreference=secondary'] = {
+exports['Should correctly parse mongodb://localhost/?safe=true&readPreference=secondary'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://localhost?safe=true&readPreference=secondary");
+    var object = parse("mongodb://localhost/?safe=true&readPreference=secondary");
     // var object = parse("mongodb://localhost?safe");
     test.equal(1, object.servers.length);
     test.equal('localhost', object.servers[0].host);
@@ -63,13 +63,13 @@ exports['Should correctly parse mongodb://localhost?safe=true&readPreference=sec
 /**
  * @ignore
  */
-exports['Should correctly parse mongodb://localhost:28101'] = {
+exports['Should correctly parse mongodb://localhost:28101/'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
-    var object = parse("mongodb://localhost:28101");
+    var object = parse("mongodb://localhost:28101/");
     test.equal(1, object.servers.length);
     test.equal('localhost', object.servers[0].host);
     test.equal('28101', object.servers[0].port);
@@ -83,7 +83,7 @@ exports['Should correctly parse mongodb://localhost:28101'] = {
  */
 exports['Should correctly parse mongodb://fred:foobar@localhost/baz'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
@@ -103,7 +103,7 @@ exports['Should correctly parse mongodb://fred:foobar@localhost/baz'] = {
  */
 exports['Should correctly parse mongodb://fred:foo%20bar@localhost/baz'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
@@ -123,7 +123,7 @@ exports['Should correctly parse mongodb://fred:foo%20bar@localhost/baz'] = {
  */
 exports['Should correctly parse mongodb:///tmp/mongodb-27017.sock'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
@@ -140,7 +140,7 @@ exports['Should correctly parse mongodb:///tmp/mongodb-27017.sock'] = {
  */
 exports['Should correctly parse mongodb://fred:foo@/tmp/mongodb-27017.sock'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
@@ -159,7 +159,7 @@ exports['Should correctly parse mongodb://fred:foo@/tmp/mongodb-27017.sock'] = {
  */
 exports['Should correctly parse mongodb://fred:foo@/tmp/mongodb-27017.sock/somedb'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
@@ -178,7 +178,7 @@ exports['Should correctly parse mongodb://fred:foo@/tmp/mongodb-27017.sock/somed
  */
 exports['Should correctly parse mongodb://fred:foo@/tmp/mongodb-27017.sock/somedb?safe=true'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
@@ -198,7 +198,7 @@ exports['Should correctly parse mongodb://fred:foo@/tmp/mongodb-27017.sock/somed
  */
 exports['Should correctly parse mongodb://example1.com:27017,example2.com:27018'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
@@ -218,7 +218,7 @@ exports['Should correctly parse mongodb://example1.com:27017,example2.com:27018'
  */
 exports['Should correctly parse mongodb://localhost,localhost:27018,localhost:27019'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
@@ -240,7 +240,7 @@ exports['Should correctly parse mongodb://localhost,localhost:27018,localhost:27
  */
 exports['Should correctly parse mongodb://host1,host2,host3/?slaveOk=true'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
@@ -261,9 +261,32 @@ exports['Should correctly parse mongodb://host1,host2,host3/?slaveOk=true'] = {
 /**
  * @ignore
  */
+exports['Should correctly parse mongodb://host1,host2,host3,host1/?slaveOk=true and de-duplicate names'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configure, test) {
+    // console.dir(parse)
+    var object = parse("mongodb://host1,host2,host3,host1/?slaveOk=true");
+    test.equal(3, object.servers.length);
+    test.equal("host1", object.servers[0].host);
+    test.equal('27017', object.servers[0].port);
+    test.equal("host2", object.servers[1].host);
+    test.equal('27017', object.servers[1].port);
+    test.equal("host3", object.servers[2].host);
+    test.equal('27017', object.servers[2].port);
+    test.equal('admin', object.dbName);
+    test.equal(true, object.server_options.slave_ok);
+    test.done();
+  }
+}
+
+/**
+ * @ignore
+ */
 exports['Should correctly parse mongodb://localhost/?safe=true'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
@@ -282,7 +305,7 @@ exports['Should correctly parse mongodb://localhost/?safe=true'] = {
  */
 exports['Should correctly parse mongodb://host1,host2,host3/?safe=true;w=2;wtimeoutMS=2000'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
@@ -307,7 +330,7 @@ exports['Should correctly parse mongodb://host1,host2,host3/?safe=true;w=2;wtime
  */
 exports['Parse mongodb://localhost/db?replicaSet=hello&ssl=prefer&connectTimeoutMS=1000&socketTimeoutMS=2000'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
@@ -332,7 +355,7 @@ exports['Parse mongodb://localhost/db?replicaSet=hello&ssl=prefer&connectTimeout
  */
 exports['Parse mongodb://localhost/db?ssl=true'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
@@ -352,7 +375,7 @@ exports['Parse mongodb://localhost/db?ssl=true'] = {
  */
 exports['Parse mongodb://localhost/db?maxPoolSize=100'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
@@ -372,7 +395,7 @@ exports['Parse mongodb://localhost/db?maxPoolSize=100'] = {
  */
 exports['Parse mongodb://localhost/db?w=-1'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
@@ -391,7 +414,7 @@ exports['Parse mongodb://localhost/db?w=-1'] = {
  */
 exports['Throw on unsuported options'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
@@ -409,7 +432,7 @@ exports['Throw on unsuported options'] = {
  */
 exports['Write concerns parsing'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     var object = parse("mongodb://localhost/db?safe=true&w=1");
@@ -430,7 +453,7 @@ exports['Write concerns parsing'] = {
  */
 exports['GSSAPI parsing'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     var object = parse("mongodb://dev1%4010GEN.ME@kdc.10gen.com/test?authMechanism=GSSAPI");
@@ -448,7 +471,7 @@ exports['GSSAPI parsing'] = {
     try {
       parse("mongodb://kdc.10gen.com/test?authMechanism=NONE");
     } catch(err) {
-      test.equal("only GSSAPI, PLAIN, MONGODB-X509, SCRAM-SHA-1 or MONGODB-CR is supported by authMechanism", err.message);
+      test.equal("only DEFAULT, GSSAPI, PLAIN, MONGODB-X509, SCRAM-SHA-1 or MONGODB-CR is supported by authMechanism", err.message);
     }
 
     object = parse("mongodb://dev1%4010GEN.ME:test@kdc.10gen.com/test?authMechanism=GSSAPI");
@@ -463,29 +486,29 @@ exports['GSSAPI parsing'] = {
  */
 exports['Read preferences parsing'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     var object = parse("mongodb://localhost/db?slaveOk=true");
     test.equal(true, object.server_options.slave_ok);
 
     object = parse("mongodb://localhost/db?readPreference=primary");
-    test.equal("primary", object.db_options.read_preference);
+    test.equal("primary", object.db_options.readPreference);
 
     object = parse("mongodb://localhost/db?readPreference=primaryPreferred");
-    test.equal("primaryPreferred", object.db_options.read_preference);
+    test.equal("primaryPreferred", object.db_options.readPreference);
 
     object = parse("mongodb://localhost/db?readPreference=secondary");
-    test.equal("secondary", object.db_options.read_preference);
+    test.equal("secondary", object.db_options.readPreference);
 
     object = parse("mongodb://localhost/db?readPreference=secondaryPreferred");
-    test.equal("secondaryPreferred", object.db_options.read_preference);
+    test.equal("secondaryPreferred", object.db_options.readPreference);
 
     object = parse("mongodb://localhost/db?readPreference=nearest");
-    test.equal("nearest", object.db_options.read_preference);
+    test.equal("nearest", object.db_options.readPreference);
 
     object = parse("mongodb://localhost/db");
-    test.equal("primary", object.db_options.read_preference);
+    test.equal("primary", object.db_options.readPreference);
 
     test.throws(function() {parse("mongodb://localhost/db?readPreference=blah"), "readPreference must be either primary/primaryPreferred/secondary/secondaryPreferred/nearest"});
     test.done();
@@ -497,7 +520,7 @@ exports['Read preferences parsing'] = {
  */
 exports['Read preferences tag parsing'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     var object = parse("mongodb://localhost/db");
@@ -523,7 +546,7 @@ exports['Read preferences tag parsing'] = {
  */
 exports['Should correctly parse mongodb://[::1]:1234'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
@@ -541,7 +564,7 @@ exports['Should correctly parse mongodb://[::1]:1234'] = {
  */
 exports['Should correctly parse mongodb://[::1]'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)
@@ -559,7 +582,7 @@ exports['Should correctly parse mongodb://[::1]'] = {
  */
 exports['Should correctly parse mongodb://localhost,[::1]:27018,[2607:f0d0:1002:51::41]'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     // console.dir(parse)

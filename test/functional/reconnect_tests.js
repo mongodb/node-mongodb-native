@@ -16,13 +16,13 @@ exports['Should correctly stop reconnection attempts after limit reached'] = {
 
     db.open(function(err, db) {
       // Now let's stop the server
-      configuration.manager.stop(function() {
+      configuration.manager.stop().then(function() {
 
         db.collection('waiting_for_reconnect').insert({a:1}, function(err, r) {
           test.ok(err != null);
           db.close();
 
-          configuration.manager.start(function() {
+          configuration.manager.start().then(function() {
             test.done();
           });
         });

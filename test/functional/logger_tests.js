@@ -13,6 +13,7 @@ exports['Should correctly Enable logging'] = {
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
+      test.equal(null, err);
       var collection = db.collection('enable_logging_1');
 
       // Logging setup
@@ -66,6 +67,50 @@ exports['Should not fail with undefined id'] = {
       // perform any operation that gets logged
       db.collection('foo').findOne({}, function(err) {
         test.equal(null, err);
+
+        // Clean up
+        Logger.reset();
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
+
+/**
+ * Should No fail with undefined id
+ * @ignore
+ */
+exports['Should correctly log cursor'] = {
+  metadata: { requires: { topology: ['single'] } },
+  
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient
+      , Logger = configuration.require.Logger;
+
+    MongoClient.connect('mongodb://localhost:27017/test', {}, function(err, db) {
+      test.equal(null, err);
+
+      // Status
+      var logged = false;
+
+      // Set the current logger
+      Logger.setCurrentLogger(function(msg, context) {
+        test.ok(msg != null);
+        test.equal('debug', context.type);
+        test.equal('Cursor', context.className);
+        logged = true;        
+      });
+
+      // Set the filter
+      Logger.setLevel('debug');
+      Logger.filter('class', ['Cursor']);
+
+      // perform any operation that gets logged
+      db.collection('logging').find().toArray(function(err, d) {
+        test.equal(null, err);
+        test.ok(logged);
 
         // Clean up
         Logger.reset();

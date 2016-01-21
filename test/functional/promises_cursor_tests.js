@@ -2,7 +2,7 @@
 
 var f = require('util').format;
 
-exports['Should correctly execute Collection.prototype.insertOne'] = {
+exports['Should correctly execute Collection.prototype.insertOne as promise'] = {
   metadata: {
     requires: {
       promises: true,
@@ -15,7 +15,7 @@ exports['Should correctly execute Collection.prototype.insertOne'] = {
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
     var url = configuration.url();
-    url = url.indexOf('?') != -1 
+    url = url.indexOf('?') != -1
       ? f('%s&%s', url, 'maxPoolSize=100')
       : f('%s?%s', url, 'maxPoolSize=100');
 

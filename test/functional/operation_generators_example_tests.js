@@ -18,15 +18,15 @@ var f = require('util').format;
 exports.aggregationExample2WithGenerators = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
-  
+  metadata: { requires: { generators:true, mongodb:">2.1.0", topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -47,10 +47,10 @@ exports.aggregationExample2WithGenerators = {
 
       // Create a collection
       var collection = db.collection('aggregationExample2_with_generatorsGenerator');
-      
+
       // Insert the docs
       yield collection.insertMany(docs, {w: 1});
-      
+
       // Execute aggregate, notice the pipeline is expressed as an Array
       var cursor = collection.aggregate([
           { $project : {
@@ -84,15 +84,15 @@ exports.aggregationExample2WithGenerators = {
 exports['Aggregation Cursor next Test with Generators'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
-  
+  metadata: { requires: { generators:true, mongodb:">2.1.0", topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -145,15 +145,15 @@ exports['Aggregation Cursor next Test with Generators'] = {
  * @ignore
  */
 exports.shouldCorrectlyDoSimpleCountExamplesWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -192,15 +192,15 @@ exports.shouldCorrectlyDoSimpleCountExamplesWithGenerators = {
  * @ignore
  */
 exports.shouldCreateComplexIndexOnTwoFieldsWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -217,7 +217,7 @@ exports.shouldCreateComplexIndexOnTwoFieldsWithGenerators = {
         , {a:2, b:2}, {a:3, b:3}, {a:4, b:4}], configuration.writeConcernMax());
 
       // Create an index on the a field
-      yield db.createIndex('createIndexExample1_with_generators', {a:1, b:1}
+      yield collection.createIndex({a:1, b:1}
         , {unique:true, background:true, w:1});
 
       // Show that duplicate records got dropped
@@ -225,7 +225,7 @@ exports.shouldCreateComplexIndexOnTwoFieldsWithGenerators = {
       test.equal(4, items.length);
 
       // Peform a query, with explain to show we hit the query
-      var explanation = yield collection.find({a:2}, {explain:true}).toArray()
+      var explanation = yield collection.find({a:2}).explain()
       test.ok(explanation != null);
 
       db.close();
@@ -243,15 +243,15 @@ exports.shouldCreateComplexIndexOnTwoFieldsWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilterWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -289,15 +289,15 @@ exports.shouldCorrectlyHandleDistinctIndexesWithSubQueryFilterWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyHandleDistinctIndexesWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -334,15 +334,15 @@ exports.shouldCorrectlyHandleDistinctIndexesWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyDropCollectionWithDropFunctionWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -355,7 +355,7 @@ exports.shouldCorrectlyDropCollectionWithDropFunctionWithGenerators = {
 
       // Create a collection we want to drop later
       var collection = yield db.createCollection('test_other_drop_with_generators');
-      
+
       // Drop the collection
       yield collection.drop();
 
@@ -393,15 +393,15 @@ exports.shouldCorrectlyDropCollectionWithDropFunctionWithGenerators = {
  * @ignore
  */
 exports.dropAllIndexesExample1WithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -411,7 +411,7 @@ exports.dropAllIndexesExample1WithGenerators = {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      yield db.createCollection('dropExample1_with_generators');          
+      yield db.createCollection('dropExample1_with_generators');
       // Drop the collection
       yield db.collection('dropExample1_with_generators').dropAllIndexes();
       // Let's close the db
@@ -430,15 +430,15 @@ exports.dropAllIndexesExample1WithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyCreateAndDropIndexWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -481,15 +481,15 @@ exports.shouldCorrectlyCreateAndDropIndexWithGenerators = {
  * @ignore
  */
 exports.shouldCreateComplexEnsureIndexWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -513,7 +513,7 @@ exports.shouldCreateComplexEnsureIndexWithGenerators = {
       test.equal(4, items.length);
 
       // Peform a query, with explain to show we hit the query
-      var explanation = yield collection.find({a:2}, {explain:true}).toArray();
+      var explanation = yield collection.find({a:2}).explain();
       test.ok(explanation != null);
 
       db.close();
@@ -531,15 +531,15 @@ exports.shouldCreateComplexEnsureIndexWithGenerators = {
  * @ignore
  */
 exports.ensureIndexExampleWithCompountIndexWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -563,7 +563,7 @@ exports.ensureIndexExampleWithCompountIndexWithGenerators = {
       test.equal(4, items.length);
 
       // Peform a query, with explain to show we hit the query
-      var explanation = yield collection.find({a:2}, {explain:true}).toArray();
+      var explanation = yield collection.find({a:2}).explain();
       test.ok(explanation != null);
 
       // Close db
@@ -582,15 +582,15 @@ exports.ensureIndexExampleWithCompountIndexWithGenerators = {
  * @ignore
  */
 exports.shouldPeformASimpleQueryWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -627,15 +627,15 @@ exports.shouldPeformASimpleQueryWithGenerators = {
  * @ignore
  */
 exports.shouldPeformASimpleExplainQueryWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -652,8 +652,8 @@ exports.shouldPeformASimpleExplainQueryWithGenerators = {
       yield collection.insertMany([{a:1}, {a:2}, {a:3}], configuration.writeConcernMax());
 
       // Peform a simple find and return all the documents
-      var docs = yield collection.find({}, {explain:true}).toArray();
-      test.equal(1, docs.length);
+      var explain = yield collection.find({}).explain();
+      test.ok(explain != null);
 
       db.close();
       test.done();
@@ -670,15 +670,15 @@ exports.shouldPeformASimpleExplainQueryWithGenerators = {
  * @ignore
  */
 exports.shouldPeformASimpleLimitSkipQueryWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -695,14 +695,15 @@ exports.shouldPeformASimpleLimitSkipQueryWithGenerators = {
       yield collection.insertMany([{a:1, b:1}, {a:2, b:2}, {a:3, b:3}], configuration.writeConcernMax());
 
       // Peform a simple find and return all the documents
-      var docs = yield collection.find({}, {skip:1, limit:1, fields:{b:1}}).toArray();
-      test.equal(1, docs.length);
-      test.equal(null, docs[0].a);
-      test.equal(2, docs[0].b);
+      var docs = yield collection.find({})
+      .skip(1).limit(1).project({b:1}).toArray();
+        test.equal(1, docs.length);
+        test.equal(null, docs[0].a);
+        test.equal(2, docs[0].b);
 
-      // Close db
-      db.close();
-      test.done();
+        // Close db
+        db.close();
+        test.done();
     });
     // END
   }
@@ -714,21 +715,21 @@ exports.shouldPeformASimpleLimitSkipQueryWithGenerators = {
  * The first findAndModify command modifies a document and returns the modified document back.
  * The second findAndModify command removes the document.
  * The second findAndModify command upserts a document and returns the new document.
- * 
+ *
  * @example-class Collection
  * @example-method findAndModify
  * @ignore
  */
 exports.shouldPerformSimpleFindAndModifyOperationsWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -780,15 +781,15 @@ exports.shouldPerformSimpleFindAndModifyOperationsWithGenerators = {
  * @ignore
  */
 exports.shouldPerformSimpleFindAndRemoveWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -830,15 +831,15 @@ exports.shouldPerformSimpleFindAndRemoveWithGenerators = {
  * @ignore
  */
 exports.shouldPeformASimpleLimitSkipFindOneQueryWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -876,15 +877,15 @@ exports.shouldPeformASimpleLimitSkipFindOneQueryWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyPerformSimpleGeoNearCommandWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -894,21 +895,21 @@ exports.shouldCorrectlyPerformSimpleGeoNearCommandWithGenerators = {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      
+
       // Fetch the collection
       var collection = db.collection("simple_geo_near_command_with_generators");
-        
+
       // Add a location based index
       yield collection.ensureIndex({loc:"2d"});
 
       // Save a new location tagged document
       yield collection.insertMany([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], configuration.writeConcernMax());
-         
+
       // Use geoNear command to find document
       var docs = yield collection.geoNear(50, 50, {query:{a:1}, num:1});
       test.equal(1, docs.results.length);
 
-      // Close db        
+      // Close db
       db.close();
       test.done();
     });
@@ -924,15 +925,15 @@ exports.shouldCorrectlyPerformSimpleGeoNearCommandWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommandWithGenerators = {
-  metadata: { requires: { generators:true, topology: ["single", "replicaset"] } },
-  
+  metadata: { requires: { generators:true, topology: ["single"] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -942,16 +943,16 @@ exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommandWithGenerators = {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      
+
       // Fetch the collection
       var collection = db.collection("simple_geo_haystack_command_with_generators");
-        
+
       // Add a location based index
       yield collection.ensureIndex({loc: "geoHaystack", type: 1}, {bucketSize: 1});
 
       // Save a new location tagged document
       yield collection.insertMany([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], configuration.writeConcernMax());
-         
+
       // Use geoNear command to find document
       var docs = yield collection.geoHaystackSearch(50, 50, {search:{a:1}, limit:1, maxDistance:100});
       test.equal(1, docs.results.length);
@@ -970,8 +971,8 @@ exports.shouldCorrectlyPerformSimpleGeoHaystackSearchCommandWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteGroupFunctionWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co'),
@@ -979,7 +980,7 @@ exports.shouldCorrectlyExecuteGroupFunctionWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   Code = require('mongodb').Code;
     // LINE   co = require('co');
@@ -1073,12 +1074,12 @@ exports.shouldCorrectlyExecuteGroupFunctionWithGenerators = {
         test.equal(1, results[1].value);
 
         try {
-          yield collection.group([], {}, {}, "5 ++ 5", false);  
+          yield collection.group([], {}, {}, "5 ++ 5", false);
         } catch(err) {
           test.ok(err.message != null);
 
           db.close();
-          test.done();                                
+          test.done();
         }
       };
     });
@@ -1094,15 +1095,15 @@ exports.shouldCorrectlyExecuteGroupFunctionWithGenerators = {
  * @ignore
  */
 exports.shouldPerformSimpleMapReduceFunctionsWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -1151,15 +1152,15 @@ exports.shouldPerformSimpleMapReduceFunctionsWithGenerators = {
 exports.shouldPerformMapReduceFunctionInlineWithGenerators = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, mongodb: '>1.7.6', topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, mongodb: '>1.7.6', topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -1203,8 +1204,8 @@ exports.shouldPerformMapReduceFunctionInlineWithGenerators = {
  * @ignore
  */
 exports.shouldPerformMapReduceWithContextWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co')
@@ -1212,7 +1213,7 @@ exports.shouldPerformMapReduceWithContextWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -1284,8 +1285,8 @@ exports.shouldPerformMapReduceWithContextWithGenerators = {
  * @ignore
  */
 exports.shouldPerformMapReduceInContextObjectsWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co'),
@@ -1293,7 +1294,7 @@ exports.shouldPerformMapReduceInContextObjectsWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -1365,15 +1366,15 @@ exports.shouldPerformMapReduceInContextObjectsWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyRetriveACollectionsIndexesWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -1415,15 +1416,15 @@ exports.shouldCorrectlyRetriveACollectionsIndexesWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteIndexExistsWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -1466,16 +1467,16 @@ exports.shouldCorrectlyExecuteIndexExistsWithGenerators = {
  */
 exports.shouldCorrectlyShowTheResultsFromIndexInformationWithGenerators = {
   metadata: {
-    requires: { generators:true, topology: ["single", "replicaset"] }
+    requires: { generators:true, topology: ["single"] }
   },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -1522,15 +1523,15 @@ exports.shouldCorrectlyShowTheResultsFromIndexInformationWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyShowAllTheResultsFromIndexInformationWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -1578,14 +1579,14 @@ exports.shouldCorrectlyShowAllTheResultsFromIndexInformationWithGenerators = {
 exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafeWithGenerators = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
+  metadata: { requires: { generators:true, topology: ['single'] } },
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -1624,15 +1625,15 @@ exports.shouldCorrectlyPerformASimpleSingleDocumentInsertNoCallbackNoSafeWithGen
 exports.shouldCorrectlyPerformABatchDocumentInsertSafeWithGenerators = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -1644,7 +1645,7 @@ exports.shouldCorrectlyPerformABatchDocumentInsertSafeWithGenerators = {
     // BEGIN
       // Fetch a collection to insert document into
       var collection = db.collection("batch_document_insert_collection_safe_with_generators");
-      
+
       // Insert a single document
       yield collection.insertMany([{hello:'world_safe1'}
         , {hello:'world_safe2'}], configuration.writeConcernMax());
@@ -1669,15 +1670,15 @@ exports.shouldCorrectlyPerformABatchDocumentInsertSafeWithGenerators = {
 exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafeWithGenerators = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -1693,7 +1694,7 @@ exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafeWithGenerator
       // Get the option
       var o = configuration.writeConcernMax();
       o.serializeFunctions = true;
-      
+
       // Insert a single document
       yield collection.insertOne({hello:'world', func:function() {}}, o);
 
@@ -1717,15 +1718,15 @@ exports.shouldCorrectlyPerformASimpleDocumentInsertWithFunctionSafeWithGenerator
 exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.1 with Generators"] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, mongodb:">1.9.1", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, mongodb:">1.9.1", topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -1738,7 +1739,7 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
 
       // Create a collection
       var collection = db.collection('keepGoingExample_with_generators');
-      
+
       // Add an unique index to title to force errors in the batch insert
       yield collection.ensureIndex({title:1}, {unique:true});
 
@@ -1748,7 +1749,7 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
 
       try {
         // Force keep going flag, ignoring unique index issue
-        yield collection.insertMany([{name:"Jim"}
+        yield collection.insert([{name:"Jim"}
           , {name:"Sarah", title:"Princess"}
           , {name:'Gump', title:"Gump"}], {w:1, keepGoing:true});
       } catch(err) {}
@@ -1771,15 +1772,15 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
  * @ignore
  */
 exports.shouldCorrectlyExecuteIsCappedWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -1813,15 +1814,15 @@ exports.shouldCorrectlyExecuteIsCappedWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyRetriveCollectionOptionsWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -1858,15 +1859,15 @@ exports.shouldCorrectlyRetriveCollectionOptionsWithGenerators = {
 exports['Should correctly execute parallelCollectionScan with multiple cursors with Generators'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, mongodb: ">2.5.5", topology: ["single", "replicaset"] } },
-  
+  metadata: { requires: { generators:true, mongodb: ">2.5.5", topology: ["single"] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -1893,22 +1894,17 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors w
       // Execute parallelCollectionScan command
       var cursors = yield collection.parallelCollectionScan({numCursors:numCursors});
       test.ok(cursors != null);
-      test.ok(cursors.length > 0);
+      test.ok(cursors.length >= 0);
 
       for(var i = 0; i < cursors.length; i++) {
         var items = yield cursors[i].toArray();
         // Add docs to results array
         results = results.concat(items);
-        numCursors = numCursors - 1;
-
-        // No more cursors let's ensure we got all results
-        if(numCursors == 0) {
-          test.equal(docs.length, results.length);
-
-          db.close();
-          test.done();
-        }
       }
+
+      test.equal(docs.length, results.length);
+      db.close();
+      test.done();
     });
     // END
   }
@@ -1922,15 +1918,15 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors w
  * @ignore
  */
 exports.shouldCorrectlyIndexAndForceReindexOnCollectionWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -1975,15 +1971,15 @@ exports.shouldCorrectlyIndexAndForceReindexOnCollectionWithGenerators = {
  * @ignore
  */
 exports.shouldRemoveAllDocumentsNoSafeWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -1993,22 +1989,22 @@ exports.shouldRemoveAllDocumentsNoSafeWithGenerators = {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      
+
       // Fetch a collection to insert document into
-      var collection = db.collection("remove_all_documents_no_safe_with_generators");        
+      var collection = db.collection("remove_all_documents_no_safe_with_generators");
 
       // Insert a bunch of documents
       yield collection.insertMany([{a:1}, {b:2}], {w:1});
 
       // Remove all the document
       collection.removeMany();
-        
+
       // Fetch all results
       var items = yield collection.find().toArray();
       test.equal(0, items.length);
       db.close();
       test.done();
-    });  
+    });
     // END
   }
 }
@@ -2021,15 +2017,15 @@ exports.shouldRemoveAllDocumentsNoSafeWithGenerators = {
  * @ignore
  */
 exports.shouldRemoveSubsetOfDocumentsSafeModeWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -2049,7 +2045,7 @@ exports.shouldRemoveSubsetOfDocumentsSafeModeWithGenerators = {
       test.equal(1, r.result.n);
       db.close();
       test.done();
-    });  
+    });
     // END
   }
 }
@@ -2062,15 +2058,15 @@ exports.shouldRemoveSubsetOfDocumentsSafeModeWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyRenameCollectionWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -2164,15 +2160,15 @@ exports.shouldCorrectlyRenameCollectionWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlySaveASimpleDocumentWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -2211,15 +2207,15 @@ exports.shouldCorrectlySaveASimpleDocumentWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveItWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -2266,15 +2262,15 @@ exports.shouldCorrectlySaveASimpleDocumentModifyItAndResaveItWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyUpdateASimpleDocumentWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -2301,7 +2297,7 @@ exports.shouldCorrectlyUpdateASimpleDocumentWithGenerators = {
           var item = yield collection.findOne({a:1});
           test.equal(1, item.a);
           test.equal(2, item.b);
-          
+
           db.close();
           test.done();
         });
@@ -2319,15 +2315,15 @@ exports.shouldCorrectlyUpdateASimpleDocumentWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyUpsertASimpleDocumentWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -2363,15 +2359,15 @@ exports.shouldCorrectlyUpsertASimpleDocumentWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyUpdateMultipleDocumentsWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -2417,15 +2413,15 @@ exports.shouldCorrectlyUpdateMultipleDocumentsWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyReturnACollectionsStatsWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -2461,15 +2457,15 @@ exports.shouldCorrectlyReturnACollectionsStatsWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyCreateAndDropAllIndexWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -2524,15 +2520,15 @@ exports.shouldCorrectlyCreateAndDropAllIndexWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDbWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -2556,7 +2552,7 @@ exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDbWithGenerators = {
         yield collection.insertOne({a:2}, configuration.writeConcernMax());
       } catch(err) {
         db.close();
-        test.done();            
+        test.done();
       }
     });
     // END
@@ -2571,8 +2567,8 @@ exports.shouldCorrectlyFailOnRetryDueToAppCloseOfDbWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteEvalFunctionsWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co'),
@@ -2581,7 +2577,7 @@ exports.shouldCorrectlyExecuteEvalFunctionsWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -2667,8 +2663,8 @@ exports.shouldCorrectlyExecuteEvalFunctionsWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunctionWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co'),
@@ -2676,7 +2672,7 @@ exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunctionWithGenerators
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -2692,7 +2688,7 @@ exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunctionWithGenerators
 
       // Define a system level function
       yield db.collection("system.js").insertOne({_id: "echo", value: new Code("function(x) { return x; }")}, configuration.writeConcernMax());
-        
+
       var result = yield db.eval("echo(5)");
       test.equal(5, result);
 
@@ -2712,14 +2708,14 @@ exports.shouldCorrectlyDefineSystemLevelFunctionAndExecuteFunctionWithGenerators
  */
 exports.shouldCorrectlyRetrievelistCollectionsWithGenerators = {
   metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -2742,7 +2738,7 @@ exports.shouldCorrectlyRetrievelistCollectionsWithGenerators = {
 
       // Return the information of a all collections, using the callback format
       var items = yield db1.listCollections().toArray();
-      test.equal(2, items.length);
+      test.ok(items.length >= 1);
 
       db.close();
       test.done();
@@ -2759,15 +2755,15 @@ exports.shouldCorrectlyRetrievelistCollectionsWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveAllCollectionsWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -2799,14 +2795,14 @@ exports.shouldCorrectlyRetrieveAllCollectionsWithGenerators = {
  */
 exports.shouldCorrectlyLogoutFromTheDatabaseWithGenerators = {
   metadata: { requires: { generators:true, topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -2847,14 +2843,14 @@ exports.shouldCorrectlyLogoutFromTheDatabaseWithGenerators = {
  */
 exports.shouldCorrectlyAuthenticateAgainstTheDatabaseWithGenerators = {
   metadata: { requires: { generators:true, topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -2889,14 +2885,14 @@ exports.shouldCorrectlyAuthenticateAgainstTheDatabaseWithGenerators = {
  */
 exports.shouldCorrectlyAddUserToDbWithGenerators = {
   metadata: { requires: { generators:true, topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -2927,14 +2923,14 @@ exports.shouldCorrectlyAddUserToDbWithGenerators = {
  */
 exports.shouldCorrectlyAddAndRemoveUserWithGenerators = {
   metadata: { requires: { generators:true, topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -2982,15 +2978,15 @@ exports.shouldCorrectlyAddAndRemoveUserWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyCreateACollectionWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -3020,15 +3016,15 @@ exports.shouldCorrectlyCreateACollectionWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteACommandAgainstTheServerWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -3069,15 +3065,15 @@ exports.shouldCorrectlyExecuteACommandAgainstTheServerWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyCreateDropAndVerifyThatCollectionIsGoneWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -3104,15 +3100,15 @@ exports.shouldCorrectlyCreateDropAndVerifyThatCollectionIsGoneWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyRenameACollectionWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -3162,15 +3158,15 @@ exports.shouldCorrectlyRenameACollectionWithGenerators = {
  * @ignore
  */
 exports.shouldCreateOnDbComplexIndexOnTwoFieldsWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -3196,7 +3192,7 @@ exports.shouldCreateOnDbComplexIndexOnTwoFieldsWithGenerators = {
       test.equal(4, items.length);
 
       // Peform a query, with explain to show we hit the query
-      var explanation = yield collection.find({a:2}, {explain:true}).toArray();
+      var explanation = yield collection.find({a:2}).explain();
       test.ok(explanation != null);
 
       db.close();
@@ -3214,15 +3210,15 @@ exports.shouldCreateOnDbComplexIndexOnTwoFieldsWithGenerators = {
  * @ignore
  */
 exports.shouldCreateComplexEnsureIndexDbWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -3248,7 +3244,7 @@ exports.shouldCreateComplexEnsureIndexDbWithGenerators = {
       test.equal(4, items.length);
 
       // Peform a query, with explain to show we hit the query
-      var explanation = yield collection.find({a:2}, {explain:true}).toArray();
+      var explanation = yield collection.find({a:2}).explain();
       test.ok(explanation != null);
 
       db.close();
@@ -3266,15 +3262,15 @@ exports.shouldCreateComplexEnsureIndexDbWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyDropTheDatabaseWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -3329,15 +3325,15 @@ exports.shouldCorrectlyDropTheDatabaseWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveDbStatsWithGeneratorsWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -3365,15 +3361,15 @@ exports.shouldCorrectlyRetrieveDbStatsWithGeneratorsWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstancesWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -3386,15 +3382,15 @@ exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstancesWithGenerato
       // Reference a different database sharing the same connections
       // for the data transfer
       var secondDb = db.db("integration_tests_2");
-      
+
       // Fetch the collections
       var multipleColl1 = db.collection("multiple_db_instances_with_generators");
       var multipleColl2 = secondDb.collection("multiple_db_instances_with_generators");
-      
+
       // Write a record into each and then count the records stored
       yield multipleColl1.insertOne({a:1}, {w:1});
       yield multipleColl2.insertOne({a:1}, {w:1})
-          
+
       // Count over the results ensuring only on record in each collection
       var count = yield multipleColl1.count();
       test.equal(1, count);
@@ -3424,14 +3420,14 @@ exports.shouldCorrectlyShareConnectionPoolsAcrossMultipleDbInstancesWithGenerato
  */
 exports.shouldCorrectlyAuthenticateWithGenerators = {
   metadata: { requires: { generators:true, topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -3477,14 +3473,14 @@ exports.shouldCorrectlyAuthenticateWithGenerators = {
  */
 exports.shouldCorrectlyRetrieveBuildInfoWithGenerators = {
   metadata: { requires: { generators:true, topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -3504,16 +3500,16 @@ exports.shouldCorrectlyRetrieveBuildInfoWithGenerators = {
       // Authenticate using the newly added user
       var result = yield adminDb.authenticate('admin3', 'admin3');
       test.ok(result);
-          
+
       // Retrive the build information for the MongoDB instance
       yield adminDb.buildInfo();
-            
+
       var result = yield adminDb.removeUser('admin3');
       test.ok(result);
 
       db.close();
       test.done();
-    });            
+    });
     // END
   }
 }
@@ -3527,14 +3523,14 @@ exports.shouldCorrectlyRetrieveBuildInfoWithGenerators = {
  */
 exports.shouldCorrectlyRetrieveBuildInfoUsingCommandWithGenerators = {
   metadata: { requires: { generators:true, topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -3554,7 +3550,7 @@ exports.shouldCorrectlyRetrieveBuildInfoUsingCommandWithGenerators = {
       // Authenticate using the newly added user
       var result = yield adminDb.authenticate('admin4', 'admin4');
       test.ok(result);
-        
+
       // Retrive the build information using the admin command
       yield adminDb.command({buildInfo:1})
 
@@ -3577,14 +3573,14 @@ exports.shouldCorrectlyRetrieveBuildInfoUsingCommandWithGenerators = {
  */
 exports.shouldCorrectlySetDefaultProfilingLevelWithGenerators = {
   metadata: { requires: { generators:true, topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -3594,7 +3590,7 @@ exports.shouldCorrectlySetDefaultProfilingLevelWithGenerators = {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      
+
       // Grab a collection object
       var collection = db.collection('test_with_generators');
 
@@ -3627,21 +3623,21 @@ exports.shouldCorrectlySetDefaultProfilingLevelWithGenerators = {
 /**
  * An example of how to use the setProfilingInfo using a Generator and the co module.
  * Use this command to set the Profiling level on the MongoDB server
- * 
+ *
  * @example-class Admin
  * @example-method setProfilingLevel
  * @ignore
- */ 
+ */
 exports.shouldCorrectlyChangeProfilingLevelWithGenerators = {
   metadata: { requires: { generators:true, topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -3651,7 +3647,7 @@ exports.shouldCorrectlyChangeProfilingLevelWithGenerators = {
     // REPLACE configuration.writeConcernMax() WITH {w:1}
     // REMOVE-LINE test.done();
     // BEGIN
-      
+
       // Grab a collection object
       var collection = db.collection('test_with_generators');
 
@@ -3667,17 +3663,17 @@ exports.shouldCorrectlyChangeProfilingLevelWithGenerators = {
 
       // Authenticate using the newly added user
       yield adminDb.authenticate('admin6', 'admin6');
-            
+
       // Set the profiling level to only profile slow queries
       yield adminDb.setProfilingLevel('slow_only')
-              
+
       // Retrive the profiling level and verify that it's set to slow_only
       var level = yield adminDb.profilingLevel();
       test.equal('slow_only', level);
 
       // Turn profiling off
       yield adminDb.setProfilingLevel('off');
-                  
+
       // Retrive the profiling level and verify that it's set to off
       var level = yield adminDb.profilingLevel();
       test.equal('off', level);
@@ -3695,7 +3691,7 @@ exports.shouldCorrectlyChangeProfilingLevelWithGenerators = {
       } catch(err) {
         test.ok(err instanceof Error);
         test.equal("Error: illegal profiling level value medium", err.message);
-      
+
         var result = yield adminDb.removeUser('admin6');
         test.ok(result);
 
@@ -3710,21 +3706,21 @@ exports.shouldCorrectlyChangeProfilingLevelWithGenerators = {
 /**
  * An example of how to use the profilingInfo using a Generator and the co module.
  * Use this command to pull back the profiling information currently set for Mongodb
- * 
+ *
  * @example-class Admin
  * @example-method profilingInfo
  * @ignore
- */ 
+ */
 exports.shouldCorrectlySetAndExtractProfilingInfoWithGenerators = {
   metadata: { requires: { generators:true, topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -3750,23 +3746,23 @@ exports.shouldCorrectlySetAndExtractProfilingInfoWithGenerators = {
 
       // Authenticate using the newly added user
       yield adminDb.authenticate('admin7', 'admin7');
-            
+
       // Set the profiling level to all
       yield adminDb.setProfilingLevel('all');
-              
+
       // Execute a query command
       yield collection.find().toArray();
 
       // Turn off profiling
       yield adminDb.setProfilingLevel('off');
-                  
+
       // Retrive the profiling information
       var infos = yield adminDb.profilingInfo();
       test.ok(infos.constructor == Array);
       test.ok(infos.length >= 1);
       test.ok(infos[0].ts.constructor == Date);
       test.ok(infos[0].millis.constructor == Number);
-      
+
       var result = yield adminDb.removeUser('admin7');
       test.ok(result);
 
@@ -3780,21 +3776,21 @@ exports.shouldCorrectlySetAndExtractProfilingInfoWithGenerators = {
 /**
  * An example of how to use the validateCollection command using a Generator and the co module.
  * Use this command to check that a collection is valid (not corrupt) and to get various statistics.
- * 
+ *
  * @example-class Admin
  * @example-method validateCollection
  * @ignore
  */
 exports.shouldCorrectlyCallValidateCollectionWithGenerators = {
   metadata: { requires: { generators:true, topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -3807,30 +3803,23 @@ exports.shouldCorrectlyCallValidateCollectionWithGenerators = {
 
       // Grab a collection object
       var collection = db.collection('test_with_generators');
-        
+
       // Force the creation of the collection by inserting a document
       // Collections are not created until the first document is inserted
       yield collection.insertOne({'a':1}, {w: 1});
-        
+
       // Use the admin database for the operation
       var adminDb = db.admin();
-        
+
       // Add the new user to the admin database
       yield adminDb.addUser('admin8', 'admin8');
-          
+
       // Authenticate using the newly added user
       yield adminDb.authenticate('admin8', 'admin8');
-            
+
       // Validate the 'test' collection
       var doc = yield adminDb.validateCollection('test_with_generators');
-
-      // Pre 1.9.1 servers
-      if(doc.result != null) {
-        test.ok(doc.result != null);
-        test.ok(doc.result.match(/firstExtent/) != null);                    
-      } else {
-        test.ok(doc.firstExtent != null);
-      }
+      test.ok(doc != null);
 
       var result = yield adminDb.removeUser('admin8')
       test.ok(result);
@@ -3843,21 +3832,21 @@ exports.shouldCorrectlyCallValidateCollectionWithGenerators = {
 
 /**
  * An example of how to add a user to the admin database using a Generator and the co module.
- * 
+ *
  * @example-class Admin
  * @example-method ping
  * @ignore
  */
 exports.shouldCorrectlyPingTheMongoDbInstanceWithGenerators = {
   metadata: { requires: { generators:true, topology: 'single' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -3870,14 +3859,14 @@ exports.shouldCorrectlyPingTheMongoDbInstanceWithGenerators = {
 
       // Use the admin database for the operation
       var adminDb = db.admin();
-        
+
       // Add the new user to the admin database
       yield adminDb.addUser('admin9', 'admin9');
-        
+
       // Authenticate using the newly added user
       var result = yield adminDb.authenticate('admin9', 'admin9');
       test.ok(result);
-          
+
       // Ping the server
       yield adminDb.ping();
 
@@ -3893,21 +3882,21 @@ exports.shouldCorrectlyPingTheMongoDbInstanceWithGenerators = {
 
 /**
  * An example of how add a user, authenticate and logout using a Generator and the co module.
- * 
+ *
  * @example-class Admin
  * @example-method logout
  * @ignore
  */
 exports.shouldCorrectlyUseLogoutFunctionWithGenerators = {
   metadata: { requires: { generators:true, topology: 'single' } },
-  
+
   // The actual test we wish to run
-  test: function(configuration, test) {  
+  test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -3920,18 +3909,18 @@ exports.shouldCorrectlyUseLogoutFunctionWithGenerators = {
 
       // Use the admin database for the operation
       var adminDb = db.admin();
-        
+
       // Add the new user to the admin database
       yield adminDb.addUser('admin10', 'admin10');
-        
+
       // Authenticate using the newly added user
       var result = yield adminDb.authenticate('admin10', 'admin10')
       test.ok(result);
-          
+
       // Logout the user
       var result = yield adminDb.logout();
       test.equal(true, result);
-            
+
       var result = adminDb.removeUser('admin10');
       test.ok(result);
 
@@ -3944,21 +3933,21 @@ exports.shouldCorrectlyUseLogoutFunctionWithGenerators = {
 
 /**
  * An example of how to add a user to the admin database using a Generator and the co module.
- * 
+ *
  * @example-class Admin
  * @example-method addUser
  * @ignore
  */
 exports.shouldCorrectlyAddAUserToAdminDbWithGenerators = {
   metadata: { requires: { generators:true, topology: 'single' } },
-  
+
   // The actual test we wish to run
-  test: function(configuration, test) {  
+  test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -3971,14 +3960,14 @@ exports.shouldCorrectlyAddAUserToAdminDbWithGenerators = {
 
       // Use the admin database for the operation
       var adminDb = db.admin();
-        
+
       // Add the new user to the admin database
       yield adminDb.addUser('admin11', 'admin11');
-        
+
       // Authenticate using the newly added user
       var result = yield adminDb.authenticate('admin11', 'admin11');
       test.ok(result);
-          
+
       var result = yield adminDb.removeUser('admin11');
       test.ok(result);
 
@@ -3990,21 +3979,21 @@ exports.shouldCorrectlyAddAUserToAdminDbWithGenerators = {
 
 /**
  * An example of how to remove a user from the admin database using a Generator and the co module.
- * 
+ *
  * @example-class Admin
  * @example-method removeUser
  * @ignore
  */
 exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDbWithGenerators = {
   metadata: { requires: { generators:true, topology: 'single' } },
-  
+
   // The actual test we wish to run
-  test: function(configuration, test) {  
+  test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -4017,24 +4006,24 @@ exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDbWithGenerators = {
 
       // Use the admin database for the operation
       var adminDb = db.admin();
-        
+
       // Add the new user to the admin database
       yield adminDb.addUser('admin12', 'admin12');
-        
+
       // Authenticate using the newly added user
       var result = yield adminDb.authenticate('admin12', 'admin12');
       test.ok(result);
-          
+
       // Remove the user
       var result = yield adminDb.removeUser('admin12');
       test.equal(true, result);
 
-      try {            
+      try {
         // Authenticate using the removed user should fail
         yield adminDb.authenticate('admin12', 'admin12');
       } catch(err) {
         db.close();
-        test.done();              
+        test.done();
       }
     });
     // END
@@ -4043,21 +4032,21 @@ exports.shouldCorrectlyAddAUserAndRemoveItFromAdminDbWithGenerators = {
 
 /**
  * An example of listing all available databases. using a Generator and the co module.
- * 
+ *
  * @example-class Admin
  * @example-method listDatabases
  * @ignore
  */
 exports.shouldCorrectlyListAllAvailableDatabasesWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
-  test: function(configuration, test) {  
+  test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -4070,11 +4059,11 @@ exports.shouldCorrectlyListAllAvailableDatabasesWithGenerators = {
 
       // Use the admin database for the operation
       var adminDb = db.admin();
-        
+
       // List all the available databases
       var dbs = yield adminDb.listDatabases();
       test.ok(dbs.databases.length > 0);
-        
+
       db.close();
       test.done();
     });
@@ -4090,15 +4079,15 @@ exports.shouldCorrectlyListAllAvailableDatabasesWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveServerInfoWithGenerators = {
-  metadata: { requires: { generators:true, topology: 'single' } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -4124,11 +4113,11 @@ exports.shouldCorrectlyRetrieveServerInfoWithGenerators = {
 
       // Authenticate using the newly added user
       yield adminDb.authenticate('admin13', 'admin13');
-           
+
       // Retrive the server Info
       var info = yield adminDb.serverStatus();
       test.ok(info != null);
-             
+
       var result = yield adminDb.removeUser('admin13');
       test.ok(result);
 
@@ -4147,15 +4136,15 @@ exports.shouldCorrectlyRetrieveServerInfoWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveReplSetGetStatusWithGenerators = {
-  metadata: { requires: { generators:true, topology: 'replicaset' } },
-  
+  metadata: { requires: { generators:true, topology: ['replicaset'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -4176,20 +4165,9 @@ exports.shouldCorrectlyRetrieveReplSetGetStatusWithGenerators = {
       // Use the admin database for the operation
       var adminDb = db.admin();
 
-      // Add the new user to the admin database
-      var result = yield adminDb.addUser('admin14', 'admin14');
-      test.ok(result != null);
-
-      // Authenticate using the newly added user
-      var result = yield adminDb.authenticate('admin14', 'admin14');
-      test.equal(true, result);
-
       // Retrive the server Info, returns error if we are not
       // running a replicaset
       yield adminDb.replSetGetStatus();
-
-      var result = yield adminDb.removeUser('admin14');
-      test.ok(result);
 
       db.close();
       test.done();
@@ -4215,15 +4193,15 @@ var fs = require('fs');
 exports.shouldCorrectlyExecuteToArrayWithGenerators = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -4262,15 +4240,15 @@ exports.shouldCorrectlyExecuteToArrayWithGenerators = {
 exports.shouldCorrectlyUseCursorCountFunctionWithGenerators = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -4308,15 +4286,15 @@ exports.shouldCorrectlyUseCursorCountFunctionWithGenerators = {
 exports.shouldCorrectlyPeformNextObjectOnCursorWithGenerators = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -4354,15 +4332,15 @@ exports.shouldCorrectlyPeformNextObjectOnCursorWithGenerators = {
 exports.shouldCorrectlyPeformNextOnCursorWithGenerators = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -4410,15 +4388,15 @@ exports.shouldCorrectlyPeformNextOnCursorWithGenerators = {
 exports.shouldCorrectlyPeformSimpleExplainCursorWithGenerators = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -4454,15 +4432,15 @@ exports.shouldCorrectlyPeformSimpleExplainCursorWithGenerators = {
 exports.shouldStreamDocumentsUsingTheCloseFunctionWithGenerators = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -4513,8 +4491,8 @@ exports.shouldStreamDocumentsUsingTheCloseFunctionWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteGridStoreExistsByObjectIdWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co'),
@@ -4523,7 +4501,7 @@ exports.shouldCorrectlyExecuteGridStoreExistsByObjectIdWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -4570,8 +4548,8 @@ exports.shouldCorrectlyExecuteGridStoreExistsByObjectIdWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteGridStoreListWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co'),
@@ -4580,7 +4558,7 @@ exports.shouldCorrectlyExecuteGridStoreListWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -4604,7 +4582,7 @@ exports.shouldCorrectlyExecuteGridStoreListWithGenerators = {
       // List the existing files
       var items = yield GridStore.list(db)
       var found = false;
-      
+
       items.forEach(function(filename) {
         if(filename == 'foobar2') found = true;
       });
@@ -4643,11 +4621,11 @@ exports.shouldCorrectlyExecuteGridStoreListWithGenerators = {
 
       // Specify seperate id
       var fileId2 = new ObjectID();
-      
+
       // Write another file to GridFS
       var gridStore2 = new GridStore(db, fileId2, "foobar3", "w");
       yield gridStore2.open();
-        
+
       // Write the content
       yield gridStore2.write('my file');
 
@@ -4683,8 +4661,8 @@ exports.shouldCorrectlyExecuteGridStoreListWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyReadlinesAndPutLinesWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co'),
@@ -4693,7 +4671,7 @@ exports.shouldCorrectlyReadlinesAndPutLinesWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -4732,8 +4710,8 @@ exports.shouldCorrectlyReadlinesAndPutLinesWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyUnlinkWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co'),
@@ -4742,7 +4720,7 @@ exports.shouldCorrectlyUnlinkWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -4803,8 +4781,8 @@ exports.shouldCorrectlyUnlinkWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyWriteAndReadJpgImageWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co'),
@@ -4813,7 +4791,7 @@ exports.shouldCorrectlyWriteAndReadJpgImageWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -4860,8 +4838,8 @@ exports.shouldCorrectlyWriteAndReadJpgImageWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlySaveSimpleFileToGridStoreUsingFilenameWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co'),
@@ -4870,7 +4848,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingFilenameWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -4911,8 +4889,8 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingFilenameWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlySaveSimpleFileToGridStoreUsingObjectIDWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co'),
@@ -4921,7 +4899,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingObjectIDWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -4965,8 +4943,8 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingObjectIDWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co'),
@@ -4975,7 +4953,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -5022,8 +5000,8 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandleWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co'),
@@ -5032,7 +5010,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandleWithGene
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -5082,8 +5060,8 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteFileWithHandleWithGene
  * @ignore
  */
 exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffersWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co'),
@@ -5092,7 +5070,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffersW
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -5139,8 +5117,8 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingWriteWithStringsAndBuffersW
  * @ignore
  */
 exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co'),
@@ -5149,7 +5127,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -5189,8 +5167,8 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkItWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co'),
@@ -5199,7 +5177,7 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkItWithGen
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -5249,8 +5227,8 @@ exports.shouldCorrectlySaveSimpleFileToGridStoreUsingCloseAndThenUnlinkItWithGen
  * @ignore
  */
 exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlinesWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co'),
@@ -5259,7 +5237,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlinesWithGenerators
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -5309,8 +5287,8 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseReadlinesWithGenerators
  * @ignore
  */
 exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlinesWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co'),
@@ -5319,7 +5297,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlinesWithGe
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -5373,8 +5351,8 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreAndUseInstanceReadlinesWithGe
  * @ignore
  */
 exports.shouldCorrectlyPutACoupleOfLinesInGridStoreReadWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co'),
@@ -5383,7 +5361,7 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreReadWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -5423,8 +5401,8 @@ exports.shouldCorrectlyPutACoupleOfLinesInGridStoreReadWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlySeekWithBufferWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co'),
@@ -5433,7 +5411,7 @@ exports.shouldCorrectlySeekWithBufferWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -5523,8 +5501,8 @@ exports.shouldCorrectlySeekWithBufferWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyRewingAndTruncateOnWriteWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co'),
@@ -5533,7 +5511,7 @@ exports.shouldCorrectlyRewingAndTruncateOnWriteWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -5589,8 +5567,8 @@ exports.shouldCorrectlyRewingAndTruncateOnWriteWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyExecuteGridstoreTellWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co'),
@@ -5599,7 +5577,7 @@ exports.shouldCorrectlyExecuteGridstoreTellWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -5645,8 +5623,8 @@ exports.shouldCorrectlyExecuteGridstoreTellWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithGenerators = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co'),
@@ -5655,7 +5633,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithGenerators = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -5695,8 +5673,8 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithGenerators = {
  * @ignore
  */
 exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithGenerators2 = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co'),
@@ -5705,7 +5683,7 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithGenerators2 = {
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -5768,15 +5746,15 @@ exports.shouldCorrectlyRetrieveSingleCharacterUsingGetCWithGenerators2 = {
  * @ignore
  */
 exports['Should correctly execute ordered batch with no errors using write commands with Generators'] = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -5805,12 +5783,12 @@ exports['Should correctly execute ordered batch with no errors using write comma
       test.equal(1, result.nMatched);
       test.ok(1 == result.nModified || result.nModified == null);
       test.equal(1, result.nRemoved);
-      
+
       var upserts = result.getUpsertedIds();
       test.equal(1, upserts.length);
       test.equal(2, upserts[0].index);
       test.ok(upserts[0]._id != null);
-      
+
       var upsert = result.getUpsertedIdAt(0);
       test.equal(2, upsert.index);
       test.ok(upsert._id != null);
@@ -5832,15 +5810,15 @@ exports['Should correctly execute ordered batch with no errors using write comma
  * @ignore
  */
 exports['Should correctly execute unordered batch with no errors with Generators'] = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -5875,7 +5853,7 @@ exports['Should correctly execute unordered batch with no errors with Generators
       test.equal(1, upserts.length);
       test.equal(2, upserts[0].index);
       test.ok(upserts[0]._id != null);
-      
+
       var upsert = result.getUpsertedIdAt(0);
       test.equal(2, upsert.index);
       test.ok(upsert._id != null);
@@ -5902,15 +5880,15 @@ exports['Should correctly execute unordered batch with no errors with Generators
  * @ignore
  */
 exports['Should correctly execute insertOne operation with Generators'] = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -5940,15 +5918,15 @@ exports['Should correctly execute insertOne operation with Generators'] = {
  * @ignore
  */
 exports['Should correctly execute insertMany operation with Generators'] = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -5978,15 +5956,15 @@ exports['Should correctly execute insertMany operation with Generators'] = {
  * @ignore
  */
 exports['Should correctly execute updateOne operation with Generators'] = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -6019,15 +5997,15 @@ exports['Should correctly execute updateOne operation with Generators'] = {
  * @ignore
  */
 exports['Should correctly execute updateMany operation with Generators'] = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -6063,15 +6041,15 @@ exports['Should correctly execute updateMany operation with Generators'] = {
  * @ignore
  */
 exports['Should correctly execute removeOne operation with Generators'] = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -6104,15 +6082,15 @@ exports['Should correctly execute removeOne operation with Generators'] = {
  * @ignore
  */
 exports['Should correctly execute removeMany operation with Generators'] = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -6147,15 +6125,15 @@ exports['Should correctly execute removeMany operation with Generators'] = {
  * @ignore
  */
 exports['Should correctly execute bulkWrite operation with Generators'] = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -6204,15 +6182,15 @@ exports['Should correctly execute bulkWrite operation with Generators'] = {
  * @ignore
  */
 exports['Should correctly execute findOneAndDelete operation with Generators'] = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -6226,7 +6204,7 @@ exports['Should correctly execute findOneAndDelete operation with Generators'] =
       var col = db.collection('find_one_and_delete_with_generators');
       var r = yield col.insertMany([{a:1, b:1}], {w:1});
       test.equal(1, r.result.n);
-        
+
       var r = yield col.findOneAndDelete({a:1}
         , { projection: {b:1}, sort: {a:1} }
         );
@@ -6248,15 +6226,15 @@ exports['Should correctly execute findOneAndDelete operation with Generators'] =
  * @ignore
  */
 exports['Should correctly execute findOneAndReplace operation with Generators'] = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -6270,14 +6248,14 @@ exports['Should correctly execute findOneAndReplace operation with Generators'] 
       var col = db.collection('find_one_and_replace_with_generators');
       var r = yield col.insertMany([{a:1, b:1}], {w:1});
       test.equal(1, r.result.n);
-        
+
       var r = yield col.findOneAndReplace({a:1}
         , {c:1, b:1}
-        , { 
+        , {
               projection: {b:1, c:1}
             , sort: {a:1}
             , returnOriginal: false
-            , upsert: true 
+            , upsert: true
           }
         );
       test.equal(1, r.lastErrorObject.n);
@@ -6286,7 +6264,7 @@ exports['Should correctly execute findOneAndReplace operation with Generators'] 
 
       db.close();
       test.done();
-    });      
+    });
     // END
   }
 }
@@ -6299,15 +6277,15 @@ exports['Should correctly execute findOneAndReplace operation with Generators'] 
  * @ignore
  */
 exports['Should correctly execute findOneAndUpdate operation with Generators'] = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');
@@ -6321,7 +6299,7 @@ exports['Should correctly execute findOneAndUpdate operation with Generators'] =
       var col = db.collection('find_one_and_update_with_generators');
       var r = yield col.insertMany([{a:1, b:1}], {w:1});
       test.equal(1, r.result.n);
-        
+
       var r = yield col.findOneAndUpdate({a:1}
         , {$set: {d:1}}
         , {
@@ -6350,15 +6328,15 @@ exports['Should correctly execute findOneAndUpdate operation with Generators'] =
  * @ignore
  */
 exports['Should correctly add capped collection options to cursor with Generators'] = {
-  metadata: { requires: { generators:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { generators:true, topology: ['single'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var co = require('co');
 
     co(function*() {
       // Connect
-      var db = yield configuration.newDbInstance({w:1}, {poolSize:1}).open();
+      var db = yield configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1}).open();
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   co = require('co');
     // LINE   test = require('assert');

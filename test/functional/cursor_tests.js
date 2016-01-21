@@ -19,9 +19,7 @@ exports.cursorShouldBeAbleToResetOnToArrayRunningQueryAgain = {
 
         collection.insert({'a':1}, configuration.writeConcernMax(), function(err, ids) {
           var cursor = collection.find({});
-          console.log("--------------------------------- TOARRAY 0")
           cursor.toArray(function(err, items) {
-          console.log("--------------------------------- TOARRAY 1")
             // Should fail if called again (cursor should be closed)
             cursor.toArray(function(err, items) {
               test.equal(null, err);
@@ -328,7 +326,10 @@ exports.shouldCorrectlyExecuteSortOnCursor = {
           test.deepEqual([['a', "asc"]], cursor.sortValue);finished();
 
           cursor = collection.find().sort([['a', -1], ['b', 1]]);
-          test.deepEqual([['a', -1], ['b', 1]], cursor.sortValue);finished();
+          var entries = cursor.sortValue.entries();
+          test.deepEqual(['a', -1], entries.next().value);
+          test.deepEqual(['b', 1], entries.next().value);
+          finished();
 
           cursor = collection.find().sort('a', 1).sort('a', -1);
           test.deepEqual([['a', -1]], cursor.sortValue);finished();
@@ -358,50 +359,6 @@ exports.shouldCorrectlyExecuteSortOnCursor = {
     });
   }
 }
-
-// /**
-//  * @ignore
-//  * @api private
-//  */
-// exports.shouldCorrectlyThrowErrorOnToArrayWhenMissingCallback = {
-//   // Add a tag that our runner can trigger on
-//   // in this case we are setting that node needs to be higher than 0.10.X to run
-//   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
-//     db.open(function(err, db) {
-//       db.createCollection('test_to_array', function(err, collection) {
-//         function insert(callback) {
-//           var total = 10;
-
-//           for(var i = 0; i < 10; i++) {
-//             collection.insert({'x':i}, configuration.writeConcernMax(), function(e) {
-//               total = total - 1;
-//               if(total == 0) callback();
-//             });
-//           }
-//         }
-
-//         function finished() {
-//           collection.find(function(err, cursor) {
-//             test.throws(function () {
-//               cursor.toArray();
-//             });
-
-//             db.close();
-//             test.done();
-//           });
-//         }
-
-//         insert(function() {
-//           finished();
-//         });
-//       });
-//     });
-//   }
-// }
 
 /**
  * @ignore
@@ -991,7 +948,7 @@ exports.shouldHandleWhenLimitBiggerThanBatchSize = {
 
                 //4th
                 cursor.nextObject(function(err, items) {
-                  test.equal(2, cursor.bufferedCount());
+                  test.equal(null, err);
 
                   //No more
                   cursor.nextObject(function(err, items) {
@@ -1213,14 +1170,13 @@ exports.shouldCorrectlyRefillViaGetMoreCommand = {
     db.open(function(err, db) {
       db.createCollection('test_refill_via_get_more', function(err, collection) {
         function insert(callback) {
-          var total = COUNT;
+          var docs = [];
 
           for(var i = 0; i < COUNT; i++) {
-            collection.insert({'a':i}, configuration.writeConcernMax(), function(e) {
-              total = total - 1;
-              if(total == 0) callback();
-            });
+            docs.push({a:i});
           }
+
+          collection.insertMany(docs, configuration.writeConcernMax(), callback);
         }
 
         function finished() {
@@ -1289,14 +1245,13 @@ exports.shouldCorrectlyRefillViaGetMoreAlternativeCollection = {
         var COUNT = 1000;
 
         function insert(callback) {
-          var total = COUNT;
+          var docs = [];
 
           for(var i = 0; i < COUNT; i++) {
-            collection.insert({'a':i}, configuration.writeConcernMax(), function(e) {
-              total = total - 1;
-              if(total == 0) callback();
-            });
+            docs.push({a:i});
           }
+
+          collection.insertMany(docs, configuration.writeConcernMax(), callback);
         }
 
         function finished() {
@@ -1468,7 +1423,7 @@ exports.shouldCorrectlyExecuteEnsureIndexWithNoCallback = {
 
             // Find with sort
             collection.find().sort(['createdAt', 'asc']).toArray(function(err, items) {
-              if (err) logger.error("error in collection_info.find: " + err);
+              test.equal(null, err);
               test.equal(1, items.length);
               db.close();
               test.done();
@@ -1650,7 +1605,7 @@ exports['immediately destroying a stream prevents the query from executing'] = {
           stream.on('data', function () {
             i++;
           })
-          
+
           stream.on('close', done('close'));
           stream.on('error', done('error'));
 
@@ -1667,7 +1622,7 @@ exports['immediately destroying a stream prevents the query from executing'] = {
                 db.close();
                 test.done();
               }
-            }              
+            }
           }
         });
       });
@@ -1784,7 +1739,7 @@ exports['cursor stream errors'] = {
                   test.equal(true, stream.isClosed());
                   client.close();
                   test.done();
-                }, 150)                
+                }, 150)
               }
             }
           }
@@ -1933,7 +1888,7 @@ exports.shouldCloseDeadTailableCursors = {
 
     db.open(function(err, db) {
 
-      var options = { capped: true, size: 8 };
+      var options = { capped: true, size: 10000000 };
       db.createCollection('test_if_dead_tailable_cursors_close', options, function(err, collection) {
         test.equal(null, err);
         var closed = false;
@@ -1944,14 +1899,18 @@ exports.shouldCloseDeadTailableCursors = {
           collection.insert({id: i});
         }
 
-        stream.on('data', function (doc) {});
+        stream.on('data', function (doc) {
+        });
 
         stream.on('error', function (err) {
           test.ok(err != null);
         });
 
+        stream.on('end', function () {
+          closed = true;
+        });
+
         stream.on('close', function () {
-          // this is what we need
           closed = true;
         });
 
@@ -1964,9 +1923,11 @@ exports.shouldCloseDeadTailableCursors = {
 
         setTimeout(function () {
           db.close();
-          test.equal(true, closed);
-          db.close();
-          test.done();
+
+          setTimeout(function() {
+            test.equal(true, closed);
+            test.done();
+          }, 1000)
         }, 800);
       });
     });
@@ -1995,11 +1956,48 @@ exports.shouldAwaitData = {
           collection.find({}, {tailable:true, awaitdata:true, numberOfRetries:1}).each(function(err, result) {
             if(err != null) {
               var e = new Date();
-              test.ok((e.getTime() - s.getTime()) > 1000);
+              test.ok((e.getTime() - s.getTime()) >= 500);
               db.close();
               test.done();
             }
           });
+        });
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports.shouldAwaitDataWithDocumentsAvailable = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    // http://www.mongodb.org/display/DOCS/Tailable+Cursors
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+
+    db.open(function(err, db) {
+      var options = { capped: true, size: 8};
+      db.createCollection('should_await_data_no_docs', options, function(err, collection) {
+        // Create cursor with awaitdata, and timeout after the period specified
+        var cursor = collection.find({}, {tailable:true, awaitdata:true, numberOfRetries:1});
+        var rewind = cursor.rewind;
+        var called = false;
+        cursor.rewind = function() {
+          called = true;
+        }
+        
+        cursor.each(function(err, result) {
+          if(err != null) {
+            test.ok(called);
+            cursor.rewind = rewind;
+            db.close();
+            test.done();
+          }
         });
       });
     });
@@ -2066,6 +2064,39 @@ exports.shouldNotAwaitDataWhenFalse = {
 
           db.close();
           test.done();
+        });
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['Should correctly retry tailable cursor connection'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    // http://www.mongodb.org/display/DOCS/Tailable+Cursors
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+
+    db.open(function(err, db) {
+      var options = { capped: true, size: 8};
+      db.createCollection('should_await_data', options, function(err, collection) {
+        collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
+          var s = new Date();
+          // Create cursor with awaitdata, and timeout after the period specified
+          collection.find({}, {tailable:true, awaitdata:true, numberOfRetries:3, tailableRetryInterval:1000}).each(function(err, result) {
+            if(err != null) {
+              var e = new Date();
+              test.ok((e.getTime() - s.getTime()) >= 3000);
+              db.close();
+              test.done();
+            }
+          });
         });
       });
     });
@@ -2351,7 +2382,7 @@ exports.shouldFailToTailANormalCollection = {
         collection.find({}, {tailable:true}).each(function(err, doc) {
           test.ok(err instanceof Error);
           test.ok(typeof(err.code) === 'number');
-          
+
           db.close();
           test.done();
         });
@@ -2745,7 +2776,7 @@ exports['Should correctly apply map to toArray'] = {
           .map(function(x) { return {a:1}; })
           .batchSize(5)
           .limit(10);
-        cursor.toArray(function(err, docs) {          
+        cursor.toArray(function(err, docs) {
           test.equal(null, err);
           test.equal(10, docs.length);
 
@@ -2796,7 +2827,7 @@ exports['Should correctly apply map to next'] = {
           .map(function(x) { return {a:1}; })
           .batchSize(5)
           .limit(10);
-        cursor.next(function(err, doc) {          
+        cursor.next(function(err, doc) {
           test.equal(null, err);
           test.equal(1, doc.a);
 
@@ -2842,7 +2873,7 @@ exports['Should correctly apply map to nextObject'] = {
           .map(function(x) { return {a:1}; })
           .batchSize(5)
           .limit(10);
-        cursor.nextObject(function(err, doc) {          
+        cursor.nextObject(function(err, doc) {
           test.equal(null, err);
           test.equal(1, doc.a);
 
@@ -2895,7 +2926,7 @@ exports['Should correctly apply map to each'] = {
             test.equal(1, doc.a);
           } else {
             db.close();
-            test.done();            
+            test.done();
           }
         });
       })
@@ -2942,9 +2973,84 @@ exports['Should correctly apply map to forEach'] = {
         }, function(err, doc) {
           test.equal(null, err);
           db.close();
-          test.done();            
+          test.done();
         });
       })
+    });
+  }
+}
+
+/**
+ * @ignore
+ * @api private
+ */
+exports['Should correctly apply skip and limit to large set of documents'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      var collection = db.collection('cursor_limit_skip_correctly');
+
+      // Insert x number of docs
+      var ordered = collection.initializeUnorderedBulkOp();
+
+      for(var i = 0; i < 6000; i++) {
+        ordered.insert({a:i});
+      }
+
+      ordered.execute({w:1}, function(err, r) {
+        test.equal(null, err);
+
+        // Let's attempt to skip and limit
+        collection.find({}).limit(2016).skip(2016).toArray(function(err, docs) {
+          test.equal(null, err);
+          test.equal(2016, docs.length);
+
+          db.close();
+          test.done();
+        });
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['should tail cursor using maxAwaitTimeMS for 3.2 or higher'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single'], mongodb: ">3.1.9" } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    db.open(function(err, db) {
+      var options = { capped: true, size: 8};
+      db.createCollection('should_await_data_max_awaittime_ms', options, function(err, collection) {
+        collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
+          var s = new Date();         
+          // Create cursor with awaitdata, and timeout after the period specified
+          collection.find({})
+            .addCursorFlag('tailable', true)
+            .addCursorFlag('awaitData', true)
+            .setCursorOption('numberOfRetries', 0)
+            .maxAwaitTimeMS(500)
+            .each(function(err, result) {
+              if(result == null) {
+                test.ok((new Date().getTime() - s.getTime()) >= 500);
+                db.close();
+                test.done();                
+              }
+          });
+        });
+      });
     });
   }
 }

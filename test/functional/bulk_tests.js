@@ -82,6 +82,7 @@ exports['Should correctly handle ordered multiple batch api write command error'
         // Execute the operations
         batch.execute(function(err, result) {
           // Basic properties check
+          test.equal(err instanceof Error, true);
           test.equal(1, result.nInserted);
           test.equal(true, result.hasWriteErrors());
           test.ok(1, result.getWriteErrorCount());
@@ -199,35 +200,16 @@ exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations
 
         // Execute the operations
         batch.execute(function(err, result) {
-          // Test basic settings
-          test.equal(0, result.nInserted);
-          test.equal(true, result.hasWriteErrors());
-          test.ok(1, result.getWriteErrorCount());
+          test.ok(err != null);
 
-          // Individual error checking
-          var error = result.getWriteErrorAt(0);
-          test.equal(0, error.index);
-          test.ok(typeof error.code == 'number');
-          test.ok(error.errmsg != null);
-          test.equal(1, error.getOperation()['$set'].a);
-
+          //
           // Initialize the Ordered Batch
           var batch = col.initializeOrderedBulkOp();
           // Add illegal remove
           batch.find({$set:{a:1}}).removeOne();
           // Execute the operations
           batch.execute(function(err, result) {
-            // Test basic settings
-            test.equal(0, result.nRemoved);
-            test.equal(true, result.hasWriteErrors());
-            test.ok(1, result.getWriteErrorCount());
-
-            // Individual error checking
-            var error = result.getWriteErrorAt(0);
-            test.equal(0, error.index);
-            test.ok(typeof error.code == 'number');
-            test.ok(error.errmsg != null);
-            test.equal(1, error.getOperation().q['$set'].a);
+            test.ok(err != null);
 
             // Initialize the Ordered Batch
             var batch = col.initializeOrderedBulkOp();
@@ -235,18 +217,7 @@ exports['Should Correctly Fail Ordered Batch Operation due to illegal Operations
             batch.find({a:{$set2:1}}).updateOne({c: {$set:{a:1}}});
             // Execute the operations
             batch.execute(function(err, result) {
-              // Test basic settings
-              test.equal(0, result.nMatched);
-              test.ok(0 == result.nModified || result.nModified == null);
-              test.equal(true, result.hasWriteErrors());
-              test.ok(1, result.getWriteErrorCount());
-
-              // Individual error checking
-              var error = result.getWriteErrorAt(0);
-              test.equal(0, error.index);
-              test.ok(typeof error.code == 'number');
-              test.ok(error.errmsg != null);
-              test.equal(1, error.getOperation().u.c['$set'].a);
+              test.ok(err != null);
 
               db.close();
               test.done();
@@ -460,7 +431,7 @@ exports['Should correctly execute ordered batch using w:0'] = {
 }
 
 exports['Should correctly handle single unordered batch API'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -474,7 +445,7 @@ exports['Should correctly handle single unordered batch API'] = {
         test.equal(err, null);
 
         // Initialize the unordered Batch
-        var batch = col.initializeUnorderedBulkOp({useLegacyOps: true});
+        var batch = col.initializeUnorderedBulkOp();
 
         // Add some operations to be executed in order
         batch.insert({b:1, a:1});
@@ -484,6 +455,7 @@ exports['Should correctly handle single unordered batch API'] = {
         // Execute the operations
         batch.execute(function(err, result) {
           // Basic properties check
+          test.equal(err instanceof Error, true);
           test.equal(2, result.nInserted);
           test.equal(0, result.nUpserted);
           test.equal(0, result.nMatched);
@@ -517,7 +489,7 @@ exports['Should correctly handle single unordered batch API'] = {
 }
 
 exports['Should correctly handle multiple unordered batch API'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -596,7 +568,7 @@ exports['Should correctly handle multiple unordered batch API'] = {
 }
 
 exports['Should fail due to document being to big for unordered batch'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -628,7 +600,7 @@ exports['Should fail due to document being to big for unordered batch'] = {
 }
 
 exports['Should correctly split up messages into more batches for unordered batches'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -668,7 +640,7 @@ exports['Should correctly split up messages into more batches for unordered batc
 }
 
 exports['Should Correctly Fail Unordered Batch Operation due to illegal Operations'] = {
-  metadata: { requires: { mongodb: '>2.5.4', topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { mongodb: '>2.5.4', topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -689,20 +661,7 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
 
         // Execute the operations
         batch.execute(function(err, result) {
-          // Test basic settings
-          test.equal(0, result.nInserted);
-          test.equal(0, result.nMatched);
-          test.equal(0, result.nUpserted);
-          test.ok(0 == result.nModified || result.nModified == null);
-          test.equal(true, result.hasWriteErrors());
-          test.ok(1, result.getWriteErrorCount());
-
-          // Individual error checking
-          var error = result.getWriteErrorAt(0);
-          test.equal(0, error.index);
-          test.ok(typeof error.code == 'number');
-          test.ok(error.errmsg != null);
-          test.equal(1, error.getOperation()['$set'].a);
+          test.ok(err != null);
 
           // Initialize the unordered Batch
           var batch = col.initializeUnorderedBulkOp();
@@ -710,20 +669,7 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
           batch.find({$set:{a:1}}).removeOne();
           // Execute the operations
           batch.execute(function(err, result) {
-            // Test basic settings
-            test.equal(0, result.nInserted);
-            test.equal(0, result.nMatched);
-            test.equal(0, result.nUpserted);
-            test.ok(0 == result.nModified || result.nModified == null);
-            test.equal(true, result.hasWriteErrors());
-            test.ok(1, result.getWriteErrorCount());
-
-            // Individual error checking
-            var error = result.getWriteErrorAt(0);
-            test.equal(0, error.index);
-            test.ok(typeof error.code == 'number');
-            test.ok(error.errmsg != null);
-            test.equal(1, error.getOperation().q['$set'].a);
+            test.ok(err != null);
 
             // Initialize the unordered Batch
             var batch = col.initializeUnorderedBulkOp();
@@ -731,19 +677,7 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
             batch.find({$set:{a:1}}).updateOne({c: {$set:{a:1}}});
             // Execute the operations
             batch.execute(function(err, result) {
-              test.equal(0, result.nInserted);
-              test.equal(0, result.nMatched);
-              test.equal(0, result.nUpserted);
-              test.ok(0 == result.nModified || result.nModified == null);
-              test.equal(true, result.hasWriteErrors());
-              test.ok(1, result.getWriteErrorCount());
-
-              // Individual error checking
-              var error = result.getWriteErrorAt(0);
-              test.equal(0, error.index);
-              test.ok(typeof error.code == 'number');
-              test.ok(error.errmsg != null);
-              test.equal(1, error.getOperation().u.c['$set'].a);
+              test.ok(err != null);
 
               db.close();
               test.done();
@@ -756,7 +690,7 @@ exports['Should Correctly Fail Unordered Batch Operation due to illegal Operatio
 }
 
 exports['Should Correctly Execute Unordered Batch with duplicate key errors on updates'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -776,9 +710,12 @@ exports['Should Correctly Execute Unordered Batch with duplicate key errors on u
         batch.insert({a:1});
         batch.find({a:1}).update({$set: {b: 1}});
         batch.insert({b:1});
+        batch.insert({b:1});
+        batch.insert({b:1});
+        batch.insert({b:1});
 
         // Execute the operations
-        batch.execute(function(err, result) {
+        batch.execute(configuration.writeConcernMax(),function(err, result) {
           // Test basic settings
           test.equal(2, result.nInserted);
           test.equal(true, result.hasWriteErrors());
@@ -786,10 +723,9 @@ exports['Should Correctly Execute Unordered Batch with duplicate key errors on u
 
           // Individual error checking
           var error = result.getWriteErrorAt(0);
-          test.equal(1, error.index);
+          test.equal(2, error.index);
           test.ok(error.code == 11000 || error.code == 11001);
           test.ok(error.errmsg != null);
-          test.equal(1, error.getOperation().u['$set'].b);
 
           db.close();
           test.done();
@@ -800,7 +736,7 @@ exports['Should Correctly Execute Unordered Batch with duplicate key errors on u
 }
 
 exports['Should Correctly Execute Unordered Batch of with upserts causing duplicate key errors on updates'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -824,7 +760,7 @@ exports['Should Correctly Execute Unordered Batch of with upserts causing duplic
         batch.insert({b:1});
 
         // Execute the operations
-        batch.execute(function(err, result) {
+        batch.execute(configuration.writeConcernMax(), function(err, result) {
           // Test basic settings
           test.equal(2, result.nInserted);
           test.equal(2, result.nUpserted);
@@ -857,7 +793,7 @@ exports['Should Correctly Execute Unordered Batch of with upserts causing duplic
 }
 
 exports['Should correctly perform unordered upsert with custom _id'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -872,7 +808,7 @@ exports['Should correctly perform unordered upsert with custom _id'] = {
       batch.find({_id:2}).upsert().updateOne({$set: {b:2}});
 
       // Execute the operations
-      batch.execute(function(err, result) {
+      batch.execute(configuration.writeConcernMax(), function(err, result) {
         // Check state of result
         test.equal(1, result.nUpserted);
         test.equal(0, result.nInserted);
@@ -894,7 +830,7 @@ exports['Should correctly perform unordered upsert with custom _id'] = {
 }
 
 exports['Should prohibit batch finds with no selector'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -927,7 +863,7 @@ exports['Should prohibit batch finds with no selector'] = {
 }
 
 exports['Should throw an error when no operations in unordered batch'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -939,7 +875,7 @@ exports['Should throw an error when no operations in unordered batch'] = {
 
       try {
         // Initialize the Ordered Batch
-        col.initializeUnorderedBulkOp().execute(function(err, result) {});
+        col.initializeUnorderedBulkOp().execute(configuration.writeConcernMax(),function(err, result) {});
       } catch(err) {
         threw = true;
       }
@@ -952,7 +888,7 @@ exports['Should throw an error when no operations in unordered batch'] = {
 }
 
 exports['Should correctly execute unordered batch using w:0'] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -992,34 +928,34 @@ exports['Should correctly execute unordered batch using w:0'] = {
  * Ordered
  *
  *******************************************************************/
-exports['Should fail with journal write concern due to --nojournal ordered'] = {
-  metadata: { requires: { topology: 'single', mongodb: '>2.5.4' }},
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
-      // Get the collection
-      var col = db.collection('batch_write_concerns_ops_0');
-      // Initialize the Ordered Batch
-      var batch = col.initializeOrderedBulkOp();
-      // Add some operations to be executed in order
-      batch.insert({a:1});
-      batch.insert({a:2});
-
-      // Execute the operations
-      batch.execute({j: true}, function(err, result) {
-        test.ok(err != null);
-        test.ok(err.code != null);
-        test.ok(err.errmsg != null);
-
-        // Finish up test
-        db.close();
-        test.done();
-      });
-    });
-  }
-}
+// exports['Should fail with journal write concern due to --nojournal ordered'] = {
+//   metadata: { requires: { topology: 'single', mongodb: '>2.5.4' }},
+//
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+//     db.open(function(err, db) {
+//       // Get the collection
+//       var col = db.collection('batch_write_concerns_ops_0');
+//       // Initialize the Ordered Batch
+//       var batch = col.initializeOrderedBulkOp();
+//       // Add some operations to be executed in order
+//       batch.insert({a:1});
+//       batch.insert({a:2});
+//
+//       // Execute the operations
+//       batch.execute({j: true}, function(err, result) {
+//         test.ok(err != null);
+//         test.ok(err.code != null);
+//         test.ok(err.errmsg != null);
+//
+//         // Finish up test
+//         db.close();
+//         test.done();
+//       });
+//     });
+//   }
+// }
 
 exports['Should fail with w:2 and wtimeout write concern due single mongod instance ordered'] = {
   metadata: { requires: { topology: 'single', mongodb: '>2.5.4' }},
@@ -1055,34 +991,34 @@ exports['Should fail with w:2 and wtimeout write concern due single mongod insta
  * Unordered
  *
  *******************************************************************/
-exports['Should fail with journal write concern due to --nojournal unordered'] = {
-  metadata: { requires: { topology: 'single', mongodb: '>2.5.4' }},
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
-      // Get the collection
-      var col = db.collection('batch_write_concerns_ops_0');
-      // Initialize the Ordered Batch
-      var batch = col.initializeUnorderedBulkOp();
-      // Add some operations to be executed in order
-      batch.insert({a:1});
-      batch.insert({a:2});
-
-      // Execute the operations
-      batch.execute({j: true}, function(err, result) {
-        test.ok(err != null);
-        test.ok(err.code != null);
-        test.ok(err.errmsg != null);
-
-        // Finish up test
-        db.close();
-        test.done();
-      });
-    });
-  }
-}
+// exports['Should fail with journal write concern due to --nojournal unordered'] = {
+//   metadata: { requires: { topology: 'single', mongodb: '>2.5.4' }},
+//
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
+//     db.open(function(err, db) {
+//       // Get the collection
+//       var col = db.collection('batch_write_concerns_ops_0');
+//       // Initialize the Ordered Batch
+//       var batch = col.initializeUnorderedBulkOp();
+//       // Add some operations to be executed in order
+//       batch.insert({a:1});
+//       batch.insert({a:2});
+//
+//       // Execute the operations
+//       batch.execute({j: true}, function(err, result) {
+//         test.ok(err != null);
+//         test.ok(err.code != null);
+//         test.ok(err.errmsg != null);
+//
+//         // Finish up test
+//         db.close();
+//         test.done();
+//       });
+//     });
+//   }
+// }
 
 exports['Should fail with w:2 and wtimeout write concern due single mongod instance unordered'] = {
   metadata: { requires: { topology: 'single', mongodb: '>2.5.4' }},
@@ -1182,7 +1118,7 @@ exports['should correctly split unordered bulk batch'] = {
 
         operation.execute(function(err, result) {
           test.equal(null, err);
-          
+
           db.close();
           test.done();
         });
@@ -1241,7 +1177,7 @@ exports['should correctly split ordered bulk batch'] = {
 
         operation.execute(function(err, result) {
           test.equal(null, err);
-          
+
           db.close();
           test.done();
         });

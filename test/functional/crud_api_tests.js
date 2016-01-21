@@ -14,7 +14,7 @@ exports['should correctly execute find method using crud api'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -40,7 +40,7 @@ exports['should correctly execute find method using crud api'] = {
           .skip(0)
           .sort({a:1});
 
-        //        
+        //
         // Exercise count method
         // -------------------------------------------------
         var countMethod = function() {
@@ -52,12 +52,12 @@ exports['should correctly execute find method using crud api'] = {
           });
         }
 
-        //        
+        //
         // Exercise legacy method each
         // -------------------------------------------------
         var eachMethod = function() {
           var count = 0;
-  
+
           cursor.each(function(err, doc) {
             test.equal(null, err);
             if(doc) count = count + 1;
@@ -98,7 +98,7 @@ exports['should correctly execute find method using crud api'] = {
                 nextObjectMethod();
               });
             });
-          });          
+          });
         }
 
         //
@@ -120,7 +120,7 @@ exports['should correctly execute find method using crud api'] = {
                 streamMethod();
               });
             });
-          });          
+          });
         }
 
         //
@@ -134,7 +134,7 @@ exports['should correctly execute find method using crud api'] = {
           });
 
           clonedCursor.once('end', function() {
-            test.equal(2, count);  
+            test.equal(2, count);
             explainMethod();
           });
         }
@@ -149,7 +149,7 @@ exports['should correctly execute find method using crud api'] = {
             test.ok(result != null);
 
             db.close();
-            test.done();            
+            test.done();
           });
         }
 
@@ -167,7 +167,7 @@ exports['should correctly execute aggregation method using crud api'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -218,7 +218,7 @@ exports['should correctly execute aggregation method using crud api'] = {
             test.equal(null, err);
             test.equal(3, docs.length);
             testNext();
-          });          
+          });
         }
 
         //
@@ -247,7 +247,7 @@ exports['should correctly execute aggregation method using crud api'] = {
               test.equal(3, count);
               testStream();
             }
-          });  
+          });
         }
 
         //
@@ -262,9 +262,9 @@ exports['should correctly execute aggregation method using crud api'] = {
           });
 
           cursor.once('end', function() {
-            test.equal(3, count);  
+            test.equal(3, count);
             testExplain();
-          });          
+          });
         }
 
         //
@@ -278,7 +278,7 @@ exports['should correctly execute aggregation method using crud api'] = {
 
             db.close();
             test.done();
-          });          
+          });
         }
 
         testAllMethods();
@@ -291,7 +291,7 @@ exports['should correctly execute insert methods using crud api'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -316,7 +316,7 @@ exports['should correctly execute insert methods using crud api'] = {
       var bulkAPIInsert = function() {
         var bulk = db.collection('t2_2').initializeOrderedBulkOp();
         bulk.insert({a:1});
-        bulk.insert({a:1});        
+        bulk.insert({a:1});
         bulk.execute(function(err, r) {
           test.equal(null, err);
 
@@ -333,7 +333,7 @@ exports['should correctly execute insert methods using crud api'] = {
           test.equal(1, r.result.n);
           test.equal(1, r.insertedCount);
           test.ok(r.insertedId != null);
-          
+
           insertMany();
         });
       }
@@ -348,7 +348,7 @@ exports['should correctly execute insert methods using crud api'] = {
           test.equal(2, r.result.n);
           test.equal(2, r.insertedCount);
           test.equal(2, r.insertedIds.length);
-          
+
           // Ordered bulk unordered
           bulkWriteUnOrdered();
         });
@@ -361,7 +361,7 @@ exports['should correctly execute insert methods using crud api'] = {
         db.collection('t2_5').insertMany([{c:1}], {w:1}, function(err, r) {
           test.equal(null, err);
           test.equal(1, r.result.n);
-  
+
           db.collection('t2_5').bulkWrite([
               { insertOne: { a: 1 } }
             , { insertMany: [{ g: 1 }, { g: 2 }] }
@@ -396,7 +396,7 @@ exports['should correctly execute insert methods using crud api'] = {
         db.collection('t2_6').insertMany([{c:1}, {c:2}, {c:3}], {w:1}, function(err, r) {
           test.equal(null, err);
           test.equal(3, r.result.n);
-  
+
           db.collection('t2_6').bulkWrite([
               { insertOne: { document: { a: 1 } } }
             , { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
@@ -431,7 +431,7 @@ exports['should correctly execute insert methods using crud api'] = {
         db.collection('t2_7').insertMany([{c:1}], {w:1}, function(err, r) {
           test.equal(null, err);
           test.equal(1, r.result.n);
-  
+
           db.collection('t2_7').bulkWrite([
               { insertOne: { a: 1 } }
             , { insertMany: [{ g: 1 }, { g: 2 }] }
@@ -465,7 +465,7 @@ exports['should correctly execute insert methods using crud api'] = {
         db.collection('t2_8').insertMany([{c:1}], {w:1}, function(err, r) {
           test.equal(null, err);
           test.equal(1, r.result.n);
-  
+
           db.collection('t2_8').bulkWrite([
               { insertOne: { document: { a: 1 }} }
             , { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
@@ -502,7 +502,7 @@ exports['should correctly execute update methods using crud api'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -528,7 +528,7 @@ exports['should correctly execute update methods using crud api'] = {
         db.collection('t3_2').insertMany([{c:1}], {w:1}, function(err, r) {
           test.equal(null, err);
           test.equal(1, r.result.n);
-          
+
           db.collection('t3_2').updateOne({ a: 1 }
             , { $set: { a: 1 } }
             , { upsert: true }, function(err, r) {
@@ -543,7 +543,7 @@ exports['should correctly execute update methods using crud api'] = {
               test.equal(1, r.result.n);
               test.equal(1, r.matchedCount);
               test.ok(r.upsertedId == null);
-            
+
               replaceOne();
             });
           });
@@ -573,7 +573,7 @@ exports['should correctly execute update methods using crud api'] = {
 
             test.equal(1, r.matchedCount);
             test.ok(r.upsertedId == null);
-            
+
             updateMany();
           });
         });
@@ -586,7 +586,7 @@ exports['should correctly execute update methods using crud api'] = {
         db.collection('t3_4').insertMany([{a:1}, {a:1}], {w:1}, function(err, r) {
           test.equal(null, err);
           test.equal(2, r.result.n);
-  
+
           db.collection('t3_4').updateMany({ a: 1 }
             , { $set: { a: 2 } }
             , { upsert: true, w: 1 }, function(err, r) {
@@ -601,7 +601,7 @@ exports['should correctly execute update methods using crud api'] = {
               test.equal(null, err);
               test.equal(1, r.matchedCount);
               test.ok(r.upsertedId != null);
-            
+
               db.close();
               test.done();
             });
@@ -618,7 +618,7 @@ exports['should correctly execute remove methods using crud api'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -632,7 +632,7 @@ exports['should correctly execute remove methods using crud api'] = {
         db.collection('t4_1').insertMany([{a:1}, {a:1}], {w:1}, function(err, r) {
           test.equal(null, err);
           test.equal(2, r.result.n);
-          
+
           db.collection('t4_1').remove({a:1}, {single:true}, function(err, r) {
             test.equal(null, err);
             test.equal(1, r.result.n);
@@ -655,7 +655,7 @@ exports['should correctly execute remove methods using crud api'] = {
               test.equal(null, err);
               test.equal(1, r.result.n);
               test.equal(1, r.deletedCount);
-              
+
               deleteMany();
           });
         });
@@ -674,7 +674,7 @@ exports['should correctly execute remove methods using crud api'] = {
               test.equal(null, err);
               test.equal(2, r.result.n);
               test.equal(2, r.deletedCount);
-              
+
               db.close();
               test.done();
           });
@@ -690,7 +690,7 @@ exports['should correctly execute findAndModify methods using crud api'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -704,7 +704,7 @@ exports['should correctly execute findAndModify methods using crud api'] = {
         db.collection('t5_1').insertMany([{a:1, b:1}], {w:1}, function(err, r) {
           test.equal(null, err);
           test.equal(1, r.result.n);
-          
+
           db.collection('t5_1').findOneAndDelete({a:1}
             , { projection: {b:1}, sort: {a:1} }
             , function(err, r) {
@@ -724,14 +724,14 @@ exports['should correctly execute findAndModify methods using crud api'] = {
         db.collection('t5_2').insertMany([{a:1, b:1}], {w:1}, function(err, r) {
           test.equal(null, err);
           test.equal(1, r.result.n);
-          
+
           db.collection('t5_2').findOneAndReplace({a:1}
             , {c:1, b:1}
-            , { 
+            , {
                   projection: {b:1, c:1}
                 , sort: {a:1}
                 , returnOriginal: false
-                , upsert: true 
+                , upsert: true
               }
             , function(err, r) {
               test.equal(null, err);
@@ -751,7 +751,7 @@ exports['should correctly execute findAndModify methods using crud api'] = {
         db.collection('t5_3').insertMany([{a:1, b:1}], {w:1}, function(err, r) {
           test.equal(null, err);
           test.equal(1, r.result.n);
-          
+
           db.collection('t5_3').findOneAndUpdate({a:1}
             , {$set: {d:1}}
             , {
@@ -781,7 +781,7 @@ exports['should correctly execute removeMany with no selector'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -804,17 +804,16 @@ exports['should correctly execute crud operations with w:0'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
     // Establish connection to db
     db.open(function(err, db) {
       test.equal(null, err);
-      
+
       var col = db.collection('shouldCorrectlyExecuteInsertOneWithW0');
-      
-      col.insertOne({a:1}, {w:0}, function(err, result) {
+      col.insertOne({a:1}, {w:0}, function(err,result) {
         test.equal(null, err);
         test.equal(1, result.result.ok);
 
@@ -845,6 +844,127 @@ exports['should correctly execute crud operations with w:0'] = {
             });
           });
         });
+      });
+    });
+  }
+}
+
+exports['should correctly execute updateOne operations with w:0 and upsert'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    // Establish connection to db
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      db.collection('try').updateOne({_id:1}, {$set:{x:1}}, {upsert:true, w:0}, function(err, r) {
+        test.equal(null, err);
+        test.ok(r != null);
+
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
+
+exports['should correctly execute crud operations using w:0'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    // Establish connection to db
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      var collection = db.collection('w0crudoperations');
+      collection.insertOne({}, function(err, r) {
+        db.close();
+        test.done();
+      });
+
+      // collection.insertOne({a:1});
+      // collection.insertMany([{b:1}]);
+      // collection.updateOne({c:1}, {$set:{a:1}}, {upsert:true});
+
+
+      // db.collection('try').updateOne({_id:1}, {$set:{x:1}}, {upsert:true, w:0}, function(err, r) {
+      //   test.equal(null, err);
+      //   test.ok(r != null);
+
+      //   db.close();
+      //   test.done();
+      // });
+    });
+  }
+}
+
+exports['should correctly throw error on illegal callback when unordered bulkWrite encounters error'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    process.once("uncaughtException", function(err) {
+      db.close();
+      test.done();
+    })
+
+    var ops = [];
+    // Create a set of operations that go over the 1000 limit causing two messages
+    for(var i = 0; i < 1005; i++) {
+      ops.push({insertOne: {_id: i, a: i}});
+    }
+
+    ops.push({insertOne: {_id: 0, a: i}});
+
+    // Establish connection to db
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      db.collection('t20_1').bulkWrite(ops, {ordered:false, w:1}, function(err, r) {
+        throw err;
+      });
+    });
+  }
+}
+
+exports['should correctly throw error on illegal callback when ordered bulkWrite encounters error'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    process.once("uncaughtException", function(err) {
+      db.close();
+      test.done();
+    })
+
+    var ops = [];
+    // Create a set of operations that go over the 1000 limit causing two messages
+    for(var i = 0; i < 1005; i++) {
+      ops.push({insertOne: {_id: i, a: i}});
+    }
+
+    ops.push({insertOne: {_id: 0, a: i}});
+
+    // Establish connection to db
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      db.collection('t20_1').bulkWrite(ops, {ordered:true, w:1}, function(err, r) {
+        throw err;
       });
     });
   }

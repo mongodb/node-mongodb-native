@@ -2,7 +2,7 @@
 
 var f = require('util').format;
 
-exports['Should Correctly Do MongoClient with bufferMaxEntries:0'] = {
+exports['Should Correctly Do MongoClient with bufferMaxEntries:0 and ordered execution'] = {
   metadata: {
     requires: {
       node: ">0.8.0",
@@ -21,7 +21,52 @@ exports['Should Correctly Do MongoClient with bufferMaxEntries:0'] = {
         // Let's insert a document
         var collection = db.collection('test_object_id_generation.data2');
         // Insert another test document and collect using ObjectId
-        collection.insert({"name":"Patty", "age":34}, configuration.writeConcern(), function(err, ids) {
+        var docs = [];
+        for(var i = 0; i < 1500; i++) docs.push({a:i})
+
+        collection.insert(docs, configuration.writeConcern(), function(err, ids) {
+          test.ok(err != null);
+          test.ok(err.message.indexOf("0") != -1)
+          // Let's close the db
+          db.close();
+          test.done();
+        });
+      };
+
+      // Add listener to close event
+      db.once("close", closeListener);
+      // Ensure death of server instance
+      db.serverConfig.connections()[0].destroy();
+    });
+  }
+}
+
+exports['Should Correctly Do MongoClient with bufferMaxEntries:0 and unordered execution'] = {
+  metadata: {
+    requires: {
+      node: ">0.8.0",
+      topology: ['single', 'ssl', 'wiredtiger']
+    }
+  },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    MongoClient.connect(configuration.url(), {
+      db: {bufferMaxEntries:0}, server: { sslValidate: false },
+    }, function(err, db) {
+      // Listener for closing event
+      var closeListener = function(has_error) {
+        // Let's insert a document
+        var collection = db.collection('test_object_id_generation.data_3');
+        // Insert another test document and collect using ObjectId
+        var docs = [];
+        for(var i = 0; i < 1500; i++) docs.push({a:i})
+
+        var opts = configuration.writeConcern();
+        opts.keepGoing = true;
+        // Execute insert
+        collection.insert(docs, opts, function(err, ids) {
           test.ok(err != null);
           test.ok(err.message.indexOf("0") != -1)
           // Let's close the db
@@ -225,7 +270,7 @@ exports['Should correctly set MaxPoolSize on single server'] = {
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
     var url = configuration.url();
-    url = url.indexOf('?') != -1 
+    url = url.indexOf('?') != -1
       ? f('%s&%s', url, 'maxPoolSize=100')
       : f('%s?%s', url, 'maxPoolSize=100');
 
@@ -250,7 +295,7 @@ exports['Should correctly set MaxPoolSize on replicaset server'] = {
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
     var url = configuration.url();
-    url = url.indexOf('?') != -1 
+    url = url.indexOf('?') != -1
       ? f('%s&%s', url, 'maxPoolSize=100')
       : f('%s?%s', url, 'maxPoolSize=100');
 
@@ -275,7 +320,7 @@ exports['Should correctly set MaxPoolSize on sharded server'] = {
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
     var url = configuration.url();
-    url = url.indexOf('?') != -1 
+    url = url.indexOf('?') != -1
       ? f('%s&%s', url, 'maxPoolSize=100')
       : f('%s?%s', url, 'maxPoolSize=100');
 
@@ -301,9 +346,64 @@ exports['Should fail due to wrong uri user:password@localhost'] = {
     try {
       MongoClient.connect('user:password@localhost:27017/test', function(err, db) {
         db.close();
-      });      
+      });
     } catch(err) {
       test.done();
     }
+  }
+}
+
+/**
+ * @ignore
+ */
+exports["correctly timeout MongoClient connect using custom connectTimeoutMS"] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+
+    var start = new Date();
+
+    MongoClient.connect('mongodb://example.com/test?connectTimeoutMS=1000&maxPoolSize=1', function(err, db) {
+      test.ok(err != null);
+      test.ok((new Date().getTime() - start.getTime()) >= 1000)
+      test.done();
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports["correctly error out when no socket available on MongoClient.connect"] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    MongoClient.connect('mongodb://localhost:27088/test', function(err, db) {
+      test.ok(err != null);
+
+      test.done();
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports["correctly error out when no socket available on MongoClient.connect with domain"] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+
+    MongoClient.connect('mongodb://test.com:80/test', function(err, db) {
+      test.ok(err != null);
+
+      test.done();
+    });
   }
 }

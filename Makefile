@@ -2,13 +2,10 @@ NODE = node
 NPM = npm
 JSDOC = jsdoc
 name = all
-
+ 
 generate_docs:
 	# cp -R ./HISTORY.md ./docs/content/meta/release-notes.md
-	cp -R ./docs/history-header.md ./docs/content/meta/release-notes.md
-	more ./HISTORY.md >> ./docs/content/meta/release-notes.md
-	pandoc docs/layouts/partials/welcome.md -o docs/layouts/partials/welcome.html
-	hugo -s docs/ -d ../public
+	hugo -s docs/reference -d ../../public
 	$(JSDOC) -c conf.json -t docs/jsdoc-template/ -d ./public/api
 	cp -R ./public/api/scripts ./public/.
 	cp -R ./public/api/styles ./public/.

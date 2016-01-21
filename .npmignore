@@ -1,6 +1,7 @@
 .npmignore
 .gitignore
 .buildinfo
+.travis.yml
 .mongodb
 .DS_Store
 *.tmp

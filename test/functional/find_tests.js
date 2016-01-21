@@ -6,7 +6,7 @@
  */
 exports.shouldCorrectlyPerformSimpleFind = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -49,7 +49,7 @@ exports.shouldCorrectlyPerformSimpleFind = {
  */
 exports.shouldCorrectlyPeformSimpleChainedFind = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -94,7 +94,7 @@ exports.shouldCorrectlyPeformSimpleChainedFind = {
  */
 exports.shouldCorrectlyPeformAdvancedFinds = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -185,7 +185,7 @@ exports.shouldCorrectlyPeformAdvancedFinds = {
  */
 exports.shouldCorrectlyPerformFindWithSort = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -293,7 +293,7 @@ exports.shouldCorrectlyPerformFindWithSort = {
  */
 exports.shouldCorrectlyPerformFindWithLimit = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -353,7 +353,7 @@ exports.shouldCorrectlyPerformFindWithLimit = {
  */
 exports.shouldCorrectlyFindWithNonQuotedValues = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -382,7 +382,7 @@ exports.shouldCorrectlyFindWithNonQuotedValues = {
  */
 exports.shouldCorrectlyFindEmbeddedDocument = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -397,16 +397,16 @@ exports.shouldCorrectlyFindEmbeddedDocument = {
              collection.find({ 'a.id': 10 }).toArray(function(err, documents) {
                test.equal(1, documents.length);
                test.equal('bar', documents[0].b);
-             });
 
-             // test using string value
-             collection.find({ 'a.value': 'foo' }).toArray(function(err, documents) {
-               // should yield 2 documents
-               test.equal(2, documents.length);
-               test.equal('bar', documents[0].b);
-               test.equal('bar2', documents[1].b);
-               db.close();
-               test.done();
+               // test using string value
+               collection.find({ 'a.value': 'foo' }).toArray(function(err, documents) {
+                 // should yield 2 documents
+                 test.equal(2, documents.length);
+                 test.equal('bar', documents[0].b);
+                 test.equal('bar2', documents[1].b);
+                 db.close();
+                 test.done();
+               });
              });
           });
         });
@@ -421,7 +421,7 @@ exports.shouldCorrectlyFindEmbeddedDocument = {
  */
 exports.shouldCorrectlyFindNoRecords = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -445,11 +445,11 @@ exports.shouldCorrectlyFindNoRecords = {
  */
 exports.shouldCorrectlyPerformFindByWhere = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Code = configuration.require.Code;
-    
+
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_where', function(err, collection) {
@@ -481,7 +481,7 @@ exports.shouldCorrectlyPerformFindByWhere = {
  */
 exports.shouldCorrectlyPerformFindsWithHintTurnedOn = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -540,11 +540,11 @@ exports.shouldCorrectlyPerformFindsWithHintTurnedOn = {
  */
 exports.shouldCorrectlyPerformFindByObjectID = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
-    
+
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_find_by_oid', function(err, collection) {
@@ -574,7 +574,7 @@ exports.shouldCorrectlyPerformFindByObjectID = {
  */
 exports.shouldCorrectlyReturnDocumentWithOriginalStructure = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
@@ -611,7 +611,7 @@ exports.shouldCorrectlyReturnDocumentWithOriginalStructure = {
  */
 exports.shouldCorrectlyRetrieveSingleRecord = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var p_client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -637,7 +637,7 @@ exports.shouldCorrectlyRetrieveSingleRecord = {
  */
 exports.shouldCorrectlyHandleError = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
@@ -664,7 +664,7 @@ exports.shouldCorrectlyHandleError = {
  */
 exports.shouldCorrectlyPerformFindWithOptions = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -710,12 +710,12 @@ exports.shouldCorrectlyPerformFindWithOptions = {
  */
 exports.shouldCorrectlyFindAndModifyDocument = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
-      db.createCollection('test_find_and_modify_a_document', function(err, collection) {
+      db.createCollection('test_find_and_modify_a_document_1', function(err, collection) {
         // Test return new document on change
         collection.insert({'a':1, 'b':2}, configuration.writeConcernMax(), function(err, doc) {
           // Let's modify the document in place
@@ -732,7 +732,7 @@ exports.shouldCorrectlyFindAndModifyDocument = {
 
                 // Test remove object on change
                 collection.insert({'a':3, 'b':2}, configuration.writeConcernMax(), function(err, doc) {
-                  
+
                   // Let's modify the document in place
                   collection.findAndModify({'a':3}, [], {'$set':{'b':3}}, {remove: true}, function(err, updated_doc) {
                     test.equal(3, updated_doc.value.a);
@@ -774,12 +774,12 @@ exports.shouldCorrectlyFindAndModifyDocument = {
  */
 exports.shouldCorrectlyFindAndModifyDocumentAndReturnSelectedFieldsOnly = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
-      db.createCollection('test_find_and_modify_a_document', function(err, collection) {
+      db.createCollection('test_find_and_modify_a_document_2', function(err, collection) {
         // Test return new document on change
         collection.insert({'a':1, 'b':2}, configuration.writeConcernMax(), function(err, doc) {
           // Let's modify the document in place
@@ -800,7 +800,7 @@ exports.shouldCorrectlyFindAndModifyDocumentAndReturnSelectedFieldsOnly = {
  */
 exports['ShouldCorrectlyLocatePostAndIncValues'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -835,7 +835,7 @@ exports['ShouldCorrectlyLocatePostAndIncValues'] = {
  */
 exports['Should Correctly Handle FindAndModify Duplicate Key Error'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -863,7 +863,7 @@ exports['Should Correctly Handle FindAndModify Duplicate Key Error'] = {
  */
 exports['Should correctly return null when attempting to modify a non-existing document'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -886,7 +886,7 @@ exports['Should correctly return null when attempting to modify a non-existing d
  */
 exports['Should correctly handle chained skip and limit on find with toArray'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -912,7 +912,7 @@ exports['Should correctly handle chained skip and limit on find with toArray'] =
  */
 exports['Should correctly handle chained skip and negative limit on find with toArray'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -940,7 +940,7 @@ exports['Should correctly handle chained skip and negative limit on find with to
  */
 exports['Should correctly pass timeout options to cursor'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -971,7 +971,7 @@ exports['Should correctly pass timeout options to cursor'] = {
  */
 exports.shouldCorrectlyFindAndModifyDocumentWithDBStrict = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var p_client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -998,7 +998,7 @@ exports.shouldCorrectlyFindAndModifyDocumentWithDBStrict = {
  */
 exports.shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -1028,7 +1028,7 @@ exports.shouldCorrectlyFindAndModifyDocumentThatFailsInFirstStep = {
  */
 exports['Should correctly return new modified document'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
@@ -1065,7 +1065,7 @@ exports['Should correctly return new modified document'] = {
  */
 exports.shouldCorrectlyExecuteFindAndModify = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
@@ -1095,7 +1095,7 @@ exports.shouldCorrectlyExecuteFindAndModify = {
  */
 exports['Should correctly return record with 64-bit id'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID
@@ -1134,7 +1134,7 @@ exports['Should correctly return record with 64-bit id'] = {
  */
 exports['Should Correctly find a Document using findOne excluding _id field'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
@@ -1170,7 +1170,7 @@ exports['Should Correctly find a Document using findOne excluding _id field'] = 
  */
 exports['Should correctly execute find and findOne queries in the same way'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
@@ -1202,7 +1202,7 @@ exports['Should correctly execute find and findOne queries in the same way'] = {
  */
 exports['Should correctly execute find and findOne queries with selector set to null'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
@@ -1234,7 +1234,7 @@ exports['Should correctly execute find and findOne queries with selector set to 
  */
 exports.shouldCorrectlyHandlerErrorForFindAndModifyWhenNoRecordExists = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -1256,10 +1256,10 @@ exports.shouldCorrectlyHandlerErrorForFindAndModifyWhenNoRecordExists = {
  */
 exports.shouldCorrectlyExecuteFindAndModifyShouldGenerateCorrectBSON = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ObjectID = configuration.require.ObjectID;  
+    var ObjectID = configuration.require.ObjectID;
 
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
@@ -1306,7 +1306,7 @@ exports.shouldCorrectlyExecuteFindAndModifyShouldGenerateCorrectBSON = {
  */
 exports.shouldCorrectlyExecuteMultipleFindsInParallel = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var p_client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -1344,7 +1344,7 @@ exports.shouldCorrectlyExecuteMultipleFindsInParallel = {
  */
 exports.shouldCorrectlyReturnErrorFromMongodbOnFindAndModifyForcedError = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
@@ -1376,7 +1376,7 @@ exports.shouldCorrectlyReturnErrorFromMongodbOnFindAndModifyForcedError = {
  */
 exports.shouldCorrectlyExecuteFindAndModifyUnderConcurrentLoad = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
@@ -1420,7 +1420,7 @@ exports.shouldCorrectlyExecuteFindAndModifyUnderConcurrentLoad = {
  */
 exports.shouldCorrectlyIterateOverCollection = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var p_client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -1452,7 +1452,7 @@ exports.shouldCorrectlyIterateOverCollection = {
              numberOfSteps = numberOfSteps + 1;
            }
           });
-        });          
+        });
       });
     });
   }
@@ -1463,7 +1463,7 @@ exports.shouldCorrectlyIterateOverCollection = {
  */
 exports.shouldCorrectlyErrorOutFindAndModifyOnDuplicateRecord = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var p_client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -1472,7 +1472,7 @@ exports.shouldCorrectlyErrorOutFindAndModifyOnDuplicateRecord = {
 
       p_client.createCollection('shouldCorrectlyErrorOutFindAndModifyOnDuplicateRecord', function(err, collection) {
         test.equal(err, null);
-  
+
         // Test return old document on change
         collection.insert([{'login':'user1'}, {'login':'user2'}], configuration.writeConcernMax(), function(err, r) {
           test.equal(err, null);
@@ -1499,7 +1499,7 @@ exports.shouldCorrectlyErrorOutFindAndModifyOnDuplicateRecord = {
  */
 exports.shouldPerformSimpleFindInArray = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -1538,7 +1538,7 @@ exports.shouldPerformSimpleFindInArray = {
 
 exports.shouldReturnInstanceofErrorWithBadFieldSelection = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -1565,7 +1565,7 @@ exports.shouldReturnInstanceofErrorWithBadFieldSelection = {
  */
 exports.shouldPeformASimpleLimitSkipFindWithFields = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -1610,7 +1610,7 @@ exports.shouldPeformASimpleLimitSkipFindWithFields = {
  */
 exports.shouldPeformASimpleLimitSkipFindWithFields2 = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -1647,7 +1647,7 @@ exports.shouldPeformASimpleLimitSkipFindWithFields2 = {
  */
 exports.shouldPerformQueryWithBatchSizeDifferentToStandard = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -1683,41 +1683,11 @@ exports.shouldPerformQueryWithBatchSizeDifferentToStandard = {
 }
 
 /**
- * A simple query with a different batchSize
- */
-exports.shouldQueryCurrentOperation = {
-  metadata: {
-    requires: {
-      topology: ["single", "replicaset"]
-    }
-  },
-  
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
-    // Establish connection to db
-    db.open(function(err, db) {
-
-      // Create a collection we want to drop later
-      db.collection('$cmd.sys.inprog', function(err, collection) {
-        // Peform a simple find and return all the documents
-        collection.find({}).toArray(function(err, docs) {
-          test.ok(Array.isArray(docs[0].inprog));
-          db.close();
-          test.done();
-        });
-      });
-    });
-  }
-}
-
-/**
  * A simple query with negative limit
  */
 exports.shouldCorrectlyPerformNegativeLimit = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -1753,7 +1723,7 @@ exports.shouldCorrectlyPerformNegativeLimit = {
  */
 exports.shouldCorrectlyExecuteExhaustQuery = {
   metadata: { requires: { topology: ["single", "replicaset"] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Binary = configuration.require.Binary;
@@ -1790,7 +1760,7 @@ exports.shouldCorrectlyExecuteExhaustQuery = {
 
           collection.insert(docs2, configuration.writeConcernMax(), function(err, result) {
             test.equal(null, err);
-    
+
             // Peform a simple find and return all the documents
             collection.find({}, {exhaust:true}).toArray(function(err, docs3) {
               test.equal(null, err);
@@ -1808,7 +1778,7 @@ exports.shouldCorrectlyExecuteExhaustQuery = {
 
 exports['Readpreferences should work fine when using a single server instance'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ReadPreference = configuration.require.ReadPreference;
@@ -1846,7 +1816,7 @@ exports['Readpreferences should work fine when using a single server instance'] 
 
 exports['Each should not hang on iterating over no results'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ReadPreference = configuration.require.ReadPreference;
@@ -1870,8 +1840,8 @@ exports['Each should not hang on iterating over no results'] = {
 }
 
 exports.shouldCorrectlyFindDocumentsByRegExp = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+  metadata: { requires: { topology: ['single', 'replicaset'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -1880,13 +1850,13 @@ exports.shouldCorrectlyFindDocumentsByRegExp = {
       // the original regex invalid, and leads to segmentation fault.
       db.createCollection('test_regex_serialization', function(err, collection) {
         collection.insert({keywords: ["test", "segmentation", "fault", "regex", "serialization", "native"]}, configuration.writeConcernMax(), function(err, r) {
-          
+
           var count = 20,
               run = function(i) {
-                // search by regex            
-                collection.findOne({keywords: {$all: [/ser/, /test/, /seg/, /fault/, /nat/]}}, function(err, item) {            
-                  test.equal(6, item.keywords.length);              
-                  
+                // search by regex
+                collection.findOne({keywords: {$all: [/ser/, /test/, /seg/, /fault/, /nat/]}}, function(err, item) {
+                  test.equal(6, item.keywords.length);
+
                   if(i === 0) {
                     db.close()
                     test.done()
@@ -1897,7 +1867,7 @@ exports.shouldCorrectlyFindDocumentsByRegExp = {
           while (count--) {
             run(count);
           }
-        });      
+        });
       });
     });
   }
@@ -1905,7 +1875,7 @@ exports.shouldCorrectlyFindDocumentsByRegExp = {
 
 exports.shouldCorrectlyDoFindMinMax = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
@@ -1916,11 +1886,11 @@ exports.shouldCorrectlyDoFindMinMax = {
         collection.insert({"_id": 123, "name": "some name", "min": 1, "max": 10}, configuration.writeConcernMax(), function(err, doc) {
           test.equal(null, err);
 
-          collection.find({"_id": {$in:['some', 'value', 123]}}, {"_id":1, "max":1}, {}).toArray(function(err, docs) {        
+          collection.find({"_id": {$in:['some', 'value', 123]}}, {"_id":1, "max":1}, {}).toArray(function(err, docs) {
             test.equal(null, err);
             test.equal(10, docs[0].max)
 
-            collection.find({"_id": {$in:['some', 'value', 123]}}, {fields: {"_id":1, "max":1}}).toArray(function(err, docs) {        
+            collection.find({"_id": {$in:['some', 'value', 123]}}, {fields: {"_id":1, "max":1}}).toArray(function(err, docs) {
               test.equal(null, err);
               test.equal(10, docs[0].max)
 
@@ -1938,7 +1908,7 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors u
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { mongodb: ">2.5.5", topology: ["single", "replicaset"] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -1963,6 +1933,8 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors u
           test.equal(null, err);
           test.ok(cursors != null);
           test.ok(cursors.length > 0);
+          test.ok(cursors.length <= numCursors);
+          var left = cursors.length;
 
           for(var i = 0; i < cursors.length; i++) {
             cursors[i].each(function(err, item) {
@@ -1972,10 +1944,10 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors u
               if(item) results.push(item);
               // Finished each
               if(item == null) {
-                numCursors = numCursors - 1;
+                left = left - 1;
 
                 // No more cursors let's ensure we got all results
-                if(numCursors == 0) {
+                if(left == 0) {
                   test.equal(docs.length, results.length);
 
                   // Ensure all cursors are closed
@@ -1999,7 +1971,7 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors u
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { mongodb: ">2.5.5", topology: ["single", "replicaset"] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -2024,22 +1996,25 @@ exports['Should correctly execute parallelCollectionScan with multiple cursors u
           test.equal(null, err);
           test.ok(cursors != null);
           test.ok(cursors.length > 0);
+          test.ok(cursors.length <= numCursors);
+
+          var left = cursors.length;
 
           for(var i = 0; i < cursors.length; i++) {
 
             // Iterate using next method
-            var nextIterator = function(_cursor) {            
+            var nextIterator = function(_cursor) {
               var _callback = function(err, item) {
                 if(item) {
                   results.push(item);
                   return _cursor.next(_callback)
                 }
 
-                numCursors = numCursors - 1;              
+                left = left - 1;
                 // Ensure cursor is closed
                 test.equal(true, _cursor.isClosed());
                 // No more cursors let's ensure we got all results
-                if(numCursors == 0) {
+                if(left == 0) {
                   test.equal(docs.length, results.length);
 
                   db.close();
@@ -2063,7 +2038,7 @@ exports['Should correctly execute parallelCollectionScan with single cursor and 
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { mongodb: ">2.5.5", topology: ["single", "replicaset"] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -2106,7 +2081,7 @@ exports['Should correctly execute parallelCollectionScan with single cursor stre
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { mongodb: ">2.5.5", topology: ["single", "replicaset"] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -2151,8 +2126,8 @@ exports['Should correctly execute parallelCollectionScan with single cursor stre
 exports['Should correctly sort using text search on 2.6 or higher in find'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { mongodb: ">2.5.5", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
-  
+  metadata: { requires: { mongodb: ">2.5.5", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -2181,19 +2156,19 @@ exports['Should correctly sort using text search on 2.6 or higher in find'] = {
               test.done();
             });
           });
-      });      
+      });
     });
   }
 }
 
 exports.shouldNotMutateUserOptions = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
-      
+
       var collection = db.collection('shouldNotMutateUserOptions');
       var options = { raw : "TEST" };
       collection.find({}, {}, options, function(error, docs) {
@@ -2211,7 +2186,7 @@ exports['Should correctly execute parallelCollectionScan with single cursor emit
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { mongodb: ">2.5.5", topology: ["single", "replicaset"] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
@@ -2240,6 +2215,179 @@ exports['Should correctly execute parallelCollectionScan with single cursor emit
           cursors[0].next(function(err, doc) {
             test.equal(null, err);
 
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
+  }
+}
+
+exports['Should simulate closed cursor'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { mongodb: ">2.5.5", topology: ["single", "replicaset"] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    // Establish connection to db
+    db.open(function(err, db) {
+      var docs = [];
+
+      // Insert some documents
+      for(var i = 0; i < 1000; i++) {
+        docs.push({a:i});
+      }
+
+      // Get the collection
+      var collection = db.collection('parallelCollectionScan_4');
+      // Insert 1000 documents in a batch
+      collection.insert(docs, function(err, result) {
+        var results = [];
+        var numCursors = 1;
+
+        // Get the cursor
+        var cursor = collection.find({}).batchSize(2);
+        // Get next document
+        cursor.next(function(err, doc) {
+          test.equal(null, err);
+          test.ok(doc != null);
+
+          // Mess with state forcing a call to isDead on the cursor
+          cursor.s.state = 2;
+
+          cursor.next(function(err, doc) {
+            test.ok(err != null);
+            db.close();
+            test.done();
+          })
+        });
+      });
+    });
+  }
+}
+
+/**
+ * Find and modify should allow for a write Concern without failing
+ * @ignore
+ */
+exports['should correctly execute a findAndModifyWithAWriteConcern'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      db.createCollection('test_find_and_modify_a_document_3', function(err, collection) {
+        // Test return new document on change
+        collection.insert({'a':1, 'b':2}, configuration.writeConcernMax(), function(err, doc) {
+          // Let's modify the document in place
+          collection.findAndModify({'a':1}
+            , [['a', 1]], {'$set':{'b':3}}, {'new':true}, function(err, updated_doc) {
+              test.equal(1, updated_doc.value.a);
+              test.equal(3, updated_doc.value.b);
+
+              db.close();
+              test.done();
+          })
+        });
+      });
+    });
+  }
+}
+
+/**
+ * Test a simple find
+ * @ignore
+ */
+exports['should execute query using batchSize of 0'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      var collection = db.collection('test_find_simple_batchsize_0', function(err, collection) {
+        var doc1 = null;
+        var doc2 = null;
+
+        // Insert some test documents
+        collection.insert([{a:2}, {b:3}, {b:4}], configuration.writeConcernMax(), function(err, r) {
+
+          // Ensure correct insertion testing via the cursor and the count function
+          collection.find().batchSize(-5).toArray(function(err, documents) {
+            test.equal(null, err);
+            test.equal(3, documents.length);
+            // Let's close the db
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
+  }
+}
+
+/**
+ * Test a simple find
+ * @ignore
+ */
+exports['should execute query using limit of 0'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      var collection = db.collection('test_find_simple_limit_0', function(err, collection) {
+        var doc1 = null;
+        var doc2 = null;
+
+        // Insert some test documents
+        collection.insert([{a:2}, {b:3}, {b:4}], configuration.writeConcernMax(), function(err, r) {
+
+          // Ensure correct insertion testing via the cursor and the count function
+          collection.find().limit(-5).toArray(function(err, documents) {
+            test.equal(null, err);
+            test.equal(3, documents.length);
+
+            // Let's close the db
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
+  }
+}
+
+/**
+ * Test a simple find
+ * @ignore
+ */
+exports['should execute query using $elemMatch'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      var collection = db.collection('elem_match_test', function(err, collection) {
+        var doc1 = null;
+        var doc2 = null;
+
+        // Insert some test documents
+        collection.insert([{ _id: 1, results: [ 82, 85, 88 ] },
+          { _id: 2, results: [ 75, 88, 89 ] }], configuration.writeConcernMax(), function(err, r) {
+
+          // Ensure correct insertion testing via the cursor and the count function
+          collection.find({ results: { $elemMatch: { $gte: 80, $lt: 85 } } }).toArray(function(err, documents) {
+            test.equal(null, err);
+            test.deepEqual([ { _id: 1, results: [ 82, 85, 88 ] } ], documents);
+
+            // Let's close the db
             db.close();
             test.done();
           });

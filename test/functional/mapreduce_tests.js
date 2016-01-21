@@ -5,17 +5,17 @@
 */
 exports.shouldCorrectlyExecuteGroupFunctionWithFinalizeFunction = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_group2', function(err, collection) {
         collection.group([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", true, function(err, results) {
           test.deepEqual([], results);
 
           // Trigger some inserts
-          collection.insert([{'a':2}, {'b':5, 'a':0}, {'a':1}, {'c':2, 'a':0}], {w:1}, function(err, ids) {
+          collection.insert([{'a':2}, {'b':5, 'a':0}, {'a':1}, {'c':2, 'a':0}], configuration.writeConcernMax(), function(err, ids) {
             collection.group([], {}, {count: 0, running_average: 0}
               , function (doc, out) {
                   out.count++;
@@ -42,13 +42,13 @@ exports.shouldCorrectlyExecuteGroupFunctionWithFinalizeFunction = {
 */
 exports.shouldPerformMapReduceWithStringFunctions = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_map_reduce', function(err, collection) {
-        collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
+        collection.insert([{'user_id':1}, {'user_id':2}], configuration.writeConcernMax(), function(err, r) {
           // String functions
           var map = "function() { emit(this.user_id, 1); }";
           var reduce = "function(k,vals) { return 1; }";
@@ -56,12 +56,12 @@ exports.shouldPerformMapReduceWithStringFunctions = {
           collection.mapReduce(map, reduce, {out: {replace : 'tempCollection'}}, function(err, collection) {
             collection.findOne({'_id':1}, function(err, result) {
               test.equal(1, result.value);
-            });
 
-            collection.findOne({'_id':2}, function(err, result) {
-              test.equal(1, result.value);
-              db.close();
-              test.done();
+              collection.findOne({'_id':2}, function(err, result) {
+                test.equal(1, result.value);
+                db.close();
+                test.done();
+              });
             });
           });
         });
@@ -77,14 +77,14 @@ exports.shouldPerformMapReduceWithStringFunctions = {
 exports.shouldForceMapReduceError = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { mongodb: ">1.7.6", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
-  
+  metadata: { requires: { mongodb: ">1.7.6", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_map_reduce', function(err, collection) {
-        collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
+        collection.insert([{'user_id':1}, {'user_id':2}], configuration.writeConcernMax(), function(err, r) {
           // String functions
           var map = "function() { emiddft(this.user_id, 1); }";
           var reduce = "function(k,vals) { return 1; }";
@@ -105,13 +105,13 @@ exports.shouldForceMapReduceError = {
 */
 exports.shouldPerformMapReduceWithParametersBeingFunctions = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_map_reduce_with_functions_as_arguments', function(err, collection) {
-        collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
+        collection.insert([{'user_id':1}, {'user_id':2}], configuration.writeConcernMax(), function(err, r) {
           // String functions
           var map = function() { emit(this.user_id, 1); };
           var reduce = function(k,vals) { return 1; };
@@ -138,15 +138,15 @@ exports.shouldPerformMapReduceWithParametersBeingFunctions = {
 */
 exports.shouldPerformMapReduceWithCodeObjects = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Code = configuration.require.Code;
-    
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_map_reduce_with_code_objects', function(err, collection) {
-        collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
+        collection.insert([{'user_id':1}, {'user_id':2}], configuration.writeConcernMax(), function(err, r) {
           // String functions
           var map = new Code("function() { emit(this.user_id, 1); }");
           var reduce = new Code("function(k,vals) { return 1; }");
@@ -173,15 +173,15 @@ exports.shouldPerformMapReduceWithCodeObjects = {
 */
 exports.shouldPerformMapReduceWithOptions = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Code = configuration.require.Code;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_map_reduce_with_options', function(err, collection) {
-        collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}], {w:1}, function(err, r) {
+        collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}], configuration.writeConcernMax(), function(err, r) {
           // String functions
           var map = new Code("function() { emit(this.user_id, 1); }");
           var reduce = new Code("function(k,vals) { return 1; }");
@@ -212,15 +212,15 @@ exports.shouldPerformMapReduceWithOptions = {
 */
 exports.shouldHandleMapReduceErrors = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Code = configuration.require.Code;
 
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_map_reduce_error', function(err, collection) {
-        collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}], {w:1}, function(err, r) {
+        collection.insert([{'user_id':1}, {'user_id':2}, {'user_id':3}], configuration.writeConcernMax(), function(err, r) {
           // String functions
           var map = new Code("function() { throw 'error'; }");
           var reduce = new Code("function(k,vals) { throw 'error'; }");
@@ -241,7 +241,7 @@ exports.shouldHandleMapReduceErrors = {
 */
 exports.shouldSaveDataToDifferentDbFromMapreduce = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:0}, {poolSize:1});
@@ -253,7 +253,7 @@ exports.shouldSaveDataToDifferentDbFromMapreduce = {
       db.createCollection('test_map_reduce_functions', function(err, collection) {
 
         // Insert some documents to perform map reduce over
-        collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
+        collection.insert([{'user_id':1}, {'user_id':2}], configuration.writeConcernMax(), function(err, r) {
 
           // Map function
           var map = function() { emit(this.user_id, 1); };
@@ -286,10 +286,10 @@ exports.shouldSaveDataToDifferentDbFromMapreduce = {
 */
 exports.shouldCorrectlyReturnNestedKeys = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       var start = new Date().setTime(new Date().getTime() - 10000);
       var end = new Date().setTime(new Date().getTime() + 10000);
@@ -322,7 +322,7 @@ exports.shouldCorrectlyReturnNestedKeys = {
               lastname:'smith',
               date:new Date()
             }
-          }, {w:1}, function(err, result) {
+          }, configuration.writeConcernMax(), function(err, result) {
 
           // Execute the group
           collection.group(keys, condition, initial, reduce, true, function(err, r) {
@@ -343,16 +343,16 @@ exports.shouldCorrectlyReturnNestedKeys = {
 */
 exports.shouldPerformMapReduceWithScopeContainingFunction = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var util = {
       times_one_hundred: function(x) {return x * 100;}
     }
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_map_reduce', function(err, collection) {
-        collection.insert([{'user_id':1}, {'user_id':2}], {w:1}, function(err, r) {
+        collection.insert([{'user_id':1}, {'user_id':2}], configuration.writeConcernMax(), function(err, r) {
           // String functions
           var map = "function() { emit(this.user_id, util.times_one_hundred(this.user_id)); }";
           var reduce = "function(k,vals) { return vals[0]; }";

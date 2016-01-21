@@ -5,21 +5,25 @@
       "test/functional/operation_example_tests.js",
       "test/functional/operation_promises_example_tests.js",
       "test/functional/operation_generators_example_tests.js",
-      "lib/admin.js", 
+      "test/functional/authentication_tests.js",
+      "test/functional/gridfs_stream_tests.js",
+      "lib/admin.js",
       "lib/collection.js",
       "lib/cursor.js",
-      "lib/aggregation_cursor.js", 
+      "lib/aggregation_cursor.js",
       "lib/command_cursor.js",
       "lib/db.js",
-      "lib/mongo_client.js", 
-      "lib/mongos.js", 
-      "lib/read_preference.js", 
-      "lib/replset.js", 
-      "lib/server.js", 
-      "lib/bulk/common.js", 
-      "lib/bulk/ordered.js", 
-      "lib/bulk/unordered.js", 
+      "lib/mongo_client.js",
+      "lib/mongos.js",
+      "lib/read_preference.js",
+      "lib/replset.js",
+      "lib/server.js",
+      "lib/bulk/common.js",
+      "lib/bulk/ordered.js",
+      "lib/bulk/unordered.js",
       "lib/gridfs/grid_store.js",
+      "node_modules/mongodb-core/lib/error.js",
+      "lib/gridfs-stream/index.js",
       "node_modules/mongodb-core/lib/connection/logger.js",
       "node_modules/bson/lib/bson/binary.js",
       "node_modules/bson/lib/bson/code.js",
@@ -31,7 +35,7 @@
       "node_modules/bson/lib/bson/timestamp.js",
       "node_modules/bson/lib/bson/max_key.js",
       "node_modules/bson/lib/bson/min_key.js"
-    ]     
+    ]
   },
   "templates": {
     "cleverLinks": true,
@@ -55,7 +59,7 @@
       "keyword": ""
     },
     "linenums": true
-  },  
+  },
   "markdown": {
     "parser": "gfm",
     "hardwrap": true,

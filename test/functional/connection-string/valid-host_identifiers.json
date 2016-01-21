@@ -1,0 +1,154 @@
+{
+    "tests": [
+        {
+            "auth": null, 
+            "description": "Single IPv4 host without port", 
+            "hosts": [
+                {
+                    "host": "127.0.0.1", 
+                    "port": null, 
+                    "type": "ipv4"
+                }
+            ], 
+            "options": null, 
+            "uri": "mongodb://127.0.0.1", 
+            "valid": true, 
+            "warning": false
+        }, 
+        {
+            "auth": null, 
+            "description": "Single IPv4 host with port", 
+            "hosts": [
+                {
+                    "host": "127.0.0.1", 
+                    "port": 27018, 
+                    "type": "ipv4"
+                }
+            ], 
+            "options": null, 
+            "uri": "mongodb://127.0.0.1:27018", 
+            "valid": true, 
+            "warning": false
+        }, 
+        {
+            "auth": null, 
+            "description": "Single IP literal host without port", 
+            "hosts": [
+                {
+                    "host": "::1", 
+                    "port": null, 
+                    "type": "ip_literal"
+                }
+            ], 
+            "options": null, 
+            "uri": "mongodb://[::1]", 
+            "valid": true, 
+            "warning": false
+        }, 
+        {
+            "auth": null, 
+            "description": "Single IP literal host with port", 
+            "hosts": [
+                {
+                    "host": "::1", 
+                    "port": 27019, 
+                    "type": "ip_literal"
+                }
+            ], 
+            "options": null, 
+            "uri": "mongodb://[::1]:27019", 
+            "valid": true, 
+            "warning": false
+        }, 
+        {
+            "auth": null, 
+            "description": "Single hostname without port", 
+            "hosts": [
+                {
+                    "host": "example.com", 
+                    "port": null, 
+                    "type": "hostname"
+                }
+            ], 
+            "options": null, 
+            "uri": "mongodb://example.com", 
+            "valid": true, 
+            "warning": false
+        }, 
+        {
+            "auth": null, 
+            "description": "Single hostname with port", 
+            "hosts": [
+                {
+                    "host": "example.com", 
+                    "port": 27020, 
+                    "type": "hostname"
+                }
+            ], 
+            "options": null, 
+            "uri": "mongodb://example.com:27020", 
+            "valid": true, 
+            "warning": false
+        }, 
+        {
+            "auth": null, 
+            "description": "Single hostname (resembling IPv4) without port", 
+            "hosts": [
+                {
+                    "host": "256.0.0.1", 
+                    "port": null, 
+                    "type": "hostname"
+                }
+            ], 
+            "options": null, 
+            "uri": "mongodb://256.0.0.1", 
+            "valid": true, 
+            "warning": false
+        }, 
+        {
+            "auth": null, 
+            "description": "Multiple hosts (mixed formats)", 
+            "hosts": [
+                {
+                    "host": "127.0.0.1", 
+                    "port": null, 
+                    "type": "ipv4"
+                }, 
+                {
+                    "host": "::1", 
+                    "port": 27018, 
+                    "type": "ip_literal"
+                }, 
+                {
+                    "host": "example.com", 
+                    "port": 27019, 
+                    "type": "hostname"
+                }
+            ], 
+            "options": null, 
+            "uri": "mongodb://127.0.0.1,[::1]:27018,example.com:27019", 
+            "valid": true, 
+            "warning": false
+        }, 
+        {
+            "auth": null, 
+            "description": "UTF-8 hosts", 
+            "hosts": [
+                {
+                    "host": "b\u00fccher.example.com", 
+                    "port": null, 
+                    "type": "hostname"
+                }, 
+                {
+                    "host": "uml\u00e4ut.example.com", 
+                    "port": null, 
+                    "type": "hostname"
+                }
+            ], 
+            "options": null, 
+            "uri": "mongodb://b\u00fccher.example.com,uml\u00e4ut.example.com/", 
+            "valid": true, 
+            "warning": false
+        }
+    ]
+}
