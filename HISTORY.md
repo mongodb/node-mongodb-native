@@ -3,6 +3,7 @@
 - Added raw support for the command function on topologies.
 - Fixed issue where raw results that fell on batchSize boundaries failed (Issue #72)
 - Added connection hash id to be able to reference connection host/name without leaking it outside of driver.
+- NODE-638, Cannot authenticate database user with utf-8 password.
 
 1.2.32 01-12-2016
 -----------------
