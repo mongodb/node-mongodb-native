@@ -114,15 +114,6 @@ Callbacks.prototype.register = function(id, callback) {
   this.callbacks[id] = bindToCurrentDomain(callback);
 }
 
-/**
- * @ignore
- */
-var bindToCurrentDomain = function(callback) {
-  var domain = process.domain;
-  if(domain == null || callback == null) return callback;
-  return domain.bind(callback);
-}
-
 var DISCONNECTED = 'disconnected';
 var CONNECTING = 'connecting';
 var CONNECTED = 'connected';
