@@ -148,96 +148,6 @@ Cursor.prototype.cursorSkip = function() {
 }
 
 //
-// Execute the first query
-var execInitialQuery = function(self, query, cmd, options, cursorState, connection, logger, callbacks, callback) {
-  if(logger.isDebug()) {
-    logger.debug(f("issue initial query [%s] with flags [%s]"
-      , JSON.stringify(cmd)
-      , JSON.stringify(query)));
-  }
-
-  var queryCallback = function(err, result) {
-    if(err) return callback(err);
-
-    if(result.queryFailure) {
-      return callback(MongoError.create(result.documents[0]), null);
-    }
-
-    // Check if we have a command cursor
-    if(Array.isArray(result.documents) && result.documents.length == 1
-      && (!cmd.find || (cmd.find && cmd.virtual == false))
-      && (result.documents[0].cursor != 'string'
-        || result.documents[0]['$err']
-        || result.documents[0]['errmsg']
-        || Array.isArray(result.documents[0].result))
-      ) {
-
-      // We have a an error document return the error
-      if(result.documents[0]['$err']
-        || result.documents[0]['errmsg']) {
-        return callback(MongoError.create(result.documents[0]), null);
-      }
-
-      // We have a cursor document
-      if(result.documents[0].cursor != null
-        && typeof result.documents[0].cursor != 'string') {
-          var id = result.documents[0].cursor.id;
-          // If we have a namespace change set the new namespace for getmores
-          if(result.documents[0].cursor.ns) {
-            self.ns = result.documents[0].cursor.ns;
-          }
-          // Promote id to long if needed
-          cursorState.cursorId = typeof id == 'number' ? Long.fromNumber(id) : id;
-          cursorState.lastCursorId = cursorState.cursorId;
-
-          // If we have a firstBatch set it
-          if(Array.isArray(result.documents[0].cursor.firstBatch)) {
-            cursorState.documents = result.documents[0].cursor.firstBatch;//.reverse();
-          }
-
-          // Return after processing command cursor
-          return callback(null, null);
-      }
-
-      if(Array.isArray(result.documents[0].result)) {
-        cursorState.documents = result.documents[0].result;
-        cursorState.cursorId = Long.ZERO;
-        return callback(null, null);
-      }
-    }
-
-    // Otherwise fall back to regular find path
-    cursorState.cursorId = result.cursorId;
-    cursorState.lastCursorId = result.cursorId;
-    cursorState.documents = result.documents;
-
-    // Transform the results with passed in transformation method if provided
-    if(cursorState.transforms && typeof cursorState.transforms.query == 'function') {
-      cursorState.documents = cursorState.transforms.query(result);
-    }
-
-    // Return callback
-    callback(null, null);
-  }
-
-  // If we have a raw query decorate the function
-  if(options.raw || cmd.raw) {
-    queryCallback.raw = options.raw || cmd.raw;
-  }
-
-  // Do we have documentsReturnedIn set on the query
-  if(typeof query.documentsReturnedIn == 'string') {
-    queryCallback.documentsReturnedIn = query.documentsReturnedIn;
-  }
-
-  // Set up callback
-  callbacks.register(query.requestId, queryCallback);
-
-  // Write the initial command out
-  connection.write(query.toBin());
-}
-
-//
 // Handle callback (including any exceptions thrown)
 var handleCallback = function(callback, err, result) {
   try {
@@ -252,7 +162,7 @@ var handleCallback = function(callback, err, result) {
 // Internal methods
 Cursor.prototype._find = function(callback) {
   var self = this;
-  // execInitialQuery(self, self.query, self.cmd, self.options, self.cursorState, self.connection, self.logger, self.callbacks, function(err, r) {
+
   if(self.logger.isDebug()) {
     self.logger.debug(f("issue initial query [%s] with flags [%s]"
       , JSON.stringify(self.cmd)
