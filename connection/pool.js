@@ -162,6 +162,10 @@ try {
   execute = process.nextTick;
 }
 
+// execute = function(x) {
+//   setTimeout(x, 1)
+// }
+
 // execute = setTimeout;
 
 /**
@@ -281,11 +285,11 @@ var _createConnection = function(self) {
 
 var _execute = function(self) {
   return function() {
-    console.log("----------------------- _execute")
-    console.log("----------------------- pool.write _execute 0 :: availableConnections = " + self.availableConnections.length)
-    console.log("----------------------- pool.write _execute 0 :: inUseConnections = " + self.inUseConnections.length)
-    console.log("----------------------- pool.write _execute 0 :: newConnections = " + self.newConnections.length)
-    console.log("----------------------- pool.write _execute 0 :: queue = " + self.queue.length)
+    // console.log("----------------------- _execute")
+    // console.log("----------------------- pool.write _execute 0 :: availableConnections = " + self.availableConnections.length)
+    // console.log("----------------------- pool.write _execute 0 :: inUseConnections = " + self.inUseConnections.length)
+    // console.log("----------------------- pool.write _execute 0 :: newConnections = " + self.newConnections.length)
+    // console.log("----------------------- pool.write _execute 0 :: queue = " + self.queue.length)
 
     // Total availble connections
     var totalConnections = self.availableConnections.length
@@ -298,11 +302,12 @@ var _execute = function(self) {
       && self.connectingConnections.length == 0
       && totalConnections < self.size 
       && self.queue.length > 0) {
-      console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 0")
+      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 0")
       // Create a new connection
       _createConnection(self);
       // Attempt to execute again
-      return execute(_execute(self));
+      // return execute(_execute(self));
+      return setTimeout(_execute(self), 0)
     }
 
     // Number of ops to do
@@ -325,7 +330,8 @@ var _execute = function(self) {
 
     // Still got work that needs doing, keep executing
     if(self.queue.length > 0) {
-      return execute(_execute(self));
+      return setTimeout(_execute(self), 0)
+      // return execute(_execute(self));
     }
   }
 }

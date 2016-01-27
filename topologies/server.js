@@ -780,8 +780,8 @@ var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAl
   //   return;
   // }
 
-  console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! COMMAND :: ")
-  console.dir(Object.keys(options))
+  // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! COMMAND :: ")
+  // console.dir(cmd)
 
   try {
     // Write the query out to the passed in connection or use the pool
@@ -798,17 +798,17 @@ var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAl
 
   // Command callback
   var commandCallback = function(err, result) {
-  console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! COMMAND :: 1")
-  console.dir(err)
-  if(result)console.dir(result.documents)
+  // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! COMMAND :: 1")
+  // console.dir(err)
+  // if(result)console.dir(result.documents)
 
-      if(options.connection) {
-        if(options.connection === result.connection) {
-          console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ SAME CONNECTION")
-        } else {
-          console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ NOT SAME CONNECTION")          
-        }
-      }
+      // if(options.connection) {
+      //   if(options.connection === result.connection) {
+      //     console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ SAME CONNECTION")
+      //   } else {
+      //     console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ NOT SAME CONNECTION")          
+      //   }
+      // }
 
     // Notify end of command
     notifyStrategies(self, self.s, 'endOperation', [self, err, result, new Date()]);
@@ -823,6 +823,7 @@ var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAl
 
       // Release the connection
       if(!options.connection) {
+        // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 0")
         self.s.pool.connectionAvailable(result.connection);
       }
 
