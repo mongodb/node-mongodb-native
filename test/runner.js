@@ -212,6 +212,7 @@ var testFiles = [
   , '/test/tests/functional/operation_example_tests.js'
   , '/test/tests/functional/replset_failover_tests.js'
   , '/test/tests/functional/undefined_tests.js'
+  , '/test/tests/functional/pool_growth_shrink_tests.js'
 ]
 
 // Check if we support es6 generators

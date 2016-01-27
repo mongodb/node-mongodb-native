@@ -24,6 +24,7 @@ exports['Should correctly connect to single server'] = {
 
     // Add event listeners
     connection.on('connect', function(_connection) {
+      console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!! CONNECT")
       connection.destroy();
       test.done();
     })
