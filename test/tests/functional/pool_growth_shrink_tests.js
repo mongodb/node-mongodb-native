@@ -46,8 +46,8 @@ exports['Example of simple parallel insert into db'] = {
         test.equal(1, results.result.n);
         numberOfOpsDone = numberOfOpsDone + 1;
 
-        if(numberOfOpsDone == 2) {
-          test.equal(1, numberOfPoolConnectionExpansion);
+        if(numberOfOpsDone == 3) {
+          test.ok(numberOfPoolConnectionExpansion > 0);
           _server.destroy();
           test.done();          
         }
@@ -61,8 +61,23 @@ exports['Example of simple parallel insert into db'] = {
         test.equal(1, results.result.n);
         numberOfOpsDone = numberOfOpsDone + 1;
 
-        if(numberOfOpsDone == 2) {
-          test.equal(1, numberOfPoolConnectionExpansion);
+        if(numberOfOpsDone == 3) {
+          test.ok(numberOfPoolConnectionExpansion > 0);
+          _server.destroy();
+          test.done();          
+        }
+      });
+
+      // Execute the insert
+      _server.insert('integration_tests.inserts_example1', [{a:1}], {
+        writeConcern: {w:1}, ordered:true
+      }, function(err, results) {
+        test.equal(null, err);
+        test.equal(1, results.result.n);
+        numberOfOpsDone = numberOfOpsDone + 1;
+
+        if(numberOfOpsDone == 3) {
+          test.ok(numberOfPoolConnectionExpansion > 0);
           _server.destroy();
           test.done();          
         }
