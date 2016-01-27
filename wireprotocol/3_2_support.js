@@ -76,7 +76,7 @@ WireProtocol.prototype.remove = function(topology, ismaster, ns, bson, pool, cal
   executeWrite(topology, 'delete', 'deletes', ns, ops, options, callback);
 }
 
-WireProtocol.prototype.killCursor = function(bson, ns, cursorId, connection, callbacks, callback) {
+WireProtocol.prototype.killCursor = function(bson, ns, cursorId, pool, callbacks, callback) {
   // Build command namespace
   var parts = ns.split(/\./);
   // Command namespace
@@ -97,8 +97,8 @@ WireProtocol.prototype.killCursor = function(bson, ns, cursorId, connection, cal
   query.slaveOk = true;
 
   // Execute the kill cursor command
-  if(connection && connection.isConnected()) {
-    connection.write(query.toBin());
+  if(pool && pool.isConnected()) {
+    pool.write(query.toBin());
   }
 
   // Kill cursor callback

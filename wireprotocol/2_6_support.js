@@ -68,18 +68,18 @@ WireProtocol.prototype.remove = function(topology, ismaster, ns, bson, pool, cal
   executeWrite(topology, 'delete', 'deletes', ns, ops, options, callback);
 }
 
-WireProtocol.prototype.killCursor = function(bson, ns, cursorId, connection, callbacks, callback) {
+WireProtocol.prototype.killCursor = function(bson, ns, cursorId, pool, callbacks, callback) {
   // Create a kill cursor command
   var killCursor = new KillCursor(bson, [cursorId]);
   // Execute the kill cursor command
-  if(connection && connection.isConnected()) connection.write(killCursor.toBin());
+  if(pool && pool.isConnected()) pool.write(killCursor.toBin());
   // Set cursor to 0
   cursorId = Long.ZERO;
   // Return to caller
   if(callback) callback(null, null);
 }
 
-WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw, connection, callbacks, options, callback) {
+WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw, pool, callbacks, options, callback) {
   // Create getMore command
   var getMore = new GetMore(bson, ns, cursorState.cursorId, {numberToReturn: batchSize});
 
@@ -113,7 +113,7 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
   // Register a callback
   callbacks.register(getMore.requestId, queryCallback);
   // Write out the getMore command
-  connection.write(getMore.toBin());
+  pool.write(getMore.toBin());
 }
 
 WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, options) {

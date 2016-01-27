@@ -780,15 +780,36 @@ var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAl
   //   return;
   // }
 
+  console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! COMMAND :: ")
+  console.dir(Object.keys(options))
+
   try {
-    // Write the query out to the pool
-    self.s.pool.write(query.toBin());
+    // Write the query out to the passed in connection or use the pool
+    // Passed in connections are used for authentication mechanisms
+    if(options.connection) {
+      options.connection.write(query.toBin());
+    } else {
+      self.s.pool.write(query.toBin());      
+    }
+
   } catch(err) {
     return callback(MongoError.create(err));
   }
 
   // Command callback
   var commandCallback = function(err, result) {
+  console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! COMMAND :: 1")
+  console.dir(err)
+  if(result)console.dir(result.documents)
+
+      if(options.connection) {
+        if(options.connection === result.connection) {
+          console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ SAME CONNECTION")
+        } else {
+          console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ NOT SAME CONNECTION")          
+        }
+      }
+
     // Notify end of command
     notifyStrategies(self, self.s, 'endOperation', [self, err, result, new Date()]);
     if(err) return callback(err);
@@ -801,7 +822,9 @@ var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAl
       result.hashedName = result.connection.hashedName;
 
       // Release the connection
-      self.s.pool.connectionAvailable(result.connection);
+      if(!options.connection) {
+        self.s.pool.connectionAvailable(result.connection);
+      }
 
       // Execute callback, catch and rethrow if needed
       try {
