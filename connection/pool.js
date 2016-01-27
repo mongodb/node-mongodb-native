@@ -19,7 +19,7 @@ var _id = 0;
  * @class
  * @param {string} options.host The server host
  * @param {number} options.port The server port
- * @param {number} [options.size=5] Server connection pool size
+ * @param {number} [options.size=1] Max server connection pool size
  * @param {boolean} [options.keepAlive=true] TCP Connection keep alive enabled
  * @param {number} [options.keepAliveInitialDelay=0] Initial delay before TCP keep alive enabled
  * @param {boolean} [options.noDelay=true] TCP Connection no delay
@@ -48,6 +48,11 @@ var Pool = function(options) {
   // Set empty if no options passed
   this.options = options || {};
   this.size = typeof options.size == 'number' && !isNaN(options.size) ? options.size : 5;
+  this.waitMS = typeof options.waitMS == 'number' && !isNaN(options.waitMS) ? options.waitMS : 1000;
+
+  // Save host and port
+  this.host = options.host;
+  this.port = options.port;
 
   // Message handler
   this.messageHandler = options.messageHandler;
@@ -55,6 +60,12 @@ var Pool = function(options) {
   if(!options.bson) throw new Error("must pass in valid bson parser");
   // Contains all connections
   this.connections = [];
+  // Contains all available connections
+  this.availableConnections = [];
+  this.inUseConnections = [];
+  this.newConnections = [];
+  this.connectingConnections = [];
+  // Current status of the pool
   this.state = DISCONNECTED;
   // Round robin index
   this.index = 0;
@@ -63,10 +74,14 @@ var Pool = function(options) {
   this.logger = Logger('Pool', options);
   // If we are monitoring this server we will create an exclusive reserved socket for that
   this.monitoring = typeof options.monitoring == 'boolean' ? options.monitoring : false;
+  // Maintain the monitoring connection
+  this.monitorConnection = null;
   // Pool id
   this.id = _id++;
   // Grouping tag used for debugging purposes
   this.tag = options.tag;
+  // Operation work queue
+  this.queue = [];
 }
 
 inherits(Pool, EventEmitter);
@@ -119,18 +134,6 @@ var parseErrorHandler = function(self) {
   }
 }
 
-var connectHandler = function(self) {
-  return function(connection) {
-    self.connections.push(connection);
-    // We have connected to all servers
-    if(self.connections.length == self.size) {
-      self.state = CONNECTED;
-      // Done connecting
-      self.emit("connect", self);
-    }
-  }
-}
-
 /**
  * Destroy pool
  * @method
@@ -159,11 +162,14 @@ try {
   execute = process.nextTick;
 }
 
+// execute = setTimeout;
+
 /**
  * Connect pool
  * @method
  */
 Pool.prototype.connect = function(_options) {
+  // console.log("---------------------- CONNECT")
   var self = this;
   // Set to connecting
   this.state = CONNECTING
@@ -173,8 +179,11 @@ Pool.prototype.connect = function(_options) {
   // Ensure we allow for a little time to setup connections
   var wait = 1;
 
+  // Number of initial connections to perform
+  var numberOfConnections = this.monitoring ? 2 : 1;
+
   // Connect all sockets
-  for(var i = 0; i < this.size; i++) {
+  for(var i = 0; i < numberOfConnections; i++) {
     setTimeout(function() {
       execute(function() {
         self.options.messageHandler = self.messageHandler;
@@ -185,7 +194,21 @@ Pool.prototype.connect = function(_options) {
         connection.once('error', errorHandler(self));
         connection.once('timeout', timeoutHandler(self));
         connection.once('parseError', parseErrorHandler(self));
-        connection.on('connect', connectHandler(self));
+        connection.on('connect', function(connection) {
+          // Add the connection to the list of available connections
+          self.availableConnections.push(connection);
+
+          // Have we finished the initial connection
+          if(self.availableConnections.length == numberOfConnections) {
+            // Reserve a monitoring socket
+            if(self.monitoring) {
+              self.monitorConnection = self.availableConnections.pop();
+            }
+
+            // Done connecting
+            self.emit("connect", self);
+          }
+        });
 
         // Start connection
         connection.connect(_options);
@@ -195,6 +218,156 @@ Pool.prototype.connect = function(_options) {
     // wait for 1 miliseconds before attempting to connect, spacing out connections
     wait = wait + 1;
   }
+}
+
+var _createConnection = function(self) {
+  self.options.messageHandler = self.messageHandler;
+  var connection = new Connection(self.options);
+
+  // Push the connection
+  self.connectingConnections.push(connection);
+
+  // Handle any errors
+  var tempErrorHandler = function(err) {
+    // self.emit('error', err);
+  }
+
+  // All event handlers
+  var handlers = ["close", "message", "error", "timeout", "parseError", "connect"];
+
+  // Handle successful connection
+  var tempConnectHandler = function() {
+    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! tempConnectHandler 0")
+    // Destroy all event emitters
+    handlers.forEach(function(e) {
+      connection.removeAllListeners(e);
+    });
+    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! tempConnectHandler 1")
+
+    // Add the final handlers
+    connection.once('close', closeHandler(self));
+    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! tempConnectHandler 3")
+    connection.once('error', errorHandler(self));
+    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! tempConnectHandler 4")
+    connection.once('timeout', timeoutHandler(self));
+    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! tempConnectHandler 5")
+    connection.once('parseError', parseErrorHandler(self));
+
+    // Remove the connection from the connectingConnections
+    var index = self.connectingConnections.indexOf(connection);
+    if(index != -1) {
+      self.connectingConnections.splice(index, 1);
+    }
+
+    // Add to queue of new connection
+    self.newConnections.push(connection);
+    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! tempConnectHandler 8")
+    // Emit connection to server instance
+    // alowing it to apply any needed authentication
+    self.emit('connection', connection);
+    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! tempConnectHandler 9")
+  }
+
+  // Add all handlers
+  connection.once('close', tempErrorHandler);
+  connection.once('error', tempErrorHandler);
+  connection.once('timeout', tempErrorHandler);
+  connection.once('parseError', tempErrorHandler);
+  connection.once('connect', tempConnectHandler);
+
+  // Start connection
+  connection.connect();
+}
+
+var _execute = function(self) {
+  return function() {
+    console.log("----------------------- _execute")
+    console.log("----------------------- pool.write _execute 0 :: availableConnections = " + self.availableConnections.length)
+    console.log("----------------------- pool.write _execute 0 :: inUseConnections = " + self.inUseConnections.length)
+    console.log("----------------------- pool.write _execute 0 :: newConnections = " + self.newConnections.length)
+    console.log("----------------------- pool.write _execute 0 :: queue = " + self.queue.length)
+
+    // Total availble connections
+    var totalConnections = self.availableConnections.length
+      + self.connectingConnections.length
+      + self.inUseConnections.length
+      + self.newConnections.length;
+
+    // Have we not reached the max connection size yet
+    if(self.availableConnections.length == 0 
+      && self.connectingConnections.length == 0
+      && totalConnections < self.size 
+      && self.queue.length > 0) {
+      console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 0")
+      // Create a new connection
+      _createConnection(self);
+      // Attempt to execute again
+      return execute(_execute(self));
+    }
+
+    // Number of ops to do
+    var numberOfOps = self.availableConnections.length > self.queue.length
+      ? self.queue.length : self.availableConnections.length;
+
+    // As long as we have available connections
+    while(true) {
+      if(self.availableConnections.length == 0) break;
+      if(self.queue.length == 0) break;
+
+      // Get a connection
+      var connection = self.availableConnections.pop();
+      var buffer = self.queue.shift();
+      // Add connection to workers in flight
+      self.inUseConnections.push(connection);
+      // Write the data to the connection
+      connection.write(buffer);
+    }
+
+    // Still got work that needs doing, keep executing
+    if(self.queue.length > 0) {
+      return execute(_execute(self));
+    }
+  }
+}
+
+/**
+ * Write a message to MongoDB
+ * @method
+ * @return {Connection}
+ */
+Pool.prototype.write = function(buffer, options) {
+  // We have a monitoring operation and need to use
+  // the dedicated connection
+  if(options && options.monitoring && this.monitorConnection) {
+    return this.monitorConnection.write(buffer);
+  }
+
+  // Push the operation to the queue of operations in progress
+  this.queue.push(buffer);
+  // Attempt to write all buffers out
+  _execute(this)();
+}
+
+/**
+ * Make a passed connection available
+ * @method
+ * @return {Connection}
+ */
+Pool.prototype.connectionAvailable = function(connection) {
+  // Get the connection from the newConnections
+  var index = this.newConnections.indexOf(connection);
+  if(index != -1) {
+    this.newConnections.splice(index, 1);
+  }
+
+  // If it's in the inUseConnections
+  index = this.inUseConnections.indexOf(connection);
+  if(index != -1) {
+    this.inUseConnections.splice(index, 1);
+  }
+
+  // Add the connection to available connections
+  this.availableConnections.push(connection);
 }
 
 /**
@@ -266,8 +439,14 @@ Pool.prototype.getAll = function() {
  * @return {boolean}
  */
 Pool.prototype.isConnected = function() {
-  for(var i = 0; i < this.connections.length; i++) {
-    if(!this.connections[i].isConnected()) return false;
+  // Available connections
+  for(var i = 0; i < this.availableConnections.length; i++) {
+    if(this.availableConnections[i].isConnected()) return true;
+  }
+
+  // inUseConnections
+  for(var i = 0; i < this.inUseConnections.length; i++) {
+    if(this.inUseConnections[i].isConnected()) return true;
   }
 
   return this.state == CONNECTED;

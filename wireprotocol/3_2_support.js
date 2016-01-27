@@ -129,7 +129,7 @@ WireProtocol.prototype.killCursor = function(bson, ns, cursorId, connection, cal
   callbacks.register(query.requestId, killCursorCallback);
 }
 
-WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw, connection, callbacks, options, callback) {
+WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw, pool, callbacks, options, callback) {
   var readPreference = options.readPreference || new ReadPreference('primary');
   if(typeof readPreference == 'string') readPreference = new ReadPreference(readPreference);
   if(!(readPreference instanceof ReadPreference)) throw new MongoError('readPreference must be a ReadPreference instance');
@@ -178,13 +178,6 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
       return callback(null, r.documents);
     }
 
-    // // Check if we have any errors
-    // if((Array.isArray(r.documents) || r.documents.length == 0)) {
-    //   console.log("@@@@@@@@@@@@@@@@@@@ YO")
-    //   console.dir(r.cursorId)
-    //   // return callback(new MongoError(f('invalid getMore result returned for cursor id %s', cursorState.cursorId)));
-    // }
-
     // We have an error detected
     if(r.documents[0].ok == 0) {
       return callback(MongoError.create(r.documents[0]));
@@ -214,7 +207,7 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
   // Register a callback
   callbacks.register(query.requestId, queryCallback);
   // Write out the getMore command
-  connection.write(query.toBin());
+  pool.write(query.toBin());
 }
 
 WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, options) {

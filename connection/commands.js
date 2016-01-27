@@ -393,9 +393,10 @@ KillCursor.prototype.toBin = function() {
   return _buffer;
 }
 
-var Response = function(bson, data, opts) {
+var Response = function(connection, bson, data, opts) {
   opts = opts || {promoteLongs: true};
   this.parsed = false;
+  this.connection = connection;
 
   //
   // Parse Header
