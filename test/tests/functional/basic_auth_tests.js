@@ -46,10 +46,14 @@ exports['Simple authentication test for single server'] = {
       }, function(err, r) {
         test.equal(null, err);
         test.equal(1, r.result.ok);
+
         // Grab the connection
         var connection = r.connection;
+        console.log("--------------------------------------------- TEST 0 :: " + configuration.db)
         // Authenticate
         _server.auth('mongocr', configuration.db, 'test', 'test', function(err, session) {
+          console.log("--------------------------------------------- TEST 1")
+          console.dir(err)
           test.equal(null, err);
           test.ok(session != null);
           // Reconnect message

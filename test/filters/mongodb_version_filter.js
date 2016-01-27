@@ -20,6 +20,7 @@ var MongoDBVersionFilter = function(options) {
 
       topology.command(f("%s.$cmd", configuration.db), {buildInfo:true}, function(err, result) {
         if(err) throw err;      
+        console.log(f('running against mongodb: %s', result.result.version));
         mongodb_version_array = result.result.versionArray;
         version = result.result.version;
         topology.destroy();

@@ -3,8 +3,7 @@
 var Runner = require('integra').Runner
   , Cover = require('integra').Cover
   , RCover = require('integra').RCover
-  , f = require('util').format
-  , m = require('mongodb-version-manager')
+  , f = require('util').format  
   , path = require('path')
   , NodeVersionFilter = require('./filters/node_version_filter')
   , MongoDBVersionFilter = require('./filters/mongodb_version_filter')
@@ -406,6 +405,8 @@ if(argv.t == 'functional') {
     return runner.run(Configuration(config));
   }
 
+  // Ensure we only use mongodb-version if not running against current path mongod process
+  var m = require('mongodb-version-manager')
   // Kill any running MongoDB processes and
   // `install $MONGODB_VERSION` || `use existing installation` || `install stable`
   m(function(err){
