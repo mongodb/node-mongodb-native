@@ -1,20 +1,10 @@
 TODO
 ====
-- Create Mongos Set Manager
-- Add Replicaset Tests
-  - Adding a new set members
-  - Removing a set member
-  - Killing a secondary and recovering
-- Add Mongos Tests
-  - Killing a mongos
-- Add support for tags to be used for selection if available
-
-DONE
-====
-- Add Custom cursor constructor 
-  - Allow setting of Custom cursor class creator
-- Integrate Pinging of servers in replicaset
-  - Add nearest read preference
-- Add fallback ability for legacy server support
-  - insert/update/remove
-- Single buffer BSON serialization option 
+- Enable all auth mechanisms to work on 1:n passed in connections instead of using the pool.getAll
+- Ensure new connections are authenticated if needed
+- Closing connections should only affect operations on that connection
+  + Add connection to callbackstore callbacks
+  + Flush connection callbacks
+- What does reconnect mean ?
+  + Server
+  + ReplSet
