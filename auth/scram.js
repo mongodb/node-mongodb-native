@@ -92,17 +92,15 @@ var hi = function(data, salt, iterations) {
  * Authenticate
  * @method
  * @param {{Server}|{ReplSet}|{Mongos}} server Topology the authentication method is being called on
- * @param {Pool} pool Connection pool for this topology
+ * @param {[]Connections} connections Connections to authenticate using this authenticator
  * @param {string} db Name of the database
  * @param {string} username Username
  * @param {string} password Password
  * @param {authResultCallback} callback The callback to return the result from the authentication
  * @return {object}
  */
-ScramSHA1.prototype.auth = function(server, pool, db, username, password, callback) {
+ScramSHA1.prototype.auth = function(server, connections, db, username, password, callback) {
   var self = this;
-  // Get all the connections
-  var connections = pool.getAll();
   // Total connections
   var count = connections.length;
   if(count == 0) return callback(null, null);
@@ -294,16 +292,16 @@ var addAuthSession = function(authStore, session) {
  * Re authenticate pool
  * @method
  * @param {{Server}|{ReplSet}|{Mongos}} server Topology the authentication method is being called on
- * @param {Pool} pool Connection pool for this topology
+ * @param {[]Connections} connections Connections to authenticate using this authenticator
  * @param {authResultCallback} callback The callback to return the result from the authentication
  * @return {object}
  */
-ScramSHA1.prototype.reauthenticate = function(server, pool, callback) {
+ScramSHA1.prototype.reauthenticate = function(server, connections, callback) {
   var count = this.authStore.length;
   if(count == 0) return callback(null, null);
   // Iterate over all the auth details stored
   for(var i = 0; i < this.authStore.length; i++) {
-    this.auth(server, pool, this.authStore[i].db, this.authStore[i].username, this.authStore[i].password, function(err, r) {
+    this.auth(server, connections, this.authStore[i].db, this.authStore[i].username, this.authStore[i].password, function(err, r) {
       count = count - 1;
       // Done re-authenticating
       if(count == 0) {

@@ -43,7 +43,7 @@ var addAuthSession = function(authStore, session) {
  * Authenticate
  * @method
  * @param {{Server}|{ReplSet}|{Mongos}} server Topology the authentication method is being called on
- * @param {Pool} pool Connection pool for this topology
+ * @param {[]Connections} connections Connections to authenticate using this authenticator
  * @param {string} db Name of the database
  * @param {string} username Username
  * @param {string} password Password
@@ -52,10 +52,6 @@ var addAuthSession = function(authStore, session) {
  */
 MongoCR.prototype.auth = function(server, connections, db, username, password, callback) {
   var self = this;
-  // Get all the connections
-  // var connections = pool.getAll();
-  // console.log("!!!!!!!!!!!!!!!!!!!!!!! pool.getAll")
-  // console.dir(connections.length)
   // Total connections
   var count = connections.length;
   if(count == 0) return callback(null, null);
@@ -75,11 +71,6 @@ MongoCR.prototype.auth = function(server, connections, db, username, password, c
         , { connection: connection }, function(err, r) {
           var nonce = null;
           var key = null;
-            // console.log("!--------------------- NONCE")
-            // console.dir(err)
-            // if(r)console.dir(r.result)
-            // console.log(username)
-            // console.log(password)
 
           // Adjust the number of connections left
           // Get nonce
@@ -96,15 +87,10 @@ MongoCR.prototype.auth = function(server, connections, db, username, password, c
             key = md5.digest('hex');
           }
 
-            // console.log("!--------------------- AUTH 0")
           // Execute command
           server.command(f("%s.$cmd", db)
             , { authenticate: 1, user: username, nonce: nonce, key:key}
             , { connection: connection }, function(err, r) {
-            // console.log("!--------------------- AUTH 1")
-            // console.dir(err)
-            // if(r)console.dir(r.result)
-
               count = count - 1;
 
               // If we have an error
@@ -142,7 +128,7 @@ MongoCR.prototype.auth = function(server, connections, db, username, password, c
  * Re authenticate pool
  * @method
  * @param {{Server}|{ReplSet}|{Mongos}} server Topology the authentication method is being called on
- * @param {Pool} pool Connection pool for this topology
+ * @param {[]Connections} connections Connections to authenticate using this authenticator
  * @param {authResultCallback} callback The callback to return the result from the authentication
  * @return {object}
  */

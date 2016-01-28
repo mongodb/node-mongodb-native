@@ -72,7 +72,7 @@ WireProtocol.prototype.killCursor = function(bson, ns, cursorId, pool, callbacks
   // Create a kill cursor command
   var killCursor = new KillCursor(bson, [cursorId]);
   // Execute the kill cursor command
-  if(pool && pool.isConnected()) pool.write(killCursor.toBin());
+  if(pool && pool.isConnected()) pool.write(killCursor.toBin(), callback);
   // Set cursor to 0
   cursorId = Long.ZERO;
   // Return to caller
@@ -113,7 +113,7 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
   // Register a callback
   callbacks.register(getMore.requestId, queryCallback);
   // Write out the getMore command
-  pool.write(getMore.toBin());
+  pool.write(getMore.toBin(), callback);
 }
 
 WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, options) {

@@ -246,7 +246,7 @@ Cursor.prototype._find = function(callback) {
   self.callbacks.register(self.query.requestId, queryCallback);
 
   // Write the initial command out
-  self.pool.write(self.query.toBin());
+  self.pool.write(self.query.toBin(), queryCallback);
 }
 
 Cursor.prototype._getmore = function(callback) {
@@ -554,7 +554,7 @@ var nextFunction = function(self, callback) {
     // Handle all the exhaust responses
     self.callbacks.register(self.query.requestId, processExhaustMessages);
     // Write the initial command out
-    return self.pool.write(self.query.toBin());
+    return self.pool.write(self.query.toBin(), processExhaustMessages);
   } else if(self.cmd.exhaust && self.cursorState.cursorIndex < self.cursorState.documents.length) {
     return handleCallback(callback, null, self.cursorState.documents[self.cursorState.cursorIndex++]);
   } else if(self.cmd.exhaust && Long.ZERO.equals(self.cursorState.cursorId)) {

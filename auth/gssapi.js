@@ -41,20 +41,18 @@ var GSSAPI = function() {
  * Authenticate
  * @method
  * @param {{Server}|{ReplSet}|{Mongos}} server Topology the authentication method is being called on
- * @param {Pool} pool Connection pool for this topology
+ * @param {[]Connections} connections Connections to authenticate using this authenticator
  * @param {string} db Name of the database
  * @param {string} username Username
  * @param {string} password Password
  * @param {authResultCallback} callback The callback to return the result from the authentication
  * @return {object}
  */
-GSSAPI.prototype.auth = function(server, pool, db, username, password, options, callback) {
+GSSAPI.prototype.auth = function(server, connections, db, username, password, options, callback) {
   var self = this;
   // We don't have the Kerberos library
   if(Kerberos == null) return callback(new Error("Kerberos library is not installed"));  
   var gssapiServiceName = options['gssapiServiceName'] || 'mongodb';
-  // Get all the connections
-  var connections = pool.getAll();
   // Total connections
   var count = connections.length;
   if(count == 0) return callback(null, null);
@@ -214,16 +212,16 @@ var addAuthSession = function(authStore, session) {
  * Re authenticate pool
  * @method
  * @param {{Server}|{ReplSet}|{Mongos}} server Topology the authentication method is being called on
- * @param {Pool} pool Connection pool for this topology
+ * @param {[]Connections} connections Connections to authenticate using this authenticator
  * @param {authResultCallback} callback The callback to return the result from the authentication
  * @return {object}
  */
-GSSAPI.prototype.reauthenticate = function(server, pool, callback) {
+GSSAPI.prototype.reauthenticate = function(server, connections, callback) {
   var count = this.authStore.length;
   if(count == 0) return callback(null, null);
   // Iterate over all the auth details stored
   for(var i = 0; i < this.authStore.length; i++) {
-    this.auth(server, pool, this.authStore[i].db, this.authStore[i].username, this.authStore[i].password, this.authStore[i].options, function(err, r) {
+    this.auth(server, connections, this.authStore[i].db, this.authStore[i].username, this.authStore[i].password, this.authStore[i].options, function(err, r) {
       count = count - 1;
       // Done re-authenticating
       if(count == 0) {

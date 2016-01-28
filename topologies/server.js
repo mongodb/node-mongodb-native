@@ -90,8 +90,34 @@ Callbacks.prototype.flush = function(err) {
   }
 }
 
+//
+// Flush all callbacks
+Callbacks.prototype.flushConnection = function(err, connection) {
+  console.log("!!!!!!!!!!!!!!!!!!! FLUSH CONNECTIONS")
+  for(var id in this.callbacks) {
+    if(!isNaN(parseInt(id, 10))) {
+      var callback = this.callbacks[id];
+      console.dir(Object.keys(callback))
+
+      // Validate if the operation ran on the connection
+      if(callback.connection === connection) {
+        console.log("!!!!!!!!!!!!!!!!!!! FLUSH CONNECTIONS -- FOUND")
+        delete this.callbacks[id];
+        callback(err, null);
+      }
+    }
+  }
+}
+
 Callbacks.prototype.emit = function(id, err, value) {
   var callback = this.callbacks[id];
+  // if(!callback.connection) {
+  //   console.log("!!!!!!!!!!!!!!!!!!!!! NO CONNECTION")
+  //   console.log(callback.toString())
+  // }
+  // console.log("---------------------------- callbacks emit")
+  // console.dir(Object.keys(callback))
+  // if(value) console.dir(value.documents)
   delete this.callbacks[id];
   callback(err, value);
 }
@@ -255,86 +281,115 @@ var messageHandler = function(self, state) {
 var errorHandler = function(self, state) {
   return function(err, connection) {
     if(state.state == DISCONNECTED || state.state == DESTROYED) return;
-    // Set disconnected state
-    state.state = DISCONNECTED;
-    if(state.readPreferenceStrategies != null) notifyStrategies(self, self.s, 'error', [self]);
-    if(state.logger.isInfo()) state.logger.info(f('server %s errored out with %s', self.name, JSON.stringify(err)));
-    // Flush out all the callbacks
-    if(state.callbacks) state.callbacks.flush(new MongoError(f("server %s received an error %s", self.name, JSON.stringify(err))));
-    // Destroy all connections
-    self.destroy();
-    // Emit error event
-    if(state.emitError && self.listeners('error').length > 0) self.emit('error', err, self);
-    // If we specified the driver to reconnect perform it
-    if(state.reconnect) setTimeout(function() {
-      reconnectServer(self, state)
-    }, state.reconnectInterval);
+    console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% errorHandler")
+    // Flush the connection operations
+    if(self.s.callbacks) {
+      self.s.callbacks.flushConnection(new MongoError(f("server %s received an error %s", self.name, JSON.stringify(err))), connection);
+    }
+    // if(state.state == DISCONNECTED || state.state == DESTROYED) return;
+    // // Set disconnected state
+    // state.state = DISCONNECTED;
+    // if(state.readPreferenceStrategies != null) notifyStrategies(self, self.s, 'error', [self]);
+    // if(state.logger.isInfo()) state.logger.info(f('server %s errored out with %s', self.name, JSON.stringify(err)));
+    // // Flush out all the callbacks
+    // if(state.callbacks) state.callbacks.flush(new MongoError(f("server %s received an error %s", self.name, JSON.stringify(err))));
+    // // Destroy all connections
+    // self.destroy();
+    // // Emit error event
+    // if(state.emitError && self.listeners('error').length > 0) self.emit('error', err, self);
+    // // If we specified the driver to reconnect perform it
+    // if(state.reconnect) setTimeout(function() {
+    //   reconnectServer(self, state)
+    // }, state.reconnectInterval);
   }
 }
 
 var fatalErrorHandler = function(self, state) {
   return function(err, connection) {
     if(state.state == DISCONNECTED || state.state == DESTROYED) return;
-    // Set disconnected state
-    state.state = DISCONNECTED;
+    console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% fatalErrorHandler")
+    // Flush the connection operations
+    if(self.s.callbacks) {
+      self.s.callbacks.flushConnection(new MongoError(f("server %s received an error %s", self.name, JSON.stringify(err))), connection);
+    }
+    // if(state.state == DISCONNECTED || state.state == DESTROYED) return;
+    // // Set disconnected state
+    // state.state = DISCONNECTED;
 
-    if(state.readPreferenceStrategies != null) notifyStrategies(self, self.s, 'error', [self]);
-    if(state.logger.isInfo()) state.logger.info(f('server %s errored out with %s', self.name, JSON.stringify(err)));
-    // Flush out all the callbacks
-    if(state.callbacks) state.callbacks.flush(new MongoError(f("server %s received an error %s", self.name, JSON.stringify(err))));
-    // Emit error event
-    if(self.listeners('error').length > 0) self.emit('error', err, self);
-    // If we specified the driver to reconnect perform it
-    if(state.reconnect) setTimeout(function() {
-      // state.currentReconnectRetry = state.reconnectTries,
-      reconnectServer(self, state)
-    }, state.reconnectInterval);
-    // Destroy all connections
-    self.destroy();
+    // if(state.readPreferenceStrategies != null) notifyStrategies(self, self.s, 'error', [self]);
+    // if(state.logger.isInfo()) state.logger.info(f('server %s errored out with %s', self.name, JSON.stringify(err)));
+    // // Flush out all the callbacks
+    // if(state.callbacks) state.callbacks.flush(new MongoError(f("server %s received an error %s", self.name, JSON.stringify(err))));
+    // // Emit error event
+    // if(self.listeners('error').length > 0) self.emit('error', err, self);
+    // // If we specified the driver to reconnect perform it
+    // if(state.reconnect) setTimeout(function() {
+    //   // state.currentReconnectRetry = state.reconnectTries,
+    //   reconnectServer(self, state)
+    // }, state.reconnectInterval);
+    // // Destroy all connections
+    // self.destroy();
   }
 }
 
 var timeoutHandler = function(self, state) {
   return function(err, connection) {
     if(state.state == DISCONNECTED || state.state == DESTROYED) return;
-    // Set disconnected state
-    state.state = DISCONNECTED;
+    console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% timeoutHandler")
+    // Flush the connection operations
+    if(self.s.callbacks) {
+      self.s.callbacks.flushConnection(new MongoError(f("server %s timed out", self.name)), connection);
+    }
 
-    if(state.readPreferenceStrategies != null) notifyStrategies(self, self.s, 'timeout', [self]);
-    if(state.logger.isInfo()) state.logger.info(f('server %s timed out', self.name));
-    // Flush out all the callbacks
-    if(state.callbacks) state.callbacks.flush(new MongoError(f("server %s timed out", self.name)));
-    // Emit error event
-    self.emit('timeout', err, self);
-    // If we specified the driver to reconnect perform it
-    if(state.reconnect) setTimeout(function() {
-      // state.currentReconnectRetry = state.reconnectTries,
-      reconnectServer(self, state)
-    }, state.reconnectInterval);
-    // Destroy all connections
-    self.destroy();
+    // if(state.state == DISCONNECTED || state.state == DESTROYED) return;
+    // // Set disconnected state
+    // state.state = DISCONNECTED;
+
+    // if(state.readPreferenceStrategies != null) notifyStrategies(self, self.s, 'timeout', [self]);
+    // if(state.logger.isInfo()) state.logger.info(f('server %s timed out', self.name));
+    // // Flush out all the callbacks
+    // if(state.callbacks) state.callbacks.flush(new MongoError(f("server %s timed out", self.name)));
+    // // Emit error event
+    // self.emit('timeout', err, self);
+    // // If we specified the driver to reconnect perform it
+    // if(state.reconnect) setTimeout(function() {
+    //   // state.currentReconnectRetry = state.reconnectTries,
+    //   reconnectServer(self, state)
+    // }, state.reconnectInterval);
+    // // Destroy all connections
+    // self.destroy();
   }
 }
 
 var closeHandler = function(self, state) {
   return function(err, connection) {
     if(state.state == DISCONNECTED || state.state == DESTROYED) return;
-    // Set disconnected state
-    state.state = DISCONNECTED;
+    console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% closeHandler")
+    // Flush the connection operations
+    if(self.s.callbacks) {
+      self.s.callbacks.flushConnection(new MongoError(f("server %s socket closed", self.name)), connection);
+    }
 
-    if(state.readPreferenceStrategies != null) notifyStrategies(self, self.s, 'close', [self]);
-    if(state.logger.isInfo()) state.logger.info(f('server %s closed', self.name));
-    // Flush out all the callbacks
-    if(state.callbacks) state.callbacks.flush(new MongoError(f("server %s sockets closed", self.name)));
-    // Emit error event
-    self.emit('close', err, self);
-    // If we specified the driver to reconnect perform it
-    if(state.reconnect) setTimeout(function() {
-      // state.currentReconnectRetry = state.reconnectTries,
-      reconnectServer(self, state)
-    }, state.reconnectInterval);
-    // Destroy all connections
-    self.destroy();
+    
+    
+
+    // if(state.state == DISCONNECTED || state.state == DESTROYED) return;
+    // // Set disconnected state
+    // state.state = DISCONNECTED;
+
+    // if(state.readPreferenceStrategies != null) notifyStrategies(self, self.s, 'close', [self]);
+    // if(state.logger.isInfo()) state.logger.info(f('server %s closed', self.name));
+    // // Flush out all the callbacks
+    // if(state.callbacks) state.callbacks.flush(new MongoError(f("server %s sockets closed", self.name)));
+    // // Emit error event
+    // self.emit('close', err, self);
+    // // If we specified the driver to reconnect perform it
+    // if(state.reconnect) setTimeout(function() {
+    //   // state.currentReconnectRetry = state.reconnectTries,
+    //   reconnectServer(self, state)
+    // }, state.reconnectInterval);
+    // // Destroy all connections
+    // self.destroy();
   }
 }
 
@@ -662,7 +717,7 @@ Server.prototype.connect = function(_options) {
   //
   // Handle new connections
   self.s.pool.on('connection', function(connection) {
-    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! NEW Connection")
+    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! NEW Connection")
     self.s.pool.connectionAvailable(connection);
   });
 
@@ -791,33 +846,8 @@ var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAl
   // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! COMMAND :: ")
   // console.dir(cmd)
 
-  try {
-    // Write the query out to the passed in connection or use the pool
-    // Passed in connections are used for authentication mechanisms
-    if(options.connection) {
-      options.connection.write(query.toBin());
-    } else {
-      self.s.pool.write(query.toBin());      
-    }
-
-  } catch(err) {
-    return callback(MongoError.create(err));
-  }
-
   // Command callback
   var commandCallback = function(err, result) {
-  // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! COMMAND :: 1")
-  // console.dir(err)
-  // if(result)console.dir(result.documents)
-
-      // if(options.connection) {
-      //   if(options.connection === result.connection) {
-      //     console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ SAME CONNECTION")
-      //   } else {
-      //     console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ NOT SAME CONNECTION")          
-      //   }
-      // }
-
     // Notify end of command
     notifyStrategies(self, self.s, 'endOperation', [self, err, result, new Date()]);
     if(err) return callback(err);
@@ -829,12 +859,6 @@ var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAl
       // Add the connection details
       result.hashedName = result.connection.hashedName;
 
-      // // Release the connection
-      // if(!options.connection) {
-      //   // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 0")
-      //   self.s.pool.connectionAvailable(result.connection);
-      // }
-
       // Execute callback, catch and rethrow if needed
       try {
         callback(null, new CommandResult(options.fullResult ? result : result.documents[0], result.connection));
@@ -842,6 +866,25 @@ var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAl
         process.nextTick(function() { throw err});
       }
   };
+
+  try {
+    // Write the query out to the passed in connection or use the pool
+    // Passed in connections are used for authentication mechanisms
+    if(options.connection) {
+      // console.log("!!!!!!!!!!!!!!!!!!!!!! ONE")
+      // Add the reference to the connection to the callback so 
+      // we can flush only the affected operations
+      commandCallback.connection = options.connection;
+      // Write out the command
+      options.connection.write(query.toBin());
+    } else {
+      // console.log("!!!!!!!!!!!!!!!!!!!!!! TWO")
+      self.s.pool.write(query.toBin(), commandCallback, options);
+    }
+
+  } catch(err) {
+    return callback(MongoError.create(err));
+  }
 
   // Return raw BSON docs
   if(raw) commandCallback.raw = true;
