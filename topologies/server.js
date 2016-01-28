@@ -205,11 +205,13 @@ var reconnectServer = function(self, state) {
     var keys = Object.keys(state.authProviders);
     if(keys.length == 0) return self.emit('reconnect', self);
 
+    // Get all connections
+    var connections = state.pool.getAll();
     // Execute all providers
     var count = keys.length;
     // Iterate over keys
     for(var i = 0; i < keys.length; i++) {
-      state.authProviders[keys[i]].reauthenticate(self, state.pool, function(err, r) {
+      state.authProviders[keys[i]].reauthenticate(self, connections, function(err, r) {
         count = count - 1;
         // We are done, emit reconnect event
         if(count == 0) {
@@ -234,6 +236,10 @@ var reconnectServer = function(self, state) {
 // Handlers
 var messageHandler = function(self, state) {
   return function(response, connection) {
+    // Release the connection back to the pool
+    self.s.pool.connectionAvailable(connection);
+
+    // Attempt to parse the message
     try {
       // Parse the message
       response.parse({raw: state.callbacks.raw(response.responseTo), documentsReturnedIn: state.callbacks.documentsReturnedIn(response.responseTo)});
@@ -339,11 +345,13 @@ var connectHandler = function(self, state) {
     var keys = Object.keys(state.authProviders);
     if(keys.length == 0) return callback(null, null);
 
+    // Get all connections
+    var connections = state.pool.getAll();
     // Execute all providers
     var count = keys.length;
     // Iterate over keys
     for(var i = 0; i < keys.length; i++) {
-      state.authProviders[keys[i]].reauthenticate(self, state.pool, function(err, r) {
+      state.authProviders[keys[i]].reauthenticate(self, connections, function(err, r) {
         count = count - 1;
         // We are done, emit reconnect event
         if(count == 0) {
@@ -821,11 +829,11 @@ var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAl
       // Add the connection details
       result.hashedName = result.connection.hashedName;
 
-      // Release the connection
-      if(!options.connection) {
-        // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 0")
-        self.s.pool.connectionAvailable(result.connection);
-      }
+      // // Release the connection
+      // if(!options.connection) {
+      //   // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! 0")
+      //   self.s.pool.connectionAvailable(result.connection);
+      // }
 
       // Execute callback, catch and rethrow if needed
       try {
@@ -1021,8 +1029,11 @@ Server.prototype.auth = function(mechanism, db) {
     mechanism = 'mongocr';
   }
 
+  // Get all available connections
+  var connections = self.s.pool.getAll();
+
   // Actual arguments
-  var finalArguments = [self, self.s.pool, db].concat(args.slice(0)).concat([function(err, r) {
+  var finalArguments = [self, connections, db].concat(args.slice(0)).concat([function(err, r) {
     if(err) return callback(err);
     if(!r) return callback(new MongoError('could not authenticate'));
     callback(null, new Session({}, self));

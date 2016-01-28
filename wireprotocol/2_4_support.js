@@ -78,18 +78,18 @@ WireProtocol.prototype.remove = function(topology, ismaster, ns, bson, pool, cal
   return executeOrdered('remove', Remove, ismaster, ns, bson, pool, callbacks, ops, options, callback);
 }
 
-WireProtocol.prototype.killCursor = function(bson, ns, cursorId, connection, callbacks, callback) {
+WireProtocol.prototype.killCursor = function(bson, ns, cursorId, pool, callbacks, callback) {
   // Create a kill cursor command
   var killCursor = new KillCursor(bson, [cursorId]);
   // Execute the kill cursor command
-  if(connection && connection.isConnected()) connection.write(killCursor.toBin());
+  if(pool && pool.isConnected()) pool.write(killCursor.toBin());
   // Set cursor to 0
   cursorId = Long.ZERO;
   // Return to caller
   if(callback) callback(null, null);
 }
 
-WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw, connection, callbacks, options, callback) {
+WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw, pool, callbacks, options, callback) {
   // Create getMore command
   var getMore = new GetMore(bson, ns, cursorState.cursorId, {numberToReturn: batchSize});
 
@@ -123,7 +123,7 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
   // Register a callback
   callbacks.register(getMore.requestId, queryCallback);
   // Write out the getMore command
-  connection.write(getMore.toBin());
+  pool.write(getMore.toBin());
 }
 
 WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, options) {
@@ -421,12 +421,10 @@ var executeOrdered = function(opType ,command, ismaster, ns, bson, pool, callbac
 
   // Execute an operation
   var executeOp = function(list, _callback) {
-    // Get a pool connection
-    var connection = pool.get();
     // No more items in the list
     if(list.length == 0) {
       return process.nextTick(function() {
-        _callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, connection));
+        _callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, null));
       });
     }
 
@@ -443,13 +441,9 @@ var executeOrdered = function(opType ,command, ismaster, ns, bson, pool, callbac
     // Get the db name
     var db = ns.split('.').shift();
 
-    // Error out if no connection available
-    if(connection == null)
-      return _callback(new MongoError("no connection available"));
-
     try {
-      // Execute the insert
-      connection.write(op.toBin());
+      // Add binary message to list of commands to execute
+      var commands = [op.toBin()];
 
       // If write concern 0 don't fire getLastError
       if(hasWriteConcern(writeConcern)) {
@@ -462,8 +456,9 @@ var executeOrdered = function(opType ,command, ismaster, ns, bson, pool, callbac
 
         // Create a getLastError command
         var getLastErrorOp = new Query(bson, f("%s.$cmd", db), getLastErrorCmd, {numberToReturn: -1});
-        // Write the lastError message
-        connection.write(getLastErrorOp.toBin());
+        // Add getLastError command to list of ops to execute
+        commands.push(getLastErrorOp.toBin());
+
         // Register the callback
         callbacks.register(getLastErrorOp.requestId, function(err, result) {
           if(err) return callback(err);
@@ -472,11 +467,14 @@ var executeOrdered = function(opType ,command, ismaster, ns, bson, pool, callbac
           // Save the getLastError document
           getLastErrors.push(doc);
           // If we have an error terminate
-          if(doc.ok == 0 || doc.err || doc.errmsg) return callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, connection));
+          if(doc.ok == 0 || doc.err || doc.errmsg) return callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, result.connection));
           // Execute the next op in the list
           executeOp(list, callback);
         });
       }
+
+      // Write both commands out at the same time
+      pool.write(commands);
     } catch(err) {
       if(typeof err == 'string') err = new MongoError(err);
       // We have a serialization error, rewrite as a write error to have same behavior as modern
@@ -484,7 +482,7 @@ var executeOrdered = function(opType ,command, ismaster, ns, bson, pool, callbac
       getLastErrors.push({ ok: 1, errmsg: err.message, code: 14 });
       // Return due to an error
       process.nextTick(function() {
-        callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, connection));
+        callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, null));
       });
     }
   }
@@ -514,19 +512,9 @@ var executeUnordered = function(opType, command, ismaster, ns, bson, pool, callb
     // Get db name
     var db = ns.split('.').shift();
 
-    // Get a pool connection
-    var connection = pool.get();
-
-    // Error out if no connection available
-    if(connection == null) {
-      return process.nextTick(function() {
-        _callback(new MongoError("no connection available"));
-      });
-    }
-
     try {
-      // Execute the insert
-      connection.write(op.toBin());
+      // Add binary message to list of commands to execute
+      var commands = [op.toBin()];
 
       // If write concern 0 don't fire getLastError
       if(hasWriteConcern(writeConcern)) {
@@ -539,8 +527,8 @@ var executeUnordered = function(opType, command, ismaster, ns, bson, pool, callb
 
         // Create a getLastError command
         var getLastErrorOp = new Query(bson, f("%s.$cmd", db), getLastErrorCmd, {numberToReturn: -1});
-        // Write the lastError message
-        connection.write(getLastErrorOp.toBin());
+        // Add getLastError command to list of ops to execute
+        commands.push(getLastErrorOp.toBin());
 
         // Give the result from getLastError the right index
         var callbackOp = function(_index) {
@@ -563,6 +551,9 @@ var executeUnordered = function(opType, command, ismaster, ns, bson, pool, callb
         // Register the callback
         callbacks.register(getLastErrorOp.requestId, callbackOp(i));
       }
+
+      // Write both commands out at the same time
+      pool.write(commands);
     } catch(err) {
       if(typeof err == 'string') err = new MongoError(err);
       // Update the number of operations executed
