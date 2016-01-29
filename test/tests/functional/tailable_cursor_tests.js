@@ -42,7 +42,7 @@ exports['Should correctly perform awaitdata'] = {
                 console.log("==================================== Should correctly perform awaitdata")
                 console.log((e.getTime() - s.getTime()));
 
-                test.ok((e.getTime() - s.getTime()) > 1000);
+                test.ok((e.getTime() - s.getTime()) >= 1000);
 
                 // Destroy the server connection
                 _server.destroy();
