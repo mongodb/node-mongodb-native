@@ -279,6 +279,9 @@ var extend = function(template, fields) {
 //       // test.done();
 //     });
 
-//     server.connect();
+    // // Gives proxies a chance to boot up
+    // setTimeout(function() {
+    //   server.connect();
+    // }, 100)
 //   }
 // }

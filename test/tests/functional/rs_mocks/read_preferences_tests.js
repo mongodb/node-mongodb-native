@@ -146,7 +146,10 @@ exports['Should correctly connect to a replicaset and select the correct tagged 
       schedule();
     });
 
-    server.connect();
+    // Gives proxies a chance to boot up
+    setTimeout(function() {
+      server.connect();
+    }, 100)
   }
 }
 
@@ -298,7 +301,10 @@ exports['Should correctly connect to a replicaset and select the primary server'
       schedule();
     });
 
-    server.connect();
+    // Gives proxies a chance to boot up
+    setTimeout(function() {
+      server.connect();
+    }, 100)
   }
 }
 
@@ -472,7 +478,10 @@ exports['Should correctly round robin secondary reads'] = {
       schedule();
     });
 
-    server.connect();
+    // Gives proxies a chance to boot up
+    setTimeout(function() {
+      server.connect();
+    }, 100)
   }
 }
 
@@ -626,7 +635,10 @@ exports['Should correctly fall back to a secondary server if the readPreference 
       schedule();
     });
 
-    server.connect();
+    // Gives proxies a chance to boot up
+    setTimeout(function() {
+      server.connect();
+    }, 100)
   }
 }
 
@@ -797,6 +809,9 @@ exports['Should correctly fallback to secondaries when primary not available'] =
       schedule();
     });
 
-    server.connect();
+    // Gives proxies a chance to boot up
+    setTimeout(function() {
+      server.connect();
+    }, 100)
   }
 }

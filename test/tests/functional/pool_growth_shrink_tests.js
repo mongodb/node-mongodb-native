@@ -89,31 +89,30 @@ exports['Destroyed connection should only affect operations on the particular co
     // Number of operations done
     var numberOfOpsDone = 0;
     var numberOfPoolConnectionExpansion = 1;
+    var numberOfErrors = 0;
+    var numberOfSuccesses = 0;
 
-    // LINE var Server = require('mongodb-core').Server,
-    // LINE   test = require('assert');
-    // LINE var server = new Server({host: 'localhost', port: 27017});
-    // REMOVE-LINE test.done();
-    // BEGIN
     // Add event listeners
     server.on('connect', function(_server) {
       _server.s.pool.on('connection', function() {
         numberOfPoolConnectionExpansion = numberOfPoolConnectionExpansion + 1;
       });
 
-      var left = 10;
-      for(var i = 0; i < 10; i++) {
+      var left = 100;
+      for(var i = 0; i < 100; i++) {
         // Execute the insert
         _server.insert('integration_tests.inserts_example1', [{a:i}], {
           writeConcern: {w:1}, ordered:true
-        }, function(err, results) {
-          console.log("------------- op returned")
-          console.dir(err)
-          // test.equal(null, err);
-          // test.equal(1, results.result.n);
+        }, function(err, results) { 
+          if(err) numberOfErrors += 1;
+          if(results) numberOfSuccesses += 1;
 
           left = left - 1;
           if(left == 0) {
+            test.equal(1, numberOfErrors);
+            test.equal(99, numberOfSuccesses);
+            test.ok(numberOfPoolConnectionExpansion >= 3);
+
             _server.destroy();
             test.done();
           }
@@ -129,6 +128,5 @@ exports['Destroyed connection should only affect operations on the particular co
 
     // Start connection
     server.connect();
-    // END
   }
 }

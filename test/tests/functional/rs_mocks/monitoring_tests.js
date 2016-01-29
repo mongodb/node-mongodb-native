@@ -144,7 +144,7 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
       { host: 'localhost', port: 32002 }], {
         setName: 'rs',
         connectionTimeout: 3000,
-        socketTimeout: 0,
+        socketTimeout: 2000,
         haInterval: 2000,
         size: 1
     });
@@ -155,10 +155,6 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
       function schedule() {
         setTimeout(function() {
           _server.insert('test.test', [{created:new Date()}], function(err, r) {
-            // console.log("=============================================== ping")
-            // console.dir(err)
-            // if(r) console.log(r.connection.port)
-
             // Did we switch servers
             if(r && r.connection.port == 32001) {
               test.ok(stopRespondingPrimary);
@@ -202,6 +198,9 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
       if(type == 'primary') leftPrimaries[server.name] = 1;
     })
 
-    server.connect();
+    // Gives proxies a chance to boot up
+    setTimeout(function() {
+      server.connect();
+    }, 100)
   }
 }

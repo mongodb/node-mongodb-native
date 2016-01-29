@@ -188,6 +188,9 @@ exports['Successfully failover to new primary'] = {
 
     // Add event listeners
     server.on('fullsetup', function(_server) {});
-    server.connect();
+    // Gives proxies a chance to boot up
+    setTimeout(function() {
+      server.connect();
+    }, 100)
   }
 }
