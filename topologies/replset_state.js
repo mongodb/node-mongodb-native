@@ -203,7 +203,8 @@ State.prototype.remove = function(server) {
   // Get the isMaster
   var isMaster = server.lastIsMaster();
   // Return primary if the server was primary
-  if(isMaster.ismaster) return 'primary';
+  if(isMaster.ismaster && isMaster.hosts) return 'primary';
+  if(isMaster.ismaster) return 'secondary';
   if(isMaster.secondary) return 'secondary';
   if(isMaster.passive) return 'passive';
   return 'arbiter';

@@ -934,6 +934,7 @@ var haveAvailableServers = function(state) {
 
 var replicasetInquirer = function(self, state, norepeat) {
   return function() {
+    // console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ execute replicasetInquirer")
     if(state.replState.state == DESTROYED) return
     // We have no connections we need to reseed the disconnected list
     if(!haveAvailableServers(state)) {
@@ -1050,6 +1051,8 @@ var replicasetInquirer = function(self, state, norepeat) {
         var timeoutId = timeoutServer(server);
         // Execute ismaster
         server.command('admin.$cmd', { ismaster:true },  { monitoring:true }, function(err, r) {
+          // console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ replicasetInquirer")
+          // console.dir(r.result)
           // Clear out the timeoutServer
           clearTimeout(timeoutId);
 
@@ -1175,12 +1178,15 @@ var replicasetInquirer = function(self, state, norepeat) {
 // Error handler for initial connect
 var errorHandlerTemp = function(self, state, event) {
   return function(err, server) {
+    // console.log("!!!!!!!!!!!!!!!!!!!! TEMP ERROR HANDLER REPLSET")
+    // console.dir(err)
     // Log the information
     if(state.logger.isInfo()) state.logger.info(f('[%s] server %s disconnected', state.id, server.lastIsMaster() ? server.lastIsMaster().me : server.name));
     // Filter out any connection servers
     state.initialConnectionServers = state.initialConnectionServers.filter(function(_server) {
       return server.name != _server.name;
     });
+    // console.log("!!!!!!!!!!!!!!!!!!!! TEMP ERROR HANDLER REPLSET 1")
 
     // Connection is destroyed, ignore
     if(state.replState.state == DESTROYED) return;
@@ -1190,30 +1196,44 @@ var errorHandlerTemp = function(self, state, event) {
       server.removeAllListeners(e);
     })
 
+    // console.log("!!!!!!!!!!!!!!!!!!!! TEMP ERROR HANDLER REPLSET 2")
+
     // Push to list of disconnected servers
     addToListIfNotExist(state.disconnectedServers, server);
+
+    // console.log("!!!!!!!!!!!!!!!!!!!! TEMP ERROR HANDLER REPLSET 3")
 
     // End connection operation if we have no legal replicaset state
     if(state.initialConnectionServers == 0 && state.replState.state == CONNECTING) {
        if((state.secondaryOnlyConnectionAllowed && !state.replState.isSecondaryConnected() && !state.replState.isPrimaryConnected())
         || (!state.secondaryOnlyConnectionAllowed && !state.replState.isPrimaryConnected())) {
+        // console.log("----- REPLSET 0")
           if(state.logger.isInfo()) state.logger.info(f('[%s] no valid seed servers in list', state.id));
 
-          if(self.listeners('error').length > 0)
+          if(self.listeners('error').length > 0) {
+        // console.log("----- REPLSET 1")
             return self.emit('error', new MongoError('no valid seed servers in list'));
+          }
        }
     }
+
+    // console.log("!!!!!!!!!!!!!!!!!!!! TEMP ERROR HANDLER REPLSET 4")
 
     // If the number of disconnected servers is equal to
     // the number of seed servers we cannot connect
     if(state.disconnectedServers.length == state.seedlist.length && state.replState.state == CONNECTING) {
       if(state.emitError && self.listeners('error').length > 0) {
+        // console.log("----- REPLSET 2")
         if(state.logger.isInfo()) state.logger.info(f('[%s] no valid seed servers in list', state.id));
 
-        if(self.listeners('error').length > 0)
+        if(self.listeners('error').length > 0) {
+        // console.log("----- REPLSET 3")
           self.emit('error', new MongoError('no valid seed servers in list'));
+        }
       }
     }
+
+    // console.log("!!!!!!!!!!!!!!!!!!!! TEMP ERROR HANDLER REPLSET 5")
   }
 }
 // TODO with arbiter
@@ -1258,7 +1278,6 @@ var connectHandler = function(self, state) {
       if(!state.replState.update(ismaster, server)) {
         // Destroy the server instance
         server.destroy();
-
         // No more candiate servers
         if(state.state == CONNECTING && state.initialConnectionServers.length == 0
           && state.replState.primary == null && state.replState.secondaries.length == 0) {
@@ -1424,6 +1443,7 @@ var addToListIfNotExist = function(list, server) {
 
 var errorHandler = function(self, state) {
   return function(err, server) {
+    // console.log("!!!!!!!!!!!!!!!!!!!!! err handler REPLSET")
     if(state.replState.state == DESTROYED) return;
     if(state.logger.isInfo()) state.logger.info(f('[%s] server %s errored out with %s', state.id, server.lastIsMaster() ? server.lastIsMaster().me : server.name, JSON.stringify(err)));
     var found = addToListIfNotExist(state.disconnectedServers, server);
@@ -1439,6 +1459,7 @@ var errorHandler = function(self, state) {
 
 var timeoutHandler = function(self, state) {
   return function(err, server) {
+    // console.log("!!!!!!!!!!!!!!!!!!!!! timeout handler REPLSET")
     if(state.replState.state == DESTROYED) return;
     if(state.logger.isInfo()) state.logger.info(f('[%s] server %s timed out', state.id, server.lastIsMaster() ? server.lastIsMaster().me : server.name));
     var found = addToListIfNotExist(state.disconnectedServers, server);
@@ -1453,6 +1474,7 @@ var timeoutHandler = function(self, state) {
 
 var closeHandler = function(self, state) {
   return function(err, server) {
+    // console.log("!!!!!!!!!!!!!!!!!!!!! close handler REPLSET")
     if(state.replState.state == DESTROYED) return;
     if(state.logger.isInfo()) state.logger.info(f('[%s] server %s closed', state.id, server.lastIsMaster() ? server.lastIsMaster().me : server.name));
     var found = addToListIfNotExist(state.disconnectedServers, server);
