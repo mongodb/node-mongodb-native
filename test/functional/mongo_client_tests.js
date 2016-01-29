@@ -275,7 +275,8 @@ exports['Should correctly set MaxPoolSize on single server'] = {
       : f('%s?%s', url, 'maxPoolSize=100');
 
     MongoClient.connect(url, function(err, db) {
-      test.equal(100, db.serverConfig.connections().length);
+      test.equal(1, db.serverConfig.connections().length);
+      test.equal(100, db.serverConfig.s.server.s.pool.size);
 
       db.close();
       test.done();
@@ -353,25 +354,25 @@ exports['Should fail due to wrong uri user:password@localhost'] = {
   }
 }
 
-/**
- * @ignore
- */
-exports["correctly timeout MongoClient connect using custom connectTimeoutMS"] = {
-  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var MongoClient = configuration.require.MongoClient;
-
-    var start = new Date();
-
-    MongoClient.connect('mongodb://example.com/test?connectTimeoutMS=1000&maxPoolSize=1', function(err, db) {
-      test.ok(err != null);
-      test.ok((new Date().getTime() - start.getTime()) >= 1000)
-      test.done();
-    });
-  }
-}
+// /**
+//  * @ignore
+//  */
+// exports["correctly timeout MongoClient connect using custom connectTimeoutMS"] = {
+//   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+//
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var MongoClient = configuration.require.MongoClient;
+//
+//     var start = new Date();
+//
+//     MongoClient.connect('mongodb://example.com/test?connectTimeoutMS=1000&maxPoolSize=1', function(err, db) {
+//       test.ok(err != null);
+//       test.ok((new Date().getTime() - start.getTime()) >= 1000)
+//       test.done();
+//     });
+//   }
+// }
 
 /**
  * @ignore

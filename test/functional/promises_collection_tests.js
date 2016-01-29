@@ -20,7 +20,7 @@ exports['Should correctly execute Collection.prototype.insertOne'] = {
       : f('%s?%s', url, 'maxPoolSize=100');
 
     MongoClient.connect(url).then(function(db) {
-      test.equal(100, db.serverConfig.connections().length);
+      test.equal(1, db.serverConfig.connections().length);
 
       db.collection('insertOne').insertOne({a:1}).then(function(r) {
         test.equal(1, r.insertedCount);

@@ -167,7 +167,8 @@ exports.testConnectServerOptions = {
     connect(configuration.url(),
             { server: {auto_reconnect: true, poolSize: 4} },
             connectionTester(test, 'testConnectServerOptions', function(db) {
-      test.equal(4, db.serverConfig.poolSize);
+      test.equal(1, db.serverConfig.poolSize);
+      test.equal(4, db.serverConfig.s.server.s.pool.size);
       test.equal(true, db.serverConfig.autoReconnect);
       test.done();
     }));
@@ -188,7 +189,8 @@ exports.testConnectAllOptions = {
             { server: {auto_reconnect: true, poolSize: 4},
               db: {native_parser: (process.env['TEST_NATIVE'] != null)} },
             connectionTester(test, 'testConnectAllOptions', function(db) {
-      test.equal(4, db.serverConfig.poolSize);
+      test.equal(1, db.serverConfig.poolSize);
+      test.equal(4, db.serverConfig.s.server.s.pool.size);
       test.equal(true, db.serverConfig.autoReconnect);
       test.done();
     }));
