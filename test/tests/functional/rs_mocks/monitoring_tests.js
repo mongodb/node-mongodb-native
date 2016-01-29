@@ -159,6 +159,10 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
             if(r && r.connection.port == 32001) {
               test.ok(stopRespondingPrimary);
               test.equal(1, currentIsMasterState);
+              console.log("----------- Should correctly connect to a replicaset where the primary hangs causing monitoring thread to hang")
+              console.dir(joinedPrimaries)
+              console.dir(joinedSecondaries)
+              console.dir(leftPrimaries)
 
               // Ensure the state is correct
               test.deepEqual({'localhost:32000':1, 'localhost:32001':1}, joinedPrimaries);
@@ -178,7 +182,7 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
 
             schedule();
           });
-        }, 1000);
+        }, 3000);
       }
 
       // Schedule an insert
@@ -188,13 +192,13 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
     server.on('error', function(){});
 
     server.on('joined', function(type, server) {
-      // console.log("--- joined :: " + type + " :: " + server.name)
+      console.log("--- joined :: " + type + " :: " + server.name)
       if(type == 'primary') joinedPrimaries[server.name] = 1;
       if(type == 'secondary') joinedSecondaries[server.name] = 1;
     });
 
     server.on('left', function(type, server) {
-      // console.log("--- left :: " + type + " :: " + server.name)
+      console.log("--- left :: " + type + " :: " + server.name)
       if(type == 'primary') leftPrimaries[server.name] = 1;
     })
 
