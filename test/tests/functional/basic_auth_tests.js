@@ -52,6 +52,7 @@ exports['Simple authentication test for single server'] = {
         _server.auth('mongocr', configuration.db, 'test', 'test', function(err, session) {
           test.equal(null, err);
           test.ok(session != null);
+
           // Reconnect message
           _server.once('reconnect', function() {
             // Add a new user
@@ -66,7 +67,6 @@ exports['Simple authentication test for single server'] = {
             });
           });
 
-          // Write garbage, force socket closure
           try {
             var a = new Buffer(100);
             for(var i = 0; i < 100; i++) a[i] = i;
