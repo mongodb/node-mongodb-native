@@ -366,11 +366,18 @@ var _execute = function(self) {
       self.inUseConnections.push(connection);
 
       // console.log("-------------------------- EXECUTE COMMAND 2")
-      try {
-        connection.write(buffer);
-      } catch(e) {
-        console.log(err.stack)
-      }
+      // try {
+        // console.dir(buffer)
+        if(Array.isArray(buffer)) {
+          for(var i = 0; i < buffer.length; i++) {
+            connection.write(buffer[i]);
+          }
+        } else {
+          connection.write(buffer);
+        }
+      // } catch(e) {
+      //   console.log(e.stack)
+      // }
     }
 
     // Still got work that needs doing, keep executing
