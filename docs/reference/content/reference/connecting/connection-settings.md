@@ -216,7 +216,7 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 | Parameter | Type | Description |
 | :----------| :------------- | :------------- |
 | `ha` | {Boolean, default:true} | Controls if the replicaset monitoring runs or not. |
-| `haInterval` | {Number, default:5000} | The number of milliseconds between each ping of the replicaset members. The replicaset monitoring process, is the process monitoring the replicaset, detecting new members and reconnecting to existing members. |
+| `haInterval` | {Number, default:10000} | The number of milliseconds between each ping of the replicaset members. The replicaset monitoring process, is the process monitoring the replicaset, detecting new members and reconnecting to existing members. |
 | `replicaSet` | {String} | the name of the replicaset to connect to. **This is a required parameter when using the 2.0 driver** |
 | `secondaryAcceptableLatencyMS` | {Number, default:15} | sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms) |
 | `connectWithNoPrimary` | {Boolean, default:false} | Sets if the driver should connect even if no primary is available. |

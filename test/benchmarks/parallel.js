@@ -58,7 +58,7 @@ suite.addTest(new Benchmark('LDJSON multi-file import', {
       processes({
         index: index,
         files: files.slice(index, index + range)
-      }), function(err, outp) {
+      }, function(err, outp) {
         workersleft = workersleft - 1;
 
         if(workersleft == 0) {

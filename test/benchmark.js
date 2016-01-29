@@ -9,10 +9,10 @@ var parallelSuite = require('./benchmarks/parallel');
 
 // Execute the processes
 co(function*() {
-  // Execute feather weight
-  yield featherWeightSuite.execute();
+  // // Execute feather weight
+  // yield featherWeightSuite.execute();
   // Execute light weight benchmarks
   yield lightWeightSuite.execute();
-  // Execute parallel suite
-  yield parallelSuite.execute();
+  // // Execute parallel suite
+  // yield parallelSuite.execute();
 });
