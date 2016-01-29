@@ -150,7 +150,10 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
 
     // Add event listeners
     server.on('fullsetup', function(_server) {});
-    server.connect();
+    // Gives proxies a chance to boot up
+    setTimeout(function() {
+      server.connect();
+    }, 100)
   }
 }
 
@@ -265,7 +268,10 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary but missi
       server.__connected = true;
     });
 
-    server.connect();
+    // Gives proxies a chance to boot up
+    setTimeout(function() {
+      server.connect();
+    }, 100)
   }
 }
 
@@ -341,7 +347,10 @@ exports['Fail to connect due to missing primary'] = {
       test.done();
     });
 
-    server.connect();
+    // Gives proxies a chance to boot up
+    setTimeout(function() {
+      server.connect();
+    }, 100)
   }
 }
 
@@ -457,7 +466,9 @@ exports['Successful connection to replicaset of 0 primary, 1 secondary and 1 arb
       server.__connected = true;
     });
 
-    // Add event listeners
-    server.connect();
+    // Gives proxies a chance to boot up
+    setTimeout(function() {
+      server.connect();
+    }, 100)
   }
 }

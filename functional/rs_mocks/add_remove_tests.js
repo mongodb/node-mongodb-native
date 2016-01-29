@@ -190,7 +190,8 @@ exports['Successfully add a new secondary server to the set'] = {
       }
     });
 
-    server.on('error', function(){});
+    server.on('error', function(){
+    });
 
     server.on('connect', function(e) {
       server.__connected = true;
@@ -198,7 +199,11 @@ exports['Successfully add a new secondary server to the set'] = {
 
     // Add event listeners
     server.on('fullsetup', function(_server) {});
-    server.connect();
+
+    // Gives proxies a chance to boot up
+    setTimeout(function() {
+      server.connect();
+    }, 100)
   }
 }
 
@@ -400,7 +405,10 @@ exports['Successfully remove a secondary server from the set'] = {
 
     // Add event listeners
     server.on('fullsetup', function(_server) {});
-    server.connect();
+    // Gives proxies a chance to boot up
+    setTimeout(function() {
+      server.connect();
+    }, 100)
   }
 }
 
@@ -607,6 +615,9 @@ exports['Successfully remove a secondary server from the set then re-add it'] = 
 
     // Add event listeners
     server.on('fullsetup', function(_server) {});
-    server.connect();
+    // Gives proxies a chance to boot up
+    setTimeout(function() {
+      server.connect();
+    }, 100)
   }
 }
