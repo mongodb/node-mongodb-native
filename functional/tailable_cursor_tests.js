@@ -39,8 +39,8 @@ exports['Should correctly perform awaitdata'] = {
 
               cursor.next(function(err, d) {
                 var e = new Date();
-                console.log("==================================== Should correctly perform awaitdata")
-                console.log((e.getTime() - s.getTime()));
+                // console.log("==================================== Should correctly perform awaitdata")
+                // console.log((e.getTime() - s.getTime()));
 
                 test.ok((e.getTime() - s.getTime()) >= 1000);
 

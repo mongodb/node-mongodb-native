@@ -126,9 +126,9 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
       { host: 'localhost', port: 32001 },
       { host: 'localhost', port: 32002 }], {
         setName: 'rs',
-        connectionTimeout: 3000,
-        socketTimeout: 1000,
-        haInterval: 500,
+        connectionTimeout: 5000,
+        socketTimeout: 5000,
+        haInterval: 1000,
         size: 1
     });
 
@@ -144,13 +144,15 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
 
         setTimeout(function() {
           die = false;
+          console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ALIVE")
 
           setTimeout(function() {
             server.command('admin.$cmd', {ismaster:true}, function(err, r) {
-              // console.log("---------------------------------------------------------------")
-              // console.log("server.s.replState.secondaries = " + server.s.replState.secondaries.length)
-              // console.log("server.s.replState.arbiters = " + server.s.replState.arbiters.length)
-              // console.log("server.s.replState.primary = " + (server.s.replState.primary != null))
+              console.log("---------------------------------------------------------------")
+              console.dir(err)
+              console.log("server.s.replState.secondaries = " + server.s.replState.secondaries.length)
+              console.log("server.s.replState.arbiters = " + server.s.replState.arbiters.length)
+              console.log("server.s.replState.primary = " + (server.s.replState.primary != null))
               // console.dir(err)
               // console.dir(r.result)
 
@@ -167,7 +169,7 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
 
               test.done();
             });
-          }, 2500);
+          }, 5000);
         }, 2500);
       }, 2500);
     });

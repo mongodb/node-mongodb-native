@@ -143,8 +143,8 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
       { host: 'localhost', port: 32001 },
       { host: 'localhost', port: 32002 }], {
         setName: 'rs',
-        connectionTimeout: 3000,
-        socketTimeout: 2000,
+        connectionTimeout: 5000,
+        socketTimeout: 5000,
         haInterval: 2000,
         size: 1
     });
@@ -153,16 +153,16 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
     server.on('fullsetup', function(_server) {
       // Set up a write
       function schedule() {
-        setTimeout(function() {
+        // setTimeout(function() {
           _server.insert('test.test', [{created:new Date()}], function(err, r) {
             // Did we switch servers
             if(r && r.connection.port == 32001) {
               test.ok(stopRespondingPrimary);
               test.equal(1, currentIsMasterState);
-              console.log("----------- Should correctly connect to a replicaset where the primary hangs causing monitoring thread to hang")
-              console.dir(joinedPrimaries)
-              console.dir(joinedSecondaries)
-              console.dir(leftPrimaries)
+              // console.log("----------- Should correctly connect to a replicaset where the primary hangs causing monitoring thread to hang")
+              // console.dir(joinedPrimaries)
+              // console.dir(joinedSecondaries)
+              // console.dir(leftPrimaries)
 
               // Ensure the state is correct
               test.deepEqual({'localhost:32000':1, 'localhost:32001':1}, joinedPrimaries);
@@ -182,7 +182,7 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
 
             schedule();
           });
-        }, 3000);
+        // }, 1);
       }
 
       // Schedule an insert
@@ -192,13 +192,13 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
     server.on('error', function(){});
 
     server.on('joined', function(type, server) {
-      console.log("--- joined :: " + type + " :: " + server.name)
+      // console.log("--- joined :: " + type + " :: " + server.name)
       if(type == 'primary') joinedPrimaries[server.name] = 1;
       if(type == 'secondary') joinedSecondaries[server.name] = 1;
     });
 
     server.on('left', function(type, server) {
-      console.log("--- left :: " + type + " :: " + server.name)
+      // console.log("--- left :: " + type + " :: " + server.name)
       if(type == 'primary') leftPrimaries[server.name] = 1;
     })
 
