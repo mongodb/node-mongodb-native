@@ -144,15 +144,15 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
 
         setTimeout(function() {
           die = false;
-          console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ALIVE")
+          // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ALIVE")
 
           setTimeout(function() {
             server.command('admin.$cmd', {ismaster:true}, function(err, r) {
-              console.log("---------------------------------------------------------------")
-              console.dir(err)
-              console.log("server.s.replState.secondaries = " + server.s.replState.secondaries.length)
-              console.log("server.s.replState.arbiters = " + server.s.replState.arbiters.length)
-              console.log("server.s.replState.primary = " + (server.s.replState.primary != null))
+              // console.log("---------------------------------------------------------------")
+              // console.dir(err)
+              // console.log("server.s.replState.secondaries = " + server.s.replState.secondaries.length)
+              // console.log("server.s.replState.arbiters = " + server.s.replState.arbiters.length)
+              // console.log("server.s.replState.primary = " + (server.s.replState.primary != null))
               // console.dir(err)
               // console.dir(r.result)
 
