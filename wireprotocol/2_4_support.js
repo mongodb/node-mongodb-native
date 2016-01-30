@@ -551,7 +551,7 @@ var executeUnordered = function(opType, command, ismaster, ns, bson, pool, callb
             if(totalOps == 0) {
               process.nextTick(function() {
                 if(error) return callback(error);
-                callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, connection));
+                callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, result.connection));
               });
             }
           }
@@ -574,7 +574,7 @@ var executeUnordered = function(opType, command, ismaster, ns, bson, pool, callb
       getLastErrors[i] = { ok: 1, errmsg: err.message, code: 14 };
       // Check if we are done
       if(totalOps == 0) {
-        callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, connection));
+        callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, null));
       }
     }
   }
