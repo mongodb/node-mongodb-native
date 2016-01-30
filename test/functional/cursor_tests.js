@@ -1915,10 +1915,10 @@ exports.shouldCloseDeadTailableCursors = {
         });
 
         // Just hammer the server
-        for(var i = 0; i < 10000; i++) {
+        for(var i = 0; i < 1000; i++) {
           process.nextTick(function() {
             collection.insert({id: i});
-          })
+          });
         }
 
         setTimeout(function () {
@@ -1990,7 +1990,7 @@ exports.shouldAwaitDataWithDocumentsAvailable = {
         cursor.rewind = function() {
           called = true;
         }
-        
+
         cursor.each(function(err, result) {
           if(err != null) {
             test.ok(called);
@@ -3035,7 +3035,7 @@ exports['should tail cursor using maxAwaitTimeMS for 3.2 or higher'] = {
       var options = { capped: true, size: 8};
       db.createCollection('should_await_data_max_awaittime_ms', options, function(err, collection) {
         collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
-          var s = new Date();         
+          var s = new Date();
           // Create cursor with awaitdata, and timeout after the period specified
           collection.find({})
             .addCursorFlag('tailable', true)
@@ -3046,7 +3046,7 @@ exports['should tail cursor using maxAwaitTimeMS for 3.2 or higher'] = {
               if(result == null) {
                 test.ok((new Date().getTime() - s.getTime()) >= 500);
                 db.close();
-                test.done();                
+                test.done();
               }
           });
         });
