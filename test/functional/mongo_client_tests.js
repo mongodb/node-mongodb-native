@@ -372,7 +372,7 @@ exports['Should fail due to wrong uri user:password@localhost'] = {
 //       test.done();
 //     });
 //   }
-// }
+// } 
 
 /**
  * @ignore
