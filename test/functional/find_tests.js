@@ -319,8 +319,13 @@ exports.shouldCorrectlyPerformFindWithLimit = {
 
                 collection.find({}, {'limit': 2}).toArray(function(err, documents) {
                   test.equal(2, documents.length);
+                  console.log("---------- -1")
+                  console.log("---------- -1")
+                  console.log("---------- -1")
 
                   collection.find({}, {'limit': 3}).toArray(function(err, documents) {
+                    console.log("---------- 0")
+                    console.dir(documents.length)
                     test.equal(3, documents.length);
 
                     collection.find({}, {'limit': 4}).toArray(function(err, documents) {
