@@ -336,6 +336,7 @@ exports['Member removed by reconfig'] = {
         // Attempt to connect
         var server = new ReplSet(config, options);
         server.on('fullsetup', function(_server) {
+          console.log("------------------------------------------ 0")
           var removedServer = null;
 
           // Save number of secondaries
@@ -345,32 +346,43 @@ exports['Member removed by reconfig'] = {
 
           // Let's listen to changes
           server.on('left', function(_t, _server) {
+            console.log("--------- left :: " + _t + " :: " + _server.name)
           });
 
           server.on('joined', function(_t, _server) {
+            console.log("--------- joined :: " + _t + " :: " + _server.name)
             if(_t == 'primary') {
+              console.log("------------------------------------------ 4")
               test.ok(server.state.primary != null);
               test.ok(numberOfSecondaries <= server.state.secondaries.length);
               test.equal(1, server.state.arbiters.length);
               test.equal(1, server.state.passives.length);
               server.destroy();
 
+              console.log("------------------------------------------ 5")
+
               // Add a new member to the set
               manager.addMember(secondaryServerManager, {
                 returnImmediately: false, force:false
               }).then(function(x) {
+                console.log("------------------------------------------ 6")
                 restartAndDone(configuration, test);
               });
             }
           });
 
+          console.log("------------------------------------------ 1")
           // Remove the secondary server
           manager.removeMember(secondaryServerManager, {
             returnImmediately: false, force: false, skipWait:true
           }).then(function() {
+            console.log("------------------------------------------ 2")
 
             // Step down primary and block until we have a new primary
-            manager.stepDownPrimary(false, {stepDownSecs: 10}).then(function() {});
+            manager.stepDownPrimary(false, {stepDownSecs: 10}).then(function() {
+              console.log("------------------------------------------ 3")
+
+            });
           });
         });
 
