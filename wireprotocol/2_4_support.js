@@ -563,7 +563,7 @@ var executeUnordered = function(opType, command, ismaster, ns, bson, pool, callb
         pool.write(commands, callbackOp(i));
       } else {
         // Write both commands out at the same time
-        pool.write(commands, callback);
+        pool.write(commands, callback, {immediateRelease:true});
       }
     } catch(err) {
       if(typeof err == 'string') err = new MongoError(err);
