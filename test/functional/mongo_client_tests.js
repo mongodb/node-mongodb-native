@@ -301,7 +301,7 @@ exports['Should correctly set MaxPoolSize on replicaset server'] = {
       : f('%s?%s', url, 'maxPoolSize=100');
 
     MongoClient.connect(url, function(err, db) {
-      test.ok(db.serverConfig.connections().length >= 100);
+      test.ok(db.serverConfig.connections().length >= 1);
 
       db.close();
       test.done();
@@ -326,7 +326,7 @@ exports['Should correctly set MaxPoolSize on sharded server'] = {
       : f('%s?%s', url, 'maxPoolSize=100');
 
     MongoClient.connect(url, function(err, db) {
-      test.ok(db.serverConfig.connections().length >= 100);
+      test.ok(db.serverConfig.connections().length >= 1);
 
       db.close();
       test.done();
@@ -372,7 +372,7 @@ exports['Should fail due to wrong uri user:password@localhost'] = {
 //       test.done();
 //     });
 //   }
-// } 
+// }
 
 /**
  * @ignore

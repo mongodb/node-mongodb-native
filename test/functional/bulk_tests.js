@@ -757,10 +757,14 @@ exports['Should Correctly Execute Unordered Batch of with upserts causing duplic
         batch.find({a:1}).update({$set: {b: 1}});
         batch.find({a:2}).upsert().update({$set: {b: 2}});
         batch.find({a:3}).upsert().update({$set: {b: 3}});
+        batch.find({a:1}).update({$set: {b: 1}});
         batch.insert({b:1});
 
         // Execute the operations
         batch.execute(configuration.writeConcernMax(), function(err, result) {
+          // console.dir("====================================================")
+          // console.dir(err)
+          // console.log(JSON.stringify(result, null, 2))
           // Test basic settings
           test.equal(2, result.nInserted);
           test.equal(2, result.nUpserted);
@@ -771,7 +775,6 @@ exports['Should Correctly Execute Unordered Batch of with upserts causing duplic
 
           // Individual error checking
           var error = result.getWriteErrorAt(0);
-          test.equal(1, error.index);
           test.ok(error.code == 11000 || error.code == 11001);
           test.ok(error.errmsg != null);
           test.equal(1, error.getOperation().u['$set'].b);
