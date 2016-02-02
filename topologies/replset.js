@@ -939,7 +939,7 @@ var haveAvailableServers = function(state) {
 
 var replicasetInquirer = function(self, state, norepeat) {
   return function() {
-    console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ execute replicasetInquirer :: " + state.replState.state)
+    // console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ execute replicasetInquirer :: " + state.replState.state)
     if(state.replState.state == DESTROYED) return
     // We have no connections we need to reseed the disconnected list
     if(!haveAvailableServers(state)) {
@@ -969,7 +969,7 @@ var replicasetInquirer = function(self, state, norepeat) {
       });
     }
 
-    console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ execute replicasetInquirer 2")
+    // console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ execute replicasetInquirer 2")
 
     // Process already running don't rerun
     if(state.highAvailabilityProcessRunning) return;
@@ -992,7 +992,7 @@ var replicasetInquirer = function(self, state, norepeat) {
       state.disconnectHandler.execute();
     }
 
-    console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ execute replicasetInquirer 3")
+    // console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ execute replicasetInquirer 3")
 
     // Emit replicasetInquirer
     self.emit('ha', 'start', {norepeat: norepeat, id: localHaId, state: state.replState ? state.replState.toJSON() : {}});
@@ -1023,7 +1023,7 @@ var replicasetInquirer = function(self, state, norepeat) {
 
       execute(server);
     }
-    console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ execute replicasetInquirer 4")
+    // console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ execute replicasetInquirer 4")
 
     // Cleanup state (removed disconnected servers)
     state.replState.clean();
@@ -1031,20 +1031,20 @@ var replicasetInquirer = function(self, state, norepeat) {
     // We need to query all servers
     var servers = state.replState.getAll({includeArbiters:true});
     var serversLeft = servers.length;
-    console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ execute replicasetInquirer 5 :: " + serversLeft)
+    // console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ execute replicasetInquirer 5 :: " + serversLeft)
 
     // If no servers and we are not destroyed keep pinging
     if(servers.length == 0 && state.replState.state == CONNECTED) {
-      console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ execute replicasetInquirer 6:1")
+      // console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ execute replicasetInquirer 6:1")
       // Emit ha process end
       self.emit('ha', 'end', {norepeat: norepeat, id: localHaId, state: state.replState ? state.replState.toJSON() : {}});
-      console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ execute replicasetInquirer 6:2")
+      // console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ execute replicasetInquirer 6:2")
       // Ended highAvailabilityProcessRunning
       state.highAvailabilityProcessRunning = false;
-      console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ execute replicasetInquirer 6:3 :: " + norepeat)
+      // console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ execute replicasetInquirer 6:3 :: " + norepeat)
       // Restart ha process
       if(!norepeat) setHaTimer(self, state);
-      console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ execute replicasetInquirer 6:4")
+      // console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ execute replicasetInquirer 6:4")
       return;
     }
 
@@ -1069,10 +1069,10 @@ var replicasetInquirer = function(self, state, norepeat) {
       if(server && server.isConnected()) {
         // Get the timeout id
         var timeoutId = timeoutServer(server);
-        console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ execute replicasetInquirer 1:1")
+        // console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ execute replicasetInquirer 1:1")
         // Execute ismaster
         server.command('admin.$cmd', { ismaster:true },  { monitoring:true }, function(err, r) {
-          console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ execute replicasetInquirer 1:2")
+          // console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ execute replicasetInquirer 1:2")
           // console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ replicasetInquirer :: " + new Date().getTime())
           // if(r)console.dir(r.result)
           // Clear out the timeoutServer
