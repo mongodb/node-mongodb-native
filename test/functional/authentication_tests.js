@@ -766,37 +766,52 @@ exports.shouldCorrectlyAuthenticateWithOnlySecondarySeed = {
               var config = f("mongodb://me:secret@localhost:%s/node-native-test?authSource=admin&readPreference=secondary&replicaSet=%s&maxPoolSize=1"
                 , 31000, 'rs');
 
+                console.log("-------------------------------------------- 0")
               // Connect
               MongoClient.connect(config, function(error, client) {
                 client.collection('test').insert({a:1}, function(err, r) {
+                  console.log("-------------------------------------------- 1")
+                  console.dir(err)
                   test.equal(null, err);
 
                   // Logout
                   client.logout(function() {
+                    console.log("-------------------------------------------- 2")
 
                     // Should fail
                     client.collection('test').findOne(function(err, r) {
+                      console.log("-------------------------------------------- 3")
+                      console.dir(err)
                       test.ok(err != null);
 
                       // Authenticate
                       client.admin().authenticate("me", "secret", function(err, r) {
+                        console.log("-------------------------------------------- 4")
+                        console.dir(err)
                         test.equal(null, err);
                         test.ok(r);
 
                         replicasetManager.secondaries().then(function(managers) {
+                          console.log("-------------------------------------------- 5")
                           // Shutdown the first secondary
                           managers[0].stop().then(function(err, result) {
+                            console.log("-------------------------------------------- 6")
 
                             // Shutdown the second secondary
                             managers[1].stop().then(function(err, result) {
+                              console.log("-------------------------------------------- 7")
 
                               // Let's restart a secondary
                               managers[0].start().then(function(err, result) {
+                                console.log("-------------------------------------------- 8")
 
                                 // Let's restart a secondary
                                 managers[1].start().then(function(err, result) {
+                                  console.log("-------------------------------------------- 9")
                                   // Should fail
                                   client.collection('test').findOne(function(err) {
+                                    console.log("-------------------------------------------- 10")
+                                    console.dir(err)
                                     test.equal(null, err);
 
                                     client.close();
