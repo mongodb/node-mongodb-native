@@ -81,8 +81,6 @@ var cloneOptions = function(options) {
 //
 // Flush all callbacks
 Callbacks.prototype.flush = function(err) {
-  // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!! FLUSH")
-  // console.dir(Object.keys(this.callbacks))
   for(var id in this.callbacks) {
     if(!isNaN(parseInt(id, 10))) {
       var callback = this.callbacks[id];
@@ -95,16 +93,12 @@ Callbacks.prototype.flush = function(err) {
 //
 // Flush all callbacks
 Callbacks.prototype.flushConnection = function(err, connection) {
-  // console.log("!!!!!!!!!!!!!!!!!!! FLUSH CONNECTIONS")
-  // console.dir(err)
   for(var id in this.callbacks) {
     if(!isNaN(parseInt(id, 10))) {
       var callback = this.callbacks[id];
-      // console.dir(Object.keys(callback))
 
       // Validate if the operation ran on the connection
       if(callback.connection === connection) {
-        // console.log("!!!!!!!!!!!!!!!!!!! FLUSH CONNECTIONS -- FOUND")
         delete this.callbacks[id];
         callback(err, null);
       }
@@ -112,17 +106,12 @@ Callbacks.prototype.flushConnection = function(err, connection) {
   }
 }
 
+Callbacks.prototype.callback = function(id) {
+  return this.callbacks[id];
+}
+
 Callbacks.prototype.emit = function(id, err, value) {
-  // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!! EMIT :: " + id)
-  // console.dir(Object.keys(this.callbacks))
   var callback = this.callbacks[id];
-  // if(!callback.connection) {
-  //   console.log("!!!!!!!!!!!!!!!!!!!!! NO CONNECTION")
-  //   console.log(callback.toString())
-  // }
-  // console.log("---------------------------- callbacks emit")
-  // console.dir(Object.keys(callback))
-  // if(value) console.dir(value.documents)
   delete this.callbacks[id];
   callback(err, value);
 }
@@ -142,8 +131,6 @@ Callbacks.prototype.unregister = function(id) {
 }
 
 Callbacks.prototype.register = function(id, callback) {
-  // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!! REGISTER :: " + id)
-  // console.log(callback.toString())
   this.callbacks[id] = bindToCurrentDomain(callback);
 }
 
@@ -269,17 +256,29 @@ var reconnectServer = function(self, state) {
 // Handlers
 var messageHandler = function(self, state) {
   return function(response, connection) {
-    // console.log("!----------------------- messageHandler " + self.s.pool.availableConnections.length)
+    // console.log("!----------------------- messageHandler " + self.s.pool.availableConnections.length + " :: " + connection.id)
     // Release the connection back to the pool
-    self.s.pool.connectionAvailable(connection);
+    // self.s.pool.connectionAvailable(connection);
 
     // Attempt to parse the message
     try {
       // Parse the message
       response.parse({raw: state.callbacks.raw(response.responseTo), documentsReturnedIn: state.callbacks.documentsReturnedIn(response.responseTo)});
+
+      // Get the callback
+      var cb = state.callbacks.callback(response.responseTo);
+
+      // console.dir(Object.keys(cb))
       // console.dir(response.documents)
-      // console.log(response.documents)
+
+      // If no
+      if(!cb.noRelease) {
+        self.s.pool.connectionAvailable(connection);
+      }
+
+      // Log if debug enabled
       if(state.logger.isDebug()) state.logger.debug(f('message [%s] received from %s', response.raw.toString('hex'), self.name));
+      // Execute the registered callback
       state.callbacks.emit(response.responseTo, null, response);
     } catch (err) {
       state.callbacks.flush(new MongoError(err));
@@ -434,6 +433,7 @@ var closeHandler = function(self, state) {
 }
 
 var connectHandler = function(self, state) {
+  // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! server connect :: " + self.name)
   // Apply all stored authentications
   var applyAuthentications = function(callback) {
     // We need to ensure we have re-authenticated
@@ -604,6 +604,9 @@ var Server = function(options) {
   // Reconnect retries
   var reconnectTries = options.reconnectTries || 30;
 
+  // console.log(")))))))))))))))))))))))))))))))))))))))))))))))))))))")
+  // console.dir(options)
+
   // Keeps all the internal state of the server
   this.s = {
     // Options
@@ -673,13 +676,15 @@ var Server = function(options) {
   getProperty(this, 'wireProtocolHandler', 'wireProtocolHandler', s.options, {});
   getSingleProperty(this, 'id', s.id);
 
-  // Add auth providers
-  this.addAuthProvider('mongocr', new MongoCR());
-  this.addAuthProvider('x509', new X509());
-  this.addAuthProvider('plain', new Plain());
-  this.addAuthProvider('gssapi', new GSSAPI());
-  this.addAuthProvider('sspi', new SSPI());
-  this.addAuthProvider('scram-sha-1', new ScramSHA1());
+  // If we do not have an inherited authorization mechanism
+  if(!options.authProviders) {
+    this.addAuthProvider('mongocr', new MongoCR());
+    this.addAuthProvider('x509', new X509());
+    this.addAuthProvider('plain', new Plain());
+    this.addAuthProvider('gssapi', new GSSAPI());
+    this.addAuthProvider('sspi', new SSPI());
+    this.addAuthProvider('scram-sha-1', new ScramSHA1());
+  }
 }
 
 inherits(Server, EventEmitter);
@@ -758,22 +763,34 @@ Server.prototype.connect = function(_options) {
   //
   // Handle new connections
   self.s.pool.on('connection', function(connection) {
-    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! NEW Connection")
+    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! NEW Connection :: " + connection.id + " -- server -- " + self.s.id + " -- " + self.s.options.port)
 
     // No auth handler used, return the connection
     var keys = Object.keys(self.s.authProviders);
     if(keys.length == 0) return self.s.pool.connectionAvailable(connection);
+    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! NEW Connection 1 :: " + keys.length)
 
     // Get all connections
     var connections = [connection];
     // Execute all providers
     var count = keys.length;
-    // Iterate over keys
+
+    // Iterate over all auth methods
     for(var i = 0; i < keys.length; i++) {
+      // console.log("------------------ authenticating against " + keys[i]);
+      // if(keys[i] == 'scram-sha-1') {
+        // console.dir(self.s.authProviders[keys[i]].authStore)
+      // }
+      // reauthenticate the connection
       self.s.authProviders[keys[i]].reauthenticate(self, connections, function(err, r) {
+        // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! NEW Connection 1 auth :: ")
+        // console.dir(err)
+        // console.dir(r)
         count = count - 1;
         // We are done, emit reconnect event
         if(count == 0) {
+          // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! NEW Connection 2 auth :: " + r)
+          // console.dir(err)
           return self.s.pool.connectionAvailable(connection);
         }
       });
@@ -838,23 +855,8 @@ var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAl
     notifyStrategies(self, self.s, 'startOperation', [self, query, new Date()]);
   }
 
-  // // Get a connection (either passed or from the pool)
-  // var connection = options.connection || self.s.pool.get(options);
-
   // Raw BSON response
   var raw = typeof options.raw == 'boolean' ? options.raw : false;
-
-  // // Double check if we have a valid connection
-  // // Checking that the connection exists to avoid an uncaught exception in case there is an issue with the pool
-  // if(!(connection && connection.isConnected())) {
-  //   return callback(new MongoError(f("no connection available to server %s", self.name)));
-  // }
-
-  // // Print cmd and execution connection if in debug mode for logging
-  // if(self.s.logger.isDebug()) {
-  //   var json = connection.toJSON();
-  //   self.s.logger.debug(f('cmd [%s] about to be executed on connection with id %s at %s:%s', JSON.stringify(cmd), json.id, json.host, json.port));
-  // }
 
   // Execute multiple queries
   if(onAll) {
@@ -912,14 +914,15 @@ var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAl
     return;
   }
 
-  // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! COMMAND :: ")
-  // console.dir(cmd)
-
   // Command callback
   var commandCallback = function(err, result) {
     // Notify end of command
     notifyStrategies(self, self.s, 'endOperation', [self, err, result, new Date()]);
     if(err) return callback(err);
+    // if(result && result.connection) {
+    //   console.log("====== received result from connection " + result.connection.id)
+    // }
+
     if(result.documents[0]['$err']
       || result.documents[0]['errmsg']
       || result.documents[0]['err']
@@ -944,6 +947,7 @@ var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAl
       // Add the reference to the connection to the callback so
       // we can flush only the affected operations
       commandCallback.connection = options.connection;
+      commandCallback.noRelease = true;
       // Write out the command
       options.connection.write(query.toBin());
     } else {
@@ -975,6 +979,10 @@ var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAl
  */
 Server.prototype.command = function(ns, cmd, options, callback) {
   if(typeof options == 'function') callback = options, options = {};
+  // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! execute command :: " + this.name)
+  // console.dir(cmd)
+  // console.dir(this.s.authProviders['scram-sha-1'].authStore)
+  // console.dir(Object.keys(options))
   var self = this;
   if(this.s.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
   // Ensure we have no options
@@ -1125,6 +1133,7 @@ Server.prototype.remove = function(ns, ops, options, callback) {
  * @param {authResultCallback} callback A callback function
  */
 Server.prototype.auth = function(mechanism, db) {
+  // console.log("=========================== SERVER.auth -- server -- " + this.s.id + " :: " + this.s.options.port)
   var self = this;
   var args = Array.prototype.slice.call(arguments, 2);
   var callback = args.pop();
@@ -1146,6 +1155,9 @@ Server.prototype.auth = function(mechanism, db) {
 
   // Actual arguments
   var finalArguments = [self, connections, db].concat(args.slice(0)).concat([function(err, r) {
+    // console.log("=========================== SERVER.auth 0 :: " + self.s.id)
+    // console.dir(self.s.authProviders[mechanism].authStore)
+    // console.dir(err)
     if(err) return callback(err);
     if(!r) return callback(new MongoError('could not authenticate'));
     callback(null, new Session({}, self));
@@ -1178,6 +1190,7 @@ Server.prototype.addReadPreferenceStrategy = function(name, strategy) {
  * @param {object} provider Authentication object instance
  */
 Server.prototype.addAuthProvider = function(name, provider) {
+  // console.log("===== Server.prototype.addAuthProvider :: " + this.name)
   var self = this;
   self.s.authProviders[name] = provider;
 }

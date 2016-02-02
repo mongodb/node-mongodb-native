@@ -133,15 +133,18 @@ MongoCR.prototype.auth = function(server, connections, db, username, password, c
  * @return {object}
  */
 MongoCR.prototype.reauthenticate = function(server, connections, callback) {
-  var count = this.authStore.length;
+  var authStore = this.authStore.slice(0);
+  var err = null;
+  var count = authStore.length;
   if(count == 0) return callback(null, null);
   // Iterate over all the auth details stored
-  for(var i = 0; i < this.authStore.length; i++) {
-    this.auth(server, connections, this.authStore[i].db, this.authStore[i].username, this.authStore[i].password, function(err, r) {
+  for(var i = 0; i < authStore.length; i++) {
+    this.auth(server, connections, authStore[i].db, authStore[i].username, authStore[i].password, function(err, r) {
+      if(err) err = err;
       count = count - 1;
       // Done re-authenticating
       if(count == 0) {
-        callback(null, null);
+        callback(err, null);
       }
     });
   }

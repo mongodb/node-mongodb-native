@@ -9,6 +9,12 @@ var inherits = require('util').inherits
   , BSON = require('bson').native().BSON
   , BasicCursor = require('../cursor')
   , Server = require('./server')
+  , MongoCR = require('../auth/mongocr')
+  , X509 = require('../auth/x509')
+  , Plain = require('../auth/plain')
+  , GSSAPI = require('../auth/gssapi')
+  , SSPI = require('../auth/sspi')
+  , ScramSHA1 = require('../auth/scram')
   , Logger = require('../connection/logger')
   , ReadPreference = require('./read_preference')
   , Session = require('./session')
@@ -295,6 +301,14 @@ var Mongos = function(seedlist, options) {
 
   // Create a new state for the mongos
   this.s.mongosState = new State(this.s.readPreferenceStrategies, this.s.localThresholdMS);
+
+  // Add the authentication mechanisms
+  this.addAuthProvider('mongocr', new MongoCR());
+  this.addAuthProvider('x509', new X509());
+  this.addAuthProvider('plain', new Plain());
+  this.addAuthProvider('gssapi', new GSSAPI());
+  this.addAuthProvider('sspi', new SSPI());
+  this.addAuthProvider('scram-sha-1', new ScramSHA1());
 
   // BSON property (find a server and pass it along)
   Object.defineProperty(this, 'bson', {

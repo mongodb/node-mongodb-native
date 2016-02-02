@@ -12,7 +12,7 @@ var AuthSession = function(db, username, password, options) {
 }
 
 AuthSession.prototype.equal = function(session) {
-  return session.db == this.db 
+  return session.db == this.db
     && session.username == this.username
     && session.password == this.password;
 }
@@ -51,7 +51,7 @@ var GSSAPI = function() {
 GSSAPI.prototype.auth = function(server, connections, db, username, password, options, callback) {
   var self = this;
   // We don't have the Kerberos library
-  if(Kerberos == null) return callback(new Error("Kerberos library is not installed"));  
+  if(Kerberos == null) return callback(new Error("Kerberos library is not installed"));
   var gssapiServiceName = options['gssapiServiceName'] || 'mongodb';
   // Total connections
   var count = connections.length;
@@ -63,7 +63,7 @@ GSSAPI.prototype.auth = function(server, connections, db, username, password, op
   var errorObject = null;
 
   // For each connection we need to authenticate
-  while(connections.length > 0) {    
+  while(connections.length > 0) {
     // Execute MongoCR
     var execute = function(connection) {
       // Start Auth process for a connection
@@ -136,7 +136,7 @@ var MongoDBGSSAPIFirstStep = function(mongo_auth_process, payload, db, username,
   server.command("$external.$cmd"
     , command
     , { connection: connection }, function(err, r) {
-    if(err) return callback(err, false);    
+    if(err) return callback(err, false);
     var doc = r.result;
     // Execute mongodb transition
     mongo_auth_process.transition(r.result.payload, function(err, payload) {
@@ -170,7 +170,7 @@ var MongoDBGSSAPISecondStep = function(mongo_auth_process, payload, doc, db, use
 
       // Call the last and third step
       MongoDBGSSAPIThirdStep(mongo_auth_process, payload, doc, db, username, password, authdb, server, connection, callback);
-    });    
+    });
   });
 }
 
@@ -217,15 +217,18 @@ var addAuthSession = function(authStore, session) {
  * @return {object}
  */
 GSSAPI.prototype.reauthenticate = function(server, connections, callback) {
-  var count = this.authStore.length;
+  var authStore = this.authStore.slice(0);
+  var err = null;
+  var count = authStore.length;
   if(count == 0) return callback(null, null);
   // Iterate over all the auth details stored
-  for(var i = 0; i < this.authStore.length; i++) {
-    this.auth(server, connections, this.authStore[i].db, this.authStore[i].username, this.authStore[i].password, this.authStore[i].options, function(err, r) {
+  for(var i = 0; i < authStore.length; i++) {
+    this.auth(server, connections, authStore[i].db, authStore[i].username, authStore[i].password, authStore[i].options, function(err, r) {
+      if(err) err = err;
       count = count - 1;
       // Done re-authenticating
       if(count == 0) {
-        callback(null, null);
+        callback(err, null);
       }
     });
   }

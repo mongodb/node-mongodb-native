@@ -12,7 +12,7 @@ var AuthSession = function(db, username, password, options) {
 }
 
 AuthSession.prototype.equal = function(session) {
-  return session.db == this.db 
+  return session.db == this.db
     && session.username == this.username
     && session.password == this.password;
 }
@@ -51,7 +51,7 @@ var SSPI = function() {
 SSPI.prototype.auth = function(server, connections, db, username, password, options, callback) {
   var self = this;
   // We don't have the Kerberos library
-  if(Kerberos == null) return callback(new Error("Kerberos library is not installed"));  
+  if(Kerberos == null) return callback(new Error("Kerberos library is not installed"));
   var gssapiServiceName = options['gssapiServiceName'] || 'mongodb';
   // Total connections
   var count = connections.length;
@@ -63,7 +63,7 @@ SSPI.prototype.auth = function(server, connections, db, username, password, opti
   var errorObject = null;
 
   // For each connection we need to authenticate
-  while(connections.length > 0) {    
+  while(connections.length > 0) {
     // Execute MongoCR
     var execute = function(connection) {
       // Start Auth process for a connection
@@ -117,7 +117,7 @@ var SSIPAuthenticate = function(username, password, gssapiServiceName, server, c
   server.command("$external.$cmd"
     , command
     , { connection: connection }, function(err, r) {
-    if(err) return callback(err, false);    
+    if(err) return callback(err, false);
     var doc = r.result;
 
     mongo_auth_process.init(username, password, function(err) {
@@ -156,7 +156,7 @@ var SSIPAuthenticate = function(username, password, gssapiServiceName, server, c
               , { connection: connection }, function(err, r) {
               if(err) return callback(err, false);
               var doc = r.result;
-              
+
               mongo_auth_process.transition(doc.payload, function(err, payload) {
                 // Perform the next step against mongod
                 var command = {
@@ -174,14 +174,14 @@ var SSIPAuthenticate = function(username, password, gssapiServiceName, server, c
 
                   if(doc.done) return callback(null, true);
                   callback(new Error("Authentication failed"), false);
-                });        
+                });
               });
             });
           });
         });
       });
     });
-  });  
+  });
 }
 
 // Add to store only if it does not exist
@@ -207,15 +207,18 @@ var addAuthSession = function(authStore, session) {
  * @return {object}
  */
 SSPI.prototype.reauthenticate = function(server, connections, callback) {
-  var count = this.authStore.length;
+  var authStore = this.authStore.slice(0);
+  var err = null;
+  var count = authStore.length;
   if(count == 0) return callback(null, null);
   // Iterate over all the auth details stored
-  for(var i = 0; i < this.authStore.length; i++) {
-    this.auth(server, connections, this.authStore[i].db, this.authStore[i].username, this.authStore[i].password, this.authStore[i].options, function(err, r) {
+  for(var i = 0; i < authStore.length; i++) {
+    this.auth(server, connections, authStore[i].db, authStore[i].username, authStore[i].password, authStore[i].options, function(err, r) {
+      if(err) err = err;
       count = count - 1;
       // Done re-authenticating
       if(count == 0) {
-        callback(null, null);
+        callback(err, null);
       }
     });
   }
