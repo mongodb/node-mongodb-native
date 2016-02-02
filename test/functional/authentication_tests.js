@@ -766,52 +766,37 @@ exports.shouldCorrectlyAuthenticateWithOnlySecondarySeed = {
               var config = f("mongodb://me:secret@localhost:%s/node-native-test?authSource=admin&readPreference=secondary&replicaSet=%s&maxPoolSize=1"
                 , 31000, 'rs');
 
-                console.log("-------------------------------------------- 0")
               // Connect
               MongoClient.connect(config, function(error, client) {
                 client.collection('test').insert({a:1}, function(err, r) {
-                  console.log("-------------------------------------------- 1")
-                  console.dir(err)
                   test.equal(null, err);
 
                   // Logout
                   client.logout(function() {
-                    console.log("-------------------------------------------- 2")
 
                     // Should fail
                     client.collection('test').findOne(function(err, r) {
-                      console.log("-------------------------------------------- 3")
-                      console.dir(err)
                       test.ok(err != null);
 
                       // Authenticate
                       client.admin().authenticate("me", "secret", function(err, r) {
-                        console.log("-------------------------------------------- 4")
-                        console.dir(err)
                         test.equal(null, err);
                         test.ok(r);
 
                         replicasetManager.secondaries().then(function(managers) {
-                          console.log("-------------------------------------------- 5")
                           // Shutdown the first secondary
                           managers[0].stop().then(function(err, result) {
-                            console.log("-------------------------------------------- 6")
 
                             // Shutdown the second secondary
                             managers[1].stop().then(function(err, result) {
-                              console.log("-------------------------------------------- 7")
 
                               // Let's restart a secondary
                               managers[0].start().then(function(err, result) {
-                                console.log("-------------------------------------------- 8")
 
                                 // Let's restart a secondary
                                 managers[1].start().then(function(err, result) {
-                                  console.log("-------------------------------------------- 9")
                                   // Should fail
                                   client.collection('test').findOne(function(err) {
-                                    console.log("-------------------------------------------- 10")
-                                    console.dir(err)
                                     test.equal(null, err);
 
                                     client.close();
@@ -1134,6 +1119,7 @@ exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary =
       db.open(function(err, db_p) {});
       db.on('fullsetup', function(err, db_p) {
         test.ok(db_p != null);
+
         db_p.admin().addUser("me", "secret", {w:3, wtimeout:25000}, function runWhatever(err, result) {
           db_p.admin().authenticate("me", "secret", function(err, result) {
             test.equal(null, err);
@@ -1147,7 +1133,7 @@ exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary =
 
                 db.serverConfig.on('joined', function(t, s) {
                   if(t == 'primary') {
-                    var counter = 1000;
+                    var counter = 100;
                     var errors = 0;
 
                     for(var i = 0; i < counter; i++) {
@@ -1183,7 +1169,6 @@ exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary =
                   password: 'secret'
                 }).then(function() {
                 }).catch(function(e) {
-                  console.log(e.stack)
                 });
               });
             });
@@ -1238,10 +1223,9 @@ exports.shouldCorrectlyAuthWithSecondaryAfterKillPrimary = {
 
                   // shutdown the primary
                   replicasetManager.primary().then(function(primary) {
-
                     primary.stop().then(function() {
 
-                      db.serverConfig.on('joined', function(t) {
+                      db_p.serverConfig.on('joined', function(t) {
                         if(t == 'primary') {
                           var counter = 1000;
                           var errors = 0;
@@ -1571,7 +1555,6 @@ exports['should correctly connect and authenticate against admin database using 
       var mongos = new Mongos([
           new Server( 'localhost', 51000),
         ], {poolSize: 1});
-
       var db = new Db('node-native-test', mongos, {w:1});
       db.open(function(err, p_db) {
         test.equal(null, err);
