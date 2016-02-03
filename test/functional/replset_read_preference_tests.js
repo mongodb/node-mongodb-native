@@ -838,6 +838,64 @@ exports['Always uses primary readPreference for findAndModify'] = {
   }
 }
 
+/**
+ * @ignore
+ */
+exports['should correctly apply read preference for direct secondary connection'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var mongo = configuration.require
+      , MongoClient = mongo.MongoClient
+      , Db = mongo.Db
+      , ReplSet = mongo.ReplSet
+      , Server = mongo.Server
+      , ReadPreference = mongo.ReadPreference;
+
+    // Replica configuration
+    var replSet = new ReplSet([
+        new Server(configuration.host, configuration.port),
+        new Server(configuration.host, configuration.port + 1),
+        new Server(configuration.host, configuration.port + 2)
+      ],
+      {readPreference: ReadPreference.NEAREST, rs_name:configuration.replicasetName, debug:true}
+    );
+
+    // Create an id
+    var db = null;
+    // Open the database
+    var db = new Db('integration_test_', replSet, {w:'majority', wtimeout: 10000});
+    db.on("fullsetup", function() {
+
+      db.collection('direct_secondary_read_test').insertMany([{a:1}, {a:1}, {a:1}, {a:1}], function(err, r) {
+        test.equal(null, err);
+        db.close();
+
+        var url = format("mongodb://localhost:%s/integration_test_?readPreference=nearest"
+          , configuration.port + 1);
+        // Connect using the MongoClient
+        MongoClient.connect(url, function(err, db){
+          test.equal(null, err);
+          test.ok(db.serverConfig instanceof Server);
+
+          db.collection('direct_secondary_read_test').count(function(err, n) {
+            test.equal(null, err);
+            test.ok(n > 0);
+
+            db.close();
+            test.done();
+          });
+        });
+      });
+    });
+
+    db.open(function(err, p_db) {
+      db = p_db;
+    });
+  }
+}
+
 // /**
 //  * @ignore
 //  */
