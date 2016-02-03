@@ -2,6 +2,7 @@
 
 var f = require('util').format
   , crypto = require('crypto')
+  , require_optional = require('require_optional')
   , MongoError = require('../error');
 
 var AuthSession = function(db, username, password, options) {
@@ -23,9 +24,9 @@ var MongoAuthProcess = null;
 
 // Try to grab the Kerberos class
 try {
-  Kerberos = require('kerberos').Kerberos
+  Kerberos = require_optional('kerberos').Kerberos;
   // Authentication process for Mongo
-  MongoAuthProcess = require('kerberos').processes.MongoAuthProcess
+  MongoAuthProcess = require_optional('kerberos').processes.MongoAuthProcess
 } catch(err) {}
 
 /**
