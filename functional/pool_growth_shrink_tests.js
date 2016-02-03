@@ -164,3 +164,88 @@ exports['Destroyed connection should only affect operations on the particular co
     server.connect();
   }
 }
+
+/**
+ * Correctly cause pool to grow
+ */
+exports['Fast operations should not be affected by slow train operation'] = {
+  metadata: {
+    requires: {
+      topology: "single"
+    }
+  },
+
+  test: function(configuration, test) {
+    var Server = configuration.require.Server
+      , f = require('util').format
+      , ReadPreference = configuration.require.ReadPreference;
+
+    // Attempt to connect
+    var server = new Server({
+        host: configuration.host
+      , port: configuration.port
+      , reconnect: true
+      , connectionTimeout: 3000
+      , socketTimeout: 5000
+      , reconnectInterval: 50
+      , size: 3
+    })
+
+    // Number of operations done
+    var numberOfOpsDone = 0;
+    var numberOfPoolConnectionExpansion = 1;
+    var numberOfErrors = 0;
+    var numberOfSuccesses = 0;
+
+    // Add event listeners
+    server.on('connect', function(_server) {
+      var ns = f("%s.cursor1", configuration.db);
+
+      // Execute the write
+      _server.insert(ns, [{a:1}, {a:2}, {a:3}], {
+        writeConcern: {w:1}, ordered:true
+      }, function(err, results) {
+        test.equal(null, err);
+        test.equal(3, results.result.n);
+
+        // Execute find
+        var cursor = _server.cursor(ns, {
+            find: ns
+          , query: {"$where": "sleep(200) || true"}
+          , batchSize: 2
+        });
+
+        var totalInsertTime = 0;
+        var s = new Date();
+        // Perform a slow query
+        cursor.next(function(err, r) {
+          var totalQueryTime = new Date().getTime() - s.getTime();
+          // console.log("totalQueryTime = " + totalQueryTime)
+          // console.log("totalInsertTime = " + totalInsertTime)
+          test.ok(totalInsertTime < totalQueryTime);
+
+          _server.destroy();
+          test.done();
+        });
+
+        var left = 100;
+        var s = new Date();
+
+        for(var i = 0; i < 100; i++) {
+          _server.insert(ns, [{a:i}], {
+            writeConcern: {w:1}, ordered:true
+          }, function(err, results) {
+            left = left - 1;
+
+            if(left == 0) {
+              totalInsertTime = new Date().getTime() - s.getTime();
+            }
+          });
+        }
+      });
+    });
+
+    // Start connection
+    server.connect();
+  }
+}
