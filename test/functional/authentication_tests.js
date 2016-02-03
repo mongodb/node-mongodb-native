@@ -1119,6 +1119,7 @@ exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary =
       db.open(function(err, db_p) {});
       db.on('fullsetup', function(err, db_p) {
         test.ok(db_p != null);
+
         db_p.admin().addUser("me", "secret", {w:3, wtimeout:25000}, function runWhatever(err, result) {
           db_p.admin().authenticate("me", "secret", function(err, result) {
             test.equal(null, err);
@@ -1132,7 +1133,7 @@ exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary =
 
                 db.serverConfig.on('joined', function(t, s) {
                   if(t == 'primary') {
-                    var counter = 1000;
+                    var counter = 100;
                     var errors = 0;
 
                     for(var i = 0; i < counter; i++) {
@@ -1168,7 +1169,6 @@ exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary =
                   password: 'secret'
                 }).then(function() {
                 }).catch(function(e) {
-                  console.log(e.stack)
                 });
               });
             });
@@ -1223,10 +1223,9 @@ exports.shouldCorrectlyAuthWithSecondaryAfterKillPrimary = {
 
                   // shutdown the primary
                   replicasetManager.primary().then(function(primary) {
-
                     primary.stop().then(function() {
 
-                      db.serverConfig.on('joined', function(t) {
+                      db_p.serverConfig.on('joined', function(t) {
                         if(t == 'primary') {
                           var counter = 1000;
                           var errors = 0;
@@ -1556,7 +1555,6 @@ exports['should correctly connect and authenticate against admin database using 
       var mongos = new Mongos([
           new Server( 'localhost', 51000),
         ], {poolSize: 1});
-
       var db = new Db('node-native-test', mongos, {w:1});
       db.open(function(err, p_db) {
         test.equal(null, err);

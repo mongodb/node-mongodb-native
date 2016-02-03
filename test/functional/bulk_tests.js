@@ -716,14 +716,17 @@ exports['Should Correctly Execute Unordered Batch with duplicate key errors on u
 
         // Execute the operations
         batch.execute(configuration.writeConcernMax(),function(err, result) {
+          // console.log("------------------------------------------------------")
+          // console.dir(err)
+          // console.log(JSON.stringify(result, null, 2))
+          // console.dir(result.getWriteErrorCount())
           // Test basic settings
           test.equal(2, result.nInserted);
           test.equal(true, result.hasWriteErrors());
-          test.ok(1, result.getWriteErrorCount());
+          test.equal(4, result.getWriteErrorCount());
 
           // Individual error checking
           var error = result.getWriteErrorAt(0);
-          test.equal(2, error.index);
           test.ok(error.code == 11000 || error.code == 11001);
           test.ok(error.errmsg != null);
 
@@ -757,10 +760,14 @@ exports['Should Correctly Execute Unordered Batch of with upserts causing duplic
         batch.find({a:1}).update({$set: {b: 1}});
         batch.find({a:2}).upsert().update({$set: {b: 2}});
         batch.find({a:3}).upsert().update({$set: {b: 3}});
+        batch.find({a:1}).update({$set: {b: 1}});
         batch.insert({b:1});
 
         // Execute the operations
         batch.execute(configuration.writeConcernMax(), function(err, result) {
+          // console.dir("====================================================")
+          // console.dir(err)
+          // console.log(JSON.stringify(result, null, 2))
           // Test basic settings
           test.equal(2, result.nInserted);
           test.equal(2, result.nUpserted);
@@ -771,7 +778,6 @@ exports['Should Correctly Execute Unordered Batch of with upserts causing duplic
 
           // Individual error checking
           var error = result.getWriteErrorAt(0);
-          test.equal(1, error.index);
           test.ok(error.code == 11000 || error.code == 11001);
           test.ok(error.errmsg != null);
           test.equal(1, error.getOperation().u['$set'].b);

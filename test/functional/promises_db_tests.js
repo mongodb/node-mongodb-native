@@ -20,7 +20,7 @@ exports['Should correctly connect with MongoClient.connect using Promise'] = {
       : f('%s?%s', url, 'maxPoolSize=100');
 
     MongoClient.connect(url).then(function(db) {
-      test.equal(100, db.serverConfig.connections().length);
+      test.equal(1, db.serverConfig.connections().length);
 
       db.close();
       test.done();
