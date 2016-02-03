@@ -1,6 +1,6 @@
 {
   "name": "mongodb-core",
-  "version": "1.2.32",
+  "version": "1.3.0",
   "description": "Core MongoDB driver functionality, no bells and whistles and meant for integration not end applications",
   "main": "index.js",
   "scripts": {
@@ -15,7 +15,8 @@
     "core"
   ],
   "dependencies": {
-    "bson": "~0.4.21"
+    "bson": "~0.4.21",
+    "require_optional": "~1.0.0"
   },
   "devDependencies": {
     "mongodb-topology-manager": "1.0.x",
@@ -30,7 +31,7 @@
     "mongodb-version-manager": "^1.x",
     "co": "4.5.4"
   },
-  "peerDependencies": {
+  "peerOptionalDependencies": {
     "kerberos": "~0.0"
   },
   "author": "Christian Kvalheim",
