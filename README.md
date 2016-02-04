@@ -1,7 +1,7 @@
 [![NPM](https://nodei.co/npm/mongodb.png?downloads=true&downloadRank=true)](https://nodei.co/npm/mongodb/) [![NPM](https://nodei.co/npm-dl/mongodb.png?months=6&height=3)](https://nodei.co/npm/mongodb/)
 
 [![Build Status](https://secure.travis-ci.org/mongodb/node-mongodb-native.png)](http://travis-ci.org/mongodb/node-mongodb-native)
-
+[![Coverage Status](https://coveralls.io/repos/github/mongodb/node-mongodb-native/badge.svg?branch=2.1)](https://coveralls.io/github/mongodb/node-mongodb-native?branch=2.1)
 [![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 # Description
