@@ -1,4 +1,4 @@
-2.1.5 
+2.1.5
 ----------------
 * Updated mongodb-core to 1.3.0.
 * Added raw support for the command function on topologies.
@@ -12,6 +12,8 @@
 * Switched to using Array.push instead of concat for use cases of a lot of documents.
 * Fixed issue where re-authentication could loose the credentials if whole Replicaset disconnected at once.
 * Added peer optional dependencies support using require_optional module.
+* Bug is listCollections for collection names that start with db name (Issue #1333, https://github.com/flyingfisher)
+* Emit error before closing stream (Issue #1335, https://github.com/eagleeye)
 
 2.1.4 2016-01-12
 ----------------
