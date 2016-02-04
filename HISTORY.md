@@ -1,4 +1,4 @@
-2.1.5
+2.1.5 2016-02-04
 ----------------
 * Updated mongodb-core to 1.3.0.
 * Added raw support for the command function on topologies.
