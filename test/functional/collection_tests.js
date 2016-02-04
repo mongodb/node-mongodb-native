@@ -59,6 +59,39 @@ exports.shouldCorrectExecuteBasicCollectionMethods = {
 /**
  * @ignore
  */
+exports['should correctly list back collection names containing .'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, client) {
+      var db1 = client.db('test');
+      var collection = db1.createCollection('test.game', function(err, collection) {
+        // Verify that all the result are correct coming back (should contain the value ok)
+        test.equal('test.game', collection.collectionName);
+        // Let's check that the collection was created correctly
+        db1.listCollections().toArray(function(err, documents) {
+          test.equal(null, err);
+          // console.log("--------------------------------------------------")
+          // console.dir(documents)
+          var found = false;
+          documents.forEach(function(x) {
+            if(x.name == 'test.game') found = true;
+          });
+
+          test.ok(found);
+          db.close();
+          test.done();
+        });
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
 exports.shouldAccessToCollections = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
