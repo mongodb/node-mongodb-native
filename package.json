@@ -18,34 +18,39 @@
     "readable-stream": "1.0.31"
   },
   "devDependencies": {
-    "integra": "0.1.8",
-    "optimist": "0.6.1",
+    "JSONStream": "^1.0.7",
+    "betterbenchmarks": "^0.1.0",
+    "bluebird": "2.9.27",
     "bson": "^0.4.20",
-    "jsdoc": "3.3.0-beta3",
-    "semver": "4.1.0",
-    "rimraf": "2.2.6",
+    "cli-table": "^0.3.1",
+    "co": "4.5.4",
+    "colors": "^1.1.2",
+    "coveralls": "^2.11.6",
+    "event-stream": "^3.3.2",
     "gleak": "0.5.0",
-    "mongodb-version-manager": "^0.8.10",
+    "integra": "0.1.8",
+    "jsdoc": "3.3.0-beta3",
+    "ldjson-stream": "^1.2.1",
     "mongodb-extended-json": "1.3.0",
     "mongodb-topology-manager": "1.0.x",
-    "co": "4.5.4",
-    "bluebird": "2.9.27",
-    "betterbenchmarks": "^0.1.0",
-    "JSONStream": "^1.0.7",
-    "event-stream": "^3.3.2",
-    "ldjson-stream": "^1.2.1",
-    "cli-table": "^0.3.1",
-    "colors": "^1.1.2",
+    "mongodb-version-manager": "^0.8.10",
+    "nyc": "^5.5.0",
+    "optimist": "0.6.1",
+    "rimraf": "2.2.6",
+    "semver": "4.1.0",
     "worker-farm": "^1.3.1"
   },
   "author": "Christian Kvalheim",
   "license": "Apache-2.0",
-  "engines" : { "node" : ">=0.10.3" },
+  "engines": {
+    "node": ">=0.10.3"
+  },
   "bugs": {
     "url": "https://github.com/mongodb/node-mongodb-native/issues"
   },
   "scripts": {
-    "test": "node test/runner.js -t functional"
+    "test": "node test/runner.js -t functional",
+    "coverage": "node_modules/.bin/nyc node test/runner.js -t functional && node_modules/.bin/nyc report --reporter=text-lcov | node_modules/.bin/coveralls"
   },
   "homepage": "https://github.com/mongodb/node-mongodb-native"
 }
