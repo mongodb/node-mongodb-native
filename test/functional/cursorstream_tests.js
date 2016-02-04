@@ -226,8 +226,6 @@ exports['should correctly error out stream'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var ObjectID = configuration.require.ObjectID
-      , Binary = configuration.require.Binary;
 
     // Should cause error
     configuration.newDbInstance({w:1}, {poolSize:1}).open(function(err, db) {
@@ -235,18 +233,23 @@ exports['should correctly error out stream'] = {
         timestamp: { $ltx: '1111' } // Error in query.
       });
 
-      var error;
+      var error, streamIsClosed;
 
       cursor.on('error', function(err) {
         error = err;
       });
+      
+      cursor.on('close', function() {
+        test.ok(error !== undefined && error !== null);
+        streamIsClosed = true;
+      });
 
       cursor.on('end', function() {
         test.ok(error !== undefined && error !== null);
-
+        test.ok(streamIsClosed === true);
         db.close();
         test.done();
-      })
+      });
 
       cursor.pipe(process.stdout);
     });
