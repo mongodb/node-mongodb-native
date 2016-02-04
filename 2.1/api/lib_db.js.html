@@ -1979,6 +1979,25 @@ Db.prototype.open = function(callback) {
 define.classMethod('open', {callback: true, promise:true});
 
 /**
+ * Converts provided read preference to CoreReadPreference
+ * @param {(ReadPreference|string|object)} readPreference the user provided read preference
+ * @return {CoreReadPreference}
+ */
+var convertReadPreference = function(readPreference) {
+  if(readPreference &amp;&amp; typeof readPreference == 'string') {
+    return new CoreReadPreference(readPreference);
+  } else if(readPreference instanceof ReadPreference) {
+    return new CoreReadPreference(readPreference.mode, readPreference.tags);
+  } else if(readPreference &amp;&amp; typeof readPreference == 'object') {
+    var mode = readPreference.mode || readPreference.preference;
+    if (mode &amp;&amp; typeof mode == 'string') {
+      readPreference = new CoreReadPreference(mode, readPreference.tags);
+    }
+  }
+  return readPreference;
+}
+
+/**
  * The callback format for results
  * @callback Db~resultCallback
  * @param {MongoError} error An error instance representing the error during the execution.
@@ -1996,11 +2015,8 @@ var executeCommand = function(self, command, options, callback) {
   }
 
   // Convert the readPreference
-  if(options.readPreference &amp;&amp; typeof options.readPreference == 'string') {
-    options.readPreference = new CoreReadPreference(options.readPreference);
-  } else if(options.readPreference instanceof ReadPreference) {
-    options.readPreference = new CoreReadPreference(options.readPreference.mode
-      , options.readPreference.tags);
+  if(options.readPreference) {
+    options.readPreference = convertReadPreference(options.readPreference);
   }
 
   // Debug information
@@ -2219,7 +2235,7 @@ var createCollection = function(self, name, options, callback) {
 }
 
 /**
- * Creates a collection on a server pre-allocating space, need to create f.ex capped collections.
+ * Create a new collection on a server with the specified options. Use this to create capped collections.
  *
  * @method
  * @param {string} name the collection name we wish to access.
@@ -2322,6 +2338,12 @@ Db.prototype.listCollections = function(filter, options) {
   options = shallowClone(options);
   // Set the promise library
   options.promiseLibrary = this.s.promiseLibrary;
+
+  // Ensure valid readPreference
+  if(options.readPreference) {
+    options.readPreference = convertReadPreference(options.readPreference);
+  }
+
   // We have a list collections command
   if(this.serverConfig.capabilities().hasListCollectionsCommand) {
     // Cursor options
@@ -2330,12 +2352,12 @@ Db.prototype.listCollections = function(filter, options) {
     var command = { listCollections : true, filter: filter, cursor: cursor };
     // Set the AggregationCursor constructor
     options.cursorFactory = CommandCursor;
-    // Filter out the correct field values
-    options.transforms = listCollectionsTranforms(this.s.databaseName);
     // Create the cursor
     var cursor = this.s.topology.cursor(f('%s.$cmd', this.s.databaseName), command, options);
     // Do we have a readPreference, apply it
-    if(options.readPeference) cursor.setReadPreference(options.readPeference);
+    if(options.readPreference) {
+      cursor.setReadPreference(options.readPreference);
+    }
     // Return the cursor
     return cursor;
   }
@@ -2366,7 +2388,7 @@ Db.prototype.listCollections = function(filter, options) {
   // Get the cursor
   var cursor = this.collection(Db.SYSTEM_NAMESPACE_COLLECTION).find(filter, _options);
   // Do we have a readPreference, apply it
-  if(options.readPeference) cursor.setReadPreference(options.readPeference);
+  if(options.readPreference) cursor.setReadPreference(options.readPreference);
   // Set the passed in batch size if one was provided
   if(options.batchSize) cursor = cursor.batchSize(options.batchSize);
   // We have a fallback mode using legacy systems collections
@@ -2516,7 +2538,7 @@ Db.prototype.dropCollection = function(name, callback) {
 define.classMethod('dropCollection', {callback: true, promise:true});
 
 /**
- * Drop a database.
+ * Drop a database, removing it permanently from the server.
  *
  * @method
  * @param {Db~resultCallback} [callback] The results callback
@@ -2611,8 +2633,14 @@ Db.prototype.executeDbAdminCommand = function(selector, options, callback) {
   if(typeof options == 'function') callback = options, options = {};
   options = options || {};
 
-  if(options.readPreference) {
-    options.readPreference = options.readPreference;
+  // Ensure valid readPreference
+  if(options.readPreference
+    &amp;&amp; !(options.readPreference instanceof ReadPreference)
+    &amp;&amp; typeof options.readPreference == 'object') {
+    var mode = options.readPreference.mode || options.readPreference.preference;
+    if (mode &amp;&amp; typeof mode == 'string') {
+      options.readPreference = new ReadPreference(mode, readPreference.tags);
+    }
   }
 
   // Return the callback
@@ -3535,7 +3563,7 @@ module.exports = Db;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Mon Jan 04 2016 15:50:45 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Feb 04 2016 13:29:41 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

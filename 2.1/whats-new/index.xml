@@ -19,7 +19,7 @@
 
 &lt;h1 id=&#34;migrating-your-application-to-2-0&#34;&gt;Migrating Your Application To 2.0&lt;/h1&gt;
 
-&lt;p&gt;There are some key changes in the driver going from 1.X to 2.X that one needs to be aware off before changing your application to using the new 2.X versions. There has been some cleanup of API&amp;rsquo;s and some deprecations of 1.X features.&lt;/p&gt;
+&lt;p&gt;There are some key changes in the driver going from 1.X to 2.X that one needs to be aware of before changing your application to using the new 2.X versions. There has been some cleanup of API&amp;rsquo;s and some deprecations of 1.X features.&lt;/p&gt;
 
 &lt;h2 id=&#34;design-differences-in-2-x&#34;&gt;Design differences in 2.X&lt;/h2&gt;
 
@@ -41,7 +41,7 @@
 
 &lt;h3 id=&#34;db-object&#34;&gt;Db Object&lt;/h3&gt;
 
-&lt;p&gt;The db instance object have had several changes made to it. We&amp;rsquo;ve removed the following methods.&lt;/p&gt;
+&lt;p&gt;The db instance object has had several changes made to it. We&amp;rsquo;ve removed the following methods.&lt;/p&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;db.dereference&lt;/code&gt; due to db references being deprecated in the server.&lt;/li&gt;

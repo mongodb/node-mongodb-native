@@ -1286,38 +1286,6 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
     </item>
     
     <item>
-      <title>Connecting</title>
-      <link>/node-mongodb-native/2.0/reference/ecmascript6/connecting/</link>
-      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
-      
-      <guid>/node-mongodb-native/2.0/reference/ecmascript6/connecting/</guid>
-      <description>
-
-&lt;h1 id=&#34;connecting&#34;&gt;Connecting&lt;/h1&gt;
-
-&lt;p&gt;The MongoClient connection method returns a Promise if no callback is passed to it. Below is an example using the &lt;a href=&#34;https://www.npmjs.com/package/co&#34;&gt;co&lt;/a&gt; package to run the &lt;code&gt;generator&lt;/code&gt; functions that is one of the most exiting innovations of ECMAScript 6.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
-  co = require(&#39;co&#39;),
-  assert = require(&#39;assert&#39;);
-
-co(function*() {
-  // Connection URL
-  var url = &#39;mongodb://localhost:27017/myproject&#39;;
-  // Use connect method to connect to the Server
-  var db = yield MongoClient.connect(url);
-  // Close the connection
-  db.close();
-}).catch(function(err) {
-  console.log(err.stack);
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;MongoClient.connect&lt;/code&gt; function returns a &lt;code&gt;Promise&lt;/code&gt; that we then execute using the &lt;code&gt;yield&lt;/code&gt; keyword of the &lt;code&gt;generator&lt;/code&gt; function. If an error happens during the &lt;code&gt;MongoClient.connect&lt;/code&gt; the error is caught by &lt;code&gt;co&lt;/code&gt; and can be inspected by attaching a function to the &lt;code&gt;catch&lt;/code&gt; method as shown above.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
       <title>CRUD Operations</title>
       <link>/node-mongodb-native/2.0/reference/crud/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
@@ -2065,32 +2033,34 @@ MongoClient.connect(url, function(err, db) {
     </item>
     
     <item>
-      <title>ECMAScript 6</title>
-      <link>/node-mongodb-native/2.0/reference/ecmascript6/</link>
+      <title>Connecting</title>
+      <link>/node-mongodb-native/2.0/reference/ecmascript6/connecting/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
       
-      <guid>/node-mongodb-native/2.0/reference/ecmascript6/</guid>
+      <guid>/node-mongodb-native/2.0/reference/ecmascript6/connecting/</guid>
       <description>
 
-&lt;h1 id=&#34;ecmascript-6&#34;&gt;ECMAScript 6&lt;/h1&gt;
+&lt;h1 id=&#34;connecting&#34;&gt;Connecting&lt;/h1&gt;
 
-&lt;p&gt;ECMAScript 6 or JavaScript 6 as it&amp;rsquo;s more commonly known is the new future of the Javascript language. It introduces fundamental changes in JavaScript while maintaining backward compatibility with ECMAScript 5.&lt;/p&gt;
+&lt;p&gt;The MongoClient connection method returns a Promise if no callback is passed to it. Below is an example using the &lt;a href=&#34;https://www.npmjs.com/package/co&#34;&gt;co&lt;/a&gt; package to run the &lt;code&gt;generator&lt;/code&gt; functions that is one of the most exiting innovations of ECMAScript 6.&lt;/p&gt;
 
-&lt;p&gt;The MongoDB Node.js driver embraces the new JavaScript version to provide the end user with much improved functionality. We do this primarily by exposing Promises for all &lt;code&gt;async&lt;/code&gt; methods without breaking backward compatibility with existing code using the driver.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
 
-&lt;p&gt;This section exposes how to use the MongoDB Node.js driver with ECMAScript 6, leveraging all the productivity gains you get from the new Generators.&lt;/p&gt;
+co(function*() {
+  // Connection URL
+  var url = &#39;mongodb://localhost:27017/myproject&#39;;
+  // Use connect method to connect to the Server
+  var db = yield MongoClient.connect(url);
+  // Close the connection
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
-&lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
-&lt;p&gt;For more information about ECMAScript 6 see the &lt;a href=&#34;http://es6-features.org/&#34;&gt;ECMAScript 6 features&lt;/a&gt;.&lt;/p&gt;
-
-&lt;/div&gt;
-&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/ecmascript6/connecting/&#34;&gt;Connecting&lt;/a&gt;: how to connect leveraging ECMASdcript 6.&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/ecmascript6/crud/&#34;&gt;CRUD&lt;/a&gt;: perform CRUD operations leveraging ECMAScript 6.&lt;/li&gt;
-&lt;/ul&gt;
+&lt;p&gt;The &lt;code&gt;MongoClient.connect&lt;/code&gt; function returns a &lt;code&gt;Promise&lt;/code&gt; that we then execute using the &lt;code&gt;yield&lt;/code&gt; keyword of the &lt;code&gt;generator&lt;/code&gt; function. If an error happens during the &lt;code&gt;MongoClient.connect&lt;/code&gt; the error is caught by &lt;code&gt;co&lt;/code&gt; and can be inspected by attaching a function to the &lt;code&gt;catch&lt;/code&gt; method as shown above.&lt;/p&gt;
 </description>
     </item>
     
@@ -2513,6 +2483,36 @@ co(function*() {
   console.log(err.stack);
 });
 &lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>ECMAScript 6</title>
+      <link>/node-mongodb-native/2.0/reference/ecmascript6/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/2.0/reference/ecmascript6/</guid>
+      <description>
+
+&lt;h1 id=&#34;ecmascript-6&#34;&gt;ECMAScript 6&lt;/h1&gt;
+
+&lt;p&gt;ECMAScript 6 or JavaScript 6 as it&amp;rsquo;s more commonly known is the new future of the Javascript language. It introduces fundamental changes in JavaScript while maintaining backward compatibility with ECMAScript 5.&lt;/p&gt;
+
+&lt;p&gt;The MongoDB Node.js driver embraces the new JavaScript version to provide the end user with much improved functionality. We do this primarily by exposing Promises for all &lt;code&gt;async&lt;/code&gt; methods without breaking backward compatibility with existing code using the driver.&lt;/p&gt;
+
+&lt;p&gt;This section exposes how to use the MongoDB Node.js driver with ECMAScript 6, leveraging all the productivity gains you get from the new Generators.&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
+&lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
+&lt;p&gt;For more information about ECMAScript 6 see the &lt;a href=&#34;http://es6-features.org/&#34;&gt;ECMAScript 6 features&lt;/a&gt;.&lt;/p&gt;
+
+&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/ecmascript6/connecting/&#34;&gt;Connecting&lt;/a&gt;: how to connect leveraging ECMASdcript 6.&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.0/node-mongodb-native/2.0/reference/ecmascript6/crud/&#34;&gt;CRUD&lt;/a&gt;: perform CRUD operations leveraging ECMAScript 6.&lt;/li&gt;
+&lt;/ul&gt;
 </description>
     </item>
     

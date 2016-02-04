@@ -2360,7 +2360,7 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
 
 &lt;tr&gt;
 &lt;td align=&#34;left&#34;&gt;&lt;code&gt;haInterval&lt;/code&gt;&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;{Number, default:5000}&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;{Number, default:10000}&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;The number of milliseconds between each ping of the replicaset members. The replicaset monitoring process, is the process monitoring the replicaset, detecting new members and reconnecting to existing members.&lt;/td&gt;
 &lt;/tr&gt;
 

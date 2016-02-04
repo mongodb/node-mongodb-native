@@ -181,7 +181,7 @@ Content Management Systems
          :header-rows: 0
 
          * - **Activity Level**
-           - .. image:: ../static/active.png
+           - .. image:: ../static/nonactive.png
          * - **Last push**
            - 19:2:50 on 21/8/2015
          * - **Homepage**
@@ -191,9 +191,9 @@ Content Management Systems
          * - **Clone Url**
            - https://github.com/cliftonc/calipso.git
          * - **Forks**
-           - 294
+           - 296
          * - **Watchers**
-           - 1632
+           - 1644
 
 Grid FS libraries or tools
 --------------------------
@@ -217,7 +217,7 @@ Grid FS libraries or tools
          * - **Clone Url**
            - https://github.com/scttnlsn/nettle.git
          * - **Forks**
-           - 0
+           - 1
          * - **Watchers**
            - 10
 
@@ -348,7 +348,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          :header-rows: 0
 
          * - **Activity Level**
-           - .. image:: ../static/active.png
+           - .. image:: ../static/nonactive.png
          * - **Last push**
            - 20:12:18 on 11/8/2015
          * - **Homepage**
@@ -384,7 +384,7 @@ REST api's around MongoDB or resource based libraries
          * - **Clone Url**
            - https://github.com/tdegrunt/mongodb-rest.git
          * - **Forks**
-           - 129
+           - 127
          * - **Watchers**
            - 347
 
@@ -458,7 +458,7 @@ Test helpers and libraries
          * - **Forks**
            - 3
          * - **Watchers**
-           - 30
+           - 32
 
 .. topic:: node-database-cleaner
 
@@ -471,7 +471,7 @@ Test helpers and libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 19:18:51 on 7/11/2015
+           - 22:25:0 on 3/1/2016
          * - **Homepage**
            - http://
          * - **Url**
@@ -481,7 +481,7 @@ Test helpers and libraries
          * - **Forks**
            - 27
          * - **Watchers**
-           - 79
+           - 82
 
 Tools or applications to manage your MongoDB's
 ----------------------------------------------
@@ -582,7 +582,7 @@ Logging libraries or applications
          * - **Forks**
            - 1
          * - **Watchers**
-           - 35
+           - 36
 
 Monitoring applications or libraries
 ------------------------------------
@@ -657,7 +657,7 @@ General frameworks over MongoDB
          * - **Forks**
            - 9
          * - **Watchers**
-           - 55
+           - 57
 
 Translation libraries or frameworks
 -----------------------------------
@@ -730,9 +730,9 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 419
+           - 417
          * - **Watchers**
-           - 3665
+           - 3668
 
 Libraries for the connect middleware
 ------------------------------------
@@ -771,7 +771,7 @@ Libraries for the connect middleware
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 13:51:59 on 28/11/2015
+           - 10:6:24 on 27/0/2016
          * - **Homepage**
            - http://
          * - **Url**
@@ -779,9 +779,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 222
+           - 220
          * - **Watchers**
-           - 879
+           - 901
 
 Libraries or applications for continous integration
 ---------------------------------------------------
@@ -807,7 +807,7 @@ Libraries or applications for continous integration
          * - **Forks**
            - 69
          * - **Watchers**
-           - 502
+           - 506
 
 Exampe applications
 -------------------

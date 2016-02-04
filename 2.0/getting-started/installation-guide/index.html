@@ -1129,9 +1129,9 @@
 <pre><code>npm WARN EPEERINVALID mongodb-core@1.2.21 requires a peer of kerberos@~0.0 but none was installed.
 </code></pre>
 
-<p>This tells you that the driver could not resolve it&rsquo;s <code>peerDependency</code>. However don&rsquo;t worry. You only need the <code>kerberos</code> module if intend to use <code>kerberos</code>. In the case you need to you can add it to your package.json by doing the following for the case of the line above.</p>
+<p>This tells you that the driver could not resolve it&rsquo;s <code>peerDependency</code>. However don&rsquo;t worry&ndash; if you do not intend to use kerberos, you can safely ignore the NPM warning above.  If you are using kerberos, then you will need to install the <code>kerberos</code> package from NPM and save it as a local dependency in your <code>package.json</code> file:</p>
 
-<pre><code>npm install kerberos@0.0.x
+<pre><code>npm install kerberos@0.0.x --save
 </code></pre>
 
 <p>The <code>kerberos</code> package is a C++ extension that requires a build environment to be installed on your system. You must be able to build node.js itself to be able to compile and install the <code>kerberos</code> module. Furthermore the <code>kerberos</code> module requires the MIT Kerberos package to correctly compile on UNIX operating systems. Consult your UNIX operation system package manager what libraries to install.</p>

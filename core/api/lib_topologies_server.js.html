@@ -997,6 +997,7 @@ var inherits = require('util').inherits
   , EventEmitter = require('events').EventEmitter
   , Pool = require('../connection/pool')
   , b = require('bson')
+  , crypto = require('crypto')
   , Query = require('../connection/commands').Query
   , MongoError = require('../error')
   , ReadPreference = require('./read_preference')
@@ -1102,15 +1103,6 @@ Callbacks.prototype.unregister = function(id) {
 
 Callbacks.prototype.register = function(id, callback) {
   this.callbacks[id] = bindToCurrentDomain(callback);
-}
-
-/**
- * @ignore
- */
-var bindToCurrentDomain = function(callback) {
-  var domain = process.domain;
-  if(domain == null || callback == null) return callback;
-  return domain.bind(callback);
 }
 
 var DISCONNECTED = 'disconnected';
@@ -1549,6 +1541,13 @@ var Server = function(options) {
     }
   }
 
+  // Create hash method
+  var hash = crypto.createHash('sha1');
+  hash.update(f('%s:%s', this.host, this.port));
+
+  // Create a hash name
+  this.hashedName = hash.digest('hex');
+
   // Reference state
   var s = this.s;
 
@@ -1703,6 +1702,9 @@ var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAl
   // Get a connection (either passed or from the pool)
   var connection = options.connection || self.s.pool.get(options);
 
+  // Raw BSON response
+  var raw = typeof options.raw == 'boolean' ? options.raw : false;
+
   // Double check if we have a valid connection
   // Checking that the connection exists to avoid an uncaught exception in case there is an issue with the pool
   if(!(connection &amp;&amp; connection.isConnected())) {
@@ -1731,8 +1733,8 @@ var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAl
         if(total == 0) return callback(MongoError.create(err));
       }
 
-      // Register the callback
-      self.s.callbacks.register(query.requestId, function(err, result) {
+      // Command callback
+      var commandCallback = function(err, result) {
         if(err) error = err;
         total = total - 1;
 
@@ -1741,11 +1743,21 @@ var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAl
           // Notify end of command
           notifyStrategies(self, self.s, 'endOperation', [self, error, result, new Date()]);
           if(error) return callback(MongoError.create(error));
+
+          // Add the connection details
+          result.hashedName = connection.hashedName;
+
           // Execute callback, catch and rethrow if needed
-          try { callback(null, new CommandResult(result.documents[0], connections)); }
+          try { callback(null, new CommandResult(options.fullResult ? result : result.documents[0], connections)); }
           catch(err) { process.nextTick(function() { throw err}); }
         }
-      });
+      };
+
+      // Return raw BSON docs
+      if(raw) commandCallback.raw = true;
+
+      // Register the callback
+      self.s.callbacks.register(query.requestId, callback);
     }
 
     return;
@@ -1758,8 +1770,8 @@ var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAl
     return callback(MongoError.create(err));
   }
 
-  // Register the callback
-  self.s.callbacks.register(query.requestId, function(err, result) {
+  // Command callback
+  var commandCallback = function(err, result) {
     // Notify end of command
     notifyStrategies(self, self.s, 'endOperation', [self, err, result, new Date()]);
     if(err) return callback(err);
@@ -1767,10 +1779,20 @@ var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAl
       || result.documents[0]['errmsg']
       || result.documents[0]['err']
       || result.documents[0]['code']) return callback(MongoError.create(result.documents[0]));
+
+      // Add the connection details
+      result.hashedName = connection.hashedName;
+
       // Execute callback, catch and rethrow if needed
-      try { callback(null, new CommandResult(result.documents[0], connection)); }
+      try { callback(null, new CommandResult(options.fullResult ? result : result.documents[0], connection)); }
       catch(err) { process.nextTick(function() { throw err}); }
-  });
+  };
+
+  // Return raw BSON docs
+  if(raw) commandCallback.raw = true;
+
+  // Register the callback
+  self.s.callbacks.register(query.requestId, commandCallback);
 }
 
 /**
@@ -1782,6 +1804,7 @@ var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAl
  * @param {Connection} [options.connection] Specify connection object to execute command against
  * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
+ * @param {Boolean} [options.fullResult=false] Return the full envelope instead of just the result document.
  * @param {opResultCallback} callback A callback function
  */
 Server.prototype.command = function(ns, cmd, options, callback) {
@@ -1790,6 +1813,7 @@ Server.prototype.command = function(ns, cmd, options, callback) {
   if(this.s.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
   // Ensure we have no options
   options = options || {};
+
   // Do we have a read Preference it need to be of type ReadPreference
   if(options.readPreference &amp;&amp; !(options.readPreference instanceof ReadPreference)) {
     throw new Error("readPreference must be an instance of ReadPreference");
@@ -1823,6 +1847,9 @@ Server.prototype.command = function(ns, cmd, options, callback) {
 
   // Ignore undefined values
   var ignoreUndefined = typeof options.ignoreUndefined == 'boolean' ? options.ignoreUndefined : false;
+
+  // Raw BSON response
+  var raw = typeof options.raw == 'boolean' ? options.raw : false;
 
   // Query options
   var queryOptions = {
@@ -1883,8 +1910,8 @@ Server.prototype.command = function(ns, cmd, options, callback) {
       return callback(MongoError.create(err));
     }
 
-    // Register the callback
-    self.s.callbacks.register(query.requestId, function(err, result) {
+    // Command callback
+    var commandCallback = function(err, result) {
       // If it's canceled ignore the operation
       if(canceled) return;
       // Update the current index
@@ -1908,8 +1935,11 @@ Server.prototype.command = function(ns, cmd, options, callback) {
         return callback(MongoError.create(result.documents[0]));
       }
 
+      // Add the connection details
+      result.hashedName = connection.hashedName;
+
       // Push results
-      results.push(result.documents[0]);
+      results.push(options.fullResult ? result : result.documents[0]);
 
       // We are done, return the result
       if(operationsLeft == 0) {
@@ -1926,7 +1956,13 @@ Server.prototype.command = function(ns, cmd, options, callback) {
         try { callback(null, commandResults); }
         catch(err) { process.nextTick(function() { throw err}); }
       }
-    });
+    };
+
+    // Do we want raw BSON returned
+    if(raw) commandResults.raw = true;
+
+    // Register the callback
+    self.s.callbacks.register(query.requestId, commandCallback);
   }
 }
 
@@ -2282,7 +2318,7 @@ module.exports = Server;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Mon Jan 04 2016 15:51:01 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Feb 04 2016 13:29:57 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

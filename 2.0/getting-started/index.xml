@@ -67,9 +67,9 @@
 &lt;pre&gt;&lt;code&gt;npm WARN EPEERINVALID mongodb-core@1.2.21 requires a peer of kerberos@~0.0 but none was installed.
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This tells you that the driver could not resolve it&amp;rsquo;s &lt;code&gt;peerDependency&lt;/code&gt;. However don&amp;rsquo;t worry. You only need the &lt;code&gt;kerberos&lt;/code&gt; module if intend to use &lt;code&gt;kerberos&lt;/code&gt;. In the case you need to you can add it to your package.json by doing the following for the case of the line above.&lt;/p&gt;
+&lt;p&gt;This tells you that the driver could not resolve it&amp;rsquo;s &lt;code&gt;peerDependency&lt;/code&gt;. However don&amp;rsquo;t worry&amp;ndash; if you do not intend to use kerberos, you can safely ignore the NPM warning above.  If you are using kerberos, then you will need to install the &lt;code&gt;kerberos&lt;/code&gt; package from NPM and save it as a local dependency in your &lt;code&gt;package.json&lt;/code&gt; file:&lt;/p&gt;
 
-&lt;pre&gt;&lt;code&gt;npm install kerberos@0.0.x
+&lt;pre&gt;&lt;code&gt;npm install kerberos@0.0.x --save
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;The &lt;code&gt;kerberos&lt;/code&gt; package is a C++ extension that requires a build environment to be installed on your system. You must be able to build node.js itself to be able to compile and install the &lt;code&gt;kerberos&lt;/code&gt; module. Furthermore the &lt;code&gt;kerberos&lt;/code&gt; module requires the MIT Kerberos package to correctly compile on UNIX operating systems. Consult your UNIX operation system package manager what libraries to install.&lt;/p&gt;
