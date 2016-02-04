@@ -1,9 +1,12 @@
+[![Build Status](https://secure.travis-ci.org/christkv/mongodb-core.png)](http://travis-ci.org/christkv/mongodb-core)
+[![Coverage Status](https://coveralls.io/repos/github/christkv/mongodb-core/badge.svg?branch=1.3)](https://coveralls.io/github/christkv/mongodb-core?branch=1.3)
+
 # Description
 
 The MongoDB Core driver is the low level part of the 2.0 or higher MongoDB driver and is meant for library developers not end users. It does not contain any abstractions or helpers outside of the basic management of MongoDB topology connections, CRUD operations and authentication.
 
 ## MongoDB Node.JS Core Driver
- 
+
 | what          | where                                          |
 |---------------|------------------------------------------------|
 | documentation | http://mongodb.github.io/node-mongodb-native/  |

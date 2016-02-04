@@ -4,7 +4,7 @@
   "description": "Core MongoDB driver functionality, no bells and whistles and meant for integration not end applications",
   "main": "index.js",
   "scripts": {
-    "test": "node test/runner.js -t functional"
+    "test": "node_modules/.bin/nyc node test/runner.js -t functional && node_modules/.bin/nyc report --reporter=text-lcov | node_modules/.bin/coveralls"
   },
   "repository": {
     "type": "git",
@@ -19,17 +19,19 @@
     "require_optional": "~1.0.0"
   },
   "devDependencies": {
-    "mongodb-topology-manager": "1.0.x",
-    "integra": "0.1.8",
-    "optimist": "latest",
-    "jsdoc": "3.3.0-alpha8",
-    "semver": "4.1.0",
-    "gleak": "0.5.0",
-    "mkdirp": "0.5.0",
-    "rimraf": "2.2.6",
+    "co": "4.5.4",
+    "coveralls": "^2.11.6",
     "es6-promise": "^3.0.2",
+    "gleak": "0.5.0",
+    "integra": "0.1.8",
+    "jsdoc": "3.3.0-alpha8",
+    "mkdirp": "0.5.0",
+    "mongodb-topology-manager": "1.0.x",
     "mongodb-version-manager": "^1.x",
-    "co": "4.5.4"
+    "nyc": "^5.5.0",
+    "optimist": "latest",
+    "rimraf": "2.2.6",
+    "semver": "4.1.0"
   },
   "peerOptionalDependencies": {
     "kerberos": "~0.0"
