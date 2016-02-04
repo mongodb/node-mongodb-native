@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Class: FindOperatorsOrdered</title>
+    <title>Class: GridFSBucketReadStream</title>
     
     
     
@@ -1784,7 +1784,7 @@
             </td>
             <td valign='top'>        
                 <div class="main">
-                    <h1 class="page-title" data-filename="FindOperatorsOrdered.html">Class: FindOperatorsOrdered</h1>
+                    <h1 class="page-title" data-filename="GridFSBucketReadStream.html">Class: GridFSBucketReadStream</h1>
                     
 
 
@@ -1793,7 +1793,7 @@
     
 <header>
     <h2>
-    FindOperatorsOrdered
+    GridFSBucketReadStream
     </h2>
     
 </header>  
@@ -1806,14 +1806,14 @@
         
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="FindOperatorsOrdered">
+        <h4 class="name" id="GridFSBucketReadStream">
             
-            new FindOperatorsOrdered<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="FindOperatorsOrdered.html">FindOperatorsOrdered</a>}</span>
+            new GridFSBucketReadStream<span class="signature">(chunks, files, readPreference, filter, <span class="optional">options</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="GridFSBucketReadStream.html">GridFSBucketReadStream</a>}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_bulk_ordered.js.html">lib/bulk/ordered.js</a>, <a href="lib_bulk_ordered.js.html#line22">line 22</a>
+            <a href="lib_gridfs-stream_download.js.html">lib/gridfs-stream/download.js</a>, <a href="lib_gridfs-stream_download.js.html#line27">line 27</a>
         </div>
         
     </div>
@@ -1824,7 +1824,8 @@
     
     
     <div class="description">
-        <p>Create a FindOperatorsOrdered instance (INTERNAL TYPE, do not instantiate directly)</p>
+        <p>A readable stream that enables you to read buffers from GridFS.</p>
+<p>Do not instantiate this class directly. Use <code>openDownloadStream()</code> instead.</p>
     </div>
     
 
@@ -1832,6 +1833,362 @@
     
     
     
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		<th>Default</th>
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>chunks</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Collection.html">Collection</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        
+                    
+                
+                <p>Handle for chunks collection</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>files</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Collection.html">Collection</a></span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        
+                    
+                
+                <p>Handle for files collection</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>readPreference</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        
+                    
+                
+                <p>The read preference to use</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>filter</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        
+                    
+                
+                <p>The query to use to find the file document</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Object</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Optional settings.</p>
+                
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		<th>Default</th>
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>sort</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Optional sort for the file find query</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>skip</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Optional skip for the file find query</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>start</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Optional 0-based offset in bytes to start streaming from</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>end</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">Number</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Optional 0-based offset in bytes to stop streaming before</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+            </td>
+        </tr>
+	
+	
+	</tbody>
+</table>
     
     
     
@@ -1861,6 +2218,13 @@
 
     
     
+    <h5>Fires:</h5>
+    <ul>
+        <li><a href="GridFSBucketReadStream.html#event:error">GridFSBucketReadStream#event:error</a></li>
+    
+        <li><a href="GridFSBucketReadStream.html#event:file">GridFSBucketReadStream#event:file</a></li>
+    </ul>
+    
 
     
 
@@ -1874,7 +2238,7 @@
 
 
 <h5>Returns:</h5>
-FindOperatorsOrdered instance.
+GridFSBucketReadStream instance.
 <br />
 
     
@@ -1904,14 +2268,14 @@ FindOperatorsOrdered instance.
             
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="delete">
+        <h4 class="name" id="_read">
             
-            delete<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="OrderedBulkOperation.html">OrderedBulkOperation</a>}</span>
+            _read<span class="signature">()</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_bulk_ordered.js.html">lib/bulk/ordered.js</a>, <a href="lib_bulk_ordered.js.html#line132">line 132</a>
+            <a href="lib_gridfs-stream_download.js.html">lib/gridfs-stream/download.js</a>, <a href="lib_gridfs-stream_download.js.html#line68">line 68</a>
         </div>
         
     </div>
@@ -1922,7 +2286,7 @@ FindOperatorsOrdered instance.
     
     
     <div class="description">
-        <p>Add a remove operation to the bulk operation</p>
+        <p>Reads from the cursor and pushes to the stream.</p>
     </div>
     
 
@@ -1965,27 +2329,7 @@ FindOperatorsOrdered instance.
     
     
     
-    <h5>Throws:</h5>
     
-            
-
-    <div class="param-desc">
-    
-        
-<span class="param-type"><a href="MongoError.html">MongoError</a></span>
-
-
-    
-    </div>
-
-
-        
-    
-    
-    
-    
-
-
     
     
     
@@ -1995,14 +2339,14 @@ FindOperatorsOrdered instance.
             
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="deleteOne">
+        <h4 class="name" id="end">
             
-            deleteOne<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="OrderedBulkOperation.html">OrderedBulkOperation</a>}</span>
+            end<span class="signature">(end)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="GridFSBucketReadStream.html">GridFSBucketReadStream</a>}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_bulk_ordered.js.html">lib/bulk/ordered.js</a>, <a href="lib_bulk_ordered.js.html#line109">line 109</a>
+            <a href="lib_gridfs-stream_download.js.html">lib/gridfs-stream/download.js</a>, <a href="lib_gridfs-stream_download.js.html#line99">line 99</a>
         </div>
         
     </div>
@@ -2013,98 +2357,9 @@ FindOperatorsOrdered instance.
     
     
     <div class="description">
-        <p>Add a remove one operation to the bulk operation</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    <h5>Throws:</h5>
-    
-            
-
-    <div class="param-desc">
-    
-        
-<span class="param-type"><a href="MongoError.html">MongoError</a></span>
-
-
-    
-    </div>
-
-
-        
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="replaceOne">
-            
-            replaceOne<span class="signature">(doc)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="OrderedBulkOperation.html">OrderedBulkOperation</a>}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_bulk_ordered.js.html">lib/bulk/ordered.js</a>, <a href="lib_bulk_ordered.js.html#line86">line 86</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Add a replace one operation to the bulk operation</p>
+        <p>Sets the 0-based offset in bytes to start streaming from. Throws
+an error if this stream has entered flowing mode
+(e.g. if you've already called <code>on('data')</code>)</p>
     </div>
     
 
@@ -2135,13 +2390,13 @@ FindOperatorsOrdered instance.
 	
         <tr>
             
-                <td class="name"><code>doc</code></td>
+                <td class="name"><code>end</code></td>
             
             
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">Number</span>
 
 
             
@@ -2151,7 +2406,7 @@ FindOperatorsOrdered instance.
             
             <td class="description last">
                 
-                <p>the new document to replace the existing one with</p></td>
+                <p>Offset in bytes to stop reading at</p></td>
         </tr>
 	
 	
@@ -2192,21 +2447,6 @@ FindOperatorsOrdered instance.
     
     
     
-    <h5>Throws:</h5>
-    
-            
-
-    <div class="param-desc">
-    
-        
-<span class="param-type"><a href="MongoError.html">MongoError</a></span>
-
-
-    
-    </div>
-
-
-        
     
     
     
@@ -2222,14 +2462,14 @@ FindOperatorsOrdered instance.
             
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="update">
+        <h4 class="name" id="start">
             
-            update<span class="signature">(doc)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="OrderedBulkOperation.html">OrderedBulkOperation</a>}</span>
+            start<span class="signature">(start)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="GridFSBucketReadStream.html">GridFSBucketReadStream</a>}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_bulk_ordered.js.html">lib/bulk/ordered.js</a>, <a href="lib_bulk_ordered.js.html#line34">line 34</a>
+            <a href="lib_gridfs-stream_download.js.html">lib/gridfs-stream/download.js</a>, <a href="lib_gridfs-stream_download.js.html#line84">line 84</a>
         </div>
         
     </div>
@@ -2240,7 +2480,9 @@ FindOperatorsOrdered instance.
     
     
     <div class="description">
-        <p>Add a single update document to the bulk operation</p>
+        <p>Sets the 0-based offset in bytes to start streaming from. Throws
+an error if this stream has entered flowing mode
+(e.g. if you've already called <code>on('data')</code>)</p>
     </div>
     
 
@@ -2271,13 +2513,13 @@ FindOperatorsOrdered instance.
 	
         <tr>
             
-                <td class="name"><code>doc</code></td>
+                <td class="name"><code>start</code></td>
             
             
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">Number</span>
 
 
             
@@ -2287,7 +2529,7 @@ FindOperatorsOrdered instance.
             
             <td class="description last">
                 
-                <p>update operations</p></td>
+                <p>Offset in bytes to start reading at</p></td>
         </tr>
 	
 	
@@ -2328,248 +2570,6 @@ FindOperatorsOrdered instance.
     
     
     
-    <h5>Throws:</h5>
-    
-            
-
-    <div class="param-desc">
-    
-        
-<span class="param-type"><a href="MongoError.html">MongoError</a></span>
-
-
-    
-    </div>
-
-
-        
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="updateOne">
-            
-            updateOne<span class="signature">(doc)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="OrderedBulkOperation.html">OrderedBulkOperation</a>}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_bulk_ordered.js.html">lib/bulk/ordered.js</a>, <a href="lib_bulk_ordered.js.html#line60">line 60</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Add a single update one document to the bulk operation</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>doc</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>update operations</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    <h5>Throws:</h5>
-    
-            
-
-    <div class="param-desc">
-    
-        
-<span class="param-type"><a href="MongoError.html">MongoError</a></span>
-
-
-    
-    </div>
-
-
-        
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="upsert">
-            
-            upsert<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="FindOperatorsOrdered.html">FindOperatorsOrdered</a>}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_bulk_ordered.js.html">lib/bulk/ordered.js</a>, <a href="lib_bulk_ordered.js.html#line97">line 97</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Upsert modifier for update bulk operation</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    <h5>Throws:</h5>
-    
-            
-
-    <div class="param-desc">
-    
-        
-<span class="param-type"><a href="MongoError.html">MongoError</a></span>
-
-
-    
-    </div>
-
-
-        
     
     
     
@@ -2586,6 +2586,173 @@ FindOperatorsOrdered instance.
     
     
     
+    
+        <h3 class="subsection-title">Events</h3>
+        
+        <dl>
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:error">
+            
+            error
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_gridfs-stream_download.js.html">lib/gridfs-stream/download.js</a>, <a href="lib_gridfs-stream_download.js.html#line48">line 48</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>An error occurred</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">Error</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:file">
+            
+            file
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_gridfs-stream_download.js.html">lib/gridfs-stream/download.js</a>, <a href="lib_gridfs-stream_download.js.html#line55">line 55</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Fires when the stream loaded the file document corresponding to the
+provided id.</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        </dl>
     
 </article>
 
@@ -2615,7 +2782,7 @@ FindOperatorsOrdered instance.
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Feb 04 2016 13:50:44 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Feb 04 2016 13:50:45 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>
