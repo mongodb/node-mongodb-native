@@ -5,8 +5,10 @@ node_js:
   - "0.12"
   - "4"
 sudo: false
+after_success: npm run coverage
 env:
   - MONGODB_VERSION=2.4.x
   - MONGODB_VERSION=2.6.x
   - MONGODB_VERSION=3.0.x
   - MONGODB_VERSION=3.2.x
+  - COVERALLS_REPO_TOKEN=47iIZ0B3llo2Wc4dxWRltvgdImqcrVDTi
