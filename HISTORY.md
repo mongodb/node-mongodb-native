@@ -1,3 +1,7 @@
+1.3.1 2016-02-05
+----------------
+- Removed annoying missing Kerberos error (NODE-654).
+
 1.3.0 2016-02-03
 ----------------
 - Added raw support for the command function on topologies.
