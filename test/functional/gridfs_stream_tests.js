@@ -429,11 +429,24 @@ exports['Destroying a download stream'] = {
       uploadStream.once('finish', function() {
         var id = uploadStream.id;
         var downloadStream = bucket.openDownloadStream(id);
+        var done = {};
         downloadStream.on('data', function() {
           test.ok(false);
         });
+        downloadStream.on('error', function() {
+          test.ok(false);
+        });
         downloadStream.on('end', function() {
-          test.done();
+          if (done.close) {
+            return test.done();
+          }
+          done.end = true;
+        });
+        downloadStream.on('close', function() {
+          if (done.end) {
+            return test.done();
+          }
+          done.close = true;
         });
         downloadStream.destroy(function(error) {
           test.equal(error, null);
