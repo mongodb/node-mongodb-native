@@ -1,3 +1,8 @@
+2.1.7
+----------------
+* NODE-656 fixed corner case where cursor count command could be left without a connection available.
+* NODE-658 Work around issue that bufferMaxEntries:-1 for js gets interpreted wrongly due to double nature of Javascript numbers.
+
 2.1.6 2016-02-05
 ----------------
 * Updated mongodb-core to 1.3.1.
