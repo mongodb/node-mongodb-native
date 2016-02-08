@@ -437,6 +437,7 @@ exports['Destroying a download stream'] = {
           test.ok(false);
         });
         downloadStream.on('end', function() {
+          test.equal(downloadStream.s.cursor, null);
           if (done.close) {
             return test.done();
           }
