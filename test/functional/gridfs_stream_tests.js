@@ -379,9 +379,9 @@ exports['Aborting an upload'] = {
                   test.equal(error.toString(),
                     'Error: this stream has been aborted');
                   // Fail if user tries to abort an aborted stream
-                  uploadStream.abort(function(error) {
+                  uploadStream.abort().then(null, function(error) {
                     test.equal(error.toString(),
-                      'Error: this stream has been aborted');
+                      'Error: Cannot call abort() on a stream twice');
                     test.done();
                   });
                 });
