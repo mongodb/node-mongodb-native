@@ -2,6 +2,9 @@
 ----------------
 * NODE-656 fixed corner case where cursor count command could be left without a connection available.
 * NODE-658 Work around issue that bufferMaxEntries:-1 for js gets interpreted wrongly due to double nature of Javascript numbers.
+* Fix: GridFS always returns the oldest version due to incorrect field name (Issue #1338, https://github.com/mdebruijne).
+* NODE-655 GridFS stream support for cancelling upload streams and download streams (Issue #1339, https://github.com/vkarpov15).
+* NODE-657 insertOne don`t return promise in some cases.
 
 2.1.6 2016-02-05
 ----------------

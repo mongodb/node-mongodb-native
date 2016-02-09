@@ -159,3 +159,53 @@ exports['Should correctly handle bulkWrite with no options'] = {
     });
   }
 }
+
+exports['Should correctly return failing Promise when no document array passed into insertMany'] = {
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var url = configuration.url();
+    url = url.indexOf('?') != -1
+      ? f('%s&%s', url, 'maxPoolSize=100')
+      : f('%s?%s', url, 'maxPoolSize=100');
+
+    MongoClient.connect(url).then(function(db) {
+      test.equal(1, db.serverConfig.connections().length);
+
+      db.collection('insertMany_Promise_error').insertMany({a:1}).then(function(r) {
+      }).catch(function(e) {
+        test.ok(e != null);
+
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
+
+exports['Should correctly return failing Promise when array passed into insertOne'] = {
+  metadata: { requires: { promises:true, topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var url = configuration.url();
+    url = url.indexOf('?') != -1
+      ? f('%s&%s', url, 'maxPoolSize=100')
+      : f('%s?%s', url, 'maxPoolSize=100');
+
+    MongoClient.connect(url).then(function(db) {
+      test.equal(1, db.serverConfig.connections().length);
+
+      db.collection('insertOne_Promise_error').insertOne([{a:1}]).then(function(r) {
+      }).catch(function(e) {
+        test.ok(e != null);
+
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
