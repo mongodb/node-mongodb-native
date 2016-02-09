@@ -396,6 +396,68 @@ exports['Aborting an upload'] = {
 };
 
 /**
+ * Aborting an upload
+ *
+ * @ignore
+ */
+exports['Destroy an upload'] = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var GridFSBucket = configuration.require.GridFSBucket;
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(),
+      { poolSize:1 });
+    db.open(function(error, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
+      var bucket = new GridFSBucket(db,
+        { bucketName: 'gridfsabort', chunkSizeBytes: 1 });
+      var CHUNKS_COLL = 'gridfsabort.chunks';
+      var FILES_COLL = 'gridfsabort.files';
+      var uploadStream = bucket.openUploadStream('test.dat');
+
+      var id = uploadStream.id;
+      var query = { files_id: id };
+      uploadStream.write('a', 'utf8', function(error) {
+        test.equal(error, null);
+        db.collection(CHUNKS_COLL).count(query, function(error, c) {
+          test.equal(error, null);
+          test.equal(c, 1);
+          uploadStream.destroy(function(error) {
+            test.equal(error, null);
+            db.collection(CHUNKS_COLL).count(query, function(error, c) {
+              test.equal(error, null);
+              test.equal(c, 0);
+              uploadStream.write('b', 'utf8', function(error) {
+                test.equal(error.toString(),
+                  'Error: this stream has been aborted');
+                uploadStream.end('c', 'utf8', function(error) {
+                  test.equal(error.toString(),
+                    'Error: this stream has been aborted');
+                  // Fail if user tries to abort an aborted stream
+                  uploadStream.destroy().then(null, function(error) {
+                    test.equal(error.toString(),
+                      'Error: Cannot call abort() on a stream twice');
+                    test.done();
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+    // END
+  }
+};
+
+/**
  * Calling destroy() on a GridFSBucketReadStream
  *
  * @example-class GridFSBucketReadStream
