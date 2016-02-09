@@ -1,4 +1,4 @@
-1.3.2
+1.3.2 2016-02-09
 ----------------
 - Harden MessageHandler in server.js to avoid issues where we cannot find a callback for an operation.
 - Ensure RequestId can never be larger than Max Number integer size.
