@@ -1,3 +1,8 @@
+1.3.2
+----------------
+- Harden MessageHandler in server.js to avoid issues where we cannot find a callback for an operation.
+- Ensure RequestId can never be larger than Max Number integer size.
+
 1.3.1 2016-02-05
 ----------------
 - Removed annoying missing Kerberos error (NODE-654).
