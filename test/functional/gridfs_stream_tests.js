@@ -429,7 +429,7 @@ exports['Destroy an upload'] = {
         db.collection(CHUNKS_COLL).count(query, function(error, c) {
           test.equal(error, null);
           test.equal(c, 1);
-          uploadStream.destroy(function(error) {
+          uploadStream.abort(function(error) {
             test.equal(error, null);
             db.collection(CHUNKS_COLL).count(query, function(error, c) {
               test.equal(error, null);
@@ -441,7 +441,7 @@ exports['Destroy an upload'] = {
                   test.equal(error.toString(),
                     'Error: this stream has been aborted');
                   // Fail if user tries to abort an aborted stream
-                  uploadStream.destroy().then(null, function(error) {
+                  uploadStream.abort().then(null, function(error) {
                     test.equal(error.toString(),
                       'Error: Cannot call abort() on a stream twice');
                     test.done();
@@ -458,7 +458,7 @@ exports['Destroy an upload'] = {
 };
 
 /**
- * Calling destroy() on a GridFSBucketReadStream
+ * Calling abort() on a GridFSBucketReadStream
  *
  * @example-class GridFSBucketReadStream
  * @example-method abort
@@ -511,7 +511,7 @@ exports['Destroying a download stream'] = {
           }
           done.close = true;
         });
-        downloadStream.destroy(function(error) {
+        downloadStream.abort(function(error) {
           test.equal(error, null);
         });
       });
