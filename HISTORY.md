@@ -1,3 +1,11 @@
+2.1.8
+----------------
+* Updated mongodb-core to 1.3.2.
+* NODE-660 TypeError: Cannot read property 'noRelease' of undefined.
+* Harden MessageHandler in server.js to avoid issues where we cannot find a callback for an operation.
+* Ensure RequestId can never be larger than Max Number integer size.
+* NODE-661 typo in url_parser.js resulting in replSetServerOptions is not defined when connecting over ssl.
+
 2.1.7 2016-02-09
 ----------------
 * NODE-656 fixed corner case where cursor count command could be left without a connection available.
