@@ -52,5 +52,8 @@
     "test": "node test/runner.js -t functional",
     "coverage": "node_modules/.bin/nyc node test/runner.js -t functional && node_modules/.bin/nyc report --reporter=text-lcov | node_modules/.bin/coveralls"
   },
+  "nyc": {
+    "include": ["lib/**/*.js"]
+  },
   "homepage": "https://github.com/mongodb/node-mongodb-native"
 }
