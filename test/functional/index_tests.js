@@ -822,7 +822,10 @@ exports['should correctly pass partialIndexes through to createIndexCommand'] = 
  * @ignore
  */
 exports['should not retry partial index expression error'] = {
-  metadata: { requires: { topology: ['single'], mongodb: ">=3.1.8" } },
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded'],
+    mongodb: ">=3.1.8" }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
