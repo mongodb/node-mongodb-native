@@ -821,6 +821,36 @@ exports['should correctly pass partialIndexes through to createIndexCommand'] = 
 /**
  * @ignore
  */
+exports['should not retry partial index expression error'] = {
+  metadata: {
+    requires: { topology: ['single', 'replicaset', 'sharded'],
+    mongodb: ">=3.1.8" }
+  },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(error, db) {
+      test.equal(error, null);
+      // Can't use $exists: false in partial filter expression, see
+      // https://jira.mongodb.org/browse/SERVER-17853
+      var opts = { partialFilterExpression: { a: { $exists: false } } };
+      db.collection('partialIndexes').createIndex({a:1}, opts, function(err) {
+        test.ok(err);
+        test.equal(err.code, 67);
+        var msg = "key $exists must not start with '$'";
+        test.ok(err.toString().indexOf(msg) === -1);
+
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
 exports['should correctly error out due to driver close'] = {
   metadata: { requires: { topology: ['single'] } },
 
