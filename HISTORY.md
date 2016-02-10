@@ -5,6 +5,7 @@
 * Harden MessageHandler in server.js to avoid issues where we cannot find a callback for an operation.
 * Ensure RequestId can never be larger than Max Number integer size.
 * NODE-661 typo in url_parser.js resulting in replSetServerOptions is not defined when connecting over ssl.
+* Confusing error with invalid partial index filter (Issue #1341, https://github.com/vkarpov15).
 
 2.1.7 2016-02-09
 ----------------
