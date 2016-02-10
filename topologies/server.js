@@ -265,7 +265,7 @@ var messageHandler = function(self, state) {
       var cb = state.callbacks.callback(response.responseTo);
 
       // If no
-      if(cb && !cb.noRelease) {
+      if((cb && !cb.noRelease) || !cb) {
         self.s.pool.connectionAvailable(connection);
       }
 
