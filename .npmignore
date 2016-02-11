@@ -28,6 +28,7 @@ performance/
 public/
 .coverage_data/
 docs/public
+.nyc_output/
 
 external-libs/bson/build/
 external-libs/bson/build/.wafpickle-7

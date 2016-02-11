@@ -868,25 +868,30 @@ exports['should correctly apply read preference for direct secondary connection'
     var db = new Db('integration_test_', replSet, {w:'majority', wtimeout: 10000});
     db.on("fullsetup", function() {
 
-      db.collection('direct_secondary_read_test').insertMany([{a:1}, {a:1}, {a:1}, {a:1}], function(err, r) {
+      db.collection('direct_secondary_read_test').insertMany([{a:1}, {a:1}, {a:1}, {a:1}], configuration.writeConcernMax(), function(err, r) {
         test.equal(null, err);
         db.close();
 
-        var url = format("mongodb://localhost:%s/integration_test_?readPreference=nearest"
-          , configuration.port + 1);
-        // Connect using the MongoClient
-        MongoClient.connect(url, function(err, db){
-          test.equal(null, err);
-          test.ok(db.serverConfig instanceof Server);
-
-          db.collection('direct_secondary_read_test').count(function(err, n) {
+        setTimeout(function() {
+          var url = format("mongodb://localhost:%s/integration_test_?readPreference=nearest"
+            , configuration.port + 1);
+          // Connect using the MongoClient
+          MongoClient.connect(url, function(err, db){
             test.equal(null, err);
-            test.ok(n > 0);
+            test.ok(db.serverConfig instanceof Server);
 
-            db.close();
-            test.done();
-          });
-        });
+            db.collection('direct_secondary_read_test').count(function(err, n) {
+              // console.log("----------------------------------------------------------")
+              // console.dir(err)
+              // console.dir(n)
+              test.equal(null, err);
+              test.ok(n > 0);
+
+              db.close();
+              test.done();
+            });
+          });          
+        }, 1000);
       });
     });
 

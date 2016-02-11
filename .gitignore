@@ -22,6 +22,7 @@ test_boot/
 t.js
 .DS_Store
 test/benchmarks/performance-data
+.nyc_output/
 
 # Directory for dbs
 db
