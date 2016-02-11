@@ -7,7 +7,7 @@ exports['Should correctly reconnect to server with automatic reconnect enabled']
   metadata: {
     requires: {
       topology: "single"
-    }, 
+    },
     ignore: { travis:true }
   },
 
@@ -45,7 +45,7 @@ exports['Should correctly reconnect to server with automatic reconnect enabled']
           // Attempt a proper command
           _server.command("system.$cmd", {ismaster: true}, {readPreference: new ReadPreference('primary')}, function(err, result) {
             test.ok(err != null);
-          });          
+          });
         }, 100);
       });
     });
@@ -71,7 +71,7 @@ exports['Should correctly reconnect to server with automatic reconnect disabled'
   metadata: {
     requires: {
       topology: "single"
-    }, 
+    },
     ignore: { travis:true }
   },
 
@@ -127,5 +127,41 @@ exports['Should correctly reconnect to server with automatic reconnect disabled'
 
     // Start connection
     server.connect();
+  }
+}
+
+exports['Should reconnect when initial connection failed'] = {
+  metadata: {
+    requires: {
+      topology: 'single'
+    },
+    ignore: { travis:true }
+  },
+
+  test: function(configuration, test) {
+    var Server = configuration.require.Server
+      , ReadPreference = configuration.require.ReadPreference
+      , manager = configuration.manager;
+
+    manager.stop('SIGINT').then(function() {
+      // Attempt to connect while server is down
+      var server = new Server({
+          host: configuration.host
+        , port: configuration.port
+        , reconnect: true
+        , size: 1
+        , emitError: true
+      });
+
+      server.on('connect', function() {
+        test.done();
+      });
+
+      server.once('error', function() {
+        manager.start().then(function() {});
+      });
+
+      server.connect();
+    })
   }
 }
