@@ -235,6 +235,10 @@ var reconnectServer = function(self, state) {
         count = count - 1;
         // We are done, emit reconnect event
         if(count == 0) {
+          if(!state.ismaster) {
+            return connectHandler(self, state)();
+          }
+
           return self.emit('reconnect', self);
         }
       });
