@@ -493,6 +493,11 @@ Response.prototype.parse = function(options) {
     // Set up the options
     var _options = {promoteLongs: this.opts.promoteLongs, fieldsAsRaw: fieldsAsRaw};
 
+    // Do we have a promoteLongs value on the options
+    if(typeof options.promoteLongs == 'boolean') {
+      _options.promoteLongs = options.promoteLongs;
+    }
+
     // Deserialize but keep the array of documents in non-parsed form
     var doc = this.bson.deserialize(document, _options);
 
@@ -519,6 +524,11 @@ Response.prototype.parse = function(options) {
     var bsonSize = this.data[this.index] | this.data[this.index + 1] << 8 | this.data[this.index + 2] << 16 | this.data[this.index + 3] << 24;
     // Parse options
     var _options = {promoteLongs: this.opts.promoteLongs};
+
+    // Do we have a promoteLongs value on the options
+    if(typeof options.promoteLongs == 'boolean') {
+      _options.promoteLongs = options.promoteLongs;
+    }
 
     // If we have raw results specified slice the return document
     if(raw) {

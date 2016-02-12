@@ -89,25 +89,14 @@ var Pool = function(options) {
 inherits(Pool, EventEmitter);
 
 var removeConnection = function(self, connection) {
-  // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! number Of connection :: " + self.getAll().length)
   var remove = function(connections) {
     for(var i = 0; i < connections.length; i++) {
       if(connections[i] === connection) {
-        // console.log("!!!!!!!!!!!!! removing the connection")
         connections.splice(i, 1);
         return true;
       }
     }
   }
-
-  // self.availableConnections.forEach(function(x) {
-  //   console.log(x === connection)
-  // })
-  //
-  // console.log("availableConnections :: " + self.availableConnections.length);
-  // console.log("inUseConnections :: " + self.inUseConnections.length);
-  // console.log("newConnections :: " + self.newConnections.length);
-  // console.log("connectingConnections :: " + self.connectingConnections.length);
 
   // Set the monitoring connection to undefined
   if(self.monitorConnection === connection) {
@@ -123,7 +112,6 @@ var removeConnection = function(self, connection) {
 
 var errorHandler = function(self) {
   return function(err, connection) {
-    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! error POOL")
     if(self.logger.isDebug()) self.logger.debug(f('pool [%s] errored out [%s] with connection [%s]', this.dead, JSON.stringify(err), JSON.stringify(connection)));
     // Remove the connection
     removeConnection(self, connection);
@@ -136,20 +124,6 @@ var errorHandler = function(self) {
 
 var timeoutHandler = function(self) {
   return function(err, connection) {
-    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! timeout POOL :: " + self.port)
-    // console.log("----------------------- pool.write _execute 0 :: availableConnections = " + self.availableConnections.length)
-    // console.log("----------------------- pool.write _execute 0 :: inUseConnections = " + self.inUseConnections.length)
-    // console.log("----------------------- pool.write _execute 0 :: newConnections = " + self.newConnections.length)
-    // console.log("----------------------- pool.write _execute 0 :: queue = " + self.queue.length)
-
-    // // Get all connections
-    // self.availableConnections.forEach(function(x) {
-    //   if(x === self.monitorConnection) {
-    //     // console.log("!!!!!!!!!!!!!!!!!!!!!!!!! MONITORING CONNECTION")
-    //   }
-    // })
-
-
     if(self.logger.isDebug()) self.logger.debug(f('pool [%s] timed out [%s] with connection [%s]', this.dead, JSON.stringify(err), JSON.stringify(connection)));
     // Remove the connection
     removeConnection(self, connection);
@@ -160,11 +134,6 @@ var timeoutHandler = function(self) {
 
 var closeHandler = function(self) {
   return function(err, connection) {
-    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! close POOL")
-    // if(connection === self.monitorConnection){
-    //   console.log(" monitorConnection closed")
-    // }
-
     if(self.logger.isDebug()) self.logger.debug(f('pool [%s] closed [%s] with connection [%s]', this.dead, JSON.stringify(err), JSON.stringify(connection)));
     // Remove the connection
     removeConnection(self, connection);
@@ -175,7 +144,6 @@ var closeHandler = function(self) {
 
 var parseErrorHandler = function(self) {
   return function(err, connection) {
-    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! parseError POOL")
     if(self.logger.isDebug()) self.logger.debug(f('pool [%s] errored out [%s] with connection [%s]', this.dead, JSON.stringify(err), JSON.stringify(connection)));
     // Remove the connection
     removeConnection(self, connection);
@@ -230,7 +198,6 @@ try {
  * @method
  */
 Pool.prototype.connect = function(_options) {
-  // console.log("---------------------- CONNECT")
   var self = this;
   // Set to connecting
   this.state = CONNECTING
@@ -298,20 +265,15 @@ var _createConnection = function(self) {
 
   // Handle successful connection
   var tempConnectHandler = function() {
-    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! tempConnectHandler 0")
     // Destroy all event emitters
     handlers.forEach(function(e) {
       connection.removeAllListeners(e);
     });
-    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! tempConnectHandler 1")
 
     // Add the final handlers
     connection.once('close', closeHandler(self));
-    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! tempConnectHandler 3")
     connection.once('error', errorHandler(self));
-    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! tempConnectHandler 4")
     connection.once('timeout', timeoutHandler(self));
-    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! tempConnectHandler 5")
     connection.once('parseError', parseErrorHandler(self));
 
     // Remove the connection from the connectingConnections
@@ -324,7 +286,6 @@ var _createConnection = function(self) {
 
     // Add to queue of new connection
     self.newConnections.push(connection);
-    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! tempConnectHandler 8")
     // Emit connection to server instance
     // alowing it to apply any needed authentication
     self.emit('connection', connection);
@@ -351,11 +312,6 @@ var _execute = function(self) {
     if(self.executing) return;
     // Set pool as executing
     self.executing = true;
-    // console.log("----------------------- _execute")
-    // console.log("----------------------- pool.write _execute 0 :: availableConnections = " + self.availableConnections.length)
-    // console.log("----------------------- pool.write _execute 0 :: inUseConnections = " + self.inUseConnections.length)
-    // console.log("----------------------- pool.write _execute 0 :: newConnections = " + self.newConnections.length)
-    // console.log("----------------------- pool.write _execute 0 :: queue = " + self.queue.length)
 
     // Total availble connections
     var totalConnections = self.availableConnections.length
@@ -403,8 +359,6 @@ var _execute = function(self) {
         if(connection !== self.monitorConnection) {
           self.inUseConnections.push(connection);
         }
-
-        // console.log("---------- write to connection " + connection.id)
 
         if(Array.isArray(buffer)) {
           for(var i = 0; i < buffer.length; i++) {
@@ -460,7 +414,6 @@ Pool.prototype.write = function(buffer, cb, options) {
  * @return {Connection}
  */
 Pool.prototype.connectionAvailable = function(connection) {
-  // console.log("@@@@@@ connectionAvailable :: " + connection.id)
   // Get the connection from the newConnections
   var index = this.newConnections.indexOf(connection);
   if(index != -1) {
