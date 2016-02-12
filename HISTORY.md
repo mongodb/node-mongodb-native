@@ -1,3 +1,9 @@
+1.3.3
+----------------
+- Added support for promoteLongs option for command function.
+- Return connection if no callback available
+- Emit connect event when server reconnects after initial connection failed (Issue #76, https://github.com/vkarpov15)
+
 1.3.2 2016-02-09
 ----------------
 - Harden MessageHandler in server.js to avoid issues where we cannot find a callback for an operation.
