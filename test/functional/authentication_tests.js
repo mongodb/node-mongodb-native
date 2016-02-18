@@ -323,8 +323,16 @@ exports['Should correctly authenticate against normal db with large connection p
 
     // restart server
     configuration.manager.restart(true).then(function() {
-      var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:500}), {w:1});
+      var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {
+        auto_reconnect: true,
+        poolSize:500,
+        socketOptions: {
+          connectTimeoutMS: 20000,
+          socketTimeoutMS: 20000
+        }
+      }), {w:1});
       db1.open(function(err, db) {
+        console.dir(err)
         test.equal(null, err);
 
         // An admin user must be defined for db level authentication to work correctly
