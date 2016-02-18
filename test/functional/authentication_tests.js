@@ -312,6 +312,72 @@ exports['Should correctly authenticate against normal db'] = {
   }
 }
 
+exports['Should correctly authenticate against normal db with large connection pool'] = {
+  metadata: { requires: { topology: ['auth'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
+      , Server = configuration.require.Server;
+
+    // restart server
+    configuration.manager.restart(true).then(function() {
+      var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {auto_reconnect: true, poolSize:500}), {w:1});
+      db1.open(function(err, db) {
+        test.equal(null, err);
+
+        // An admin user must be defined for db level authentication to work correctly
+        db.admin().addUser('admin', 'admin', function(err, result) {
+
+          // Authenticate against admin
+          db.admin().authenticate('admin', 'admin', function(err, result) {
+
+            db.addUser('user', 'user', function(err, result) {
+              test.equal(null, err);
+
+              // Logout admin
+              db.admin().logout(function(err, result) {
+
+                // Attempt to save a document
+                db.collection('test').insert({a:1}, function(err, result) {
+                  test.ok(err != null);
+
+                  // Login the user
+                  db.authenticate("user", "user", function(err, result) {
+                    test.equal(null, err);
+                    test.ok(result);
+
+                    db.collection('test').insert({a:1}, function(err, result) {
+                      test.equal(null, err);
+
+                      // Logout the user
+                      db.logout(function(err, result) {
+                        test.equal(null, err);
+
+                        // Attempt to save a document
+                        db.collection('test').insert({a:1}, function(err, result) {
+                          test.ok(err != null);
+                          db1.close();
+
+                          // restart server
+                          configuration.manager.restart(true).then(function() {
+                            test.done();
+                          });
+                        });
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  }
+}
+
 exports['Should correctly reapply the authentications'] = {
   metadata: { requires: { topology: ['auth'] } },
 
