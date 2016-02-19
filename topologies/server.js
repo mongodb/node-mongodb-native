@@ -266,7 +266,7 @@ var messageHandler = function(self, state) {
       var cb = state.callbacks.callback(response.responseTo);
 
       // Parse options
-      var parseOptions {
+      var parseOptions = {
         raw: state.callbacks.raw(response.responseTo),
         promoteLongs: cb && typeof cb.promoteLongs == 'boolean' ? cb.promoteLongs : true,
         documentsReturnedIn: state.callbacks.documentsReturnedIn(response.responseTo)
