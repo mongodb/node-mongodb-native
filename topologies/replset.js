@@ -950,8 +950,6 @@ var haveAvailableServers = function(state) {
 var replicasetInquirer = function(self, state, norepeat) {
   return function() {
     if(state.replState.state == DESTROYED) return
-    console.log("------------------------- replicasetInquirer :: " + state.replState.state)
-    console.log("!haveAvailableServers(state) = " + !haveAvailableServers(state))
     // We have no connections we need to reseed the disconnected list
     if(!haveAvailableServers(state)) {
       // For all entries in the seedlist build a server instance
