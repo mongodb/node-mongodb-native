@@ -106,6 +106,11 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
     , transforms: options.transforms
   }
 
+  // Add promoteLong to cursor state
+  if(typeof topologyOptions.promoteLongs == 'boolean') {
+    this.cursorState.promoteLongs = topologyOptions.promoteLongs;
+  }
+
   // Callback controller
   this.callbacks = null;
 
@@ -240,6 +245,11 @@ Cursor.prototype._find = function(callback) {
   // Do we have documentsReturnedIn set on the query
   if(typeof self.query.documentsReturnedIn == 'string') {
     queryCallback.documentsReturnedIn = self.query.documentsReturnedIn;
+  }
+
+  // Add promote Long value if defined
+  if(typeof self.cursorState.promoteLongs == 'boolean') {
+    queryCallback.promoteLongs = self.cursorState.promoteLongs;
   }
 
   // Set up callback
@@ -540,6 +550,11 @@ var nextFunction = function(self, callback) {
       return nextFunction(self, callback);
     }
 
+    // Add promote Long value if defined
+    if(typeof self.cursorState.promoteLongs == 'boolean') {
+      processExhaustMessages.promoteLongs = self.cursorState.promoteLongs;
+    }
+
     // Set up next listener
     self.callbacks.register(result.requestId, processExhaustMessages)
 
@@ -553,6 +568,11 @@ var nextFunction = function(self, callback) {
 
   // If we have exhaust
   if(self.cmd.exhaust && self.cursorState.cursorId == null) {
+    // Add promote Long value if defined
+    if(typeof self.cursorState.promoteLongs == 'boolean') {
+      processExhaustMessages.promoteLongs = self.cursorState.promoteLongs;
+    }
+
     // Handle all the exhaust responses
     self.callbacks.register(self.query.requestId, processExhaustMessages);
     // Write the initial command out

@@ -265,12 +265,15 @@ var messageHandler = function(self, state) {
       // Get the callback
       var cb = state.callbacks.callback(response.responseTo);
 
-      // Parse the message
-      response.parse({
+      // Parse options
+      var parseOptions {
         raw: state.callbacks.raw(response.responseTo),
-        promoteLongs: typeof cb.promoteLongs == 'boolean' ? cb.promoteLongs : true,
+        promoteLongs: cb && typeof cb.promoteLongs == 'boolean' ? cb.promoteLongs : true,
         documentsReturnedIn: state.callbacks.documentsReturnedIn(response.responseTo)
-      });
+      };
+
+      // Parse the message
+      response.parse(parseOptions);
 
       // If no
       if((cb && !cb.noRelease) || !cb) {
