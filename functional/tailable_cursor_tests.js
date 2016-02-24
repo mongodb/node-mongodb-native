@@ -34,6 +34,7 @@ exports['Should correctly perform awaitdata'] = {
 
             // Execute next
             cursor.next(function(err, d) {
+              // console.log("==================================== Should correctly perform awaitdata 0")
               test.equal(null, err);
               var s = new Date();
 
@@ -49,6 +50,10 @@ exports['Should correctly perform awaitdata'] = {
                 // Finish the test
                 test.done();
               });
+
+              setTimeout(function() {
+                cursor.kill();
+              }, 300)
             });
           });
         });
