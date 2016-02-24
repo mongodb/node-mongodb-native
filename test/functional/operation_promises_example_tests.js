@@ -6381,24 +6381,28 @@ exports['Should correctly add capped collection options to cursor With Promises'
     // REMOVE-LINE test.done();
     // BEGIN
       // Create a capped collection with a maximum of 1000 documents
-      db.createCollection("a_simple_collection_2_with_promise", {capped:true, size:10000, max:1000, w:1}).then(function(collection) {
+      db.createCollection("a_simple_collection_2_with_promise", {capped:true, size:100000, max:10000, w:1}).then(function(collection) {
         var docs = [];
         for(var i = 0; i < 1000; i++) docs.push({a:i});
 
         // Insert a document in the capped collection
         collection.insertMany(docs, configuration.writeConcernMax()).then(function(result) {
-
           // Start date
           var s = new Date();
+          var total = 0;
 
           // Get the cursor
-          var cursor = collection.find({})
+          var cursor = collection.find({a: {$gte:0}})
             .addCursorFlag('tailable', true)
             .addCursorFlag('awaitData', true)
-            .setCursorOption('numberOfRetries', 5)
-            .setCursorOption('tailableRetryInterval', 100);
 
-          cursor.on('data', function() {});
+          cursor.on('data', function(d) {
+            total = total + 1;
+
+            if(total == 1000) {
+              cursor.kill();
+            }
+          });
 
           cursor.on('end', function() {
             test.ok((new Date().getTime() - s.getTime()) > 1000);

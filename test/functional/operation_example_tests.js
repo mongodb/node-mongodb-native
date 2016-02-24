@@ -8510,7 +8510,7 @@ exports['Should correctly add capped collection options to cursor'] = {
       test.equal(null, err);
 
       // Create a capped collection with a maximum of 1000 documents
-      db.createCollection("a_simple_collection_2", {capped:true, size:10000, max:1000, w:1}, function(err, collection) {
+      db.createCollection("a_simple_collection_2", {capped:true, size:100000, max:10000, w:1}, function(err, collection) {
         test.equal(null, err);
 
         var docs = [];
@@ -8521,15 +8521,20 @@ exports['Should correctly add capped collection options to cursor'] = {
 
           // Start date
           var s = new Date();
+          var total = 0;
 
           // Get the cursor
           var cursor = collection.find({})
             .addCursorFlag('tailable', true)
             .addCursorFlag('awaitData', true)
-            .setCursorOption('numberOfRetries', 5)
-            .setCursorOption('tailableRetryInterval', 100);
 
-          cursor.on('data', function() {});
+          cursor.on('data', function() {
+            total = total + 1;
+
+            if(total == 1000) {
+              cursor.kill();
+            }
+          });
 
           cursor.on('end', function() {
             test.ok((new Date().getTime() - s.getTime()) > 1000);

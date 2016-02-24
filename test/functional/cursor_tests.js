@@ -1952,11 +1952,16 @@ exports.shouldAwaitData = {
       db.createCollection('should_await_data', options, function(err, collection) {
         collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
           var s = new Date();
+
           // Create cursor with awaitdata, and timeout after the period specified
-          collection.find({}, {tailable:true, awaitdata:true, numberOfRetries:1}).each(function(err, result) {
+          var cursor = collection.find({}, {tailable:true, awaitdata:true});
+          // Execute each
+          cursor.each(function(err, result) {
+            if(result) {
+              cursor.kill();
+            }
+
             if(err != null) {
-              var e = new Date();
-              test.ok((e.getTime() - s.getTime()) >= 500);
               db.close();
               test.done();
             }
@@ -1984,7 +1989,7 @@ exports.shouldAwaitDataWithDocumentsAvailable = {
       var options = { capped: true, size: 8};
       db.createCollection('should_await_data_no_docs', options, function(err, collection) {
         // Create cursor with awaitdata, and timeout after the period specified
-        var cursor = collection.find({}, {tailable:true, awaitdata:true, numberOfRetries:1});
+        var cursor = collection.find({}, {tailable:true, awaitdata:true});
         var rewind = cursor.rewind;
         var called = false;
         cursor.rewind = function() {
@@ -2023,16 +2028,16 @@ exports.shouldAwaitDataUsingCursorFlag = {
         collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
           var s = new Date();
           // Create cursor with awaitdata, and timeout after the period specified
-          var cursor = collection.find({}, {numberOfRetries:1});
+          var cursor = collection.find({}, {});
           cursor.addCursorFlag('tailable', true)
           cursor.addCursorFlag('awaitData', true)
           cursor.each(function(err, result) {
-              if(err != null) {
-                var e = new Date();
-                test.ok((e.getTime() - s.getTime()) > 1000);
-                db.close();
-                test.done();
-              }
+            if(err != null) {
+              db.close();
+              test.done();
+            } else {
+              cursor.kill();
+            }
           });
         });
       });
@@ -2089,12 +2094,13 @@ exports['Should correctly retry tailable cursor connection'] = {
         collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
           var s = new Date();
           // Create cursor with awaitdata, and timeout after the period specified
-          collection.find({}, {tailable:true, awaitdata:true, numberOfRetries:3, tailableRetryInterval:1000}).each(function(err, result) {
+          var cursor = collection.find({}, {tailable:true, awaitdata:true});
+          cursor.each(function(err, result) {
             if(err != null) {
-              var e = new Date();
-              test.ok((e.getTime() - s.getTime()) >= 3000);
               db.close();
               test.done();
+            } else {
+              cursor.kill();
             }
           });
         });
@@ -3037,17 +3043,21 @@ exports['should tail cursor using maxAwaitTimeMS for 3.2 or higher'] = {
         collection.insert({a:1}, configuration.writeConcernMax(), function(err, result) {
           var s = new Date();
           // Create cursor with awaitdata, and timeout after the period specified
-          collection.find({})
+          var cursor = collection.find({})
             .addCursorFlag('tailable', true)
             .addCursorFlag('awaitData', true)
-            .setCursorOption('numberOfRetries', 0)
-            .maxAwaitTimeMS(500)
-            .each(function(err, result) {
-              if(result == null) {
-                test.ok((new Date().getTime() - s.getTime()) >= 500);
-                db.close();
-                test.done();
-              }
+            .maxAwaitTimeMS(500);
+
+          cursor.each(function(err, result) {
+            if(result) {
+              setTimeout(function() {
+                cursor.kill();
+              }, 300)
+            } else {
+              test.ok((new Date().getTime() - s.getTime()) >= 500);
+              db.close();
+              test.done();
+            }
           });
         });
       });
