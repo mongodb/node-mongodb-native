@@ -570,23 +570,24 @@ exports['Should correctly fall back to a secondary server if the readPreference 
 
     // mock ops store from node-mongodb-native for handling repl set disconnects
     mockDisconnectHandler = {
-        add: function(opType, ns, ops, options, callback) {
-            // Command issued to replSet will fail immediately if !server.isConnected()
-            return callback(MongoError.create({message: "no connection available", driver:true}));
-        },
-        execute: function() {
-            // method needs to be called, so provide a dummy version
-            return;
-        }
+      add: function(opType, ns, ops, options, callback) {
+        // Command issued to replSet will fail immediately if !server.isConnected()
+        return callback(MongoError.create({message: "no connection available", driver:true}));
+      },
+      execute: function() {
+        // method needs to be called, so provide a dummy version
+        return;
+      }
     };
 
     // Attempt to connect
     var server = new ReplSet([
-      { host: 'localhost', port: 32000 },
+      { host: 'localhost', port: 32000, monitoringSocketTimeout: 5000 },
       { host: 'localhost', port: 32001 }], {
         setName: 'rs',
         connectionTimeout: 3000,
         socketTimeout: 0,
+        monitoringSocketTimeout: 5000,
         haInterval: 2000,
         disconnectHandler: mockDisconnectHandler,
         size: 1
@@ -596,6 +597,7 @@ exports['Should correctly fall back to a secondary server if the readPreference 
     server.on('fullsetup', function(_server) {
       function schedule() {
         setTimeout(function() {
+          // console.log("----------------------------------------------- 0")
           // Perform a find
           _server.command('test.test', {
               count: 'test.test'
@@ -603,12 +605,15 @@ exports['Should correctly fall back to a secondary server if the readPreference 
           }, {
             readPreference: new ReadPreference('primaryPreferred')
           }, function(err, r) {
+            // console.log("----------------------------------------------- 1")
+            // console.dir(err)
             test.equal(err, null);
             test.equal(32000, r.connection.port);
 
             primaryServer.destroy();
 
-            _server.on('left', function() {
+            _server.on('left', function(t, s) {
+              // console.log("----------------------------------------------- 2 :: " + t + " :: " + s.name)
                 // Perform another find, after primary is gone
                 _server.command('test.test', {
                     count: 'test.test'
@@ -616,6 +621,8 @@ exports['Should correctly fall back to a secondary server if the readPreference 
                 }, {
                   readPreference: new ReadPreference('primaryPreferred')
                 }, function(err, r) {
+                  // console.log("----------------------------------------------- 3")
+                  // console.dir(err)
                   test.equal(err, null);
                   test.equal(32001, r.connection.port); // reads from secondary while primary down
 
