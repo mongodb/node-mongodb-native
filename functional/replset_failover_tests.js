@@ -251,6 +251,10 @@ exports['Should correctly fire single no-repeat ha state update due to not maste
       , ReadPreference = configuration.require.ReadPreference
       , manager = configuration.manager;
 
+    // Set up the parameter
+    var steppedDownPrimary = false;
+    var detectedNewPrimary = false;
+
     // Get the primary server
     manager.primary().then(function(m) {
       // Attempt to connect
@@ -264,9 +268,11 @@ exports['Should correctly fire single no-repeat ha state update due to not maste
       // Add event listeners
       server.on('fullsetup', function(_server) {
         _server.on('ha', function(e, options) {
+          // console.log("-- ha :: ")
+          // console.dir(options)
 
           // Manual status request issues correctly
-          if(options.norepeat) {
+          if(detectedNewPrimary) {
             process.nextTick(function() {
               // Destroy the connection
               _server.destroy();
@@ -279,8 +285,8 @@ exports['Should correctly fire single no-repeat ha state update due to not maste
 
         // Wait for close event due to primary stepdown
         _server.on('joined', function(t, s) {
-
-          if(t == 'secondary') {
+          // console.log("-- joined :: " + t + " :: " + s.name)
+          if(t == 'secondary' && steppedDownPrimary) {
             // Execute write command
             _server.command(f("%s.$cmd", configuration.db)
               , {
@@ -292,11 +298,16 @@ exports['Should correctly fire single no-repeat ha state update due to not maste
               , {readPreference: new ReadPreference('secondary')}, function(err, result) {
                 test.equal('not master', result.result.errmsg);
             });
+          } else if(t == 'primary' && steppedDownPrimary) {
+            detectedNewPrimary = true;
           }
         });
 
+        // console.log("+++++++++++++++++++++++++++++++++++++++++++++++++ 0")
+        steppedDownPrimary = true;
         // Wait for a second and then step down primary
         manager.stepDownPrimary(false, {stepDownSecs: 1, force:true}).then(function() {
+          // console.log("+++++++++++++++++++++++++++++++++++++++++++++++++ 1")
         });
       });
 
