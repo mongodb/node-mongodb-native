@@ -25,6 +25,7 @@ var _id = 0;
  * @param {boolean} [options.noDelay=true] TCP Connection no delay
  * @param {number} [options.connectionTimeout=0] TCP Connection timeout setting
  * @param {number} [options.socketTimeout=0] TCP Socket timeout setting
+ * @param {number} [options.monitoringSocketTimeout=30000] TCP Socket timeout setting for replicaset monitoring socket
  * @param {boolean} [options.singleBufferSerializtion=true] Serialize into single buffer, trade of peak memory for serialization speed
  * @param {boolean} [options.ssl=false] Use SSL for connection
  * @param {boolean|function} [options.checkServerIdentity=true] Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.
@@ -230,7 +231,12 @@ Pool.prototype.connect = function(_options) {
           if(self.availableConnections.length == numberOfConnections) {
             // Reserve a monitoring socket
             if(self.monitoring) {
+              // Set the monitoring connection
               self.monitorConnection = self.availableConnections.pop();
+              // If we have specified a different monitoring socketTimeoutMS
+              self.monitorConnection.socketTimeoutMS = typeof self.options.monitoringSocketTimeout == 'number'
+                ? self.options.monitoringSocketTimeout
+                : 10000;
             }
 
             // Done connecting
@@ -389,9 +395,14 @@ Pool.prototype.write = function(buffer, cb, options) {
   // the dedicated connection
   if(options && options.monitoring && !this.monitorConnection) {
     this.monitorConnection = this.availableConnections.pop();
+    // If we have specified a different monitoring socketTimeoutMS
+    this.monitorConnection.socketTimeoutMS = typeof this.options.monitoringSocketTimeout == 'number'
+      ? this.options.monitoringSocketTimeout
+      : 10000;
   }
 
   if(options && options.monitoring && this.monitorConnection) {
+    if(typeof cb == 'function') cb.connection = this.monitorConnection;
     return this.monitorConnection.write(buffer);
   }
 

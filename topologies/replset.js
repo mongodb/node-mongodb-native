@@ -80,6 +80,7 @@ var bsonInstance = null;
  * @param {boolean} [options.noDelay=true] TCP Connection no delay
  * @param {number} [options.connectionTimeout=10000] TCP Connection timeout setting
  * @param {number} [options.socketTimeout=0] TCP Socket timeout setting
+ * @param {number} [options.monitoringSocketTimeout=30000] TCP Socket timeout setting for replicaset monitoring socket
  * @param {boolean} [options.singleBufferSerializtion=true] Serialize into single buffer, trade of peak memory for serialization speed
  * @param {boolean} [options.ssl=false] Use SSL for connection
  * @param {boolean|function} [options.checkServerIdentity=true] Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.
@@ -412,7 +413,6 @@ var executeWriteOperation = function(self, op, ns, ops, options, callback) {
 ReplSet.prototype.command = function(ns, cmd, options, callback) {
   if(typeof options == 'function') callback = options, options = {};
   if(this.s.replState.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
-
   var server = null;
   var self = this;
   // Ensure we have no options
@@ -704,23 +704,29 @@ ReplSet.prototype.isConnected = function(options) {
   // If we specified a read preference check if we are connected to something
   // than can satisfy this
   if(options.readPreference
-    && options.readPreference.equals(ReadPreference.secondary))
+    && options.readPreference.equals(ReadPreference.secondary)) {
     return this.s.replState.isSecondaryConnected();
+  }
 
   if(options.readPreference
-    && options.readPreference.equals(ReadPreference.primary))
+    && options.readPreference.equals(ReadPreference.primary)) {
     return this.s.replState.isSecondaryConnected() || this.s.replState.isPrimaryConnected();
+  }
 
   if(options.readPreference
-    && options.readPreference.equals(ReadPreference.primaryPreferred))
+    && options.readPreference.equals(ReadPreference.primaryPreferred)) {
     return this.s.replState.isSecondaryConnected() || this.s.replState.isPrimaryConnected();
+  }
 
   if(options.readPreference
-    && options.readPreference.equals(ReadPreference.secondaryPreferred))
+    && options.readPreference.equals(ReadPreference.secondaryPreferred)) {
     return this.s.replState.isSecondaryConnected() || this.s.replState.isPrimaryConnected();
+  }
 
   if(this.s.secondaryOnlyConnectionAllowed
-    && this.s.replState.isSecondaryConnected()) return true;
+    && this.s.replState.isSecondaryConnected()) {
+      return true;
+  }
 
   return this.s.replState.isPrimaryConnected();
 }
@@ -1046,14 +1052,14 @@ var replicasetInquirer = function(self, state, norepeat) {
     // ismaster for Master server
     var primaryIsMaster = null;
 
-    // Kill the server connection if it hangs
-    var timeoutServer = function(_server) {
-      return setTimeout(function() {
-        if(_server.isConnected()) {
-          _server.connections()[0].connection.destroy();
-        }
-      }, self.s.options.connectionTimeout);
-    }
+    // // Kill the server connection if it hangs
+    // var timeoutServer = function(_server) {
+    //   return setTimeout(function() {
+    //     if(_server.isConnected()) {
+    //       _server.connections()[0].connection.destroy();
+    //     }
+    //   }, self.s.options.connectionTimeout);
+    // }
 
     //
     // Inspect a specific servers ismaster
@@ -1061,12 +1067,14 @@ var replicasetInquirer = function(self, state, norepeat) {
       if(state.replState.state == DESTROYED) return;
       // Did we get a server
       if(server && server.isConnected()) {
-        // Get the timeout id
-        var timeoutId = timeoutServer(server);
+        // // Get the timeout id
+        // var timeoutId = timeoutServer(server);
+        // console.log("------------------------- replicasetInquirer ismaster 0 :: " + server.name)
         // Execute ismaster
         server.command('admin.$cmd', { ismaster:true },  { monitoring:true }, function(err, r) {
+          // console.log("------------------------- replicasetInquirer ismaster 1 :: " + server.name)
           // Clear out the timeoutServer
-          clearTimeout(timeoutId);
+          // clearTimeout(timeoutId);
 
           // If the state was destroyed
           if(state.replState.state == DESTROYED) return;
@@ -1457,6 +1465,7 @@ var errorHandler = function(self, state) {
 
 var timeoutHandler = function(self, state) {
   return function(err, server) {
+    // console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$ server timeout")
     if(state.replState.state == DESTROYED) return;
     if(state.logger.isInfo()) state.logger.info(f('[%s] server %s timed out', state.id, server.lastIsMaster() ? server.lastIsMaster().me : server.name));
     var found = addToListIfNotExist(state.disconnectedServers, server);
