@@ -1052,30 +1052,14 @@ var replicasetInquirer = function(self, state, norepeat) {
     // ismaster for Master server
     var primaryIsMaster = null;
 
-    // // Kill the server connection if it hangs
-    // var timeoutServer = function(_server) {
-    //   return setTimeout(function() {
-    //     if(_server.isConnected()) {
-    //       _server.connections()[0].connection.destroy();
-    //     }
-    //   }, self.s.options.connectionTimeout);
-    // }
-
     //
     // Inspect a specific servers ismaster
     var inspectServer = function(server) {
       if(state.replState.state == DESTROYED) return;
       // Did we get a server
       if(server && server.isConnected()) {
-        // // Get the timeout id
-        // var timeoutId = timeoutServer(server);
-        // console.log("------------------------- replicasetInquirer ismaster 0 :: " + server.name)
         // Execute ismaster
         server.command('admin.$cmd', { ismaster:true },  { monitoring:true }, function(err, r) {
-          // console.log("------------------------- replicasetInquirer ismaster 1 :: " + server.name)
-          // Clear out the timeoutServer
-          // clearTimeout(timeoutId);
-
           // If the state was destroyed
           if(state.replState.state == DESTROYED) return;
 
@@ -1465,7 +1449,6 @@ var errorHandler = function(self, state) {
 
 var timeoutHandler = function(self, state) {
   return function(err, server) {
-    // console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$ server timeout")
     if(state.replState.state == DESTROYED) return;
     if(state.logger.isInfo()) state.logger.info(f('[%s] server %s timed out', state.id, server.lastIsMaster() ? server.lastIsMaster().me : server.name));
     var found = addToListIfNotExist(state.disconnectedServers, server);

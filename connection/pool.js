@@ -188,12 +188,6 @@ try {
   execute = process.nextTick;
 }
 
-// execute = function(x) {
-//   setTimeout(x, 1)
-// }
-
-// execute = setTimeout;
-
 /**
  * Connect pool
  * @method
@@ -234,9 +228,14 @@ Pool.prototype.connect = function(_options) {
               // Set the monitoring connection
               self.monitorConnection = self.availableConnections.pop();
               // If we have specified a different monitoring socketTimeoutMS
-              self.monitorConnection.socketTimeoutMS = typeof self.options.monitoringSocketTimeout == 'number'
-                ? self.options.monitoringSocketTimeout
-                : 10000;
+              if(typeof self.options.monitoringSocketTimeout == 'number') {
+                self.monitorConnection.socketTimeoutMS = self.options.monitoringSocketTimeout;
+              } else if(typeof self.options.connectionTimeout == 'number'
+                && self.options.connectionTimeout > 0) {
+                self.monitorConnection.socketTimeoutMS = self.options.connectionTimeout;
+              } else {
+                self.monitorConnection.socketTimeoutMS = 30000;
+              }
             }
 
             // Done connecting
@@ -396,9 +395,14 @@ Pool.prototype.write = function(buffer, cb, options) {
   if(options && options.monitoring && !this.monitorConnection) {
     this.monitorConnection = this.availableConnections.pop();
     // If we have specified a different monitoring socketTimeoutMS
-    this.monitorConnection.socketTimeoutMS = typeof this.options.monitoringSocketTimeout == 'number'
-      ? this.options.monitoringSocketTimeout
-      : 10000;
+    if(typeof this.options.monitoringSocketTimeout == 'number') {
+      this.monitorConnection.socketTimeoutMS = this.options.monitoringSocketTimeout;
+    } else if(typeof this.options.connectionTimeout == 'number'
+      && this.options.connectionTimeout > 0) {
+      this.monitorConnection.socketTimeoutMS = this.options.connectionTimeout;
+    } else {
+      this.monitorConnection.socketTimeoutMS = 30000;
+    }
   }
 
   if(options && options.monitoring && this.monitorConnection) {
