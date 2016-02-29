@@ -3,6 +3,10 @@
 - Added support for promoteLongs option for command function.
 - Return connection if no callback available
 - Emit connect event when server reconnects after initial connection failed (Issue #76, https://github.com/vkarpov15)
+- Introduced optional monitoringSocketTimeout option to allow better control of SDAM monitoring timeouts.
+- Made monitoringSocketTimeout default to 30000 if no connectionTimeout value specified or if set to 0.
+- Fixed issue where tailable cursor would not retry even though cursor was still alive.
+- Disabled exhaust flag support to avoid issues where users could easily write code that would cause memory to run out.
 
 1.3.2 2016-02-09
 ----------------
