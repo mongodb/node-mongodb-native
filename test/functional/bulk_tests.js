@@ -774,9 +774,6 @@ exports['Should Correctly Execute Unordered Batch of with upserts causing duplic
 
         // Execute the operations
         batch.execute(configuration.writeConcernMax(), function(err, result) {
-          // console.dir("====================================================")
-          // console.dir(err)
-          // console.log(JSON.stringify(result, null, 2))
           // Test basic settings
           test.equal(2, result.nInserted);
           test.equal(2, result.nUpserted);
@@ -943,35 +940,6 @@ exports['Should correctly execute unordered batch using w:0'] = {
  * Ordered
  *
  *******************************************************************/
-// exports['Should fail with journal write concern due to --nojournal ordered'] = {
-//   metadata: { requires: { topology: 'single', mongodb: '>2.5.4' }},
-//
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-//     db.open(function(err, db) {
-//       // Get the collection
-//       var col = db.collection('batch_write_concerns_ops_0');
-//       // Initialize the Ordered Batch
-//       var batch = col.initializeOrderedBulkOp();
-//       // Add some operations to be executed in order
-//       batch.insert({a:1});
-//       batch.insert({a:2});
-//
-//       // Execute the operations
-//       batch.execute({j: true}, function(err, result) {
-//         test.ok(err != null);
-//         test.ok(err.code != null);
-//         test.ok(err.errmsg != null);
-//
-//         // Finish up test
-//         db.close();
-//         test.done();
-//       });
-//     });
-//   }
-// }
-
 exports['Should fail with w:2 and wtimeout write concern due single mongod instance ordered'] = {
   metadata: { requires: { topology: 'single', mongodb: '>2.5.4' }},
 
@@ -1001,40 +969,49 @@ exports['Should fail with w:2 and wtimeout write concern due single mongod insta
   }
 }
 
+exports['Should correctly handle bulk operation split for ordered bulk operation'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: {
+    requires: {
+        mongodb: ">=2.6.0"
+      , topology: 'single'
+      , node: ">0.10.0"
+    }
+  },
+
+  // The actual test we wish to run
+  test: function(configure, test) {
+    var db = configure.newDbInstance({w:1}, {poolSize:1});
+
+    db.open(function(err, db) {
+      var docs = [];
+      for(var i = 0; i < 5; i++) {
+        docs.push({
+          s: new Array(6000000).join('x')
+        });
+      }
+
+      db.collection('bigdocs_ordered').insertMany(docs, function(err, r) {
+        test.equal(null, err);
+
+        db.collection('bigdocs_ordered').count(function(err, c) {
+          test.equal(null, err);
+          test.equal(5, c);
+
+          db.close();
+          test.done();
+        });
+      });
+    });
+  }
+}
+
 /*******************************************************************
  *
  * Unordered
  *
  *******************************************************************/
-// exports['Should fail with journal write concern due to --nojournal unordered'] = {
-//   metadata: { requires: { topology: 'single', mongodb: '>2.5.4' }},
-//
-//   // The actual test we wish to run
-//   test: function(configuration, test) {
-//     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-//     db.open(function(err, db) {
-//       // Get the collection
-//       var col = db.collection('batch_write_concerns_ops_0');
-//       // Initialize the Ordered Batch
-//       var batch = col.initializeUnorderedBulkOp();
-//       // Add some operations to be executed in order
-//       batch.insert({a:1});
-//       batch.insert({a:2});
-//
-//       // Execute the operations
-//       batch.execute({j: true}, function(err, result) {
-//         test.ok(err != null);
-//         test.ok(err.code != null);
-//         test.ok(err.errmsg != null);
-//
-//         // Finish up test
-//         db.close();
-//         test.done();
-//       });
-//     });
-//   }
-// }
-
 exports['Should fail with w:2 and wtimeout write concern due single mongod instance unordered'] = {
   metadata: { requires: { topology: 'single', mongodb: '>2.5.4' }},
 
@@ -1209,6 +1186,44 @@ exports['should correctly split ordered bulk batch'] = {
           operation.find({_id: documents[i]._id}).replaceOne({name: 'joe' + i});
         }
       }
+    });
+  }
+}
+
+exports['Should correctly handle bulk operation split for unordered bulk operation'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: {
+    requires: {
+        mongodb: ">=2.6.0"
+      , topology: 'single'
+      , node: ">0.10.0"
+    }
+  },
+
+  // The actual test we wish to run
+  test: function(configure, test) {
+    var db = configure.newDbInstance({w:1}, {poolSize:1});
+
+    db.open(function(err, db) {
+      var docs = [];
+      for(var i = 0; i < 5; i++) {
+        docs.push({
+          s: new Array(6000000).join('x')
+        });
+      }
+
+      db.collection('bigdocs_unordered').insertMany(docs, {ordered:false}, function(err, r) {
+        test.equal(null, err);
+
+        db.collection('bigdocs_unordered').count(function(err, c) {
+          test.equal(null, err);
+          test.equal(5, c);
+
+          db.close();
+          test.done();
+        });
+      });
     });
   }
 }

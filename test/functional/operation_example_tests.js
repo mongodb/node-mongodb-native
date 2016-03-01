@@ -8526,7 +8526,7 @@ exports['Should correctly add capped collection options to cursor'] = {
           // Get the cursor
           var cursor = collection.find({})
             .addCursorFlag('tailable', true)
-            .addCursorFlag('awaitData', true)
+            .addCursorFlag('awaitData', true);
 
           cursor.on('data', function() {
             total = total + 1;
@@ -8537,8 +8537,6 @@ exports['Should correctly add capped collection options to cursor'] = {
           });
 
           cursor.on('end', function() {
-            test.ok((new Date().getTime() - s.getTime()) > 1000);
-
             db.close();
             test.done();
           });

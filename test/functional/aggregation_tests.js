@@ -10,8 +10,8 @@
 exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
-  
+  metadata: { requires: { mongodb:">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
   // The actual test we wish to run
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
@@ -72,8 +72,8 @@ exports.shouldCorrectlyExecuteSimpleAggregationPipelineUsingArray = {
 exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsNotAnArray = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { mongodb: ">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
-  
+  metadata: { requires: { mongodb: ">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
   // The actual test we wish to run
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
@@ -134,8 +134,8 @@ exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsNotAnArray
 exports.shouldFailWhenExecutingSimpleAggregationPipelineUsingArgumentsUsingSingleObject = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { mongodb: ">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
-  
+  metadata: { requires: { mongodb: ">2.1.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
   // The actual test we wish to run
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
@@ -203,7 +203,7 @@ exports['Should correctly return and iterate over all the cursor results'] = {
       , node: ">0.10.0"
     }
   },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
@@ -247,7 +247,7 @@ exports['Should correctly return and iterate over all the cursor results'] = {
           test.ok(results != null);
 
           db.close();
-          test.done();        
+          test.done();
         });
       });
     });
@@ -317,7 +317,7 @@ exports['Should correctly return a cursor and call explain'] = {
           test.equal(4, result.stages.length);
 
           db.close();
-          test.done();        
+          test.done();
         });
       });
     });
@@ -342,7 +342,7 @@ exports['Should correctly return a cursor with batchSize 1 and call next'] = {
       , node: ">0.10.0"
     }
   },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
@@ -388,7 +388,7 @@ exports['Should correctly return a cursor with batchSize 1 and call next'] = {
           test.deepEqual(['bob'], result.authors);
 
           db.close();
-          test.done();        
+          test.done();
         });
       });
     });
@@ -406,8 +406,8 @@ exports['Should correctly return a cursor with batchSize 1 and call next'] = {
 exports['Should correctly write the results out to a new collection'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { mongodb: ">2.5.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
-  
+  metadata: { requires: { mongodb: ">2.5.0", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
   // The actual test we wish to run
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
@@ -449,7 +449,7 @@ exports['Should correctly write the results out to a new collection'] = {
             test.equal(0, results.length);
 
             db.close();
-            test.done();        
+            test.done();
           });
       });
     });
@@ -467,8 +467,8 @@ exports['Should correctly write the results out to a new collection'] = {
 exports['Should correctly use allowDiskUse when performing an aggregation'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { mongodb: ">2.5.5", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
-  
+  metadata: { requires: { mongodb: ">2.5.5", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
   // The actual test we wish to run
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
@@ -513,7 +513,7 @@ exports['Should correctly use allowDiskUse when performing an aggregation'] = {
             test.deepEqual(['bob'], results[1].authors);
 
             db.close();
-            test.done();        
+            test.done();
           });
       });
     });
@@ -528,8 +528,8 @@ exports['Should correctly use allowDiskUse when performing an aggregation'] = {
 exports['Should perform a simple group aggregation'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { mongodb: ">2.5.5", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
-  
+  metadata: { requires: { mongodb: ">2.5.5", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
   // The actual test we wish to run
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
@@ -567,8 +567,8 @@ exports['Should perform a simple group aggregation'] = {
 exports['Should correctly perform an aggregation using a collection name with dot in it'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
-  metadata: { requires: { mongodb: ">2.5.5", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },  
-  
+  metadata: { requires: { mongodb: ">2.5.5", topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
   // The actual test we wish to run
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
@@ -576,18 +576,18 @@ exports['Should correctly perform an aggregation using a collection name with do
       db.collection('te.st', function(err, col){
         test.equal(null, err);
         var count = 0;
-        
+
         col.insert([{a: 1}, {a: 1}, {a: 1}], function(err, r) {
           test.equal(null, err);
           test.equal(3, r.result.n);
-          
+
           //Using callback - OK
           col.aggregate([
               {$project: {a: 1}}
             ], function(err, docs) {
               test.equal(null, err);
               test.notEqual(0, docs.length);
-              
+
               //Using cursor - KO
               col.aggregate([
                 {$project: {a: 1}}
@@ -622,7 +622,7 @@ exports['Should fail aggregation due to illegal cursor option and streams'] = {
       , node: ">0.10.0"
     }
   },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
@@ -654,13 +654,13 @@ exports['Should fail aggregation due to illegal cursor option and streams'] = {
               }}
             ], {
               cursor: 1
-            }); 
+            });
         } catch(err) {
           db.close();
           return test.done();
         }
 
-        test.ok(false);         
+        test.ok(false);
       });
     });
   }
@@ -681,7 +681,7 @@ exports['Ensure MaxTimeMS is correctly passed down into command execution when u
       , node: ">0.10.0"
     }
   },
-  
+
   // The actual test we wish to run
   test: function(configure, test) {
     var db = configure.newDbInstance({w:1}, {poolSize:1});
@@ -760,11 +760,54 @@ exports['Ensure MaxTimeMS is correctly passed down into command execution when u
               // Return the command
               db.command = cmd;
               db.close();
-              test.done();        
-            });          
+              test.done();
+            });
         });
       });
     });
     // DOC_END
+  }
+}
+
+/**
+ * Correctly call the aggregation framework to return a cursor with batchSize 1 and get the first result using next
+ *
+ * @ignore
+ */
+exports['Correctly handle sample aggregation'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: {
+    requires: {
+        mongodb: ">=3.2.0"
+      , topology: 'single'
+      , node: ">0.10.0"
+    }
+  },
+
+  // The actual test we wish to run
+  test: function(configure, test) {
+    var db = configure.newDbInstance({w:1}, {poolSize:1});
+
+    db.open(function(err, db) {
+      var docs = [];
+      for(var i = 0; i < 5; i++) {
+        docs.push({
+          s: new Array(6000000).join('x')
+        });
+      }
+
+      db.collection('bigdocs').insertMany(docs, function(err, r) {
+        test.equal(null, err);
+
+        db.collection('bigdocs').count(function(err, c) {
+          test.equal(null, err);
+          test.equal(5, c);
+
+          db.close();
+          test.done();
+        });
+      });
+    });
   }
 }

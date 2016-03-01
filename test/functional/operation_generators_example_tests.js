@@ -6371,8 +6371,6 @@ exports['Should correctly add capped collection options to cursor with Generator
       });
 
       cursor.on('end', function() {
-        test.ok((new Date().getTime() - s.getTime()) > 1000);
-
         db.close();
         test.done();
       });
