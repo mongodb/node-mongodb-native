@@ -542,7 +542,10 @@ var nextFunction = function(self, callback) {
     // query, cmd, options, cursorState, callback
     self._find(function(err, r) {
       if(err) return handleCallback(callback, err, null);
-      if(self.cursorState.documents.length == 0 && !self.cmd.tailable && !self.cmd.awaitData) {
+
+      if(self.cursorState.documents.length == 0
+        && self.cursorState.cursorId && self.cursorState.cursorId.isZero()
+        && !self.cmd.tailable && !self.cmd.awaitData) {
         return setCursorNotified(self, callback);
       }
 
