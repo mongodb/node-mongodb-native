@@ -1,4 +1,4 @@
-1.3.3 
+1.3.3
 ----------------
 - Added support for promoteLongs option for command function.
 - Return connection if no callback available
@@ -7,6 +7,7 @@
 - Made monitoringSocketTimeout default to 30000 if no connectionTimeout value specified or if set to 0.
 - Fixed issue where tailable cursor would not retry even though cursor was still alive.
 - Disabled exhaust flag support to avoid issues where users could easily write code that would cause memory to run out.
+- Handle the case where the first command result document returns an empty list of documents but a live cursor.
 
 1.3.2 2016-02-09
 ----------------
