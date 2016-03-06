@@ -1,7 +1,7 @@
 {
   "name": "mongodb",
   "version": "2.1.7",
-  "description": "MongoDB legacy driver emulation layer on top of mongodb-core",
+  "description": "The official MongoDB driver for Node.js",
   "main": "index.js",
   "repository": {
     "type": "git",
