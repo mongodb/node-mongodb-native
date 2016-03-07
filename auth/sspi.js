@@ -68,7 +68,7 @@ SSPI.prototype.auth = function(server, connections, db, username, password, opti
     // Execute MongoCR
     var execute = function(connection) {
       // Start Auth process for a connection
-      SSIPAuthenticate(username, password, gssapiServiceName, server, connection, function(err, r) {
+      SSIPAuthenticate(username, password, gssapiServiceName, server, connection, options, function(err, r) {
         // Adjust count
         count = count - 1;
 
@@ -102,7 +102,7 @@ SSPI.prototype.auth = function(server, connections, db, username, password, opti
   }
 }
 
-var SSIPAuthenticate = function(username, password, gssapiServiceName, server, connection, callback) {
+var SSIPAuthenticate = function(username, password, gssapiServiceName, server, connection, options, callback) {
   // Build Authentication command to send to MongoDB
   var command = {
       saslStart: 1
@@ -112,7 +112,7 @@ var SSIPAuthenticate = function(username, password, gssapiServiceName, server, c
   };
 
   // Create authenticator
-  var mongo_auth_process = new MongoAuthProcess(connection.host, connection.port, gssapiServiceName);
+  var mongo_auth_process = new MongoAuthProcess(connection.host, connection.port, gssapiServiceName, options);
 
   // Execute first sasl step
   server.command("$external.$cmd"
