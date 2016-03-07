@@ -432,7 +432,7 @@ exports['Aborting an upload'] = {
  * @ignore
  */
 exports['Destroy an upload'] = {
-  metadata: { requires: { topology: ['single'] } },
+  metadata: { requires: { topology: ['single'], node: ">12.0.0" } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -561,7 +561,7 @@ exports['Destroying a download stream'] = {
  * @ignore
  */
 exports['Deleting a file using promises'] = {
-  metadata: { requires: { topology: ['single'] } },
+  metadata: { requires: { topology: ['single'], node: ">12.0.0" } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -711,7 +711,7 @@ exports['drop example'] = {
  * @ignore
  */
 exports['drop using promises'] = {
-  metadata: { requires: { topology: ['single'] } },
+  metadata: { requires: { topology: ['single'], node: ">12.0.0" } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
