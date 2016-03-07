@@ -150,6 +150,37 @@ exports.shouldDownloadToUploadStream = {
 };
 
 /**
+ * Correctly return file not found error
+ * @ignore
+ */
+exports['should fail to locate gridfs stream'] = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var GridFSBucket = configuration.require.GridFSBucket,
+      ObjectId = configuration.require.ObjectID;
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(),
+      { poolSize:1 });
+    db.open(function(error, db) {
+      var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
+      // Get an unknown file
+      var downloadStream = bucket.openDownloadStream(new ObjectId());
+      downloadStream.on('data', function() {
+      });
+
+      downloadStream.on('error', function(err) {
+        test.equal('ENOENT', err.code);
+
+        db.close();
+        test.done();
+      });
+    });
+  }
+};
+
+/**
  * Correctly download a GridFS file by name
  *
  * @example-class GridFSBucket

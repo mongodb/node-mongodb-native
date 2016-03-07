@@ -780,6 +780,7 @@ exports['Correctly handle sample aggregation'] = {
   metadata: {
     requires: {
         mongodb: ">=3.2.0"
+      , generators:true
       , topology: 'single'
       , node: ">0.10.0"
     }
@@ -787,27 +788,61 @@ exports['Correctly handle sample aggregation'] = {
 
   // The actual test we wish to run
   test: function(configure, test) {
-    var db = configure.newDbInstance({w:1}, {poolSize:1});
+    var co = require('co');
 
-    db.open(function(err, db) {
-      var docs = [];
-      for(var i = 0; i < 5; i++) {
-        docs.push({
-          s: new Array(6000000).join('x')
+    co(function*() {
+      var db = configure.newDbInstance({w:1}, {poolSize:1});
+      db = yield db.open();
+      var string = new Array(6000000).join('x');
+      // var string = new Array(600000).join('x');
+      // Get the collection
+      var collection = db.collection('bigdocs_aggregate_sample_issue');
+
+      // Go over the number of
+      for(var i = 0; i < 100; i++) {
+        var r = yield collection.insertOne({
+          s: string
         });
       }
 
-      db.collection('bigdocs').insertMany(docs, function(err, r) {
-        test.equal(null, err);
+      // count just to make sure we're getting something back
+      var count = yield collection.count();
+      console.log('counting %d docs.', count);
 
-        db.collection('bigdocs').count(function(err, c) {
-          test.equal(null, err);
-          test.equal(5, c);
+      var options = {
+        maxTimeMS: 10000,
+        allowDiskUse: true
+      };
+
+      var index = 0;
+
+      collection.aggregate([{
+          $sample: {
+            size: 100
+          }
+        }], options)
+        .batchSize(10)
+
+        .on('error', function(err) {
+          // console.error('error: ', err);
+          db.close();
+          process.exit(1);
+        })
+
+        .on('data', function(data) {
+          index = index + 1;
+          // console.log('data received :: ' + (index++));
+        })
+
+        // `end` sometimes emits before any `data` events have been emitted,
+        // depending on document size.
+        .on('end', function() {
+          // console.log('end received');
+          test.equal(100, index);
 
           db.close();
           test.done();
         });
-      });
     });
   }
 }
