@@ -354,6 +354,8 @@ testFiles.forEach(function(t) {
 //  ]
 // }));
 
+// Filter by OS
+runner.plugin(new OSFilter());
 // Add a Node version plugin
 runner.plugin(new NodeVersionFilter(startupOptions));
 // Add a MongoDB version plugin
@@ -364,8 +366,6 @@ runner.plugin(new MongoDBTopologyFilter(startupOptions));
 runner.plugin(new ES6PromisesSupportedFilter());
 // Add a Filter allowing us to validate if generators are available
 runner.plugin(new ES6GeneratorsSupportedFilter());
-// Filter by OS
-runner.plugin(new OSFilter());
 
 // Exit when done
 runner.on('exit', function(errors, results) {
