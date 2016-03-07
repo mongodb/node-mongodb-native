@@ -8,6 +8,7 @@
 - Fixed issue where tailable cursor would not retry even though cursor was still alive.
 - Disabled exhaust flag support to avoid issues where users could easily write code that would cause memory to run out.
 - Handle the case where the first command result document returns an empty list of documents but a live cursor.
+- Allow passing down off CANONICALIZE_HOST_NAME and SERVICE_REALM options for kerberos.
 
 1.3.2 2016-02-09
 ----------------
