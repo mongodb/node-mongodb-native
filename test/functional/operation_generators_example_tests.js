@@ -6392,7 +6392,7 @@ exports['Correctly handle sample aggregation'] = {
       generators:true,
       mongodb: ">=3.2.0",
       topology: 'single',
-      node: ">0.10.0"
+      node: ">0.12.0"
     }
   },
 
