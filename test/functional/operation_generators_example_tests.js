@@ -6389,10 +6389,10 @@ exports['Correctly handle sample aggregation'] = {
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: {
     requires: {
+      node: ">0.12.0".
       generators:true,
       mongodb: ">=3.2.0",
-      topology: 'single',
-      node: ">0.12.0"
+      topology: 'single'
     }
   },
 

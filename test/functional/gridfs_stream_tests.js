@@ -370,7 +370,7 @@ exports['Deleting a file'] = {
  * @ignore
  */
 exports['Aborting an upload'] = {
-  metadata: { requires: { topology: ['single'] } },
+  metadata: { requires: { topology: ['single'], node: ">12.0.0" } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -761,7 +761,7 @@ exports['drop using promises'] = {
 };
 
 
-/**
+/*
  * Find all associates files with a bucket
  *
  * @example-class GridFSBucket

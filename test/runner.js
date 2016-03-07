@@ -283,7 +283,6 @@ var testFiles = [
   , '/test/functional/bulk_tests.js'
   , '/test/functional/operation_example_tests.js'
   , '/test/functional/crud_api_tests.js'
-  , '/test/functional/reconnect_tests.js'
   , '/test/functional/find_and_modify_tests.js'
   , '/test/functional/document_validation_tests.js'
   , '/test/functional/ignore_undefined_tests.js'
@@ -318,6 +317,9 @@ var testFiles = [
 
   // GridFS
   , '/test/functional/gridfs_stream_tests.js'
+
+  // // Reconnection tests
+  // , '/test/functional/reconnect_tests.js'
 ]
 
 // Check if we support es6 generators
