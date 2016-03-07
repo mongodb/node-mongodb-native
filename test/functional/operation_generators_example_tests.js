@@ -6392,9 +6392,9 @@ exports['Correctly handle sample aggregation'] = {
       node: ">0.12.0",
       generators:true,
       mongodb: ">=3.2.0",
-      topology: 'single',
-      ignore: { travis:true }
-    }
+      topology: 'single'
+    },
+    ignore: { travis:true }
   },
 
   // The actual test we wish to run
