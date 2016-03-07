@@ -6378,3 +6378,81 @@ exports['Should correctly add capped collection options to cursor with Generator
     // END
   }
 }
+
+/**
+ * Correctly call the aggregation framework to return a cursor with batchSize 1 and get the first result using next
+ *
+ * @ignore
+ */
+exports['Correctly handle sample aggregation'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: {
+    requires: {
+      generators:true,
+      mongodb: ">=3.2.0",
+      topology: 'single',
+      node: ">0.10.0"
+    }
+  },
+
+  // The actual test we wish to run
+  test: function(configure, test) {
+    var co = require('co');
+
+    co(function*() {
+      var db = configure.newDbInstance({w:1}, {poolSize:1});
+      db = yield db.open();
+      var string = new Array(6000000).join('x');
+      // var string = new Array(600000).join('x');
+      // Get the collection
+      var collection = db.collection('bigdocs_aggregate_sample_issue');
+
+      // Go over the number of
+      for(var i = 0; i < 100; i++) {
+        var r = yield collection.insertOne({
+          s: string
+        });
+      }
+
+      // count just to make sure we're getting something back
+      var count = yield collection.count();
+      console.log('counting %d docs.', count);
+
+      var options = {
+        maxTimeMS: 10000,
+        allowDiskUse: true
+      };
+
+      var index = 0;
+
+      collection.aggregate([{
+          $sample: {
+            size: 100
+          }
+        }], options)
+        .batchSize(10)
+
+        .on('error', function(err) {
+          // console.error('error: ', err);
+          db.close();
+          process.exit(1);
+        })
+
+        .on('data', function(data) {
+          index = index + 1;
+          // console.log('data received :: ' + (index++));
+        })
+
+        // `end` sometimes emits before any `data` events have been emitted,
+        // depending on document size.
+        .on('end', function() {
+          // console.log('end received');
+          test.equal(100, index);
+
+          db.close();
+          test.done();
+        });
+    });
+  }
+}
