@@ -29,6 +29,8 @@ performance/
 public/
 docs/public/
 .nyc_output/
+typings/
+jsconfig.json
 
 external-libs/bson/build/
 external-libs/bson/build/.wafpickle-7
