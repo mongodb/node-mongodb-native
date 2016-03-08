@@ -10,6 +10,7 @@
 * NODE-662 shallow copy options on methods that are not currently doing it to avoid passed in options mutiation.
 * NODE-663 added lookup helper on aggregation cursor.
 * NODE-585 Result object specified incorrectly for findAndModify?.
+* NODE-666 harden validation for findAndModify CRUD methods.
 
 2.1.7 2016-02-09
 ----------------
