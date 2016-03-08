@@ -6405,7 +6405,6 @@ exports['Correctly handle sample aggregation'] = {
       var db = configure.newDbInstance({w:1}, {poolSize:1});
       db = yield db.open();
       var string = new Array(6000000).join('x');
-      // var string = new Array(600000).join('x');
       // Get the collection
       var collection = db.collection('bigdocs_aggregate_sample_issue');
 
@@ -6435,20 +6434,16 @@ exports['Correctly handle sample aggregation'] = {
         .batchSize(10)
 
         .on('error', function(err) {
-          // console.error('error: ', err);
           db.close();
-          process.exit(1);
         })
 
         .on('data', function(data) {
           index = index + 1;
-          // console.log('data received :: ' + (index++));
         })
 
         // `end` sometimes emits before any `data` events have been emitted,
         // depending on document size.
         .on('end', function() {
-          // console.log('end received');
           test.equal(100, index);
 
           db.close();
