@@ -1,4 +1,4 @@
-1.3.3
+1.3.3 2016-03-08
 ----------------
 - Added support for promoteLongs option for command function.
 - Return connection if no callback available
