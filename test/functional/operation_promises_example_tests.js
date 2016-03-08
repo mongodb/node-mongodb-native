@@ -6235,12 +6235,6 @@ exports['Should correctly handle duplicate key error with bulkWrite'] = {
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
     db.open().then(function(db) {
-    // LINE var MongoClient = require('mongodb').MongoClient,
-    // LINE   test = require('assert');
-    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-    // REPLACE configuration.writeConcernMax() WITH {w:1}
-    // REMOVE-LINE test.done();
-    // BEGIN
       // Get the collection
       var col = db.collection('bulk_write_with_promise_write_error');
       col.bulkWrite([
@@ -6253,7 +6247,6 @@ exports['Should correctly handle duplicate key error with bulkWrite'] = {
         test.done();
       });
     });
-    // END
   }
 }
 

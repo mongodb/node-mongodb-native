@@ -5,7 +5,8 @@
 * Harden MessageHandler in server.js to avoid issues where we cannot find a callback for an operation.
 * Ensure RequestId can never be larger than Max Number integer size.
 * NODE-661 typo in url_parser.js resulting in replSetServerOptions is not defined when connecting over ssl.
-* Confusing error with invalid partial index filter (Issue #1341, https://github.com/vkarpov15). 
+* Confusing error with invalid partial index filter (Issue #1341, https://github.com/vkarpov15).
+* NODE-669 Should only error out promise for bulkWrite when error is a driver level error not a write error or write concern error.
 
 2.1.7 2016-02-09
 ----------------
