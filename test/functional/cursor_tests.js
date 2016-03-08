@@ -3064,3 +3064,51 @@ exports['should tail cursor using maxAwaitTimeMS for 3.2 or higher'] = {
     });
   }
 }
+
+/**
+ * @ignore
+ * @api private
+ */
+exports['Should not emit any events after close event emitted due to cursor killed'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: { requires: { topology: ['single', 'replicaset', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      var collection = db.collection('cursor_limit_skip_correctly');
+
+      // Insert x number of docs
+      var ordered = collection.initializeUnorderedBulkOp();
+
+      for(var i = 0; i < 100; i++) {
+        ordered.insert({a:i});
+      }
+
+      ordered.execute({w:1}, function(err, r) {
+        test.equal(null, err);
+
+        // Let's attempt to skip and limit
+        var cursor = collection.find({}).batchSize(10);
+        cursor.on('data', function() {
+          // console.log("------------- received data")
+          cursor.destroy();
+        });
+
+        cursor.on('close', function() {
+          // console.log("------------- received close")
+          db.close();
+          test.done();
+        })
+
+        cursor.on('end', function() {
+          // console.log("------------- received end")
+        })
+      });
+    });
+  }
+}
