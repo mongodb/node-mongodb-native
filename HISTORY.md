@@ -1,3 +1,8 @@
+1.3.4 2016-03-14
+----------------
+- Added unref options on server, replicaset and mongos (Issue #81, https://github.com/allevo)
+- cursorNotFound flag always false (Issue #83, https://github.com/xgfd)
+
 1.3.3 2016-03-08
 ----------------
 - Added support for promoteLongs option for command function.
