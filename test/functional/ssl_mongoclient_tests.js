@@ -358,6 +358,66 @@ exports.shouldValidatePresentedServerCertificateButPresentInvalidCertificate = {
 /**
  * @ignore
  */
+exports.shouldCorrectlyValidatePresentedServerCertificateAndInvalidKey = {
+  metadata: { requires: { topology: 'ssl' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var ServerManager = require('mongodb-topology-manager').Server
+      , MongoClient = configuration.require.MongoClient;
+
+    // All inserted docs
+    var docs = [];
+    var errs = [];
+    var insertDocs = [];
+
+    // Read the ca
+    var ca = [fs.readFileSync(__dirname + "/ssl/ca.pem")];
+    var cert = fs.readFileSync(__dirname + "/ssl/client.pem");
+    var key = fs.readFileSync(__dirname + "/ssl/mycert.pem");
+
+    // Start server
+    var serverManager = new ServerManager('mongod', {
+        journal:null
+      , sslOnNormalPorts: null
+      , sslCAFile: __dirname + "/ssl/ca.pem"
+      , sslCRLFile: __dirname + "/ssl/crl.pem"
+      , sslPEMKeyFile: __dirname + "/ssl/server.pem"
+      // EnsureUp options
+      , dbpath: path.join(path.resolve('db'), f("data-%d", 27019))
+      , bind_ip: 'server'
+      , port: 27019
+    });
+
+    serverManager.purge().then(function() {
+      // Start the server
+      serverManager.start().then(function() {
+        setTimeout(function() {
+          // Connect and validate the server certificate
+          MongoClient.connect("mongodb://server:27019/test?ssl=true&maxPoolSize=1", {
+            server: {
+                sslValidate:true
+              , sslCA:ca
+              , sslKey:key
+              , sslCert:cert
+              , sslPass:'10gen'
+            }
+          }, function(err, db) {
+            test.ok(err != null);
+
+            serverManager.stop().then(function() {
+              test.done();
+            });
+          });
+        }, 10000);
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
 exports['Should correctly shut down if attempting to connect to ssl server with wrong parameters'] = {
   metadata: { requires: { topology: 'ssl' } },
 
