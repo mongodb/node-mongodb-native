@@ -497,8 +497,6 @@ exports['Should correctly execute unref and finish all operations'] = {
 
             // Number of operations left
             if(left == 0) {
-              // _server.destroy()
-
               configuration.newTopology(function(err, server) {
                 // Add event listeners
                 server.on('connect', function(_server) {
