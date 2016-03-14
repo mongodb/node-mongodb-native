@@ -378,18 +378,28 @@ Connection.prototype.connect = function(_options) {
       sslOptions.checkServerIdentity = self.checkServerIdentity;
     }
 
-    // Attempt SSL connection
-    self.connection = tls.connect(self.port, self.host, sslOptions, function() {
-      // Error on auth or skip
-      if(self.connection.authorizationError && self.rejectUnauthorized) {
-        return self.emit("error", self.connection.authorizationError, self, {ssl:true});
-      }
+    try {
+      self.connection = tls.connect(self.port, self.host, sslOptions, function() {
+        // Error on auth or skip
+        if(self.connection.authorizationError && self.rejectUnauthorized) {
+          return self.emit("error", self.connection.authorizationError, self, {ssl:true});
+        }
 
-      // Set socket timeout instead of connection timeout
-      self.connection.setTimeout(self.socketTimeout);
-      // We are done emit connect
-      self.emit('connect', self);
-    });
+        // Set socket timeout instead of connection timeout
+        self.connection.setTimeout(self.socketTimeout);
+        // We are done emit connect
+        self.emit('connect', self);
+      });
+    }
+    catch (error) {
+      // In the case of an invalid key, the Node tls module raises the error
+      // Error: error:0B080074:x509 certificate routines:X509_check_private_key
+      // but does not emit an error event like all other errors. We handle this
+      // and other potential inconsistencies here.
+      process.nextTick(function() {
+        return self.emit("error", error, self, {ssl:true});
+      });
+    }
     self.connection.setTimeout(self.connectionTimeout);
   } else {
     self.connection.on('connect', function() {
