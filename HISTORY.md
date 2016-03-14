@@ -2,6 +2,7 @@
 ----------------
 - Added unref options on server, replicaset and mongos (Issue #81, https://github.com/allevo)
 - cursorNotFound flag always false (Issue #83, https://github.com/xgfd)
+- refactor of events emission of fullsetup and all events (Issue #84, https://github.com/xizhibei)
 
 1.3.3 2016-03-08
 ----------------
