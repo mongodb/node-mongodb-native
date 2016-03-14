@@ -23,6 +23,8 @@ t.js
 .DS_Store
 test/benchmarks/performance-data
 .nyc_output/
+typings/
+jsconfig.json
 
 # Directory for dbs
 db
