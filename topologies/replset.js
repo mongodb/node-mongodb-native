@@ -656,6 +656,8 @@ ReplSet.prototype.connect = function(_options) {
     // Add a reserved connection for monitoring
     opts.size = opts.size + 1;
     opts.monitoring = true;
+    // Server is in topology
+    opts.inTopology = true;
     // Set up tags if any
     if(self.s.tag) opts.tag = self.s.tag;
     // Share the auth store
@@ -670,6 +672,9 @@ ReplSet.prototype.connect = function(_options) {
     self.s.initialConnectionServers.push(server);
   });
 
+  // Emit the topology opening event
+  this.emit('topologyOpeningEvent', { topologyId: this.s.id });
+
   // Attempt to connect to all the servers
   while(this.s.disconnectedServers.length > 0) {
     // Get the server
@@ -680,6 +685,10 @@ ReplSet.prototype.connect = function(_options) {
     server.once('close', errorHandlerTemp(self, self.s, 'close'));
     server.once('timeout', errorHandlerTemp(self, self.s, 'timeout'));
     server.once('connect', connectHandler(self, self.s));
+
+    // Server opening event
+    server.once('serverOpeningEvent', function(e) { self.emit('serverOpeningEvent', e); });
+    server.once('serverClosedEvent', function(e) { self.emit('serverClosedEvent', e); });
 
     // Ensure we schedule the opening of new socket
     // on separate ticks of the event loop
@@ -754,6 +763,9 @@ ReplSet.prototype.destroy = function(emitClose) {
 
   // Destroy state
   this.s.replState.destroy();
+
+  // Emit toplogy opening event if not in topology
+  this.emit('topologyClosedEvent', { topologyId: this.s.id });
 
   // Clear out any listeners
   var events = ['timeout', 'error', 'close', 'joined', 'left'];
@@ -971,6 +983,8 @@ var replicasetInquirer = function(self, state, norepeat) {
         // Add a reserved connection for monitoring
         opts.size = opts.size + 1;
         opts.monitoring = true;
+        // Server is in topology
+        opts.inTopology = true;
         // Set up tags if any
         if(state.tag) opts.tag = stage.tag;
         // Share the auth store
@@ -1017,6 +1031,10 @@ var replicasetInquirer = function(self, state, norepeat) {
       server.once('close', errorHandlerTemp(self, state, 'close'));
       server.once('timeout', errorHandlerTemp(self, state, 'timeout'));
       server.once('connect', connectHandler(self, state));
+
+      // Server opening event
+      server.once('serverOpeningEvent', function(e) { self.emit('serverOpeningEvent', e); });
+      server.once('serverClosedEvent', function(e) { self.emit('serverClosedEvent', e); });
 
       // Ensure we schedule the opening of new socket
       // on separate ticks of the event loop
@@ -1383,6 +1401,8 @@ var connectToServer = function(self, state, host, port, options) {
   // Share the auth store
   opts.authProviders = state.authProviders;
   opts.emitError = true;
+  // Server is in topology
+  opts.inTopology = true;
   // Set the size to size + 1 and mark monitoring
   opts.size = opts.size + 1;
   opts.monitoring = true;
@@ -1401,6 +1421,10 @@ var connectToServer = function(self, state, host, port, options) {
   server.once('close', errorHandlerTemp(self, state, 'close'));
   server.once('timeout', errorHandlerTemp(self, state, 'timeout'));
   server.once('connect', connectHandler(self, state));
+
+  // Server opening event
+  server.once('serverOpeningEvent', function(e) { self.emit('serverOpeningEvent', e); });
+  server.once('serverClosedEvent', function(e) { self.emit('serverClosedEvent', e); });
 
   // Attempt to connect
   process.nextTick(function() {
