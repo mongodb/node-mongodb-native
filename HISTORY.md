@@ -1,3 +1,7 @@
+1.3.5 2016-03-14
+----------------
+- Handle rogue SSL exceptions (Issue #85, https://github.com/durran).
+
 1.3.4 2016-03-14
 ----------------
 - Added unref options on server, replicaset and mongos (Issue #81, https://github.com/allevo)
