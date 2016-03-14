@@ -379,7 +379,7 @@ exports['Member removed by reconfig'] = {
             // console.log("------------------------------------------ 2")
 
             // Step down primary and block until we have a new primary
-            manager.stepDownPrimary(false, {stepDownSecs: 10}).then(function() {
+            manager.stepDownPrimary(true, {stepDownSecs: 10}).then(function() {
               // console.log("------------------------------------------ 3")
 
             });
