@@ -405,7 +405,7 @@ var closeHandler = function(self, state) {
 
       // Emit opening server event
       if(self.listeners('serverClosed').length > 0) self.emit('serverClosed', {
-        topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.s.id, address: self.s.serverDetails
+        topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.s.id, address: self.name
       });
 
       // Emit toplogy opening event if not in topology
@@ -465,7 +465,7 @@ var connectHandler = function(self, state) {
 
           // Emit opening server event
           if(self.listeners('serverClosed').length > 0) self.emit('serverClosed', {
-            topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.s.id, address: self.s.serverDetails
+            topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.s.id, address: self.name
           });
 
           // Emit toplogy opening event if not in topology
@@ -478,12 +478,12 @@ var connectHandler = function(self, state) {
 
         // Emit server description changed if something listening
         emitServerDescriptionChanged(self, {
-          address: self.s.serverDetails, arbiters: [], hosts: [], passives: [], type: !self.s.inTopology ? 'Standalone' : getTopologyType(self)
+          address: self.name, arbiters: [], hosts: [], passives: [], type: !self.s.inTopology ? 'Standalone' : getTopologyType(self)
         });
 
         // Emit topology description changed if something listening
         emitTopologyDescriptionChanged(self, {
-          topologyType: 'Single', servers: [{address: self.s.serverDetails, arbiters: [], hosts: [], passives: [], type: 'Standalone'}]
+          topologyType: 'Single', servers: [{address: self.name, arbiters: [], hosts: [], passives: [], type: 'Standalone'}]
         });
 
         // Set the latency for this instance
@@ -723,7 +723,7 @@ inherits(Server, EventEmitter);
 var getPreviousDescription = function(self) {
   if(!self.s.serverDescription) {
     self.s.serverDescription = {
-      address: self.s.serverDetails,
+      address: self.name,
       arbiters: [], hosts: [], passives: [], type: 'Unknown'
     }
   }
@@ -735,7 +735,7 @@ var emitServerDescriptionChanged = function(self, description) {
   if(self.listeners('serverDescriptionChanged').length > 0) {
     // Emit the server description changed events
     self.emit('serverDescriptionChanged', {
-      topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.s.id, address: self.s.serverDetails,
+      topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.s.id, address: self.name,
       previousDescription: getPreviousDescription(self),
       newDescription: description
     });
@@ -749,7 +749,7 @@ var getPreviousTopologyDescription = function(self) {
     self.s.topologyDescription = {
       topologyType: 'Unknown',
       servers: [{
-        address: self.s.serverDetails, arbiters: [], hosts: [], passives: [], type: 'Unknown'
+        address: self.name, arbiters: [], hosts: [], passives: [], type: 'Unknown'
       }]
     }
   }
@@ -761,7 +761,7 @@ var emitTopologyDescriptionChanged = function(self, description) {
   if(self.listeners('topologyDescriptionChanged').length > 0) {
     // Emit the server description changed events
     self.emit('topologyDescriptionChanged', {
-      topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.s.id, address: self.s.serverDetails,
+      topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.s.id, address: self.name,
       previousDescription: getPreviousTopologyDescription(self),
       newDescription: description
     });
@@ -778,6 +778,27 @@ function emitSDAMEvent(self, event, description) {
   if(self.listeners(event).length > 0) {
     self.emit(event, description);
   }
+}
+
+/**
+ * Get the server description
+ * @method
+ * @return {object}
+*/
+Server.prototype.getDescription = function() {
+  var ismaster = this.s.ismaster || {};
+  var description = {
+    type: getTopologyType(this),
+    address: this.name,
+  };
+
+  // Add fields if available
+  if(ismaster.primary) description.primary = ismaster.primary;
+  if(ismaster.hosts) description.hosts = ismaster.hosts;
+  if(ismaster.arbiters) description.arbiters = ismaster.arbiters;
+  if(ismaster.passives) description.passives = ismaster.passives;
+  if(ismaster.setName) description.setName = ismaster.setName;
+  return description;
 }
 
 /**
@@ -867,7 +888,7 @@ Server.prototype.connect = function(_options) {
 
   // Emit opening server event
   self.emit('serverOpening', {
-    topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.s.id, address: self.s.serverDetails
+    topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.s.id, address: self.name
   });
 
   //
@@ -947,7 +968,7 @@ var inquireServerState = function(self) {
         if(changedIsMaster(self, self.s.ismaster, r.result)) {
           // Emit server description changed if something listening
           emitServerDescriptionChanged(self, {
-            address: self.s.serverDetails, arbiters: [], hosts: [], passives: [], type: !self.s.inTopology ? 'Standalone' : getTopologyType(self)
+            address: self.name, arbiters: [], hosts: [], passives: [], type: !self.s.inTopology ? 'Standalone' : getTopologyType(self)
           });
         }
 
@@ -989,7 +1010,7 @@ Server.prototype.destroy = function(emitClose, emitDestroy) {
 
   // Emit opening server event
   if(self.listeners('serverClosed').length > 0) self.emit('serverClosed', {
-    topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.s.id, address: self.s.serverDetails
+    topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.s.id, address: self.name
   });
 
   // Emit toplogy opening event if not in topology
