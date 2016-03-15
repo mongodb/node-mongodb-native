@@ -132,9 +132,9 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
       { host: 'localhost', port: 32001 },
       { host: 'localhost', port: 32002 }], {
         setName: 'rs',
-        connectionTimeout: 5000,
+        connectionTimeout: 2000,
         socketTimeout: 5000,
-        haInterval: 1000,
+        haInterval: 500,
         size: 500
     });
 
@@ -151,10 +151,6 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
 
       setTimeout(function() {
         die = true;
-
-        server.command('admin.$cmd', {ismaster:true}, function(err, r) {
-          test.ok(err != null);
-        });
 
         setTimeout(function() {
           die = false;
