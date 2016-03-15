@@ -1,3 +1,7 @@
+"use strict"
+
+var f = require('util').format;
+
 // Extend the object
 var extend = function(template, fields) {
   var object = {};
@@ -76,6 +80,8 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
 
             if(doc.ismaster) {
               request.reply(primary[0]);
+            } else if(doc.insert) {
+              request.reply({ "ok" : 1, "n" : 1 });
             }
           }
         }
@@ -129,11 +135,19 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
         connectionTimeout: 5000,
         socketTimeout: 5000,
         haInterval: 1000,
-        size: 1
+        size: 500
     });
 
     server.on('connect', function(e) {
       server.__connected = true;
+
+      for(var i = 0; i < 100000; i++) {
+        // Execute the write
+        server.insert(f("%s.inserts", configuration.db), [{a:1}], {
+          writeConcern: {w:1}, ordered:true
+        }, function(err, results) {
+        });
+      }
 
       setTimeout(function() {
         die = true;

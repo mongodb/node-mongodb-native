@@ -36,6 +36,8 @@ var Server = function(port, host, options) {
   this.messages = [];
   // state
   this.state = 'stopped';
+  // Number of connections
+  this.connections = 0;
 }
 
 inherits(Server, EventEmitter);
@@ -55,6 +57,8 @@ Server.prototype.start = function() {
     });
 
     self.socket.on('connection', function(c) {
+      self.connections = self.connections + 1;
+      // console.dir(self.connections)
       c.on('error', function(e) {});
       c.on('data', dataHandler(self, {
         buffer: new Buffer(0),
@@ -63,6 +67,9 @@ Server.prototype.start = function() {
         bytesRead: 0,
         maxBsonMessageSize: (1024 * 1024 * 48)
       }, c));
+      c.on('close', function() {
+        self.connections = self.connections - 1;
+      });
     });
 
     self.socket.listen(self.port, self.host, function() {

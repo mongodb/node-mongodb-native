@@ -621,8 +621,8 @@ exports['Should correctly fall back to a secondary server if the readPreference 
                 }, {
                   readPreference: new ReadPreference('primaryPreferred')
                 }, function(err, r) {
-                  // console.log("----------------------------------------------- 3")
-                  // console.dir(err)
+                  console.log("----------------------------------------------- 3")
+                  console.dir(err)
                   test.equal(err, null);
                   test.equal(32001, r.connection.port); // reads from secondary while primary down
 
