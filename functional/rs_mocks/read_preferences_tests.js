@@ -613,26 +613,23 @@ exports['Should correctly fall back to a secondary server if the readPreference 
             primaryServer.destroy();
 
             _server.on('left', function(t, s) {
-              // console.log("----------------------------------------------- 2 :: " + t + " :: " + s.name)
-                // Perform another find, after primary is gone
-                _server.command('test.test', {
-                    count: 'test.test'
-                    , batchSize: 2
-                }, {
-                  readPreference: new ReadPreference('primaryPreferred')
-                }, function(err, r) {
-                  console.log("----------------------------------------------- 3")
-                  console.dir(err)
-                  test.equal(err, null);
-                  test.equal(32001, r.connection.port); // reads from secondary while primary down
+              // Perform another find, after primary is gone
+              _server.command('test.test', {
+                  count: 'test.test'
+                  , batchSize: 2
+              }, {
+                readPreference: new ReadPreference('primaryPreferred')
+              }, function(err, r) {
+                test.equal(err, null);
+                test.equal(32001, r.connection.port); // reads from secondary while primary down
 
-                  firstSecondaryServer.destroy();
-                  _server.destroy();
-                  running = false;
+                firstSecondaryServer.destroy();
+                _server.destroy();
+                running = false;
 
-                  test.done();
-                  return;
-                });
+                test.done();
+                return;
+              });
             });
           });
         }, 500);
