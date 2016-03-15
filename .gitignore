@@ -21,6 +21,8 @@ public
 docs/public
 public
 .nyc_output/
+typings/
+jsconfig.json
 
 npm-debug.log
 node_modules

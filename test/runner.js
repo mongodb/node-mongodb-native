@@ -3,7 +3,7 @@
 var Runner = require('integra').Runner
   , Cover = require('integra').Cover
   , RCover = require('integra').RCover
-  , f = require('util').format  
+  , f = require('util').format
   , path = require('path')
   , NodeVersionFilter = require('./filters/node_version_filter')
   , MongoDBVersionFilter = require('./filters/mongodb_version_filter')
@@ -226,6 +226,7 @@ try {
   testFiles.push('/test/tests/functional/rs_mocks/read_preferences_tests.js');
   testFiles.push('/test/tests/functional/rs_mocks/step_down_tests.js');
   testFiles.push('/test/tests/functional/rs_mocks/all_servers_close_tests.js');
+  testFiles.push('/test/tests/functional/rs_mocks/server_in_recovery_tests.js');
 
   // Mongos Mock Tests
   testFiles.push('/test/tests/functional/mongos_mocks/single_proxy_connection_tests.js');

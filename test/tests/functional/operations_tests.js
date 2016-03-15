@@ -474,3 +474,53 @@ exports['Should correctly kill find command cursor'] = {
     });
   }
 }
+
+exports['Should correctly execute unref and finish all operations'] = {
+  metadata: {
+    requires: { topology: ["single", "replicaset", "mongos"] }
+  },
+
+  test: function(configuration, test) {
+    configuration.newTopology(function(err, server) {
+      // Add event listeners
+      server.on('connect', function(_server) {
+        var left = 100;
+
+        for(var i = 0; i < 100; i++) {
+          // Execute the write
+          _server.insert(f("%s.inserts_unref", configuration.db), [{a:i}], {
+            writeConcern: {w:1}, ordered:true
+          }, function(err, results) {
+            left = left - 1;
+            test.equal(null, err);
+            test.equal(1, results.result.n);
+
+            // Number of operations left
+            if(left == 0) {
+              configuration.newTopology(function(err, server) {
+                // Add event listeners
+                server.on('connect', function(_server) {
+                  _server.command(f("%s.$cmd", configuration.db), {count: 'inserts_unref'}, function(e, result) {
+                    test.equal(null, err);
+                    test.equal(100, result.result.n);
+
+                    _server.destroy();
+                    test.done();
+                  });
+                });
+
+                server.connect();
+              });
+            }
+          });
+
+          // Unref all sockets
+          if(i == 10) _server.unref();
+        }
+      });
+
+      // Start connection
+      server.connect();
+    });
+  }
+}
