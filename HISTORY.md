@@ -1,3 +1,7 @@
+1.3.6 2016-03-15
+----------------
+- Fixed raise condition where multiple replicasetInquirer operations could be started in parallel creating redundant connections.
+
 1.3.5 2016-03-14
 ----------------
 - Handle rogue SSL exceptions (Issue #85, https://github.com/durran).
