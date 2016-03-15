@@ -404,13 +404,13 @@ var closeHandler = function(self, state) {
       if(state.callbacks) state.callbacks.flush(new MongoError(f("server %s sockets closed", self.name)));
 
       // Emit opening server event
-      self.emit('serverClosedEvent', {
-        topologyId: self.s.id, address: { host: self.s.serverDetails }
+      if(self.listeners('serverClosed').length > 0) self.emit('serverClosed', {
+        topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.s.id, address: self.s.serverDetails
       });
 
       // Emit toplogy opening event if not in topology
-      if(!self.s.inTopology) {
-        self.emit('topologyClosedEvent', { topologyId: self.s.id });
+      if(self.listeners('topologyClosed').length > 0 && !self.s.inTopology) {
+        self.emit('topologyClosed', { topologyId: self.s.id });
       }
 
       // Emit close event
@@ -464,17 +464,27 @@ var connectHandler = function(self, state) {
           state.state = DISCONNECTED;
 
           // Emit opening server event
-          self.emit('serverClosedEvent', {
-            topologyId: self.s.id, address: { host: self.s.serverDetails }
+          if(self.listeners('serverClosed').length > 0) self.emit('serverClosed', {
+            topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.s.id, address: self.s.serverDetails
           });
 
           // Emit toplogy opening event if not in topology
           if(!self.s.inTopology) {
-            self.emit('topologyOpeningEvent', { topologyId: self.s.id });
+            self.emit('topologyOpening', { topologyId: self.s.id });
           }
 
           return self.emit('close', err, self);
         }
+
+        // Emit server description changed if something listening
+        emitServerDescriptionChanged(self, {
+          address: self.s.serverDetails, arbiters: [], hosts: [], passives: [], type: !self.s.inTopology ? 'Standalone' : getTopologyType(self)
+        });
+
+        // Emit topology description changed if something listening
+        emitTopologyDescriptionChanged(self, {
+          topologyType: 'Single', servers: [{address: self.s.serverDetails, arbiters: [], hosts: [], passives: [], type: 'Standalone'}]
+        });
 
         // Set the latency for this instance
         state.isMasterLatencyMS = new Date().getTime() - start;
@@ -638,6 +648,8 @@ var Server = function(options) {
     , authProviders: options.authProviders || {}
     // Server instance id
     , id: serverId++
+    // Shared topology id if part of another one
+    , topologyId: options.topologyId || -1
     // Grouping tag used for debugging purposes
     , tag: options.tag
     // Do we have a not connected handler
@@ -666,6 +678,10 @@ var Server = function(options) {
       , port: options.port
       , name: options.port ? f("%s:%s", options.host, options.port) : options.host
     }
+    // Current server description
+    , serverDescription: null
+    // Current topology description
+    , topologyDescription: null
   }
 
   // Create hash method
@@ -703,6 +719,66 @@ var Server = function(options) {
 }
 
 inherits(Server, EventEmitter);
+
+var getPreviousDescription = function(self) {
+  if(!self.s.serverDescription) {
+    self.s.serverDescription = {
+      address: self.s.serverDetails,
+      arbiters: [], hosts: [], passives: [], type: 'Unknown'
+    }
+  }
+
+  return self.s.serverDescription;
+}
+
+var emitServerDescriptionChanged = function(self, description) {
+  if(self.listeners('serverDescriptionChanged').length > 0) {
+    // Emit the server description changed events
+    self.emit('serverDescriptionChanged', {
+      topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.s.id, address: self.s.serverDetails,
+      previousDescription: getPreviousDescription(self),
+      newDescription: description
+    });
+
+    self.s.serverDescription = description;
+  }
+}
+
+var getPreviousTopologyDescription = function(self) {
+  if(!self.s.topologyDescription) {
+    self.s.topologyDescription = {
+      topologyType: 'Unknown',
+      servers: [{
+        address: self.s.serverDetails, arbiters: [], hosts: [], passives: [], type: 'Unknown'
+      }]
+    }
+  }
+
+  return self.s.topologyDescription;
+}
+
+var emitTopologyDescriptionChanged = function(self, description) {
+  if(self.listeners('topologyDescriptionChanged').length > 0) {
+    // Emit the server description changed events
+    self.emit('topologyDescriptionChanged', {
+      topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.s.id, address: self.s.serverDetails,
+      previousDescription: getPreviousTopologyDescription(self),
+      newDescription: description
+    });
+
+    self.s.serverDescription = description;
+  }
+}
+
+/**
+ * Emit event if it exists
+ * @method
+ */
+function emitSDAMEvent(self, event, description) {
+  if(self.listeners(event).length > 0) {
+    self.emit(event, description);
+  }
+}
 
 /**
  * Execute a command
@@ -742,6 +818,15 @@ Server.prototype.lastIsMaster = function() {
 }
 
 /**
+ * Returns the last known ismaster response latency
+ * @method
+ * @return {object}
+ */
+Server.prototype.isMasterLatencyMS = function() {
+  return this.s.isMasterLatencyMS;
+}
+
+/**
  * Initiate server connect
  * @method
  */
@@ -777,12 +862,12 @@ Server.prototype.connect = function(_options) {
 
   // Emit toplogy opening event if not in topology
   if(!self.s.inTopology) {
-    this.emit('topologyOpeningEvent', { topologyId: this.s.id });
+    this.emit('topologyOpening', { topologyId: this.s.id });
   }
 
   // Emit opening server event
-  self.emit('serverOpeningEvent', {
-    topologyId: self.s.id, address: { host: self.s.serverDetails }
+  self.emit('serverOpening', {
+    topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.s.id, address: self.s.serverDetails
   });
 
   //
@@ -817,13 +902,62 @@ Server.prototype.connect = function(_options) {
   self.s.pool.connect();
 }
 
+var getTopologyType = function(self, ismaster) {
+  if(!ismaster) {
+    ismaster = self.s.ismaster;
+  }
+
+  if(!ismaster) return 'Unknown';
+  if(ismaster.ismaster && !ismaster.hosts) return 'Standalone';
+  if(ismaster.ismaster) return 'RSPrimary';
+  if(ismaster.secondary) return 'RSSecondary';
+  if(ismaster.arbiterOnly) return 'RSArbiter';
+  return 'Unknown';
+}
+
+var changedIsMaster = function(self, currentIsmaster, ismaster) {
+  var currentType = getTopologyType(self, currentIsmaster);
+  var newType = getTopologyType(self, ismaster);
+  if(newType != currentType) return true;
+  return false;
+}
+
 var inquireServerState = function(self) {
   return function() {
     if(self.s.state == DESTROYED) return;
+    // Record response time
+    var start = new Date().getTime();
+
+    // emitSDAMEvent
+    emitSDAMEvent(self, 'serverHeartbeatStarted', { connectionId: self.s.serverDetails });
+
     // Attempt to execute ismaster command
     self.command('admin.$cmd', { ismaster:true },  { monitoring:true }, function(err, r) {
       if(!err) {
+        // Legacy event sender
         self.emit('ismaster', r, self);
+
+        // Calculate latencyMS
+        var latencyMS = new Date().getTime() - start;
+
+        // Server heart beat event
+        emitSDAMEvent(self, 'serverHeartbeatSucceeded', { durationMS: latencyMS, reply: r.result, connectionId: self.s.serverDetails });
+
+        // Did the server change
+        if(changedIsMaster(self, self.s.ismaster, r.result)) {
+          // Emit server description changed if something listening
+          emitServerDescriptionChanged(self, {
+            address: self.s.serverDetails, arbiters: [], hosts: [], passives: [], type: !self.s.inTopology ? 'Standalone' : getTopologyType(self)
+          });
+        }
+
+        // Updat ismaster view
+        self.s.ismaster = r.result;
+
+        // Set server response time
+        self.s.isMasterLatencyMS = latencyMS;
+      } else {
+        emitSDAMEvent(self, 'serverHearbeatFailed', { durationMS: latencyMS, failure: err, connectionId: self.s.serverDetails });
       }
 
       // Perform another sweep
@@ -851,16 +985,16 @@ Server.prototype.destroy = function(emitClose, emitDestroy) {
   // Emit close
   if(emitClose && self.listeners('close').length > 0) {
     self.emit('close', null, self);
+  }
 
-    // Emit opening server event
-    self.emit('serverClosedEvent', {
-      topologyId: self.s.id, address: { host: self.s.serverDetails }
-    });
+  // Emit opening server event
+  if(self.listeners('serverClosed').length > 0) self.emit('serverClosed', {
+    topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.s.id, address: self.s.serverDetails
+  });
 
-    // Emit toplogy opening event if not in topology
-    if(!self.s.inTopology) {
-      self.emit('topologyClosedEvent', { topologyId: self.s.id });
-    }
+  // Emit toplogy opening event if not in topology
+  if(self.listeners('topologyClosed').length > 0 && !self.s.inTopology) {
+    self.emit('topologyClosed', { topologyId: self.s.id });
   }
 
   // Emit destroy event
