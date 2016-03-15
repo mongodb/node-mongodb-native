@@ -1013,6 +1013,7 @@ var haveAvailableServers = function(state) {
 
 var replicasetInquirer = function(self, state, norepeat) {
   return function() {
+    // console.log("-------------------------------------- replicasetInquirer : " + state.replState.state)
     // Process already running don't rerun
     if(state.highAvailabilityProcessRunning) return;
     // State destroyed return
@@ -1492,6 +1493,11 @@ var errorHandler = function(self, state) {
     var found = addToListIfNotExist(state.disconnectedServers, server);
     if(!found) self.emit('left', state.replState.remove(server), server);
     if(found && state.emitError && self.listeners('error').length > 0) self.emit('error', err, server);
+
+    // // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!! error " + state.disconnectedServers)
+    // if(!haveAvailableServers(state)) {
+    //   console.log("!!!!!!!!!!!!!!!!!!! error: no servers available")
+    // }
   }
 }
 
@@ -1504,6 +1510,11 @@ var timeoutHandler = function(self, state) {
     if(state.logger.isInfo()) state.logger.info(f('[%s] server %s timed out', state.id, server.lastIsMaster() ? server.lastIsMaster().me : server.name));
     var found = addToListIfNotExist(state.disconnectedServers, server);
     if(!found) self.emit('left', state.replState.remove(server), server);
+
+    // // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!! timeout " + state.disconnectedServers)
+    // if(!haveAvailableServers(state)) {
+    //   console.log("!!!!!!!!!!!!!!!!!!! timeout: no servers available")
+    // }
   }
 }
 
@@ -1518,6 +1529,11 @@ var closeHandler = function(self, state) {
     if(!found) {
       self.emit('left', state.replState.remove(server), server);
     }
+
+    // // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!! close " + state.disconnectedServers)
+    // if(!haveAvailableServers(state)) {
+    //   console.log("!!!!!!!!!!!!!!!!!!! close: no servers available")
+    // }
   }
 }
 
