@@ -152,6 +152,20 @@ var extend = function(template, fields) {
 //         }, function(err, results) {
 //         });
 //       }
+//
+//       server.on('reconnect', function() {
+//         console.log("------------ reconnect")
+//       })
+//
+//       setTimeout(function() {
+//         var c = server.s.replState.primary.connections();
+//         var c = server.connections();
+//         console.log("---------------- c " + c.length)
+//
+//         c.forEach(function(x) {
+//           x.connection.write("!!!!!!!!@#!@!#!@#!@#DFASFDFAFASFASAFS");
+//         })
+//       }, 5000);
 //     });
 //
 //     // Add event listeners
