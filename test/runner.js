@@ -236,6 +236,10 @@ try {
 
   // Single server Mock Tests
   testFiles.push('/test/tests/functional/single_mocks/timeout_tests.js');
+
+  // SDAM Monitoring tests
+  testFiles.push('/test/tests/functional/sdam_monitoring_mocks/single_server_tests.js');
+  testFiles.push('/test/tests/functional/sdam_monitoring_mocks/replset_server_tests.js');
 } catch(err) {}
 
 // Add all the tests to run
