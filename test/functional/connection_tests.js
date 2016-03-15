@@ -127,7 +127,6 @@ function connectionTester(test, testName, callback) {
       collection.insert({foo:123}, {w:1}, function(err, docs) {
         test.equal(err, null);
         db.dropDatabase(function(err, done) {
-          db.close();
           test.equal(err, null);
           test.ok(done);
           if(callback) return callback(db);
@@ -149,6 +148,7 @@ exports.testConnectNoOptions = {
     var connect = configuration.require;
 
     connect(configuration.url(), connectionTester(test, 'testConnectNoOptions', function(db) {
+      db.close();
       test.done();
     }));
   }
@@ -170,6 +170,7 @@ exports.testConnectServerOptions = {
       test.equal(1, db.serverConfig.poolSize);
       test.equal(4, db.serverConfig.s.server.s.pool.size);
       test.equal(true, db.serverConfig.autoReconnect);
+      db.close();
       test.done();
     }));
   }
@@ -192,6 +193,7 @@ exports.testConnectAllOptions = {
       test.equal(1, db.serverConfig.poolSize);
       test.equal(4, db.serverConfig.s.server.s.pool.size);
       test.equal(true, db.serverConfig.autoReconnect);
+      db.close();
       test.done();
     }));
   }
@@ -220,6 +222,7 @@ exports.testConnectGoodAuth = {
 
     function restOfTest() {
       connect(configuration.url(user, password), connectionTester(test, 'testConnectGoodAuth', function(db) {
+        db.close();
         test.done();
       }));
     }
