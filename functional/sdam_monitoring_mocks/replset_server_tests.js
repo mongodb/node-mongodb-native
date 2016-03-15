@@ -121,8 +121,11 @@ exports['Successful emit SDAM monitoring events for replicaset'] = {
         size: 1
     });
 
-    server.on('connect', function(e) {
+    server.on('connect', function(_server) {
       server.__connected = true;
+
+      _server.destroy();
+      test.done();
     });
 
     server.on('serverOpening', function(event) {

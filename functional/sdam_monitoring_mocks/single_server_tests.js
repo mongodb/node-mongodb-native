@@ -124,26 +124,18 @@ exports['Should correctly emit sdam monitoring events for single server'] = {
     server.on('error', function(){});
     server.on('close', function(){
       process.nextTick(function() {
-        test.deepEqual({ topologyId: id, address: { host: 'localhost', port: '37017', name: 'localhost:37017' } }, flags[0]);
-        test.deepEqual({ topologyId: id, address: { host: 'localhost', port: '37017', name: 'localhost:37017' } }, flags[1]);
-        test.deepEqual({ "topologyId": id, "address": { "host": "localhost", "port": "37017", "name": "localhost:37017" },
+        test.deepEqual({ topologyId: id, address: 'localhost:37017' }, flags[0]);
+        test.deepEqual({ topologyId: id, address: 'localhost:37017' }, flags[1]);
+        test.deepEqual({ "topologyId": id, "address": "localhost:37017",
           "previousDescription": {
-            "address": {
-              "host": "localhost",
-              "port": "37017",
-              "name": "localhost:37017"
-            },
+            "address": "localhost:37017",
             "arbiters": [],
             "hosts": [],
             "passives": [],
             "type": "Unknown"
           },
           "newDescription": {
-            "address": {
-              "host": "localhost",
-              "port": "37017",
-              "name": "localhost:37017"
-            },
+            "address": "localhost:37017",
             "arbiters": [],
             "hosts": [],
             "passives": [],
@@ -152,16 +144,12 @@ exports['Should correctly emit sdam monitoring events for single server'] = {
         }, flags[2]);
         test.deepEqual({ topologyId: id }, flags[3]);
         test.deepEqual({ topologyId: id }, flags[4]);
-        test.deepEqual({ "topologyId": id, "address": { "host": "localhost", "port": "37017", "name": "localhost:37017" },
+        test.deepEqual({ "topologyId": id, "address": "localhost:37017",
           "previousDescription": {
             "topologyType": "Unknown",
             "servers": [
               {
-                "address": {
-                  "host": "localhost",
-                  "port": "37017",
-                  "name": "localhost:37017"
-                },
+                "address": "localhost:37017",
                 "arbiters": [],
                 "hosts": [],
                 "passives": [],
@@ -173,11 +161,7 @@ exports['Should correctly emit sdam monitoring events for single server'] = {
             "topologyType": "Single",
             "servers": [
               {
-                "address": {
-                  "host": "localhost",
-                  "port": "37017",
-                  "name": "localhost:37017"
-                },
+                "address": "localhost:37017",
                 "arbiters": [],
                 "hosts": [],
                 "passives": [],
