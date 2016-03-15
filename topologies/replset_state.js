@@ -149,6 +149,20 @@ State.prototype.clean = function() {
 }
 
 /**
+ * Unref state
+ * @method
+ */
+State.prototype.unref = function() {
+  if(this.primary) this.primary.unref();
+  this.secondaries.forEach(function(s) {
+    s.unref();
+  });
+  this.arbiters.forEach(function(s) {
+    s.unref();
+  });
+}
+
+/**
  * Destroy state
  * @method
  */
