@@ -1,3 +1,8 @@
+2.1.9 2016-03-16
+----------------
+* Updated mongodb-core to 1.3.7 to fix intermittent race condition that causes some users to experience big amounts of socket connections.
+* Makde bson parser in ordered/unordered bulk be directly from mongodb-core to avoid intermittent null error on mongoose.
+
 2.1.8 2016-03-14
 ----------------
 * Updated mongodb-core to 1.3.5.
