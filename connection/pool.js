@@ -116,6 +116,8 @@ var removeConnection = function(self, connection) {
 var errorHandler = function(self) {
   return function(err, connection) {
     if(self.logger.isDebug()) self.logger.debug(f('pool [%s] errored out [%s] with connection [%s]', this.dead, JSON.stringify(err), JSON.stringify(connection)));
+    // Destroy the connection
+    connection.destroy();
     // Remove the connection
     removeConnection(self, connection);
     // Emit error
@@ -128,6 +130,8 @@ var errorHandler = function(self) {
 var timeoutHandler = function(self) {
   return function(err, connection) {
     if(self.logger.isDebug()) self.logger.debug(f('pool [%s] timed out [%s] with connection [%s]', this.dead, JSON.stringify(err), JSON.stringify(connection)));
+    // Destroy the connection
+    connection.destroy();
     // Remove the connection
     removeConnection(self, connection);
     // Emit connection timeout to server instance
@@ -138,6 +142,8 @@ var timeoutHandler = function(self) {
 var closeHandler = function(self) {
   return function(err, connection) {
     if(self.logger.isDebug()) self.logger.debug(f('pool [%s] closed [%s] with connection [%s]', this.dead, JSON.stringify(err), JSON.stringify(connection)));
+    // Destroy the connection
+    connection.destroy();
     // Remove the connection
     removeConnection(self, connection);
     // Emit connection close to server instance
@@ -148,6 +154,8 @@ var closeHandler = function(self) {
 var parseErrorHandler = function(self) {
   return function(err, connection) {
     if(self.logger.isDebug()) self.logger.debug(f('pool [%s] errored out [%s] with connection [%s]', this.dead, JSON.stringify(err), JSON.stringify(connection)));
+    // Destroy the connection
+    connection.destroy();
     // Remove the connection
     removeConnection(self, connection);
     // Emit error to server instance
@@ -186,6 +194,12 @@ Pool.prototype.destroy = function() {
     // Destroy the connection
     c.destroy();
   });
+
+  // Wipe out all connection arrays
+  this.availableConnections = [];
+  this.connectingConnections = [];
+  this.inUseConnections = [];
+  this.newConnections = [];
 
   // Do we have a monitoring connection
   if(this.monitorConnection) {
@@ -231,6 +245,10 @@ Pool.prototype.connect = function(_options) {
         connection.once('timeout', timeoutHandler(self));
         connection.once('parseError', parseErrorHandler(self));
         connection.on('connect', function(connection) {
+          if(self.state == 'DESTROYED') {
+            return connection.destroy();
+          }
+
           // Add the connection to the list of available connections
           self.availableConnections.push(connection);
 
@@ -285,6 +303,16 @@ var _createConnection = function(self) {
 
   // Handle successful connection
   var tempConnectHandler = function() {
+    if(self.state == 'DESTROYED') {
+      // Remove the connection from the connectingConnections
+      var index = self.connectingConnections.indexOf(connection);
+      if(index != -1) {
+        self.connectingConnections.splice(index, 1);
+      }
+
+      return connection.destroy();
+    }
+
     // Destroy all event emitters
     handlers.forEach(function(e) {
       connection.removeAllListeners(e);
@@ -301,8 +329,6 @@ var _createConnection = function(self) {
     if(index != -1) {
       self.connectingConnections.splice(index, 1);
     }
-
-    // connection.destroy()
 
     // Add to queue of new connection
     self.newConnections.push(connection);
