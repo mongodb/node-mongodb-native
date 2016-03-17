@@ -1026,7 +1026,7 @@ var replicasetInquirer = function(self, state, norepeat) {
       return;
     }
 
-    console.log("------------------------------------------- replicasetInquirer :: " + self.s.currentHaInterval + " :: " + self.s.id)
+    // console.log("------------------------------------------- replicasetInquirer :: " + self.s.currentHaInterval + " :: " + self.s.id)
 
     // State destroyed return
     if(state.replState.state == DESTROYED) {
