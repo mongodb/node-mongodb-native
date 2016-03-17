@@ -176,7 +176,7 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
 
               test.done();
             });
-          }, 5000);
+          }, 6000);
         }, 2500);
       }, 2500);
     });
