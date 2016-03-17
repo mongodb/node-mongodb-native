@@ -153,21 +153,21 @@ exports['Successfully add a new secondary server to the set'] = {
     });
 
     server.on('joined', function(_type, _server) {
-      if(_type == 'arbiter') {
+      // if(_type == 'arbiter') {
         // test.equal(true, server.__connected);
 
         // test.equal(1, server.s.replState.secondaries.length);
         // test.equal('localhost:32001', server.s.replState.secondaries[0].name);
 
-        test.equal(1, server.s.replState.arbiters.length);
-        test.equal('localhost:32002', server.s.replState.arbiters[0].name);
+        // test.equal(1, server.s.replState.arbiters.length);
+        // test.equal('localhost:32002', server.s.replState.arbiters[0].name);
 
-        test.ok(server.s.replState.primary != null);
-        test.equal('localhost:32000', server.s.replState.primary.name);
+        // test.ok(server.s.replState.primary != null);
+        // test.equal('localhost:32000', server.s.replState.primary.name);
 
         // Flip the ismaster message
-        currentIsMasterIndex = currentIsMasterIndex + 1;
-      } else if(_type == 'secondary' && _server.name == 'localhost:32003') {
+        // currentIsMasterIndex = currentIsMasterIndex + 1;
+      if(_type == 'secondary' && _server.name == 'localhost:32003') {
         // test.equal(true, server.__connected);
 
         test.equal(2, server.s.replState.secondaries.length);
