@@ -30,7 +30,7 @@ var parseTopologyTests = function(dir, excludes) {
 
 var executeState = function(assert, test) {
   var state = new State({
-    emit: function(){}
+    emit: function(){}, listeners: function() { return []; }
   }, {
     id: 1, setName: 'rs', connectingServers: {}, secondaryOnlyConnectionAllowed: false
   })
@@ -54,6 +54,9 @@ var executeState = function(assert, test) {
           return s.name == _name;
         }, destroy: function() {}, lastIsMaster: function() {
           return _ismaster;
+        }, isConnected: function() { return true;
+        }, getDescription: function() {
+          return {}
         }});
       }
 
