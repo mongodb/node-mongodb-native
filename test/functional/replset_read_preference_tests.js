@@ -568,7 +568,7 @@ exports['Attempt to change read preference at cursor level after object read leg
               cursor.setReadPreference(ReadPreference.PRIMARY);
               test.ok(false);
             } catch(err) {
-              console.log(err.stack)
+              // console.log(err.stack)
             }
 
             test.equal(ReadPreference.SECONDARY, cursor.readPreference.preference);
@@ -890,7 +890,7 @@ exports['should correctly apply read preference for direct secondary connection'
               db.close();
               test.done();
             });
-          });          
+          });
         }, 1000);
       });
     });
