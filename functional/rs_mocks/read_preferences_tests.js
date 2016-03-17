@@ -125,7 +125,7 @@ exports['Should correctly connect to a replicaset and select the correct tagged 
               count: 'test.test'
             , batchSize: 2
           }, {
-            readPreference: new ReadPreference('secondaryPreferred', {loc:'dc'})
+            readPreference: new ReadPreference('secondary', {loc:'dc'})
           }, function(err, r) {
             test.equal(err, null);
             test.equal(32002, r.connection.port);
