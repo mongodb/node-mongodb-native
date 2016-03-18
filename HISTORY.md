@@ -1,3 +1,7 @@
+2.1.10
+----------------
+* Updated mongodb-core to 1.3.8.
+
 2.1.9 2016-03-16
 ----------------
 * Updated mongodb-core to 1.3.7 to fix intermittent race condition that causes some users to experience big amounts of socket connections.
