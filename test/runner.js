@@ -238,8 +238,9 @@ try {
   testFiles.push('/test/tests/functional/single_mocks/timeout_tests.js');
 
   // SDAM Monitoring tests
-  testFiles.push('/test/tests/functional/sdam_monitoring_mocks/single_server_tests.js');
-  testFiles.push('/test/tests/functional/sdam_monitoring_mocks/replset_server_tests.js');
+  testFiles.push('/test/tests/functional/sdam_monitoring_mocks/single_topology_tests.js');
+  testFiles.push('/test/tests/functional/sdam_monitoring_mocks/replset_topology_tests.js');
+  testFiles.push('/test/tests/functional/sdam_monitoring_mocks/mongos_topology_tests.js');
 } catch(err) {}
 
 // Add all the tests to run
