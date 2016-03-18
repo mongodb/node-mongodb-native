@@ -1,3 +1,8 @@
+1.3.8 2016-03-18
+----------------
+- Implements the SDAM monitoring specification.
+- Fix issue where cursor would error out and not be buffered when primary is not connected.
+
 1.3.7 2016-03-16
 ----------------
 - Fixed issue with replicasetInquirer where it could stop performing monitoring if there was no servers available.
