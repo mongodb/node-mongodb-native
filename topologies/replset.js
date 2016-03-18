@@ -824,7 +824,7 @@ ReplSet.prototype.destroy = function(emitClose) {
   // Destroy state
   this.s.replState.destroy();
 
-  // Emit toplogy opening event if not in topology
+  // Emit toplogy closing event
   emitSDAMEvent(this, 'topologyClosed', { topologyId: this.s.id });
 
   // Clear out any listeners
@@ -1068,8 +1068,6 @@ var replicasetInquirer = function(self, state, norepeat) {
       return;
     }
 
-    // console.log("------------------------------------------- replicasetInquirer :: " + self.s.currentHaInterval + " :: " + self.s.id)
-
     // State destroyed return
     if(state.replState.state == DESTROYED) {
       return
@@ -1227,6 +1225,10 @@ var replicasetInquirer = function(self, state, norepeat) {
           // Handle the primary
           var ismaster = r.result;
           if(state.logger.isDebug()) state.logger.debug(f('[%s] monitoring process ismaster %s', state.id, JSON.stringify(ismaster)));
+
+          // Update server instance ismaster to ensure proper sync
+          // when producing SDAM monitoring events
+          server.s.ismaster = ismaster;
 
           // Update the replicaset state
           state.replState.update(ismaster, server);
@@ -1437,6 +1439,14 @@ var connectHandler = function(self, state) {
         server.on('error', errorHandler(self, state));
         server.on('close', closeHandler(self, state));
         server.on('timeout', timeoutHandler(self, state));
+
+        // SDAM Monitoring events
+        server.on('serverOpening', function(e) { self.emit('serverOpening', e); });
+        server.on('serverDescriptionChanged', function(e) { self.emit('serverDescriptionChanged', e); });
+        server.on('serverHeartbeatStarted', function(e) { self.emit('serverHeartbeatStarted', e); });
+        server.on('serverHeartbeatSucceeded', function(e) { self.emit('serverHeartbeatSucceeded', e); });
+        server.on('serverHearbeatFailed', function(e) { self.emit('serverHearbeatFailed', e); });
+        server.on('serverClosed', function(e) { self.emit('serverClosed', e); });
       }
 
       // Hosts to process

@@ -794,7 +794,6 @@ Server.prototype.getDescription = function() {
   };
 
   // Add fields if available
-  if(ismaster.primary) description.primary = ismaster.primary;
   if(ismaster.hosts) description.hosts = ismaster.hosts;
   if(ismaster.arbiters) description.arbiters = ismaster.arbiters;
   if(ismaster.passives) description.passives = ismaster.passives;
