@@ -38,6 +38,8 @@ var Server = function(port, host, options) {
   this.state = 'stopped';
   // Number of connections
   this.connections = 0;
+  // sockets
+  this.sockets = [];
 }
 
 inherits(Server, EventEmitter);
@@ -45,6 +47,10 @@ inherits(Server, EventEmitter);
 Server.prototype.destroy = function() {
   this.state = 'destroyed';
   this.socket.close();
+
+  this.sockets.forEach(function(x) {
+    x.destroy();
+  });
 }
 
 Server.prototype.start = function() {
@@ -58,7 +64,8 @@ Server.prototype.start = function() {
 
     self.socket.on('connection', function(c) {
       self.connections = self.connections + 1;
-      // console.dir(self.connections)
+      self.sockets.push(c);
+
       c.on('error', function(e) {});
       c.on('data', dataHandler(self, {
         buffer: new Buffer(0),
@@ -69,6 +76,11 @@ Server.prototype.start = function() {
       }, c));
       c.on('close', function() {
         self.connections = self.connections - 1;
+        var index = self.sockets.indexOf(c);
+
+        if(index != -1) {
+          self.sockets.splice(index, 1);
+        }
       });
     });
 

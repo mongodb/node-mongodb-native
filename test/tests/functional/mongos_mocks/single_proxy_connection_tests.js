@@ -60,6 +60,7 @@ exports['Should correctly timeout mongos socket operation and then correctly re-
 
           // Get the document
           var doc = request.document;
+
           if(doc.ismaster && currentStep == 0) {
             request.reply(serverIsMaster[0]);
             currentStep += 1;
@@ -72,7 +73,7 @@ exports['Should correctly timeout mongos socket operation and then correctly re-
               yield timeoutPromise(1500);
               request.connection.destroy();
             }
-          } else if(doc.ismaster && currentStep == 2) {
+          } else if(doc.ismaster) {
             request.reply(serverIsMaster[0]);
           } else if(doc.insert && currentStep == 2) {
             request.reply({ok:1, n:doc.documents, lastOp: new Date()});
@@ -105,6 +106,8 @@ exports['Should correctly timeout mongos socket operation and then correctly re-
       // Run an interval
       var intervalId = setInterval(function() {
         _server.insert('test.test', [{created:new Date()}], function(err, r) {
+          // console.log("-------------------------------- insert attempt")
+          // console.dir(err)
           if(r && !done) {
             done = true;
             clearInterval(intervalId);

@@ -1,3 +1,7 @@
+1.3.9
+----------------
+- Removed monitoring exclusive connection, should resolve timeouts and reconnects on idle replicasets where haInteval > socketTimeout.
+
 1.3.8 2016-03-18
 ----------------
 - Implements the SDAM monitoring specification.
