@@ -49,7 +49,8 @@ var executeWrite = function(topology, type, opsField, ns, ops, options, callback
   if(options.serializeFunctions) opts.serializeFunctions = options.serializeFunctions;
   if(options.ignoreUndefined) opts.ignoreUndefined = options.ignoreUndefined;
   // Execute command
-  topology.command(f("%s.$cmd", d), writeCommand, opts, callback);
+  // topology.command(f("%s.$cmd", d), writeCommand, opts, callback);
+  topology.command("" + d + ".$cmd", writeCommand, opts, callback);
 }
 
 //
