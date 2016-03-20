@@ -1,4 +1,4 @@
-1.3.9
+1.3.9 2016-03-20
 ----------------
 - Removed monitoring exclusive connection, should resolve timeouts and reconnects on idle replicasets where haInteval > socketTimeout.
 
