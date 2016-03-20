@@ -390,7 +390,7 @@ var executeWriteOperation = function(self, op, ns, ops, options, callback) {
   // Handler
   var handler = function(err, r) {
     // We have a no master error, immediately refresh the view of the replicaset
-    if(notMasterError(r) || notMasterError(err)) {
+    if((notMasterError(r) || notMasterError(err)) && !self.s.highAvailabilityProcessRunning) {
       // Set he current interval to minHeartbeatFrequencyMS
       self.s.currentHaInterval = self.s.minHeartbeatFrequencyMS;
       // Attempt to locate the current master immediately
@@ -446,7 +446,10 @@ ReplSet.prototype.command = function(ns, cmd, options, callback) {
           // Was it a logout command clear any credentials
           if(cmd.logout) clearCredentials(self.s, ns);
           // We have a no master error, immediately refresh the view of the replicaset
-          if(notMasterError(r) || notMasterError(err)) replicasetInquirer(self, self.s, self.s.highAvailabilityProcessRunning)();
+          if((notMasterError(r) || notMasterError(err)) && !self.s.highAvailabilityProcessRunning) {
+            replicasetInquirer(self, self.s, true)();
+          }
+
           // Return the error
           callback(err, r);
         }
@@ -471,8 +474,8 @@ ReplSet.prototype.command = function(ns, cmd, options, callback) {
     // Was it a logout command clear any credentials
     if(cmd.logout) clearCredentials(self.s, ns);
     // We have a no master error, immediately refresh the view of the replicaset
-    if(notMasterError(r) || notMasterError(err)) {
-      replicasetInquirer(self, self.s, self.s.highAvailabilityProcessRunning)();
+    if((notMasterError(r) || notMasterError(err)) && !self.s.highAvailabilityProcessRunning) {
+      replicasetInquirer(self, self.s, true)();
     }
     // Return the error
     callback(err, r);
@@ -789,14 +792,6 @@ ReplSet.prototype.unref = function(emitClose) {
 
   // Unref sockets
   this.s.replState.unref();
-
-  server.on('serverOpening', function(e) { self.emit('serverOpening', e); });
-  server.on('serverDescriptionChanged', function(e) { self.emit('serverDescriptionChanged', e); });
-  server.on('serverHeartbeatStarted', function(e) { self.emit('serverHeartbeatStarted', e); });
-  server.on('serverHeartbeatSucceeded', function(e) { self.emit('serverHeartbeatSucceeded', e); });
-  server.on('serverHearbeatFailed', function(e) { self.emit('serverHearbeatFailed', e); });
-  server.on('serverClosed', function(e) { self.emit('serverClosed', e); });
-
 
   // Clear out any listeners
   var events = ['timeout', 'error', 'close', 'joined', 'left',
@@ -1179,7 +1174,10 @@ var replicasetInquirer = function(self, state, norepeat) {
       // Ended highAvailabilityProcessRunning
       state.highAvailabilityProcessRunning = false;
       // Restart ha process
-      if(!norepeat) return setHaTimer(self, state);
+      if(!norepeat) {
+        setHaTimer(self, state);
+      }
+
       return;
     }
 
@@ -1213,7 +1211,7 @@ var replicasetInquirer = function(self, state, norepeat) {
           // We had an error and have no more servers to inspect, schedule a new check
           if(err && serversLeft == 0) {
             self.emit('ha', 'end', {norepeat: norepeat, id: localHaId, state: state.replState ? state.replState.toJSON() : {}});
-            // Ended highAvailabilityProcessRunnfing
+            // Ended highAvailabilityProcessRunning
             state.highAvailabilityProcessRunning = false;
             // Return the replicasetInquirer
             return callback();
@@ -1300,6 +1298,21 @@ var replicasetInquirer = function(self, state, norepeat) {
       }
     }
 
+    // Go over all the servers
+    if(servers.length == 0) {
+      // Set the high availability
+      state.highAvailabilityProcessRunning = false;
+      // Check if we need to emit a fullsetup event
+      checkAndEmitEvent(self, state, 'fullsetup');
+      // Check if we need to emit the all event
+      checkAndEmitEvent(self, state, 'all');
+      // Repeat the process
+      if(!norepeat) {
+        setHaTimer(self, state);
+      }
+    }
+
+    // Ge the number of servers left
     var left = servers.length;
     // Call ismaster on all servers
     for(var i = 0; i < servers.length; i++) {
@@ -1314,19 +1327,11 @@ var replicasetInquirer = function(self, state, norepeat) {
           // Check if we need to emit the all event
           checkAndEmitEvent(self, state, 'all');
           // Repeat the process
-          if(!norepeat) setHaTimer(self, state);
+          if(!norepeat) {
+            setHaTimer(self, state);
+          }
         }
       });
-    }
-
-    // Go over all the servers
-    if(servers.length == 0) {
-      // Set the high availability
-      state.highAvailabilityProcessRunning = false;
-      // Check if we need to emit a fullsetup event
-      checkAndEmitEvent(self, state, 'fullsetup');
-      // Check if we need to emit the all event
-      checkAndEmitEvent(self, state, 'all');
     }
   }
 }
