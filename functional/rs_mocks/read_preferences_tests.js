@@ -582,13 +582,14 @@ exports['Should correctly fall back to a secondary server if the readPreference 
 
     // Attempt to connect
     var server = new ReplSet([
-      { host: 'localhost', port: 32000, monitoringSocketTimeout: 5000 },
+      { host: 'localhost', port: 32000,
+        socketTimeout: 3000,
+        connectionTimeout: 3000 },
       { host: 'localhost', port: 32001 }], {
         setName: 'rs',
-        connectionTimeout: 3000,
-        socketTimeout: 0,
-        monitoringSocketTimeout: 5000,
-        haInterval: 2000,
+        // connectionTimeout: 10000,
+        // socketTimeout: 10000,
+        haInterval: 10000,
         disconnectHandler: mockDisconnectHandler,
         size: 1
     });
@@ -597,7 +598,6 @@ exports['Should correctly fall back to a secondary server if the readPreference 
     server.on('fullsetup', function(_server) {
       function schedule() {
         setTimeout(function() {
-          // console.log("----------------------------------------------- 0")
           // Perform a find
           _server.command('test.test', {
               count: 'test.test'
@@ -605,8 +605,6 @@ exports['Should correctly fall back to a secondary server if the readPreference 
           }, {
             readPreference: new ReadPreference('primaryPreferred')
           }, function(err, r) {
-            // console.log("----------------------------------------------- 1")
-            // console.dir(err)
             test.equal(err, null);
             test.equal(32000, r.connection.port);
 
@@ -630,7 +628,7 @@ exports['Should correctly fall back to a secondary server if the readPreference 
                 test.done();
                 return;
               });
-            });
+            }, 2500);
           });
         }, 500);
       }

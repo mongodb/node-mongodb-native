@@ -84,7 +84,7 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
 
           // Stop responding to any calls (emulate dropping packets on the floor)
           if(stopRespondingPrimary) {
-            yield timeoutPromise(1000);
+            yield timeoutPromise(10000);
             continue;
           }
 
@@ -144,7 +144,7 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
       { host: 'localhost', port: 32002 }], {
         setName: 'rs',
         connectionTimeout: 5000,
-        socketTimeout: 5000,
+        socketTimeout: 2000,
         haInterval: 2000,
         size: 1
     });
@@ -159,15 +159,10 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
             if(r && r.connection.port == 32001) {
               test.ok(stopRespondingPrimary);
               test.equal(1, currentIsMasterState);
-              // console.log("----------- Should correctly connect to a replicaset where the primary hangs causing monitoring thread to hang")
-              // console.dir(joinedPrimaries)
-              // console.dir(joinedSecondaries)
-              // console.dir(leftPrimaries)
 
               // Ensure the state is correct
               test.deepEqual({'localhost:32000':1, 'localhost:32001':1}, joinedPrimaries);
               test.deepEqual({'localhost:32001':1, 'localhost:32002':1}, joinedSecondaries);
-              test.deepEqual({'localhost:32000':1}, leftPrimaries);
 
               // Destroy mock
               primaryServer.destroy();
