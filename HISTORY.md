@@ -1,6 +1,6 @@
 2.1.10
 ----------------
-* Updated mongodb-core to 1.3.8.
+* Updated mongodb-core to 1.3.9.
 
 2.1.9 2016-03-16
 ----------------
