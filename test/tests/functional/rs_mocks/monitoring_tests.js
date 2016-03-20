@@ -153,7 +153,7 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
     server.on('fullsetup', function(_server) {
       // Set up a write
       function schedule() {
-        // setTimeout(function() {
+        setTimeout(function() {
           _server.insert('test.test', [{created:new Date()}], function(err, r) {
             // Did we switch servers
             if(r && r.connection.port == 32001) {
@@ -177,7 +177,7 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
 
             schedule();
           });
-        // }, 1);
+        }, 1);
       }
 
       // Schedule an insert
