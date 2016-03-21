@@ -18,7 +18,17 @@ Key features of the 2.0 driver include:
 - A new core driver on top of which you can build alternative or experimental driver APIs
 - APM (Application Performance Monitoring) API.
 
-[Driver revision history](https://github.com/mongodb/node-mongodb-native/blob/2.0/HISTORY.md).
+# What's New in 2.1
+
+Key features of the 2.1 driver include:
+
+- Implements the new GridFS specification
+- Implements support for the new 3.2 wireprotocol level find, getMore and killCursor commands.
+- A growing/shrinking connection pool.
+- A worker based connection pool minimizing the impact of slow operations on throughput and latency when the number of slow operations < the number of connections in the pool.
+- Topology monitoring specification implementation allowing applications to monitor the view of the topology as it changes.
+
+[Driver revision history](https://github.com/mongodb/node-mongodb-native/blob/2.1/HISTORY.md).
 
 ## Upgrading
 
