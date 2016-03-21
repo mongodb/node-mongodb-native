@@ -53,12 +53,17 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.1/reference/crud/</loc>
+    <loc>/node-mongodb-native/2.1/reference/ecmascript6/connecting/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.1/reference/ecmascript6/connecting/</loc>
+    <loc>/node-mongodb-native/2.1/reference/ecmascript6/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/reference/crud/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
@@ -73,17 +78,17 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.1/reference/ecmascript6/</loc>
-    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/node-mongodb-native/2.1/reference/connecting/ssl/</loc>
     <lastmod>2015-03-19T12:53:26-04:00</lastmod>
   </url>
   
   <url>
     <loc>/node-mongodb-native/2.1/reference/management/apm/</loc>
+    <lastmod>2015-03-19T12:53:26-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/reference/management/sdam-monitoring/</loc>
     <lastmod>2015-03-19T12:53:26-04:00</lastmod>
   </url>
   
@@ -103,7 +108,7 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.1/getting-started/installation-guide/</loc>
+    <loc>/node-mongodb-native/2.1/getting-started/</loc>
     <lastmod>2015-03-17T15:36:56+00:00</lastmod>
   </url>
   
@@ -113,7 +118,7 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.1/getting-started/</loc>
+    <loc>/node-mongodb-native/2.1/getting-started/installation-guide/</loc>
     <lastmod>2015-03-17T15:36:56+00:00</lastmod>
   </url>
   

@@ -154,6 +154,8 @@
             
                 <li data-name="AggregationCursor#limit"><a href="AggregationCursor.html#limit">limit</a></li>
             
+                <li data-name="AggregationCursor#lookup"><a href="AggregationCursor.html#lookup">lookup</a></li>
+            
                 <li data-name="AggregationCursor#match"><a href="AggregationCursor.html#match">match</a></li>
             
                 <li data-name="AggregationCursor#maxTimeMS"><a href="AggregationCursor.html#maxTimeMS">maxTimeMS</a></li>
@@ -739,6 +741,8 @@
             
                 <li data-name="Db#stats"><a href="Db.html#stats">stats</a></li>
             
+                <li data-name="Db#unref"><a href="Db.html#unref">unref</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -929,6 +933,8 @@
             
                 <li data-name="GridFSBucketReadStream#_read"><a href="GridFSBucketReadStream.html#_read">_read</a></li>
             
+                <li data-name="GridFSBucketReadStream#abort"><a href="GridFSBucketReadStream.html#abort">abort</a></li>
+            
                 <li data-name="GridFSBucketReadStream#end"><a href="GridFSBucketReadStream.html#end">end</a></li>
             
                 <li data-name="GridFSBucketReadStream#start"><a href="GridFSBucketReadStream.html#start">start</a></li>
@@ -937,6 +943,12 @@
             <ul class="events itemMembers">
             
             <span class="subtitle">Events</span>
+            
+                <li data-name="GridFSBucketReadStream#event:close"><a href="GridFSBucketReadStream.html#event:close">close</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:data"><a href="GridFSBucketReadStream.html#event:data">data</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:end"><a href="GridFSBucketReadStream.html#event:end">end</a></li>
             
                 <li data-name="GridFSBucketReadStream#event:error"><a href="GridFSBucketReadStream.html#event:error">error</a></li>
             
@@ -959,6 +971,8 @@
             <ul class="methods itemMembers">
             
             <span class="subtitle">Methods</span>
+            
+                <li data-name="GridFSBucketWriteStream#abort"><a href="GridFSBucketWriteStream.html#abort">abort</a></li>
             
                 <li data-name="GridFSBucketWriteStream#end"><a href="GridFSBucketWriteStream.html#end">end</a></li>
             
@@ -2167,7 +2181,7 @@
     <div class="nameContainer">
         <h4 class="name" id="delete">
             
-            delete<span class="signature">(id, callback)</span>
+            delete<span class="signature">(id, <span class="optional">callback</span>)</span>
         </h4>
     
         
@@ -2230,6 +2244,11 @@
             
             <td class="description last">
                 
+                    
+                    
+                        
+                    
+                
                 <p>The id of the file doc</p></td>
         </tr>
 	
@@ -2243,7 +2262,7 @@
             <td class="type">
             
                 
-<span class="param-type">function</span>
+<span class="param-type"><a href="GridFSBucket.html#~errorCallback">GridFSBucket~errorCallback</a></span>
 
 
             
@@ -2252,6 +2271,13 @@
             
             
             <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
                 
                 </td>
         </tr>
@@ -2991,37 +3017,6 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
     
     
-        <h5>Example</h5>
-        
-
-    
-    <pre class="prettyprint"><code>// Find all associates files with a bucket
-
-var MongoClient = require('mongodb').MongoClient,
-  test = require('assert');
-MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
-  var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload_2' });
-  var CHUNKS_COLL = 'gridfsdownload.chunks';
-  var FILES_COLL = 'gridfsdownload.files';
-  var readStream = fs.createReadStream('./LICENSE');
-
-  var uploadStream = bucket.openUploadStream('test.dat');
-
-  var license = fs.readFileSync('./LICENSE');
-  var id = uploadStream.id;
-
-  uploadStream.once('finish', function() {
-    bucket.find({}, {batchSize:1}).toArray(function(err, files) {
-      test.equal(null, err);
-      test.equal(1, files.length);
-    });
-  });
-
-  readStream.pipe(uploadStream);
-});</code></pre>
-    
-
-    
 </dd>
 
         
@@ -3412,7 +3407,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
         <p>Returns a readable stream (GridFSBucketReadStream) for streaming the
 file with the given name from GridFS. If there are multiple files with
 the same name, this will stream the most recent file with the given name
-(as determined by the <code>uploadedDate</code> field). You can set the <code>revision</code>
+(as determined by the <code>uploadDate</code> field). You can set the <code>revision</code>
 option to change this behavior.</p>
     </div>
     
@@ -4585,7 +4580,7 @@ necessary indexes.</p>
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Feb 04 2016 13:50:45 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Mon Mar 21 2016 14:54:58 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

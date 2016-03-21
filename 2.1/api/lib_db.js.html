@@ -154,6 +154,8 @@
             
                 <li data-name="AggregationCursor#limit"><a href="AggregationCursor.html#limit">limit</a></li>
             
+                <li data-name="AggregationCursor#lookup"><a href="AggregationCursor.html#lookup">lookup</a></li>
+            
                 <li data-name="AggregationCursor#match"><a href="AggregationCursor.html#match">match</a></li>
             
                 <li data-name="AggregationCursor#maxTimeMS"><a href="AggregationCursor.html#maxTimeMS">maxTimeMS</a></li>
@@ -739,6 +741,8 @@
             
                 <li data-name="Db#stats"><a href="Db.html#stats">stats</a></li>
             
+                <li data-name="Db#unref"><a href="Db.html#unref">unref</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -929,6 +933,8 @@
             
                 <li data-name="GridFSBucketReadStream#_read"><a href="GridFSBucketReadStream.html#_read">_read</a></li>
             
+                <li data-name="GridFSBucketReadStream#abort"><a href="GridFSBucketReadStream.html#abort">abort</a></li>
+            
                 <li data-name="GridFSBucketReadStream#end"><a href="GridFSBucketReadStream.html#end">end</a></li>
             
                 <li data-name="GridFSBucketReadStream#start"><a href="GridFSBucketReadStream.html#start">start</a></li>
@@ -937,6 +943,12 @@
             <ul class="events itemMembers">
             
             <span class="subtitle">Events</span>
+            
+                <li data-name="GridFSBucketReadStream#event:close"><a href="GridFSBucketReadStream.html#event:close">close</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:data"><a href="GridFSBucketReadStream.html#event:data">data</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:end"><a href="GridFSBucketReadStream.html#event:end">end</a></li>
             
                 <li data-name="GridFSBucketReadStream#event:error"><a href="GridFSBucketReadStream.html#event:error">error</a></li>
             
@@ -959,6 +971,8 @@
             <ul class="methods itemMembers">
             
             <span class="subtitle">Methods</span>
+            
+                <li data-name="GridFSBucketWriteStream#abort"><a href="GridFSBucketWriteStream.html#abort">abort</a></li>
             
                 <li data-name="GridFSBucketWriteStream#end"><a href="GridFSBucketWriteStream.html#end">end</a></li>
             
@@ -1863,6 +1877,7 @@ var debugFields = ['authSource', 'w', 'wtimeout', 'j', 'native_parser', 'forceSe
  * @property {boolean} native_parser The current value of the parameter native_parser.
  * @property {boolean} slaveOk The current slaveOk value for the db instance.
  * @property {object} writeConcern The current write concern values.
+ * @property {object} topology Access the topology object (single server, replicaset or mongos).
  * @fires Db#close
  * @fires Db#authenticated
  * @fires Db#reconnect
@@ -1943,42 +1958,6 @@ var Db = function(databaseName, topology, options) {
   getSingleProperty(this, 'bufferMaxEntries', self.s.bufferMaxEntries);
   getSingleProperty(this, 'databaseName', self.s.databaseName);
 
-  // Last ismaster
-  Object.defineProperty(this, 'options', {
-    enumerable:true,
-    get: function() { return self.s.options; }
-  });
-
-  // Last ismaster
-  Object.defineProperty(this, 'native_parser', {
-    enumerable:true,
-    get: function() { return self.s.topology.parserType() == 'c++'; }
-  });
-
-  // Last ismaster
-  Object.defineProperty(this, 'slaveOk', {
-    enumerable:true,
-    get: function() {
-      if(self.s.options.readPreference != null
-        &amp;&amp; (self.s.options.readPreference != 'primary' || self.s.options.readPreference.mode != 'primary')) {
-        return true;
-      }
-      return false;
-    }
-  });
-
-  Object.defineProperty(this, 'writeConcern', {
-    enumerable:true,
-    get: function() {
-      var ops = {};
-      if(self.s.options.w != null) ops.w = self.s.options.w;
-      if(self.s.options.j != null) ops.j = self.s.options.j;
-      if(self.s.options.fsync != null) ops.fsync = self.s.options.fsync;
-      if(self.s.options.wtimeout != null) ops.wtimeout = self.s.options.wtimeout;
-      return ops;
-    }
-  });
-
   // This is a child db, do not register any listeners
   if(options.parentDb) return;
   if(this.s.noListener) return;
@@ -1997,6 +1976,49 @@ var Db = function(databaseName, topology, options) {
 inherits(Db, EventEmitter);
 
 var define = Db.define = new Define('Db', Db, false);
+
+// Topology
+Object.defineProperty(Db.prototype, 'topology', {
+  enumerable:true,
+  get: function() { return this.s.topology; }
+});
+
+// Options
+Object.defineProperty(Db.prototype, 'options', {
+  enumerable:true,
+  get: function() { return this.s.options; }
+});
+
+// Running native parser
+Object.defineProperty(Db.prototype, 'native_parser', {
+  enumerable:true,
+  get: function() { return this.s.topology.parserType() == 'c++'; }
+});
+
+// slaveOk specified
+Object.defineProperty(Db.prototype, 'slaveOk', {
+  enumerable:true,
+  get: function() {
+    if(this.s.options.readPreference != null
+      &amp;&amp; (this.s.options.readPreference != 'primary' || this.s.options.readPreference.mode != 'primary')) {
+      return true;
+    }
+    return false;
+  }
+});
+
+// get the write Concern
+Object.defineProperty(Db.prototype, 'writeConcern', {
+  enumerable:true,
+  get: function() {
+    var ops = {};
+    if(this.s.options.w != null) ops.w = this.s.options.w;
+    if(this.s.options.j != null) ops.j = this.s.options.j;
+    if(this.s.options.fsync != null) ops.fsync = this.s.options.fsync;
+    if(this.s.options.wtimeout != null) ops.wtimeout = this.s.options.wtimeout;
+    return ops;
+  }
+});
 
 /**
  * The callback format for the Db.open method
@@ -2132,7 +2154,7 @@ define.classMethod('command', {callback: true, promise:true});
  */
 
 /**
- * Close the db and it's underlying connections
+ * Close the db and its underlying connections
  * @method
  * @param {boolean} force Force close, emitting no events
  * @param {Db~noResultCallback} [callback] The result callback
@@ -2194,7 +2216,7 @@ define.classMethod('admin', {callback: false, promise:false, returns: [Admin]});
 
 /**
  * Fetch a specific collection (containing the actual collection information). If the application does not use strict mode you can
- * can use it without a callback in the following way. var collection = db.collection('mycollection');
+ * can use it without a callback in the following way: `var collection = db.collection('mycollection');`
  *
  * @method
  * @param {string} name the collection name we wish to access.
@@ -2746,6 +2768,7 @@ define.classMethod('executeDbAdminCommand', {callback: true, promise:true});
  * @param {number} [options.v=null] Specify the format version of the indexes.
  * @param {number} [options.expireAfterSeconds=null] Allows you to expire data on indexes applied to a data (MongoDB 2.2 or higher)
  * @param {number} [options.name=null] Override the autogenerated index name (useful if the resulting name is larger than 128 bytes)
+ * @param {object} [options.partialFilterExpression=null] Creates a partial index based on the given filter object (MongoDB 3.2 or higher)
  * @param {Db~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
@@ -2787,6 +2810,12 @@ var createIndex = function(self, name, fieldOrSpec, options, callback) {
   // Attempt to run using createIndexes command
   createIndexUsingCreateIndexes(self, name, fieldOrSpec, options, function(err, result) {
     if(err == null) return handleCallback(callback, err, result);
+    // 67 = 'CannotCreateIndex', means that the server recognized
+    // `createIndex` as a command and so we don't need to fallback to
+    // an insert.
+    if(err.code === 67) {
+      return handleCallback(callback, err, result);
+    }
     // Create command
     var doc = createCreateIndexCommand(self, name, fieldOrSpec, options);
     // Set no key checking
@@ -3180,6 +3209,7 @@ Db.prototype.removeUser = function(username, options, callback) {
 var authenticate = function(self, username, password, options, callback) {
   // Did the user destroy the topology
   if(self.serverConfig &amp;&amp; self.serverConfig.isDestroyed()) return callback(new MongoError('topology was destroyed'));
+
   // the default db to authenticate against is 'self'
   // if authententicate is called from a retry context, it may be another one, like admin
   var authdb = options.authdb ? options.authdb : options.dbName;
@@ -3522,6 +3552,15 @@ var createListener = function(self, e, object) {
   return listener;
 }
 
+
+/**
+ * Unref all sockets
+ * @method
+ */
+Db.prototype.unref = function(options, callback) {
+  this.s.topology.unref();
+}
+
 /**
  * Db close event
  *
@@ -3627,7 +3666,7 @@ module.exports = Db;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Feb 04 2016 13:50:44 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Mon Mar 21 2016 14:54:58 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

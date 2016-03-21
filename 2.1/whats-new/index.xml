@@ -113,7 +113,19 @@
 &lt;li&gt;APM (Application Performance Monitoring) API.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;&lt;a href=&#34;https://github.com/mongodb/node-mongodb-native/blob/2.0/HISTORY.md&#34;&gt;Driver revision history&lt;/a&gt;.&lt;/p&gt;
+&lt;h1 id=&#34;what-s-new-in-2-1&#34;&gt;What&amp;rsquo;s New in 2.1&lt;/h1&gt;
+
+&lt;p&gt;Key features of the 2.1 driver include:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Implements the new GridFS specification&lt;/li&gt;
+&lt;li&gt;Implements support for the new 3.2 wireprotocol level find, getMore and killCursor commands.&lt;/li&gt;
+&lt;li&gt;A growing/shrinking connection pool.&lt;/li&gt;
+&lt;li&gt;A worker based connection pool minimizing the impact of slow operations on throughput and latency when the number of slow operations &amp;lt; the number of connections in the pool.&lt;/li&gt;
+&lt;li&gt;Topology monitoring specification implementation allowing applications to monitor the view of the topology as it changes.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;&lt;a href=&#34;https://github.com/mongodb/node-mongodb-native/blob/2.1/HISTORY.md&#34;&gt;Driver revision history&lt;/a&gt;.&lt;/p&gt;
 
 &lt;h2 id=&#34;upgrading&#34;&gt;Upgrading&lt;/h2&gt;
 

@@ -154,6 +154,8 @@
             
                 <li data-name="AggregationCursor#limit"><a href="AggregationCursor.html#limit">limit</a></li>
             
+                <li data-name="AggregationCursor#lookup"><a href="AggregationCursor.html#lookup">lookup</a></li>
+            
                 <li data-name="AggregationCursor#match"><a href="AggregationCursor.html#match">match</a></li>
             
                 <li data-name="AggregationCursor#maxTimeMS"><a href="AggregationCursor.html#maxTimeMS">maxTimeMS</a></li>
@@ -739,6 +741,8 @@
             
                 <li data-name="Db#stats"><a href="Db.html#stats">stats</a></li>
             
+                <li data-name="Db#unref"><a href="Db.html#unref">unref</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -929,6 +933,8 @@
             
                 <li data-name="GridFSBucketReadStream#_read"><a href="GridFSBucketReadStream.html#_read">_read</a></li>
             
+                <li data-name="GridFSBucketReadStream#abort"><a href="GridFSBucketReadStream.html#abort">abort</a></li>
+            
                 <li data-name="GridFSBucketReadStream#end"><a href="GridFSBucketReadStream.html#end">end</a></li>
             
                 <li data-name="GridFSBucketReadStream#start"><a href="GridFSBucketReadStream.html#start">start</a></li>
@@ -937,6 +943,12 @@
             <ul class="events itemMembers">
             
             <span class="subtitle">Events</span>
+            
+                <li data-name="GridFSBucketReadStream#event:close"><a href="GridFSBucketReadStream.html#event:close">close</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:data"><a href="GridFSBucketReadStream.html#event:data">data</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:end"><a href="GridFSBucketReadStream.html#event:end">end</a></li>
             
                 <li data-name="GridFSBucketReadStream#event:error"><a href="GridFSBucketReadStream.html#event:error">error</a></li>
             
@@ -959,6 +971,8 @@
             <ul class="methods itemMembers">
             
             <span class="subtitle">Methods</span>
+            
+                <li data-name="GridFSBucketWriteStream#abort"><a href="GridFSBucketWriteStream.html#abort">abort</a></li>
             
                 <li data-name="GridFSBucketWriteStream#end"><a href="GridFSBucketWriteStream.html#end">end</a></li>
             
@@ -1813,7 +1827,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line64">line 64</a>
+            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line65">line 65</a>
         </div>
         
     </div>
@@ -2690,7 +2704,7 @@ Server instance.
     
         
         <div class="tag-source">
-            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line394">line 394</a>
+            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line420">line 420</a>
         </div>
         
     </div>
@@ -2774,7 +2788,7 @@ Server instance.
     
         
         <div class="tag-source">
-            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line407">line 407</a>
+            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line433">line 433</a>
         </div>
         
     </div>
@@ -2855,7 +2869,7 @@ Server instance.
     
         
         <div class="tag-source">
-            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line400">line 400</a>
+            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line426">line 426</a>
         </div>
         
     </div>
@@ -2936,7 +2950,7 @@ Server instance.
     
         
         <div class="tag-source">
-            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line421">line 421</a>
+            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line447">line 447</a>
         </div>
         
     </div>
@@ -3017,7 +3031,7 @@ Server instance.
     
         
         <div class="tag-source">
-            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line435">line 435</a>
+            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line461">line 461</a>
         </div>
         
     </div>
@@ -3098,7 +3112,7 @@ Server instance.
     
         
         <div class="tag-source">
-            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line414">line 414</a>
+            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line440">line 440</a>
         </div>
         
     </div>
@@ -3179,7 +3193,7 @@ Server instance.
     
         
         <div class="tag-source">
-            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line428">line 428</a>
+            <a href="lib_server.js.html">lib/server.js</a>, <a href="lib_server.js.html#line454">line 454</a>
         </div>
         
     </div>
@@ -3279,7 +3293,7 @@ Server instance.
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Feb 04 2016 13:50:45 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Mon Mar 21 2016 14:54:58 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

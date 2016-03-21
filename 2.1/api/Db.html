@@ -154,6 +154,8 @@
             
                 <li data-name="AggregationCursor#limit"><a href="AggregationCursor.html#limit">limit</a></li>
             
+                <li data-name="AggregationCursor#lookup"><a href="AggregationCursor.html#lookup">lookup</a></li>
+            
                 <li data-name="AggregationCursor#match"><a href="AggregationCursor.html#match">match</a></li>
             
                 <li data-name="AggregationCursor#maxTimeMS"><a href="AggregationCursor.html#maxTimeMS">maxTimeMS</a></li>
@@ -739,6 +741,8 @@
             
                 <li data-name="Db#stats"><a href="Db.html#stats">stats</a></li>
             
+                <li data-name="Db#unref"><a href="Db.html#unref">unref</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -929,6 +933,8 @@
             
                 <li data-name="GridFSBucketReadStream#_read"><a href="GridFSBucketReadStream.html#_read">_read</a></li>
             
+                <li data-name="GridFSBucketReadStream#abort"><a href="GridFSBucketReadStream.html#abort">abort</a></li>
+            
                 <li data-name="GridFSBucketReadStream#end"><a href="GridFSBucketReadStream.html#end">end</a></li>
             
                 <li data-name="GridFSBucketReadStream#start"><a href="GridFSBucketReadStream.html#start">start</a></li>
@@ -937,6 +943,12 @@
             <ul class="events itemMembers">
             
             <span class="subtitle">Events</span>
+            
+                <li data-name="GridFSBucketReadStream#event:close"><a href="GridFSBucketReadStream.html#event:close">close</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:data"><a href="GridFSBucketReadStream.html#event:data">data</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:end"><a href="GridFSBucketReadStream.html#event:end">end</a></li>
             
                 <li data-name="GridFSBucketReadStream#event:error"><a href="GridFSBucketReadStream.html#event:error">error</a></li>
             
@@ -959,6 +971,8 @@
             <ul class="methods itemMembers">
             
             <span class="subtitle">Methods</span>
+            
+                <li data-name="GridFSBucketWriteStream#abort"><a href="GridFSBucketWriteStream.html#abort">abort</a></li>
             
                 <li data-name="GridFSBucketWriteStream#end"><a href="GridFSBucketWriteStream.html#end">end</a></li>
             
@@ -1813,7 +1827,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line82">line 82</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line83">line 83</a>
         </div>
         
     </div>
@@ -2788,6 +2802,29 @@
         </tr>
 	
 	
+	
+        <tr>
+            
+                <td class="name"><code>topology</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"><p>Access the topology object (single server, replicaset or mongos).</p></td>
+        </tr>
+	
+	
 	</tbody>
 </table></dl>
         
@@ -2883,7 +2920,7 @@ Db instance.
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1272">line 1272</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1287">line 1287</a>
         </div>
         
     </div>
@@ -3391,7 +3428,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line389">line 389</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line397">line 397</a>
         </div>
         
     </div>
@@ -3490,7 +3527,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1463">line 1463</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1479">line 1479</a>
         </div>
         
     </div>
@@ -3867,7 +3904,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line348">line 348</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line356">line 356</a>
         </div>
         
     </div>
@@ -3878,7 +3915,7 @@ co(function*() {
     
     
     <div class="description">
-        <p>Close the db and it's underlying connections</p>
+        <p>Close the db and its underlying connections</p>
     </div>
     
 
@@ -4142,7 +4179,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line422">line 422</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line430">line 430</a>
         </div>
         
     </div>
@@ -4154,7 +4191,7 @@ co(function*() {
     
     <div class="description">
         <p>Fetch a specific collection (containing the actual collection information). If the application does not use strict mode you can
-can use it without a callback in the following way. var collection = db.collection('mycollection');</p>
+can use it without a callback in the following way: <code>var collection = db.collection('mycollection');</code></p>
     </div>
     
 
@@ -4826,7 +4863,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line876">line 876</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line884">line 884</a>
         </div>
         
     </div>
@@ -5020,7 +5057,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line314">line 314</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line322">line 322</a>
         </div>
         
     </div>
@@ -5340,7 +5377,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line529">line 529</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line537">line 537</a>
         </div>
         
     </div>
@@ -6030,7 +6067,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   test.equal(null, err);
 
   // Create a capped collection with a maximum of 1000 documents
-  db.createCollection("a_simple_collection_2", {capped:true, size:10000, max:1000, w:1}, function(err, collection) {
+  db.createCollection("a_simple_collection_2", {capped:true, size:100000, max:10000, w:1}, function(err, collection) {
     test.equal(null, err);
 
     var docs = [];
@@ -6041,19 +6078,22 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
 
       // Start date
       var s = new Date();
+      var total = 0;
 
       // Get the cursor
       var cursor = collection.find({})
         .addCursorFlag('tailable', true)
-        .addCursorFlag('awaitData', true)
-        .setCursorOption('numberOfRetries', 5)
-        .setCursorOption('tailableRetryInterval', 100);
+        .addCursorFlag('awaitData', true);
 
-      cursor.on('data', function() {});
+      cursor.on('data', function() {
+        total = total + 1;
+
+        if(total == 1000) {
+          cursor.kill();
+        }
+      });
 
       cursor.on('end', function() {
-        test.ok((new Date().getTime() - s.getTime()) > 1000);
-
         db.close();
       });
     });
@@ -6087,24 +6127,28 @@ var MongoClient = require('mongodb').MongoClient,
   test = require('assert');
 MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
   // Create a capped collection with a maximum of 1000 documents
-  db.createCollection("a_simple_collection_2_with_promise", {capped:true, size:10000, max:1000, w:1}).then(function(collection) {
+  db.createCollection("a_simple_collection_2_with_promise", {capped:true, size:100000, max:10000, w:1}).then(function(collection) {
     var docs = [];
     for(var i = 0; i < 1000; i++) docs.push({a:i});
 
     // Insert a document in the capped collection
     collection.insertMany(docs, {w:1}).then(function(result) {
-
       // Start date
       var s = new Date();
+      var total = 0;
 
       // Get the cursor
-      var cursor = collection.find({})
+      var cursor = collection.find({a: {$gte:0}})
         .addCursorFlag('tailable', true)
         .addCursorFlag('awaitData', true)
-        .setCursorOption('numberOfRetries', 5)
-        .setCursorOption('tailableRetryInterval', 100);
 
-      cursor.on('data', function() {});
+      cursor.on('data', function(d) {
+        total = total + 1;
+
+        if(total == 1000) {
+          cursor.kill();
+        }
+      });
 
       cursor.on('end', function() {
         test.ok((new Date().getTime() - s.getTime()) > 1000);
@@ -6146,7 +6190,7 @@ var MongoClient = require('mongodb').MongoClient,
 co(function*() {
   var db = yield MongoClient.connect('mongodb://localhost:27017/test');
   // Create a capped collection with a maximum of 1000 documents
-  var collection = yield db.createCollection("a_simple_collection_2_with_generators", {capped:true, size:10000, max:1000, w:1});
+  var collection = yield db.createCollection("a_simple_collection_2_with_generators", {capped:true, size:100000, max:10000, w:1});
   var docs = [];
   for(var i = 0; i < 1000; i++) docs.push({a:i});
 
@@ -6154,19 +6198,22 @@ co(function*() {
   yield collection.insertMany(docs, {w:1});
   // Start date
   var s = new Date();
+  var total = 0;
 
   // Get the cursor
   var cursor = collection.find({})
     .addCursorFlag('tailable', true)
     .addCursorFlag('awaitData', true)
-    .setCursorOption('numberOfRetries', 2)
-    .setCursorOption('tailableRetryInterval', 100);
 
-  cursor.on('data', function() {});
+  cursor.on('data', function() {
+    total = total + 1;
+
+    if(total == 1000) {
+      cursor.kill();
+    }
+  });
 
   cursor.on('end', function() {
-    test.ok((new Date().getTime() - s.getTime()) > 1000);
-
     db.close();
   });
 });</code></pre>
@@ -6186,7 +6233,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line959">line 959</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line968">line 968</a>
         </div>
         
     </div>
@@ -6783,6 +6830,42 @@ co(function*() {
         </tr>
 	
 	
+	
+        <tr>
+            
+                <td class="name"><code>partialFilterExpression</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Creates a partial index based on the given filter object (MongoDB 3.2 or higher)</p></td>
+        </tr>
+	
+	
 	</tbody>
 </table>
             </td>
@@ -6993,7 +7076,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1097">line 1097</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1112">line 1112</a>
         </div>
         
     </div>
@@ -7366,7 +7449,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line781">line 781</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line789">line 789</a>
         </div>
         
     </div>
@@ -7629,7 +7712,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line818">line 818</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line826">line 826</a>
         </div>
         
     </div>
@@ -7894,7 +7977,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1036">line 1036</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1051">line 1051</a>
         </div>
         
     </div>
@@ -8703,7 +8786,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line718">line 718</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line726">line 726</a>
         </div>
         
     </div>
@@ -9320,7 +9403,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line902">line 902</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line910">line 910</a>
         </div>
         
     </div>
@@ -9625,7 +9708,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1565">line 1565</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1581">line 1581</a>
         </div>
         
     </div>
@@ -9930,7 +10013,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line604">line 604</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line612">line 612</a>
         </div>
         
     </div>
@@ -10292,7 +10375,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1511">line 1511</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1527">line 1527</a>
         </div>
         
     </div>
@@ -10623,7 +10706,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line237">line 237</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line245">line 245</a>
         </div>
         
     </div>
@@ -10797,7 +10880,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1367">line 1367</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1382">line 1382</a>
         </div>
         
     </div>
@@ -11252,7 +11335,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line750">line 750</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line758">line 758</a>
         </div>
         
     </div>
@@ -11683,7 +11766,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line564">line 564</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line572">line 572</a>
         </div>
         
     </div>
@@ -11959,6 +12042,77 @@ co(function*() {
     
 </dd>
 
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="unref">
+            
+            unref<span class="signature">()</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1753">line 1753</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Unref all sockets</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
         </dl>
     
     
@@ -11976,7 +12130,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line395">line 395</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line403">line 403</a>
         </div>
         
     </div>
@@ -12115,7 +12269,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line847">line 847</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line855">line 855</a>
         </div>
         
     </div>
@@ -12254,7 +12408,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line334">line 334</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line342">line 342</a>
         </div>
         
     </div>
@@ -12393,7 +12547,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line208">line 208</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line216">line 216</a>
         </div>
         
     </div>
@@ -12532,7 +12686,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line271">line 271</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line279">line 279</a>
         </div>
         
     </div>
@@ -12677,7 +12831,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1741">line 1741</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1766">line 1766</a>
         </div>
         
     </div>
@@ -12759,7 +12913,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1732">line 1732</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1757">line 1757</a>
         </div>
         
     </div>
@@ -12841,7 +12995,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1761">line 1761</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1786">line 1786</a>
         </div>
         
     </div>
@@ -12923,7 +13077,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1788">line 1788</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1813">line 1813</a>
         </div>
         
     </div>
@@ -13009,7 +13163,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1779">line 1779</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1804">line 1804</a>
         </div>
         
     </div>
@@ -13091,7 +13245,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1750">line 1750</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1775">line 1775</a>
         </div>
         
     </div>
@@ -13177,7 +13331,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1770">line 1770</a>
+            <a href="lib_db.js.html">lib/db.js</a>, <a href="lib_db.js.html#line1795">line 1795</a>
         </div>
         
     </div>
@@ -13278,7 +13432,7 @@ co(function*() {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Feb 04 2016 13:50:44 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Mon Mar 21 2016 14:54:58 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

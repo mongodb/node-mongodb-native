@@ -154,6 +154,8 @@
             
                 <li data-name="AggregationCursor#limit"><a href="AggregationCursor.html#limit">limit</a></li>
             
+                <li data-name="AggregationCursor#lookup"><a href="AggregationCursor.html#lookup">lookup</a></li>
+            
                 <li data-name="AggregationCursor#match"><a href="AggregationCursor.html#match">match</a></li>
             
                 <li data-name="AggregationCursor#maxTimeMS"><a href="AggregationCursor.html#maxTimeMS">maxTimeMS</a></li>
@@ -739,6 +741,8 @@
             
                 <li data-name="Db#stats"><a href="Db.html#stats">stats</a></li>
             
+                <li data-name="Db#unref"><a href="Db.html#unref">unref</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -929,6 +933,8 @@
             
                 <li data-name="GridFSBucketReadStream#_read"><a href="GridFSBucketReadStream.html#_read">_read</a></li>
             
+                <li data-name="GridFSBucketReadStream#abort"><a href="GridFSBucketReadStream.html#abort">abort</a></li>
+            
                 <li data-name="GridFSBucketReadStream#end"><a href="GridFSBucketReadStream.html#end">end</a></li>
             
                 <li data-name="GridFSBucketReadStream#start"><a href="GridFSBucketReadStream.html#start">start</a></li>
@@ -937,6 +943,12 @@
             <ul class="events itemMembers">
             
             <span class="subtitle">Events</span>
+            
+                <li data-name="GridFSBucketReadStream#event:close"><a href="GridFSBucketReadStream.html#event:close">close</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:data"><a href="GridFSBucketReadStream.html#event:data">data</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:end"><a href="GridFSBucketReadStream.html#event:end">end</a></li>
             
                 <li data-name="GridFSBucketReadStream#event:error"><a href="GridFSBucketReadStream.html#event:error">error</a></li>
             
@@ -959,6 +971,8 @@
             <ul class="methods itemMembers">
             
             <span class="subtitle">Methods</span>
+            
+                <li data-name="GridFSBucketWriteStream#abort"><a href="GridFSBucketWriteStream.html#abort">abort</a></li>
             
                 <li data-name="GridFSBucketWriteStream#end"><a href="GridFSBucketWriteStream.html#end">end</a></li>
             
@@ -1804,7 +1818,8 @@ var EventEmitter = require('events').EventEmitter
   , Store = require('./topology_base').Store
   , Define = require('./metadata')
   , MongoError = require('mongodb-core').MongoError
-  , shallowClone = require('./utils').shallowClone;
+  , shallowClone = require('./utils').shallowClone
+  , MAX_JS_INT = require('./utils').MAX_JS_INT;
 
 /**
  * @fileOverview The **Server** class is a class that represents a single server topology and is
@@ -1864,6 +1879,11 @@ var Server = function(host, port, options) {
   var storeOptions = {
       force: false
     , bufferMaxEntries: -1
+  }
+
+  // If we have "unlimited" set to max Number
+  if(storeOptions.bufferMaxEntries == -1) {
+    storeOptions.bufferMaxEntries = MAX_JS_INT;
   }
 
   // Shared global store
@@ -2054,7 +2074,9 @@ Server.prototype.connect = function(db, _options, callback) {
   // Connect handler
   var connectHandler = function() {
     // Clear out all the current handlers left over
-    ["timeout", "error", "close"].forEach(function(e) {
+    ["timeout", "error", "close", 'serverOpening', 'serverDescriptionChanged', 'serverHeartbeatStarted',
+      'serverHeartbeatSucceeded', 'serverHearbeatFailed', 'serverClosed', 'topologyOpening',
+      'topologyClosed', 'topologyDescriptionChanged'].forEach(function(e) {
       self.s.server.removeAllListeners(e);
     });
 
@@ -2064,6 +2086,24 @@ Server.prototype.connect = function(db, _options, callback) {
     self.s.server.on('close', errorHandler('close'));
     // Only called on destroy
     self.s.server.once('destroy', destroyHandler);
+
+    // relay the event
+    var relay = function(event) {
+      return function(t, server) {
+        self.emit(event, t, server);
+      }
+    }
+
+    // Set up SDAM listeners
+    self.s.server.on('serverDescriptionChanged', relay('serverDescriptionChanged'));
+    self.s.server.on('serverHeartbeatStarted', relay('serverHeartbeatStarted'));
+    self.s.server.on('serverHeartbeatSucceeded', relay('serverHeartbeatSucceeded'));
+    self.s.server.on('serverHearbeatFailed', relay('serverHearbeatFailed'));
+    self.s.server.on('serverOpening', relay('serverOpening'));
+    self.s.server.on('serverClosed', relay('serverClosed'));
+    self.s.server.on('topologyOpening', relay('topologyOpening'));
+    self.s.server.on('topologyClosed', relay('topologyClosed'));
+    self.s.server.on('topologyDescriptionChanged', relay('topologyDescriptionChanged'));
 
     // Emit open event
     self.emit('open', null, self);
@@ -2140,7 +2180,7 @@ Server.prototype.isConnected = function() {
 }
 
 Server.prototype.isDestroyed = function() {
-  return this.s.server.isDestroyed(); 
+  return this.s.server.isDestroyed();
 }
 
 define.classMethod('isConnected', {callback: false, promise:false, returns: [Boolean]});
@@ -2262,7 +2302,7 @@ module.exports = Server;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Feb 04 2016 13:50:44 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Mon Mar 21 2016 14:54:58 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

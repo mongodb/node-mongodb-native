@@ -154,6 +154,8 @@
             
                 <li data-name="AggregationCursor#limit"><a href="AggregationCursor.html#limit">limit</a></li>
             
+                <li data-name="AggregationCursor#lookup"><a href="AggregationCursor.html#lookup">lookup</a></li>
+            
                 <li data-name="AggregationCursor#match"><a href="AggregationCursor.html#match">match</a></li>
             
                 <li data-name="AggregationCursor#maxTimeMS"><a href="AggregationCursor.html#maxTimeMS">maxTimeMS</a></li>
@@ -739,6 +741,8 @@
             
                 <li data-name="Db#stats"><a href="Db.html#stats">stats</a></li>
             
+                <li data-name="Db#unref"><a href="Db.html#unref">unref</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -929,6 +933,8 @@
             
                 <li data-name="GridFSBucketReadStream#_read"><a href="GridFSBucketReadStream.html#_read">_read</a></li>
             
+                <li data-name="GridFSBucketReadStream#abort"><a href="GridFSBucketReadStream.html#abort">abort</a></li>
+            
                 <li data-name="GridFSBucketReadStream#end"><a href="GridFSBucketReadStream.html#end">end</a></li>
             
                 <li data-name="GridFSBucketReadStream#start"><a href="GridFSBucketReadStream.html#start">start</a></li>
@@ -937,6 +943,12 @@
             <ul class="events itemMembers">
             
             <span class="subtitle">Events</span>
+            
+                <li data-name="GridFSBucketReadStream#event:close"><a href="GridFSBucketReadStream.html#event:close">close</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:data"><a href="GridFSBucketReadStream.html#event:data">data</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:end"><a href="GridFSBucketReadStream.html#event:end">end</a></li>
             
                 <li data-name="GridFSBucketReadStream#event:error"><a href="GridFSBucketReadStream.html#event:error">error</a></li>
             
@@ -959,6 +971,8 @@
             <ul class="methods itemMembers">
             
             <span class="subtitle">Methods</span>
+            
+                <li data-name="GridFSBucketWriteStream#abort"><a href="GridFSBucketWriteStream.html#abort">abort</a></li>
             
                 <li data-name="GridFSBucketWriteStream#end"><a href="GridFSBucketWriteStream.html#end">end</a></li>
             
@@ -2064,7 +2078,7 @@ AggregationCursor instance.
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line395">line 395</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line408">line 408</a>
         </div>
         
     </div>
@@ -2140,7 +2154,7 @@ AggregationCursor instance.
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line375">line 375</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line388">line 388</a>
         </div>
         
     </div>
@@ -2272,7 +2286,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line362">line 362</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line375">line 375</a>
         </div>
         
     </div>
@@ -2461,7 +2475,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line388">line 388</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line401">line 401</a>
         </div>
         
     </div>
@@ -2835,7 +2849,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line382">line 382</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line395">line 395</a>
         </div>
         
     </div>
@@ -2970,6 +2984,127 @@ Promise if no callback passed
             <td class="description last">
                 
                 <p>The state limit value.</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="lookup">
+            
+            lookup<span class="signature">(document)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="AggregationCursor.html">AggregationCursor</a>}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line270">line 270</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Add a lookup stage to the aggregation pipeline</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>document</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>The lookup stage document.</p></td>
         </tr>
 	
 	
@@ -3274,7 +3409,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line329">line 329</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line342">line 342</a>
         </div>
         
     </div>
@@ -3673,7 +3808,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1159">line 1159</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1124">line 1124</a>
         </div>
         
     </div>
@@ -3751,7 +3886,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1165">line 1165</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1130">line 1130</a>
         </div>
         
     </div>
@@ -4030,7 +4165,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1139">line 1139</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1104">line 1104</a>
         </div>
         
     </div>
@@ -4151,7 +4286,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line270">line 270</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line283">line 283</a>
         </div>
         
     </div>
@@ -4274,7 +4409,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1153">line 1153</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1118">line 1118</a>
         </div>
         
     </div>
@@ -4350,7 +4485,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line401">line 401</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line414">line 414</a>
         </div>
         
     </div>
@@ -4428,7 +4563,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1146">line 1146</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1111">line 1111</a>
         </div>
         
     </div>
@@ -4549,7 +4684,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line283">line 283</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line296">line 296</a>
         </div>
         
     </div>
@@ -4670,7 +4805,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line296">line 296</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line309">line 309</a>
         </div>
         
     </div>
@@ -4791,7 +4926,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line344">line 344</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line357">line 357</a>
         </div>
         
     </div>
@@ -4989,7 +5124,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1173">line 1173</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1138">line 1138</a>
         </div>
         
     </div>
@@ -5119,7 +5254,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1180">line 1180</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1145">line 1145</a>
         </div>
         
     </div>
@@ -5243,7 +5378,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line309">line 309</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line322">line 322</a>
         </div>
         
     </div>
@@ -5366,7 +5501,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1187">line 1187</a>
+            <a href="lib_cursor.js.html">lib/cursor.js</a>, <a href="lib_cursor.js.html#line1152">line 1152</a>
         </div>
         
     </div>
@@ -5493,7 +5628,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line413">line 413</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line426">line 426</a>
         </div>
         
     </div>
@@ -5609,7 +5744,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line407">line 407</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line420">line 420</a>
         </div>
         
     </div>
@@ -5725,7 +5860,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line355">line 355</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line368">line 368</a>
         </div>
         
     </div>
@@ -5867,7 +6002,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
     
         
         <div class="tag-source">
-            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line337">line 337</a>
+            <a href="lib_aggregation_cursor.js.html">lib/aggregation_cursor.js</a>, <a href="lib_aggregation_cursor.js.html#line350">line 350</a>
         </div>
         
     </div>
@@ -6355,7 +6490,7 @@ MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Feb 04 2016 13:50:44 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Mon Mar 21 2016 14:54:58 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

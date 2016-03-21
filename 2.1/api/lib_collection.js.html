@@ -154,6 +154,8 @@
             
                 <li data-name="AggregationCursor#limit"><a href="AggregationCursor.html#limit">limit</a></li>
             
+                <li data-name="AggregationCursor#lookup"><a href="AggregationCursor.html#lookup">lookup</a></li>
+            
                 <li data-name="AggregationCursor#match"><a href="AggregationCursor.html#match">match</a></li>
             
                 <li data-name="AggregationCursor#maxTimeMS"><a href="AggregationCursor.html#maxTimeMS">maxTimeMS</a></li>
@@ -739,6 +741,8 @@
             
                 <li data-name="Db#stats"><a href="Db.html#stats">stats</a></li>
             
+                <li data-name="Db#unref"><a href="Db.html#unref">unref</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -929,6 +933,8 @@
             
                 <li data-name="GridFSBucketReadStream#_read"><a href="GridFSBucketReadStream.html#_read">_read</a></li>
             
+                <li data-name="GridFSBucketReadStream#abort"><a href="GridFSBucketReadStream.html#abort">abort</a></li>
+            
                 <li data-name="GridFSBucketReadStream#end"><a href="GridFSBucketReadStream.html#end">end</a></li>
             
                 <li data-name="GridFSBucketReadStream#start"><a href="GridFSBucketReadStream.html#start">start</a></li>
@@ -937,6 +943,12 @@
             <ul class="events itemMembers">
             
             <span class="subtitle">Events</span>
+            
+                <li data-name="GridFSBucketReadStream#event:close"><a href="GridFSBucketReadStream.html#event:close">close</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:data"><a href="GridFSBucketReadStream.html#event:data">data</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:end"><a href="GridFSBucketReadStream.html#event:end">end</a></li>
             
                 <li data-name="GridFSBucketReadStream#event:error"><a href="GridFSBucketReadStream.html#event:error">error</a></li>
             
@@ -959,6 +971,8 @@
             <ul class="methods itemMembers">
             
             <span class="subtitle">Methods</span>
+            
+                <li data-name="GridFSBucketWriteStream#abort"><a href="GridFSBucketWriteStream.html#abort">abort</a></li>
             
                 <li data-name="GridFSBucketWriteStream#end"><a href="GridFSBucketWriteStream.html#end">end</a></li>
             
@@ -2171,7 +2185,13 @@ Collection.prototype.insertOne = function(doc, options, callback) {
   var self = this;
   if(typeof options == 'function') callback = options, options = {};
   options = options || {};
-  if(Array.isArray(doc)) return callback(MongoError.create({message: 'doc parameter must be an object', driver:true }));
+  if(Array.isArray(doc) &amp;&amp; typeof callback == 'function') {
+    return callback(MongoError.create({message: 'doc parameter must be an object', driver:true }));
+  } else if(Array.isArray(doc)) {
+    return new this.s.promiseLibrary(function(resolve, reject) {
+      reject(MongoError.create({message: 'doc parameter must be an object', driver:true }));
+    });
+  }
 
   // Add ignoreUndfined
   if(this.s.options.ignoreUndefined) {
@@ -2207,7 +2227,7 @@ var insertOne = function(self, doc, options, callback) {
 var mapInserManyResults = function(docs, r) {
   var ids = r.getInsertedIds();
   var keys = Object.keys(ids);
-  var finalIds = new Array(keys);
+  var finalIds = new Array(keys.length);
 
   for(var i = 0; i &lt; keys.length; i++) {
     if(ids[keys[i]]._id) {
@@ -2252,7 +2272,13 @@ Collection.prototype.insertMany = function(docs, options, callback) {
   var self = this;
   if(typeof options == 'function') callback = options, options = {};
   options = options || {ordered:true};
-  if(!Array.isArray(docs)) return callback(MongoError.create({message: 'docs parameter must be an array of documents', driver:true }));
+  if(!Array.isArray(docs) &amp;&amp; typeof callback == 'function') {
+    return callback(MongoError.create({message: 'docs parameter must be an array of documents', driver:true }));
+  } else if(!Array.isArray(docs)) {
+    return new this.s.promiseLibrary(function(resolve, reject) {
+      reject(MongoError.create({message: 'docs parameter must be an array of documents', driver:true }));
+    });
+  }
 
   // Get the write concern options
   if(typeof options.checkKeys != 'boolean') {
@@ -2363,7 +2389,7 @@ Collection.prototype.bulkWrite = function(operations, options, callback) {
   // Return a Promise
   return new this.s.promiseLibrary(function(resolve, reject) {
     bulkWrite(self, operations, options, function(err, r) {
-      if(err) return reject(err);
+      if(err &amp;&amp; r == null) return reject(err);
       resolve(r);
     });
   });
@@ -2380,8 +2406,12 @@ var bulkWrite = function(self, operations, options, callback) {
   var bulk = options.ordered == true || options.ordered == null ? self.initializeOrderedBulkOp(options) : self.initializeUnorderedBulkOp(options);
 
   // for each op go through and add to the bulk
-  for(var i = 0; i &lt; operations.length; i++) {
-    bulk.raw(operations[i]);
+  try {
+    for(var i = 0; i &lt; operations.length; i++) {
+      bulk.raw(operations[i]);
+    }
+  } catch(err) {
+    return callback(err, null);
   }
 
   // Final options for write concern
@@ -3373,7 +3403,7 @@ var createIndexes = function(self, indexSpecs, callback) {
   // Execute the index
   self.s.db.command({
     createIndexes: self.s.name, indexes: indexSpecs
-  }, callback);
+  }, { readPreference: ReadPreference.PRIMARY }, callback);
 }
 
 define.classMethod('createIndexes', {callback: true, promise:true});
@@ -3732,6 +3762,7 @@ var count = function(self, query, options, callback) {
   if(typeof limit == 'number') cmd.limit = limit;
   if(hint) options.hint = hint;
 
+  options = shallowClone(options);
   // Ensure we have the right read preference inheritance
   options = getReadPreference(self, options, self.s.db, self);
 
@@ -3792,6 +3823,7 @@ var distinct = function(self, key, query, options, callback) {
     'distinct': self.s.name, 'key': key, 'query': query
   };
 
+  options = shallowClone(options);
   // Ensure we have the right read preference inheritance
   options = getReadPreference(self, options, self.s.db, self);
 
@@ -3873,6 +3905,7 @@ var stats = function(self, options, callback) {
   // Check if we have the scale value
   if(options['scale'] != null) commandObject['scale'] = options['scale'];
 
+  options = shallowClone(options);
   // Ensure we have the right read preference inheritance
   options = getReadPreference(self, options, self.s.db, self);
 
@@ -3912,6 +3945,9 @@ Collection.prototype.findOneAndDelete = function(filter, options, callback) {
   var self = this;
   if(typeof options == 'function') callback = options, options = {};
   options = options || {};
+
+  // Basic validation
+  if(filter == null || typeof filter != 'object') throw toError('filter parameter must be an object');
 
   // Execute using callback
   if(typeof callback == 'function') return findOneAndDelete(self, filter, options, callback);
@@ -3963,6 +3999,10 @@ Collection.prototype.findOneAndReplace = function(filter, replacement, options, 
   var self = this;
   if(typeof options == 'function') callback = options, options = {};
   options = options || {};
+
+  // Basic validation
+  if(filter == null || typeof filter != 'object') throw toError('filter parameter must be an object');
+  if(replacement == null || typeof replacement != 'object') throw toError('replacement parameter must be an object');
 
   // Execute using callback
   if(typeof callback == 'function') return findOneAndReplace(self, filter, replacement, options, callback);
@@ -4018,6 +4058,10 @@ Collection.prototype.findOneAndUpdate = function(filter, update, options, callba
   if(typeof options == 'function') callback = options, options = {};
   options = options || {};
 
+  // Basic validation
+  if(filter == null || typeof filter != 'object') throw toError('filter parameter must be an object');
+  if(update == null || typeof update != 'object') throw toError('update parameter must be an object');
+
   // Execute using callback
   if(typeof callback == 'function') return findOneAndUpdate(self, filter, update, options, callback);
 
@@ -4066,7 +4110,7 @@ define.classMethod('findOneAndUpdate', {callback: true, promise:true});
  * @param {boolean} [options.upsert=false] Perform an upsert operation.
  * @param {boolean} [options.new=false] Set to true if you want to return the modified object rather than the original. Ignored for remove.
  * @param {object} [options.fields=null] Object containing the field projection for the result returned from the operation.
- * @param {Collection~resultCallback} [callback] The command result callback
+ * @param {Collection~findAndModifyCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  * @deprecated use findOneAndUpdate, findOneAndReplace or findOneAndDelete instead
  */
@@ -4270,6 +4314,7 @@ Collection.prototype.aggregate = function(pipeline, options, callback) {
   if(options.allowDiskUse) command.allowDiskUse = options.allowDiskUse;
   if(typeof options.maxTimeMS == 'number') command.maxTimeMS = options.maxTimeMS;
 
+  options = shallowClone(options);
   // Ensure we have the right read preference inheritance
   options = getReadPreference(this, options, this.s.db, this);
 
@@ -4354,6 +4399,7 @@ Collection.prototype.parallelCollectionScan = function(options, callback) {
   options.numCursors = options.numCursors || 1;
   options.batchSize = options.batchSize || 1000;
 
+  options = shallowClone(options);
   // Ensure we have the right read preference inheritance
   options = getReadPreference(this, options, this.s.db, this);
 
@@ -4467,6 +4513,7 @@ var geoNear = function(self, x, y, point, options, callback) {
     near: point || [x, y]
   }
 
+  options = shallowClone(options);
   // Ensure we have the right read preference inheritance
   options = getReadPreference(self, options, self.s.db, self);
 
@@ -4542,6 +4589,7 @@ var geoHaystackSearch = function(self, x, y, options, callback) {
   // Remove read preference from hash if it exists
   commandObject = decorateCommand(commandObject, options, {readPreference: true});
 
+  options = shallowClone(options);
   // Ensure we have the right read preference inheritance
   options = getReadPreference(self, options, self.s.db, self);
 
@@ -4566,33 +4614,34 @@ define.classMethod('geoHaystackSearch', {callback: true, promise:true});
  * Group function helper
  * @ignore
  */
-var groupFunction = function () {
-  var c = db[ns].find(condition);
-  var map = new Map();
-  var reduce_function = reduce;
-
-  while (c.hasNext()) {
-    var obj = c.next();
-    var key = {};
-
-    for (var i = 0, len = keys.length; i &lt; len; ++i) {
-      var k = keys[i];
-      key[k] = obj[k];
-    }
-
-    var aggObj = map.get(key);
-
-    if (aggObj == null) {
-      var newObj = Object.extend({}, key);
-      aggObj = Object.extend(newObj, initial);
-      map.put(key, aggObj);
-    }
-
-    reduce_function(obj, aggObj);
-  }
-
-  return { "result": map.values() };
-}.toString();
+// var groupFunction = function () {
+//   var c = db[ns].find(condition);
+//   var map = new Map();
+//   var reduce_function = reduce;
+//
+//   while (c.hasNext()) {
+//     var obj = c.next();
+//     var key = {};
+//
+//     for (var i = 0, len = keys.length; i &lt; len; ++i) {
+//       var k = keys[i];
+//       key[k] = obj[k];
+//     }
+//
+//     var aggObj = map.get(key);
+//
+//     if (aggObj == null) {
+//       var newObj = Object.extend({}, key);
+//       aggObj = Object.extend(newObj, initial);
+//       map.put(key, aggObj);
+//     }
+//
+//     reduce_function(obj, aggObj);
+//   }
+//
+//   return { "result": map.values() };
+// }.toString();
+var groupFunction = 'function () {\nvar c = db[ns].find(condition);\nvar map = new Map();\nvar reduce_function = reduce;\n\nwhile (c.hasNext()) {\nvar obj = c.next();\nvar key = {};\n\nfor (var i = 0, len = keys.length; i &lt; len; ++i) {\nvar k = keys[i];\nkey[k] = obj[k];\n}\n\nvar aggObj = map.get(key);\n\nif (aggObj == null) {\nvar newObj = Object.extend({}, key);\naggObj = Object.extend(newObj, initial);\nmap.put(key, aggObj);\n}\n\nreduce_function(obj, aggObj);\n}\n\nreturn { "result": map.values() };\n}';
 
 /**
  * Run a group command across a collection
@@ -4643,7 +4692,6 @@ Collection.prototype.group = function(keys, condition, initial, reduce, finalize
 
   // Execute using callback
   if(typeof callback == 'function') return group(self, keys, condition, initial, reduce, finalize, command, options, callback);
-
   // Return a Promise
   return new this.s.promiseLibrary(function(resolve, reject) {
     group(self, keys, condition, initial, reduce, finalize, command, options, function(err, r) {
@@ -4685,6 +4733,7 @@ var group = function(self, keys, condition, initial, reduce, finalize, command, 
       selector.group.key = hash;
     }
 
+    options = shallowClone(options);
     // Ensure we have the right read preference inheritance
     options = getReadPreference(self, options, self.s.db, self);
 
@@ -4797,7 +4846,7 @@ Collection.prototype.mapReduce = function(map, reduce, options, callback) {
   return new this.s.promiseLibrary(function(resolve, reject) {
     mapReduce(self, map, reduce, options, function(err, r, r1) {
       if(err) return reject(err);
-      if(r instanceof Collection) return resolve(r);
+      if(!r1) return resolve(r);
       resolve({results: r, stats: r1});
     });
   });
@@ -4819,6 +4868,7 @@ var mapReduce = function(self, map, reduce, options, callback) {
     }
   }
 
+  options = shallowClone(options);
   // Ensure we have the right read preference inheritance
   options = getReadPreference(self, options, self.s.db, self);
 
@@ -4999,7 +5049,7 @@ module.exports = Collection;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Feb 04 2016 13:50:44 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Mon Mar 21 2016 14:54:58 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

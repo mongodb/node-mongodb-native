@@ -3571,138 +3571,401 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
     </item>
     
     <item>
-      <title>Logging</title>
-      <link>/node-mongodb-native/2.1/reference/management/logging/</link>
-      <pubDate>Wed, 18 Mar 2015 21:14:20 -0400</pubDate>
+      <title>Topology Monitoring</title>
+      <link>/node-mongodb-native/2.1/reference/management/sdam-monitoring/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:26 -0400</pubDate>
       
-      <guid>/node-mongodb-native/2.1/reference/management/logging/</guid>
+      <guid>/node-mongodb-native/2.1/reference/management/sdam-monitoring/</guid>
       <description>
 
-&lt;h1 id=&#34;logging&#34;&gt;Logging&lt;/h1&gt;
+&lt;h1 id=&#34;topology-management&#34;&gt;Topology Management&lt;/h1&gt;
 
-&lt;p&gt;The driver lets you log at 3 different levels. These are &lt;code&gt;debug&lt;/code&gt;, &lt;code&gt;info&lt;/code&gt; and &lt;code&gt;error&lt;/code&gt;. By default the log level is at &lt;code&gt;error&lt;/code&gt;. You can change the level, only allow specific classes to log and provide your own logger implementation. Let&amp;rsquo;s look at how we control the log level.&lt;/p&gt;
+&lt;p&gt;The node.js driver &lt;code&gt;2.1.10&lt;/code&gt; or higher introduces the SDAM Monitoring events allowing an application or tool to monitor changes in the drivers view of a single server, replicaset or mongos topology. This allows an application to react to changes such as a secondary joining or leaving a replicaset.&lt;/p&gt;
 
-&lt;h2 id=&#34;setting-log-level&#34;&gt;Setting Log level&lt;/h2&gt;
+&lt;h2 id=&#34;overview-of-sdam-events&#34;&gt;Overview of SDAM events&lt;/h2&gt;
 
-&lt;p&gt;Setting the log level is pretty easy. Let&amp;rsquo;s look at example of adjusting it for our application only logging the Db class.&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Event&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Applies To&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
 
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
-  , Logger = require(&#39;mongodb&#39;).Logger
-  , assert = require(&#39;assert&#39;);
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;serverOpening&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Server, Replicaset, Mongos&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Emitted when before server connection is established.&lt;/td&gt;
+&lt;/tr&gt;
 
-// Connection URL
-var url = &#39;mongodb://localhost:27017/myproject&#39;;
-// Use connect method to connect to the Server
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;serverClosed&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Server, Replicaset, Mongos&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Emitted when server connection gets closed.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;serverDescriptionChanged&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Server, Replicaset, Mongos&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Emitted when server state changes (such as from secondary to primary).&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;topologyOpening&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Server, Replicaset, Mongos&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Emitted before any server connections are performed.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;topologyClosed&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Server, Replicaset, Mongos&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Emitted when topology connections have all closed.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;topologyDescriptionChanged&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Replicaset, Mongos&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Emitted when the topology shape changes, such as a new primary being elected or a mongos proxy disconnecting.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;serverHeartbeatStarted&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Replicaset, Mongos&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Emitted before the ismaster command is issued to a MongoDB server.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;serverHeartbeatSucceeded&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Replicaset, Mongos&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Emitted after a successful ismaster command was issued to a MongoDB server.&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;serverHearbeatFailed&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Replicaset, Mongos&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Emitted if a ismaster command failed against a specific MongoDB server.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h2 id=&#34;simple-code-example&#34;&gt;Simple Code Example&lt;/h2&gt;
+
+&lt;p&gt;Let&amp;rsquo;s look at a simple script that connects to a replicaset and then monitors all the events that are emitted by the replicaset topology.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient;
+
+var url = &#39;mongodb://localhost:31000,localhost:31001/db?replicaSet=rs&#39;;
+
 MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+  if(err) throw err;
 
-  // Set debug level
-  Logger.setLevel(&#39;debug&#39;);
+  db.topology.on(&#39;serverDescriptionChanged&#39;, function(event) {
+    console.log(&#39;received serverDescriptionChanged&#39;);
+    console.log(JSON.stringify(event, null, 2));
+  });
 
-  // Execute command {ismaster:true} against db
-  db.command({ismaster:true}, function(err, d) {
-    assert.equal(null, err);
-    db.close();
+  db.topology.on(&#39;serverHeartbeatStarted&#39;, function(event) {
+    console.log(&#39;received serverHeartbeatStarted&#39;);
+    console.log(JSON.stringify(event, null, 2));
+  });
+
+  db.topology.on(&#39;serverHeartbeatSucceeded&#39;, function(event) {
+    console.log(&#39;received serverHeartbeatSucceeded&#39;);
+    console.log(JSON.stringify(event, null, 2));
+  });
+
+  db.topology.on(&#39;serverHearbeatFailed&#39;, function(event) {
+    console.log(&#39;received serverHearbeatFailed&#39;);
+    console.log(JSON.stringify(event, null, 2));
+  });
+
+  db.topology.on(&#39;serverOpening&#39;, function(event) {
+    console.log(&#39;received serverOpening&#39;);
+    console.log(JSON.stringify(event, null, 2));
+  });
+
+  db.topology.on(&#39;serverClosed&#39;, function(event) {
+    console.log(&#39;received serverClosed&#39;);
+    console.log(JSON.stringify(event, null, 2));
+  });
+
+  db.topology.on(&#39;topologyOpening&#39;, function(event) {
+    console.log(&#39;received topologyOpening&#39;);
+    console.log(JSON.stringify(event, null, 2));
+  });
+
+  db.topology.on(&#39;topologyClosed&#39;, function(event) {
+    console.log(&#39;received topologyClosed&#39;);
+    console.log(JSON.stringify(event, null, 2));
+  });
+
+  db.topology.on(&#39;topologyDescriptionChanged&#39;, function(event) {
+    console.log(&#39;received topologyDescriptionChanged&#39;);
+    console.log(JSON.stringify(event, null, 2));
   });
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Setting the level is as easy as calling the method &lt;code&gt;setLevel&lt;/code&gt; with the string value &lt;code&gt;debug&lt;/code&gt;, &lt;code&gt;info&lt;/code&gt; or &lt;code&gt;error&lt;/code&gt;. Log level is set globally.&lt;/p&gt;
+&lt;h2 id=&#34;example-documents-returned-for-each-event-type&#34;&gt;Example Documents Returned For Each Event Type&lt;/h2&gt;
 
-&lt;h2 id=&#34;filtering-on-specific-classes&#34;&gt;Filtering On specific classes&lt;/h2&gt;
+&lt;p&gt;The example documents are meant to serve as a guide to the format of the returned documents.&lt;/p&gt;
 
-&lt;p&gt;Say you are only interested in logging a specific class. You can tell the Logger to only log specific class names. Let&amp;rsquo;s take an example Where we only log the &lt;code&gt;Db&lt;/code&gt; class.&lt;/p&gt;
+&lt;h3 id=&#34;serverdescriptionchanged&#34;&gt;serverDescriptionChanged&lt;/h3&gt;
 
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
-  , Logger = require(&#39;mongodb&#39;).Logger
-  , assert = require(&#39;assert&#39;);
-
-// Connection URL
-var url = &#39;mongodb://localhost:27017/myproject&#39;;
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log(&amp;quot;Connected correctly to server&amp;quot;);
-
-  // Set debug level
-  Logger.setLevel(&#39;debug&#39;);
-  // Only log statements on &#39;Db&#39; class
-  Logger.filter(&#39;class&#39;, [&#39;Db&#39;]);
-
-  // Execute command {ismaster:true} against db
-  db.command({ismaster:true}, function(err, d) {
-    assert.equal(null, err);
-    db.close();
-  });
-});
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{ address: &#39;localhost:27017&#39;,
+  arbiters: [],
+  hosts: [],
+  passives: [],
+  type: &#39;RSPrimary&#39; }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This will only log statements on the &lt;code&gt;Db&lt;/code&gt; class. The available classes in the driver are.&lt;/p&gt;
+&lt;p&gt;The type can be one of the following values.&lt;/p&gt;
 
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;Db&lt;/code&gt;: The Db instance log statements&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;Server&lt;/code&gt;: A server instance (either standalone, a mongos or replicaset member)&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ReplSet&lt;/code&gt;: Replicaset related log statements&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;Mongos&lt;/code&gt;: Mongos related log statements&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;Cursor&lt;/code&gt;: Cursor log statements&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;Pool&lt;/code&gt;: Connection Pool specific log statements&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;Connection&lt;/code&gt;: Singular connection specific log statements&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;Ping&lt;/code&gt;: Replicaset ping inquiry log statements&lt;/li&gt;
-&lt;/ul&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
 
-&lt;p&gt;You can add your own classes to the logger if you wish by creating your own logger instances. Let&amp;rsquo;s look at a simple example on how to add our custom class to the Logger.&lt;/p&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;RSPrimary&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Primary server&lt;/td&gt;
+&lt;/tr&gt;
 
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var Logger = require(&#39;mongodb&#39;).Logger
-  , assert = require(&#39;assert&#39;);
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;RSSecondary&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Secondary server&lt;/td&gt;
+&lt;/tr&gt;
 
-var A = function() {
-  var logger = Logger(&#39;A&#39;, options);
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;RSArbiter&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Arbiter&lt;/td&gt;
+&lt;/tr&gt;
 
-  this.do = function() {
-    if(logger.isInfo()) logger.info(&#39;logging A&#39;, {});
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;Standalone&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Standalone server&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;Unknown&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Unknown server&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;Mongos&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Mongos proxy&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+&lt;h3 id=&#34;serverheartbeatstarted&#34;&gt;serverHeartbeatStarted&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{ connectionId: &#39;localhost:27017&#39; }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;serverheartbeatsucceeded&#34;&gt;serverHeartbeatSucceeded&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{ durationMS: 20,
+  reply: {
+    setName: &amp;quot;rs&amp;quot;, setVersion: 1, electionId: new ObjectId(),
+    maxBsonObjectSize : 16777216, maxMessageSizeBytes : 48000000,
+    maxWriteBatchSize : 1000, localTime : new Date(),
+    maxWireVersion : 4, minWireVersion : 0, ok : 1,
+    hosts: [&amp;quot;localhost:32000&amp;quot;, &amp;quot;localhost:32001&amp;quot;],
+    arbiters: [&amp;quot;localhost:32002&amp;quot;]
+  },
+  connectionId: &#39;localhost:27017&#39; }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;serverhearbeatfailed&#34;&gt;serverHearbeatFailed&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{ durationMS: 20,
+  err: new MongoError(&#39;some error&#39;),
+  connectionId: &#39;localhost:27017&#39; }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;serveropening&#34;&gt;serverOpening&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{ topologyId: 0, name: &#39;localhost:27017&#39; }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;serverclosed&#34;&gt;serverClosed&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{ topologyId: 0, name: &#39;localhost:27017&#39; }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;topologyopening&#34;&gt;topologyOpening&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{ topologyId: 0 }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;topologyclosed&#34;&gt;topologyClosed&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{ topologyId: 0 }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;topologydescriptionchanged&#34;&gt;topologyDescriptionChanged&lt;/h3&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{
+  topologyId: 0,
+  previousDescription: {
+    topologyType: &amp;quot;ReplicaSetNoPrimary&amp;quot;,
+    setName: &amp;quot;rs&amp;quot;,
+    servers: [
+      {
+        type: &amp;quot;RSSecondary&amp;quot;,
+        address: &amp;quot;localhost:32001&amp;quot;,
+        hosts: [
+          &amp;quot;localhost:32000&amp;quot;,
+          &amp;quot;localhost:32001&amp;quot;
+        ],
+        arbiters: [
+          &amp;quot;localhost:32002&amp;quot;
+        ],
+        setName: &amp;quot;rs&amp;quot;
+      },
+      {
+        type: &amp;quot;RSSecondary&amp;quot;,
+        address: &amp;quot;localhost:32000&amp;quot;,
+        hosts: [
+          &amp;quot;localhost:32000&amp;quot;,
+          &amp;quot;localhost:32001&amp;quot;
+        ],
+        arbiters: [
+          &amp;quot;localhost:32002&amp;quot;
+        ],
+        setName: &amp;quot;rs&amp;quot;
+      },
+      {
+        type: &amp;quot;RSArbiter&amp;quot;,
+        address: &amp;quot;localhost:32002&amp;quot;,
+        hosts: [
+          &amp;quot;localhost:32000&amp;quot;,
+          &amp;quot;localhost:32001&amp;quot;
+        ],
+        arbiters: [
+          &amp;quot;localhost:32002&amp;quot;
+        ],
+        setName: &amp;quot;rs&amp;quot;
+      }
+    ]
+  },
+  newDescription: {
+    topologyType: &amp;quot;ReplicaSetWithPrimary&amp;quot;,
+    setName: &amp;quot;rs&amp;quot;,
+    servers: [
+      {
+        type: &amp;quot;RSPrimary&amp;quot;,
+        address: &amp;quot;localhost:32001&amp;quot;,
+        hosts: [
+          &amp;quot;localhost:32000&amp;quot;,
+          &amp;quot;localhost:32001&amp;quot;
+        ],
+        arbiters: [
+          &amp;quot;localhost:32002&amp;quot;
+        ],
+        setName: &amp;quot;rs&amp;quot;
+      },
+      {
+        type: &amp;quot;RSSecondary&amp;quot;,
+        address: &amp;quot;localhost:32000&amp;quot;,
+        hosts: [
+          &amp;quot;localhost:32000&amp;quot;,
+          &amp;quot;localhost:32001&amp;quot;
+        ],
+        arbiters: [
+          &amp;quot;localhost:32002&amp;quot;
+        ],
+        setName: &amp;quot;rs&amp;quot;
+      },
+      {
+        type: &amp;quot;RSArbiter&amp;quot;,
+        address: &amp;quot;localhost:32002&amp;quot;,
+        hosts: [
+          &amp;quot;localhost:32000&amp;quot;,
+          &amp;quot;localhost:32001&amp;quot;
+        ],
+        arbiters: [
+          &amp;quot;localhost:32002&amp;quot;
+        ],
+        setName: &amp;quot;rs&amp;quot;
+      }
+    ]
   }
 }
-
-// Execute A
-var a = new A();
-a.do();
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Pretty simple and straightforward.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;type&lt;/code&gt; field in the server array documents can be one of the following values.&lt;/p&gt;
 
-&lt;h2 id=&#34;custom-logger&#34;&gt;Custom logger&lt;/h2&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
 
-&lt;p&gt;Let&amp;rsquo;s say you don&amp;rsquo;t want the log statements to go to &lt;code&gt;console.log&lt;/code&gt; but want to send them to a new location or maybe transform them before you send them on. Let&amp;rsquo;s define our custom logger.&lt;/p&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;RSPrimary&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Primary server&lt;/td&gt;
+&lt;/tr&gt;
 
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
-  , Logger = require(&#39;mongodb&#39;).Logger
-  , assert = require(&#39;assert&#39;);
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;RSSecondary&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Secondary server&lt;/td&gt;
+&lt;/tr&gt;
 
-// Connection URL
-var url = &#39;mongodb://localhost:27017/myproject&#39;;
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;RSArbiter&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Arbiter&lt;/td&gt;
+&lt;/tr&gt;
 
-  // Set debug level
-  Logger.setLevel(&#39;debug&#39;);
-  
-  // Set our own logger
-  Logger.setCurrentLogger(function(msg, context) {
-    console.log(msg, context);
-  });
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;Standalone&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Standalone server&lt;/td&gt;
+&lt;/tr&gt;
 
-  // Execute command {ismaster:true} against db
-  db.command({ismaster:true}, function(err, d) {
-    assert.equal(null, err);
-    db.close();
-  });
-});
-&lt;/code&gt;&lt;/pre&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;Unknown&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Unknown server&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 
-&lt;p&gt;That wraps up the Logging support in the driver.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;topologyType&lt;/code&gt; field can be one of the following values.&lt;/p&gt;
+
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th align=&#34;left&#34;&gt;Type&lt;/th&gt;
+&lt;th align=&#34;left&#34;&gt;Description&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;ReplicaSetWithPrimary&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Replicaset with a primary&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;ReplicaSetNoPrimary&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Replicaset with no primary&lt;/td&gt;
+&lt;/tr&gt;
+
+&lt;tr&gt;
+&lt;td align=&#34;left&#34;&gt;Unknown&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Unknown topology&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 </description>
     </item>
     

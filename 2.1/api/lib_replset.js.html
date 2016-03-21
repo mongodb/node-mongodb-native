@@ -154,6 +154,8 @@
             
                 <li data-name="AggregationCursor#limit"><a href="AggregationCursor.html#limit">limit</a></li>
             
+                <li data-name="AggregationCursor#lookup"><a href="AggregationCursor.html#lookup">lookup</a></li>
+            
                 <li data-name="AggregationCursor#match"><a href="AggregationCursor.html#match">match</a></li>
             
                 <li data-name="AggregationCursor#maxTimeMS"><a href="AggregationCursor.html#maxTimeMS">maxTimeMS</a></li>
@@ -739,6 +741,8 @@
             
                 <li data-name="Db#stats"><a href="Db.html#stats">stats</a></li>
             
+                <li data-name="Db#unref"><a href="Db.html#unref">unref</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -929,6 +933,8 @@
             
                 <li data-name="GridFSBucketReadStream#_read"><a href="GridFSBucketReadStream.html#_read">_read</a></li>
             
+                <li data-name="GridFSBucketReadStream#abort"><a href="GridFSBucketReadStream.html#abort">abort</a></li>
+            
                 <li data-name="GridFSBucketReadStream#end"><a href="GridFSBucketReadStream.html#end">end</a></li>
             
                 <li data-name="GridFSBucketReadStream#start"><a href="GridFSBucketReadStream.html#start">start</a></li>
@@ -937,6 +943,12 @@
             <ul class="events itemMembers">
             
             <span class="subtitle">Events</span>
+            
+                <li data-name="GridFSBucketReadStream#event:close"><a href="GridFSBucketReadStream.html#event:close">close</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:data"><a href="GridFSBucketReadStream.html#event:data">data</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:end"><a href="GridFSBucketReadStream.html#event:end">end</a></li>
             
                 <li data-name="GridFSBucketReadStream#event:error"><a href="GridFSBucketReadStream.html#event:error">error</a></li>
             
@@ -959,6 +971,8 @@
             <ul class="methods itemMembers">
             
             <span class="subtitle">Methods</span>
+            
+                <li data-name="GridFSBucketWriteStream#abort"><a href="GridFSBucketWriteStream.html#abort">abort</a></li>
             
                 <li data-name="GridFSBucketWriteStream#end"><a href="GridFSBucketWriteStream.html#end">end</a></li>
             
@@ -1810,7 +1824,8 @@ var EventEmitter = require('events').EventEmitter
   , CServer = require('mongodb-core').Server
   , CReplSet = require('mongodb-core').ReplSet
   , CoreReadPreference = require('mongodb-core').ReadPreference
-  , shallowClone = require('./utils').shallowClone;
+  , shallowClone = require('./utils').shallowClone
+  , MAX_JS_INT = require('./utils').MAX_JS_INT;
 
 /**
  * @fileOverview The **ReplSet** class is a class that represents a Replicaset topology and is
@@ -1883,6 +1898,11 @@ var ReplSet = function(servers, options) {
   var storeOptions = {
       force: false
     , bufferMaxEntries: -1
+  }
+
+  // If we have "unlimited" set to max Number
+  if(storeOptions.bufferMaxEntries == -1) {
+    storeOptions.bufferMaxEntries = MAX_JS_INT;
   }
 
   // Shared global store
@@ -2079,7 +2099,9 @@ ReplSet.prototype.connect = function(db, _options, callback) {
   // Connect handler
   var connectHandler = function() {
     // Clear out all the current handlers left over
-    ["timeout", "error", "close"].forEach(function(e) {
+    ["timeout", "error", "close", 'serverOpening', 'serverDescriptionChanged', 'serverHeartbeatStarted',
+      'serverHeartbeatSucceeded', 'serverHearbeatFailed', 'serverClosed', 'topologyOpening',
+      'topologyClosed', 'topologyDescriptionChanged'].forEach(function(e) {
       self.s.replset.removeAllListeners(e);
     });
 
@@ -2118,6 +2140,17 @@ ReplSet.prototype.connect = function(db, _options, callback) {
     self.s.replset.on('left', relay('left'));
     self.s.replset.on('ping', relay('ping'));
     self.s.replset.on('ha', relayHa);
+
+    // Set up SDAM listeners
+    self.s.replset.on('serverDescriptionChanged', relay('serverDescriptionChanged'));
+    self.s.replset.on('serverHeartbeatStarted', relay('serverHeartbeatStarted'));
+    self.s.replset.on('serverHeartbeatSucceeded', relay('serverHeartbeatSucceeded'));
+    self.s.replset.on('serverHearbeatFailed', relay('serverHearbeatFailed'));
+    self.s.replset.on('serverOpening', relay('serverOpening'));
+    self.s.replset.on('serverClosed', relay('serverClosed'));
+    self.s.replset.on('topologyOpening', relay('topologyOpening'));
+    self.s.replset.on('topologyClosed', relay('topologyClosed'));
+    self.s.replset.on('topologyDescriptionChanged', relay('topologyDescriptionChanged'));
 
     self.s.replset.on('fullsetup', function(topology) {
       self.emit('fullsetup', null, self);
@@ -2380,7 +2413,7 @@ module.exports = ReplSet;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Feb 04 2016 13:50:44 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Mon Mar 21 2016 14:54:58 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

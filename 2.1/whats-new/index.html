@@ -832,6 +832,35 @@
 
         
         
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/management/sdam-monitoring/">
+        <i class='fa'></i>
+        Topology Monitoring
+    </a>
+  </li>
+
+
+        
+        
     </ul>
   </li>
 
@@ -1074,7 +1103,19 @@
 <li>APM (Application Performance Monitoring) API.</li>
 </ul>
 
-<p><a href="https://github.com/mongodb/node-mongodb-native/blob/2.0/HISTORY.md">Driver revision history</a>.</p>
+<h1 id="what-s-new-in-2-1">What&rsquo;s New in 2.1</h1>
+
+<p>Key features of the 2.1 driver include:</p>
+
+<ul>
+<li>Implements the new GridFS specification</li>
+<li>Implements support for the new 3.2 wireprotocol level find, getMore and killCursor commands.</li>
+<li>A growing/shrinking connection pool.</li>
+<li>A worker based connection pool minimizing the impact of slow operations on throughput and latency when the number of slow operations &lt; the number of connections in the pool.</li>
+<li>Topology monitoring specification implementation allowing applications to monitor the view of the topology as it changes.</li>
+</ul>
+
+<p><a href="https://github.com/mongodb/node-mongodb-native/blob/2.1/HISTORY.md">Driver revision history</a>.</p>
 
 <h2 id="upgrading">Upgrading</h2>
 
@@ -1115,7 +1156,8 @@
     <span class="toc-header">On this page</span>
     <nav id="TableOfContents">
 <ul>
-<li><a href="#what-s-new-in-2-0">What&rsquo;s New in 2.0</a>
+<li><a href="#what-s-new-in-2-0">What&rsquo;s New in 2.0</a></li>
+<li><a href="#what-s-new-in-2-1">What&rsquo;s New in 2.1</a>
 <ul>
 <li><a href="#upgrading">Upgrading</a></li>
 </ul></li>

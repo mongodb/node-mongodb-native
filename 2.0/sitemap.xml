@@ -18,12 +18,12 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/reference/management/</loc>
+    <loc>/node-mongodb-native/2.0/reference/gridfs/gridstore/</loc>
     <lastmod>2015-03-19T14:27:51-04:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/reference/gridfs/gridstore/</loc>
+    <loc>/node-mongodb-native/2.0/reference/management/</loc>
     <lastmod>2015-03-19T14:27:51-04:00</lastmod>
   </url>
   
@@ -93,22 +93,22 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/</loc>
-    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/2.0/getting-started/installation-guide/</loc>
-    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/node-mongodb-native/2.0/getting-started/</loc>
     <lastmod>2015-03-17T15:36:56+00:00</lastmod>
   </url>
   
   <url>
+    <loc>/node-mongodb-native/2.0/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/node-mongodb-native/2.0/getting-started/quick-tour/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.0/getting-started/installation-guide/</loc>
     <lastmod>2015-03-17T15:36:56+00:00</lastmod>
   </url>
   

@@ -154,6 +154,8 @@
             
                 <li data-name="AggregationCursor#limit"><a href="AggregationCursor.html#limit">limit</a></li>
             
+                <li data-name="AggregationCursor#lookup"><a href="AggregationCursor.html#lookup">lookup</a></li>
+            
                 <li data-name="AggregationCursor#match"><a href="AggregationCursor.html#match">match</a></li>
             
                 <li data-name="AggregationCursor#maxTimeMS"><a href="AggregationCursor.html#maxTimeMS">maxTimeMS</a></li>
@@ -739,6 +741,8 @@
             
                 <li data-name="Db#stats"><a href="Db.html#stats">stats</a></li>
             
+                <li data-name="Db#unref"><a href="Db.html#unref">unref</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -929,6 +933,8 @@
             
                 <li data-name="GridFSBucketReadStream#_read"><a href="GridFSBucketReadStream.html#_read">_read</a></li>
             
+                <li data-name="GridFSBucketReadStream#abort"><a href="GridFSBucketReadStream.html#abort">abort</a></li>
+            
                 <li data-name="GridFSBucketReadStream#end"><a href="GridFSBucketReadStream.html#end">end</a></li>
             
                 <li data-name="GridFSBucketReadStream#start"><a href="GridFSBucketReadStream.html#start">start</a></li>
@@ -937,6 +943,12 @@
             <ul class="events itemMembers">
             
             <span class="subtitle">Events</span>
+            
+                <li data-name="GridFSBucketReadStream#event:close"><a href="GridFSBucketReadStream.html#event:close">close</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:data"><a href="GridFSBucketReadStream.html#event:data">data</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:end"><a href="GridFSBucketReadStream.html#event:end">end</a></li>
             
                 <li data-name="GridFSBucketReadStream#event:error"><a href="GridFSBucketReadStream.html#event:error">error</a></li>
             
@@ -959,6 +971,8 @@
             <ul class="methods itemMembers">
             
             <span class="subtitle">Methods</span>
+            
+                <li data-name="GridFSBucketWriteStream#abort"><a href="GridFSBucketWriteStream.html#abort">abort</a></li>
             
                 <li data-name="GridFSBucketWriteStream#end"><a href="GridFSBucketWriteStream.html#end">end</a></li>
             
@@ -1874,7 +1888,6 @@ var push = Array.prototype.push;
  * collection.find({}).addCursorFlag('oplogReplay', true)         // Set cursor as oplogReplay
  * collection.find({}).addCursorFlag('noCursorTimeout', true)     // Set cursor as noCursorTimeout
  * collection.find({}).addCursorFlag('awaitData', true)           // Set cursor as awaitData
- * collection.find({}).addCursorFlag('exhaust', true)             // Set cursor as exhaust
  * collection.find({}).addCursorFlag('partial', true)             // Set cursor as partial
  * collection.find({}).addQueryModifier('$orderby', {a:1})        // Set $orderby {a:1}
  * collection.find({}).max(10)                                    // Set the cursor maxScan
@@ -2204,7 +2217,7 @@ define.classMethod('setCursorOption', {callback: false, promise:false, returns: 
 /**
  * Add a cursor flag to the cursor
  * @method
- * @param {string} flag The flag to set, must be one of following ['tailable', 'oplogReplay', 'noCursorTimeout', 'awaitData', 'exhaust', 'partial'].
+ * @param {string} flag The flag to set, must be one of following ['tailable', 'oplogReplay', 'noCursorTimeout', 'awaitData', 'partial'].
  * @param {boolean} value The flag boolean value.
  * @throws {MongoError}
  * @return {Cursor}
@@ -2446,18 +2459,6 @@ var nextObject = function(self, callback) {
 
   // Get the next object
   self._next(function(err, doc) {
-    if(err &amp;&amp; err.tailable &amp;&amp; self.s.currentNumberOfRetries == 0) return callback(err);
-    if(err &amp;&amp; err.tailable &amp;&amp; self.s.currentNumberOfRetries > 0) {
-      self.s.currentNumberOfRetries = self.s.currentNumberOfRetries - 1;
-
-      return setTimeout(function() {
-        // Rewind the cursor only when it has not actually read any documents yet
-        if(self.cursorState.currentLimit == 0) self.rewind();
-        // Read the next document, forcing a re-issue of query if no cursorId exists
-        self.nextObject(callback);
-      }, self.s.tailableRetryInterval);
-    }
-
     self.s.state = Cursor.OPEN;
     if(err) return handleCallback(callback, err);
     handleCallback(callback, null, doc);
@@ -2728,38 +2729,16 @@ var count = function(self, applySkipLimit, opts, callback) {
     command.maxTimeMS = self.s.cmd.maxTimeMS;
   }
 
-  // Get a server
-  var server = self.s.topology.getServer(opts);
-  // Get a connection
-  var connection = self.s.topology.getConnection(opts);
-  // Get the callbacks
-  var callbacks = server.getCallbacks();
-
   // Merge in any options
   if(opts.skip) command.skip = opts.skip;
   if(opts.limit) command.limit = opts.limit;
   if(self.s.options.hint) command.hint = self.s.options.hint;
 
-  // Build Query object
-  var query = new Query(self.s.bson, f("%s.$cmd", self.s.ns.substr(0, delimiter)), command, {
-      numberToSkip: 0, numberToReturn: -1
-    , checkKeys: false
-  });
-
-  // Set up callback
-  callbacks.register(query.requestId, function(err, result) {
-    if(err) return handleCallback(callback, err);
-    if(result.documents.length == 1
-      &amp;&amp; (result.documents[0].errmsg
-      || result.documents[0].err
-      || result.documents[0]['$err'])) {
-      return handleCallback(callback, MongoError.create(result.documents[0]));
-    }
-    handleCallback(callback, null, result.documents[0].n);
-  });
-
-  // Write the initial command out
-  connection.write(query.toBin());
+  // Execute the command
+  self.topology.command(f("%s.$cmd", self.s.ns.substr(0, delimiter))
+    , command, function(err, result) {
+      callback(err, result ? result.result.n : null)
+    });
 }
 
 define.classMethod('count', {callback: true, promise:true});
@@ -3019,7 +2998,7 @@ module.exports = Cursor;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Feb 04 2016 13:50:44 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Mon Mar 21 2016 14:54:58 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

@@ -154,6 +154,8 @@
             
                 <li data-name="AggregationCursor#limit"><a href="AggregationCursor.html#limit">limit</a></li>
             
+                <li data-name="AggregationCursor#lookup"><a href="AggregationCursor.html#lookup">lookup</a></li>
+            
                 <li data-name="AggregationCursor#match"><a href="AggregationCursor.html#match">match</a></li>
             
                 <li data-name="AggregationCursor#maxTimeMS"><a href="AggregationCursor.html#maxTimeMS">maxTimeMS</a></li>
@@ -739,6 +741,8 @@
             
                 <li data-name="Db#stats"><a href="Db.html#stats">stats</a></li>
             
+                <li data-name="Db#unref"><a href="Db.html#unref">unref</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -929,6 +933,8 @@
             
                 <li data-name="GridFSBucketReadStream#_read"><a href="GridFSBucketReadStream.html#_read">_read</a></li>
             
+                <li data-name="GridFSBucketReadStream#abort"><a href="GridFSBucketReadStream.html#abort">abort</a></li>
+            
                 <li data-name="GridFSBucketReadStream#end"><a href="GridFSBucketReadStream.html#end">end</a></li>
             
                 <li data-name="GridFSBucketReadStream#start"><a href="GridFSBucketReadStream.html#start">start</a></li>
@@ -937,6 +943,12 @@
             <ul class="events itemMembers">
             
             <span class="subtitle">Events</span>
+            
+                <li data-name="GridFSBucketReadStream#event:close"><a href="GridFSBucketReadStream.html#event:close">close</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:data"><a href="GridFSBucketReadStream.html#event:data">data</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:end"><a href="GridFSBucketReadStream.html#event:end">end</a></li>
             
                 <li data-name="GridFSBucketReadStream#event:error"><a href="GridFSBucketReadStream.html#event:error">error</a></li>
             
@@ -959,6 +971,8 @@
             <ul class="methods itemMembers">
             
             <span class="subtitle">Methods</span>
+            
+                <li data-name="GridFSBucketWriteStream#abort"><a href="GridFSBucketWriteStream.html#abort">abort</a></li>
             
                 <li data-name="GridFSBucketWriteStream#end"><a href="GridFSBucketWriteStream.html#end">end</a></li>
             
@@ -2275,7 +2289,7 @@ GridFSBucketReadStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs-stream_download.js.html">lib/gridfs-stream/download.js</a>, <a href="lib_gridfs-stream_download.js.html#line68">line 68</a>
+            <a href="lib_gridfs-stream_download.js.html">lib/gridfs-stream/download.js</a>, <a href="lib_gridfs-stream_download.js.html#line89">line 89</a>
         </div>
         
     </div>
@@ -2339,6 +2353,185 @@ GridFSBucketReadStream instance.
             
 <dt>
     <div class="nameContainer">
+        <h4 class="name" id="abort">
+            
+            abort<span class="signature">(<span class="optional">callback</span>)</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_gridfs-stream_download.js.html">lib/gridfs-stream/download.js</a>, <a href="lib_gridfs-stream_download.js.html#line140">line 140</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Marks this stream as aborted (will never push another <code>data</code> event)
+and kills the underlying cursor. Will emit the 'end' event, and then
+the 'close' event once the cursor is successfully killed.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="GridFSBucket.html#~errorCallback">GridFSBucket~errorCallback</a></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>called when the cursor is successfully closed or an error occurred.</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+    <h5>Fires:</h5>
+    <ul>
+        <li>GridFSBucketWriteStream#event:close</li>
+    
+        <li>GridFSBucketWriteStream#event:end</li>
+    </ul>
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+        <h5>Example</h5>
+        
+
+    
+    <pre class="prettyprint"><code>// Calling abort() on a GridFSBucketReadStream
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  var bucket = new GridFSBucket(db,
+    { bucketName: 'gridfsdestroy', chunkSizeBytes: 10 });
+  var readStream = fs.createReadStream('./LICENSE');
+  var uploadStream = bucket.openUploadStream('test.dat');
+
+  var id = uploadStream.id;
+
+  // Wait for stream to finish
+  uploadStream.once('finish', function() {
+    var id = uploadStream.id;
+    var downloadStream = bucket.openDownloadStream(id);
+    var done = {};
+    downloadStream.on('data', function() {
+      test.ok(false);
+    });
+    downloadStream.on('error', function() {
+      test.ok(false);
+    });
+    downloadStream.on('end', function() {
+      test.equal(downloadStream.s.cursor, null);
+      if (done.close) {
+      }
+      done.end = true;
+    });
+    downloadStream.on('close', function() {
+      if (done.end) {
+      }
+      done.close = true;
+    });
+    downloadStream.abort(function(error) {
+      test.equal(error, null);
+    });
+  });
+
+  readStream.pipe(uploadStream);</code></pre>
+    
+
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
         <h4 class="name" id="end">
             
             end<span class="signature">(end)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="GridFSBucketReadStream.html">GridFSBucketReadStream</a>}</span>
@@ -2346,7 +2539,7 @@ GridFSBucketReadStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs-stream_download.js.html">lib/gridfs-stream/download.js</a>, <a href="lib_gridfs-stream_download.js.html#line99">line 99</a>
+            <a href="lib_gridfs-stream_download.js.html">lib/gridfs-stream/download.js</a>, <a href="lib_gridfs-stream_download.js.html#line123">line 123</a>
         </div>
         
     </div>
@@ -2469,7 +2662,7 @@ an error if this stream has entered flowing mode
     
         
         <div class="tag-source">
-            <a href="lib_gridfs-stream_download.js.html">lib/gridfs-stream/download.js</a>, <a href="lib_gridfs-stream_download.js.html#line84">line 84</a>
+            <a href="lib_gridfs-stream_download.js.html">lib/gridfs-stream/download.js</a>, <a href="lib_gridfs-stream_download.js.html#line108">line 108</a>
         </div>
         
     </div>
@@ -2590,6 +2783,249 @@ an error if this stream has entered flowing mode
         <h3 class="subsection-title">Events</h3>
         
         <dl>
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:close">
+            
+            close
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_gridfs-stream_download.js.html">lib/gridfs-stream/download.js</a>, <a href="lib_gridfs-stream_download.js.html#line77">line 77</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Fired when the stream is exhausted and the underlying cursor is killed</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:data">
+            
+            data
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_gridfs-stream_download.js.html">lib/gridfs-stream/download.js</a>, <a href="lib_gridfs-stream_download.js.html#line63">line 63</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Emitted when a chunk of data is available to be consumed.</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:end">
+            
+            end
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_gridfs-stream_download.js.html">lib/gridfs-stream/download.js</a>, <a href="lib_gridfs-stream_download.js.html#line70">line 70</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Fired when the stream is exhausted (no more data events).</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
             
 <dt>
     <div class="nameContainer">
@@ -2782,7 +3218,7 @@ provided id.</p>
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Feb 04 2016 13:50:45 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Mon Mar 21 2016 14:54:58 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>

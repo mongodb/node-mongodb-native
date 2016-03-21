@@ -24,7 +24,7 @@ Web frameworks using MongoDB
          * - **Clone Url**
            - https://github.com/nwtjs/nwt.git
          * - **Forks**
-           - 13
+           - 14
          * - **Watchers**
            - 30
 
@@ -191,9 +191,9 @@ Content Management Systems
          * - **Clone Url**
            - https://github.com/cliftonc/calipso.git
          * - **Forks**
-           - 296
+           - 300
          * - **Watchers**
-           - 1644
+           - 1659
 
 Grid FS libraries or tools
 --------------------------
@@ -245,7 +245,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 3
          * - **Watchers**
-           - 45
+           - 44
 
 .. topic:: mongoq
 
@@ -266,7 +266,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Clone Url**
            - https://github.com/zzdhidden/mongoq.git
          * - **Forks**
-           - 7
+           - 6
          * - **Watchers**
            - 69
 
@@ -314,7 +314,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 13
          * - **Watchers**
-           - 52
+           - 51
 
 .. topic:: mdoq-mongodb
 
@@ -386,7 +386,7 @@ REST api's around MongoDB or resource based libraries
          * - **Forks**
            - 127
          * - **Watchers**
-           - 347
+           - 349
 
 .. topic:: lazyBum
 
@@ -458,7 +458,7 @@ Test helpers and libraries
          * - **Forks**
            - 3
          * - **Watchers**
-           - 32
+           - 33
 
 .. topic:: node-database-cleaner
 
@@ -471,7 +471,7 @@ Test helpers and libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 22:25:0 on 3/1/2016
+           - 15:0:48 on 2/2/2016
          * - **Homepage**
            - http://
          * - **Url**
@@ -479,9 +479,9 @@ Test helpers and libraries
          * - **Clone Url**
            - https://github.com/emerleite/node-database-cleaner.git
          * - **Forks**
-           - 27
+           - 28
          * - **Watchers**
-           - 82
+           - 92
 
 Tools or applications to manage your MongoDB's
 ----------------------------------------------
@@ -533,7 +533,7 @@ Queue libraries using MongoDB
          * - **Forks**
            - 6
          * - **Watchers**
-           - 97
+           - 98
 
 Logging libraries or applications
 ---------------------------------
@@ -645,7 +645,7 @@ General frameworks over MongoDB
          :header-rows: 0
 
          * - **Activity Level**
-           - .. image:: ../static/active.png
+           - .. image:: ../static/nonactive.png
          * - **Last push**
            - 22:55:46 on 23/9/2015
          * - **Homepage**
@@ -706,7 +706,7 @@ Translation libraries or frameworks
          * - **Forks**
            - 22
          * - **Watchers**
-           - 109
+           - 110
 
 Libraries or Applications for analytics
 ---------------------------------------
@@ -730,9 +730,9 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 417
+           - 426
          * - **Watchers**
-           - 3668
+           - 3709
 
 Libraries for the connect middleware
 ------------------------------------
@@ -779,9 +779,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 220
+           - 223
          * - **Watchers**
-           - 901
+           - 941
 
 Libraries or applications for continous integration
 ---------------------------------------------------
@@ -805,9 +805,9 @@ Libraries or applications for continous integration
          * - **Clone Url**
            - https://github.com/ryankee/concrete.git
          * - **Forks**
-           - 69
+           - 68
          * - **Watchers**
-           - 506
+           - 510
 
 Exampe applications
 -------------------
@@ -833,7 +833,7 @@ Exampe applications
          * - **Forks**
            - 21
          * - **Watchers**
-           - 36
+           - 37
 
 .. topic:: node-mongo-cms
 

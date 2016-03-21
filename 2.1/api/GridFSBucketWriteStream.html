@@ -154,6 +154,8 @@
             
                 <li data-name="AggregationCursor#limit"><a href="AggregationCursor.html#limit">limit</a></li>
             
+                <li data-name="AggregationCursor#lookup"><a href="AggregationCursor.html#lookup">lookup</a></li>
+            
                 <li data-name="AggregationCursor#match"><a href="AggregationCursor.html#match">match</a></li>
             
                 <li data-name="AggregationCursor#maxTimeMS"><a href="AggregationCursor.html#maxTimeMS">maxTimeMS</a></li>
@@ -739,6 +741,8 @@
             
                 <li data-name="Db#stats"><a href="Db.html#stats">stats</a></li>
             
+                <li data-name="Db#unref"><a href="Db.html#unref">unref</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -929,6 +933,8 @@
             
                 <li data-name="GridFSBucketReadStream#_read"><a href="GridFSBucketReadStream.html#_read">_read</a></li>
             
+                <li data-name="GridFSBucketReadStream#abort"><a href="GridFSBucketReadStream.html#abort">abort</a></li>
+            
                 <li data-name="GridFSBucketReadStream#end"><a href="GridFSBucketReadStream.html#end">end</a></li>
             
                 <li data-name="GridFSBucketReadStream#start"><a href="GridFSBucketReadStream.html#start">start</a></li>
@@ -937,6 +943,12 @@
             <ul class="events itemMembers">
             
             <span class="subtitle">Events</span>
+            
+                <li data-name="GridFSBucketReadStream#event:close"><a href="GridFSBucketReadStream.html#event:close">close</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:data"><a href="GridFSBucketReadStream.html#event:data">data</a></li>
+            
+                <li data-name="GridFSBucketReadStream#event:end"><a href="GridFSBucketReadStream.html#event:end">end</a></li>
             
                 <li data-name="GridFSBucketReadStream#event:error"><a href="GridFSBucketReadStream.html#event:error">error</a></li>
             
@@ -959,6 +971,8 @@
             <ul class="methods itemMembers">
             
             <span class="subtitle">Methods</span>
+            
+                <li data-name="GridFSBucketWriteStream#abort"><a href="GridFSBucketWriteStream.html#abort">abort</a></li>
             
                 <li data-name="GridFSBucketWriteStream#end"><a href="GridFSBucketWriteStream.html#end">end</a></li>
             
@@ -2204,6 +2218,180 @@ GridFSBucketWriteStream instance.
             
 <dt>
     <div class="nameContainer">
+        <h4 class="name" id="abort">
+            
+            abort<span class="signature">(callback)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_gridfs-stream_upload.js.html">lib/gridfs-stream/upload.js</a>, <a href="lib_gridfs-stream_upload.js.html#line105">line 105</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Places this write stream into an aborted state (all future writes fail)
+and deletes all chunks that have already been written.</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="GridFSBucket.html#~errorCallback">GridFSBucket~errorCallback</a></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>called when chunks are successfully removed or error occurred</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+
+
+<h5>Returns:</h5>
+no callback specified
+<br />
+
+    
+    
+    
+        <h5>Example</h5>
+        
+
+    
+    <pre class="prettyprint"><code>// Aborting an upload
+
+var MongoClient = require('mongodb').MongoClient,
+  test = require('assert');
+MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+  var bucket = new GridFSBucket(db,
+    { bucketName: 'gridfsabort', chunkSizeBytes: 1 });
+  var CHUNKS_COLL = 'gridfsabort.chunks';
+  var FILES_COLL = 'gridfsabort.files';
+  var uploadStream = bucket.openUploadStream('test.dat');
+
+  var id = uploadStream.id;
+  var query = { files_id: id };
+  uploadStream.write('a', 'utf8', function(error) {
+    test.equal(error, null);
+    db.collection(CHUNKS_COLL).count(query, function(error, c) {
+      test.equal(error, null);
+      test.equal(c, 1);
+      uploadStream.abort(function(error) {
+        test.equal(error, null);
+        db.collection(CHUNKS_COLL).count(query, function(error, c) {
+          test.equal(error, null);
+          test.equal(c, 0);
+          uploadStream.write('b', 'utf8', function(error) {
+            test.equal(error.toString(),
+              'Error: this stream has been aborted');
+            uploadStream.end('c', 'utf8', function(error) {
+              test.equal(error.toString(),
+                'Error: this stream has been aborted');
+              // Fail if user tries to abort an aborted stream
+              uploadStream.abort().then(null, function(error) {
+                test.equal(error.toString(),
+                  'Error: Cannot call abort() on a stream twice');
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+});</code></pre>
+    
+
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
         <h4 class="name" id="end">
             
             end<span class="signature">(chunk, encoding, callback)</span>
@@ -2211,7 +2399,7 @@ GridFSBucketWriteStream instance.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs-stream_upload.js.html">lib/gridfs-stream/upload.js</a>, <a href="lib_gridfs-stream_upload.js.html#line105">line 105</a>
+            <a href="lib_gridfs-stream_upload.js.html">lib/gridfs-stream/upload.js</a>, <a href="lib_gridfs-stream_upload.js.html#line137">line 137</a>
         </div>
         
     </div>
@@ -2375,7 +2563,7 @@ then emit a 'finish' event.</p>
     
         
         <div class="tag-source">
-            <a href="lib_gridfs-stream_upload.js.html">lib/gridfs-stream/upload.js</a>, <a href="lib_gridfs-stream_upload.js.html#line87">line 87</a>
+            <a href="lib_gridfs-stream_upload.js.html">lib/gridfs-stream/upload.js</a>, <a href="lib_gridfs-stream_upload.js.html#line89">line 89</a>
         </div>
         
     </div>
@@ -2554,7 +2742,7 @@ if this write required flushing a chunk to MongoDB. True otherwise.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs-stream_upload.js.html">lib/gridfs-stream/upload.js</a>, <a href="lib_gridfs-stream_upload.js.html#line62">line 62</a>
+            <a href="lib_gridfs-stream_upload.js.html">lib/gridfs-stream/upload.js</a>, <a href="lib_gridfs-stream_upload.js.html#line64">line 64</a>
         </div>
         
     </div>
@@ -2635,7 +2823,7 @@ if this write required flushing a chunk to MongoDB. True otherwise.
     
         
         <div class="tag-source">
-            <a href="lib_gridfs-stream_upload.js.html">lib/gridfs-stream/upload.js</a>, <a href="lib_gridfs-stream_upload.js.html#line69">line 69</a>
+            <a href="lib_gridfs-stream_upload.js.html">lib/gridfs-stream/upload.js</a>, <a href="lib_gridfs-stream_upload.js.html#line71">line 71</a>
         </div>
         
     </div>
@@ -2646,8 +2834,8 @@ if this write required flushing a chunk to MongoDB. True otherwise.
     
     
     <div class="description">
-        <p>end() was called and the write stream successfully wrote all chunks to
-MongoDB.</p>
+        <p><code>end()</code> was called and the write stream successfully wrote the file
+metadata and all the chunks to MongoDB.</p>
     </div>
     
 
@@ -2736,7 +2924,7 @@ MongoDB.</p>
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Feb 04 2016 13:50:45 GMT+0100 (CET)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Mon Mar 21 2016 14:54:58 GMT+0100 (CET)
                     </footer>
                 </div>
             </td>
