@@ -71,7 +71,7 @@ var bsonInstance = null;
  * @param {array} seedlist A list of seeds for the replicaset
  * @param {boolean} options.setName The Replicaset set name
  * @param {boolean} [options.secondaryOnlyConnectionAllowed=false] Allow connection to a secondary only replicaset
- * @param {number} [options.haInterval=5000] The High availability period for replicaset inquiry
+ * @param {number} [options.haInterval=10000] The High availability period for replicaset inquiry
  * @param {boolean} [options.emitError=false] Server will emit errors events
  * @param {Cursor} [options.cursorFactory=Cursor] The cursor factory class used for all query cursors
  * @param {number} [options.size=5] Server connection pool size

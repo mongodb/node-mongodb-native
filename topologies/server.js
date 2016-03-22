@@ -930,6 +930,7 @@ var getTopologyType = function(self, ismaster) {
 
   if(!ismaster) return 'Unknown';
   if(ismaster.ismaster && !ismaster.hosts) return 'Standalone';
+  if(ismaster.ismaster && ismaster.msg == 'isdbgrid') return 'Mongos';
   if(ismaster.ismaster) return 'RSPrimary';
   if(ismaster.secondary) return 'RSSecondary';
   if(ismaster.arbiterOnly) return 'RSArbiter';

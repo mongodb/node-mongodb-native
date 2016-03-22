@@ -52,6 +52,38 @@ State.prototype.resetDescription = function() {
   }
 }
 
+function diff(previous, current) {
+  // Difference document
+  var diff = {
+    servers: []
+  }
+
+  // Got through all the servers
+  for(var i = 0; i < previous.servers.length; i++) {
+    var prevServer = previous.servers[i];
+
+    // Go through all current servers
+    for(var j = 0; j < current.servers.length; j++) {
+      var currServer = current.servers[j];
+
+      // Matching server
+      if(prevServer.address === currServer.address) {
+        // We had a change in state
+        if(prevServer.type != currServer.type) {
+          diff.servers.push({
+            address: prevServer.address,
+            from: prevServer.type,
+            to: currServer.type
+          });
+        }
+      }
+    }
+  }
+
+  // Return difference
+  return diff;
+}
+
 function emitTopologyDescriptionChanged(self) {
   if(self.replSet.listeners('topologyDescriptionChanged').length > 0) {
     var topology = 'Unknown';
@@ -101,7 +133,8 @@ function emitTopologyDescriptionChanged(self) {
     var result = {
       topologyId: self.id,
       previousDescription: self.replicasetDescription,
-      newDescription: description
+      newDescription: description,
+      diff: diff(self.replicasetDescription, description)
     };
 
     // Emit the topologyDescription change
