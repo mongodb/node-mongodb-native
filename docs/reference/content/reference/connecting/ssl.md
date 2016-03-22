@@ -1,10 +1,10 @@
 +++
 date = "2015-03-19T12:53:26-04:00"
-title = "SSL"
+title = "SSL Settings"
 [menu.main]
   parent = "Connecting"
-  identifier = "SSL"
-  weight = 10
+  identifier = "SSL Settings"
+  weight = 25
   pre = "<i class='fa'></i>"
 +++
 

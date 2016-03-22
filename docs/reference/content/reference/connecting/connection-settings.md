@@ -104,34 +104,21 @@ Let's break down the `URI` string.
 | `/myproject` | is the database we wish to connect to |
 | `authSource=admin` | is the database we wish to authenticate against |
 
-# MongoClient.connect Optional Parameters
+## Optional Connection Settings
 
-The driver has many more options for tweaking than what's available through the `URI` specification. These can be passed to the driver using an optional parameters object. The top level fields in the options object are.
-
-| Parameter | Description |
-| :----------| :------------- |
-| `db` | Options that affect the Db instance returned by the MongoClient.connect method. |
-| `replSet` | Options that modify the Replicaset topology connection behavior. **This is a required parameter when using the 2.0 driver** |
-| `mongos` | Options that modify the Mongos topology connection behavior. |
-| `server` | Options that modify the Server topology connection behavior. |
-
-A simple example connecting to a single server setting all returned queries to be raw BSON buffers and adjusting the poolSize to be 10 connections for this connection.
+Optional connection settings are settings not covered by the MongoDB URI specification. These options are passed in the options parameter in the MongoClient.connect function.
 
 ```js
 var MongoClient = require('mongodb').MongoClient
   , assert = require('assert');
 
 // Connection URL
-var url = 'mongodb://dave:password@localhost:27017/myproject';
-// Use connect method to connect to the Server
+var url = 'mongodb://localhost:50000,localhost:50001/myproject';
+// Use connect method to connect to the Server passing in
+// additional options
 MongoClient.connect(url, {
-    db: {
-      raw: true
-    },
-    server: {
-      poolSize: 10
-    }
-  }, function(err, db) {
+  poolSize: 10, ssl: true
+}, function(err, db) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
 
@@ -139,152 +126,40 @@ MongoClient.connect(url, {
 });
 ```
 
-Let's look at the individual options for each of the top level fields.
+The table below shows all settings and what topology they affect.
 
-## Data base level options
-
-| Parameter | Type | Description |
-| :----------| :------------- | :------------- |
-| `w` | {Number/String, > -1 \|\| 'majority'} | the write concern for the operation where < 1 is no acknowledgment of write and w >= 1 or w = 'majority' acknowledges the write |
-| `wtimeout` | {Number, 0} | set the timeout for waiting for write concern to finish (combines with w option) |
-| `fsync` | (Boolean, default:false) | write waits for fsync before returning |
-| `j` | (Boolean, default:false) | write waits for journal sync before returning |
-| `readPreference` | {String} | the preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). |
-| `readPreferenceTags` | {Object, default:null} | the tags object {'loc':'ny'} used with the readPreference. |
-| `native_parser` | {Boolean, default:false} | use c++ bson parser. |
-| `forceServerObjectId` | {Boolean, default:false} | force server to create _id fields instead of client.|
-| `pkFactory` | {Object} | object overriding the basic ObjectID primary key generation. |
-| `serializeFunctions` | {Boolean, default:false} | serialize functions. |
-| `raw` | {Boolean, default:false} | perform operations using raw bson buffers. |
-| `bufferMaxEntries` | {Number, default: -1} | sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited. |
-
-If you are connecting to a MongoDB replicaset, you pass the parameters using the `replset` options field.
-
-```js
-var MongoClient = require('mongodb').MongoClient,
-  f = require('util').format,
-  fs = require('fs');
-
-MongoClient.connect(f('mongodb://%s@server:27017/test'), {
-  db: {
-    w:1
-  }
-}, function(err, db) {
-  db.close();
-});
-
-```
-
-## Individual Server Level Options
-
-| Parameter | Type | Description |
-| :----------| :------------- | :------------- |
-| `poolSize` | {Number, default: 5} | Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons. |
-| `ssl` | {Boolean, default: false} | Use ssl connection (needs to have a mongod server with ssl support). |
-| `sslValidate` | {Boolean, default: true} | Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher). |
-| `checkServerIdentity` | {Boolean\|Function, default: true} | Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function. |
-| `sslCA` | {Buffer[]\|string[], default: null} | Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher). |
-| `sslCert` | {Buffer\|string, default: null} | String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher). |
-| `sslKey` | {Buffer\|string, default: null} | String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher). |
-| `sslPass` | {Buffer\|string, default: null} | String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher). |
-| `autoReconnect` | {Boolean, default: true} | Reconnect on error. |
-| `socketOptions.noDelay` | {Boolean, default: true} | TCP Socket NoDelay option. |
-| `socketOptions.keepAlive` | {Number, default: 0} | The number of milliseconds to wait before initiating keepAlive on the TCP socket. |
-| `socketOptions.connectTimeoutMS` | {Number, default: 30000} | TCP Connection timeout setting. |
-| `socketOptions.socketTimeoutMS` | {Number, default: 30000} | TCP Socket timeout setting. |
-
-If you are connecting to a single MongoDB instance you pass the parameters using the `server` options field.
-
-```js
-var MongoClient = require('mongodb').MongoClient,
-  f = require('util').format,
-  fs = require('fs');
-
-MongoClient.connect(f('mongodb://%s@server:27017/test'), {
-  server: {
-      sslKey:key
-    , sslCert:cert
-  }
-}, function(err, db) {
-  db.close();
-});
-
-```
-
-## Replicaset Level Options
-
-| Parameter | Type | Description |
-| :----------| :------------- | :------------- |
-| `ha` | {Boolean, default:true} | Controls if the replicaset monitoring runs or not. |
-| `haInterval` | {Number, default:10000} | The number of milliseconds between each ping of the replicaset members. The replicaset monitoring process, is the process monitoring the replicaset, detecting new members and reconnecting to existing members. |
-| `replicaSet` | {String} | the name of the replicaset to connect to. **This is a required parameter when using the 2.0 driver** |
-| `secondaryAcceptableLatencyMS` | {Number, default:15} | sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms) |
-| `connectWithNoPrimary` | {Boolean, default:false} | Sets if the driver should connect even if no primary is available. |
-| `poolSize` | {Number, default: 5} | Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons. |
-| `ssl` | {Boolean, default: false} | Use ssl connection (needs to have a mongod server with ssl support). |
-| `sslValidate` | {Boolean, default: true} | Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher). |
-| `checkServerIdentity` | {Boolean\|Function, default: true} | Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function. |
-| `sslCA` | {Buffer[]\|string[], default: null} | Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher). |
-| `sslCert` | {Buffer\|string, default: null} | String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher). |
-| `sslKey` | {Buffer\|string, default: null} | String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher). |
-| `sslPass` | {Buffer\|string, default: null} | String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher). |
-| `socketOptions.noDelay` | {Boolean, default: true} | TCP Socket NoDelay option. |
-| `socketOptions.keepAlive` | {Number, default: 0} | The number of milliseconds to wait before initiating keepAlive on the TCP socket. |
-| `socketOptions.connectTimeoutMS` | {Number, default: 0} | TCP Connection timeout setting. |
-| `socketOptions.socketTimeoutMS` | {Number, default: 0} | TCP Socket timeout setting. |
-
-If you are connecting to a MongoDB replicaset, you pass the parameters using the `replset` options field.
-
-```js
-var MongoClient = require('mongodb').MongoClient,
-  f = require('util').format,
-  fs = require('fs');
-
-MongoClient.connect(f('mongodb://%s@server:27017/test'), {
-  replset: {
-      sslKey:key
-    , sslCert:cert
-  }
-}, function(err, db) {
-  db.close();
-});
-
-```
-
-## Mongos Proxy Level Options
-
-| Parameter | Type | Description |
-| :----------| :------------- | :------------- |
-| `ha` | {Boolean, default:true} | turn on high availability. |
-| `haInterval` | {Number, default:5000} | time between each replicaset status check. |
-| `secondaryAcceptableLatencyMS` | {Number, default:15} | sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms) |
-| `poolSize` | {Number, default: 5} | Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons. |
-| `ssl` | {Boolean, default: false} | Use ssl connection (needs to have a mongod server with ssl support). |
-| `sslValidate` | {Boolean, default: true} | Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher). |
-| `checkServerIdentity` | {Boolean\|Function, default: true} | Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function. |
-| `sslCA` | {Buffer[]\|string[], default: null} | Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher). |
-| `sslCert` | {Buffer\|string, default: null} | String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher). |
-| `sslKey` | {Buffer\|string, default: null} | String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher). |
-| `sslPass` | {Buffer\|string, default: null} | String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher). |
-| `socketOptions.noDelay` | {Boolean, default: true} | TCP Socket NoDelay option. |
-| `socketOptions.keepAlive` | {Number, default: 0} | The number of milliseconds to wait before initiating keepAlive on the TCP socket. |
-| `socketOptions.connectTimeoutMS` | {Number, default: 0} | TCP Connection timeout setting. |
-| `socketOptions.socketTimeoutMS` | {Number, default: 0} | TCP Socket timeout setting. |
-
-If you are connecting to a MongoDB replicaset, you pass the parameters using the `mongos` options field.
-
-```js
-var MongoClient = require('mongodb').MongoClient,
-  f = require('util').format,
-  fs = require('fs');
-
-MongoClient.connect(f('mongodb://%s@server:27017/test'), {
-  mongos: {
-      sslKey:key
-    , sslCert:cert
-  }
-}, function(err, db) {
-  db.close();
-});
-
-```
+| Option | Affects | Type | Default | Description |
+| :----------| :------------------ | :------ | :------ |:------------- |
+| **poolSize** | Server, ReplicaSet, Mongos | integer | 5 | Set the maximum poolSize for each individual server or proxy connection.|
+| **ssl** | Server, ReplicaSet, Mongos | boolean | false | Use ssl connection (needs to have a mongod server with ssl support) |
+| **sslValidate** | Server, ReplicaSet, Mongos | boolean | true | Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher) |
+| **sslCA** | Server, ReplicaSet, Mongos | Array | null | Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher) |
+| **sslCert** | Server, ReplicaSet, Mongos | Buffer/String | null | String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher) |
+| **sslKey** | Server, ReplicaSet, Mongos | Buffer/String | null | String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher) |
+| **sslPass** | Server, ReplicaSet, Mongos | Buffer/String | null | String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher) |
+| **autoReconnect** | Server | boolean | true | Reconnect on error. |
+| **noDelay** | Server, ReplicaSet, Mongos | boolean | true | TCP Socket NoDelay option. |
+| **keepAlive** | Server, ReplicaSet, Mongos | integer | 0 | The number of milliseconds to wait before initiating keepAlive on the TCP socket. |
+| **connectTimeoutMS** | Server, ReplicaSet, Mongos | integer | 30000 | TCP Connection timeout setting. |
+| **socketTimeoutMS** | Server, ReplicaSet, Mongos | integer | 30000 | TCP Socket timeout setting. |
+| **reconnectTries** | Server | integer | 30 | Server attempt to reconnect #times |
+| **reconnectInterval** | Server | integer | 1000 | Server will wait # milliseconds between retries. |
+| **ha** | ReplicaSet, Mongos | boolean | true | Turn on high availability monitoring. |
+| **haInterval** | ReplicaSet, Mongos | integer | 10000,5000 | Time between each replicaset status check. |
+| **replicaSet** | ReplicaSet | string | null | The name of the replicaset to connect to. |
+| **secondaryAcceptableLatencyMS** | ReplicaSet | integer | 15 | Sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms). |
+| **connectWithNoPrimary** | ReplicaSet | boolean | false | Sets if the driver should connect even if no primary is available. |
+| **authSource** | Server, ReplicaSet, Mongos | string | null |  If the database authentication is dependent on another databaseName. |
+| **w** | Server, ReplicaSet, Mongos | string, integer| null |  The write concern. |
+| **wtimeout** | Server, ReplicaSet, Mongos | integer | null |  The write concern timeout value. |
+| **j** | Server, ReplicaSet, Mongos | boolean | false | Specify a journal write concern. |
+| **forceServerObjectId** | Server, ReplicaSet, Mongos | boolean | false | Force server to assign _id values instead of driver. |
+| **serializeFunctions** | Server, ReplicaSet, Mongos | boolean | false | Serialize functions on any object. |
+| **ignoreUndefined** | Server, ReplicaSet, Mongos | boolean | false | Specify if the BSON serializer should ignore undefined fields. |
+| **raw** | Server, ReplicaSet, Mongos | boolean | false | Return document results as raw BSON buffers. |
+| **promoteLongs** | Server, ReplicaSet, Mongos | boolean | true | Promotes Long values to number if they fit inside the 53 bits resolution. |
+| **bufferMaxEntries** | Server, ReplicaSet, Mongos | integer | -1 | Sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited. |
+| **readPreference** | Server, ReplicaSet, Mongos | object | null | The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST). |
+| **pkFactory** | Server, ReplicaSet, Mongos | object | null | A primary key factory object for generation of custom _id keys. |
+| **promiseLibrary** | Server, ReplicaSet, Mongos | object | null | A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible. |
+| **readConcern** | Server, ReplicaSet, Mongos | object | null |  Specify a read concern for the collection. (only MongoDB 3.2 or higher supported). |

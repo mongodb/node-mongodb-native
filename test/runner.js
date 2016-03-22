@@ -286,6 +286,7 @@ var testFiles = [
   , '/test/functional/find_and_modify_tests.js'
   , '/test/functional/document_validation_tests.js'
   , '/test/functional/ignore_undefined_tests.js'
+  , '/test/functional/mongo_client_options_tests.js'
 
   // Replicaset tests
   , '/test/functional/replset_read_preference_tests.js'
