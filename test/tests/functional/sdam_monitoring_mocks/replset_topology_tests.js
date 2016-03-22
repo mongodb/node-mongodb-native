@@ -222,6 +222,9 @@ exports['Successful emit SDAM monitoring events for replicaset'] = {
               test.ok(responses['serverHeartbeatSucceeded'].length > 0);
               test.ok(responses['serverDescriptionChanged'].length > 0);
 
+              console.log("---------------------------------------------------")
+              console.log(JSON.stringify(responses['topologyDescriptionChanged'], null, 2))
+
               for(var i = 0; i < expectedResults.length; i++) {
                 try {
                   test.deepEqual(expectedResults[i], responses['topologyDescriptionChanged'][i]);
@@ -268,9 +271,11 @@ exports['Successful emit SDAM monitoring events for replicaset'] = {
             "setName": "rs"
           }
         ]
+      },
+      "diff": {
+        "servers": []
       }
-    },
-    {
+    }, {
       "topologyId": server.s.id,
       "previousDescription": {
         "topologyType": "Unknown",
@@ -319,9 +324,11 @@ exports['Successful emit SDAM monitoring events for replicaset'] = {
             "setName": "rs"
           }
         ]
+      },
+      "diff": {
+        "servers": []
       }
-    },
-    {
+    }, {
       "topologyId": server.s.id,
       "previousDescription": {
         "topologyType": "ReplicaSetWithPrimary",
@@ -394,9 +401,11 @@ exports['Successful emit SDAM monitoring events for replicaset'] = {
             "setName": "rs"
           }
         ]
+      },
+      "diff": {
+        "servers": []
       }
-    },
-    {
+    }, {
       "topologyId": server.s.id,
       "previousDescription": {
         "topologyType": "ReplicaSetWithPrimary",
@@ -481,10 +490,19 @@ exports['Successful emit SDAM monitoring events for replicaset'] = {
             "setName": "rs"
           }
         ]
+      },
+      "diff": {
+        "servers": [
+          {
+            "address": "localhost:32000",
+            "from": "RSPrimary",
+            "to": "RSSecondary"
+          }
+        ]
       }
     },
     {
-      "topologyId": server.s.id,
+      "topologyId": 1,
       "previousDescription": {
         "topologyType": "ReplicaSetNoPrimary",
         "setName": "rs",
@@ -566,6 +584,15 @@ exports['Successful emit SDAM monitoring events for replicaset'] = {
               "localhost:32002"
             ],
             "setName": "rs"
+          }
+        ]
+      },
+      "diff": {
+        "servers": [
+          {
+            "address": "localhost:32001",
+            "from": "RSSecondary",
+            "to": "RSPrimary"
           }
         ]
       }

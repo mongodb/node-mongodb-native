@@ -1,3 +1,8 @@
+1.3.10 2016-03-22
+-----------------
+- SDAM Monitoring emits diff for Replicasets to simplify detecting the state changes.
+- SDAM Monitoring correctly emits Mongos as serverDescriptionEvent.
+
 1.3.9 2016-03-20
 ----------------
 - Removed monitoring exclusive connection, should resolve timeouts and reconnects on idle replicasets where haInteval > socketTimeout.
