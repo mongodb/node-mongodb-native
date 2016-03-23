@@ -31,6 +31,7 @@ docs/public
 .nyc_output/
 typings/
 jsconfig.json
+manual_tests/
 
 external-libs/bson/build/
 external-libs/bson/build/.wafpickle-7

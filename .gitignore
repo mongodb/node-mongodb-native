@@ -25,6 +25,7 @@ test/benchmarks/performance-data
 .nyc_output/
 typings/
 jsconfig.json
+manual_tests/
 
 # Directory for dbs
 db

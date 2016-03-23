@@ -10,6 +10,10 @@ title = "Connection Settings"
 
 # Connecting To MongoDB
 
+{{% note %}}
+This reference applies to `2.1.11` or higher. For `2.1.10` or earlier please see the legacy connection settings. `2.1.11` is backward compatible with the legacy connection settings as well as the simplified settings.
+{{% /note %}}
+
 Connecting to MongoDB using the driver is primarily done using the `MongoClient.connect` method and a URI. Let's look at how we connect to a couple of different server topologies.
 
 ## Single Server Connection

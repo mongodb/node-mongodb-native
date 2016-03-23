@@ -251,7 +251,15 @@ The type can be one of the following values.
         setName: "rs"
       }
     ]
-  }
+  },
+  diff: {
+    servers: [{
+        "address": "localhost:32000",
+        "from": "RSSecondary",
+        "to": "RSPrimary"
+      }
+    ]
+  }  
 }
 ```
 
