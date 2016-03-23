@@ -1,3 +1,8 @@
+2.1.11 2016-03-23
+-----------------
+* Updated mongodb-core to 1.3.10.
+* Introducing simplified connections settings.
+
 2.1.10 2016-03-21
 -----------------
 * Updated mongodb-core to 1.3.9.
