@@ -9,7 +9,7 @@
 
     <link rel="shortcut icon" href="/node-mongodb-native/2.1//img/favicon.png">
 
-    <title>SSL Settings</title>
+    <title>Legacy Connection Settings</title>
 
     <link rel="stylesheet" href="/node-mongodb-native/2.1//lib/bootstrap.css" type="text/css" />
 <link rel="stylesheet" href="/node-mongodb-native/2.1//lib/font-awesome/css/font-awesome.min.css" type="text/css" />
@@ -322,6 +322,33 @@
 
 
   
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
   
   
   
@@ -348,11 +375,6 @@
         
       
     
-      
-      
-        
-      
-    
     
   
 
@@ -361,6 +383,8 @@
       
     
       
+      
+        
       
     
       
@@ -724,8 +748,6 @@
 
 
 
-  
-
 
 
 
@@ -754,6 +776,8 @@
 
 
 
+
+  
 
 
 
@@ -1302,7 +1326,7 @@
 
 
    
-<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/2.1/docs/reference/content/reference/connecting/ssl.md" target="_blank" title="Edit reference/connecting/ssl.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
+<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/2.1/docs/reference/content/reference/connecting/legacy-connection-settings.md" target="_blank" title="Edit reference/connecting/legacy-connection-settings.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
 
 
 
@@ -1321,133 +1345,259 @@
   
   <li><a href="/node-mongodb-native/2.1/reference/">Reference</a> <i class="fa fa-angle-right"></i></li>
   <li><a href="/node-mongodb-native/2.1/reference/connecting/">Connecting</a> <i class="fa fa-angle-right"></i></li>
-  <li>SSL Settings</li>
+  <li>Legacy Connection Settings</li>
 </ul>
 </div>
 
 
 
 
-<h1 id="ssl">SSL</h1>
+<h1 id="connecting-to-mongodb">Connecting To MongoDB</h1>
 
-<p>The Node.js driver supports SSL connections to MongoDB when using the Enterprise edition of MongoDB or the open source edition with SSL support compiled in.</p>
+<p>Connecting to MongoDB using the driver is primarily done using the <code>MongoClient.connect</code> method and a URI. Let&rsquo;s look at how we connect to a couple of different server topologies.</p>
 
-<h2 id="no-validation-of-certificate-chain">No validation of certificate chain</h2>
+<h2 id="single-server-connection">Single Server Connection</h2>
 
-<p>If the server does not perform any validation of the certificate chain connecting to the server is straightforward.</p>
+<p>We have a single MongoDB server instance running on the port <em>27017</em> Let&rsquo;s connect using the driver and <em>MongoClient.connect</em></p>
 
-<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient;
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
+  , assert = require('assert');
 
-MongoClient.connect(&quot;mongodb://localhost:27017/test?ssl=true&quot;, function(err, db) {
-  db.close();
-});
+// Connection URL
+var url = 'mongodb://localhost:27017/myproject';
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&quot;Connected correctly to server&quot;);
 
-</code></pre>
-
-<h2 id="driver-should-validate-server-certificate">Driver should validate Server certificate</h2>
-
-<p>If the server presents a certificate that we wish to validate client side we need a couple more parameters.</p>
-
-<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient,
-  f = require('util').format,
-  fs = require('fs');
-
-// Read the certificate authority
-var ca = [fs.readFileSync(__dirname + &quot;/ssl/ca.pem&quot;)];
-
-// Connect validating the returned certificates from the server
-MongoClient.connect(&quot;mongodb://localhost:27017/test?ssl=true&quot;, {
-  server: {
-      sslValidate:true
-    , sslCA:ca
-  }
-}, function(err, db) {
   db.close();
 });
 </code></pre>
 
-<h2 id="driver-should-ignore-host-name-validation">Driver should ignore host name validation</h2>
+<p>Let&rsquo;s break down the <code>URI</code> string we passed as the first argument to MongoClient.connect.</p>
 
-<p>We want to validate the certificate but ignore the host name validation aspect. We can do so by setting the option <code>checkServerIdentity</code> to false.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Parameter</th>
+<th align="left">Description</th>
+</tr>
+</thead>
 
-<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient,
-  f = require('util').format,
-  fs = require('fs');
+<tbody>
+<tr>
+<td align="left"><code>mongodb://</code></td>
+<td align="left">is the protocol definition</td>
+</tr>
 
-// Read the certificate authority
-var ca = [fs.readFileSync(__dirname + &quot;/ssl/ca.pem&quot;)];
+<tr>
+<td align="left"><code>localhost:27017</code></td>
+<td align="left">is the server we are connecting to</td>
+</tr>
 
-// Connect validating the returned certificates from the server
-MongoClient.connect(&quot;mongodb://localhost:27017/test?ssl=true&quot;, {
-  server: {
-      sslValidate:true
-    , checkServerIdentity:false
-    , sslCA:ca
-  }
-}, function(err, db) {
+<tr>
+<td align="left"><code>/myproject</code></td>
+<td align="left">is the database we wish to connect to</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="replicaset-server-connection">Replicaset Server Connection</h2>
+
+<p>We wish to connect to a ReplicaSet consisting of one primary and 1 or more secondaries. To Do this we need to supply the driver with a seedlist of servers and the name of the ReplicaSet we wish to connect to. Let&rsquo;s take a look at a code example.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
+  , assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://localhost:27017,localhost:27018/myproject?replicaSet=foo';
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&quot;Connected correctly to server&quot;);
+
   db.close();
 });
 </code></pre>
 
-<h2 id="driver-should-validate-server-certificate-and-present-valid-certificate">Driver should validate Server certificate and present valid Certificate</h2>
+<p>Let&rsquo;s break down the <code>URI</code> string.</p>
 
-<p>If the server is configured to perform certificate validation we need to pass a certificate through the driver as well as verify the one retrieved. In this case our certificate password is <code>10gen</code>.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Parameter</th>
+<th align="left">Description</th>
+</tr>
+</thead>
 
-<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient,
-  f = require('util').format,
-  fs = require('fs');
+<tbody>
+<tr>
+<td align="left"><code>mongodb://</code></td>
+<td align="left">is the protocol definition</td>
+</tr>
 
-// Read the certificate authority
-var ca = [fs.readFileSync(__dirname + &quot;/ssl/ca.pem&quot;)];
-var cert = fs.readFileSync(__dirname + &quot;/ssl/client.pem&quot;);
-var key = fs.readFileSync(__dirname + &quot;/ssl/client.pem&quot;);
+<tr>
+<td align="left"><code>localhost:27017,localhost:27018</code></td>
+<td align="left">is the servers we are connecting to to discover the topology of the ReplicaSet.</td>
+</tr>
 
-// Connect validating the returned certificates from the server
-MongoClient.connect(&quot;mongodb://localhost:27017/test?ssl=true&quot;, {
-  server: {
-      sslValidate:true
-    , sslCA:ca
-    , sslKey:key
-    , sslCert:cert
-    , sslPass:'10gen'
-  }
-}, function(err, db) {
+<tr>
+<td align="left"><code>/myproject</code></td>
+<td align="left">is the database we wish to connect to</td>
+</tr>
+
+<tr>
+<td align="left"><code>replicaSet=foo</code></td>
+<td align="left">is the name of the ReplicaSet we are connecting to. This ensures we are connecting to the correct Replicaset. <strong>This is a required parameter when using the 2.0 driver</strong></td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="mongos-proxy-connection">Mongos Proxy Connection</h2>
+
+<p>We wish to connect to a set of <code>mongos</code> proxies. Just as in the case of connecting to a ReplicaSet we can provide a seed list of <code>mongos</code> proxies. This allows the driver to perform failover between proxies automatically in case of a proxy process having been shut down. Let&rsquo;s look at an example of code connecting to a set of proxies.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
+  , assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://localhost:50000,localhost:50001/myproject';
+// Use connect method to connect to the Server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&quot;Connected correctly to server&quot;);
+
   db.close();
 });
-
 </code></pre>
 
-<h2 id="connecting-using-x509">Connecting using X509</h2>
+<p>Let&rsquo;s break down the <code>URI</code> string.</p>
 
-<p>X509 is a certification validation process similar to normal SSL validation but it also includes specific user information that can be used for authorization. Connecting is very similar to the previous SSL examples.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Parameter</th>
+<th align="left">Description</th>
+</tr>
+</thead>
 
-<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient,
-  f = require('util').format,
-  fs = require('fs');
+<tbody>
+<tr>
+<td align="left"><code>mongodb://</code></td>
+<td align="left">is the protocol definition</td>
+</tr>
 
-// Read the cert and key
-var cert = fs.readFileSync(__dirname + &quot;/ssl/x509/client.pem&quot;);
-var key = fs.readFileSync(__dirname + &quot;/ssl/x509/client.pem&quot;);
+<tr>
+<td align="left"><code>localhost:50000,localhost:50001</code></td>
+<td align="left">is the <em>mongos</em> proxies we are connecting to.</td>
+</tr>
 
-// User name
-var userName = &quot;CN=client,OU=kerneluser,O=10Gen,L=New York City,ST=New York,C=US&quot;;
+<tr>
+<td align="left"><code>/myproject</code></td>
+<td align="left">is the database we wish to connect to</td>
+</tr>
+</tbody>
+</table>
 
-// Connect using the MONGODB-X509 authentication mechanism
-MongoClient.connect(f('mongodb://%s@server:27017/test?authMechanism=%s&amp;ssl=true'
-    , encodeURIComponent(userName), 'MONGODB-X509'), {
-  server: {
-      sslKey:key
-    , sslCert:cert
-  }
-}, function(err, db) {
+<p>Let&rsquo;s break down the <code>URI</code> string.</p>
+
+<table>
+<thead>
+<tr>
+<th align="left">Parameter</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left"><code>mongodb://</code></td>
+<td align="left">is the protocol definition</td>
+</tr>
+
+<tr>
+<td align="left"><code>dave:password</code></td>
+<td align="left">is the user name and password for the database</td>
+</tr>
+
+<tr>
+<td align="left"><code>localhost:27017</code></td>
+<td align="left">is the server we are connecting to</td>
+</tr>
+
+<tr>
+<td align="left"><code>/myproject</code></td>
+<td align="left">is the database we wish to connect to</td>
+</tr>
+
+<tr>
+<td align="left"><code>authSource=admin</code></td>
+<td align="left">is the database we wish to authenticate against</td>
+</tr>
+</tbody>
+</table>
+
+<h1 id="mongoclient-connect-optional-parameters">MongoClient.connect Optional Parameters</h1>
+
+<p>The driver has many more options for tweaking than what&rsquo;s available through the <code>URI</code> specification. These can be passed to the driver using an optional parameters object. The top level fields in the options object are.</p>
+
+<table>
+<thead>
+<tr>
+<th align="left">Parameter</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left"><code>db</code></td>
+<td align="left">Options that affect the Db instance returned by the MongoClient.connect method.</td>
+</tr>
+
+<tr>
+<td align="left"><code>replSet</code></td>
+<td align="left">Options that modify the Replicaset topology connection behavior. <strong>This is a required parameter when using the 2.0 driver</strong></td>
+</tr>
+
+<tr>
+<td align="left"><code>mongos</code></td>
+<td align="left">Options that modify the Mongos topology connection behavior.</td>
+</tr>
+
+<tr>
+<td align="left"><code>server</code></td>
+<td align="left">Options that modify the Server topology connection behavior.</td>
+</tr>
+</tbody>
+</table>
+
+<p>A simple example connecting to a single server setting all returned queries to be raw BSON buffers and adjusting the poolSize to be 10 connections for this connection.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
+  , assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://dave:password@localhost:27017/myproject';
+// Use connect method to connect to the Server
+MongoClient.connect(url, {
+    db: {
+      raw: true
+    },
+    server: {
+      poolSize: 10
+    }
+  }, function(err, db) {
+  assert.equal(null, err);
+  console.log(&quot;Connected correctly to server&quot;);
+
   db.close();
 });
-
 </code></pre>
 
-<h2 id="topology-options-related-to-ssl">Topology Options Related to SSL</h2>
+<p>Let&rsquo;s look at the individual options for each of the top level fields.</p>
 
-<h3 id="individual-server-level-options">Individual Server Level Options</h3>
+<h2 id="data-base-level-options">Data base level options</h2>
 
 <table>
 <thead>
@@ -1460,15 +1610,129 @@ MongoClient.connect(f('mongodb://%s@server:27017/test?authMechanism=%s&amp;ssl=t
 
 <tbody>
 <tr>
+<td align="left"><code>w</code></td>
+<td align="left">{Number/String, &gt; -1 || &lsquo;majority&rsquo;}</td>
+<td align="left">the write concern for the operation where &lt; 1 is no acknowledgment of write and w &gt;= 1 or w = &lsquo;majority&rsquo; acknowledges the write</td>
+</tr>
+
+<tr>
+<td align="left"><code>wtimeout</code></td>
+<td align="left">{Number, 0}</td>
+<td align="left">set the timeout for waiting for write concern to finish (combines with w option)</td>
+</tr>
+
+<tr>
+<td align="left"><code>fsync</code></td>
+<td align="left">(Boolean, default:false)</td>
+<td align="left">write waits for fsync before returning</td>
+</tr>
+
+<tr>
+<td align="left"><code>j</code></td>
+<td align="left">(Boolean, default:false)</td>
+<td align="left">write waits for journal sync before returning</td>
+</tr>
+
+<tr>
+<td align="left"><code>readPreference</code></td>
+<td align="left">{String}</td>
+<td align="left">the preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).</td>
+</tr>
+
+<tr>
+<td align="left"><code>readPreferenceTags</code></td>
+<td align="left">{Object, default:null}</td>
+<td align="left">the tags object {&lsquo;loc&rsquo;:&lsquo;ny&rsquo;} used with the readPreference.</td>
+</tr>
+
+<tr>
+<td align="left"><code>native_parser</code></td>
+<td align="left">{Boolean, default:false}</td>
+<td align="left">use c++ bson parser.</td>
+</tr>
+
+<tr>
+<td align="left"><code>forceServerObjectId</code></td>
+<td align="left">{Boolean, default:false}</td>
+<td align="left">force server to create _id fields instead of client.</td>
+</tr>
+
+<tr>
+<td align="left"><code>pkFactory</code></td>
+<td align="left">{Object}</td>
+<td align="left">object overriding the basic ObjectID primary key generation.</td>
+</tr>
+
+<tr>
+<td align="left"><code>serializeFunctions</code></td>
+<td align="left">{Boolean, default:false}</td>
+<td align="left">serialize functions.</td>
+</tr>
+
+<tr>
+<td align="left"><code>raw</code></td>
+<td align="left">{Boolean, default:false}</td>
+<td align="left">perform operations using raw bson buffers.</td>
+</tr>
+
+<tr>
+<td align="left"><code>bufferMaxEntries</code></td>
+<td align="left">{Number, default: -1}</td>
+<td align="left">sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited.</td>
+</tr>
+</tbody>
+</table>
+
+<p>If you are connecting to a MongoDB replicaset, you pass the parameters using the <code>replset</code> options field.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient,
+  f = require('util').format,
+  fs = require('fs');
+
+MongoClient.connect(f('mongodb://%s@server:27017/test'), {
+  db: {
+    w:1
+  }
+}, function(err, db) {
+  db.close();
+});
+
+</code></pre>
+
+<h2 id="individual-server-level-options">Individual Server Level Options</h2>
+
+<table>
+<thead>
+<tr>
+<th align="left">Parameter</th>
+<th align="left">Type</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left"><code>poolSize</code></td>
+<td align="left">{Number, default: 5}</td>
+<td align="left">Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.</td>
+</tr>
+
+<tr>
 <td align="left"><code>ssl</code></td>
 <td align="left">{Boolean, default: false}</td>
-<td align="left">Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.</td>
+<td align="left">Use ssl connection (needs to have a mongod server with ssl support).</td>
 </tr>
 
 <tr>
 <td align="left"><code>sslValidate</code></td>
 <td align="left">{Boolean, default: true}</td>
 <td align="left">Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).</td>
+</tr>
+
+<tr>
+<td align="left"><code>checkServerIdentity</code></td>
+<td align="left">{Boolean|Function, default: true}</td>
+<td align="left">Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.</td>
 </tr>
 
 <tr>
@@ -1493,6 +1757,36 @@ MongoClient.connect(f('mongodb://%s@server:27017/test?authMechanism=%s&amp;ssl=t
 <td align="left"><code>sslPass</code></td>
 <td align="left">{Buffer|string, default: null}</td>
 <td align="left">String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).</td>
+</tr>
+
+<tr>
+<td align="left"><code>autoReconnect</code></td>
+<td align="left">{Boolean, default: true}</td>
+<td align="left">Reconnect on error.</td>
+</tr>
+
+<tr>
+<td align="left"><code>socketOptions.noDelay</code></td>
+<td align="left">{Boolean, default: true}</td>
+<td align="left">TCP Socket NoDelay option.</td>
+</tr>
+
+<tr>
+<td align="left"><code>socketOptions.keepAlive</code></td>
+<td align="left">{Number, default: 0}</td>
+<td align="left">The number of milliseconds to wait before initiating keepAlive on the TCP socket.</td>
+</tr>
+
+<tr>
+<td align="left"><code>socketOptions.connectTimeoutMS</code></td>
+<td align="left">{Number, default: 30000}</td>
+<td align="left">TCP Connection timeout setting.</td>
+</tr>
+
+<tr>
+<td align="left"><code>socketOptions.socketTimeoutMS</code></td>
+<td align="left">{Number, default: 30000}</td>
+<td align="left">TCP Socket timeout setting.</td>
 </tr>
 </tbody>
 </table>
@@ -1514,7 +1808,7 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 
 </code></pre>
 
-<h3 id="replicaset-level-options">Replicaset Level Options</h3>
+<h2 id="replicaset-level-options">Replicaset Level Options</h2>
 
 <table>
 <thead>
@@ -1527,15 +1821,57 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 
 <tbody>
 <tr>
+<td align="left"><code>ha</code></td>
+<td align="left">{Boolean, default:true}</td>
+<td align="left">Controls if the replicaset monitoring runs or not.</td>
+</tr>
+
+<tr>
+<td align="left"><code>haInterval</code></td>
+<td align="left">{Number, default:10000}</td>
+<td align="left">The number of milliseconds between each ping of the replicaset members. The replicaset monitoring process, is the process monitoring the replicaset, detecting new members and reconnecting to existing members.</td>
+</tr>
+
+<tr>
+<td align="left"><code>replicaSet</code></td>
+<td align="left">{String}</td>
+<td align="left">the name of the replicaset to connect to. <strong>This is a required parameter when using the 2.0 driver</strong></td>
+</tr>
+
+<tr>
+<td align="left"><code>secondaryAcceptableLatencyMS</code></td>
+<td align="left">{Number, default:15}</td>
+<td align="left">sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)</td>
+</tr>
+
+<tr>
+<td align="left"><code>connectWithNoPrimary</code></td>
+<td align="left">{Boolean, default:false}</td>
+<td align="left">Sets if the driver should connect even if no primary is available.</td>
+</tr>
+
+<tr>
+<td align="left"><code>poolSize</code></td>
+<td align="left">{Number, default: 5}</td>
+<td align="left">Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.</td>
+</tr>
+
+<tr>
 <td align="left"><code>ssl</code></td>
 <td align="left">{Boolean, default: false}</td>
-<td align="left">Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.</td>
+<td align="left">Use ssl connection (needs to have a mongod server with ssl support).</td>
 </tr>
 
 <tr>
 <td align="left"><code>sslValidate</code></td>
 <td align="left">{Boolean, default: true}</td>
 <td align="left">Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).</td>
+</tr>
+
+<tr>
+<td align="left"><code>checkServerIdentity</code></td>
+<td align="left">{Boolean|Function, default: true}</td>
+<td align="left">Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.</td>
 </tr>
 
 <tr>
@@ -1560,6 +1896,30 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 <td align="left"><code>sslPass</code></td>
 <td align="left">{Buffer|string, default: null}</td>
 <td align="left">String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).</td>
+</tr>
+
+<tr>
+<td align="left"><code>socketOptions.noDelay</code></td>
+<td align="left">{Boolean, default: true}</td>
+<td align="left">TCP Socket NoDelay option.</td>
+</tr>
+
+<tr>
+<td align="left"><code>socketOptions.keepAlive</code></td>
+<td align="left">{Number, default: 0}</td>
+<td align="left">The number of milliseconds to wait before initiating keepAlive on the TCP socket.</td>
+</tr>
+
+<tr>
+<td align="left"><code>socketOptions.connectTimeoutMS</code></td>
+<td align="left">{Number, default: 0}</td>
+<td align="left">TCP Connection timeout setting.</td>
+</tr>
+
+<tr>
+<td align="left"><code>socketOptions.socketTimeoutMS</code></td>
+<td align="left">{Number, default: 0}</td>
+<td align="left">TCP Socket timeout setting.</td>
 </tr>
 </tbody>
 </table>
@@ -1581,7 +1941,7 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 
 </code></pre>
 
-<h3 id="mongos-proxy-level-options">Mongos Proxy Level Options</h3>
+<h2 id="mongos-proxy-level-options">Mongos Proxy Level Options</h2>
 
 <table>
 <thead>
@@ -1594,15 +1954,45 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 
 <tbody>
 <tr>
+<td align="left"><code>ha</code></td>
+<td align="left">{Boolean, default:true}</td>
+<td align="left">turn on high availability.</td>
+</tr>
+
+<tr>
+<td align="left"><code>haInterval</code></td>
+<td align="left">{Number, default:5000}</td>
+<td align="left">time between each replicaset status check.</td>
+</tr>
+
+<tr>
+<td align="left"><code>secondaryAcceptableLatencyMS</code></td>
+<td align="left">{Number, default:15}</td>
+<td align="left">sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)</td>
+</tr>
+
+<tr>
+<td align="left"><code>poolSize</code></td>
+<td align="left">{Number, default: 5}</td>
+<td align="left">Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.</td>
+</tr>
+
+<tr>
 <td align="left"><code>ssl</code></td>
 <td align="left">{Boolean, default: false}</td>
-<td align="left">Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.</td>
+<td align="left">Use ssl connection (needs to have a mongod server with ssl support).</td>
 </tr>
 
 <tr>
 <td align="left"><code>sslValidate</code></td>
 <td align="left">{Boolean, default: true}</td>
 <td align="left">Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher).</td>
+</tr>
+
+<tr>
+<td align="left"><code>checkServerIdentity</code></td>
+<td align="left">{Boolean|Function, default: true}</td>
+<td align="left">Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.</td>
 </tr>
 
 <tr>
@@ -1627,6 +2017,30 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 <td align="left"><code>sslPass</code></td>
 <td align="left">{Buffer|string, default: null}</td>
 <td align="left">String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher).</td>
+</tr>
+
+<tr>
+<td align="left"><code>socketOptions.noDelay</code></td>
+<td align="left">{Boolean, default: true}</td>
+<td align="left">TCP Socket NoDelay option.</td>
+</tr>
+
+<tr>
+<td align="left"><code>socketOptions.keepAlive</code></td>
+<td align="left">{Number, default: 0}</td>
+<td align="left">The number of milliseconds to wait before initiating keepAlive on the TCP socket.</td>
+</tr>
+
+<tr>
+<td align="left"><code>socketOptions.connectTimeoutMS</code></td>
+<td align="left">{Number, default: 0}</td>
+<td align="left">TCP Connection timeout setting.</td>
+</tr>
+
+<tr>
+<td align="left"><code>socketOptions.socketTimeoutMS</code></td>
+<td align="left">{Number, default: 0}</td>
+<td align="left">TCP Socket timeout setting.</td>
 </tr>
 </tbody>
 </table>
@@ -1656,15 +2070,15 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
 <div id="btnv">
   
   <div class="pull-left">
-  <a class="navigation prev" href="/node-mongodb-native/2.1/reference/connecting/authenticating/">
-      <i class="fa fa-long-arrow-left"> </i> Authenticating
+  <a class="navigation prev" href="/node-mongodb-native/2.1/reference/connecting/ssl/">
+      <i class="fa fa-long-arrow-left"> </i> SSL Settings
   </a>
   </div>
   
   
   <div class="pull-right">
-  <a class="navigation next" href="/node-mongodb-native/2.1/reference/connecting/legacy-connection-settings/">
-    Legacy Connection Settings <i class="fa fa-long-arrow-right"> </i>
+  <a class="navigation next" href="/node-mongodb-native/2.1/reference/crud/">
+    CRUD Operations <i class="fa fa-long-arrow-right"> </i>
   </a>
   
 </div>
@@ -1694,19 +2108,18 @@ MongoClient.connect(f('mongodb://%s@server:27017/test'), {
     <span class="toc-header">On this page</span>
     <nav id="TableOfContents">
 <ul>
-<li><a href="#ssl">SSL</a>
+<li><a href="#connecting-to-mongodb">Connecting To MongoDB</a>
 <ul>
-<li><a href="#no-validation-of-certificate-chain">No validation of certificate chain</a></li>
-<li><a href="#driver-should-validate-server-certificate">Driver should validate Server certificate</a></li>
-<li><a href="#driver-should-ignore-host-name-validation">Driver should ignore host name validation</a></li>
-<li><a href="#driver-should-validate-server-certificate-and-present-valid-certificate">Driver should validate Server certificate and present valid Certificate</a></li>
-<li><a href="#connecting-using-x509">Connecting using X509</a></li>
-<li><a href="#topology-options-related-to-ssl">Topology Options Related to SSL</a>
+<li><a href="#single-server-connection">Single Server Connection</a></li>
+<li><a href="#replicaset-server-connection">Replicaset Server Connection</a></li>
+<li><a href="#mongos-proxy-connection">Mongos Proxy Connection</a></li>
+</ul></li>
+<li><a href="#mongoclient-connect-optional-parameters">MongoClient.connect Optional Parameters</a>
 <ul>
+<li><a href="#data-base-level-options">Data base level options</a></li>
 <li><a href="#individual-server-level-options">Individual Server Level Options</a></li>
 <li><a href="#replicaset-level-options">Replicaset Level Options</a></li>
 <li><a href="#mongos-proxy-level-options">Mongos Proxy Level Options</a></li>
-</ul></li>
 </ul></li>
 </ul>
 </nav>

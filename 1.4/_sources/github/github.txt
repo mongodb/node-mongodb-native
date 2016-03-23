@@ -193,7 +193,7 @@ Content Management Systems
          * - **Forks**
            - 300
          * - **Watchers**
-           - 1659
+           - 1662
 
 Grid FS libraries or tools
 --------------------------
@@ -471,7 +471,7 @@ Test helpers and libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 15:0:48 on 2/2/2016
+           - 19:55:36 on 22/2/2016
          * - **Homepage**
            - http://
          * - **Url**
@@ -479,7 +479,7 @@ Test helpers and libraries
          * - **Clone Url**
            - https://github.com/emerleite/node-database-cleaner.git
          * - **Forks**
-           - 28
+           - 29
          * - **Watchers**
            - 92
 
@@ -732,7 +732,7 @@ Libraries or Applications for analytics
          * - **Forks**
            - 426
          * - **Watchers**
-           - 3709
+           - 3712
 
 Libraries for the connect middleware
 ------------------------------------
@@ -779,9 +779,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 223
+           - 224
          * - **Watchers**
-           - 941
+           - 943
 
 Libraries or applications for continous integration
 ---------------------------------------------------
