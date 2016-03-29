@@ -193,7 +193,7 @@ Content Management Systems
          * - **Forks**
            - 300
          * - **Watchers**
-           - 1662
+           - 1663
 
 Grid FS libraries or tools
 --------------------------
@@ -314,7 +314,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 13
          * - **Watchers**
-           - 51
+           - 52
 
 .. topic:: mdoq-mongodb
 
@@ -386,7 +386,7 @@ REST api's around MongoDB or resource based libraries
          * - **Forks**
            - 127
          * - **Watchers**
-           - 349
+           - 350
 
 .. topic:: lazyBum
 
@@ -471,7 +471,7 @@ Test helpers and libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 19:55:36 on 22/2/2016
+           - 13:52:41 on 26/2/2016
          * - **Homepage**
            - http://
          * - **Url**
@@ -479,9 +479,9 @@ Test helpers and libraries
          * - **Clone Url**
            - https://github.com/emerleite/node-database-cleaner.git
          * - **Forks**
-           - 29
+           - 31
          * - **Watchers**
-           - 92
+           - 94
 
 Tools or applications to manage your MongoDB's
 ----------------------------------------------
@@ -730,9 +730,9 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 426
+           - 428
          * - **Watchers**
-           - 3712
+           - 3716
 
 Libraries for the connect middleware
 ------------------------------------
@@ -771,7 +771,7 @@ Libraries for the connect middleware
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 10:6:24 on 27/0/2016
+           - 20:31:24 on 23/2/2016
          * - **Homepage**
            - http://
          * - **Url**
@@ -779,9 +779,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 224
+           - 225
          * - **Watchers**
-           - 943
+           - 947
 
 Libraries or applications for continous integration
 ---------------------------------------------------

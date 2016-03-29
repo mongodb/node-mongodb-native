@@ -1652,6 +1652,14 @@ MongoClient.connect(url, {
 </tr>
 
 <tr>
+<td align="left"><strong>acceptableLatencyMS</strong></td>
+<td align="left">Mongos</td>
+<td align="left">integer</td>
+<td align="left">15</td>
+<td align="left">Sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms).</td>
+</tr>
+
+<tr>
 <td align="left"><strong>connectWithNoPrimary</strong></td>
 <td align="left">ReplicaSet</td>
 <td align="left">boolean</td>
