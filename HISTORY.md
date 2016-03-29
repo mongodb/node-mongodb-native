@@ -1,3 +1,8 @@
+1.3.11 2016-03-29
+-----------------
+- isConnected method for mongos uses same selection code as getServer.
+- Exceptions in cursor getServer trapped and correctly delegated to high level handler.
+
 1.3.10 2016-03-22
 -----------------
 - SDAM Monitoring emits diff for Replicasets to simplify detecting the state changes.
