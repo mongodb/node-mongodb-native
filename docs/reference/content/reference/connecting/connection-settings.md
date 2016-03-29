@@ -152,6 +152,7 @@ The table below shows all settings and what topology they affect.
 | **haInterval** | ReplicaSet, Mongos | integer | 10000,5000 | Time between each replicaset status check. |
 | **replicaSet** | ReplicaSet | string | null | The name of the replicaset to connect to. |
 | **secondaryAcceptableLatencyMS** | ReplicaSet | integer | 15 | Sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms). |
+| **acceptableLatencyMS** | Mongos | integer | 15 | Sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms). |
 | **connectWithNoPrimary** | ReplicaSet | boolean | false | Sets if the driver should connect even if no primary is available. |
 | **authSource** | Server, ReplicaSet, Mongos | string | null |  If the database authentication is dependent on another databaseName. |
 | **w** | Server, ReplicaSet, Mongos | string, integer| null |  The write concern. |

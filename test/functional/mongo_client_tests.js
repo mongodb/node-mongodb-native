@@ -232,7 +232,7 @@ exports['Should correctly pass through extra sharded options'] = {
       mongos: {
           ha:false
         , haInterval: 10000
-        , secondaryAcceptableLatencyMS: 100
+        , acceptableLatencyMS: 100
         , poolSize: 1
         , socketOptions: {
             noDelay: false
@@ -244,7 +244,7 @@ exports['Should correctly pass through extra sharded options'] = {
     }, function(err, db) {
       test.equal(false, db.s.topology.s.clonedOptions.ha);
       test.equal(10000, db.s.topology.s.clonedOptions.haInterval);
-      test.equal(100, db.s.topology.s.clonedOptions.acceptableLatency);
+      test.equal(100, db.s.topology.s.clonedOptions.localThresholdMS);
       test.equal(1, db.s.topology.s.clonedOptions.poolSize);
 
       test.equal(444444, db.s.topology.s.clonedOptions.connectionTimeout);

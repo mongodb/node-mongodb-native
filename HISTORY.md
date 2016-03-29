@@ -1,3 +1,11 @@
+2.1.12 2016-03-29
+-----------------
+* Updated mongodb-core to 1.3.12.
+* Mongos setting acceptableLatencyMS exposed to control the latency women for mongos selection.
+* Mongos pickProxies fall back to closest mongos if no proxies meet latency window specified.
+* isConnected method for mongos uses same selection code as getServer.
+* Exceptions in cursor getServer trapped and correctly delegated to high level handler.
+
 2.1.11 2016-03-23
 -----------------
 * Updated mongodb-core to 1.3.10.
