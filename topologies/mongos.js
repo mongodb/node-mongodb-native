@@ -261,6 +261,16 @@ var pickProxies = function(self, options) {
     }
   });
 
+  // If no servers found return the lowest latency proxy
+  if(servers.length == 0 && self.s.connectedServers.length > 0) {
+    servers = self.s.connectedServers.sort(function(server1, server2) {
+      return server1.s.isMasterLatencyMS - server2.s.isMasterLatencyMS;
+    });
+
+    // Return the lowest latency server if none is found
+    return [servers[0]];
+  }
+
   // Return all the servers found
   return servers;
 }
