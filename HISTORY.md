@@ -1,3 +1,7 @@
+1.3.12 2016-03-29
+-----------------
+- Mongos pickProxies fall back to closest mongos if no proxies meet latency window specified.
+
 1.3.11 2016-03-29
 -----------------
 - isConnected method for mongos uses same selection code as getServer.
