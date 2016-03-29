@@ -222,8 +222,8 @@ exports['Successful emit SDAM monitoring events for replicaset'] = {
               test.ok(responses['serverHeartbeatSucceeded'].length > 0);
               test.ok(responses['serverDescriptionChanged'].length > 0);
 
-              console.log("---------------------------------------------------")
-              console.log(JSON.stringify(responses['topologyDescriptionChanged'], null, 2))
+              // console.log("---------------------------------------------------")
+              // console.log(JSON.stringify(responses['topologyDescriptionChanged'], null, 2))
 
               for(var i = 0; i < expectedResults.length; i++) {
                 try {
@@ -502,7 +502,7 @@ exports['Successful emit SDAM monitoring events for replicaset'] = {
       }
     },
     {
-      "topologyId": 1,
+      "topologyId": server.s.id,
       "previousDescription": {
         "topologyType": "ReplicaSetNoPrimary",
         "setName": "rs",
