@@ -1,3 +1,7 @@
+1.3.13 2016-03-30
+-----------------
+- Handle missing cursor on getMore when going through a mongos proxy by pinning to socket connection and not server.
+
 1.3.12 2016-03-29
 -----------------
 - Mongos pickProxies fall back to closest mongos if no proxies meet latency window specified.
