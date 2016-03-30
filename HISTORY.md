@@ -1,3 +1,8 @@
+2.1.14 2016-03-29
+-----------------
+* Updated mongodb-core to 1.3.13.
+* Handle missing cursor on getMore when going through a mongos proxy by pinning to socket connection and not server.
+
 2.1.13 2016-03-29
 -----------------
 * Updated mongodb-core to 1.3.12.
