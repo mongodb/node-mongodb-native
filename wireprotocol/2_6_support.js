@@ -79,7 +79,7 @@ WireProtocol.prototype.killCursor = function(bson, ns, cursorId, pool, callbacks
   if(callback) callback(null, null);
 }
 
-WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw, pool, callbacks, options, callback) {
+WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw, connection, callbacks, options, callback) {
   // Create getMore command
   var getMore = new GetMore(bson, ns, cursorState.cursorId, {numberToReturn: batchSize});
 
@@ -102,7 +102,7 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
     cursorState.cursorId = cursorId;
 
     // Return
-    callback(null);
+    callback(null, null, r.connection);
   }
 
   // If we have a raw query decorate the function
@@ -118,7 +118,7 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
   // Register a callback
   callbacks.register(getMore.requestId, queryCallback);
   // Write out the getMore command
-  pool.write(getMore.toBin(), callback);
+  connection.write(getMore.toBin(), queryCallback);
 }
 
 WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, options) {

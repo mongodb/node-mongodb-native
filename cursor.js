@@ -177,9 +177,13 @@ Cursor.prototype._find = function(callback) {
   var queryCallback = function(err, result) {
     if(err) return callback(err);
 
+    // Query failure bit set
     if(result.queryFailure) {
       return callback(MongoError.create(result.documents[0]), null);
     }
+
+    // Store the connection for usage with getMore command
+    self.connection = result.connection;
 
     // Check if we have a command cursor
     if(Array.isArray(result.documents) && result.documents.length == 1
@@ -271,8 +275,11 @@ Cursor.prototype._getmore = function(callback) {
     batchSize = this.cursorState.limit - this.cursorState.currentLimit;
   }
 
+  // Connection to write too
+  var connection = this.connection || this.pool;
+
   // We have a wire protocol handler
-  this.server.wireProtocolHandler.getMore(this.bson, this.ns, this.cursorState, batchSize, raw, this.pool, this.callbacks, this.options, callback);
+  this.server.wireProtocolHandler.getMore(this.bson, this.ns, this.cursorState, batchSize, raw, connection, this.callbacks, this.options, callback);
 }
 
 Cursor.prototype._killcursor = function(callback) {
@@ -511,7 +518,7 @@ var nextFunction = function(self, callback) {
     try {
       // Get a server
       self.server = self.topology.getServer(self.options);
-      // Get a connection
+      // Get a reference to the pool
       self.pool = self.server.s.pool;
       // Get the callbacks
       self.callbacks = self.server.getCallbacks();
@@ -529,7 +536,6 @@ var nextFunction = function(self, callback) {
     self.cursorState.init = true;
 
     try {
-      // Get the right wire protocol command
       self.query = self.server.wireProtocolHandler.command(self.bson, self.ns, self.cmd, self.cursorState, self.topology, self.options);
     } catch(err) {
       return callback(err);
@@ -576,22 +582,27 @@ var nextFunction = function(self, callback) {
       if(isConnectionDead(self, callback)) return;
 
       // Execute the next get more
-      self._getmore(function(err, doc) {
-        if(err) return handleCallback(callback, err);
-        if(self.cursorState.documents.length == 0
-          && Long.ZERO.equals(self.cursorState.cursorId) && !self.cmd.tailable) {
+      self._getmore(function(err, doc, connection) {
+        // General error
+        // if(err && err.code != 43) return handleCallback(callback, err);
+        if(err && err.code != 43) return handleCallback(callback, err);
+        // No cursor found error from mongos
+        if((err && err.code == 43) || (self.cursorState.documents.length == 0
+          && Long.ZERO.equals(self.cursorState.cursorId) && !self.cmd.tailable)) {
             self.cursorState.dead = true;
             // Finished iterating over the cursor
             return setCursorDeadAndNotified(self, callback);
           }
+
+        // Save the returned connection to ensure all getMore's fire over the same connection
+        self.connection = connection;
 
         // Tailable cursor getMore result, notify owner about it
         // No attempt is made here to retry, this is left to the user of the
         // core module to handle to keep core simple
         if(self.cursorState.documents.length == 0
           && self.cmd.tailable && Long.ZERO.equals(self.cursorState.cursorId)) {
-
-          //
+          // No more documents in the tailed cursor
           return handleCallback(callback, MongoError.create({
               message: "No more documents in tailed cursor"
             , tailable: self.cmd.tailable
