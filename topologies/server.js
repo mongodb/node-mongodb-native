@@ -184,6 +184,7 @@ var reconnectServer = function(self, state) {
   if(state.pool) state.pool.destroy();
   // Create a new Pool
   state.pool = new Pool(state.options);
+
   // error handler
   var reconnectErrorHandler = function(err) {
     // Set the state to disconnected so we can peform a proper reconnect
@@ -458,7 +459,7 @@ var connectHandler = function(self, state) {
     applyAuthentications(function() {
       // Initiate monitoring
       if(state.monitoring) {
-        setTimeout(inquireServerState(self), state.haInterval);
+        self.s.inquireServerStateTimeout = setTimeout(inquireServerState(self), state.haInterval);
       }
 
       // Get the actual latency of the ismaster
@@ -669,6 +670,8 @@ var Server = function(options) {
     , Cursor: options.cursorFactory || BasicCursor
     // BSON Parser, ensure we have a single instance
     , bsonInstance: bsonInstance
+    // Contains the inquireServerState timeout reference
+    , inquireServerStateTimeout: null
     // Pick the right bson parser
     , bson: options.bson ? options.bson : bsonInstance
     // Internal connection pool
@@ -983,7 +986,7 @@ var inquireServerState = function(self) {
       }
 
       // Perform another sweep
-      setTimeout(inquireServerState(self), self.s.haInterval);
+      self.s.inquireServerStateTimeout = setTimeout(inquireServerState(self), self.s.haInterval);
     });
   };
 }
@@ -1003,6 +1006,11 @@ Server.prototype.unref = function() {
 Server.prototype.destroy = function(emitClose, emitDestroy) {
   var self = this;
   if(self.s.logger.isDebug()) self.s.logger.debug(f('destroy called on server %s', self.name));
+
+  // Do we have a inquireServerState running
+  if(this.s.inquireServerStateTimeout) {
+    clearTimeout(this.s.inquireServerStateTimeout);
+  }
 
   // Emit close
   if(emitClose && self.listeners('close').length > 0) {

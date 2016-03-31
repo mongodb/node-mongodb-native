@@ -211,47 +211,39 @@ Pool.prototype.connect = function(_options) {
   // No dead
   this.dead = false;
 
-  // Ensure we allow for a little time to setup connections
-  var wait = 1;
-
   // Number of initial connections to perform
   var numberOfConnections = 1;
 
   // Connect all sockets
   for(var i = 0; i < numberOfConnections; i++) {
-    setTimeout(function() {
-      execute(function() {
-        self.options.messageHandler = self.messageHandler;
-        var connection = new Connection(self.options);
+    execute(function() {
+      self.options.messageHandler = self.messageHandler;
+      var connection = new Connection(self.options);
 
-        // Add all handlers
-        connection.once('close', closeHandler(self));
-        connection.once('error', errorHandler(self));
-        connection.once('timeout', timeoutHandler(self));
-        connection.once('parseError', parseErrorHandler(self));
-        connection.on('connect', function(connection) {
-          if(self.state == 'DESTROYED') {
-            return connection.destroy();
-          }
+      // Add all handlers
+      connection.once('close', closeHandler(self));
+      connection.once('error', errorHandler(self));
+      connection.once('timeout', timeoutHandler(self));
+      connection.once('parseError', parseErrorHandler(self));
+      connection.on('connect', function(connection) {
+        if(self.state == 'DESTROYED') {
+          return connection.destroy();
+        }
 
-          // Add the connection to the list of available connections
-          self.availableConnections.push(connection);
+        // Add the connection to the list of available connections
+        self.availableConnections.push(connection);
 
-          // Have we finished the initial connection
-          if(self.availableConnections.length == numberOfConnections) {
-            self.emit("connect", self);
-          }
-        });
-
-        if(self.unreference) connection.unref();
-
-        // Start connection
-        connection.connect(_options);
+        // Have we finished the initial connection
+        if(self.availableConnections.length == numberOfConnections) {
+          self.emit("connect", self);
+        }
       });
-    }, wait);
 
-    // wait for 1 miliseconds before attempting to connect, spacing out connections
-    wait = wait + 1;
+      if(self.unreference) connection.unref();
+
+      // Start connection
+      connection.connect(_options);
+    });
   }
 }
 

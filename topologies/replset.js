@@ -813,6 +813,9 @@ ReplSet.prototype.destroy = function(emitClose) {
   if(this.s.logger.isInfo()) this.s.logger.info(f('[%s] destroyed', this.s.id));
   this.s.replState.state = DESTROYED;
 
+  // Clear the ha timer
+  if(self.s.haTimer) clearTimeout(self.s.haTimer);
+
   // Emit close
   if(emitClose && self.listeners('close').length > 0) self.emit('close', self);
 
@@ -1585,6 +1588,7 @@ var connectToServer = function(self, state, host, port, options) {
 
   // Attempt to connect
   process.nextTick(function() {
+    if(self.s.replState.state == DESTROYED) return;
     server.connect();
   });
 }
