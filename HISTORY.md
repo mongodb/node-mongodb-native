@@ -1,3 +1,7 @@
+1.3.14
+-----------------
+- Ensure server inquireServerState exits immediately on server.destroy call.
+
 1.3.13 2016-03-30
 -----------------
 - Handle missing cursor on getMore when going through a mongos proxy by pinning to socket connection and not server.
