@@ -1,4 +1,4 @@
-1.3.14
+1.3.14 2016-04-01
 -----------------
 - Ensure server inquireServerState exits immediately on server.destroy call.
 - Refactored readPreference handling in 2.4, 2.6 and 3.2 wire protocol handling.
