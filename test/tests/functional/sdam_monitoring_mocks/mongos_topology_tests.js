@@ -358,8 +358,8 @@ exports['SDAM Monitoring Should correctly failover due to proxy going away causi
 
               // Wait for a little bit to let all events fire
               setTimeout(function() {
-                test.equal(3, responses['serverOpening'].length);
-                test.equal(3, responses['serverClosed'].length);
+                test.ok(responses['serverOpening'].length >= 2);
+                test.ok(responses['serverClosed'].length >= 2);
                 test.equal(1, responses['topologyOpening'].length);
                 test.equal(1, responses['topologyClosed'].length);
                 test.ok(responses['serverHeartbeatStarted'].length > 0);
