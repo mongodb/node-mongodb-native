@@ -12,7 +12,8 @@ var Insert = require('./commands').Insert
   , f = require('util').format
   , CommandResult = require('../topologies/command_result')
   , MongoError = require('../error')
-  , Long = require('bson').Long;
+  , Long = require('bson').Long
+  , getReadPreference = require('./shared').getReadPreference;
 
 var WireProtocol = function() {}
 
@@ -136,17 +137,10 @@ WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, 
 //
 // Execute a find command
 var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
-  var readPreference = options.readPreference || new ReadPreference('primary');
-  if(typeof readPreference == 'string') readPreference = new ReadPreference(readPreference);
-  if(!(readPreference instanceof ReadPreference)) throw new MongoError('readPreference must be a ReadPreference instance');
-
-  // Does the cmd have a readPreference
-  if(cmd.readPreference) {
-    readPreference = cmd.readPreference;
-  }
-
   // Ensure we have at least some options
   options = options || {};
+  // Get the readPreference
+  var readPreference = getReadPreference(cmd, options);
   // Set the optional batchSize
   cursorState.batchSize = cmd.batchSize || cursorState.batchSize;
   var numberToReturn = 0;
@@ -255,17 +249,10 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
 //
 // Set up a command cursor
 var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
-  var readPreference = options.readPreference || new ReadPreference('primary');
-  if(typeof readPreference == 'string') readPreference = new ReadPreference(readPreference);
-  if(!(readPreference instanceof ReadPreference)) throw new MongoError('readPreference must be a ReadPreference instance');
-
-  // Does the cmd have a readPreference
-  if(cmd.readPreference) {
-    readPreference = cmd.readPreference;
-  }
-
   // Set empty options object
   options = options || {}
+  // Get the readPreference
+  var readPreference = getReadPreference(cmd, options);
 
   // Final query
   var finalCmd = {};
