@@ -438,7 +438,7 @@ exports['Should correctly round robin secondary reads'] = {
             readPreference: new ReadPreference('secondary')
           }, function(err, r) {
             test.equal(err, null);
-            test.equal(32002, r.connection.port);
+            var port = r.connection.port;
 
             // Perform a find
             _server.command('test.test', {
@@ -448,7 +448,8 @@ exports['Should correctly round robin secondary reads'] = {
               readPreference: new ReadPreference('secondary')
             }, function(err, r) {
               test.equal(err, null);
-              test.equal(32001, r.connection.port);
+              test.ok(r.connection.port != port);
+              var port = r.connection.port;
 
               // Perform a find
               _server.command('test.test', {
@@ -458,7 +459,7 @@ exports['Should correctly round robin secondary reads'] = {
                 readPreference: new ReadPreference('secondary')
               }, function(err, r) {
                 test.equal(err, null);
-                test.equal(32002, r.connection.port);
+                test.ok(r.connection.port != port);
 
                 primaryServer.destroy();
                 firstSecondaryServer.destroy();
