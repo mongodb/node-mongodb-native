@@ -215,7 +215,7 @@ exports['Successful emit SDAM monitoring events for replicaset'] = {
             // Wait to ensure all events fired
             setTimeout(function() {
               test.ok(responses['serverOpening'].length >= 3);
-              test.ok(responses['serverClosed'].length == 3);
+              test.ok(responses['serverClosed'].length >= 3);
               test.ok(responses['topologyOpening'].length == 1);
               test.ok(responses['topologyClosed'].length == 1);
               test.ok(responses['serverHeartbeatStarted'].length > 0);
