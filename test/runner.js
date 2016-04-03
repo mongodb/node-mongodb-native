@@ -234,8 +234,8 @@ try {
   testFiles.push('/test/tests/functional/mongos_mocks/proxy_failover_tests.js');
   testFiles.push('/test/tests/functional/mongos_mocks/proxy_read_preference_tests.js');
 
-  // Single server Mock Tests
-  testFiles.push('/test/tests/functional/single_mocks/timeout_tests.js');
+  // // Single server Mock Tests
+  // testFiles.push('/test/tests/functional/single_mocks/timeout_tests.js');
 
   // SDAM Monitoring tests
   testFiles.push('/test/tests/functional/sdam_monitoring_mocks/single_topology_tests.js');
