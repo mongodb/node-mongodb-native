@@ -928,9 +928,10 @@ var mongosInquirer = function(self, state) {
       // Connect to proxy
       var connectToProxy = function(_server) {
         setTimeout(function() {
-          var events = ['error', 'close', 'timeout', 'connect', 'message', 'parseError'];
-          // Remove any listeners
-          events.forEach(function(e) {
+          // Remove any non used handlers
+          ['error', 'close', 'timeout', 'connect', 'message', 'parseError',
+            'serverOpening', 'serverDescriptionChanged', 'serverHeartbeatStarted',
+            'serverHeartbeatSucceeded', 'serverHearbeatFailed', 'serverClosed'].forEach(function(e) {
             _server.removeAllListeners(e);
           });
 
@@ -939,6 +940,14 @@ var mongosInquirer = function(self, state) {
           _server.once('close', errorHandlerTemp(self, state, server));
           _server.once('timeout', errorHandlerTemp(self, state, server));
           _server.once('connect', connectHandler(self, state, 'ha'));
+
+          // SDAM Monitoring events
+          _server.on('serverOpening', function(e) { self.emit('serverOpening', e); });
+          _server.on('serverDescriptionChanged', function(e) { self.emit('serverDescriptionChanged', e); });
+          _server.on('serverHeartbeatStarted', function(e) { self.emit('serverHeartbeatStarted', e); });
+          _server.on('serverHeartbeatSucceeded', function(e) { self.emit('serverHeartbeatSucceeded', e); });
+          _server.on('serverHearbeatFailed', function(e) { self.emit('serverHearbeatFailed', e); });
+          _server.on('serverClosed', function(e) { self.emit('serverClosed', e); });
 
           // Start connect
           _server.connect();

@@ -34,7 +34,7 @@ var State = function(replSet, options) {
   // Unpacked options
   this.id = options.id;
   this.setName = options.setName;
-  this.connectingServers = options.connectingServers;
+  this.connectingServers = {};
   this.secondaryOnlyConnectionAllowed = options.secondaryOnlyConnectionAllowed;
   // Description of the Replicaset
   this.replicasetDescription = null;
@@ -212,6 +212,38 @@ State.prototype.isPassive = function(address) {
   return false;
 }
 
+State.prototype.clearConnectingServers = function() {
+  for(var name in this.connectingServers) {
+    if(typeof this.connectingServers[name].destroy == 'function') {
+      this.connectingServers[name].destroy();
+    }
+  }
+
+  this.connectingServers = {};
+}
+
+State.prototype.removeConnectingServer = function(address) {
+  if(this.connectingServers[address]) {
+    if(this.connectingServers[address].destroy) {
+      this.connectingServers[address].destroy();
+    }
+  }
+
+  delete this.connectingServers[address];
+}
+
+State.prototype.addConnectingServer = function(host, object) {
+  this.connectingServers[host] = object;
+}
+
+State.prototype.isConnectingServer = function(host) {
+  return this.connectingServers[host] != null;
+}
+
+State.prototype.connectingServersCount = function() {
+  return Object.keys(this.connectingServers).length;
+}
+
 /**
  * Does the replicaset contain this server
  * @method
@@ -240,6 +272,8 @@ State.prototype.contains = function(address) {
  * @method
  */
 State.prototype.clean = function() {
+  var self = this;
+
   if(this.primary != null && !this.primary.isConnected()) {
     this.primary = null;
   }
@@ -251,6 +285,11 @@ State.prototype.clean = function() {
 
   // Filter out disconnected servers
   this.arbiters = this.arbiters.filter(function(s) {
+    return s.isConnected();
+  });
+
+  // Filter out disconnected servers
+  this.passives = this.passives.filter(function(s) {
     return s.isConnected();
   });
 }
@@ -269,18 +308,37 @@ State.prototype.unref = function() {
   });
 }
 
+// Remove listeners
+var events = ['timeout', 'error', 'close', 'joined', 'left',
+  'serverOpening', 'serverDescriptionChanged', 'serverHeartbeatStarted',
+  'serverHeartbeatSucceeded', 'serverHearbeatFailed', 'serverClosed'];
+
+var removeEvents = function(s) {
+  events.forEach(function(e) {
+    s.removeAllListeners(e);
+  });
+}
+
 /**
  * Destroy state
  * @method
  */
 State.prototype.destroy = function() {
   this.state = DESTROYED;
-  if(this.primary) this.primary.destroy();
+
+  if(this.primary) {
+    this.primary.destroy();
+    removeEvents(this.primary);
+  }
+
   this.secondaries.forEach(function(s) {
     s.destroy();
+    removeEvents(s);
   });
+
   this.arbiters.forEach(function(s) {
     s.destroy();
+    removeEvents(s);
   });
 }
 

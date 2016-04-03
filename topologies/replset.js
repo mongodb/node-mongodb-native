@@ -155,8 +155,8 @@ var ReplSet = function(seedlist, options) {
     , tag: options.tag
     // Do we have a not connected handler
     , disconnectHandler: options.disconnectHandler
-    // Currently connecting servers
-    , connectingServers: {}
+    // // Currently connecting servers
+    // , connectingServers: {}
     // Contains any alternate strategies for picking
     , readPreferenceStrategies: {}
     // Auth providers
@@ -191,7 +191,7 @@ var ReplSet = function(seedlist, options) {
   // Replicaset state
   var replState = new State(this, {
       id: this.s.id, setName: this.s.setName
-    , connectingServers: this.s.connectingServers
+    // , connectingServers: this.s.connectingServers
     , secondaryOnlyConnectionAllowed: this.s.secondaryOnlyConnectionAllowed
   });
 
@@ -1115,8 +1115,10 @@ var replicasetInquirer = function(self, state, norepeat) {
     // Unique HA id to identify the current look running
     var localHaId = state.haId++;
 
-    // Clean out any failed connection attempts
-    state.connectingServers = {};
+    // // Clean out any failed connection attempts
+    // state.connectingServers = {};
+    // state.replState.connectingServers = state.connectingServers;
+    state.replState.clearConnectingServers();
 
     // Controls if we are doing a single inquiry or repeating
     norepeat = typeof norepeat == 'boolean' ? norepeat : false;
@@ -1194,10 +1196,15 @@ var replicasetInquirer = function(self, state, norepeat) {
       if(state.replState.state == DESTROYED) {
         return;
       }
+
+      if(server && !server.isConnected()) {
+        return callback();
+      }
+
       // Did we get a server
       if(server && server.isConnected()) {
         // Execute ismaster
-        server.command('admin.$cmd', { ismaster:true },  { monitoring:true }, function(err, r) {
+        server.command('admin.$cmd', { ismaster:true }, {monitoring: true}, function(err, r) {
           // If the state was destroyed
           if(state.replState.state == DESTROYED) {
             return callback();
@@ -1353,6 +1360,9 @@ var errorHandlerTemp = function(self, state, event) {
       return server.name != _server.name;
     });
 
+    // Remove from list of connected servers
+    state.replState.removeConnectingServer(server.name);
+
     // Connection is destroyed, ignore
     if(state.replState.state == DESTROYED) return;
 
@@ -1423,7 +1433,8 @@ var connectHandler = function(self, state) {
       })
 
       // Clean up
-      delete state.connectingServers[server.name];
+      // delete state.connectingServers[server.name];
+      state.replState.removeConnectingServer(server.name);
       // Update the replicaset state, destroy if not added
       if(!state.replState.update(ismaster, server)) {
         // Destroy the server instance
@@ -1467,7 +1478,7 @@ var connectHandler = function(self, state) {
       processHosts(self, state, hosts);
 
       // If have the server instance already destroy it
-      if(state.initialConnectionServers.length == 0 && Object.keys(state.connectingServers).length == 0
+      if(state.initialConnectionServers.length == 0 && state.replState.connectingServersCount() == 0
         && !state.replState.isPrimaryConnected() && !state.secondaryOnlyConnectionAllowed && state.replState.state == CONNECTING) {
         if(state.logger.isInfo()) state.logger.info(f('[%s] no primary found in replicaset', state.id));
         self.emit('error', new MongoError("no primary found in replicaset"));
@@ -1520,10 +1531,10 @@ var processHosts = function(self, state, hosts) {
 
       // If not found we need to create a new connection
       if(!state.replState.contains(host)) {
-        if(state.connectingServers[host] == null && !inInitialConnectingServers(self, state, host)) {
+        if(!state.replState.isConnectingServer(host) && !inInitialConnectingServers(self, state, host)) {
           if(state.logger.isInfo()) state.logger.info(f('[%s] scheduled server %s for connection', state.id, host));
           // Make sure we know what is trying to connect
-          state.connectingServers[host] = host;
+          state.replState.addConnectingServer(host, host);
           // Connect the server
           connectToServer(self, state, host.split(':')[0], parseInt(host.split(':')[1], 10), options);
         }
@@ -1594,6 +1605,9 @@ var connectToServer = function(self, state, host, port, options) {
     });
   }
 
+  // Add server as connecting
+  state.replState.addConnectingServer(server.name, host);
+  // Attempt connection of server
   execute(server);
 }
 
@@ -1627,6 +1641,8 @@ var errorHandler = function(self, state) {
   return function(err, server) {
     // Destroy the server
     server.destroy();
+    // Remove from list of connected servers
+    state.replState.removeConnectingServer(server.name);
     // Check if destroyed the topology
     if(state.replState.state == DESTROYED) return;
     if(state.logger.isInfo()) state.logger.info(f('[%s] server %s errored out with %s', state.id, server.lastIsMaster() ? server.lastIsMaster().me : server.name, JSON.stringify(err)));
@@ -1640,6 +1656,8 @@ var timeoutHandler = function(self, state) {
   return function(err, server) {
     // Destroy the server
     server.destroy();
+    // Remove from list of connected servers
+    state.replState.removeConnectingServer(server.name);
     // Check if destroyed the topology
     if(state.replState.state == DESTROYED) return;
     if(state.logger.isInfo()) state.logger.info(f('[%s] server %s timed out', state.id, server.lastIsMaster() ? server.lastIsMaster().me : server.name));
@@ -1652,6 +1670,8 @@ var closeHandler = function(self, state) {
   return function(err, server) {
     // Destroy the server
     server.destroy();
+    // Remove from list of connected servers
+    state.replState.removeConnectingServer(server.name);
     // Check if destroyed the topology
     if(state.replState.state == DESTROYED) return;
     if(state.logger.isInfo()) state.logger.info(f('[%s] server %s closed', state.id, server.lastIsMaster() ? server.lastIsMaster().me : server.name));
