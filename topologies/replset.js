@@ -1232,7 +1232,9 @@ var replicasetInquirer = function(self, state, norepeat) {
           server.s.ismaster = ismaster;
 
           // Update the replicaset state
-          state.replState.update(ismaster, server);
+          if(!state.replState.update(ismaster, server)) {
+            server.destroy();
+          }
 
           //
           // Process hosts list from ismaster under two conditions
@@ -1398,8 +1400,7 @@ var connectHandler = function(self, state) {
     if(state.logger.isInfo()) state.logger.info(f('[%s] connected to %s', state.id, server.name));
     // Destroyed connection
     if(state.replState.state == DESTROYED) {
-      server.destroy(false, false);
-      return;
+      return server.destroy(false, false);
     }
 
     // Filter out any connection servers
@@ -1411,12 +1412,6 @@ var connectHandler = function(self, state) {
     var processNewServer = function() {
       // Discover any additional servers
       var ismaster = server.lastIsMaster();
-
-      // Are we an arbiter, restrict number of connections to
-      // one single connection
-      if(ismaster.arbiterOnly) {
-        server.capConnections(1);
-      }
 
       // Deal with events
       var events = ['error', 'close', 'timeout', 'connect', 'message',
@@ -1568,6 +1563,9 @@ var connectToServer = function(self, state, host, port, options) {
     opts.size = 1;
   }
 
+  // Do not create a new server instance
+  if(self.s.replState.state == DESTROYED) return;
+
   // Create a new server instance
   var server = new Server(opts);
   // Handle the ismaster
@@ -1586,11 +1584,17 @@ var connectToServer = function(self, state, host, port, options) {
   server.on('serverHearbeatFailed', function(e) { self.emit('serverHearbeatFailed', e); });
   server.on('serverClosed', function(e) { self.emit('serverClosed', e); });
 
-  // Attempt to connect
-  process.nextTick(function() {
-    if(self.s.replState.state == DESTROYED) return;
-    server.connect();
-  });
+  // Ensure we schedule the opening of new socket
+  // on separate ticks of the event loop
+  var execute = function(_server) {
+    // Attempt to connect
+    process.nextTick(function() {
+      if(self.s.replState.state == DESTROYED) return;
+      _server.connect();
+    });
+  }
+
+  execute(server);
 }
 
 //

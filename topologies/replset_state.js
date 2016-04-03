@@ -441,7 +441,7 @@ State.prototype.promotePrimary = function(server) {
 }
 
 var add = function(self, list, server) {
-  // Check if the server is a secondary at the moment
+  // Check if the server is contained in the list
   for(var i = 0; i < list.length; i++) {
     if(list[i].equals(server)) return false;
   }

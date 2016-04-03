@@ -438,7 +438,8 @@ Connection.prototype.unref = function() {
  */
 Connection.prototype.destroy = function() {
   if(this.connection) {
-    // this.connection.end();
+    this.connection.unref();
+    this.connection.end();
     this.connection.destroy();
   }
 
