@@ -116,30 +116,30 @@ exports['Should correctly connect to a replicaset and select the correct tagged 
     });
 
     // Add event listeners
-    server.on('fullsetup', function(_server) {
+    server.on('all', function(_server) {
       // Set up a write
       function schedule() {
-        setTimeout(function() {
-          // Perform a find
-          _server.command('test.test', {
-              count: 'test.test'
-            , batchSize: 2
-          }, {
-            readPreference: new ReadPreference('secondary', {loc:'dc'})
-          }, function(err, r) {
-            test.equal(err, null);
-            test.equal(32002, r.connection.port);
+        // Perform a find
+        _server.command('test.test', {
+            count: 'test.test'
+          , batchSize: 2
+        }, {
+          readPreference: new ReadPreference('secondary', {loc:'dc'})
+        }, function(err, r) {
+          // console.dir(err)
+          test.equal(err, null);
+          // console.log(r.connection.port)
+          test.equal(32002, r.connection.port);
 
-            primaryServer.destroy();
-            firstSecondaryServer.destroy();
-            secondSecondaryServer.destroy();
-            server.destroy();
-            running = false;
+          primaryServer.destroy();
+          firstSecondaryServer.destroy();
+          secondSecondaryServer.destroy();
+          server.destroy();
+          running = false;
 
-            test.done();
-            return;
-          });
-        }, 2000);
+          test.done();
+          return;
+        });
       }
 
       // Schedule an insert
