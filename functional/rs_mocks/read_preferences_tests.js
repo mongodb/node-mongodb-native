@@ -139,7 +139,7 @@ exports['Should correctly connect to a replicaset and select the correct tagged 
             test.done();
             return;
           });
-        }, 500);
+        }, 2000);
       }
 
       // Schedule an insert
