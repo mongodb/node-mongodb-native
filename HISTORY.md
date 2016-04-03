@@ -1,3 +1,7 @@
+1.3.15
+-----------------
+- NODE-687 Fixed issue where a server object failed to be destroyed if the replicaset state did not update successfully. This could leave active connections accumulating over time.
+
 1.3.14 2016-04-01
 -----------------
 - Ensure server inquireServerState exits immediately on server.destroy call.
