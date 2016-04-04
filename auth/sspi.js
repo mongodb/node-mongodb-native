@@ -97,8 +97,13 @@ SSPI.prototype.auth = function(server, connections, db, username, password, opti
       });
     }
 
-    // Get the connection
-    execute(connections.shift());
+    var _execute = function(_connection) {
+      process.nextTick(function() {
+        execute(_connection);
+      });
+    }
+
+    _execute(connections.shift());
   }
 }
 

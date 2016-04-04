@@ -273,25 +273,32 @@ State.prototype.contains = function(address) {
  */
 State.prototype.clean = function() {
   var self = this;
+  var disconnectedServers = [];
 
   if(this.primary != null && !this.primary.isConnected()) {
+    disconnectedServers.push(this.primary);
     this.primary = null;
   }
 
   // Filter out disconnected servers
   this.secondaries = this.secondaries.filter(function(s) {
+    disconnectedServers.push(s);
     return s.isConnected();
   });
 
   // Filter out disconnected servers
   this.arbiters = this.arbiters.filter(function(s) {
+    disconnectedServers.push(s);
     return s.isConnected();
   });
 
   // Filter out disconnected servers
   this.passives = this.passives.filter(function(s) {
+    disconnectedServers.push(s);
     return s.isConnected();
   });
+
+  return disconnectedServers;
 }
 
 /**
@@ -425,7 +432,6 @@ State.prototype.getAll = function(options) {
     servers = servers.concat(this.arbiters);
   }
 
-  // return ;
   return servers;
 }
 

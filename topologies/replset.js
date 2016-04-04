@@ -809,6 +809,9 @@ ReplSet.prototype.unref = function(emitClose) {
  * @method
  */
 ReplSet.prototype.destroy = function(emitClose) {
+  // console.log("================== replset destroy")
+  // console.dir(this.s.authInProgressServers.length)
+
   var self = this;
   if(this.s.logger.isInfo()) this.s.logger.info(f('[%s] destroyed', this.s.id));
   this.s.replState.state = DESTROYED;
@@ -1059,8 +1062,19 @@ var haveAvailableServers = function(state) {
     return true;
 }
 
+var merge = function(list, newList) {
+  var finalList = list.slice(0)
+
+  for(var i = 0; i < newList.length; i++) {
+    if(finalList.indexOf(newList[i]) == -1) finalList.push(newList[i]);
+  }
+
+  return finalList;
+}
+
 var replicasetInquirer = function(self, state, norepeat) {
   return function() {
+    // console.log("--------------------------------- replicasetInquirer 0")
     // Process already running don't rerun
     if(state.highAvailabilityProcessRunning) {
       return;
@@ -1077,6 +1091,12 @@ var replicasetInquirer = function(self, state, norepeat) {
     } else {
       self.s.currentHaInterval = self.s.minHeartbeatFrequencyMS;
     }
+
+    // Clean out any failed connection attempts
+    state.replState.clearConnectingServers();
+
+    // Cleanup state (removed disconnected servers)
+    state.disconnectedServers = merge(state.disconnectedServers, state.replState.clean());
 
     // Started processes
     state.highAvailabilityProcessRunning = true;
@@ -1099,7 +1119,7 @@ var replicasetInquirer = function(self, state, norepeat) {
         // Server is in topology
         opts.inTopology = true;
         // Set up tags if any
-        if(state.tag) opts.tag = stage.tag;
+        if(state.tag) opts.tag = state.tag;
         // Share the auth store
         opts.authProviders = state.authProviders;
         // Create a new Server
@@ -1114,11 +1134,6 @@ var replicasetInquirer = function(self, state, norepeat) {
 
     // Unique HA id to identify the current look running
     var localHaId = state.haId++;
-
-    // // Clean out any failed connection attempts
-    // state.connectingServers = {};
-    // state.replState.connectingServers = state.connectingServers;
-    state.replState.clearConnectingServers();
 
     // Controls if we are doing a single inquiry or repeating
     norepeat = typeof norepeat == 'boolean' ? norepeat : false;
@@ -1136,6 +1151,7 @@ var replicasetInquirer = function(self, state, norepeat) {
     while(state.disconnectedServers.length > 0) {
       // Get the first disconnected server
       var server = state.disconnectedServers.shift();
+      // console.log("--------------------------- connect to disconnected server :: " + server.name)
       if(state.logger.isInfo()) state.logger.info(f('[%s] monitoring attempting to connect to %s', state.id, server.lastIsMaster() ? server.lastIsMaster().me : server.name));
       // Ensure server is properly disconnected
       server.destroy();
@@ -1165,11 +1181,9 @@ var replicasetInquirer = function(self, state, norepeat) {
       execute(server);
     }
 
-    // Cleanup state (removed disconnected servers)
-    state.replState.clean();
-
     // We need to query all servers
     var servers = state.replState.getAll({includeArbiters:true});
+    // console.log("----------- replicasetInquirer " + servers.length)
     var serversLeft = servers.length;
 
     // If no servers and we are not destroyed keep pinging
@@ -1203,6 +1217,7 @@ var replicasetInquirer = function(self, state, norepeat) {
 
       // Did we get a server
       if(server && server.isConnected()) {
+        // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^ inspectServer :: " + server.name)
         // Execute ismaster
         server.command('admin.$cmd', { ismaster:true }, {monitoring: true}, function(err, r) {
           // If the state was destroyed
@@ -1232,6 +1247,8 @@ var replicasetInquirer = function(self, state, norepeat) {
 
           // Handle the primary
           var ismaster = r.result;
+          // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^ inspectServer 1 :: " + server.name)
+          // console.dir(ismaster)
           if(state.logger.isDebug()) state.logger.debug(f('[%s] monitoring process ismaster %s', state.id, JSON.stringify(ismaster)));
 
           // Update server instance ismaster to ensure proper sync
@@ -1240,7 +1257,10 @@ var replicasetInquirer = function(self, state, norepeat) {
 
           // Update the replicaset state
           if(!state.replState.update(ismaster, server)) {
+            // Destroy the instance
             server.destroy();
+            // Return
+            return callback();
           }
 
           //
@@ -1263,7 +1283,10 @@ var replicasetInquirer = function(self, state, norepeat) {
             // Process all the hsots
             processHosts(self, state, hosts);
           } else if(err == null && !Array.isArray(ismaster.hosts)) {
+            // Destroy the instance
             server.destroy();
+            // Return
+            return callback();
           }
 
           // No read Preferences strategies
@@ -1351,6 +1374,8 @@ var replicasetInquirer = function(self, state, norepeat) {
 // Error handler for initial connect
 var errorHandlerTemp = function(self, state, event) {
   return function(err, server) {
+    // console.log("--------------- errorHandlerTemp :: " + server.name)
+    // console.log(err.stack)
     // Destroy the server
     server.destroy();
     // Log the information
@@ -1401,12 +1426,11 @@ var errorHandlerTemp = function(self, state, event) {
     }
   }
 }
-// TODO with arbiter
-//  - if connected to an arbiter, shut down all but single server connection
 
 // Connect handler
 var connectHandler = function(self, state) {
   return function(server) {
+    // console.log("-------------------------------- connectHandler :: " + state.replState.state)
     if(state.logger.isInfo()) state.logger.info(f('[%s] connected to %s', state.id, server.name));
     // Destroyed connection
     if(state.replState.state == DESTROYED) {
@@ -1417,6 +1441,11 @@ var connectHandler = function(self, state) {
     state.initialConnectionServers = state.initialConnectionServers.filter(function(_server) {
       return server.name != _server.name;
     });
+
+    var ismaster = server.lastIsMaster();
+
+    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! server handler")
+    // console.dir(ismaster)
 
     // Process the new server
     var processNewServer = function() {
@@ -1498,17 +1527,25 @@ var connectHandler = function(self, state) {
 
     // No credentials just process server
     if(state.credentials.length == 0) return processNewServer();
-    // Do we have credentials, let's apply them all
-    var count = state.credentials.length;
-    // Apply the credentials
-    for(var i = 0; i < state.credentials.length; i++) {
-      server.auth.apply(server, state.credentials[i].concat([function(err, r) {
-        count = count - 1;
-        if(count == 0) {
-          processNewServer();
-        }
+
+    // Apply all the credentials serially
+    var applyCredentials = function(server, index, credentials, callback) {
+      if(index > credentials.length || credentials.length == 0) return callback();
+      // Apply the credential
+      server.auth.apply(server, credentials[index].concat([function(err, r) {
+        if(err) return callback(err);
+        applyCredentials(server, index + 1, credentials, callback);
       }]));
     }
+
+    applyCredentials(server, 0, state.credentials, function(err) {
+      if(err) {
+        return server.destroy();
+      }
+
+      // Did not fail the authentication, process the instance
+      processNewServer();
+    });
   }
 }
 
