@@ -874,6 +874,36 @@ exports['should correctly error out due to driver close'] = {
   }
 }
 
+/**
+ * @ignore
+ */
+exports['should correctly create index on embedded key'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      test.equal(null, err);
+      var collection = db.collection('embedded_key_indes');
+
+      collection.insertMany([{
+        a: { a: 1}
+      }, {
+        a: { a: 2}
+      }], function(err, r) {
+        test.equal(null, err);
+
+        collection.ensureIndex({'a.a':1}, function(err, indexName) {
+          test.equal(null, err);
+          db.close();
+          test.done();
+        });
+      })
+    });
+  }
+}
+
 // /**
 //  * @ignore
 //  */
