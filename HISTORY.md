@@ -1,3 +1,8 @@
+2.1.5
+-----------------
+* Updated mongodb-core to 1.3.15.
+* Set ssl, sslValidate etc to mongosOptions on url_parser (Issue #1352, https://github.com/rubenstolk).
+
 2.1.14 2016-03-29
 -----------------
 * Updated mongodb-core to 1.3.13.
@@ -23,7 +28,7 @@
 2.1.10 2016-03-21
 -----------------
 * Updated mongodb-core to 1.3.9.
-* Fixing issue that prevented mapReduce stats from being resolved (#1351, https://github.com/davidgtonge)
+* Fixing issue that prevented mapReduce stats from being resolved (Issue #1351, https://github.com/davidgtonge)
 * Forwards SDAM monitoring events from mongodb-core.
 
 2.1.9 2016-03-16
