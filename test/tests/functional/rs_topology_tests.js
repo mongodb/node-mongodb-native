@@ -353,6 +353,11 @@ exports['Member removed by reconfig'] = {
             // console.log("--------- joined :: " + _t + " :: " + _server.name)
             if(_t == 'primary') {
               // console.log("------------------------------------------ 4")
+              // console.log("server.state.primary = " + (server.state.primary != null))
+              // console.log("numberOfSecondaries = " + numberOfSecondaries)
+              // console.log("server.state.secondaries.length = " + server.state.secondaries.length)
+              // console.log("server.state.arbiters.length = " + server.state.arbiters.length)
+              // console.log("server.state.passives.length = " + server.state.passives.length)
               test.ok(server.state.primary != null);
               test.ok(numberOfSecondaries <= server.state.secondaries.length);
               test.equal(1, server.state.arbiters.length);

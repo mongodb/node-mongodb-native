@@ -254,9 +254,11 @@ exports['Should correctly fire single no-repeat ha state update due to not maste
     // Set up the parameter
     var steppedDownPrimary = false;
     var detectedNewPrimary = false;
+    // console.log("+++++++++++++++++++++++++++++++++++++++++++++++++ -2")
 
     // Get the primary server
     manager.primary().then(function(m) {
+      // console.log("+++++++++++++++++++++++++++++++++++++++++++++++++ -1")
       // Attempt to connect
       var server = new ReplSet([{
           host: m.host
@@ -267,6 +269,7 @@ exports['Should correctly fire single no-repeat ha state update due to not maste
 
       // Add event listeners
       server.on('fullsetup', function(_server) {
+        // console.log("------------------------------------- ha")
         _server.on('ha', function(e, options) {
           // console.log("-- ha :: ")
           // console.dir(options)
@@ -296,7 +299,12 @@ exports['Should correctly fire single no-repeat ha state update due to not maste
                 , writeConcern: {w:1}
               }
               , {readPreference: new ReadPreference('secondary')}, function(err, result) {
-                test.equal('not master', result.result.errmsg);
+                test.ok(err != null);
+                test.equal('not master', err.message);
+                // console.log("*****************************************************")
+                // console.dir(err)
+                // if(result) console.dir(result.result)
+                // test.equal('not master', result.result.errmsg);
             });
           } else if(t == 'primary' && steppedDownPrimary) {
             detectedNewPrimary = true;
