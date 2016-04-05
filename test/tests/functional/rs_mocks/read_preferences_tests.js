@@ -143,7 +143,9 @@ exports['Should correctly connect to a replicaset and select the correct tagged 
       }
 
       // Schedule an insert
-      schedule();
+      setTimeout(function() {
+        schedule();
+      }, 500);
     });
 
     // Gives proxies a chance to boot up
