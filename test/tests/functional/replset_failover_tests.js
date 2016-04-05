@@ -254,6 +254,7 @@ exports['Should correctly fire single no-repeat ha state update due to not maste
     // Set up the parameter
     var steppedDownPrimary = false;
     var detectedNewPrimary = false;
+    var receivedNotIsMasterError = false;
     // console.log("+++++++++++++++++++++++++++++++++++++++++++++++++ -2")
 
     // Get the primary server
@@ -277,6 +278,7 @@ exports['Should correctly fire single no-repeat ha state update due to not maste
           // Manual status request issues correctly
           if(detectedNewPrimary) {
             process.nextTick(function() {
+              test.equal(true, receivedNotIsMasterError);
               // Destroy the connection
               _server.destroy();
               // Finish the test
@@ -299,11 +301,12 @@ exports['Should correctly fire single no-repeat ha state update due to not maste
                 , writeConcern: {w:1}
               }
               , {readPreference: new ReadPreference('secondary')}, function(err, result) {
-                test.ok(err != null);
-                test.equal('not master', err.message);
-                // console.log("*****************************************************")
+                // console.log("***************************************************** :: " + s.name)
                 // console.dir(err)
                 // if(result) console.dir(result.result)
+                test.ok(err != null);
+                if(err && err.message == 'not master') receivedNotIsMasterError = true;
+                // test.equal('not master', err.message);
                 // test.equal('not master', result.result.errmsg);
             });
           } else if(t == 'primary' && steppedDownPrimary) {

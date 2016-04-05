@@ -8,7 +8,7 @@ var extend = function(template, fields) {
   }
 
   for(var name in fields) {
-   object[name] = fields[name]; 
+   object[name] = fields[name];
   }
 
   return object;
@@ -29,7 +29,7 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
       Long = configuration.require.BSON.Long,
       co = require('co'),
       mockupdb = require('../../../mock');
-    
+
     // Contain mock server
     var primaryServer = null;
     var firstSecondaryServer = null;
@@ -123,24 +123,28 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
 
     server.on('joined', function(_type) {
       if(_type == 'arbiter') {
-        test.equal(true, server.__connected);
+        if(server.s.replState.secondaries.length == 1
+          && server.s.replState.arbiters.length == 1
+          && server.s.replState.primary) {
+            test.equal(true, server.__connected);
 
-        test.equal(1, server.s.replState.secondaries.length);
-        test.equal('localhost:32001', server.s.replState.secondaries[0].name);
+            test.equal(1, server.s.replState.secondaries.length);
+            test.equal('localhost:32001', server.s.replState.secondaries[0].name);
 
-        test.equal(1, server.s.replState.arbiters.length);
-        test.equal('localhost:32002', server.s.replState.arbiters[0].name);
+            test.equal(1, server.s.replState.arbiters.length);
+            test.equal('localhost:32002', server.s.replState.arbiters[0].name);
 
-        test.ok(server.s.replState.primary != null);
-        test.equal('localhost:32000', server.s.replState.primary.name);
+            test.ok(server.s.replState.primary != null);
+            test.equal('localhost:32000', server.s.replState.primary.name);
 
-        primaryServer.destroy();
-        firstSecondaryServer.destroy();
-        arbiterServer.destroy();
-        server.destroy();
-        running = false;
+            primaryServer.destroy();
+            firstSecondaryServer.destroy();
+            arbiterServer.destroy();
+            server.destroy();
+            running = false;
 
-        test.done();        
+            test.done();            
+          }
       }
     });
 
@@ -172,7 +176,7 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary but missi
       Long = configuration.require.BSON.Long,
       co = require('co'),
       mockupdb = require('../../../mock');
-    
+
     // Contain mock server
     var primaryServer = null;
     var firstSecondaryServer = null;
@@ -261,7 +265,7 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary but missi
       server.destroy();
       running = false;
 
-      test.done();        
+      test.done();
     });
 
     server.on('connect', function(e) {
@@ -290,7 +294,7 @@ exports['Fail to connect due to missing primary'] = {
       Long = configuration.require.BSON.Long,
       co = require('co'),
       mockupdb = require('../../../mock');
-    
+
     // Contain mock server
     var firstSecondaryServer = null;
     var running = true;
@@ -369,7 +373,7 @@ exports['Successful connection to replicaset of 0 primary, 1 secondary and 1 arb
       Long = configuration.require.BSON.Long,
       co = require('co'),
       mockupdb = require('../../../mock');
-    
+
     // Contain mock server
     var firstSecondaryServer = null;
     var arbiterServer = null;
@@ -458,7 +462,7 @@ exports['Successful connection to replicaset of 0 primary, 1 secondary and 1 arb
         server.destroy();
         running = false;
 
-        test.done();        
+        test.done();
       }
     });
 
