@@ -563,7 +563,7 @@ exports['Successfully remove a secondary server from the set then re-add it'] = 
 
     server.on('joined', function(_type, _server) {
       if(_type == 'arbiter') {
-        currentIsMasterIndex = currentIsMasterIndex + 1;
+        if(currentIsMasterIndex < 2) currentIsMasterIndex = currentIsMasterIndex + 1;
       } else if(_type == 'secondary'
         && _server.name == 'localhost:32003' && currentIsMasterIndex == 2) {
         test.equal(true, server.__connected);
