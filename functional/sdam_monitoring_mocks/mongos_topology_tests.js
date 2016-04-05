@@ -177,17 +177,12 @@ exports['SDAM Monitoring Should correctly connect to two proxies'] = {
                     }]
 
                     for(var i = 0; i < responses['topologyDescriptionChanged'].length; i++) {
-                      // console.log("---------------------------------------------------- " + i)
-                      // console.log(JSON.stringify(responses['topologyDescriptionChanged'][i], null, 2))
-
                       test.deepEqual(results[i], responses['topologyDescriptionChanged'][i]);
                     }
 
-                    // console.log(JSON.stringify(responses['topologyDescriptionChanged'], null, 2))
-                    // test.deepEqual(results, responses['topologyDescriptionChanged']);
                     running = false;
                     test.done();
-                  }, 100);
+                  }, 1000);
                 }
               });
             }, 500);
