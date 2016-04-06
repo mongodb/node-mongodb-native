@@ -1,6 +1,7 @@
-1.3.15
+1.3.15 2016-04-06
 -----------------
 - NODE-687 Fixed issue where a server object failed to be destroyed if the replicaset state did not update successfully. This could leave active connections accumulating over time.
+- Fixed some situations where all connections are flushed due to a single connection in the connection pool closing.
 
 1.3.14 2016-04-01
 -----------------
