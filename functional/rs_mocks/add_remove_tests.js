@@ -152,41 +152,33 @@ exports['Successfully add a new secondary server to the set'] = {
         size: 1
     });
 
+    var secondaries = {};
+    var arbiters = {};
+
     server.on('joined', function(_type, _server) {
+      // console.log("----------- joined :: " + _type + " :: " + _server.name)
       if(_type == 'arbiter') {
-        // test.equal(true, server.__connected);
-
-        // test.equal(1, server.s.replState.secondaries.length);
-        // test.equal('localhost:32001', server.s.replState.secondaries[0].name);
-
-        // test.equal(1, server.s.replState.arbiters.length);
-        // test.equal('localhost:32002', server.s.replState.arbiters[0].name);
-
-        // test.ok(server.s.replState.primary != null);
-        // test.equal('localhost:32000', server.s.replState.primary.name);
-
+        arbiters[_server.name] = _server;
         // Flip the ismaster message
         currentIsMasterIndex = currentIsMasterIndex + 1;
-      } else if(_type == 'secondary' && _server.name == 'localhost:32003') {
+      } else if(_type == 'secondary') {
         // test.equal(true, server.__connected);
+        secondaries[_server.name] = _server;
 
-        test.equal(2, server.s.replState.secondaries.length);
-        test.equal('localhost:32001', server.s.replState.secondaries[0].name);
-        test.equal('localhost:32003', server.s.replState.secondaries[1].name);
+        if(Object.keys(secondaries).length == 2) {
+          test.ok(secondaries['localhost:32001'] != null);
+          test.ok(secondaries['localhost:32003'] != null);
+          test.ok(arbiters['localhost:32002'] != null);
 
-        // test.equal(1, server.s.replState.arbiters.length);
-        // test.equal('localhost:32002', server.s.replState.arbiters[0].name);
-
-        test.ok(server.s.replState.primary != null);
-        test.equal('localhost:32000', server.s.replState.primary.name);
-
-        running = false;
-        primaryServer.destroy();
-        firstSecondaryServer.destroy();
-        secondSecondaryServer.destroy();
-        arbiterServer.destroy();
-        server.destroy();
-        test.done();
+          // Finish up the test
+          running = false;
+          primaryServer.destroy();
+          firstSecondaryServer.destroy();
+          secondSecondaryServer.destroy();
+          arbiterServer.destroy();
+          server.destroy();
+          test.done();
+        }
       }
     });
 
@@ -352,6 +344,7 @@ exports['Successfully remove a secondary server from the set'] = {
     var joined = 0;
 
     server.on('joined', function(_type, _server) {
+      // console.log("----- joined :: " + _type + " :: " + _server)
       joined = joined + 1;
 
       // primary, secondary and arbiter have joined
@@ -374,8 +367,12 @@ exports['Successfully remove a secondary server from the set'] = {
     });
 
     server.on('left', function(_type, _server) {
+      // console.log("----- left :: " + _type + " :: " + _server.name)
       if(_type == 'secondary' && _server.name == 'localhost:32003') {
         test.equal(true, server.__connected);
+
+        // console.log("-------------------------------------------- done")
+        // console.log(server.connections().map(function(x) { return x.port; }))
 
         test.equal(1, server.s.replState.secondaries.length);
         test.equal('localhost:32001', server.s.replState.secondaries[0].name);
@@ -412,7 +409,7 @@ exports['Successfully remove a secondary server from the set'] = {
   }
 }
 
-exports['Successfully remove a secondary server from the set then re-add it'] = {
+exports['Successfully remove and re-add secondary server to the set'] = {
   metadata: {
     requires: {
       generators: true,
@@ -561,39 +558,45 @@ exports['Successfully remove a secondary server from the set then re-add it'] = 
         size: 1
     });
 
+    var secondaries = {};
+    var arbiters = {};
+
     server.on('joined', function(_type, _server) {
+      // console.log("---------------------------------- joined :: " + _type + " :: " + _server.name)
       if(_type == 'arbiter') {
         if(currentIsMasterIndex < 2) {
           currentIsMasterIndex = currentIsMasterIndex + 1;
         }
-      } else if(_type == 'secondary'
-        && _server.name == 'localhost:32003' && currentIsMasterIndex == 2) {
+
+        arbiters[_server.name] = _server;
+      } else if(_type == 'secondary') {
         test.equal(true, server.__connected);
 
-        test.equal(2, server.s.replState.secondaries.length);
-        test.equal('localhost:32001', server.s.replState.secondaries[0].name);
-        test.equal('localhost:32003', server.s.replState.secondaries[1].name);
+        secondaries[_server.name] = _server;
 
-        // test.equal(1, server.s.replState.arbiters.length);
-        // test.equal('localhost:32002', server.s.replState.arbiters[0].name);
+        if(Object.keys(secondaries).length == 2) {
+          test.ok(secondaries['localhost:32001'] != null);
+          test.ok(secondaries['localhost:32003'] != null);
+          test.ok(arbiters['localhost:32002'] != null);
+          test.ok(server.s.replState.primary != null);
+          test.equal('localhost:32000', server.s.replState.primary.name);
 
-        test.ok(server.s.replState.primary != null);
-        test.equal('localhost:32000', server.s.replState.primary.name);
+          primaryServer.destroy();
+          firstSecondaryServer.destroy();
+          secondSecondaryServer.destroy();
+          arbiterServer.destroy();
+          server.destroy();
+          running = false;
 
-        primaryServer.destroy();
-        firstSecondaryServer.destroy();
-        secondSecondaryServer.destroy();
-        arbiterServer.destroy();
-        server.destroy();
-        running = false;
-
-        test.done();
+          test.done();
+        }
       }
     });
 
     server.on('error', function(){});
 
     server.on('left', function(_type, _server) {
+      // console.log("---------------------------------- left :: " + _type + " :: " + _server.name)
       if(_type == 'secondary' && _server.name == 'localhost:32003') {
         test.equal(true, server.__connected);
 
