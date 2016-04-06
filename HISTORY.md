@@ -1,7 +1,9 @@
-2.1.5
+2.1.5 2016-04-06
 -----------------
 * Updated mongodb-core to 1.3.15.
 * Set ssl, sslValidate etc to mongosOptions on url_parser (Issue #1352, https://github.com/rubenstolk).
+- NODE-687 Fixed issue where a server object failed to be destroyed if the replicaset state did not update successfully. This could leave active connections accumulating over time.
+- Fixed some situations where all connections are flushed due to a single connection in the connection pool closing.
 
 2.1.14 2016-03-29
 -----------------
