@@ -1,3 +1,7 @@
+2.1.6 2016-04-07
+-----------------
+* Updated mongodb-core to 1.3.16 to work around issue with early versions of node 0.10.x due to missing unref method on ClearText streams.
+
 2.1.5 2016-04-06
 -----------------
 * Updated mongodb-core to 1.3.15.
