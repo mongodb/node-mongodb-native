@@ -1,4 +1,4 @@
-2.1.5 2016-04-06
+2.1.15 2016-04-06
 -----------------
 * Updated mongodb-core to 1.3.15.
 * Set ssl, sslValidate etc to mongosOptions on url_parser (Issue #1352, https://github.com/rubenstolk).
