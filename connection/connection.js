@@ -397,7 +397,7 @@ Connection.prototype.connect = function(_options) {
       // but does not emit an error event like all other errors. We handle this
       // and other potential inconsistencies here.
       process.nextTick(function() {
-        return self.emit("error", error, self, {ssl:true});
+        return self.emit("error", MongoError.create(error), self, {ssl:true});
       });
     }
     self.connection.setTimeout(self.connectionTimeout);
