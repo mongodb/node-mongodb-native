@@ -55,6 +55,7 @@ exports['Should correctly reconnect to server with automatic reconnect enabled']
     });
 
     server.once('reconnect', function() {
+      // console.log('!!!!!!!!!!! reconnect')
       test.equal(true, emittedClose);
       test.equal(true, server.isConnected());
       test.equal(30, server.s.currentReconnectRetry);
@@ -149,15 +150,18 @@ exports['Should reconnect when initial connection failed'] = {
           host: configuration.host
         , port: configuration.port
         , reconnect: true
+        , reconnectTries: 2
         , size: 1
         , emitError: true
       });
 
       server.on('connect', function() {
+        // console.log("----------- connect")
         test.done();
       });
 
       server.once('error', function() {
+        // console.log("----------- error")
         manager.start().then(function() {});
       });
 
