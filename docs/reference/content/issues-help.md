@@ -8,15 +8,15 @@ title = "Issues & Help"
 
 # Issues & Help
 
-We are lucky to have a vibrant Node.js community with lots of varying
-experience of using the Node.js driver.  We often find the quickest way to get support for
+Our developer community is vibrant and highly engaged, with wide experience using Node.js with MongoDB."  
+Often find the quickest way to get support for
 general questions is through the [mongodb-user google group](http://groups.google.com/group/mongodb-user)
-or through [stackoverflow](http://stackoverflow.com/questions/tagged/mongodb+nodejs).  Please also
-refer to our own [support channels](http://www.mongodb.org/about/support) documentation.
+or through [stackoverflow](http://stackoverflow.com/questions/tagged/mongodb+nodejs).  
+Refer to our [support channels](http://www.mongodb.org/about/support) documentation for more information.
 
 ## Bugs / Feature Requests
 
-If you think you’ve found a bug or want to see a new feature in the Node.js driver,
+If you’ve found a bug or want to see a new feature in the Node.js driver,
 please open a case in our issue management tool, JIRA:
 
 - [Create an account and login](https://jira.mongodb.org).
@@ -31,9 +31,8 @@ MongoDB project, please report it according to the [instructions here](http://do
 ## Pull Requests
 
 We are happy to accept contributions to help improve the driver.
-We will guide user contributions to ensure they meet the standards of the codebase.
-Please ensure that any pull requests include documentation, tests and also pass
-the travis.ci checks.
+We will review user contributions to ensure they meet the standards of the codebase.
+Please ensure that any pull requests pass the travis.ci checks, and include documentation and tests.
 
 To get started check out the source and work on a branch:
 
@@ -44,7 +43,8 @@ $ npm install
 $ git checkout -b myNewFeature
 ```
 
-Ensure you code passes the test suite. Before running the test suite make sure you have the `mongod` executable on your current path.
+Ensure your code passes the test suite. Before running the test suite make sure you have the `mongod` executable 
+in your current path.
 
 Run the functional test suite.
 ```bash
