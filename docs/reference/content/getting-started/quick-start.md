@@ -1,6 +1,6 @@
 +++
 date = "2015-03-17T15:36:56Z"
-title = "Quick Tour"
+title = "Quick Start"
 [menu.main]
   parent = "Getting Started"
   identifier = "Quick Tour"
@@ -8,14 +8,14 @@ title = "Quick Tour"
   pre = "<i class='fa'></i>"
 +++
 
-QuickStart
-==========
-The quick start guide will show you how to set up a simple application using node.js and MongoDB. Its scope is only how to set up the driver and perform the simple crud operations. For more in depth coverage we encourage reading the tutorials.
+Quick Start
+===========
+This guide will show you how to set up a simple application using Node.js and MongoDB. Its scope is only how to set up the driver and perform the simple CRUD operations. For more in-depth coverage, see the tutorials.
 
-Installing MongoDB Node.js driver using NPM
+Installing the Node.js driver using NPM
 -------------------------------------------
 
-Installing the MongoDB Node.js driver using NPM is very easy. First you need to ensure you have Node.js and NPM correctly set up and in your path. Installing the driver is as easy as.
+Be sure Node.js and NPM are correctly set up and included in your PATH. To install the driver:
 
 ```js
 npm install mongodb
@@ -23,20 +23,20 @@ npm install mongodb
 
 Create the package.json file
 ----------------------------
-Let's create a directory where our application will live. In our case we will put this under our projects directory.
+First, create a directory where your application will live.
 
 ```
 mkdir myproject
 cd myproject
 ```
 
-Enter the following command and answer the questions to create the initial structure for your new project
+Enter the following command and answer the questions to create the initial structure for your new project:
 
 ```
 npm init
 ```
 
-Next we install the driver dependency.
+Next, install the driver dependency.
 
 ```
 npm install mongodb --save
@@ -46,19 +46,19 @@ You should see **NPM** download a lot of files. Once it's done you'll find all t
 
 Booting up a MongoDB Server
 ---------------------------
-Let's boot up a MongoDB server instance. Download the right MongoDB version from [MongoDB](http://www.mongodb.org), open a new shell or command line and ensure the **mongod** command is in the shell or command line path. Now let's create a database directory (in our case under **/data**).
+Next, boot up a MongoDB server instance. Download the right MongoDB version from [MongoDB](https://www.mongodb.org/downloads), open a new shell or command line and ensure the **mongod** command is in the shell or command line path. Next create a database directory (in this case under **/data**).
 
 ```
-mongod --dbpath=/data --port 27017
+mongod --dbpath=/data
 ```
 
 You should see the **mongod** process start up and print some status information.
 
 Connecting to MongoDB
 ---------------------
-Let's create a new **app.js** file that we will use to show the basic CRUD operations using the MongoDB driver.
+Next, create a new **app.js** file that you can use to try out some basic CRUD operations using the MongoDB driver.
 
-First let's add code to connect to the server and the database **myproject**.
+Add code to connect to the server and the database **myproject**:
 
 ```js
 var MongoClient = require('mongodb').MongoClient
@@ -66,22 +66,22 @@ var MongoClient = require('mongodb').MongoClient
 
 // Connection URL
 var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the Server
+// Use connect method to connect to the server
 MongoClient.connect(url, function(err, db) {
   assert.equal(null, err);
-  console.log("Connected correctly to server");
+  console.log("Connected succesfully to server");
 
   db.close();
 });
 ```
 
-Given that you booted up the **mongod** process earlier the application should connect successfully and print **Connected correctly to server** to the console.
+The application should print **Connected successfully to server** to the console.
 
-Let's Add some code to show the different CRUD operations available.
+Add some code to show the different CRUD operations available:
 
 Inserting a Document
 --------------------
-Let's create a function that will insert some documents for us.
+Next, create a function to insert some documents.
 
 ```js
 var insertDocuments = function(db, callback) {
@@ -94,19 +94,19 @@ var insertDocuments = function(db, callback) {
     assert.equal(err, null);
     assert.equal(3, result.result.n);
     assert.equal(3, result.ops.length);
-    console.log("Inserted 3 documents into the document collection");
+    console.log("Inserted 3 documents into the collection");
     callback(result);
   });
 }
 ```
 
-The insert command will return a results object that contains several fields that might be useful.
+The **insert** command returns an object with the following fields:
 
 * **result** Contains the result document from MongoDB
 * **ops** Contains the documents inserted with added **_id** fields
 * **connection** Contains the connection used to perform the insert
 
-Let's add call the **insertDocuments** command to the **MongoClient.connect** method callback.
+Next, add a call the **insertDocuments** command to the **MongoClient.connect** method callback.
 
 ```js
 var MongoClient = require('mongodb').MongoClient
@@ -114,10 +114,10 @@ var MongoClient = require('mongodb').MongoClient
 
 // Connection URL
 var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the Server
+// Use connect method to connect to the server
 MongoClient.connect(url, function(err, db) {
   assert.equal(null, err);
-  console.log("Connected correctly to server");
+  console.log("Connected successfully to server");
 
   insertDocuments(db, function() {
     db.close();
@@ -125,7 +125,7 @@ MongoClient.connect(url, function(err, db) {
 });
 ```
 
-We can now run the update **app.js** file.
+Run the updated **app.js** file:
 
 ```
 node app.js
@@ -134,13 +134,13 @@ node app.js
 You should see the following output after running the **app.js** file.
 
 ```
-Connected correctly to server
-Inserted 3 documents into the document collection
+Connected successfully to server
+Inserted 3 documents into the collection
 ```
 
 Updating a document
 -------------------
-Let's look at how to do a simple document update by adding a new field **b** to the document that has the field **a** set to **2**.
+Here's how to do a simple document update by adding a new field **b** to the document that has the field **a** set to **2**.
 
 ```js
 var updateDocument = function(db, callback) {
@@ -157,7 +157,7 @@ var updateDocument = function(db, callback) {
 }
 ```
 
-The method will update the first document where the field **a** is equal to **2** by adding a new field **b** to the document set to **1**. Let's update the callback function from **MongoClient.connect** to include the update method.
+The method updates the first document where the field **a** is equal to **2** by adding a new field **b** to the document set to **1**. Next, update the callback function from **MongoClient.connect** to include the update method.
 
 ```js
 var MongoClient = require('mongodb').MongoClient
@@ -165,10 +165,10 @@ var MongoClient = require('mongodb').MongoClient
 
 // Connection URL
 var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the Server
+// Use connect method to connect to the server
 MongoClient.connect(url, function(err, db) {
   assert.equal(null, err);
-  console.log("Connected correctly to server");
+  console.log("Connected successfully to server");
 
   insertDocuments(db, function() {
     updateDocument(db, function() {
@@ -180,7 +180,7 @@ MongoClient.connect(url, function(err, db) {
 
 Remove a document
 -----------------
-Next lets remove the document where the field **a** equals to **3**.
+Next, remove the document where the field **a** is equal to **3**.
 
 ```js
 var removeDocument = function(db, callback) {
@@ -196,7 +196,7 @@ var removeDocument = function(db, callback) {
 }
 ```
 
-This will remove the first document where the field **a** equals to **3**. Let's add the method to the **MongoClient.connect** callback function.
+Add the new method to the **MongoClient.connect** callback function.
 
 ```js
 var MongoClient = require('mongodb').MongoClient
@@ -204,10 +204,10 @@ var MongoClient = require('mongodb').MongoClient
 
 // Connection URL
 var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the Server
+// Use connect method to connect to the server
 MongoClient.connect(url, function(err, db) {
   assert.equal(null, err);
-  console.log("Connected correctly to server");
+  console.log("Connected successfully to server");
 
   insertDocuments(db, function() {
     updateDocument(db, function() {
@@ -219,11 +219,9 @@ MongoClient.connect(url, function(err, db) {
 });
 ```
 
-Finally let's retrieve all the documents using a simple find.
-
 Find All Documents
 ------------------
-We will finish up the Quickstart CRUD methods by performing a simple query that returns all the documents matching the query.
+Finally, add a query that returns all the documents.
 
 ```js
 var findDocuments = function(db, callback) {
@@ -240,7 +238,8 @@ var findDocuments = function(db, callback) {
 }
 ```
 
-This query will return all the documents in the **documents** collection. Since we removed a document the total documents returned is **2**. Finally let's add the findDocument method to the **MongoClient.connect** callback.
+This query returns all the documents in the **documents** collection. One document was deleted earlier, so the total number
+of documents returned is 2 **2**. Add the **findDocument** method to the **MongoClient.connect** callback:
 
 ```js
 var MongoClient = require('mongodb').MongoClient
@@ -248,7 +247,7 @@ var MongoClient = require('mongodb').MongoClient
 
 // Connection URL
 var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the Server
+// Use connect method to connect to the server
 MongoClient.connect(url, function(err, db) {
   assert.equal(null, err);
   console.log("Connected correctly to server");
@@ -265,4 +264,4 @@ MongoClient.connect(url, function(err, db) {
 });
 ```
 
-This concludes the QuickStart of connecting and performing some Basic operations using the MongoDB Node.js driver. For more detailed information you can look at the tutorials covering more specific topics of interest.
+This concludes the Quick Start guide to basic CRUD functions. For more detailed information, see the tutorials covering more specific topics of interest.
