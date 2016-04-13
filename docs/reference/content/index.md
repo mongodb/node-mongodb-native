@@ -32,7 +32,7 @@ If you'd like to use the MongoDB driver with ES6 features such as Promises and G
 
 ## Next steps
 
-* [Authentication]({{< relref "reference/connecting/autjenticate.md" >}})
+* [Authentication]({{< relref "reference/connecting/authenticate.md" >}})
 * [Grid FS]({{< relref "reference/gridfs/streaming.md" >}})
 
 ## Advanced topics
