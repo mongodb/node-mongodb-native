@@ -10,10 +10,10 @@ title = "Quick Start"
 
 Quick Start
 ===========
-This guide will show you how to set up a simple application using Node.js and MongoDB. Its scope is only how to set up the driver and perform the simple CRUD operations. For more in-depth coverage, see the tutorials.
+This guide will show you how to set up a simple application using Node.js and MongoDB. Its scope is only how to set up the driver and perform the simple CRUD operations. For more in-depth coverage, see the [tutorials]({{< relref "reference/index.md" >}}).
 
 Installing the Node.js driver using NPM
--------------------------------------------
+---------------------------------------
 
 Be sure Node.js and NPM are correctly set up and included in your PATH. To install the driver:
 
@@ -264,4 +264,5 @@ MongoClient.connect(url, function(err, db) {
 });
 ```
 
-This concludes the Quick Start guide to basic CRUD functions. For more detailed information, see the tutorials covering more specific topics of interest.
+This concludes the Quick Start guide to basic CRUD functions. For more detailed information, see the 
+[tutorials]({{< relref "reference/index.md" >}}) covering more specific topics of interest.

@@ -19,7 +19,7 @@ information on recent changes.
 ## Starting points
 
 * [Installing the driver]({{< relref "getting-started/installation-guide.md" >}})
-* [Quick start]({{< relref "getting-started/quick-tour.md" >}})
+* [Quick start]({{< relref "getting-started/quick-start.md" >}})
 * [CRUD operation]({{< relref "reference/crud/index.md" >}})
 * [Connection settings]({{< relref "reference/connecting/connection-settings.md" >}})
 
@@ -32,7 +32,7 @@ If you'd like to use the MongoDB driver with ES6 features such as Promises and G
 
 ## Next steps
 
-* [Authentication]({{< relref "reference/connecting/authenticate.md" >}})
+* [Authentication]({{< relref "reference/connecting/authenticating.md" >}})
 * [Grid FS]({{< relref "reference/gridfs/streaming.md" >}})
 
 ## Advanced topics
