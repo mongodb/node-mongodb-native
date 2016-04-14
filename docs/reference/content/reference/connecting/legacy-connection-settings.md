@@ -2,13 +2,19 @@
 date = "2015-03-19T12:53:30-04:00"
 title = "Legacy Connection Settings"
 [menu.main]
-  parent = "Connecting"
+  parent = "Connect to MongoDB"
   identifier = "Legacy Connection Settings"
   weight = 40
   pre = "<i class='fa'></i>"
 +++
 
-# Connecting To MongoDB
+# Connect To MongoDB (Legacy)
+
+{{% note %}}
+
+For 2.1.10 or earlier. For newer versions, see [Connect to MongoDB]({{< relref
+"reference/connecting/index.md" >}})
+{{% /note %}}
 
 Connecting to MongoDB using the driver is primarily done using the `MongoClient.connect` method and a URI. Let's look at how we connect to a couple of different server topologies.
 
