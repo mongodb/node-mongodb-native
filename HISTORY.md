@@ -1,3 +1,8 @@
+1.3.17
+-----------------
+- Added improved handling of reconnect when topology is a single server.
+- Added better handling of $query queries passed down for 3.2 or higher.
+
 1.3.16 2016-04-07
 -----------------
 - Only call unref on destroy if it exists to ensure proper working destroy method on early node v0.10.x versions.
