@@ -309,7 +309,14 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
   };
 
   // I we provided a filter
-  if(cmd.query) findCmd.filter = cmd.query;
+  if(cmd.query) {
+    // Check if the user is passing in the $query parameter
+    if(cmd.query['$query']) {
+      findCmd.filter = cmd.query['$query'];
+    } else {
+      findCmd.filter = cmd.query;
+    }
+  }
 
   // Sort value
   var sortValue = cmd.sort;
