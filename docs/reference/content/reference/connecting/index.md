@@ -1,17 +1,16 @@
 +++
 date = "2015-03-19T12:53:30-04:00"
-title = "Connecting"
+title = "Connection Options"
 [menu.main]
   parent = "Reference"
-  identifier = "Connecting"
+  identifier = "Connection Options"
   weight = 30
   pre = "<i class='fa'></i>"
 +++
 
-## Connecting
+# Connection Options
 
-The reference documentation for connecting to a MongoDB server deployment is divided into three sections:   
+For more information on the connection options:
 
-- [Connection Settings]({{<relref "reference/connecting/connection-settings.md">}}): documentation of the various ways to specify the properties of a connection
-- [Authenticating]({{<relref "reference/connecting/authenticating.md">}}): detailed documentation of the various ways to specify authentication credentials
-- [SSL]({{<relref "reference/connecting/ssl.md">}}): Detailed documentation of the various ways to specify the properties of an SSL connection
+- [URI Connection String](https://docs.mongodb.org/manual/reference/connection-string/): MongoDB connection string URI.
+- [Connection Settings]({{<relref "reference/connecting/connection-settings.md">}}): Reference on the driver-specific connection settings.
