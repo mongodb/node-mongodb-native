@@ -346,6 +346,22 @@ ReplSet.prototype.getServer = function(options) {
 }
 
 /**
+ * Get correct server for a given connection
+ * @method
+ * @param {Connection} [connection] A Connection showing a current server
+ * @return {Server}
+ */
+ReplSet.prototype.getServerFrom = function(connection) {
+  var servers = this.s.replState.getAll();
+  // Go through all the server
+  for(var i = 0; i < servers.length; i++) {
+    if(servers[i].equals(connection.name)) return servers[i];
+  }
+
+  return null;
+}
+
+/**
  * Perform one or more remove operations
  * @method
  * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
