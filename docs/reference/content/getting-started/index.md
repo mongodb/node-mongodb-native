@@ -9,7 +9,5 @@ title = "Getting Started"
 
 ## Getting Started
 
-To help you get started quickly on the new driver, follow:
-
-  * [Installation]({{< ref "getting-started/installation-guide.md" >}})
-  * [Quick Tour]({{< ref "getting-started/quick-start.md" >}})
+  * [Installation Guide]({{< ref "getting-started/installation-guide.md" >}})
+  * [Quick Start]({{< ref "getting-started/quick-start.md" >}})
