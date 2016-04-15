@@ -10,7 +10,7 @@ title = "CRUD Operations"
 
 # CRUD
 
-For a walkthrough of the main CRUD operations please refer to the [Quick Tour]({{< ref "getting-started/quick-tour.md" >}}).
+For a walkthrough of the main CRUD operations please refer to the [Quick Tour]({{< ref "getting-started/quick-start.md" >}}).
 
 The driver crud operations are defined as the operations performed to insert/update/remove and query for documents. In this tutorial we will cover both the basic CRUD methods as well as the specialized *findAndModify* based methods and the new Bulk API methods allowing for efficient bulk write operations. But let's start with a simple introduction to the insert, update and remove operations that are on the collection class.
 
