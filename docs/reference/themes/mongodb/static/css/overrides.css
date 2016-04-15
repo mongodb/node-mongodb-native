@@ -17,7 +17,8 @@
 }
 
 .jsEnabled pre { padding: 0px; overflow: auto; word-wrap: normal; white-space: nowrap;}
-.jsEnabled pre code { padding: 24px 12px; overflow: auto; white-space: pre;}
+.jsEnabled pre code { padding: 24px 12px; overflow: auto; white-space: pre;
+    background: url(https://media.mongodb.org/code-block-bg.png) #f5f6f7;}
 
 .body blockquote {
   background-color: #edf4e8;

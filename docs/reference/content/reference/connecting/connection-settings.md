@@ -2,115 +2,15 @@
 date = "2015-03-19T12:53:30-04:00"
 title = "Connection Settings"
 [menu.main]
-  parent = "Connecting"
+  parent = "Connect to MongoDB"
   identifier = "Connection Settings"
-  weight = 10
+  weight = 40
   pre = "<i class='fa'></i>"
 +++
 
-# Connecting To MongoDB
+# URI Connection Settings
 
-{{% note %}}
-This reference applies to `2.1.11` or higher. For `2.1.10` or earlier please see the legacy connection settings. `2.1.11` is backward compatible with the legacy connection settings as well as the simplified settings.
-{{% /note %}}
-
-Connecting to MongoDB using the driver is primarily done using the `MongoClient.connect` method and a URI. Let's look at how we connect to a couple of different server topologies.
-
-## Single Server Connection
-
-We have a single MongoDB server instance running on the port *27017* Let's connect using the driver and *MongoClient.connect*
-
-```js
-var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
-
-// Connection URL
-var url = 'mongodb://localhost:27017/myproject';
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log("Connected correctly to server");
-
-  db.close();
-});
-```
-
-Let's break down the `URI` string we passed as the first argument to MongoClient.connect.
-
-| Parameter | Description |
-| :----------| :------------- |
-| `mongodb://` | is the protocol definition |
-| `localhost:27017` | is the server we are connecting to |
-| `/myproject` | is the database we wish to connect to |
-
-## Replicaset Server Connection
-
-We wish to connect to a ReplicaSet consisting of one primary and 1 or more secondaries. To Do this we need to supply the driver with a seedlist of servers and the name of the ReplicaSet we wish to connect to. Let's take a look at a code example.
-
-```js
-var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
-
-// Connection URL
-var url = 'mongodb://localhost:27017,localhost:27018/myproject?replicaSet=foo';
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log("Connected correctly to server");
-
-  db.close();
-});
-```
-
-Let's break down the `URI` string.
-
-| Parameter | Description |
-| :----------| :------------- |
-| `mongodb://` | is the protocol definition |
-| `localhost:27017,localhost:27018` | is the servers we are connecting to to discover the topology of the ReplicaSet. |
-| `/myproject` | is the database we wish to connect to |
-| `replicaSet=foo` | is the name of the ReplicaSet we are connecting to. This ensures we are connecting to the correct Replicaset. **This is a required parameter when using the 2.0 driver** |
-
-## Mongos Proxy Connection
-
-We wish to connect to a set of `mongos` proxies. Just as in the case of connecting to a ReplicaSet we can provide a seed list of `mongos` proxies. This allows the driver to perform failover between proxies automatically in case of a proxy process having been shut down. Let's look at an example of code connecting to a set of proxies.
-
-```js
-var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
-
-// Connection URL
-var url = 'mongodb://localhost:50000,localhost:50001/myproject';
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log("Connected correctly to server");
-
-  db.close();
-});
-```
-
-Let's break down the `URI` string.
-
-| Parameter | Description |
-| :----------| :------------- |
-| `mongodb://` | is the protocol definition |
-| `localhost:50000,localhost:50001` | is the *mongos* proxies we are connecting to. |
-| `/myproject` | is the database we wish to connect to |
-
-Let's break down the `URI` string.
-
-| Parameter | Description |
-| :----------| :------------- |
-| `mongodb://` | is the protocol definition |
-| `dave:password` | is the user name and password for the database |
-| `localhost:27017` | is the server we are connecting to |
-| `/myproject` | is the database we wish to connect to |
-| `authSource=admin` | is the database we wish to authenticate against |
-
-## Optional Connection Settings
-
-Optional connection settings are settings not covered by the MongoDB URI specification. These options are passed in the options parameter in the MongoClient.connect function.
+Optional connection settings are settings not covered by the [URI Connection String ](https://docs.mongodb.org/manual/reference/connection-string/). The following options are passed in the options parameter in the MongoClient.connect function.
 
 ```js
 var MongoClient = require('mongodb').MongoClient
