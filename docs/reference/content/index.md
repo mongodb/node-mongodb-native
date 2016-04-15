@@ -36,7 +36,7 @@ If you wish to use the MongoDB driver with the ES6 features such as Promises and
 
 After going over the basics of the driver use you might want to explore how authentication and the Grid FS implementation work.
 
-* [Authentication]({{< relref "reference/connecting/autjenticate.md" >}})
+* [Authentication]({{< relref "reference/connecting/authenticating.md" >}})
 * [Grid FS]({{< relref "reference/gridfs/streaming.md" >}})
 
 ## Advanced topics
