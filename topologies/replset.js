@@ -1531,6 +1531,9 @@ var connectHandler = function(self, state) {
 
     // Apply all the credentials serially
     var applyCredentials = function(server, index, credentials, callback) {
+      // Do not apply credentials if we have an arbiter
+      if(server.lastIsMaster() && server.lastIsMaster().arbiterOnly) return callback();
+      // Done applying the credentials return
       if(index >= credentials.length || credentials.length == 0) return callback();
       // Apply the credential
       server.auth.apply(server, credentials[index].concat([function(err, r) {
