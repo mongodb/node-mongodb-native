@@ -3,6 +3,7 @@
 - Added improved handling of reconnect when topology is a single server.
 - Added better handling of $query queries passed down for 3.2 or higher.
 - Introduced getServerFrom method to topologies to let cursor grab a new pool for getMore and killCursors commands and not use connection pipelining.
+- NODE-693 Move authentication to be after ismaster call to avoid authenticating against arbiters.
 
 1.3.16 2016-04-07
 -----------------
