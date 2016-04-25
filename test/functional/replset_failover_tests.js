@@ -206,24 +206,30 @@ exports['Should correctly remove and re-add secondary with new priority and dete
     var state = 0;
     var leftServer = null;
 
+    console.log('start')
     // Get a new instance
     var db = configuration.newDbInstance({w:0}, {poolSize:1});
     db.open(function(err, db) {
+      console.log('open')
       test.equal(null, err);
 
       // Add event listeners
       db.serverConfig.on('joined', function(t, d, s) {
+        console.log("joined - " + t + " - " + s.name)
         if(t == 'primary' && leftServer && s.name == f('%s:%s', leftServer.host, leftServer.port)) {
+          console.log("done")
           db.close();
           restartAndDone(configuration, test);
         }
       });
 
       db.serverConfig.on('left', function(t, s) {
+        console.log("left - " + t + " - " + s.name)
         if(t == 'secondary' && leftServer && s.name == f('%s:%s', leftServer.host, leftServer.port)) state++;
       });
 
       db.once('fullsetup', function() {
+        console.log("fullsetup")
         configuration.manager.secondaries().then(function(managers) {
           leftServer = managers[0];
 
@@ -231,6 +237,7 @@ exports['Should correctly remove and re-add secondary with new priority and dete
           configuration.manager.removeMember(managers[0], {
             returnImmediately: false, force: false, skipWait:true
           }).then(function() {
+            console.log("removed member")
             var config = JSON.parse(JSON.stringify(configuration.manager.configurations[0]));
             var members = config.members;
             // Update the right configuration
@@ -248,8 +255,10 @@ exports['Should correctly remove and re-add secondary with new priority and dete
             configuration.manager.reconfigure(config, {
               returnImmediately:false, force:false
             }).then(function() {
+              console.log("reconfigure")
               setTimeout(function() {
                 managers[0].start().then(function() {
+                  console.log("started")
                 });
               }, 10000)
             })

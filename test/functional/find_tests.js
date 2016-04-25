@@ -947,13 +947,13 @@ exports['Should correctly pass timeout options to cursor'] = {
     db.open(function(err, db) {
       db.createCollection('timeoutFalse', function(err, collection) {
         collection.find({},{timeout:false},function(err, cursor) {
-          test.equal(false, cursor.timeout);
+          test.equal(false, cursor.s.cmd.noCursorTimeout);
 
           collection.find({},{timeout:true},function(err, cursor) {
-            test.equal(true, cursor.timeout);
+            test.equal(true, cursor.s.cmd.noCursorTimeout);
 
             collection.find({},{},function(err, cursor) {
-              test.equal(false, cursor.timeout);
+              test.ok(!cursor.s.cmd.noCursorTimeout);
 
               db.close();
               test.done();
