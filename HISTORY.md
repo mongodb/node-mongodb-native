@@ -1,4 +1,4 @@
-1.3.17
+1.3.17 2016-04-26
 -----------------
 - Added improved handling of reconnect when topology is a single server.
 - Added better handling of $query queries passed down for 3.2 or higher.
