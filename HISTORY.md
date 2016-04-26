@@ -1,6 +1,16 @@
-2.1.16 2016-04-07
+2.1.17 2016-04-07
 -----------------
 * Updated mongodb-core to 1.3.16 to work around issue with early versions of node 0.10.x due to missing unref method on ClearText streams.
+* INT-1308: Allow listIndexes to inherit readPreference from Collection or DB.
+* Fix timeout issue using new flags #1361.
+* Updated mongodb-core to 1.3.17.
+* Better handling of unique createIndex error.
+* Emit error only if db instance has an error listener.
+* DEFAULT authMechanism; don't throw error if explicitly set by user.
+
+2.1.16 2016-04-06
+-----------------
+* Updated mongodb-core to 1.3.16.
 
 2.1.15 2016-04-06
 -----------------
