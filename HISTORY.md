@@ -1,3 +1,7 @@
+1.3.18 2016-04-27
+-----------------
+- Hardened cursor connection handling for getMore and killCursor to ensure mid operation connection kill does not throw null exception.
+
 1.3.17 2016-04-26
 -----------------
 - Added improved handling of reconnect when topology is a single server.
