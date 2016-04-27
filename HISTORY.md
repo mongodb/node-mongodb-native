@@ -1,4 +1,8 @@
-2.1.17 2016-04-07
+2.1.18 2016-04-27
+-----------------
+* Updated mongodb-core to 1.3.17 to fix Node 6.0 issues.
+
+2.1.17 2016-04-26
 -----------------
 * Updated mongodb-core to 1.3.16 to work around issue with early versions of node 0.10.x due to missing unref method on ClearText streams.
 * INT-1308: Allow listIndexes to inherit readPreference from Collection or DB.
