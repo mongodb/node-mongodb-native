@@ -446,24 +446,24 @@ exports['Successful connection to replicaset of 0 primary, 1 secondary and 1 arb
     });
 
     server.on('joined', function(_type) {
-      if(_type == 'arbiter') {
-        test.equal(true, server.__connected);
+      if(server.s.replState.secondaries.length == 1
+        && server.s.replState.arbiters.length == 1) {
+          test.equal(true, server.__connected);
 
-        test.equal(1, server.s.replState.secondaries.length);
-        test.equal('localhost:32001', server.s.replState.secondaries[0].name);
+          test.equal(1, server.s.replState.secondaries.length);
+          test.equal('localhost:32001', server.s.replState.secondaries[0].name);
 
-        test.equal(1, server.s.replState.arbiters.length);
-        test.equal('localhost:32002', server.s.replState.arbiters[0].name);
+          test.equal(1, server.s.replState.arbiters.length);
+          test.equal('localhost:32002', server.s.replState.arbiters[0].name);
 
-        test.ok(server.s.replState.primary == null);
+          test.ok(server.s.replState.primary == null);
 
-        firstSecondaryServer.destroy();
-        arbiterServer.destroy();
-        server.destroy();
-        running = false;
-
-        test.done();
-      }
+          firstSecondaryServer.destroy();
+          arbiterServer.destroy();
+          server.destroy();
+          running = false;
+          test.done();
+        }
     });
 
     server.on('connect', function(e) {
