@@ -1,6 +1,6 @@
 2.1.18 2016-04-27
 -----------------
-* Updated mongodb-core to 1.3.17 to fix Node 6.0 issues.
+* Updated mongodb-core to 1.3.18 to fix Node 6.0 issues.
 
 2.1.17 2016-04-26
 -----------------
