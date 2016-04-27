@@ -278,11 +278,13 @@ Cursor.prototype._getmore = function(callback) {
   // Default pool
   var pool = this.pool;
   // If we have a connection get the corresponding pool
-  if(this.connection) {
+  if(this.connection && this.connection.isConnected()) {
     // Get the server
     var server = this.topology.getServerFrom(this.connection);
     // Get the pool
-    pool = server.s.pool;
+    if(server && server.s.pool) {
+      pool = server.s.pool;
+    }
   }
 
   // We have a wire protocol handler
@@ -305,11 +307,13 @@ Cursor.prototype._killcursor = function(callback) {
   // Default pool
   var pool = this.pool;
   // If we have a connection get the corresponding pool
-  if(this.connection) {
+  if(this.connection && this.connection.isConnected()) {
     // Get the server
     var server = this.topology.getServerFrom(this.connection);
     // Get the pool
-    pool = server.s.pool;
+    if(server && server.s.pool) {
+      pool = server.s.pool;
+    }
   }
 
   // Execute command
