@@ -12,7 +12,7 @@ title = "CRUD Operations"
 
 Let's take a look at the CRUD operations from the perspective of ECMAScript 6. In this guide we will be using the same examples as in the general CRUD specification overview but rewrite them to use the new ECMAScript 6 features. For all method options refer to the main CRUD tutorial.
 
-- [CRUD]({{<relref "reference/crud/index.md">}}): CRUD Specification.
+- [CRUD]({{<relref "tutorials/crud.md">}}): CRUD Specification.
 
 This reference also obmits methods that no longer make sense when using ECMAScript 6 such as the `each` and `forEach` methods.
 

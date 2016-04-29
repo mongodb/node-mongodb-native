@@ -2,13 +2,19 @@
 date = "2015-03-19T12:53:30-04:00"
 title = "Legacy Connection Settings"
 [menu.main]
-  parent = "Connecting"
+  parent = "Connection Options"
   identifier = "Legacy Connection Settings"
   weight = 40
   pre = "<i class='fa'></i>"
 +++
 
-# Connecting To MongoDB
+# Connect To MongoDB (Legacy)
+
+{{% note %}}
+
+For 2.1.10 or earlier. For newer versions, see [Connect to MongoDB]({{< relref
+"reference/connecting/index.md" >}})
+{{% /note %}}
 
 Connecting to MongoDB using the driver is primarily done using the `MongoClient.connect` method and a URI. Let's look at how we connect to a couple of different server topologies.
 
@@ -44,18 +50,7 @@ Let's break down the `URI` string we passed as the first argument to MongoClient
 We wish to connect to a ReplicaSet consisting of one primary and 1 or more secondaries. To Do this we need to supply the driver with a seedlist of servers and the name of the ReplicaSet we wish to connect to. Let's take a look at a code example.
 
 ```js
-var MongoClient = require('mongodb').MongoClient
-  , assert = require('assert');
-
-// Connection URL
-var url = 'mongodb://localhost:27017,localhost:27018/myproject?replicaSet=foo';
-// Use connect method to connect to the Server
-MongoClient.connect(url, function(err, db) {
-  assert.equal(null, err);
-  console.log("Connected correctly to server");
-
-  db.close();
-});
+{{% connect-to-replicaset %}}
 ```
 
 Let's break down the `URI` string.

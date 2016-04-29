@@ -1,6 +1,6 @@
 +++
 date = "2015-10-15T14:27:51-04:00"
-title = "Grid File System API"
+title = "GridFS API"
 [menu.main]
   parent = "GridFS"
   identifier = "GridFSStream"
@@ -8,15 +8,9 @@ title = "Grid File System API"
   pre = "<i class='fa'></i>"
 +++
 
-[GridFS](http://docs.mongodb.org/manual/core/gridfs/) is a mechanism for
-storing large files in MongoDB. As you might know, MongoDB documents are
-limited to
-[16MB](http://docs.mongodb.org/manual/reference/limits/#limit-bson-document-size).
-GridFS provides a mechanism to work around that limitation by enabling you
-to break up files into chunks that are smaller than 16MB.
+# The GridFS API
 
-The MongoDB Node.js
-driver now supports a
+The MongoDB Node.j6 driver now supports a
 [stream-based API for GridFS](https://github.com/mongodb/specifications/blob/master/source/gridfs/gridfs-spec.rst)
 that's compatible with Node.js'
 [streams3](https://strongloop.com/strongblog/whats-new-io-js-beta-streams3/), so you can `.pipe()` directly from file streams to MongoDB. In
@@ -27,9 +21,9 @@ to MongoDB using streams.
 Getting Set Up
 --------------
 
-The new GridFS streaming API will be part of the 2.1.0 release of the
-[MongoDB Node.js driver](https://www.npmjs.com/package/mongodb). If you want
-a pre-release preview, just make put the following dependency in your
+The new GridFS streaming functionality is part of the 2.1.0 release of the
+[MongoDB Node.js driver](https://www.npmjs.com/package/mongodb). To use it,
+put the following dependency in your
 `package.json`. We strongly recommend not using versions from GitHub in
 production, but it's fine for experimentation.
 
@@ -44,14 +38,13 @@ production, but it's fine for experimentation.
 Uploading a File
 ----------------
 
-Let's see how to upload a file to MongoDB using the new API. For this example,
-I'm going to assume that you have a file named `meistersinger.mp3` in the
+You can use GridFS to upload a file to MongoDB. This example
+assumes that you have a file named `meistersinger.mp3` in the
 root directory of your project. You can use whichever file you want, or you
 can just download a [*Die Meistersinger* Overture mp3](https://musopen.org/music/213/richard-wagner/die-meistersinger-von-nurnberg-overture/).
 
-In order to use the new streaming GridFS API, you first need to create
-a `GridFSBucket`. This class will enable you to access the streaming GridFS
-API.
+In order to use the streaming GridFS API, you first need to create
+a `GridFSBucket`.
 
 ```javascript
 mongodb.MongoClient.connect(uri, function(error, db) {
@@ -63,12 +56,12 @@ mongodb.MongoClient.connect(uri, function(error, db) {
 });
 ```
 
-Now that you have the bucket, how do you upload a file? The bucket has an
+The bucket has an
 `openUploadStream()` method that creates an upload stream for a given
-file name. You can then just pipe a Node.js `fs` read stream to the
+file name. You can pipe a Node.js `fs` read stream to the
 upload stream.
 
-```javascript
+```js
 var assert = require('assert');
 var fs = require('fs');
 var mongodb = require('mongodb');
@@ -110,13 +103,12 @@ has a document that looks like what you see below.
 }
 ```
 
-The above document says that the file is named 'meistersinger.mp3', and tells
+The above document indicates that the file is named 'meistersinger.mp3', and tells
 you its size in bytes, when it was uploaded, and the
 [md5](https://en.wikipedia.org/wiki/MD5) of the contents. There's also a
-`chunkSize` field. This field says how big the 'chunks' that the file is
-broken up into are. In this case, the `chunkSize` is 255KB, which is the
-default. For instance, after you upload 'meistersinger.mp3', there should be
-107 documents in the `fs.chunks` collection.
+`chunkSize` field indicating that the file is
+broken up into chunks of size 255 kilobytes, which is the
+default.
 
 ```
 > db.fs.chunks.count()
@@ -172,7 +164,7 @@ file to your hard drive, an HTTP response, or to npm modules like
 a download stream. The easiest way to get a download stream is
 the `openDownloadStreamByName()` method.
 
-```javascript
+```js
 var bucket = new mongodb.GridFSBucket(db, {
   chunkSizeBytes: 1024,
   bucketName: 'songs'
@@ -195,7 +187,7 @@ neat tricks. For instance, you can cut off the beginning of the song by
 specifying a number of bytes to skip. You can cut off the first 41 seconds of
 the mp3 and skip right to the good part of the song as shown below.
 
-```javascript
+```js
 bucket.openDownloadStreamByName('meistersinger.mp3').
   start(1024 * 1585). // <-- skip the first 1585 KB, approximately 41 seconds
   pipe(fs.createWriteStream('./output.mp3')).
@@ -210,7 +202,7 @@ bucket.openDownloadStreamByName('meistersinger.mp3').
 
 An important point to be aware of regarding performance is that the GridFS
 streaming API can't load partial chunks. When a download stream needs to pull a
-chunk from MongoDB, it pulls the entire chunk into memory. The 255KB default
+chunk from MongoDB, it pulls the entire chunk into memory. The 255 kilobyte default
 chunk size is usually sufficient, but you can reduce the chunk size to reduce
 memory overhead.
 
@@ -218,6 +210,6 @@ Moving On
 ---------
 
 Congratulations, you've just used MongoDB and Node.js streams to store and
-manipulate an mp3. With GridFS, you have a file system with all the
-horizontal scalability features of MongoDB. Now, it also has a neat stream-based
-API so can `pipe()` files to and from MongoDB.
+manipulate a .mp3 file. With GridFS, you have a file system with all the
+horizontal scalability features of MongoDB. It also has a stream-based
+API you can use to `pipe()` files to and from MongoDB.

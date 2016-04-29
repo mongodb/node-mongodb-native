@@ -1,0 +1,8 @@
+var MongoClient = require('mongodb').MongoClient,
+  co = require('co'),
+  assert = require('assert');
+
+co(function*() {
+  // Connection URL
+  var db = yield MongoClient.connect('mongodb://localhost:27017/myproject');
+  console.log("Connected correctly to server");
