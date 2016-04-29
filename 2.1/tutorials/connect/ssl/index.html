@@ -1,0 +1,1767 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="">
+<meta name="author" content="">
+<meta name="keyword" content="">
+
+    <link rel="shortcut icon" href="/node-mongodb-native/2.1//img/favicon.png">
+
+    <title>SSL Settings</title>
+
+    <link rel="stylesheet" href="/node-mongodb-native/2.1//lib/bootstrap.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.1//lib/font-awesome/css/font-awesome.min.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.1//css/mongodb-docs.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.1//css/overrides.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.1//lib/highlight/styles/idea.css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.1//lib/bootstrap-toggle/bootstrap-toggle.min.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.1//css/java.css" type="text/css" />
+
+
+  </head>
+
+  <body>
+  
+  <section id="container" class="">
+      
+      <header id="header-db" class="row" role="navigation">
+  <div class="header-content">
+    <div class="toggle-nav pull-left">
+        <i class="fa fa-bars"></i>
+        <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom"></div>
+    </div>
+    
+    <div class="logo pull-left">
+      <a href="/node-mongodb-native/2.1//../">
+        <img src="/node-mongodb-native/2.1//img/logo-mongodb-header.png", alt="MongoDB.org" />
+      </a>
+    </div>
+    
+    <div>
+<div class="nav-items pull-right">
+  <a href="https://university.mongodb.com" data-toggle="tooltip" data-placement="bottom" title="Free Online Classes">MongoDB University</a>
+  <a href="http://www.mongodb.org/downloads" data-toggle="tooltip" data-placement="bottom" title="Download MongoDB">Downloads</a>
+  <a href="http://www.mongodb.org/get-involved" data-toggle="tooltip" data-placement="bottom" title="Get involved with MongoDB">Community</a>
+  <a href="http://docs.mongodb.org" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Documentation">Docs</a>
+  <a href="http://blog.mongodb.org" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Blog">Blog</a>
+  <div id="search">
+<form method="get" action="//www.google.com/search" target="_blank">
+    <input type="text" name="searchQuery" size="20" value="" autocomplete="off" placeholder="Search docs">
+    <input type="hidden" name="site" value="/node-mongodb-native/2.1/">
+    <input type="hidden" name="q" value="">
+    <label for="searchQuery"><i class="fa fa-search fa-1"></i></label>
+</form>
+</div>
+
+</div>
+</div>
+
+  </div>
+</header>
+
+      
+
+      
+<aside id="sidebar" class="sidebar">
+    <div class="ssidebar nav-collapse">
+      <div class="ssidebarwrapper">
+        <h3>
+          <a class="index-link" href="/node-mongodb-native/2.1//../">MongoDB Node.js Driver</a>
+          <a class="version pull-right" href="/node-mongodb-native/2.1/">2.1</a>
+        </h3>
+
+        
+        <ul class="sidebar-menu">
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+
+          
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+
+  
+    
+    
+    
+      
+      
+      
+    
+    
+  
+  
+
+
+        
+      
+    
+    
+  
+
+
+        
+      
+    
+      
+      
+        
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+    
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+
+          
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/2.1/quick-start/">
+        <i class='fa fa-road'></i>
+        Quick Start
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/2.1/installation-guide/">
+        <i class='fa fa-puzzle-piece'></i>
+        Installation Guide
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<li class="toctree-l1  current">
+  <a href="/node-mongodb-native/2.1/tutorials/" class="">
+      <i class='fa fa-thumb-tack'></i>
+      <span>Tutorials</span>
+      <span class="menu-arrow fa fa-angle-down"></span>
+  </a>
+    <ul  class="current">
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<li class="toctree-l2  current">
+  <a href="/node-mongodb-native/2.1/tutorials/connect/" class="">
+      <i class='fa'></i>
+      <span>Connect to MongoDB</span>
+      
+  </a>
+    <ul  class="current">
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/tutorials/connect/authenticating/">
+        <i class='fa'></i>
+        Authentication
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/tutorials/connect/ssl/">
+        <i class='fa'></i>
+        SSL Settings
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.1/tutorials/crud/">
+        <i class='fa'></i>
+        CRUD Operations
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.1/tutorials/create-indexes/">
+        <i class='fa'></i>
+        Create Indexes
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.1/tutorials/text-search/">
+        <i class='fa'></i>
+        Text Search
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.1/tutorials/geospatial-search/">
+        <i class='fa'></i>
+        Geospatial Search
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.1/tutorials/commands/">
+        <i class='fa'></i>
+        Database Commands
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/2.1/tutorials/gridfs/" class="">
+      <i class='fa'></i>
+      <span>GridFS</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/tutorials/gridfs/streaming/">
+        <i class='fa'></i>
+        GridFS API
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/tutorials/gridfs/gridstore/">
+        <i class='fa'></i>
+        Legacy GridStore
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l1 ">
+  <a href="/node-mongodb-native/2.1/reference/" class="">
+      <i class='fa fa-book'></i>
+      <span>Reference</span>
+      <span class="menu-arrow fa fa-angle-right"></span>
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/2.1/reference/connecting/" class="">
+      <i class='fa'></i>
+      <span>Connection Options</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/connecting/connection-settings/">
+        <i class='fa'></i>
+        Connection Settings
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/connecting/legacy-connection-settings/">
+        <i class='fa'></i>
+        Legacy Connection Settings
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/2.1/reference/ecmascript6/" class="">
+      <i class='fa'></i>
+      <span>ECMAScript 6</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/ecmascript6/connecting/">
+        <i class='fa'></i>
+        Connecting
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/ecmascript6/crud/">
+        <i class='fa'></i>
+        CRUD Operations
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/2.1/reference/management/" class="">
+      <i class='fa'></i>
+      <span>Management</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/management/logging/">
+        <i class='fa'></i>
+        Logging
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/management/apm/">
+        <i class='fa'></i>
+        APM
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/management/sdam-monitoring/">
+        <i class='fa'></i>
+        Topology Monitoring
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.1/reference/faq/">
+        <i class='fa'></i>
+        Frequently Asked Questions
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l1 ">
+  <a href="/node-mongodb-native/2.1/upgrade-migration/" class="">
+      <i class='fa fa-cog'></i>
+      <span>Upgrade Guide</span>
+      <span class="menu-arrow fa fa-angle-right"></span>
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.1/upgrade-migration/upgrading/">
+        <i class='fa fa-wrench'></i>
+        Upgrading to 2.0
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/2.1/api/">
+        <i class='fa fa-file-text-o'></i>
+        API Documentation
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="https://github.com/mongodb/node-mongodb-native">
+        <i class='fa fa-github'></i>
+        Source Code
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/2.1/issues-help/">
+        <i class='fa fa-life-ring'></i>
+        Issues &amp; Help
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge">
+        <img src='https://badges.gitter.im/Join Chat.svg'/>
+        
+    </a>
+  </li>
+
+
+          
+        </ul>
+        
+    </div>
+  </div>
+  
+</aside>
+
+<div class="option-popup closed hidden" id="optionsVersionsPopup">
+<div class="option-header">
+  <i class="fa fa-gear"></i>
+  <span>OPTIONS</span>
+  <i class="fa fa-angle-up pull-right"></i>
+</div>
+<div class="option-body">
+  <ul>
+      
+      <li>
+        <label>Version</label>
+        <div class="btn-group btn-group-xs pull-right">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+            Select Version <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" role="menu" id="optionsVersionsMenu">
+          </ul>
+        </div>
+      </li>
+
+   
+
+
+    
+
+  </ul>
+</div>
+</div>
+
+
+
+      
+      <section id="main-content" class="content">
+          <section class="main-column pull-left">
+            <div class="document">
+              <div class="documentwrapper">
+                <div class="bodywrapper">
+                  <div class="body">
+                    <p><div class="admonition note">
+                    <h5 class="admonition-title">Survey</h5>
+                    <p>Please help us improve by answering a few questions at our
+						<a href="https://www.research.net/r/BPJSGJC"><strong> user survey</strong></a>.
+                    </p>
+                    </div>
+                    </p>
+
+
+   
+<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/2.1/docs/reference/content/tutorials/connect/ssl.md" target="_blank" title="Edit tutorials/connect/ssl.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
+
+
+
+
+
+
+
+
+
+
+<div class="bc">
+<ul>
+  
+  
+  
+  
+  <li><a href="/node-mongodb-native/2.1/tutorials/">Tutorials</a> <i class="fa fa-angle-right"></i></li>
+  <li><a href="/node-mongodb-native/2.1/tutorials/connect/">Connect to MongoDB</a> <i class="fa fa-angle-right"></i></li>
+  <li>SSL Settings</li>
+</ul>
+</div>
+
+
+
+
+<h1 id="tls-ssl">TLS/SSL</h1>
+
+<p>The Node.js driver supports TLS/SSL connections to MongoDB that support TLS/SSL support.</p>
+
+<h2 id="no-certificate-validation">No Certificate Validation</h2>
+
+<p>If the MongoDB instance does not perform any validation of the certificate chain, include the <code>ssl=true</code> in the <a href="https://docs.mongodb.org/manual/reference/connection-string/">URI Connection String </a>.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient;
+
+MongoClient.connect(&quot;mongodb://localhost:27017/test?ssl=true&quot;, function(err, db) {
+  db.close();
+});
+
+</code></pre>
+
+<h2 id="validate-server-certificate">Validate Server Certificate</h2>
+
+<p>If the MongoDB instance presents a certificate, to validate the server&rsquo;s certificate, pass to the <code>MongoClient.connect</code> method:</p>
+
+<ul>
+<li><p>A <a href="https://docs.mongodb.org/manual/reference/connection-string/">URI Connection String </a> that includes <code>ssl=true</code> setting,</p></li>
+
+<li><p>A connections options for the <code>server</code> with the certificate for the Certificate Authority (<code>sslCA</code>) and the <code>sslValidate</code> setting set to <code>true</code></p></li>
+</ul>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient,
+  f = require('util').format,
+  fs = require('fs');
+
+// Read the certificate authority
+var ca = [fs.readFileSync(__dirname + &quot;/ssl/ca.pem&quot;)];
+
+// Connect validating the returned certificates from the server
+MongoClient.connect(&quot;mongodb://localhost:27017/test?ssl=true&quot;, {
+  server: {
+      sslValidate:true
+    , sslCA:ca
+  }
+}, function(err, db) {
+  db.close();
+});
+</code></pre>
+
+<h2 id="disable-hostname-verification">Disable Hostname Verification</h2>
+
+<p>By default, the driver ensures that the hostname included in the
+server&rsquo;s SSL certificate(s) matches the hostname(s) provided in the URI connection string. If you need to disable the hostname verification, but otherwise validate the server&rsquo;s certificate, pass to the <code>MongoClient.connect</code> method:</p>
+
+<ul>
+<li><p>A <a href="https://docs.mongodb.org/manual/reference/connection-string/">URI Connection String </a> that includes <code>ssl=true</code> setting,</p></li>
+
+<li><p>A connections options for the <code>server</code> with the certificate for the Certificate Authority (<code>sslCA</code>) and the <code>sslValidate</code> setting set to <code>true</code> but  <code>checkServerIdentity</code> set to <code>false</code>.</p></li>
+</ul>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient,
+  f = require('util').format,
+  fs = require('fs');
+
+// Read the certificate authority
+var ca = [fs.readFileSync(__dirname + &quot;/ssl/ca.pem&quot;)];
+
+// Connect validating the returned certificates from the server
+MongoClient.connect(&quot;mongodb://localhost:27017/test?ssl=true&quot;, {
+  server: {
+      sslValidate:true
+    , checkServerIdentity:false
+    , sslCA:ca
+  }
+}, function(err, db) {
+  db.close();
+});
+</code></pre>
+
+<h2 id="validate-server-certificate-and-present-valid-certificate">Validate Server Certificate and Present Valid Certificate</h2>
+
+<p>If the MongoDB server performs certificate validation, the client must pass its
+certificate to the server. To pass the client&rsquo;s certificate as well as to validate the server&rsquo;s certificate, pass to the <code>MongoClient.connect</code> method:</p>
+
+<ul>
+<li><p>A <a href="https://docs.mongodb.org/manual/reference/connection-string/">URI Connection String </a> that includes <code>ssl=true</code> setting,</p></li>
+
+<li><p>A connections options for the <code>server</code> with the <code>sslValidate</code> setting set to <code>true</code>, the certificate for the Certificate Authority (<code>sslCA</code>), the client&rsquo;s certificate (<code>sslCert</code>) and private key file (<code>sslKey</code>).  If the client&rsquo;s key file is encrypted, include the password (<code>sslPass</code>).</p></li>
+</ul>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient,
+  f = require('util').format,
+  fs = require('fs');
+
+// Read the certificates
+var ca = [fs.readFileSync(__dirname + &quot;/ssl/ca.pem&quot;)];
+var cert = fs.readFileSync(__dirname + &quot;/ssl/client.pem&quot;);
+var key = fs.readFileSync(__dirname + &quot;/ssl/client.pem&quot;);
+
+// Connect validating the returned certificates from the server
+MongoClient.connect(&quot;mongodb://localhost:27017/test?ssl=true&quot;, {
+  server: {
+      sslValidate:true
+    , sslCA:ca
+    , sslKey:key
+    , sslCert:cert
+    , sslPass:'10gen'
+  }
+}, function(err, db) {
+  db.close();
+});
+
+</code></pre>
+
+<h2 id="connect-with-x-509">Connect with X.509</h2>
+
+<p><a href="http://docs.mongodb.org/manual/core/authentication/#x-509-certificate-authentication">X.509</a> authentication requires the use of TLS/SSL connections with certificate validation. MongoDB uses the X.509 certificate presented during SSL negotiation to authenticate a user whose name is derived from the distinguished name of the X.509 certificate.</p>
+
+<p>To connect using the X.509 authentication mechanism, specify <code>MONGODB-CR</code> as the mechanism in the <a href="https://docs.mongodb.org/manual/reference/connection-string/">URI connection string</a>, <code>ssl=true</code>, and the username. Use <code>enodeURIComponent</code> to encode the username string.</p>
+
+<p>In addition to the connection string, pass to the <code>MongoClient.connect</code> method
+a connections options for the <code>server</code> with  the X.509 certificate and other <a href="/node-mongodb-native/2.1/tutorials/connect/ssl/">TLS/SSL connections</a> options.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient,
+  f = require('util').format,
+  fs = require('fs');
+
+// Read the cert and key
+var cert = fs.readFileSync(__dirname + &quot;/ssl/x509/client.pem&quot;);
+var key = fs.readFileSync(__dirname + &quot;/ssl/x509/client.pem&quot;);
+
+// User name
+var userName = &quot;CN=client,OU=kerneluser,O=10Gen,L=New York City,ST=New York,C=US&quot;;
+
+// Connect using the MONGODB-X509 authentication mechanism
+MongoClient.connect(f('mongodb://%s@server:27017/test?authMechanism=%s&amp;ssl=true'
+    , encodeURIComponent(userName), 'MONGODB-X509'), {
+  server: {
+      sslKey:key
+    , sslCert:cert
+  }
+}, function(err, db) {
+  db.close();
+});
+
+</code></pre>
+
+<h2 id="tls-ssl-options">TLS/SSL Options</h2>
+
+<p>The following TLS/SSL options are available.</p>
+
+<table>
+<thead>
+<tr>
+<th align="left">Parameter</th>
+<th align="left">Type</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left"><code>ssl</code></td>
+<td align="left">{Boolean, default: false}</td>
+<td align="left">Use ssl connection</td>
+</tr>
+
+<tr>
+<td align="left"><code>sslValidate</code></td>
+<td align="left">{Boolean, default: true}</td>
+<td align="left">Validate server certificate against certificate authority.</td>
+</tr>
+
+<tr>
+<td align="left"><code>sslCA</code></td>
+<td align="left">{Buffer[]|string[], default: null}</td>
+<td align="left">Array of valid certificates for Certificate Authority either as Buffers or Strings.</td>
+</tr>
+
+<tr>
+<td align="left"><code>sslCert</code></td>
+<td align="left">{Buffer|string, default: null}</td>
+<td align="left">String or buffer containing the client certificate.</td>
+</tr>
+
+<tr>
+<td align="left"><code>sslPass</code></td>
+<td align="left">{Buffer|string, default: null}</td>
+<td align="left">String or buffer containing the client certificate password.</td>
+</tr>
+</tbody>
+</table>
+
+<p>To connect to a single MongoDB instance, specify the TLS/SSL connection options for <code>server</code>.</p>
+
+<pre><code class="language-js">
+var MongoClient = require('mongodb').MongoClient,
+  fs = require('fs');
+
+
+// Read the certificates
+
+var ca = [fs.readFileSync(__dirname + &quot;/ssl/ca.pem&quot;)];
+var cert = fs.readFileSync(__dirname + &quot;/ssl/client.pem&quot;);
+var key = fs.readFileSync(__dirname + &quot;/ssl/client.pem&quot;);
+
+MongoClient.connect('mongodb://server:27017/test?ssl=true', {
+  server: {
+      sslCA:ca
+    , sslKey:key
+    , sslCert:cert
+  }
+}, function(err, db) {
+  db.close();
+});
+
+</code></pre>
+
+<p>To connect to a replica set, specify the TLS/SSL connection options for <code>replset</code> .</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient,
+  fs = require('fs');
+
+// Read the certificates
+
+var ca = [fs.readFileSync(__dirname + &quot;/ssl/ca.pem&quot;)];
+var cert = fs.readFileSync(__dirname + &quot;/ssl/client.pem&quot;);
+var key = fs.readFileSync(__dirname + &quot;/ssl/client.pem&quot;);
+
+
+MongoClient.connect('mongodb://server:27017/test?replicaSet=foo&amp;ssl=true', {
+  replset: {
+      sslCA:ca
+    , sslKey:key
+    , sslCert:cert
+  }
+}, function(err, db) {
+  db.close();
+});
+
+</code></pre>
+
+<p>To connect to a replica set, specify the TLS/SSL connection options for <code>mongos</code>.</p>
+
+<pre><code class="language-js">var MongoClient = require('mongodb').MongoClient,
+  fs = require('fs');
+
+// Read the certificates
+
+var ca = [fs.readFileSync(__dirname + &quot;/ssl/ca.pem&quot;)];
+var cert = fs.readFileSync(__dirname + &quot;/ssl/client.pem&quot;);
+var key = fs.readFileSync(__dirname + &quot;/ssl/client.pem&quot;);
+
+MongoClient.connect('mongodb://server:27017/test?ssl=true', {
+  mongos: {
+      sslCA:ca
+    , sslKey:key
+    , sslCert:cert
+  }
+}, function(err, db) {
+  db.close();
+});
+
+</code></pre>
+
+
+
+
+
+
+<div id="btnv">
+  
+  <div class="pull-left">
+  <a class="navigation prev" href="/node-mongodb-native/2.1/tutorials/connect/authenticating/">
+      <i class="fa fa-long-arrow-left"> </i> Authentication
+  </a>
+  </div>
+  
+  
+  <div class="pull-right">
+  <a class="navigation next" href="/node-mongodb-native/2.1/tutorials/crud/">
+    CRUD Operations <i class="fa fa-long-arrow-right"> </i>
+  </a>
+  
+</div>
+</div>
+
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+     
+    var disqus_shortname = 'nodejsmongodbdriver'; 
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+</div>
+<div class="right-column">
+<div class="wrapper">
+  
+  <div class="toc">
+    <span class="toc-header">On this page</span>
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#tls-ssl">TLS/SSL</a>
+<ul>
+<li><a href="#no-certificate-validation">No Certificate Validation</a></li>
+<li><a href="#validate-server-certificate">Validate Server Certificate</a></li>
+<li><a href="#disable-hostname-verification">Disable Hostname Verification</a></li>
+<li><a href="#validate-server-certificate-and-present-valid-certificate">Validate Server Certificate and Present Valid Certificate</a></li>
+<li><a href="#connect-with-x-509">Connect with X.509</a></li>
+<li><a href="#tls-ssl-options">TLS/SSL Options</a></li>
+</ul></li>
+</ul>
+</nav>
+  </div>
+  
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</section>
+</section>
+
+</section>
+
+
+<script type="text/javascript">
+  var DOCUMENTATION_OPTIONS = {
+   URL_ROOT:    "/node-mongodb-native/2.1/",
+   VERSION:     "2.1",
+   COLLAPSE_INDEX: false,
+   FILE_SUFFIX: '.html',
+   HAS_SOURCE:  true
+  };
+</script>
+<script type="text/javascript" src="/node-mongodb-native/2.1/js/jquery.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.1/lib/bootstrap.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.1/js/navbar.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.1/lib/highlight/highlight.pack.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.1/js/scripts.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.1//lib/bootstrap-toggle/bootstrap-toggle.min.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.1//js/java.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.1//js/toggle-switch.js"></script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-29229787-1', 'auto');
+  ga('send', 'pageview');
+</script>
+</body>
+</html>
+

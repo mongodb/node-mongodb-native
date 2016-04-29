@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Installation-Guides on MongoDB Node.js Driver</title>
+    <link>/node-mongodb-native/2.1/installation-guide/</link>
+    <description>Recent content in Installation-Guides on MongoDB Node.js Driver</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Tue, 17 Mar 2015 15:36:56 +0000</lastBuildDate>
+    <atom:link href="/node-mongodb-native/2.1/installation-guide/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Installation Guide</title>
+      <link>/node-mongodb-native/2.1/installation-guide/</link>
+      <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
+      
+      <guid>/node-mongodb-native/2.1/installation-guide/</guid>
+      <description>
+
+&lt;h1 id=&#34;installation&#34;&gt;Installation&lt;/h1&gt;
+
+&lt;p&gt;The recommended way to get started using the Node.js 2.0 driver is by using &lt;code&gt;NPM&lt;/code&gt; (Node Package Manager) to install the dependency in your project.&lt;/p&gt;
+
+&lt;h2 id=&#34;mongodb-driver&#34;&gt;MongoDB Driver&lt;/h2&gt;
+
+&lt;p&gt;After you&amp;rsquo;ve created your project with &lt;code&gt;npm init&lt;/code&gt;, you can install the MongoDB driver and its dependencies with the command:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install mongodb --save
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will download the MongoDB driver and add a dependency entry in your &lt;code&gt;package.json&lt;/code&gt; file.&lt;/p&gt;
+
+&lt;h2 id=&#34;troubleshooting&#34;&gt;Troubleshooting&lt;/h2&gt;
+
+&lt;p&gt;The MongoDB driver depends on several other packages, including:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;mongodb-core&lt;/li&gt;
+&lt;li&gt;bson&lt;/li&gt;
+&lt;li&gt;kerberos&lt;/li&gt;
+&lt;li&gt;node-gyp&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The only native extension is the &lt;code&gt;kerberos&lt;/code&gt; extension. This is a &lt;code&gt;peer dependency&lt;/code&gt; for the &lt;code&gt;mongodb&lt;/code&gt; module. This means that if you need to use &lt;code&gt;kerberos&lt;/code&gt; you will need to add the &lt;code&gt;kerberos&lt;/code&gt; module to your module&amp;rsquo;s dependencies.&lt;/p&gt;
+
+&lt;p&gt;If you have &lt;strong&gt;NPM 2.0&lt;/strong&gt; or earlier NPM will attempt to download and build the &lt;code&gt;kerberos&lt;/code&gt; module if you do not have it defined as a dependency in your module. However, from &lt;strong&gt;NPM 3.0&lt;/strong&gt; onwards NPM will not attempt to build the &lt;code&gt;kerberos&lt;/code&gt; module but instead print a warning in your install log that looks something like the following.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm WARN EPEERINVALID mongodb-core@1.2.21 requires a peer of kerberos@~0.0 but none was installed.
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This tells you that the driver could not resolve its &lt;code&gt;peer dependency&lt;/code&gt;. However, don&amp;rsquo;t worry. You only need the &lt;code&gt;kerberos&lt;/code&gt; module if you intend to use &lt;code&gt;kerberos&lt;/code&gt;, in which case you can add it to your package.json by doing the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install kerberos@0.0.x
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;kerberos&lt;/code&gt; package is a C++ extension that requires a build environment to be installed on your system. You must be able to build Node.js itself to be able to compile and install the &lt;code&gt;kerberos&lt;/code&gt; module. Furthermore the &lt;code&gt;kerberos&lt;/code&gt; module requires the MIT Kerberos package to correctly compile on UNIX operating systems. Consult your UNIX operating system package manager for what libraries to install.&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&#34;admonition important&#34;&gt;
+&lt;h5 class=&#34;admonition-title&#34;&gt;important&lt;/h5&gt;
+&lt;p&gt;Windows already contains the SSPI API used for Kerberos authentication. However, you will need to install a full compiler toolchain
+using Visual Studio to correctly install the &lt;code&gt;kerberos&lt;/code&gt; extension.&lt;/p&gt;
+
+&lt;/div&gt;
+&lt;/p&gt;
+
+&lt;h3 id=&#34;diagnosing-on-unix&#34;&gt;Diagnosing on UNIX&lt;/h3&gt;
+
+&lt;p&gt;If you don’t have the build essentials it won’t build. In the case of linux you will need gcc and g++, Node.js with all the headers and Python. The easiest way to figure out what’s missing is by trying to build the kerberos project. You can do this by performing the following steps.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;git clone https://github.com/christkv/kerberos.git
+cd kerberos
+npm install
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If all the steps complete you have the right toolchain installed. If you get &lt;code&gt;node-gyp not found&lt;/code&gt; you need to install it globally by doing:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install -g node-gyp
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If it compiles correctly, you&amp;rsquo;re ready to proceed. You can now try to install the MongoDB driver with the following command:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;cd yourproject
+npm install mongodb --save
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;If it still fails the next step is to examine the npm log. Re-run the command in verbose mode.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm --loglevel verbose install mongodb
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This will print out all the steps npm is performing while trying to install the module.&lt;/p&gt;
+
+&lt;h3 id=&#34;diagnosing-on-windows&#34;&gt;Diagnosing on Windows&lt;/h3&gt;
+
+&lt;p&gt;A compiler toolchain known to work for compiling &lt;code&gt;kerberos&lt;/code&gt; on Windows is the following:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Visual Studio 2010 (do not use higher versions)&lt;/li&gt;
+&lt;li&gt;Windows 7 64bit SDK&lt;/li&gt;
+&lt;li&gt;Python 2.7 or higher&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;Open Visual Studio command prompt. Ensure node.exe is in your path and install node-gyp.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;npm install -g node-gyp
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Next you will have to build the project manually to test it. Use any tool you use with git and grab the repo.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code&gt;git clone https://github.com/christkv/kerberos.git
+cd kerberos
+npm install
+node-gyp rebuild
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;This should rebuild the driver successfully if you have everything set up correctly.&lt;/p&gt;
+
+&lt;h3 id=&#34;other-possible-issues&#34;&gt;Other possible issues&lt;/h3&gt;
+
+&lt;p&gt;If Python is installed incorrectly, it can cause problems for &lt;code&gt;gyp&lt;/code&gt;. It&amp;rsquo;s a good idea to test your
+deployment environment first by trying to build Node.js itself on the server in question, as this should unearth
+any issues with broken packages (and there are a lot of broken packages out there).&lt;/p&gt;
+
+&lt;p&gt;Another thing is to ensure your user has write permission to wherever the Node.js modules are being installed.&lt;/p&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -8,23 +8,13 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.1/reference/gridfs/streaming/</loc>
+    <loc>/node-mongodb-native/2.1/tutorials/gridfs/streaming/</loc>
     <lastmod>2015-10-15T14:27:51-04:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.1/reference/gridfs/</loc>
+    <loc>/node-mongodb-native/2.1/tutorials/gridfs/</loc>
     <lastmod>2015-08-05T12:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/2.1/reference/connecting/authenticating/</loc>
-    <lastmod>2015-03-19T14:27:51-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/2.1/reference/gridfs/gridstore/</loc>
-    <lastmod>2015-03-19T14:27:51-04:00</lastmod>
   </url>
   
   <url>
@@ -33,22 +23,42 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.1/whats-new/upgrading/</loc>
+    <loc>/node-mongodb-native/2.1/tutorials/commands/</loc>
+    <lastmod>2015-03-19T14:27:51-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/tutorials/connect/authenticating/</loc>
+    <lastmod>2015-03-19T14:27:51-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/tutorials/gridfs/gridstore/</loc>
+    <lastmod>2015-03-19T14:27:51-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/tutorials/geospatial-search/</loc>
+    <lastmod>2015-03-19T14:27:51-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/tutorials/text-search/</loc>
+    <lastmod>2015-03-19T14:27:51-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/upgrade-migration/upgrading/</loc>
     <lastmod>2015-03-19T12:53:39-04:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.1/whats-new/</loc>
+    <loc>/node-mongodb-native/2.1/upgrade-migration/</loc>
     <lastmod>2015-03-19T12:53:35-04:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.1/reference/connecting/legacy-connection-settings/</loc>
-    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/2.1/reference/ecmascript6/connecting/</loc>
+    <loc>/node-mongodb-native/2.1/reference/connecting/connection-settings/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
@@ -58,17 +68,12 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.1/reference/connecting/connection-settings/</loc>
+    <loc>/node-mongodb-native/2.1/reference/ecmascript6/connecting/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.1/reference/crud/</loc>
-    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/2.1/reference/ecmascript6/</loc>
+    <loc>/node-mongodb-native/2.1/reference/connecting/legacy-connection-settings/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
@@ -78,13 +83,23 @@
   </url>
   
   <url>
+    <loc>/node-mongodb-native/2.1/reference/ecmascript6/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/node-mongodb-native/2.1/reference/faq/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.1/reference/connecting/ssl/</loc>
-    <lastmod>2015-03-19T12:53:26-04:00</lastmod>
+    <loc>/node-mongodb-native/2.1/tutorials/connect/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/tutorials/crud/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
   <url>
@@ -94,6 +109,11 @@
   
   <url>
     <loc>/node-mongodb-native/2.1/reference/management/sdam-monitoring/</loc>
+    <lastmod>2015-03-19T12:53:26-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/tutorials/connect/ssl/</loc>
     <lastmod>2015-03-19T12:53:26-04:00</lastmod>
   </url>
   
@@ -108,27 +128,32 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.1/getting-started/installation-guide/</loc>
-    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/2.1/getting-started/quick-tour/</loc>
-    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/node-mongodb-native/2.1/</loc>
     <lastmod>2015-03-17T15:36:56+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.1/getting-started/</loc>
+    <loc>/node-mongodb-native/2.1/quick-start/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/installation-guide/</loc>
     <lastmod>2015-03-17T15:36:56+00:00</lastmod>
   </url>
   
   <url>
     <loc>/node-mongodb-native/2.1/reference/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/tutorials/create-indexes/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/tutorials/</loc>
     <lastmod>2015-03-17T15:36:56+00:00</lastmod>
   </url>
   

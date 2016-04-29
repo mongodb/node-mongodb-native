@@ -51,29 +51,6 @@ Web frameworks using MongoDB
          * - **Watchers**
            - 18
 
-.. topic:: node-bread
-
-    file based static website/blog generator --
-
-      .. list-table::
-         :widths: 25 85
-         :header-rows: 0
-
-         * - **Activity Level**
-           - .. image:: ../static/nonactive.png
-         * - **Last push**
-           - 19:30:24 on 8/3/2014
-         * - **Homepage**
-           - http://https://npmjs.org/package/bread
-         * - **Url**
-           - https://github.com/pvorb/node-bread
-         * - **Clone Url**
-           - https://github.com/pvorb/node-bread.git
-         * - **Forks**
-           - 3
-         * - **Watchers**
-           - 9
-
 .. topic:: arrjs
 
     HTTP and WebSocket application routing
@@ -193,7 +170,7 @@ Content Management Systems
          * - **Forks**
            - 300
          * - **Watchers**
-           - 1663
+           - 1666
 
 Grid FS libraries or tools
 --------------------------
@@ -268,7 +245,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 6
          * - **Watchers**
-           - 69
+           - 68
 
 .. topic:: mongolia
 
@@ -360,7 +337,7 @@ Wrapper libraries to ease the use of development or provide simple ODM like beha
          * - **Forks**
            - 14
          * - **Watchers**
-           - 99
+           - 98
 
 REST api's around MongoDB or resource based libraries
 -----------------------------------------------------
@@ -386,7 +363,7 @@ REST api's around MongoDB or resource based libraries
          * - **Forks**
            - 127
          * - **Watchers**
-           - 350
+           - 349
 
 .. topic:: lazyBum
 
@@ -471,7 +448,7 @@ Test helpers and libraries
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 13:52:41 on 26/2/2016
+           - 16:52:13 on 20/3/2016
          * - **Homepage**
            - http://
          * - **Url**
@@ -479,9 +456,9 @@ Test helpers and libraries
          * - **Clone Url**
            - https://github.com/emerleite/node-database-cleaner.git
          * - **Forks**
-           - 31
+           - 32
          * - **Watchers**
-           - 94
+           - 98
 
 Tools or applications to manage your MongoDB's
 ----------------------------------------------
@@ -533,7 +510,7 @@ Queue libraries using MongoDB
          * - **Forks**
            - 6
          * - **Watchers**
-           - 98
+           - 99
 
 Logging libraries or applications
 ---------------------------------
@@ -657,7 +634,7 @@ General frameworks over MongoDB
          * - **Forks**
            - 9
          * - **Watchers**
-           - 57
+           - 58
 
 Translation libraries or frameworks
 -----------------------------------
@@ -720,7 +697,7 @@ Libraries or Applications for analytics
          :header-rows: 0
 
          * - **Activity Level**
-           - .. image:: ../static/active.png
+           - .. image:: ../static/nonactive.png
          * - **Last push**
            - 14:47:4 on 2/11/2015
          * - **Homepage**
@@ -730,9 +707,9 @@ Libraries or Applications for analytics
          * - **Clone Url**
            - https://github.com/square/cube.git
          * - **Forks**
-           - 428
+           - 429
          * - **Watchers**
-           - 3716
+           - 3727
 
 Libraries for the connect middleware
 ------------------------------------
@@ -771,7 +748,7 @@ Libraries for the connect middleware
          * - **Activity Level**
            - .. image:: ../static/active.png
          * - **Last push**
-           - 20:31:24 on 23/2/2016
+           - 5:28:13 on 12/3/2016
          * - **Homepage**
            - http://
          * - **Url**
@@ -779,9 +756,9 @@ Libraries for the connect middleware
          * - **Clone Url**
            - https://github.com/kcbanner/connect-mongo.git
          * - **Forks**
-           - 225
+           - 232
          * - **Watchers**
-           - 947
+           - 964
 
 Libraries or applications for continous integration
 ---------------------------------------------------
@@ -805,9 +782,9 @@ Libraries or applications for continous integration
          * - **Clone Url**
            - https://github.com/ryankee/concrete.git
          * - **Forks**
-           - 68
+           - 69
          * - **Watchers**
-           - 510
+           - 509
 
 Exampe applications
 -------------------
@@ -831,7 +808,7 @@ Exampe applications
          * - **Clone Url**
            - https://github.com/gotik/nodejs-blackboard.git
          * - **Forks**
-           - 21
+           - 22
          * - **Watchers**
            - 37
 

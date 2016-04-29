@@ -1,0 +1,1762 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="">
+<meta name="author" content="">
+<meta name="keyword" content="">
+
+    <link rel="shortcut icon" href="/node-mongodb-native/2.1//img/favicon.png">
+
+    <title>Create Indexes</title>
+
+    <link rel="stylesheet" href="/node-mongodb-native/2.1//lib/bootstrap.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.1//lib/font-awesome/css/font-awesome.min.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.1//css/mongodb-docs.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.1//css/overrides.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.1//lib/highlight/styles/idea.css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.1//lib/bootstrap-toggle/bootstrap-toggle.min.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.1//css/java.css" type="text/css" />
+
+
+  </head>
+
+  <body>
+  
+  <section id="container" class="">
+      
+      <header id="header-db" class="row" role="navigation">
+  <div class="header-content">
+    <div class="toggle-nav pull-left">
+        <i class="fa fa-bars"></i>
+        <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom"></div>
+    </div>
+    
+    <div class="logo pull-left">
+      <a href="/node-mongodb-native/2.1//../">
+        <img src="/node-mongodb-native/2.1//img/logo-mongodb-header.png", alt="MongoDB.org" />
+      </a>
+    </div>
+    
+    <div>
+<div class="nav-items pull-right">
+  <a href="https://university.mongodb.com" data-toggle="tooltip" data-placement="bottom" title="Free Online Classes">MongoDB University</a>
+  <a href="http://www.mongodb.org/downloads" data-toggle="tooltip" data-placement="bottom" title="Download MongoDB">Downloads</a>
+  <a href="http://www.mongodb.org/get-involved" data-toggle="tooltip" data-placement="bottom" title="Get involved with MongoDB">Community</a>
+  <a href="http://docs.mongodb.org" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Documentation">Docs</a>
+  <a href="http://blog.mongodb.org" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Blog">Blog</a>
+  <div id="search">
+<form method="get" action="//www.google.com/search" target="_blank">
+    <input type="text" name="searchQuery" size="20" value="" autocomplete="off" placeholder="Search docs">
+    <input type="hidden" name="site" value="/node-mongodb-native/2.1/">
+    <input type="hidden" name="q" value="">
+    <label for="searchQuery"><i class="fa fa-search fa-1"></i></label>
+</form>
+</div>
+
+</div>
+</div>
+
+  </div>
+</header>
+
+      
+
+      
+<aside id="sidebar" class="sidebar">
+    <div class="ssidebar nav-collapse">
+      <div class="ssidebarwrapper">
+        <h3>
+          <a class="index-link" href="/node-mongodb-native/2.1//../">MongoDB Node.js Driver</a>
+          <a class="version pull-right" href="/node-mongodb-native/2.1/">2.1</a>
+        </h3>
+
+        
+        <ul class="sidebar-menu">
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+
+          
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+    
+      
+    
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+
+  
+    
+    
+    
+  
+  
+
+
+        
+      
+    
+      
+      
+        
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+    
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+
+          
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/2.1/quick-start/">
+        <i class='fa fa-road'></i>
+        Quick Start
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/2.1/installation-guide/">
+        <i class='fa fa-puzzle-piece'></i>
+        Installation Guide
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<li class="toctree-l1  current">
+  <a href="/node-mongodb-native/2.1/tutorials/" class="">
+      <i class='fa fa-thumb-tack'></i>
+      <span>Tutorials</span>
+      <span class="menu-arrow fa fa-angle-down"></span>
+  </a>
+    <ul  class="current">
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/2.1/tutorials/connect/" class="">
+      <i class='fa'></i>
+      <span>Connect to MongoDB</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/tutorials/connect/authenticating/">
+        <i class='fa'></i>
+        Authentication
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/tutorials/connect/ssl/">
+        <i class='fa'></i>
+        SSL Settings
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.1/tutorials/crud/">
+        <i class='fa'></i>
+        CRUD Operations
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.1/tutorials/create-indexes/">
+        <i class='fa'></i>
+        Create Indexes
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.1/tutorials/text-search/">
+        <i class='fa'></i>
+        Text Search
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.1/tutorials/geospatial-search/">
+        <i class='fa'></i>
+        Geospatial Search
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.1/tutorials/commands/">
+        <i class='fa'></i>
+        Database Commands
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/2.1/tutorials/gridfs/" class="">
+      <i class='fa'></i>
+      <span>GridFS</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/tutorials/gridfs/streaming/">
+        <i class='fa'></i>
+        GridFS API
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/tutorials/gridfs/gridstore/">
+        <i class='fa'></i>
+        Legacy GridStore
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l1 ">
+  <a href="/node-mongodb-native/2.1/reference/" class="">
+      <i class='fa fa-book'></i>
+      <span>Reference</span>
+      <span class="menu-arrow fa fa-angle-right"></span>
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/2.1/reference/connecting/" class="">
+      <i class='fa'></i>
+      <span>Connection Options</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/connecting/connection-settings/">
+        <i class='fa'></i>
+        Connection Settings
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/connecting/legacy-connection-settings/">
+        <i class='fa'></i>
+        Legacy Connection Settings
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/2.1/reference/ecmascript6/" class="">
+      <i class='fa'></i>
+      <span>ECMAScript 6</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/ecmascript6/connecting/">
+        <i class='fa'></i>
+        Connecting
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/ecmascript6/crud/">
+        <i class='fa'></i>
+        CRUD Operations
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/2.1/reference/management/" class="">
+      <i class='fa'></i>
+      <span>Management</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/management/logging/">
+        <i class='fa'></i>
+        Logging
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/management/apm/">
+        <i class='fa'></i>
+        APM
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.1/reference/management/sdam-monitoring/">
+        <i class='fa'></i>
+        Topology Monitoring
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.1/reference/faq/">
+        <i class='fa'></i>
+        Frequently Asked Questions
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l1 ">
+  <a href="/node-mongodb-native/2.1/upgrade-migration/" class="">
+      <i class='fa fa-cog'></i>
+      <span>Upgrade Guide</span>
+      <span class="menu-arrow fa fa-angle-right"></span>
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.1/upgrade-migration/upgrading/">
+        <i class='fa fa-wrench'></i>
+        Upgrading to 2.0
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/2.1/api/">
+        <i class='fa fa-file-text-o'></i>
+        API Documentation
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="https://github.com/mongodb/node-mongodb-native">
+        <i class='fa fa-github'></i>
+        Source Code
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/2.1/issues-help/">
+        <i class='fa fa-life-ring'></i>
+        Issues &amp; Help
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge">
+        <img src='https://badges.gitter.im/Join Chat.svg'/>
+        
+    </a>
+  </li>
+
+
+          
+        </ul>
+        
+    </div>
+  </div>
+  
+</aside>
+
+<div class="option-popup closed hidden" id="optionsVersionsPopup">
+<div class="option-header">
+  <i class="fa fa-gear"></i>
+  <span>OPTIONS</span>
+  <i class="fa fa-angle-up pull-right"></i>
+</div>
+<div class="option-body">
+  <ul>
+      
+      <li>
+        <label>Version</label>
+        <div class="btn-group btn-group-xs pull-right">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+            Select Version <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" role="menu" id="optionsVersionsMenu">
+          </ul>
+        </div>
+      </li>
+
+   
+
+
+    
+
+  </ul>
+</div>
+</div>
+
+
+
+      
+      <section id="main-content" class="content">
+          <section class="main-column pull-left">
+            <div class="document">
+              <div class="documentwrapper">
+                <div class="bodywrapper">
+                  <div class="body">
+                    <p><div class="admonition note">
+                    <h5 class="admonition-title">Survey</h5>
+                    <p>Please help us improve by answering a few questions at our
+						<a href="https://www.research.net/r/BPJSGJC"><strong> user survey</strong></a>.
+                    </p>
+                    </div>
+                    </p>
+
+
+   
+<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/2.1/docs/reference/content/tutorials/create-indexes.md" target="_blank" title="Edit tutorials/create-indexes.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
+
+
+
+
+
+
+
+
+
+
+<div class="bc">
+<ul>
+  
+  
+  
+  
+  
+  <li><a href="/node-mongodb-native/2.1/tutorials/">Tutorials</a> <i class="fa fa-angle-right"></i></li>
+  <li>Create Indexes</li>
+</ul>
+</div>
+
+
+
+
+<h1 id="create-indexes">Create Indexes</h1>
+
+<p>To create an index on a field or fields, pass an index specification
+document to the <code>createIndex()</code> method:</p>
+
+<pre><code class="language-js">
+   { &lt;field1&gt;: &lt;type1&gt;, &lt;field2&gt;, &lt;type2&gt; ... }
+
+</code></pre>
+
+<h2 id="create-an-ascending-index">Create an Ascending Index</h2>
+
+<p>For an ascending index type, specify <code>1</code> for <code>&lt;type&gt;</code>.</p>
+
+<p>The following example creates an ascending index key for the
+<code>quantity</code> field:</p>
+
+<pre><code class="language-js">
+var createAscendingIndex = function(db, callback) {
+  // Get the users collection
+  var collection = db.collection('users');
+  // Create the index
+  collection.createIndex(
+    { dateOfBirth : 1 }, function(err, result) {
+    console.log(result);
+    callback(result);
+  });
+};
+
+</code></pre>
+
+<h2 id="create-a-descending-index">Create a Descending Index</h2>
+
+<p>For an ascending index type, specify <code>-1</code> for <code>&lt;type&gt;</code>.</p>
+
+<p>The following example specifies a descending index key on the
+<code>lastName</code> field:</p>
+
+<pre><code class="language-js">var createDescendingIndex = function(db, callback) {
+  // Get the documents collection
+  var collection = db.collection('users');
+  // Create the index
+  collection.createIndex(
+    { lastName : -1 }, function(err, result) {
+    console.log(result);
+    callback(result);
+  });
+};
+
+</code></pre>
+
+<h2 id="create-a-compound-index">Create a Compound Index</h2>
+
+<p>To specify a compound index, use the <code>compoundIndex</code> method.</p>
+
+<p>The following example specifies a compound index key composed of the
+<code>lastName</code> field sorted in descending order, followed by the
+<code>dateOfBirth</code> field sorted in ascending order:</p>
+
+<pre><code class="language-js">var createCompoundIndex = function(db, callback) {
+  // Get the documents collection
+  var collection = db.collection('users');
+  // Create the index
+  collection.createIndex(
+    { lastName : -1, dateOfBirth : 1 }, function(err, result) {
+    console.log(result);
+    callback(result);
+  });
+};
+</code></pre>
+
+<h2 id="create-a-text-index">Create a Text Index</h2>
+
+<p>MongoDB also provides
+<a href="https://docs.mongodb.org/manual/core/index-text/">text</a> indexes to
+support text search of string content. Text indexes can include any
+field whose value is a string or an array of string elements.</p>
+
+<p>This example specifies a text index key for the <code>content</code> field:</p>
+
+<pre><code class="language-js">var createTextIndex = function(db, callback) {
+  // Get the documents collection
+  var collection = db.collection('users');
+  // Create the index
+  collection.createIndex(
+    { comments : "text" }, function(err, result) {
+    console.log(result);
+    callback(result);
+  });
+};
+</code></pre>
+
+<h2 id="create-a-hashed-index">Create a Hashed Index</h2>
+
+<p>To specify a <a href="https://docs.mongodb.org/manual/core/index-hashed/">hashed</a> index key,
+use the <code>hashed</code> method.</p>
+
+<p>This example specifies a hashed index key for the <code>timestamp</code> field:</p>
+
+<pre><code class="language-js">var createHashedIndex = function(db, callback) {
+  // Get the documents collection
+  var collection = db.collection('users');
+  // Create the index
+  collection.createIndex(
+    { timestamp : &quot;hashed&quot; }, function(err, result) {
+    console.log(result);
+    callback(result);
+  });
+};
+</code></pre>
+
+<h2 id="create-geospatial-indexes">Create Geospatial Indexes</h2>
+
+<p>There are also helpers for creating the index keys for the various
+geospatial indexes supported by mongodb.</p>
+
+<h3 id="create-a-2dsphere-index">Create a <code>2dsphere</code> Index</h3>
+
+<p>To specify a <a href="https://docs.mongodb.org/manual/core/2dsphere/">2dsphere</a>
+index key, use one of the <code>geo2dsphere</code> methods.</p>
+
+<p>This example specifies a 2dsphere index on the <code>location</code> field:</p>
+
+<pre><code class="language-js">var create2dSphereIndex = function(db, callback) {
+  // Get the documents collection
+  var collection = db.collection('users');
+  // Create the index
+  collection.createIndex(
+    { location : "2dsphere" }, function(err, result) {
+    console.log(result);
+    callback(result);
+  });
+};
+</code></pre>
+
+<h3 id="create-a-2d-index">Create a <code>2d</code> Index</h3>
+
+<p>To specify a <a href="https://docs.mongodb.org/manual/core/2d/">2d</a> index key, use the <code>geo2d</code>
+method.</p>
+
+<p>.. important::</p>
+
+<p>A 2d index is for data stored as points on a two-dimensional plane
+   and is intended for legacy coordinate pairs used in MongoDB 2.2 and
+   earlier.</p>
+
+<p>This example specifies a 2d index on the <code>points</code> field:</p>
+
+<pre><code class="language-js">var create2dIndex = function(db, callback) {
+  // Get the documents collection
+  var collection = db.collection('users');
+  // Create the index
+  collection.createIndex(
+    { points : &quot;2d&quot; }, function(err, result) {
+    console.log(result);
+    callback(result);
+  });
+};
+</code></pre>
+
+<h2 id="indexoptions">IndexOptions</h2>
+
+<p>In addition to the index specification document, <code>createIndex</code>
+method can take an index options document, such as to create unique
+indexes or partial indexes.</p>
+
+<h3 id="create-a-unique-index">Create a Unique Index</h3>
+
+<pre><code class="language-js">var createUniqueIndex = function(db, callback) {
+  // Get the documents collection
+  var collection = db.collection('users');
+  // Create the index
+  collection.createIndex(
+    { lastName : -1, dateOfBirth : 1 },
+    { unique:true },
+    function(err, result) {
+      console.log(result);
+      callback(result);
+  });
+};
+</code></pre>
+
+<h3 id="create-a-partial-index">Create a Partial Index</h3>
+
+<pre><code class="language-js">
+var createPartialIndex = function(db, callback) {
+  // Get the documents collection
+  var collection = db.collection('users');
+  // Create the index
+  collection.createIndex(
+    { lastName : 1, firstName: 1 },
+    { partialFilterExpression: { points: { $gt: 5 } } },
+    function(err, result) {
+       console.log(result);
+       callback(result);
+  });
+};
+</code></pre>
+
+<p>For other index options, see <a href="https://docs.mongodb.org/manual/core/index-properties/">Index Options</a>.</p>
+
+
+
+
+
+
+<div id="btnv">
+  
+  <div class="pull-left">
+  <a class="navigation prev" href="/node-mongodb-native/2.1/tutorials/crud/">
+      <i class="fa fa-long-arrow-left"> </i> CRUD Operations
+  </a>
+  </div>
+  
+  
+  <div class="pull-right">
+  <a class="navigation next" href="/node-mongodb-native/2.1/tutorials/text-search/">
+    Text Search <i class="fa fa-long-arrow-right"> </i>
+  </a>
+  
+</div>
+</div>
+
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+     
+    var disqus_shortname = 'nodejsmongodbdriver'; 
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+</div>
+<div class="right-column">
+<div class="wrapper">
+  
+  <div class="toc">
+    <span class="toc-header">On this page</span>
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#create-indexes">Create Indexes</a>
+<ul>
+<li><a href="#create-an-ascending-index">Create an Ascending Index</a></li>
+<li><a href="#create-a-descending-index">Create a Descending Index</a></li>
+<li><a href="#create-a-compound-index">Create a Compound Index</a></li>
+<li><a href="#create-a-text-index">Create a Text Index</a></li>
+<li><a href="#create-a-hashed-index">Create a Hashed Index</a></li>
+<li><a href="#create-geospatial-indexes">Create Geospatial Indexes</a>
+<ul>
+<li><a href="#create-a-2dsphere-index">Create a <code>2dsphere</code> Index</a></li>
+<li><a href="#create-a-2d-index">Create a <code>2d</code> Index</a></li>
+</ul></li>
+<li><a href="#indexoptions">IndexOptions</a>
+<ul>
+<li><a href="#create-a-unique-index">Create a Unique Index</a></li>
+<li><a href="#create-a-partial-index">Create a Partial Index</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+  </div>
+  
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</section>
+</section>
+
+</section>
+
+
+<script type="text/javascript">
+  var DOCUMENTATION_OPTIONS = {
+   URL_ROOT:    "/node-mongodb-native/2.1/",
+   VERSION:     "2.1",
+   COLLAPSE_INDEX: false,
+   FILE_SUFFIX: '.html',
+   HAS_SOURCE:  true
+  };
+</script>
+<script type="text/javascript" src="/node-mongodb-native/2.1/js/jquery.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.1/lib/bootstrap.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.1/js/navbar.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.1/lib/highlight/highlight.pack.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.1/js/scripts.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.1//lib/bootstrap-toggle/bootstrap-toggle.min.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.1//js/java.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.1//js/toggle-switch.js"></script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-29229787-1', 'auto');
+  ga('send', 'pageview');
+</script>
+</body>
+</html>
+
