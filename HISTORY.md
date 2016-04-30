@@ -1,3 +1,7 @@
+1.3.19
+-----------------
+- Handle situation where a server connection in a replicaset sometimes fails to be destroyed properly due to being in the middle of authentication when the destroy method is called on the replicaset causing it to be orphaned and never collected.
+
 1.3.18 2016-04-27
 -----------------
 - Hardened cursor connection handling for getMore and killCursor to ensure mid operation connection kill does not throw null exception.
