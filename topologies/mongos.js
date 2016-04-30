@@ -1128,7 +1128,15 @@ var connectHandler = function(self, state, e) {
     for(var i = 0; i < state.credentials.length; i++) {
       server.auth.apply(server, state.credentials[i].concat([function(err, r) {
         count = count - 1;
-        if(count == 0) processNewServer(server);
+        if(count == 0) {
+          // Did someone call destroy on the connection, close and return
+          if(self.s.state == DESTROYED) {
+            return server.destroy(false, false);
+          }
+
+          // Otherwise process server
+          processNewServer(server);
+        }
       }]));
     }
   }
