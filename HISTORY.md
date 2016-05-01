@@ -1,6 +1,7 @@
 1.3.19
 -----------------
 - Handle situation where a server connection in a replicaset sometimes fails to be destroyed properly due to being in the middle of authentication when the destroy method is called on the replicaset causing it to be orphaned and never collected.
+- Set keepAlive to false by default to work around bug in node.js for Windows XP and Windows 2003.
 
 1.3.18 2016-04-27
 -----------------
