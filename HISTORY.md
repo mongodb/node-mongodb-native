@@ -1,3 +1,8 @@
+2.1.19
+----------------
+* Set keepAlive to false by default to work around bug in node.js for Windows XP and Windows 2003.
+* Updated mongodb-core to 1.3.19 to fix minor connectivity issue on quick open/close of MongoClient connections on auth enabled mongodb Replicasets.
+
 2.1.18 2016-04-27
 -----------------
 * Updated mongodb-core to 1.3.18 to fix Node 6.0 issues.

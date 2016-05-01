@@ -408,3 +408,37 @@ exports["correctly error out when no socket available on MongoClient.connect wit
     });
   }
 }
+
+/**
+ * @ignore
+ */
+exports["correctly connect setting keepAlive to 100"] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+
+    MongoClient.connect(configuration.url(), {
+      keepAlive: 100
+    }, function(err, db) {
+      test.equal(null, err);
+      var connection = db.serverConfig.connections()[0];
+      test.equal(true, connection.keepAlive);
+      test.equal(100, connection.keepAliveInitialDelay);
+
+      db.close();
+
+      MongoClient.connect(configuration.url(), {
+        keepAlive: 0
+      }, function(err, db) {
+        test.equal(null, err);
+        var connection = db.serverConfig.connections()[0];
+        test.equal(false, connection.keepAlive);
+
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
