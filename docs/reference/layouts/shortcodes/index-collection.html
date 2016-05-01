@@ -1,0 +1,10 @@
+var indexCollection = function(db, callback) {
+  db.collection('documents').createIndex(
+    { "a": 1 },
+      null,
+      function(err, results) {
+        console.log(results);
+        callback();
+    }
+  );
+};

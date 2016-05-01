@@ -12,6 +12,68 @@
 
 @import url(http://fonts.googleapis.com/css?family=Source+Code+Pro:300,500,700);
 
+* Fonts! */
+/*Reg*/
+@font-face {
+    font-family: 'Akzidenz';
+    src: url('fonts/akzidgrostdreg.eot');
+    src: url('fonts/akzidgrostdreg.eot#iefix') format('embedded-opentype'),
+    url('fonts/akzidgrostdreg.woff') format('woff'),
+    url('fonts/akzidgrostdreg.ttf')  format('truetype');
+    font-style: normal;
+    font-weight: normal;
+}
+/*Reg Italic*/
+@font-face {
+    font-family: 'Akzidenz';
+    src: url('fonts/akzidgrostdita.eot');
+    src: url('fonts/akzidgrostdita.eot#iefix') format('embedded-opentype'),
+    url('fonts/akzidgrostdita.woff') format('woff'),
+    url('fonts/akzidgrostdita.ttf')  format('truetype');
+    font-style: italic;
+    font-weight: normal;
+}
+/*Bold*/
+@font-face {
+    font-family: 'Akzidenz';
+    src: url('fonts/akzidgrostdmed.eot');
+    src: url('fonts/akzidgrostdmed.eot#iefix') format('embedded-opentype'),
+    url('fonts/akzidgrostdmed.woff') format('woff'),
+    url('fonts/akzidgrostdmed.ttf')  format('truetype');
+    font-style: normal;
+    font-weight: bold;
+}
+/*Bold Italic*/
+@font-face {
+    font-family: 'Akzidenz';
+    src: url('fonts/akzidgrostdmedita.eot');
+    src: url('fonts/akzidgrostdmedita.eot#iefix') format('embedded-opentype'),
+    url('fonts/akzidgrostdmedita.woff') format('woff'),
+    url('fonts/akzidgrostdmedita.ttf')  format('truetype');
+    font-style: italic;
+    font-weight: bold;
+}
+/*Light*/
+@font-face {
+    font-family: 'Akzidenz';
+    src: url('fonts/akzidgrostdlig.eot');
+    src: url('fonts/akzidgrostdlig.eot#iefix') format('embedded-opentype'),
+    url('fonts/akzidgrostdlig.woff') format('woff'),
+    url('fonts/akzidgrostdlig.ttf')  format('truetype');
+    font-style: normal;
+    font-weight: 200;
+}
+/*Light Italic*/
+@font-face {
+    font-family: 'Akzidenz';
+    src: url('fonts/akzidgrostdligita.eot');
+    src: url('fonts/akzidgrostdligita.eot#iefix') format('embedded-opentype'),
+    url('fonts/akzidgrostdligita.woff') format('woff'),
+    url('fonts/akzidgrostdligita.ttf')  format('truetype');
+    font-style: italic;
+    font-weight: 200;
+}
+
 /* -- page layout ----------------------------------------------------------- */
 
 #baselineOverlay {
@@ -29,7 +91,7 @@
 }
 
 body {
-    font-family: "PT Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: "Akzidenz", "Helvetica Neue", Helvetica, Arial, sans-serif;
     margin: 0;
     padding: 0;
     color: #494747;
@@ -85,7 +147,7 @@ a:hover {
 }
 
 div.body h1, div.body h2, div.body h3, div.body h4, div.body h5, div.body h6 {
-    font-family: "PT Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: "Akzidenz", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-weight: normal;
     line-height: 24px;
     color: #313030;
@@ -180,6 +242,11 @@ pre {
 }
 
 tt {
+    color: #000;
+    font-family: 'Source Code Pro', monospace;
+}
+
+code {
     color: #000;
     font-family: 'Source Code Pro', monospace;
 }

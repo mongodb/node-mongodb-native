@@ -10,7 +10,7 @@ title = "Connecting"
 
 # Connecting
 
-The MongoClient connection method returns a Promise if no callback is passed to it. Below is an example using the [co](https://www.npmjs.com/package/co) package to run the `generator` functions that is one of the most exiting innovations of ECMAScript 6.
+The MongoClient connection method returns a Promise if no callback is passed to it. Below is an example using the [co](https://www.npmjs.com/package/co) package to run a `generator` function, which is one of the most exciting innovations of ECMAScript 6.
 
 ```js
 var MongoClient = require('mongodb').MongoClient,
