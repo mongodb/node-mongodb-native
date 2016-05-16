@@ -70,7 +70,7 @@ var Connection = function(options) {
   // Default options
   this.port = options.port || 27017;
   this.host = options.host || 'localhost';
-  this.keepAlive = typeof options.keepAlive == 'boolean' ? options.keepAlive : false;
+  this.keepAlive = typeof options.keepAlive == 'boolean' ? options.keepAlive : true;
   this.keepAliveInitialDelay = options.keepAliveInitialDelay || 0;
   this.noDelay = typeof options.noDelay == 'boolean' ? options.noDelay : true;
   this.connectionTimeout = options.connectionTimeout || 0;
