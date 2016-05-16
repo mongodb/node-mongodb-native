@@ -300,11 +300,38 @@ exports['Should correctly set MaxPoolSize on replicaset server'] = {
       ? f('%s&%s', url, 'maxPoolSize=100')
       : f('%s?%s', url, 'maxPoolSize=100');
 
-    MongoClient.connect(url, function(err, db) {
+    MongoClient.connect(url, {}, function(err, db) {
       test.ok(db.serverConfig.connections().length >= 1);
 
-      db.close();
-      test.done();
+      db.on('all', function() {
+        var connections = db.serverConfig.connections();
+
+        for(var i = 0; i < connections.length; i++) {
+          test.equal(120000, connections[i].connectionTimeout);
+          test.equal(120000, connections[i].socketTimeout);
+        }
+
+        db.close();
+
+        MongoClient.connect(url, {
+          connectTimeoutMS: 15000,
+          socketTimeoutMS: 30000
+        }, function(err, db) {
+          test.ok(db.serverConfig.connections().length >= 1);
+
+          db.on('all', function() {
+            var connections = db.serverConfig.connections();
+
+            for(var i = 0; i < connections.length; i++) {
+              test.equal(15000, connections[i].connectionTimeout);
+              test.equal(30000, connections[i].socketTimeout);
+            }
+
+            db.close();
+            test.done();
+          });
+        });
+      });
     });
   }
 }
@@ -433,12 +460,38 @@ exports["correctly connect setting keepAlive to 100"] = {
         keepAlive: 0
       }, function(err, db) {
         test.equal(null, err);
-        var connection = db.serverConfig.connections()[0];
-        test.equal(false, connection.keepAlive);
+
+        db.serverConfig.connections().forEach(function(x) {
+          test.equal(false, x.keepAlive);
+        })
 
         db.close();
         test.done();
       });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports["default keepAlive behavior"] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+
+    MongoClient.connect(configuration.url(), {
+    }, function(err, db) {
+      test.equal(null, err);
+
+      db.serverConfig.connections().forEach(function(x) {
+        test.equal(true, x.keepAlive);
+      });
+
+      db.close();
+      test.done();
     });
   }
 }

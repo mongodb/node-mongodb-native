@@ -68,3 +68,31 @@ The table below shows all settings and what topology they affect.
 | **pkFactory** | Server, ReplicaSet, Mongos | object | null | A primary key factory object for generation of custom _id keys. |
 | **promiseLibrary** | Server, ReplicaSet, Mongos | object | null | A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible. |
 | **readConcern** | Server, ReplicaSet, Mongos | object | null |  Specify a read concern for the collection. (only MongoDB 3.2 or higher supported). |
+
+# Ensure you connection string is valid for Replica Sets
+
+The connection string passed to the driver must use the fully qualified host names for the servers as set in the replicaset config. Given the following configuration settings for your replicaset.
+
+```js
+{
+	"_id" : "testSet",
+	"version" : 1,
+	"protocolVersion" : 1,
+	"members" : [
+		{
+			"_id" : 1,
+			"host" : "server1:31000",
+		},
+		{
+			"_id" : 2,
+			"host" : "server2:31001",
+		},
+		{
+			"_id" : 3,
+			"host" : "server3:31002",
+		}
+	]
+}
+```
+
+You must ensure `server1`, `server2` and `server3` are resolvable from the driver for the Replicaset discovery and failover to work correctly.

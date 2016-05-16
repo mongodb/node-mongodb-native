@@ -107,3 +107,31 @@ Unfortunately until MongoDB starts multiplexing threads on sockets or becomes an
 {{% note %}}
 Create a separate connection pool for the slow executing operations, thus isolating the slow operations from the fast operations.
 {{% /note %}}
+
+# Ensure you connection string is valid for Replica Set
+
+The connection string passed to the driver must use the fully qualified host names for the servers as set in the replicaset config. Given the following configuration settings for your replicaset.
+
+```js
+{
+	"_id" : "testSet",
+	"version" : 1,
+	"protocolVersion" : 1,
+	"members" : [
+		{
+			"_id" : 1,
+			"host" : "server1:31000",
+		},
+		{
+			"_id" : 2,
+			"host" : "server2:31001",
+		},
+		{
+			"_id" : 3,
+			"host" : "server3:31002",
+		}
+	]
+}
+```
+
+You must ensure `server1`, `server2` and `server3` are resolvable from the driver for the Replicaset discovery and failover to work correctly.
