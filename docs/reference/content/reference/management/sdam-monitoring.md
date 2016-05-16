@@ -10,7 +10,11 @@ title = "Topology Monitoring"
 
 # Topology Management
 
-The node.js driver `2.1.10` or higher introduces the SDAM Monitoring events allowing an application or tool to monitor changes in the drivers view of a single server, replicaset or mongos topology. This allows an application to react to changes such as a secondary joining or leaving a replicaset.
+The Node.js driver `2.1.10` or higher features SDAM Monitoring events,
+allowing an application or tool to monitor changes in the drivers
+view of a single server, replica set or `mongos`. This allows an
+application to react to changes of topology, such as a secondary
+joining or leaving a replica set.
 
 ## Overview of SDAM events
 
@@ -28,7 +32,7 @@ The node.js driver `2.1.10` or higher introduces the SDAM Monitoring events allo
 
 ## Simple Code Example
 
-Let's look at a simple script that connects to a replicaset and then monitors all the events that are emitted by the replicaset topology.
+The following example demonstrates how to connect to a replica set and monitor all the events that are emitted by the replica set topology.
 
 ```js
 var MongoClient = require('mongodb').MongoClient;
@@ -87,7 +91,7 @@ MongoClient.connect(url, function(err, db) {
 
 ## Example Documents Returned For Each Event Type
 
-The example documents are meant to serve as a guide to the format of the returned documents.
+The following examples serve as a guide to the format of the returned documents.
 
 ### serverDescriptionChanged
 
@@ -263,7 +267,7 @@ The type can be one of the following values.
 }
 ```
 
-The `type` field in the server array documents can be one of the following values.
+The `type` field in the server array documents can be one of the following values:
 
 | Type | Description |
 | :----------| :------------- |
@@ -273,10 +277,10 @@ The `type` field in the server array documents can be one of the following value
 | Standalone| Standalone server|
 | Unknown | Unknown server |
 
-The `topologyType` field can be one of the following values.
+The `topologyType` field can be one of the following values:
 
 | Type | Description |
 | :----------| :------------- |
-| ReplicaSetWithPrimary| Replicaset with a primary |
-| ReplicaSetNoPrimary| Replicaset with no primary |
+| ReplicaSetWithPrimary| Replica set with a primary |
+| ReplicaSetNoPrimary| Replica set with no primary |
 | Unknown | Unknown topology |

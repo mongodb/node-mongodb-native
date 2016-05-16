@@ -20,7 +20,7 @@ information on recent changes.
 
 * [Installing the driver]({{< relref "installation-guide/index.md" >}})
 * [Quick start]({{< relref "quick-start/index.md" >}})
-* [CRUD operation]({{< relref "tutorials/crud.md" >}})
+* [CRUD operations]({{< relref "tutorials/crud.md" >}})
 * [Connect]({{< relref "tutorials/connect/index.md" >}})
 
 ## Developing with ECMAScript 6
@@ -28,7 +28,7 @@ information on recent changes.
 If you'd like to use the MongoDB driver with ES6 features such as Promises and Generators, here are some good starting points.
 
 * [Connecting]({{< relref "reference/ecmascript6/connecting.md" >}})
-* [CRUD operation]({{< relref "reference/ecmascript6/crud.md" >}})
+* [CRUD operations]({{< relref "reference/ecmascript6/crud.md" >}})
 
 ## Next steps
 
