@@ -122,7 +122,7 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
     });
 
     server.on('joined', function(_type) {
-      if(_type == 'arbiter' || _type == 'secondary') {
+      if(_type == 'arbiter' || _type == 'secondary' || _type == 'primary') {
         if(server.s.replState.secondaries.length == 1
           && server.s.replState.arbiters.length == 1
           && server.s.replState.primary) {
