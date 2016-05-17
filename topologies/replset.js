@@ -1088,14 +1088,9 @@ var merge = function(list, newList) {
 
 var replicasetInquirer = function(self, state, norepeat) {
   return function() {
-    // Process already running don't rerun
-    if(state.highAvailabilityProcessRunning) {
+    // Process already running or state destroyed, don't rerun
+    if(state.highAvailabilityProcessRunning || state.replState.state == DESTROYED) {
       return;
-    }
-
-    // State destroyed return
-    if(state.replState.state == DESTROYED) {
-      return
     }
 
     // Do we have a primary, ensure we only monitor by the haInterval
@@ -1216,11 +1211,8 @@ var replicasetInquirer = function(self, state, norepeat) {
     //
     // Inspect a specific servers ismaster
     var inspectServer = function(server, callback) {
-      if(state.replState.state == DESTROYED) {
-        return;
-      }
-
-      if(server && !server.isConnected()) {
+      // If the server is not connected or the topology was destroyed
+      if((server && !server.isConnected()) || state.replState.state == DESTROYED) {
         return callback();
       }
 
@@ -1361,6 +1353,11 @@ var replicasetInquirer = function(self, state, norepeat) {
         left = left - 1;
 
         if(left == 0) {
+          // Do not schedule any more replica monitoring checks
+          if(state.replState.state == DESTROYED) {
+            return;
+          }
+
           // Set the high availability
           state.highAvailabilityProcessRunning = false;
           // Check if we need to emit a fullsetup event
