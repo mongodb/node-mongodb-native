@@ -24,7 +24,7 @@ The node.js driver `2.1.10` or higher introduces the SDAM Monitoring events allo
 | topologyDescriptionChanged | Replicaset, Mongos | Emitted when the topology shape changes, such as a new primary being elected or a mongos proxy disconnecting. |
 | serverHeartbeatStarted | Replicaset, Mongos | Emitted before the ismaster command is issued to a MongoDB server. |
 | serverHeartbeatSucceeded | Replicaset, Mongos | Emitted after a successful ismaster command was issued to a MongoDB server. |
-| serverHearbeatFailed | Replicaset, Mongos | Emitted if a ismaster command failed against a specific MongoDB server. |
+| serverHeartbeatFailed | Replicaset, Mongos | Emitted if a ismaster command failed against a specific MongoDB server. |
 
 ## Simple Code Example
 
@@ -53,8 +53,8 @@ MongoClient.connect(url, function(err, db) {
     console.log(JSON.stringify(event, null, 2));
   });
 
-  db.topology.on('serverHearbeatFailed', function(event) {
-    console.log('received serverHearbeatFailed');
+  db.topology.on('serverHeartbeatFailed', function(event) {
+    console.log('received serverHeartbeatFailed');
     console.log(JSON.stringify(event, null, 2));
   });
 
@@ -131,7 +131,7 @@ The type can be one of the following values.
   connectionId: 'localhost:27017' }
 ```
 
-### serverHearbeatFailed
+### serverHeartbeatFailed
 
 ```js
 { durationMS: 20,
