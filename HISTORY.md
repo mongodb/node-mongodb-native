@@ -1,6 +1,8 @@
-2.1.19
+2.1.19 2016-05-17
 ----------------
-* Set keepAlive to false by default to work around bug in node.js for Windows XP and Windows 2003.
+* Handle situation where a server connection in a replicaset sometimes fails to be destroyed properly due to being in the middle of authentication when the destroy method is called on the replicaset causing it to be orphaned and never collected.
+* Ensure replicaset topology destroy is never called by SDAM.
+* Ensure all paths are correctly returned on inspectServer in replset.
 * Updated mongodb-core to 1.3.19 to fix minor connectivity issue on quick open/close of MongoClient connections on auth enabled mongodb Replicasets.
 
 2.1.18 2016-04-27
