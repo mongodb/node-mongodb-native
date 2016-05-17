@@ -15,7 +15,7 @@ document to the `createIndex()` method:
 
 ```js
 
-   { <field1>: <type1>, <field2>, <type2> ... }
+   { <field1>: <type1>, <field2>: <type2> ... }
 
 ```
 
