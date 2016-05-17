@@ -10,7 +10,7 @@
   "keywords": [
     "mongodb",
     "driver",
-    "legacy"
+    "official"
   ],
   "dependencies": {
     "es6-promise": "3.0.2",
