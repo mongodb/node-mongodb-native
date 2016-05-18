@@ -1,4 +1,4 @@
-baseurl = "/node-mongodb-native/steverenaker/2.1-stage"
+baseurl = "/node-mongodb-native/steverenaker/phase2"
 languageCode = "en-us"
 title = "MongoDB Node.js Driver"
 theme = "mongodb"

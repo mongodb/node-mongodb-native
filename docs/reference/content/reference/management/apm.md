@@ -10,11 +10,16 @@ title = "APM"
 
 # APM
 
-Application Performance Monitoring support is a driver feature that allows monitoring services to hook into the driver in a forward compatible and stable way. The API is not applied to the driver unless explicitly initialized to avoid any performance penalties.
+Application Performance Monitoring support is a driver
+feature that allows monitoring services to hook into the
+driver in a forward compatible and stable way. The API is
+not applied to the driver unless explicitly initialized to
+avoid any performance penalties.
 
 ## API
 
-The following code example hooks into all the available features of the APM API.
+The following code example hooks into all the available features
+of the APM API.
 
 ```js
 var listener = require('mongodb').instrument({
@@ -253,11 +258,20 @@ The next example shows a complete `find` operation that results in multiple `get
 }
 ```
 
-The main thing to notice here is that they all share the same `operationId`, allowing the APM API user to correctly map the low level commands to the logical command executed by the user (in this case `toArray` on a cursor).
+**Note:** all the documents share the same `operationId`, allowing the
+APM API user to correctly map the low level commands to the logical
+command executed by the user (in this case `toArray` on a cursor).
 
 ### operationIdGenerator
 
-The `operationIdGenerator` option allows the API user to pass in a custom `operationId` generator object that can be used to synchronize internal request Id's in the APM client with the low level command monitoring API. This makes it possible to tie together the logical method called by the user's code with the low-level commands issued to MongoDB, allowing for a richer APM experience and performance breakdown. Below is a simple `operationIdGenerator` example.
+The `operationIdGenerator` option allows the API user to pass in a
+custom `operationId` generator object. You can use this object to
+synchronize internal request IDs in the APM client with the low-level
+command monitoring API. This synchronization makes it possible to
+associate the logical method called by the user's code with the
+low-level commands issued to MongoDB. This allows for a richer
+APM experience and performance breakdown. Below is a simple
+`operationIdGenerator` example.
 
 ```js
 var generator = {
@@ -271,7 +285,11 @@ var generator = {
 
 ### timestampGenerator
 
-The `timestampGenerator` option lets the API user override the method used to timestamp the command monitoring events with a custom timestamp type. The generator contains two methods. `current` returns the current `timestamp` and `duration` calculates the total operation duration between the `start` and `end` time. Below is a simple generator example.
+The `timestampGenerator` option lets the API user to override the method
+used to timestamp the command monitoring events with a custom timestamp
+type. The generator contains two methods. `current` returns the current 
+timestamp` and `duration` calculates the total operation duration
+between the `start` and `end` time. Below is a simple generator example.
 
 ```js
 var generator = {
@@ -287,8 +305,9 @@ var generator = {
 
 ## Instrumentation
 
-The `instrumentation` callback returns the instrumentation points in the driver and associated metadata. 
-In the following example, the result shown is the result from performing `JSON.stringify`.
+The `instrumentation` callback returns the instrumentation points in
+the driver and associated metadata. In the following example, the
+result shown is the result from performing `JSON.stringify`.
 
 ```js
 {
@@ -379,7 +398,13 @@ In the following example, the result shown is the result from performing `JSON.s
 }
 ```
 
-At the top level is the name of the class exposed for instrumentation. Next is the `stream` value that tells the user if the object can operate as a Node.js stream. Next the `instrumentations` array contains all the methods available for instrumentation. The methods are grouped by method characteristics. All methods that support a callback as well as a promise will be grouped in a single instrumentation. This simplifies the code to perform the actual instrumentation.
+* `name` the name of the class exposed for instrumentation.
+* `stream` tells the user if the object can operate as a Node.js stream.
+* `instrumentations` an array which contains all the methods available
+  for instrumentation. The methods are grouped
+  by method characteristics. All methods that support a callback as well
+  as a promise will be grouped in a single instrumentation. This
+  simplifies the code to perform the actual instrumentation.
 
 ```js
 {
@@ -404,7 +429,9 @@ At the top level is the name of the class exposed for instrumentation. Next is t
 }
 ```
 
-The `methods` array contains all the methods that have the options `callback=true` and `promise=true` for the GridStore prototype. The available options are:
+The `methods` array contains all the methods that have the options
+`callback=true` and `promise=true` for the GridStore prototype.
+The available options are:
 
 | Options          | Description                                                |
 | ------------- |:-----------------------------------------------------------|
@@ -452,4 +479,7 @@ var listener = require('../..').instrument(function(err, instrumentations) {
 });
 ```
 
-This instrumentation only overrides methods that have callbacks and ignores promises, so it's not a complete solution, but shows how an API user can structure code to tap into the exposed surface of the driver.
+This instrumentation only overrides methods that have callbacks and
+ignores promises, so it's not a complete solution, but shows how an
+API user can structure code to tap into the exposed surface of the
+driver.

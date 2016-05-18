@@ -16,6 +16,12 @@ The tutorials in this section provide examples of some frequently used operation
 
 [CRUD Operations]({{< relref "tutorials/crud.md" >}})
 
+[Collections]({{< relref "tutorials/collections.md" >}})
+
+[Projections]({{< relref "tutorials/projections.md" >}})
+
+[Aggregation]({{< relref "tutorials/aggregation.md" >}})
+
 [Create Indexes]({{< relref "tutorials/create-indexes.md" >}})
 
 [Text Search]({{< relref "tutorials/text-search.md" >}})

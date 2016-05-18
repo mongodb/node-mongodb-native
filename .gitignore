@@ -26,6 +26,8 @@ test/benchmarks/performance-data
 typings/
 jsconfig.json
 manual_tests/
+docs/build
+docs/Makefile
 
 # Directory for dbs
 db

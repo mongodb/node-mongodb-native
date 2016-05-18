@@ -10,10 +10,12 @@ title = "Logging"
 
 # Logging
 
-The driver allows logging at three different levels: `debug`, `info` and `error`. The default level is `error`. You can change the level, only allow specific classes to log and provide your own logger implementation.
+You can change the log level, filter on classes to allow only specific classes
+to log, and provide your own logger implementation.
 
 ## Setting Log level
-
+The driver allows logging at three different levels: `debug`,
+`info` and `error`. The default level is `error`.
 The following example demonstrates how to set the logger to `debug`.
 
 ```js
