@@ -1145,14 +1145,6 @@ var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAl
         }
       };
 
-      try {
-        query.incRequestId();
-        connections[i].write(query.toBin());
-      } catch(err) {
-        total = total - 1;
-        if(total == 0) return callback(MongoError.create(err));
-      }
-
       // Return raw BSON docs
       if(raw) {
         commandCallback.raw = true;
@@ -1169,6 +1161,16 @@ var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAl
 
       // Register the callback
       self.s.callbacks.register(query.requestId, commandCallback(connections[i]));
+
+      try {
+        query.incRequestId();
+        connections[i].write(query.toBin());
+      } catch(err) {
+        // Unregister the command callback
+        self.s.callbacks.unregister(query.requestId);
+        total = total - 1;
+        if(total == 0) return callback(MongoError.create(err));
+      }
     }
 
     return;
@@ -1196,6 +1198,14 @@ var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAl
       }
   };
 
+  // Return raw BSON docs
+  if(raw) commandCallback.raw = true;
+  // Promote long setting
+  commandCallback.promoteLongs = promoteLongs;
+
+  // Register the callback
+  self.s.callbacks.register(query.requestId, commandCallback);
+
   try {
     // Add monitoring
     commandCallback.monitoring = monitoring;
@@ -1214,16 +1224,11 @@ var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAl
     }
 
   } catch(err) {
+    // Un register the command Callback if we threw
+    self.s.callbacks.unregister(query.requestId);
+    // Execute the callback
     return callback(MongoError.create(err));
   }
-
-  // Return raw BSON docs
-  if(raw) commandCallback.raw = true;
-  // Promote long setting
-  commandCallback.promoteLongs = promoteLongs;
-
-  // Register the callback
-  self.s.callbacks.register(query.requestId, commandCallback);
 }
 
 /**
