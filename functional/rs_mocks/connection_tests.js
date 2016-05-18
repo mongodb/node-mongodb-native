@@ -126,8 +126,6 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
         if(server.s.replState.secondaries.length == 1
           && server.s.replState.arbiters.length == 1
           && server.s.replState.primary) {
-            test.equal(true, server.__connected);
-
             test.equal(1, server.s.replState.secondaries.length);
             test.equal('localhost:32001', server.s.replState.secondaries[0].name);
 
