@@ -57,7 +57,7 @@ For more information on the URI connection string, see
 
 To connect to a [sharded cluster] (https://docs.mongodb.org/manual/core/sharded-cluster-components/), specify the `mongos` instance or instances in the [URI connection string](https://docs.mongodb.org/manual/reference/connection-string/).
 
-In the following example, the connection string specifies the `mongos` instances running on `localhost:50000` and `localhost:50000` and the database to access (`myproject`).
+In the following example, the connection string specifies the `mongos` instances running on `localhost:50000` and `localhost:50001` and the database to access (`myproject`).
 
 ```js
 {{% connect-to-sharded-cluster %}}
