@@ -1472,6 +1472,7 @@ exports.shouldCorrectlyAuthAgainstNormalDbUsingMongoClient = {
       , ReplSet = configuration.require.ReplSet;
 
     setUp(configuration, function(err, replicasetManager) {
+      // console.log("------------------------------------0")
       var replSet = new ReplSet( [
           new Server( 'localhost', 31000),
           new Server( 'localhost', 31001)
@@ -1482,30 +1483,40 @@ exports.shouldCorrectlyAuthAgainstNormalDbUsingMongoClient = {
       var dbName = 'foo';
 
       new Db(dbName, replSet, {w:3}).open(function(err, db_p) {
-        db_p.on('all', function(err, db) {
+        // console.log("------------------------------------1")
+        // db_p.on('all', function(err, db) {
+          // console.log("------------------------------------2")
           // Add a user
           db_p.admin().addUser("admin", "admin", {w:3, wtimeout: 25000}, function(err, result) {
+            // console.log("------------------------------------3")
 
             // Log in to admin
             db_p.admin().authenticate("admin", "admin", function(err, result) {
+              // console.log("------------------------------------4")
               test.equal(null, err);
 
               db_p.addUser("me", "secret", {w:3, wtimeout: 25000}, function runWhatever(err, result) {
+                // console.log("------------------------------------5")
 
                 db_p.close();
 
+                // console.log("------------------------------------6")
                 MongoClient.connect(f("mongodb://me:secret@%s:%s/%s?rs_name=%s&readPreference=secondary&w=3"
                   , 'localhost', 31000, dbName, 'rs'), function(err, db) {
+                    // console.log("------------------------------------7")
                     test.equal(null, err);
-                    db.on('all', function(err, db) {
+                    // db.on('all', function(err, db) {
+                      // console.log("------------------------------------8")
                       test.ok(db != null);
 
                       // Insert document
                       db.collection('authcollectiontest1').insert({a:1}, {w:3, wtimeout:25000}, function(err, result) {
+                        // console.log("------------------------------------9")
                         test.equal(null, err);
 
                         // Find the document
                         db.collection('authcollectiontest1').find().toArray(function(err, docs) {
+                          // console.log("------------------------------------10")
                           test.equal(null, err);
                           test.equal(1, docs.length);
                           test.equal(1, docs[0].a);
@@ -1513,16 +1524,17 @@ exports.shouldCorrectlyAuthAgainstNormalDbUsingMongoClient = {
                           db.close();
 
                           replicasetManager.stop().then(function() {
+                            // console.log("------------------------------------11")
                             test.done();
                           });
                         });
                       });
-                    });
+                    // });
                 });
               });
             });
           });
-        });
+        // });
       });
     });
   }

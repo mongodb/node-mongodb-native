@@ -881,9 +881,6 @@ exports['should correctly apply read preference for direct secondary connection'
             test.ok(db.serverConfig instanceof Server);
 
             db.collection('direct_secondary_read_test').count(function(err, n) {
-              // console.log("----------------------------------------------------------")
-              // console.dir(err)
-              // console.dir(n)
               test.equal(null, err);
               test.ok(n > 0);
 

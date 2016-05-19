@@ -201,10 +201,10 @@ exports['Should correctly pass through extra replicaset options'] = {
     }, function(err, db) {
       test.equal(false, db.s.topology.s.clonedOptions.ha);
       test.equal(10000, db.s.topology.s.clonedOptions.haInterval);
-      test.equal('rs', db.s.topology.s.clonedOptions.replicaSet);
+      test.equal('rs', db.s.topology.s.clonedOptions.setName);
       test.equal(100, db.s.topology.s.clonedOptions.acceptableLatency);
       test.equal(true, db.s.topology.s.clonedOptions.secondaryOnlyConnectionAllowed);
-      test.equal(1, db.s.topology.s.clonedOptions.poolSize);
+      test.equal(1, db.s.topology.s.clonedOptions.size);
 
       test.equal(444444, db.s.topology.s.clonedOptions.connectionTimeout);
       test.equal(555555, db.s.topology.s.clonedOptions.socketTimeout);

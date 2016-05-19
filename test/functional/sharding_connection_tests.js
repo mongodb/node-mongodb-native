@@ -7,7 +7,7 @@ var f = require('util').format;
  */
 exports['Should connect to mongos proxies using connectiong string and options'] = {
   metadata: { requires: { topology: 'sharded' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
@@ -38,7 +38,7 @@ exports['Should connect to mongos proxies using connectiong string and options']
           db.close();
           test.done();
         });
-      });    
+      });
     });
   }
 }
@@ -48,7 +48,7 @@ exports['Should connect to mongos proxies using connectiong string and options']
  */
 exports['Should correctly connect with a missing mongos'] = {
   metadata: { requires: { topology: 'sharded' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
@@ -73,7 +73,7 @@ exports['Should correctly connect with a missing mongos'] = {
  */
 exports['Should correctly emit open and fullsetup to all db instances'] = {
   metadata: { requires: { topology: 'sharded' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Mongos = configuration.require.Mongos
@@ -81,7 +81,7 @@ exports['Should correctly emit open and fullsetup to all db instances'] = {
       , Db = configuration.require.Db;
 
     var db_conn = new Db('integration_test_', new Mongos([
-      new Server(configuration.host, configuration.port), 
+      new Server(configuration.host, configuration.port),
       new Server(configuration.host, configuration.port + 1)]), {w:1});
     var db2 = db_conn.db('integration_test_2');
 
@@ -91,16 +91,16 @@ exports['Should correctly emit open and fullsetup to all db instances'] = {
 
     db2.on('close', function() {
       close_count = close_count + 1;
-    });                                                                             
-    
+    });
+
     db_conn.on('close', function() {
       close_count = close_count + 1;
-    });                                                                             
+    });
 
     db2.on('open', function(err, db) {
       test.equal('integration_test_2', db.databaseName);
       open_count = open_count + 1;
-    }); 
+    });
 
     db_conn.on('open', function(err, db) {
       test.equal('integration_test_', db.databaseName);
@@ -117,28 +117,28 @@ exports['Should correctly emit open and fullsetup to all db instances'] = {
       fullsetup_count = fullsetup_count + 1;
     });
 
-    db_conn.open(function (err) {                                                   
-      if (err) throw err;                                                                                                                                               
-      var col1 = db_conn.collection('test');                                        
-      var col2 = db2.collection('test');                                            
-                                                                                    
-      var testData = { value : "something" };                                       
-      col1.insert(testData, function (err) {                                        
-        if (err) throw err;                                                         
+    db_conn.open(function (err) {
+      if (err) throw err;
+      var col1 = db_conn.collection('test');
+      var col2 = db2.collection('test');
 
-        var testData = { value : "something" };                                       
-        col2.insert(testData, function (err) {                                      
-          if (err) throw err;  
+      var testData = { value : "something" };
+      col1.insert(testData, function (err) {
+        if (err) throw err;
+
+        var testData = { value : "something" };
+        col2.insert(testData, function (err) {
+          if (err) throw err;
           db2.close(function() {
             setTimeout(function() {
               test.equal(2, close_count);
               test.equal(2, open_count);
               test.equal(2, fullsetup_count);
-              test.done();            
+              test.done();
             }, 1000);
-          });                                                                      
-        });                                                                         
-      });                                                                           
+          });
+        });
+      });
     });
   }
 }
@@ -148,7 +148,7 @@ exports['Should correctly emit open and fullsetup to all db instances'] = {
  */
 exports['Should exercise all options on mongos topology'] = {
   metadata: { requires: { topology: 'sharded' } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient;
@@ -160,7 +160,7 @@ exports['Should exercise all options on mongos topology'] = {
       mongos: {
         haInterval: 500
       }
-    }, function(err, db) {          
+    }, function(err, db) {
       test.equal(null, err);
       test.ok(db != null);
       test.equal(500, db.serverConfig.haInterval);

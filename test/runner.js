@@ -553,13 +553,13 @@ if(argv.t == 'functional') {
         sslOnNormalPorts: null
       , fork:null
       , sslPEMKeyFile: __dirname + "/functional/ssl/server.pem"
-      , url: "mongodb://%slocalhost:27017/integration_tests?ssl=true"
+      , url: "mongodb://%slocalhost:27017/integration_tests?ssl=true&sslValidate=false"
       , topology: function(host, port, serverOptions) {
         host = host || 'localhost';
         port = port || 27017;
         serverOptions = clone(serverOptions);
         serverOptions.poolSize = 1;
-        serverOptions.ssl = true
+        serverOptions.ssl = true;
         serverOptions.sslValidate = false;
         return new mongo.Server(host, port, serverOptions);
       }, manager: new ServerManager('mongod', {
