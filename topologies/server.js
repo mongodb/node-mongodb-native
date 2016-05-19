@@ -218,21 +218,34 @@ var reconnectErrorHandler = function(self, state) {
       self.emit('error', err, self);
     }
 
+    // No reconnect enabled exit fast
+    if(!state.reconnect) {
+      // Set state to destroyed
+      state.state = DESTROYED;
+      // Emit error event
+      if(self.listeners('error').length > 0) {
+        self.emit('error', err, self);
+      }
+      // Destroy pool
+      return self.destroy();
+    }
+
     // No more connections left, emit a close
     if(state.pool.getAll().length == 0) {
+
       // No more retries
       if(state.currentReconnectRetry == 0) {
         // Set state to destroyed
-        self.state = DESTROYED;
+        state.state = DESTROYED;
         // Destroy pool
         self.destroy();
 
-        if(self.listeners('error').length > 0) {
+        if(state.emitError && self.listeners('error').length > 0) {
           self.emit('error', new MongoError(f('failed to connect to %s:%s after %s retries', state.options.host, state.options.port, state.reconnectTries)), self);
         }
       } else {
         // Do we have an error listener emit the error
-        if(self.listeners('error').length > 0) {
+        if(state.emitError && self.listeners('error').length > 0) {
           self.emit('error', new MongoError(f('failed to connect to %s:%s, %s connection attempts left ', state.options.host, state.options.port, state.currentReconnectRetry)), self);
         }
 
