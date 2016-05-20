@@ -1,3 +1,7 @@
+1.3.20
+-----------------
+* NODE-710 Allow setting driver loggerLevel and logger function from MongoClient options.
+
 1.3.19 2016-05-17
 -----------------
 - Handle situation where a server connection in a replicaset sometimes fails to be destroyed properly due to being in the middle of authentication when the destroy method is called on the replicaset causing it to be orphaned and never collected.
