@@ -85,6 +85,88 @@ exports.shouldUploadFromFileStream = {
 };
 
 /**
+ * Correctly stream a file from disk into GridFS using openUploadStream
+ *
+ * @example-class GridFSBucket
+ * @example-method openUploadStreamWithId
+ * @ignore
+ */
+exports.shouldUploadFromFileStreamWithCustomId = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var GridFSBucket = configuration.require.GridFSBucket;
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(),
+      { poolSize:1 });
+    db.open(function(error, db) {
+      test.equal(error, null);
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
+      db.dropDatabase(function(error) {
+        test.equal(error, null);
+
+        var bucket = new GridFSBucket(db);
+        var readStream = fs.createReadStream('./LICENSE');
+
+        var uploadStream = bucket.openUploadStreamWithId(1, 'test.dat');
+
+        var license = fs.readFileSync('./LICENSE');
+        var id = uploadStream.id;
+        test.equal(1, id);
+
+        // Wait for stream to finish
+        uploadStream.once('finish', function() {
+          var chunksColl = db.collection('fs.chunks');
+          var chunksQuery = chunksColl.find({ files_id: id });
+
+          // Get all the chunks
+          chunksQuery.toArray(function(error, docs) {
+            test.equal(error, null);
+            test.equal(docs.length, 1);
+            test.equal(docs[0].data.toString('hex'), license.toString('hex'));
+
+            var filesColl = db.collection('fs.files');
+            var filesQuery = filesColl.find({ _id: id });
+
+            filesQuery.toArray(function(error, docs) {
+              test.equal(error, null);
+              test.equal(docs.length, 1);
+
+              var hash = crypto.createHash('md5');
+              hash.update(license);
+              test.equal(docs[0].md5, hash.digest('hex'));
+
+              // make sure we created indexes
+              filesColl.listIndexes().toArray(function(error, indexes) {
+                test.equal(error, null);
+                test.equal(indexes.length, 2);
+                test.equal(indexes[1].name, 'filename_1_uploadDate_1');
+
+                chunksColl.listIndexes().toArray(function(error, indexes) {
+                  test.equal(error, null);
+                  test.equal(indexes.length, 2);
+                  test.equal(indexes[1].name, 'files_id_1_n_1');
+                  test.done();
+                });
+              });
+            });
+          });
+        });
+
+        readStream.pipe(uploadStream);
+      });
+    });
+    // END
+  }
+};
+
+/**
  * Correctly upload a file to GridFS and then retrieve it as a stream
  *
  * @example-class GridFSBucket

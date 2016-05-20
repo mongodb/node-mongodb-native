@@ -1,3 +1,8 @@
+2.1.20
+----------------
+* Refactored MongoClient options handling to simplify the logic, unifying it.
+* Implemented openUploadStreamWithId on GridFS to allow for custom fileIds so users are able to customize shard key and shard distribution.
+
 2.1.19 2016-05-17
 ----------------
 * Handle situation where a server connection in a replicaset sometimes fails to be destroyed properly due to being in the middle of authentication when the destroy method is called on the replicaset causing it to be orphaned and never collected.
