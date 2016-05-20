@@ -1,7 +1,8 @@
 2.1.20
 ----------------
 * Refactored MongoClient options handling to simplify the logic, unifying it.
-* Implemented openUploadStreamWithId on GridFS to allow for custom fileIds so users are able to customize shard key and shard distribution.
+* NODE-707 Implemented openUploadStreamWithId on GridFS to allow for custom fileIds so users are able to customize shard key and shard distribution.
+* NODE-710 Allow setting driver loggerLevel and logger function from MongoClient options.
 
 2.1.19 2016-05-17
 ----------------
