@@ -4519,10 +4519,10 @@ exports.shouldCorrectlyExecuteGridStoreExistsByObjectIdWithGenerators = {
       yield gridStore.write("hello world!");
 
       // Flush the file to GridFS
-      var result = yield gridStore.close();
+      var file = yield gridStore.close();
 
       // Check if the file exists using the id returned from the close function
-      var result = yield GridStore.exist(db, result._id);
+      var result = yield GridStore.exist(db, file._id);
       test.equal(true, result);
 
       // Show that the file does not exist for a random ObjectID
@@ -4530,11 +4530,13 @@ exports.shouldCorrectlyExecuteGridStoreExistsByObjectIdWithGenerators = {
       test.equal(false, result);
 
       // Show that the file does not exist for a different file root
-      var result = yield GridStore.exist(db, result._id, 'another_root');
+      var result = yield GridStore.exist(db, file._id, 'another_root');
       test.equal(false, result);
 
       db.close();
       test.done();
+    }).catch(function(e) {
+      console.dir(e)
     });
     // END
   }
