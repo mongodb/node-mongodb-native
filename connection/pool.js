@@ -247,7 +247,10 @@ var _createConnection = function(self) {
   // Handle any errors
   var tempErrorHandler = function(_connection) {
     return function(err) {
+      // Destroy the connection
       _connection.destroy();
+      // Remove the connection from the connectingConnections list
+      removeConnection(self, connection);
     }
   }
 
