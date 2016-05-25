@@ -373,6 +373,7 @@ var _execute = function(self) {
         // Fire and forgot message
         if(workItem.immediateRelease) {
           self.availableConnections.push(connection);
+          self.inUseConnections.pop();
         }
       }
     }
