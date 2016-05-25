@@ -113,7 +113,7 @@ exports['Should correctly execute remove culling undefined'] = {
         var objectId = new ObjectId();
 
         _server.command(f('%s.$cmd', configuration.db), {drop: 'remove1'}, function() {
-          
+
           // Execute the write
           _server.insert(ns, [{id: objectId, a:1, b:undefined}, {id: objectId, a:2, b:1}], {
             writeConcern: {w:1}, ordered:true
@@ -159,7 +159,7 @@ exports['Should correctly execute remove not culling undefined'] = {
         var objectId = new ObjectId();
 
         _server.command(f('%s.$cmd', configuration.db), {drop: 'remove2'}, function() {
-          
+
           // Execute the write
           _server.insert(ns, [{id: objectId, a:1, b:undefined}, {id: objectId, a:2, b:1}], {
             writeConcern: {w:1}, ordered:true
