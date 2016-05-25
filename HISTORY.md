@@ -1,8 +1,12 @@
-2.1.20
-----------------
+2.1.20 2016-05-25
+-----------------
 * Refactored MongoClient options handling to simplify the logic, unifying it.
 * NODE-707 Implemented openUploadStreamWithId on GridFS to allow for custom fileIds so users are able to customize shard key and shard distribution.
 * NODE-710 Allow setting driver loggerLevel and logger function from MongoClient options.
+* Updated mongodb-core to 1.3.20.
+* Minor fix for SSL errors on connection attempts, minor fix to reconnect handler for the server.
+* Don't write to socket before having registered the callback for commands, work around for windows issuing error events twice on node.js when socket gets destroyed by firewall.
+* Fix minor issue where connectingServers would not be removed correctly causing single server connections to not auto-reconnect.
 
 2.1.19 2016-05-17
 ----------------
