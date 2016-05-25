@@ -227,6 +227,10 @@ Pool.prototype.connect = function(_options) {
       return connection.destroy();
     }
 
+    if(self.state == CONNECTING) {
+      self.state = CONNECTED;
+    }
+
     // Add the connection to the list of available connections
     self.availableConnections.push(connection);
     // Emit connected event
