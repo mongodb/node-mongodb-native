@@ -1,4 +1,4 @@
-1.3.20
+1.3.20 2016-05-25
 -----------------
 * NODE-710 Allow setting driver loggerLevel and logger function from MongoClient options.
 * Minor fix for SSL errors on connection attempts, minor fix to reconnect handler for the server.
