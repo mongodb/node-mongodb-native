@@ -128,6 +128,8 @@ var timeoutHandler = function(self) {
     connection.destroy();
     // Remove the connection
     removeConnection(self, connection);
+    // Set disconnected if pool is empty
+    if(self.getAll().length == 0) self.state = DISCONNECTED;
     // Emit connection timeout to server instance
     self.emit('timeout', err, connection);
   }
@@ -140,6 +142,8 @@ var closeHandler = function(self) {
     connection.destroy();
     // Remove the connection
     removeConnection(self, connection);
+    // Set disconnected if pool is empty
+    if(self.getAll().length == 0) self.state = DISCONNECTED;
     // Emit connection close to server instance
     self.emit('close', err, connection);
   }
@@ -152,6 +156,8 @@ var parseErrorHandler = function(self) {
     connection.destroy();
     // Remove the connection
     removeConnection(self, connection);
+    // Set disconnected if pool is empty
+    if(self.getAll().length == 0) self.state = DISCONNECTED;
     // Emit error to server instance
     self.emit('parseError', err, connection);
   }
@@ -486,7 +492,7 @@ Pool.prototype.isConnected = function() {
     if(this.newConnections[i].isConnected()) return true;
   }
 
-  return this.state == CONNECTED;
+  return false;
 }
 
 /**
