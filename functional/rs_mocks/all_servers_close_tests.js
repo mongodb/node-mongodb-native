@@ -156,7 +156,7 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
         die = true;
 
         setTimeout(function() {
-          console.log("------------------------------- step 2 ")
+          // console.log("------------------------------- step 2 ")
           die = false;
 
           setTimeout(function() {
