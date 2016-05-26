@@ -287,6 +287,7 @@ var testFiles = [
   , '/test/functional/document_validation_tests.js'
   , '/test/functional/ignore_undefined_tests.js'
   , '/test/functional/mongo_client_options_tests.js'
+  , '/test/functional/decimal128_tests.js'
 
   // Replicaset tests
   , '/test/functional/replset_read_preference_tests.js'
@@ -624,8 +625,8 @@ if(argv.t == 'functional') {
       , skipStart: startupOptions.skipStartup
       , skipTermination: startupOptions.skipShutdown
       , manager: new ServerManager('mongod', {
-        dbpath: path.join(path.resolve('db'), f("data-%d", 27017)),
-        setParameter: ['enableTestCommands=1']
+          dbpath: path.join(path.resolve('db'), f("data-%d", 27017)),
+          setParameter: ['enableTestCommands=1']
       })
     }
 

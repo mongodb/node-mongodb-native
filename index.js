@@ -36,6 +36,7 @@ connect.ObjectID = core.BSON.ObjectID;
 connect.ObjectId = core.BSON.ObjectID;
 connect.Symbol = core.BSON.Symbol;
 connect.Timestamp = core.BSON.Timestamp;
+connect.Decimal128 = core.BSON.Decimal128;
 
 // Add connect method
 connect.connect = connect;
