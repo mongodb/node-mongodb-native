@@ -1,3 +1,7 @@
+1.3.21
+-----------------
+* Pool gets stuck if a connection marked for immediateRelease times out (Issue #99, https://github.com/nbrachet).
+
 1.3.20 2016-05-25
 -----------------
 * NODE-710 Allow setting driver loggerLevel and logger function from MongoClient options.
