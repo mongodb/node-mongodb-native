@@ -134,7 +134,7 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
       { host: 'localhost', port: 32002 }], {
         setName: 'rs',
         connectionTimeout: 2000,
-        socketTimeout: 5000,
+        socketTimeout: 2000,
         haInterval: 500,
         size: 500
     });
@@ -160,14 +160,27 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
           die = false;
 
           setTimeout(function() {
+            // console.log("------------------------------- step 5 : 0")
+            // console.dir(server.s.replState.primary)
+            // console.log("------------------------------- step 6 : 0")
+            // console.dir(server.s.replState.secondaries)
+            // console.log("------------------------------- step 7 : 0")
+            // console.dir(server.s.replState.arbiters)
+
             // console.log("------------------------------- step 3 ")
             server.command('admin.$cmd', {ismaster:true}, function(err, r) {
-              // console.log("------------------------------- step 4 ")
+              // console.log("------------------------------- step 4 : 1")
               // console.dir(err)
+              // console.log("------------------------------- step 5 : 1")
+              // console.dir(server.s.replState.primary)
+              // console.log("------------------------------- step 6 : 1")
+              // console.dir(server.s.replState.secondaries)
+              // console.log("------------------------------- step 7 : 1")
+              // console.dir(server.s.replState.arbiters)
               test.equal(null, err);
               test.ok(server.s.replState.primary != null);
-              // test.equal(1, server.s.replState.secondaries.length);
-              // test.equal(1, server.s.replState.arbiters.length);
+              test.equal(1, server.s.replState.secondaries.length);
+              test.equal(1, server.s.replState.arbiters.length);
 
               primaryServer.destroy();
               firstSecondaryServer.destroy();
