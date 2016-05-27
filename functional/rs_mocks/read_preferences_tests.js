@@ -128,7 +128,10 @@ exports['Should correctly connect to a replicaset and select the correct tagged 
         }, function(err, r) {
           // console.dir(err)
           test.equal(err, null);
-          // console.log(r.connection.port)
+          if(!(r.connection.port == 32002 || r.connection.port == 31000)) {
+            console.log(r.connection.port);
+          }
+
           test.ok(r.connection.port == 32002 || r.connection.port == 31000);
 
           primaryServer.destroy();
