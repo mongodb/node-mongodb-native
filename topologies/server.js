@@ -310,14 +310,39 @@ var reconnectServer = function(self, state) {
     var keys = Object.keys(state.authProviders);
     if(keys.length == 0) return self.emit('reconnect', self);
 
-    // Get all connections
-    var connections = state.pool.getAll();
-    // Execute all providers
-    var count = keys.length;
+    // Authenticate against a provider
+    var authenticate = function(retries, provider, self, state, callback) {
+      // Adjust the number of retries
+      var retries = retries - 1;
+      // Get all connections
+      var connections = state.pool.getAll();
+      // Authenticate using the provider
+      provider.reauthenticate(self, connections, function(err, r) {
+        if(err) {
+          if(retries == 0) return callback(err);
+          // Set the timeout
+          return setTimeout(function() {
+            authenticate(retries, provider, self, state, callback);
+          }, 100);
+        }
+
+        // Finished reauthenticating
+        callback(null, null);
+      });
+    }
+
     // Iterate over keys
     for(var i = 0; i < keys.length; i++) {
-      state.authProviders[keys[i]].reauthenticate(self, connections, function(err, r) {
+      authenticate(10, state.authProviders[keys[i]], self, state, function(err) {
         count = count - 1;
+
+        // Log an authentication error
+        if(err) {
+          if(self.logger.isError()) {
+            self.logger.error(f('[%s] failed to authenticate agains server %s', state.id, self.name));
+          }
+        }
+
         // We are done, emit reconnect event
         if(count == 0) {
           if(!state.ismaster) {
