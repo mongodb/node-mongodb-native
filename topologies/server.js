@@ -331,6 +331,9 @@ var reconnectServer = function(self, state) {
       });
     }
 
+    // Total count
+    var count = keys.length;
+
     // Iterate over keys
     for(var i = 0; i < keys.length; i++) {
       authenticate(10, state.authProviders[keys[i]], self, state, function(err) {
