@@ -446,8 +446,6 @@ exports['Successful connection to replicaset of 0 primary, 1 secondary and 1 arb
     server.on('joined', function(_type) {
       if(server.s.replState.secondaries.length == 1
         && server.s.replState.arbiters.length == 1) {
-          test.equal(true, server.__connected);
-
           test.equal(1, server.s.replState.secondaries.length);
           test.equal('localhost:32001', server.s.replState.secondaries[0].name);
 
