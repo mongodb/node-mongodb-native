@@ -418,7 +418,6 @@ exports['Should correctly reapply the authentications'] = {
 
                 // Bounce server
                 configuration.manager.restart(true).then(function() {
-
                   // Reconnect should reapply the credentials
                   db.collection('test').insert({a:1}, function(err, result) {
                     // test.equal(null, err);
