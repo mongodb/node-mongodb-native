@@ -1,6 +1,11 @@
-1.3.21
+1.3.21 2016-05-30
 -----------------
 * Pool gets stuck if a connection marked for immediateRelease times out (Issue #99, https://github.com/nbrachet).
+* Make authentication process retry up to authenticationRetries at authenticationRetryIntervalMS interval.
+* Made ismaster replicaset calls operate with connectTimeout or monitorSocketTimeout to lower impact of big socketTimeouts on monitoring performance.
+* Make sure connections mark as "immediateRelease" don't linger the inUserConnections list. Otherwise, after that connection times out, getAll() incorrectly returns more connections than are effectively present, causing the pool to not get restarted by reconnectServer. (Issue #99, https://github.com/nbrachet).
+* Make cursor getMore or killCursor correctly trigger pool reconnect to single server if pool has not been destroyed.
+* Make ismaster monitoring for single server connection default to avoid user confusion due to change in behavior.
 
 1.3.20 2016-05-25
 -----------------
