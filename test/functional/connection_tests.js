@@ -3,6 +3,44 @@
 /**
  * @ignore
  */
+exports['Should correctly start monitoring for single server connection'] = {
+  metadata: { requires: { topology: 'single' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstanceWithDomainSocket({w:1}, {poolSize: 1, host: "/tmp/mongodb-27017.sock"});
+    db.open(function(err, db) {
+      test.equal(null, err);
+      test.ok(db.serverConfig.s.server.s.inquireServerStateTimeout != null);
+
+      db.close();
+      test.done();
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['Should correctly disable monitoring for single server connection'] = {
+  metadata: { requires: { topology: 'single' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstanceWithDomainSocket({w:1}, {poolSize: 1, host: "/tmp/mongodb-27017.sock", monitoring: false});
+    db.open(function(err, db) {
+      test.equal(null, err);
+      test.equal(null, db.serverConfig.s.server.s.inquireServerStateTimeout);
+
+      db.close();
+      test.done();
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
 exports['Should correctly connect to server using domain socket'] = {
   metadata: { requires: { topology: 'single' } },
 
