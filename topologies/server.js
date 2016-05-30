@@ -684,6 +684,8 @@ var debugFields = ['reconnect', 'reconnectTries', 'reconnectInterval', 'emitErro
  * @param {boolean} [options.noDelay=true] TCP Connection no delay
  * @param {number} [options.connectionTimeout=0] TCP Connection timeout setting
  * @param {number} [options.socketTimeout=0] TCP Socket timeout setting
+ * @param {number} [options.monitoring=true] Enable the server state monitoring (calling ismaster at haInterval)
+ * @param {number} [options.haInterval=10000] The interval of calling ismaster when monitoring is enabled.
  * @param {number} [options.monitoringSocketTimeout=30000] TCP Socket timeout setting for replicaset monitoring socket
  * @param {number} [options.authenticationRetries=10] The number of times to retry the authentication and re-authentication before giving up.
  * @param {number} [options.authenticationRetryIntervalMS=500] The interval in MS between each authentication retry.
@@ -753,7 +755,7 @@ var Server = function(options) {
     // Do we have a not connected handler
     , disconnectHandler: options.disconnectHandler
     // If we are monitoring this server we will create an exclusive reserved socket for that
-    , monitoring: typeof options.monitoring == 'boolean' ? options.monitoring : false
+    , monitoring: typeof options.monitoring == 'boolean' ? options.monitoring : true
     // High availability monitoring interval
     , haInterval: options.haInterval || 10000
     // wireProtocolHandler methods
