@@ -817,6 +817,33 @@ MongoClient.connect(url, {
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
+
+&lt;h1 id=&#34;ensure-you-connection-string-is-valid-for-replica-sets&#34;&gt;Ensure you connection string is valid for Replica Sets&lt;/h1&gt;
+
+&lt;p&gt;The connection string passed to the driver must use the fully qualified host names for the servers as set in the replicaset config. Given the following configuration settings for your replicaset.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{
+	&amp;quot;_id&amp;quot; : &amp;quot;testSet&amp;quot;,
+	&amp;quot;version&amp;quot; : 1,
+	&amp;quot;protocolVersion&amp;quot; : 1,
+	&amp;quot;members&amp;quot; : [
+		{
+			&amp;quot;_id&amp;quot; : 1,
+			&amp;quot;host&amp;quot; : &amp;quot;server1:31000&amp;quot;,
+		},
+		{
+			&amp;quot;_id&amp;quot; : 2,
+			&amp;quot;host&amp;quot; : &amp;quot;server2:31001&amp;quot;,
+		},
+		{
+			&amp;quot;_id&amp;quot; : 3,
+			&amp;quot;host&amp;quot; : &amp;quot;server3:31002&amp;quot;,
+		}
+	]
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You must ensure &lt;code&gt;server1&lt;/code&gt;, &lt;code&gt;server2&lt;/code&gt; and &lt;code&gt;server3&lt;/code&gt; are resolvable from the driver for the Replicaset discovery and failover to work correctly.&lt;/p&gt;
 </description>
     </item>
     
@@ -994,6 +1021,33 @@ Socket N &amp;lt;- [S, F, F, F]
 
 &lt;/div&gt;
 &lt;/p&gt;
+
+&lt;h1 id=&#34;ensure-you-connection-string-is-valid-for-replica-set&#34;&gt;Ensure you connection string is valid for Replica Set&lt;/h1&gt;
+
+&lt;p&gt;The connection string passed to the driver must use the fully qualified host names for the servers as set in the replicaset config. Given the following configuration settings for your replicaset.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{
+	&amp;quot;_id&amp;quot; : &amp;quot;testSet&amp;quot;,
+	&amp;quot;version&amp;quot; : 1,
+	&amp;quot;protocolVersion&amp;quot; : 1,
+	&amp;quot;members&amp;quot; : [
+		{
+			&amp;quot;_id&amp;quot; : 1,
+			&amp;quot;host&amp;quot; : &amp;quot;server1:31000&amp;quot;,
+		},
+		{
+			&amp;quot;_id&amp;quot; : 2,
+			&amp;quot;host&amp;quot; : &amp;quot;server2:31001&amp;quot;,
+		},
+		{
+			&amp;quot;_id&amp;quot; : 3,
+			&amp;quot;host&amp;quot; : &amp;quot;server3:31002&amp;quot;,
+		}
+	]
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;You must ensure &lt;code&gt;server1&lt;/code&gt;, &lt;code&gt;server2&lt;/code&gt; and &lt;code&gt;server3&lt;/code&gt; are resolvable from the driver for the Replicaset discovery and failover to work correctly.&lt;/p&gt;
 </description>
     </item>
     
@@ -2264,7 +2318,7 @@ listener.on(&#39;failed&#39;, function(event) {
 &lt;/tr&gt;
 
 &lt;tr&gt;
-&lt;td align=&#34;left&#34;&gt;serverHearbeatFailed&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;serverHeartbeatFailed&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Replicaset, Mongos&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Emitted if a ismaster command failed against a specific MongoDB server.&lt;/td&gt;
 &lt;/tr&gt;
@@ -2297,8 +2351,8 @@ MongoClient.connect(url, function(err, db) {
     console.log(JSON.stringify(event, null, 2));
   });
 
-  db.topology.on(&#39;serverHearbeatFailed&#39;, function(event) {
-    console.log(&#39;received serverHearbeatFailed&#39;);
+  db.topology.on(&#39;serverHeartbeatFailed&#39;, function(event) {
+    console.log(&#39;received serverHeartbeatFailed&#39;);
     console.log(JSON.stringify(event, null, 2));
   });
 
@@ -2404,7 +2458,7 @@ MongoClient.connect(url, function(err, db) {
   connectionId: &#39;localhost:27017&#39; }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;h3 id=&#34;serverhearbeatfailed&#34;&gt;serverHearbeatFailed&lt;/h3&gt;
+&lt;h3 id=&#34;serverheartbeatfailed&#34;&gt;serverHeartbeatFailed&lt;/h3&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{ durationMS: 20,
   err: new MongoError(&#39;some error&#39;),

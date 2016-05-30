@@ -904,6 +904,8 @@
             
                 <li data-name="GridFSBucket#openUploadStream"><a href="GridFSBucket.html#openUploadStream">openUploadStream</a></li>
             
+                <li data-name="GridFSBucket#openUploadStreamWithId"><a href="GridFSBucket.html#openUploadStreamWithId">openUploadStreamWithId</a></li>
+            
                 <li data-name="GridFSBucket#rename"><a href="GridFSBucket.html#rename">rename</a></li>
             
             </ul>
@@ -1578,6 +1580,8 @@
             
                 <li data-name="Server#connections"><a href="Server.html#connections">connections</a></li>
             
+                <li data-name="Server#unref"><a href="Server.html#unref">unref</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -1825,7 +1829,10 @@ var EventEmitter = require('events').EventEmitter
   , CReplSet = require('mongodb-core').ReplSet
   , CoreReadPreference = require('mongodb-core').ReadPreference
   , shallowClone = require('./utils').shallowClone
-  , MAX_JS_INT = require('./utils').MAX_JS_INT;
+  , MAX_JS_INT = require('./utils').MAX_JS_INT
+  , translateOptions = require('./utils').translateOptions
+  , filterOptions = require('./utils').filterOptions
+  , mergeOptions = require('./utils').mergeOptions;
 
 /**
  * @fileOverview The **ReplSet** class is a class that represents a Replicaset topology and is
@@ -1846,6 +1853,14 @@ var EventEmitter = require('events').EventEmitter
  * });
  */
 
+// Allowed parameters
+var legalOptionNames = ['ha', 'haInterval', 'replicaSet', 'rs_name', 'secondaryAcceptableLatencyMS'
+  , 'connectWithNoPrimary', 'poolSize', 'ssl', 'checkServerIdentity', 'sslValidate'
+  , 'sslCA', 'sslCert', 'sslKey', 'sslPass', 'socketOptions', 'bufferMaxEntries'
+  , 'store', 'auto_reconnect', 'autoReconnect', 'emitError'
+  , 'keepAlive', 'noDelay', 'connectTimeoutMS', 'socketTimeoutMS', 'strategy', 'debug'
+  , 'loggerLevel', 'logger'];
+
 /**
  * Creates a new ReplSet instance
  * @class
@@ -1854,7 +1869,7 @@ var EventEmitter = require('events').EventEmitter
  * @param {object} [options=null] Optional settings.
  * @param {booelan} [options.ha=true] Turn on high availability monitoring.
  * @param {number} [options.haInterval=10000] Time between each replicaset status check.
- * @param {string} options.replicaSet The name of the replicaset to connect to.
+ * @param {string} [options.replicaSet] The name of the replicaset to connect to.
  * @param {number} [options.secondaryAcceptableLatencyMS=15] Sets the range of servers to pick when using NEAREST (lowest ping ms + the latency fence, ex: range of 1 to (1 + 15) ms)
  * @param {boolean} [options.connectWithNoPrimary=false] Sets if the driver should connect even if no primary is available
  * @param {number} [options.poolSize=5] Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.
@@ -1886,6 +1901,11 @@ var ReplSet = function(servers, options) {
   if(!(this instanceof ReplSet)) return new ReplSet(servers, options);
   options = options || {};
   var self = this;
+  // Set up event emitter
+  EventEmitter.call(this);
+
+  // Filter the options
+  options = filterOptions(options, legalOptionNames);
 
   // Ensure all the instances are Server
   for(var i = 0; i &lt; servers.length; i++) {
@@ -1894,111 +1914,50 @@ var ReplSet = function(servers, options) {
     }
   }
 
-  // Store option defaults
+  // Stored options
   var storeOptions = {
       force: false
-    , bufferMaxEntries: -1
-  }
-
-  // If we have "unlimited" set to max Number
-  if(storeOptions.bufferMaxEntries == -1) {
-    storeOptions.bufferMaxEntries = MAX_JS_INT;
+    , bufferMaxEntries: typeof options.bufferMaxEntries == 'number' ? options.bufferMaxEntries : MAX_JS_INT
   }
 
   // Shared global store
   var store = options.store || new Store(self, storeOptions);
-
-  // Set up event emitter
-  EventEmitter.call(this);
-
-  // Debug tag
-  var tag = options.tag;
 
   // Build seed list
   var seedlist = servers.map(function(x) {
     return {host: x.host, port: x.port}
   });
 
-  // Final options
-  var finalOptions = shallowClone(options);
 
-  // Default values
-  finalOptions.size = typeof options.poolSize == 'number' ? options.poolSize : 5;
-  finalOptions.reconnect = typeof options.auto_reconnect == 'boolean' ? options.auto_reconnect : true;
-  finalOptions.emitError = typeof options.emitError == 'boolean' ? options.emitError : true;
-  finalOptions.cursorFactory = Cursor;
+  // Get the reconnect option
+  var reconnect = typeof options.auto_reconnect == 'boolean' ? options.auto_reconnect : true;
+  reconnect = typeof options.autoReconnect == 'boolean' ? options.autoReconnect : reconnect;
 
-  // Add the store
-  finalOptions.disconnectHandler = store;
+  // Clone options
+  var clonedOptions = mergeOptions({}, {
+    disconnectHandler: store,
+    cursorFactory: Cursor,
+    reconnect: reconnect,
+    emitError: typeof options.emitError == 'boolean' ? options.emitError : true,
+    size: typeof options.poolSize == 'number' ? options.poolSize : 5
+  });
 
-  // Socket options passed down
-  if(options.socketOptions) {
-    if(options.socketOptions.connectTimeoutMS) {
-      this.connectTimeoutMS = options.socketOptions.connectTimeoutMS;
-      finalOptions.connectionTimeout = options.socketOptions.connectTimeoutMS;
-    }
+  // Translate any SSL options and other connectivity options
+  clonedOptions = translateOptions(clonedOptions, options);
 
-    if(options.socketOptions.socketTimeoutMS) {
-      finalOptions.socketTimeout = options.socketOptions.socketTimeoutMS;
-    }
+  // Socket options
+  var socketOptions = options.socketOptions &amp;&amp; Object.keys(options.socketOptions).length > 0
+    ? options.socketOptions : options;
+
+  // Translate all the options to the mongodb-core ones
+  clonedOptions = translateOptions(clonedOptions, socketOptions);
+  if(typeof clonedOptions.keepAlive == 'number') {
+    clonedOptions.keepAliveInitialDelay = clonedOptions.keepAlive;
+    clonedOptions.keepAlive = clonedOptions.keepAlive > 0;
   }
-
-  // Get the name
-  var replicaSet = options.replicaSet || options.rs_name;
-
-  // Set up options
-  finalOptions.setName = replicaSet;
-
-  // Are we running in debug mode
-  var debug = typeof options.debug == 'boolean' ? options.debug : false;
-  if(debug) {
-    finalOptions.debug = debug;
-  }
-
-  // Map keep alive setting
-  if(options.socketOptions &amp;&amp; typeof options.socketOptions.keepAlive == 'number') {
-    finalOptions.keepAlive = true;
-    if(typeof options.socketOptions.keepAlive == 'number') {
-      finalOptions.keepAliveInitialDelay = options.socketOptions.keepAlive;
-    }
-  }
-
-  // Connection timeout
-  if(options.socketOptions &amp;&amp; typeof options.socketOptions.connectionTimeout == 'number') {
-    finalOptions.connectionTimeout = options.socketOptions.connectionTimeout;
-  }
-
-  // Socket timeout
-  if(options.socketOptions &amp;&amp; typeof options.socketOptions.socketTimeout == 'number') {
-    finalOptions.socketTimeout = options.socketOptions.socketTimeout;
-  }
-
-  // noDelay
-  if(options.socketOptions &amp;&amp; typeof options.socketOptions.noDelay == 'boolean') {
-    finalOptions.noDelay = options.socketOptions.noDelay;
-  }
-
-  if(typeof options.secondaryAcceptableLatencyMS == 'number') {
-    finalOptions.acceptableLatency = options.secondaryAcceptableLatencyMS;
-  }
-
-  if(options.connectWithNoPrimary == true) {
-    finalOptions.secondaryOnlyConnectionAllowed = true;
-  }
-
-  // Add the non connection store
-  finalOptions.disconnectHandler = store;
-
-  // Translate the options
-  if(options.sslCA) finalOptions.ca = options.sslCA;
-  if(typeof options.sslValidate == 'boolean') finalOptions.rejectUnauthorized = options.sslValidate;
-  if(options.sslKey) finalOptions.key = options.sslKey;
-  if(options.sslCert) finalOptions.cert = options.sslCert;
-  if(options.sslPass) finalOptions.passphrase = options.sslPass;
-  if(options.checkServerIdentity) finalOptions.checkServerIdentity = options.checkServerIdentity;
 
   // Create the ReplSet
-  var replset = new CReplSet(seedlist, finalOptions)
+  var replset = new CReplSet(seedlist, clonedOptions);
   // Server capabilities
   var sCapabilities = null;
 
@@ -2019,7 +1978,7 @@ var ReplSet = function(servers, options) {
     // Store options
     , storeOptions: storeOptions
     // Cloned options
-    , clonedOptions: finalOptions
+    , clonedOptions: clonedOptions
     // Store
     , store: store
     // Options
@@ -2027,7 +1986,7 @@ var ReplSet = function(servers, options) {
   }
 
   // Debug
-  if(debug) {
+  if(clonedOptions.debug) {
     // Last ismaster
     Object.defineProperty(this, 'replset', {
       enumerable:true, get: function() { return replset; }
@@ -2413,7 +2372,7 @@ module.exports = ReplSet;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Fri Apr 29 2016 15:41:03 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Mon May 30 2016 18:28:01 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

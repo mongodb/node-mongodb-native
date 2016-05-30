@@ -2045,7 +2045,7 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;p&gt;To connect to a &lt;a href=&#34;https://docs.mongodb.org/manual/core/sharded-cluster-components/&#34;&gt;sharded cluster&lt;/a&gt;, specify the &lt;code&gt;mongos&lt;/code&gt; instance or instances in the &lt;a href=&#34;https://docs.mongodb.org/manual/reference/connection-string/&#34;&gt;URI connection string&lt;/a&gt;.&lt;/p&gt;
 
-&lt;p&gt;In the following example, the connection string specifies the &lt;code&gt;mongos&lt;/code&gt; instances running on &lt;code&gt;localhost:50000&lt;/code&gt; and &lt;code&gt;localhost:50000&lt;/code&gt; and the database to access (&lt;code&gt;myproject&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;In the following example, the connection string specifies the &lt;code&gt;mongos&lt;/code&gt; instances running on &lt;code&gt;localhost:50000&lt;/code&gt; and &lt;code&gt;localhost:50001&lt;/code&gt; and the database to access (&lt;code&gt;myproject&lt;/code&gt;).&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
   , assert = require(&#39;assert&#39;);
@@ -2401,7 +2401,7 @@ MongoClient.connect(&#39;mongodb://server:27017/test?ssl=true&#39;, {
 document to the &lt;code&gt;createIndex()&lt;/code&gt; method:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;
-   { &amp;lt;field1&amp;gt;: &amp;lt;type1&amp;gt;, &amp;lt;field2&amp;gt;, &amp;lt;type2&amp;gt; ... }
+   { &amp;lt;field1&amp;gt;: &amp;lt;type1&amp;gt;, &amp;lt;field2&amp;gt;: &amp;lt;type2&amp;gt; ... }
 
 &lt;/code&gt;&lt;/pre&gt;
 

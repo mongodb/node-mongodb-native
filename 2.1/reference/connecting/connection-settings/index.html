@@ -1981,6 +1981,33 @@ MongoClient.connect(url, {
 </tbody>
 </table>
 
+<h1 id="ensure-you-connection-string-is-valid-for-replica-sets">Ensure you connection string is valid for Replica Sets</h1>
+
+<p>The connection string passed to the driver must use the fully qualified host names for the servers as set in the replicaset config. Given the following configuration settings for your replicaset.</p>
+
+<pre><code class="language-js">{
+	&quot;_id&quot; : &quot;testSet&quot;,
+	&quot;version&quot; : 1,
+	&quot;protocolVersion&quot; : 1,
+	&quot;members&quot; : [
+		{
+			&quot;_id&quot; : 1,
+			&quot;host&quot; : &quot;server1:31000&quot;,
+		},
+		{
+			&quot;_id&quot; : 2,
+			&quot;host&quot; : &quot;server2:31001&quot;,
+		},
+		{
+			&quot;_id&quot; : 3,
+			&quot;host&quot; : &quot;server3:31002&quot;,
+		}
+	]
+}
+</code></pre>
+
+<p>You must ensure <code>server1</code>, <code>server2</code> and <code>server3</code> are resolvable from the driver for the Replicaset discovery and failover to work correctly.</p>
+
 
 
 
@@ -2022,6 +2049,7 @@ MongoClient.connect(url, {
     <nav id="TableOfContents">
 <ul>
 <li><a href="#uri-connection-settings">URI Connection Settings</a></li>
+<li><a href="#ensure-you-connection-string-is-valid-for-replica-sets">Ensure you connection string is valid for Replica Sets</a></li>
 </ul>
 </nav>
   </div>

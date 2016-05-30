@@ -1956,7 +1956,7 @@
 </tr>
 
 <tr>
-<td align="left">serverHearbeatFailed</td>
+<td align="left">serverHeartbeatFailed</td>
 <td align="left">Replicaset, Mongos</td>
 <td align="left">Emitted if a ismaster command failed against a specific MongoDB server.</td>
 </tr>
@@ -1989,8 +1989,8 @@ MongoClient.connect(url, function(err, db) {
     console.log(JSON.stringify(event, null, 2));
   });
 
-  db.topology.on('serverHearbeatFailed', function(event) {
-    console.log('received serverHearbeatFailed');
+  db.topology.on('serverHeartbeatFailed', function(event) {
+    console.log('received serverHeartbeatFailed');
     console.log(JSON.stringify(event, null, 2));
   });
 
@@ -2096,7 +2096,7 @@ MongoClient.connect(url, function(err, db) {
   connectionId: 'localhost:27017' }
 </code></pre>
 
-<h3 id="serverhearbeatfailed">serverHearbeatFailed</h3>
+<h3 id="serverheartbeatfailed">serverHeartbeatFailed</h3>
 
 <pre><code class="language-js">{ durationMS: 20,
   err: new MongoError('some error'),
@@ -2343,7 +2343,7 @@ MongoClient.connect(url, function(err, db) {
 <li><a href="#serverdescriptionchanged">serverDescriptionChanged</a></li>
 <li><a href="#serverheartbeatstarted">serverHeartbeatStarted</a></li>
 <li><a href="#serverheartbeatsucceeded">serverHeartbeatSucceeded</a></li>
-<li><a href="#serverhearbeatfailed">serverHearbeatFailed</a></li>
+<li><a href="#serverheartbeatfailed">serverHeartbeatFailed</a></li>
 <li><a href="#serveropening">serverOpening</a></li>
 <li><a href="#serverclosed">serverClosed</a></li>
 <li><a href="#topologyopening">topologyOpening</a></li>

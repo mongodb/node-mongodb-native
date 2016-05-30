@@ -904,6 +904,8 @@
             
                 <li data-name="GridFSBucket#openUploadStream"><a href="GridFSBucket.html#openUploadStream">openUploadStream</a></li>
             
+                <li data-name="GridFSBucket#openUploadStreamWithId"><a href="GridFSBucket.html#openUploadStreamWithId">openUploadStreamWithId</a></li>
+            
                 <li data-name="GridFSBucket#rename"><a href="GridFSBucket.html#rename">rename</a></li>
             
             </ul>
@@ -1578,6 +1580,8 @@
             
                 <li data-name="Server#connections"><a href="Server.html#connections">connections</a></li>
             
+                <li data-name="Server#unref"><a href="Server.html#unref">unref</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -2068,7 +2072,7 @@ Collection instance.
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2455">line 2455</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2458">line 2458</a>
         </div>
         
     </div>
@@ -3368,7 +3372,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1920">line 1920</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1923">line 1923</a>
         </div>
         
     </div>
@@ -3833,7 +3837,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1530">line 1530</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1533">line 1533</a>
         </div>
         
     </div>
@@ -4674,7 +4678,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1566">line 1566</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1569">line 1569</a>
         </div>
         
     </div>
@@ -5518,7 +5522,7 @@ Promise if no callback passed
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1988">line 1988</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1991">line 1991</a>
         </div>
         
     </div>
@@ -5929,12 +5933,12 @@ co(function*() {
     <div class="nameContainer">
         <h4 class="name" id="drop">
             
-            drop<span class="signature">(<span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
+            drop<span class="signature">(<span class="optional">options</span>, <span class="optional">callback</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Promise}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1428">line 1428</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1429">line 1429</a>
         </div>
         
     </div>
@@ -5966,12 +5970,50 @@ co(function*() {
 		<th>Type</th>
 		
 		
+		<th>Default</th>
+		
 		
 		<th class="last">Description</th>
 	</tr>
 	</thead>
 	
 	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Optional settings.</p></td>
+        </tr>
+	
 	
 	
         <tr>
@@ -5988,6 +6030,10 @@ co(function*() {
             
             </td>
             
+            
+                <td class="default">
+                
+                </td>
             
             
             <td class="description last">
@@ -6182,7 +6228,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1687">line 1687</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1690">line 1690</a>
         </div>
         
     </div>
@@ -6368,7 +6414,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1615">line 1615</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1618">line 1618</a>
         </div>
         
     </div>
@@ -6810,7 +6856,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1656">line 1656</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1659">line 1659</a>
         </div>
         
     </div>
@@ -7065,7 +7111,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1802">line 1802</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1805">line 1805</a>
         </div>
         
     </div>
@@ -8305,7 +8351,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2312">line 2312</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2315">line 2315</a>
         </div>
         
     </div>
@@ -8998,7 +9044,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2411">line 2411</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2414">line 2414</a>
         </div>
         
     </div>
@@ -10508,7 +10554,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2139">line 2139</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2142">line 2142</a>
         </div>
         
     </div>
@@ -10924,7 +10970,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2193">line 2193</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2196">line 2196</a>
         </div>
         
     </div>
@@ -11465,7 +11511,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2251">line 2251</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2254">line 2254</a>
         </div>
         
     </div>
@@ -12006,7 +12052,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2757">line 2757</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2760">line 2760</a>
         </div>
         
     </div>
@@ -12499,7 +12545,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2682">line 2682</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2685">line 2685</a>
         </div>
         
     </div>
@@ -13176,7 +13222,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2856">line 2856</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2859">line 2859</a>
         </div>
         
     </div>
@@ -13946,7 +13992,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2045">line 2045</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2048">line 2048</a>
         </div>
         
     </div>
@@ -14171,7 +14217,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1832">line 1832</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1835">line 1835</a>
         </div>
         
     </div>
@@ -14431,7 +14477,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1875">line 1875</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1878">line 1878</a>
         </div>
         
     </div>
@@ -14889,7 +14935,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line3160">line 3160</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line3163">line 3163</a>
         </div>
         
     </div>
@@ -15323,7 +15369,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line3141">line 3141</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line3144">line 3144</a>
         </div>
         
     </div>
@@ -17527,7 +17573,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1486">line 1486</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1489">line 1489</a>
         </div>
         
     </div>
@@ -17729,7 +17775,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1738">line 1738</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1741">line 1741</a>
         </div>
         
     </div>
@@ -17964,7 +18010,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line3017">line 3017</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line3020">line 3020</a>
         </div>
         
     </div>
@@ -19242,7 +19288,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1451">line 1451</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1454">line 1454</a>
         </div>
         
     </div>
@@ -19447,7 +19493,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2590">line 2590</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2593">line 2593</a>
         </div>
         
     </div>
@@ -19931,7 +19977,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1698">line 1698</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1701">line 1701</a>
         </div>
         
     </div>
@@ -22205,7 +22251,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2074">line 2074</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2077">line 2077</a>
         </div>
         
     </div>
@@ -24828,7 +24874,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1901">line 1901</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line1904">line 1904</a>
         </div>
         
     </div>
@@ -25314,7 +25360,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2120">line 2120</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2123">line 2123</a>
         </div>
         
     </div>
@@ -26377,7 +26423,7 @@ co(function*() {
     
         
         <div class="tag-source">
-            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2571">line 2571</a>
+            <a href="lib_collection.js.html">lib/collection.js</a>, <a href="lib_collection.js.html#line2574">line 2574</a>
         </div>
         
     </div>
@@ -27439,7 +27485,7 @@ co(function*() {
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Fri Apr 29 2016 15:41:03 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Mon May 30 2016 18:28:01 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

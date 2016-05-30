@@ -904,6 +904,8 @@
             
                 <li data-name="GridFSBucket#openUploadStream"><a href="GridFSBucket.html#openUploadStream">openUploadStream</a></li>
             
+                <li data-name="GridFSBucket#openUploadStreamWithId"><a href="GridFSBucket.html#openUploadStreamWithId">openUploadStreamWithId</a></li>
+            
                 <li data-name="GridFSBucket#rename"><a href="GridFSBucket.html#rename">rename</a></li>
             
             </ul>
@@ -1578,6 +1580,8 @@
             
                 <li data-name="Server#connections"><a href="Server.html#connections">connections</a></li>
             
+                <li data-name="Server#unref"><a href="Server.html#unref">unref</a></li>
+            
             </ul>
             <ul class="events itemMembers">
             
@@ -1813,7 +1817,8 @@ var parse = require('./url_parser')
   , ReplSet = require('./replset')
   , Define = require('./metadata')
   , ReadPreference = require('./read_preference')
-  , Db = require('./db');
+  , Db = require('./db')
+  , shallowClone = require('./utils').shallowClone;
 
 /**
  * @fileOverview The **MongoClient** class is a class that allows for making Connections to MongoDB.
@@ -1918,132 +1923,57 @@ MongoClient.connect = function(url, options, callback) {
 
 define.staticMethod('connect', {callback: true, promise:true});
 
-var serverOptions = ['poolSize', 'ssl', 'sslValidate', 'checkServerIdentity',
-  'sslCA', 'sslCert', 'sslKey', 'sslPass', 'autoReconnect', 'noDelay',
-  'keepAlive', 'connectionTimeoutMS', 'socketTimeoutMS', 'reconnectTries',
-  'reconnectInterval'];
-
-var replsetOptions = ['ha', 'haInterval', 'replicaSet', 'secondaryAcceptableLatencyMS',
-  'connectWithNoPrimary', 'poolSize', 'ssl', 'checkServerIdentity', 'sslValidate',
-  'sslCA', 'sslCert', 'sslKey', 'sslPass', 'noDelay', 'keepAlive', 'connectTimeoutMS',
-  'socketTimeoutMS'];
-
-var mongosOptions = ['ha', 'haInterval', 'poolSize', 'ssl', 'checkServerIdentity', 'sslValidate',
-  'sslCA', 'sslCert', 'sslKey', 'sslPass', 'noDelay', 'keepAlive', 'connectTimeoutMS',
-  'socketTimeoutMS', 'acceptableLatencyMS'];
-
-var dbOptions = ['authSource', 'w', 'wtimeout', 'j', 'native_parser', 'forceServerObjectId',
-  'serializeFunctions', 'ignoreUndefined', 'raw', 'promoteLongs', 'bufferMaxEntries', 'readPreference',
-  'pkFactory', 'promiseLibrary', 'readConcern']
-
-/*
- * Merge top level options into final options object
- */
-var mergeTopLevel = function(object, options) {
-  if(!object.server_options) object.server_options = {};
-  if(!object.db_options) object.db_options = {};
-  if(!object.rs_options) object.rs_options = {};
-  if(!object.mongos_options) object.mongos_options = {};
-
-  for(var name in options) {
-    if(serverOptions.indexOf(name) != -1) {
-      object.server_options[name] = options[name];
-    }
-
-    if(replsetOptions.indexOf(name) != -1) {
-      object.rs_options[name] = options[name];
-    }
-
-    if(mongosOptions.indexOf(name) != -1) {
-      object.mongos_options[name] = options[name];
-    }
-
-    if(dbOptions.indexOf(name) != -1) {
-      object.db_options[name] = options[name];
+var mergeOptions = function(target, source, flatten) {
+  for(var name in source) {
+    if(source[name] &amp;&amp; typeof source[name] == 'object' &amp;&amp; flatten) {
+      target = mergeOptions(target, source[name], flatten);
+    } else {
+      target[name] = source[name];
     }
   }
 
-  return object;
+  return target;
+}
+
+var createUnifiedOptions = function(finalOptions, options) {
+  var childOptions = ['mongos', 'server', 'db'
+    , 'replset', 'db_options', 'server_options', 'rs_options', 'mongos_options'];
+
+  for(var name in options) {
+    if(childOptions.indexOf(name.toLowerCase()) != -1) {
+      finalOptions = mergeOptions(finalOptions, options[name], false);
+    } else {
+      if(options[name] &amp;&amp; typeof options[name] == 'object') {
+        finalOptions = mergeOptions(finalOptions, options[name], true);
+      } else {
+        finalOptions[name] = options[name];
+      }
+    }
+  }
+
+  return finalOptions;
 }
 
 /*
  * Connect using MongoClient
  */
 var connect = function(url, options, callback) {
-  var serverOptions = options.server || {};
-  var mongosOptions = options.mongos || {};
-  var replSetServersOptions = options.replSet || options.replSetServers || {};
-  var dbOptions = options.db || {};
+  options = options || {};
+  options = shallowClone(options);
 
   // If callback is null throw an exception
-  if(callback == null)
+  if(callback == null) {
     throw new Error("no callback function provided");
+  }
 
   // Parse the string
   var object = parse(url, options);
+  var _finalOptions = createUnifiedOptions({}, object);
+  _finalOptions = createUnifiedOptions(_finalOptions, options);
 
-  // Merge in any options for db in options object
-  if(dbOptions) {
-    for(var name in dbOptions) object.db_options[name] = dbOptions[name];
-  }
-
-  // Added the url to the options
-  object.db_options.url = url;
-
-  // Merge in any options for server in options object
-  if(serverOptions) {
-    for(var name in serverOptions) object.server_options[name] = serverOptions[name];
-  }
-
-  // Merge in any replicaset server options
-  if(replSetServersOptions) {
-    for(var name in replSetServersOptions) object.rs_options[name] = replSetServersOptions[name];
-  }
-
-  if(replSetServersOptions.ssl
-    || replSetServersOptions.sslValidate
-    || replSetServersOptions.checkServerIdentity
-    || replSetServersOptions.sslCA
-    || replSetServersOptions.sslCert
-    || replSetServersOptions.sslKey
-    || replSetServersOptions.sslPass) {
-    object.server_options.ssl = replSetServersOptions.ssl;
-    object.server_options.sslValidate = replSetServersOptions.sslValidate;
-    object.server_options.checkServerIdentity = replSetServersOptions.checkServerIdentity;
-    object.server_options.sslCA = replSetServersOptions.sslCA;
-    object.server_options.sslCert = replSetServersOptions.sslCert;
-    object.server_options.sslKey = replSetServersOptions.sslKey;
-    object.server_options.sslPass = replSetServersOptions.sslPass;
-  }
-
-  // Merge in any replicaset server options
-  if(mongosOptions) {
-    for(var name in mongosOptions) object.mongos_options[name] = mongosOptions[name];
-  }
-
-  if(typeof object.server_options.poolSize == 'number') {
-    if(!object.mongos_options.poolSize) object.mongos_options.poolSize = object.server_options.poolSize;
-    if(!object.rs_options.poolSize) object.rs_options.poolSize = object.server_options.poolSize;
-  }
-
-  if(mongosOptions.ssl
-    || mongosOptions.sslValidate
-    || mongosOptions.checkServerIdentity
-    || mongosOptions.sslCA
-    || mongosOptions.sslCert
-    || mongosOptions.sslKey
-    || mongosOptions.sslPass) {
-    object.server_options.ssl = mongosOptions.ssl;
-    object.server_options.sslValidate = mongosOptions.sslValidate;
-    object.server_options.checkServerIdentity = mongosOptions.checkServerIdentity;
-    object.server_options.sslCA = mongosOptions.sslCA;
-    object.server_options.sslCert = mongosOptions.sslCert;
-    object.server_options.sslKey = mongosOptions.sslKey;
-    object.server_options.sslPass = mongosOptions.sslPass;
-  }
-
-  // Set the promise library
-  object.db_options.promiseLibrary = options.promiseLibrary;
+  // Check if we have connection and socket timeout set
+  if(!_finalOptions.socketTimeoutMS) _finalOptions.socketTimeoutMS = 120000;
+  if(!_finalOptions.connectTimeoutMS) _finalOptions.connectTimeoutMS = 120000;
 
   // We need to ensure that the list of servers are only either direct members or mongos
   // they cannot be a mix of monogs and mongod's
@@ -2054,50 +1984,32 @@ var connect = function(url, options, callback) {
   var errorServers = {};
 
   // Failure modes
-  if(object.servers.length == 0) throw new Error("connection string must contain at least one seed host");
-
-  // If we have no db setting for the native parser try to set the c++ one first
-  object.db_options.native_parser = _setNativeParser(object.db_options);
-  // If no auto_reconnect is set, set it to true as default for single servers
-  if(typeof object.server_options.auto_reconnect != 'boolean') {
-    object.server_options.auto_reconnect = true;
+  if(object.servers.length == 0) {
+    throw new Error("connection string must contain at least one seed host");
   }
-
-  // Merge in the top level options if any specified
-  object = mergeTopLevel(object, options);
 
   // If we have more than a server, it could be replicaset or mongos list
   // need to verify that it's one or the other and fail if it's a mix
   // Connect to all servers and run ismaster
   for(var i = 0; i &lt; object.servers.length; i++) {
     // Set up socket options
-    var providedSocketOptions = object.server_options.socketOptions || {};
-
     var _server_options = {
         poolSize:1
       , socketOptions: {
-          connectTimeoutMS: providedSocketOptions.connectTimeoutMS || (1000 * 120)
-        , socketTimeoutMS:  providedSocketOptions.socketTimeoutMS || (1000 * 120)
+          connectTimeoutMS: _finalOptions.connectTimeoutMS || (1000 * 120)
+        , socketTimeoutMS:  _finalOptions.socketTimeoutMS || (1000 * 120)
       }
       , auto_reconnect:false};
 
     // Ensure we have ssl setup for the servers
-    if(object.server_options.ssl) {
-      _server_options.ssl = object.server_options.ssl;
-      _server_options.sslValidate = object.server_options.sslValidate;
-      _server_options.checkServerIdentity = object.server_options.checkServerIdentity;
-      _server_options.sslCA = object.server_options.sslCA;
-      _server_options.sslCert = object.server_options.sslCert;
-      _server_options.sslKey = object.server_options.sslKey;
-      _server_options.sslPass = object.server_options.sslPass;
-    } else if(object.rs_options.ssl) {
-      _server_options.ssl = object.rs_options.ssl;
-      _server_options.sslValidate = object.rs_options.sslValidate;
-      _server_options.checkServerIdentity = object.rs_options.checkServerIdentity;
-      _server_options.sslCA = object.rs_options.sslCA;
-      _server_options.sslCert = object.rs_options.sslCert;
-      _server_options.sslKey = object.rs_options.sslKey;
-      _server_options.sslPass = object.rs_options.sslPass;
+    if(_finalOptions.ssl) {
+      _server_options.ssl = _finalOptions.ssl;
+      _server_options.sslValidate = _finalOptions.sslValidate;
+      _server_options.checkServerIdentity = _finalOptions.checkServerIdentity;
+      _server_options.sslCA = _finalOptions.sslCA;
+      _server_options.sslCert = _finalOptions.sslCert;
+      _server_options.sslKey = _finalOptions.sslKey;
+      _server_options.sslPass = _finalOptions.sslPass;
     }
 
     // Error
@@ -2109,7 +2021,7 @@ var connect = function(url, options, callback) {
 
     var connectFunction = function(__server) {
       // Attempt connect
-      new Db(object.dbName, __server, {w:1, native_parser:false, promiseLibrary:options.promiseLibrary}).open(function(err, db) {
+      new Db(object.dbName, __server, {w:1, native_parser:false}).open(function(err, db) {
         // Update number of servers
         totalNumberOfServers = totalNumberOfServers - 1;
 
@@ -2152,16 +2064,16 @@ var connect = function(url, options, callback) {
           if(totalNumberOfMongodServers == 0
             &amp;&amp; totalNumberOfMongosServers == 0
             &amp;&amp; object.servers.length == 1
-            &amp;&amp; (!object.rs_options.replicaSet || !object.rs_options.rs_name)) {
+            &amp;&amp; (!_finalOptions.replicaSet || !_finalOptions.rs_name)) {
 
             var obj = object.servers[0];
             serverConfig = obj.domain_socket ?
-                new Server(obj.domain_socket, object.server_options)
-              : new Server(obj.host, obj.port, object.server_options);
+                new Server(obj.domain_socket, _finalOptions)
+              : new Server(obj.host, obj.port, _finalOptions);
 
           } else if(totalNumberOfMongodServers > 0
             || totalNumberOfMongosServers > 0
-            || object.rs_options.replicaSet || object.rs_options.rs_name) {
+            || _finalOptions.replicaSet || _finalOptions.rs_name) {
 
             var finalServers = object.servers
               .filter(function(serverObj) {
@@ -2169,8 +2081,8 @@ var connect = function(url, options, callback) {
               })
               .map(function(serverObj) {
                 return serverObj.domain_socket ?
-                  new Server(serverObj.domain_socket, 27017, object.server_options)
-                : new Server(serverObj.host, serverObj.port, object.server_options);
+                  new Server(serverObj.domain_socket, 27017, _finalOptions)
+                : new Server(serverObj.host, serverObj.port, _finalOptions);
               });
 
             // Clean out any error servers
@@ -2179,24 +2091,23 @@ var connect = function(url, options, callback) {
             // Set up the final configuration
             if(totalNumberOfMongodServers > 0) {
               try {
-
                 // If no replicaset name was provided, we wish to perform a
                 // direct connection
                 if(totalNumberOfMongodServers == 1
-                  &amp;&amp; (!object.rs_options.replicaSet &amp;&amp; !object.rs_options.rs_name)) {
+                  &amp;&amp; (!_finalOptions.replicaSet &amp;&amp; !_finalOptions.rs_name)) {
                   serverConfig = finalServers[0];
                 } else if(totalNumberOfMongodServers == 1) {
-                  object.rs_options.replicaSet = object.rs_options.replicaSet || object.rs_options.rs_name;
-                  serverConfig = new ReplSet(finalServers, object.rs_options);
+                  _finalOptions.replicaSet = _finalOptions.replicaSet || _finalOptions.rs_name;
+                  serverConfig = new ReplSet(finalServers, _finalOptions);
                 } else {
-                  serverConfig = new ReplSet(finalServers, object.rs_options);
+                  serverConfig = new ReplSet(finalServers, _finalOptions);
                 }
 
               } catch(err) {
                 return callback(err, null);
               }
             } else {
-              serverConfig = new Mongos(finalServers, object.mongos_options);
+              serverConfig = new Mongos(finalServers, _finalOptions);
             }
           }
 
@@ -2214,7 +2125,7 @@ var connect = function(url, options, callback) {
           // Ensure no firing of open event before we are ready
           serverConfig.emitOpen = false;
           // Set up all options etc and connect to the database
-          _finishConnecting(serverConfig, object, options, callback)
+          _finishConnecting(serverConfig, object, _finalOptions, callback)
         }
       });
     }
@@ -2224,38 +2135,27 @@ var connect = function(url, options, callback) {
   }
 }
 
-var _setNativeParser = function(db_options) {
-  if(typeof db_options.native_parser == 'boolean') return db_options.native_parser;
-
-  try {
-    require('mongodb-core').BSON.BSONNative.BSON;
-    return true;
-  } catch(err) {
-    return false;
-  }
-}
-
 var _finishConnecting = function(serverConfig, object, options, callback) {
   // If we have a readPreference passed in by the db options
-  if(typeof object.db_options.readPreference == 'string') {
-    object.db_options.readPreference = new ReadPreference(object.db_options.readPreference);
-  } else if(typeof object.db_options.read_preference == 'string') {
-    object.db_options.readPreference = new ReadPreference(object.db_options.read_preference);
+  if(typeof options.readPreference == 'string') {
+    options.readPreference = new ReadPreference(options.readPreference);
+  } else if(typeof options.read_preference == 'string') {
+    options.readPreference = new ReadPreference(options.read_preference);
   }
 
   // Do we have readPreference tags
-  if(object.db_options.readPreference &amp;&amp; object.db_options.readPreferenceTags) {
-    object.db_options.readPreference.tags = object.db_options.readPreferenceTags;
-  } else if(object.db_options.readPreference &amp;&amp; object.db_options.read_preference_tags) {
-    object.db_options.readPreference.tags = object.db_options.read_preference_tags;
+  if(options.readPreference &amp;&amp; options.readPreferenceTags) {
+    options.readPreference.tags = options.readPreferenceTags;
+  } else if(options.readPreference &amp;&amp; options.read_preference_tags) {
+    options.readPreference.tags = options.read_preference_tags;
   }
 
   // Get the socketTimeoutMS
-  var socketTimeoutMS = object.server_options.socketOptions.socketTimeoutMS || 0;
+  var socketTimeoutMS = options.socketTimeoutMS || 0;
 
   // If we have a replset, override with replicaset socket timeout option if available
   if(serverConfig instanceof ReplSet) {
-    socketTimeoutMS = object.rs_options.socketOptions.socketTimeoutMS || socketTimeoutMS;
+    socketTimeoutMS = options.socketTimeoutMS || socketTimeoutMS;
   }
 
   // Set socketTimeout to the same as the connectTimeoutMS or 30 sec
@@ -2263,10 +2163,9 @@ var _finishConnecting = function(serverConfig, object, options, callback) {
   serverConfig.socketTimeoutMS = serverConfig.connectTimeoutMS;
 
   // Set up the db options
-  var db = new Db(object.dbName, serverConfig, object.db_options);
+  var db = new Db(object.dbName, serverConfig, options);
   // Open the db
-  db.open(function(err, db){
-
+  db.open(function(err, db) {
     if(err) {
       return process.nextTick(function() {
         try {
@@ -2285,20 +2184,12 @@ var _finishConnecting = function(serverConfig, object, options, callback) {
     if(err == null &amp;&amp; object.auth){
       // What db to authenticate against
       var authentication_db = db;
-      if(object.db_options &amp;&amp; object.db_options.authSource) {
-        authentication_db = db.db(object.db_options.authSource);
+      if(options.authSource) {
+        authentication_db = db.db(options.authSource);
       }
 
-      // Build options object
-      var options = {};
-      // Ensure we pass in the correct authentication options
-      if(object.db_options.authMechanism) options.authMechanism = object.db_options.authMechanism;
-      if(object.db_options.gssapiServiceName) options.gssapiServiceName = object.db_options.gssapiServiceName;
-      if(object.db_options.gssapiServiceRealm) options.gssapiServiceRealm = object.db_options.gssapiServiceRealm;
-      if(object.db_options.gssapiCanonicalizeHostName) options.gssapiCanonicalizeHostName = object.db_options.gssapiCanonicalizeHostName;
-
       // Authenticate
-      authentication_db.authenticate(object.auth.user, object.auth.password, options, function(err, success){
+      authentication_db.authenticate(options.user, options.password, options, function(err, success){
         if(success){
           process.nextTick(function() {
             try {
@@ -2363,7 +2254,7 @@ module.exports = MongoClient
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Fri Apr 29 2016 15:41:03 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Mon May 30 2016 18:28:01 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>
