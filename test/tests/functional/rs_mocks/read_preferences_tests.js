@@ -3,7 +3,8 @@ exports['Should correctly connect to a replicaset and select the correct tagged 
     requires: {
       generators: true,
       topology: "single"
-    }
+    },
+    ignore: { travis:true }
   },
 
   test: function(configuration, test) {
