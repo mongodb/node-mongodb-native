@@ -1,3 +1,8 @@
+1.3.22
+-----------------
+* Disabled single server self monitoring for replicaset and mongos topologies and moved logic into higher topology layer, ensuring single servers will never always correctly timeout if they for some reason are orphaned by the replicaset or mongos topology.
+* reset socketTimeout which may have been overwritten during a monitoring operation (Issue #102, https://github.com/nbrachet).
+
 1.3.21 2016-05-30
 -----------------
 * Pool gets stuck if a connection marked for immediateRelease times out (Issue #99, https://github.com/nbrachet).
