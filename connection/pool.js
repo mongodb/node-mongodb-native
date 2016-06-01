@@ -85,7 +85,7 @@ var Pool = function(options) {
   this.unreference = false;
   // Set the monitoring socket timeout
   this.monitoringSocketTimeout = typeof options.monitoringSocketTimeout == 'number'
-    ? options.monitoringSocketTimeout : options.socketTimeout;
+    ? options.monitoringSocketTimeout : options.connectionTimeout;
   this.monitoringSocketTimeout = typeof this.monitoringSocketTimeout == 'number'
     ? this.monitoringSocketTimeout : 30000;
 }

@@ -18,7 +18,8 @@ var inherits = require('util').inherits
   , Logger = require('../connection/logger')
   , ReadPreference = require('./read_preference')
   , Session = require('./session')
-  , MongoError = require('../error');
+  , MongoError = require('../error')
+  , cloneOptions = require('./shared').cloneOptions;
 
 /**
  * @fileOverview The **Mongos** class is a class that represents a Mongos Proxy topology and is

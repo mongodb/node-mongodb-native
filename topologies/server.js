@@ -26,7 +26,10 @@ var inherits = require('util').inherits
   , Plain = require('../auth/plain')
   , GSSAPI = require('../auth/gssapi')
   , SSPI = require('../auth/sspi')
-  , ScramSHA1 = require('../auth/scram');
+  , ScramSHA1 = require('../auth/scram')
+  , sdam = require('./shared')
+  , cloneOptions = sdam.cloneOptions
+  , Callbacks = require('./callbacks');
 
 /**
  * @fileOverview The **Server** class is a class that represents a single server topology and is
@@ -53,89 +56,6 @@ var bsonTypes = [b.Long, b.ObjectID, b.Binary, b.Code, b.DBRef, b.Symbol, b.Doub
 var bsonInstance = null;
 // Server instance id
 var serverId = 0;
-// Callbacks instance id
-var callbackId = 0;
-
-// Single store for all callbacks
-var Callbacks = function() {
-  // EventEmitter.call(this);
-  var self = this;
-  // Callbacks
-  this.callbacks = {};
-  // Set the callbacks id
-  this.id = callbackId++;
-  // Set the type to server
-  this.type = 'server';
-}
-
-//
-// Clone the options
-var cloneOptions = function(options) {
-  var opts = {};
-  for(var name in options) {
-    opts[name] = options[name];
-  }
-  return opts;
-}
-
-//
-// Flush all callbacks
-Callbacks.prototype.flush = function(err) {
-  for(var id in this.callbacks) {
-    if(!isNaN(parseInt(id, 10))) {
-      var callback = this.callbacks[id];
-      delete this.callbacks[id];
-      callback(err, null);
-    }
-  }
-}
-
-//
-// Flush all callbacks
-Callbacks.prototype.flushConnection = function(err, connection) {
-  for(var id in this.callbacks) {
-    if(!isNaN(parseInt(id, 10))) {
-      var callback = this.callbacks[id];
-
-      // Validate if the operation ran on the connection
-      if(callback.connection && callback.connection.id === connection.id) {
-        delete this.callbacks[id];
-        callback(err, null);
-      } else if(!callback.connection && callback.monitoring) {
-        delete this.callbacks[id];
-        callback(err, null);
-      }
-    }
-  }
-}
-
-Callbacks.prototype.callback = function(id) {
-  return this.callbacks[id];
-}
-
-Callbacks.prototype.emit = function(id, err, value) {
-  var callback = this.callbacks[id];
-  delete this.callbacks[id];
-  callback(err, value);
-}
-
-Callbacks.prototype.raw = function(id) {
-  if(this.callbacks[id] == null) return false;
-  return this.callbacks[id].raw == true ? true : false
-}
-
-Callbacks.prototype.documentsReturnedIn = function(id) {
-  if(this.callbacks[id] == null) return false;
-  return typeof this.callbacks[id].documentsReturnedIn == 'string' ? this.callbacks[id].documentsReturnedIn : null;
-}
-
-Callbacks.prototype.unregister = function(id) {
-  delete this.callbacks[id];
-}
-
-Callbacks.prototype.register = function(id, callback) {
-  this.callbacks[id] = bindToCurrentDomain(callback);
-}
 
 var DISCONNECTED = 'disconnected';
 var CONNECTING = 'connecting';
@@ -564,16 +484,16 @@ var connectHandler = function(self, state) {
       applyAuthentications(r.result, function(err) {
         // Initiate monitoring
         if(state.monitoring) {
-          self.s.inquireServerStateTimeout = setTimeout(inquireServerState(self), state.haInterval);
+          self.s.inquireServerStateTimeout = setTimeout(sdam.inquireServerState(self), state.haInterval);
         }
 
         // Emit server description changed if something listening
-        emitServerDescriptionChanged(self, {
-          address: self.name, arbiters: [], hosts: [], passives: [], type: !self.s.inTopology ? 'Standalone' : getTopologyType(self)
+        sdam.emitServerDescriptionChanged(self, {
+          address: self.name, arbiters: [], hosts: [], passives: [], type: !self.s.inTopology ? 'Standalone' : sdam.getTopologyType(self)
         });
 
         // Emit topology description changed if something listening
-        emitTopologyDescriptionChanged(self, {
+        sdam.emitTopologyDescriptionChanged(self, {
           topologyType: 'Single', servers: [{address: self.name, arbiters: [], hosts: [], passives: [], type: 'Standalone'}]
         });
 
@@ -818,66 +738,6 @@ var Server = function(options) {
 
 inherits(Server, EventEmitter);
 
-var getPreviousDescription = function(self) {
-  if(!self.s.serverDescription) {
-    self.s.serverDescription = {
-      address: self.name,
-      arbiters: [], hosts: [], passives: [], type: 'Unknown'
-    }
-  }
-
-  return self.s.serverDescription;
-}
-
-var emitServerDescriptionChanged = function(self, description) {
-  if(self.listeners('serverDescriptionChanged').length > 0) {
-    // Emit the server description changed events
-    self.emit('serverDescriptionChanged', {
-      topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.s.id, address: self.name,
-      previousDescription: getPreviousDescription(self),
-      newDescription: description
-    });
-
-    self.s.serverDescription = description;
-  }
-}
-
-var getPreviousTopologyDescription = function(self) {
-  if(!self.s.topologyDescription) {
-    self.s.topologyDescription = {
-      topologyType: 'Unknown',
-      servers: [{
-        address: self.name, arbiters: [], hosts: [], passives: [], type: 'Unknown'
-      }]
-    }
-  }
-
-  return self.s.topologyDescription;
-}
-
-var emitTopologyDescriptionChanged = function(self, description) {
-  if(self.listeners('topologyDescriptionChanged').length > 0) {
-    // Emit the server description changed events
-    self.emit('topologyDescriptionChanged', {
-      topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.s.id, address: self.name,
-      previousDescription: getPreviousTopologyDescription(self),
-      newDescription: description
-    });
-
-    self.s.serverDescription = description;
-  }
-}
-
-/**
- * Emit event if it exists
- * @method
- */
-function emitSDAMEvent(self, event, description) {
-  if(self.listeners(event).length > 0) {
-    self.emit(event, description);
-  }
-}
-
 /**
  * Get the server description
  * @method
@@ -886,7 +746,7 @@ function emitSDAMEvent(self, event, description) {
 Server.prototype.getDescription = function() {
   var ismaster = this.s.ismaster || {};
   var description = {
-    type: getTopologyType(this),
+    type: sdam.getTopologyType(this),
     address: this.name,
   };
 
@@ -1008,71 +868,6 @@ Server.prototype.connect = function(_options) {
 
   // Connect the pool
   self.s.pool.connect();
-}
-
-var getTopologyType = function(self, ismaster) {
-  if(!ismaster) {
-    ismaster = self.s.ismaster;
-  }
-
-  if(!ismaster) return 'Unknown';
-  if(ismaster.ismaster && !ismaster.hosts) return 'Standalone';
-  if(ismaster.ismaster && ismaster.msg == 'isdbgrid') return 'Mongos';
-  if(ismaster.ismaster) return 'RSPrimary';
-  if(ismaster.secondary) return 'RSSecondary';
-  if(ismaster.arbiterOnly) return 'RSArbiter';
-  return 'Unknown';
-}
-
-var changedIsMaster = function(self, currentIsmaster, ismaster) {
-  var currentType = getTopologyType(self, currentIsmaster);
-  var newType = getTopologyType(self, ismaster);
-  if(newType != currentType) return true;
-  return false;
-}
-
-var inquireServerState = function(self) {
-  return function() {
-    if(self.s.state == DESTROYED) return;
-    // Record response time
-    var start = new Date().getTime();
-
-    // emitSDAMEvent
-    emitSDAMEvent(self, 'serverHeartbeatStarted', { connectionId: self.name });
-
-    // Attempt to execute ismaster command
-    self.command('admin.$cmd', { ismaster:true },  { monitoring:true }, function(err, r) {
-      if(!err) {
-        // Legacy event sender
-        self.emit('ismaster', r, self);
-
-        // Calculate latencyMS
-        var latencyMS = new Date().getTime() - start;
-
-        // Server heart beat event
-        emitSDAMEvent(self, 'serverHeartbeatSucceeded', { durationMS: latencyMS, reply: r.result, connectionId: self.name });
-
-        // Did the server change
-        if(changedIsMaster(self, self.s.ismaster, r.result)) {
-          // Emit server description changed if something listening
-          emitServerDescriptionChanged(self, {
-            address: self.name, arbiters: [], hosts: [], passives: [], type: !self.s.inTopology ? 'Standalone' : getTopologyType(self)
-          });
-        }
-
-        // Updat ismaster view
-        self.s.ismaster = r.result;
-
-        // Set server response time
-        self.s.isMasterLatencyMS = latencyMS;
-      } else {
-        emitSDAMEvent(self, 'serverHearbeatFailed', { durationMS: latencyMS, failure: err, connectionId: self.name });
-      }
-
-      // Perform another sweep
-      self.s.inquireServerStateTimeout = setTimeout(inquireServerState(self), self.s.haInterval);
-    });
-  };
 }
 
 /**

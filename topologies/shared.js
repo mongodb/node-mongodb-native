@@ -1,0 +1,145 @@
+/**
+ * Emit event if it exists
+ * @method
+ */
+function emitSDAMEvent(self, event, description) {
+  if(self.listeners(event).length > 0) {
+    self.emit(event, description);
+  }
+}
+
+var getPreviousDescription = function(self) {
+  if(!self.s.serverDescription) {
+    self.s.serverDescription = {
+      address: self.name,
+      arbiters: [], hosts: [], passives: [], type: 'Unknown'
+    }
+  }
+
+  return self.s.serverDescription;
+}
+
+var emitServerDescriptionChanged = function(self, description) {
+  if(self.listeners('serverDescriptionChanged').length > 0) {
+    // Emit the server description changed events
+    self.emit('serverDescriptionChanged', {
+      topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.s.id, address: self.name,
+      previousDescription: getPreviousDescription(self),
+      newDescription: description
+    });
+
+    self.s.serverDescription = description;
+  }
+}
+
+var getPreviousTopologyDescription = function(self) {
+  if(!self.s.topologyDescription) {
+    self.s.topologyDescription = {
+      topologyType: 'Unknown',
+      servers: [{
+        address: self.name, arbiters: [], hosts: [], passives: [], type: 'Unknown'
+      }]
+    }
+  }
+
+  return self.s.topologyDescription;
+}
+
+var emitTopologyDescriptionChanged = function(self, description) {
+  if(self.listeners('topologyDescriptionChanged').length > 0) {
+    // Emit the server description changed events
+    self.emit('topologyDescriptionChanged', {
+      topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.s.id, address: self.name,
+      previousDescription: getPreviousTopologyDescription(self),
+      newDescription: description
+    });
+
+    self.s.serverDescription = description;
+  }
+}
+
+var changedIsMaster = function(self, currentIsmaster, ismaster) {
+  var currentType = getTopologyType(self, currentIsmaster);
+  var newType = getTopologyType(self, ismaster);
+  if(newType != currentType) return true;
+  return false;
+}
+
+var getTopologyType = function(self, ismaster) {
+  if(!ismaster) {
+    ismaster = self.s.ismaster;
+  }
+
+  if(!ismaster) return 'Unknown';
+  if(ismaster.ismaster && !ismaster.hosts) return 'Standalone';
+  if(ismaster.ismaster && ismaster.msg == 'isdbgrid') return 'Mongos';
+  if(ismaster.ismaster) return 'RSPrimary';
+  if(ismaster.secondary) return 'RSSecondary';
+  if(ismaster.arbiterOnly) return 'RSArbiter';
+  return 'Unknown';
+}
+
+var inquireServerState = function(self) {
+  return function(callback) {
+    if(self.s.state == 'destroyed') return;
+    // Record response time
+    var start = new Date().getTime();
+
+    // emitSDAMEvent
+    emitSDAMEvent(self, 'serverHeartbeatStarted', { connectionId: self.name });
+
+    // Attempt to execute ismaster command
+    self.command('admin.$cmd', { ismaster:true },  { monitoring:true }, function(err, r) {
+      if(!err) {
+        // Legacy event sender
+        self.emit('ismaster', r, self);
+
+        // Calculate latencyMS
+        var latencyMS = new Date().getTime() - start;
+
+        // Server heart beat event
+        emitSDAMEvent(self, 'serverHeartbeatSucceeded', { durationMS: latencyMS, reply: r.result, connectionId: self.name });
+
+        // Did the server change
+        if(changedIsMaster(self, self.s.ismaster, r.result)) {
+          // Emit server description changed if something listening
+          emitServerDescriptionChanged(self, {
+            address: self.name, arbiters: [], hosts: [], passives: [], type: !self.s.inTopology ? 'Standalone' : getTopologyType(self)
+          });
+        }
+
+        // Updat ismaster view
+        self.s.ismaster = r.result;
+
+        // Set server response time
+        self.s.isMasterLatencyMS = latencyMS;
+      } else {
+        emitSDAMEvent(self, 'serverHearbeatFailed', { durationMS: latencyMS, failure: err, connectionId: self.name });
+      }
+
+      // Peforming an ismaster monitoring callback operation
+      if(typeof callback == 'function') {
+        return callback(err, r);
+      }
+
+      // Perform another sweep
+      self.s.inquireServerStateTimeout = setTimeout(inquireServerState(self), self.s.haInterval);
+    });
+  };
+}
+
+//
+// Clone the options
+var cloneOptions = function(options) {
+  var opts = {};
+  for(var name in options) {
+    opts[name] = options[name];
+  }
+  return opts;
+}
+
+module.exports.inquireServerState = inquireServerState
+module.exports.getTopologyType = getTopologyType;
+module.exports.emitServerDescriptionChanged = emitServerDescriptionChanged;
+module.exports.emitTopologyDescriptionChanged = emitTopologyDescriptionChanged;
+module.exports.cloneOptions = cloneOptions;
