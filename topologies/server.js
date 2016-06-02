@@ -225,6 +225,7 @@ var reconnectServer = function(self, state) {
     state.pool.on('close', closeHandler(self, state));
     state.pool.on('timeout', timeoutHandler(self, state));
     state.pool.on('parseError', fatalErrorHandler(self, state));
+    state.pool.on('connection', connectionHandler(self, state));
 
     // We need to ensure we have re-authenticated
     var keys = Object.keys(state.authProviders);
@@ -544,6 +545,34 @@ var connectHandler = function(self, state) {
   }
 }
 
+function connectionHandler(self, state) {
+  return function(connection) {
+    // No auth handler used, return the connection
+    var keys = Object.keys(self.s.authProviders);
+    if(keys.length == 0) {
+      return self.s.pool.connectionAvailable(connection);
+    }
+
+    // Get all connections
+    var connections = [connection];
+    // Execute all providers
+    var count = keys.length;
+
+    // Iterate over all auth methods
+    for(var i = 0; i < keys.length; i++) {
+      // reauthenticate the connection
+      self.s.authProviders[keys[i]].reauthenticate(self, connections, function(err, r) {
+        count = count - 1;
+
+        // We are done, Make the connection available
+        if(count == 0) {
+          return self.s.pool.connectionAvailable(connection);
+        }
+      });
+    }
+  };
+}
+
 var slaveOk = function(r) {
   if(r) return r.slaveOk()
   return false;
@@ -827,6 +856,7 @@ Server.prototype.connect = function(_options) {
   self.s.pool.once('error', self.s.inTopology ? errorHandler(self, self.s) : reconnectErrorHandler(self, self.s));
   self.s.pool.once('connect', connectHandler(self, self.s));
   self.s.pool.on('parseError', fatalErrorHandler(self, self.s));
+  self.s.pool.on('connection', connectionHandler(self, self.s));
 
   // Emit toplogy opening event if not in topology
   if(!self.s.inTopology) {
@@ -836,34 +866,6 @@ Server.prototype.connect = function(_options) {
   // Emit opening server event
   self.emit('serverOpening', {
     topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.s.id, address: self.name
-  });
-
-  //
-  // Handle new connections
-  self.s.pool.on('connection', function(connection) {
-    // No auth handler used, return the connection
-    var keys = Object.keys(self.s.authProviders);
-    if(keys.length == 0) {
-      return self.s.pool.connectionAvailable(connection);
-    }
-
-    // Get all connections
-    var connections = [connection];
-    // Execute all providers
-    var count = keys.length;
-
-    // Iterate over all auth methods
-    for(var i = 0; i < keys.length; i++) {
-      // reauthenticate the connection
-      self.s.authProviders[keys[i]].reauthenticate(self, connections, function(err, r) {
-        count = count - 1;
-
-        // We are done, Make the connection available
-        if(count == 0) {
-          return self.s.pool.connectionAvailable(connection);
-        }
-      });
-    }
   });
 
   // Connect the pool
