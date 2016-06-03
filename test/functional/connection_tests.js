@@ -399,7 +399,6 @@ exports['Should correctly reconnect and finish query operation'] = {
 
             // Await reconnect and re-authentication
             db.collection('test_reconnect').findOne(function(err, doc) {
-              console.dir(err)
               test.equal(null, err);
               test.equal(1, doc.a);
               test.equal(2, dbReconnect);
