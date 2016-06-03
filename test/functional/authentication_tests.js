@@ -417,17 +417,25 @@ exports['Should correctly reapply the authentications'] = {
                 test.equal(null, err);
 
                 // Bounce server
-                configuration.manager.restart(true).then(function() {
+                configuration.manager.restart(false).then(function() {
+                  db.admin().authenticate("admin", "admin", function(err, result) {
                   // Reconnect should reapply the credentials
                   db.collection('test').insert({a:1}, function(err, result) {
-                    // test.equal(null, err);
-                    db1.close();
+                    test.equal(null, err);
 
-                    // restart server
-                    configuration.manager.restart(true).then(function() {
-                      test.done();
+                    // Reconnect should reapply the credentials
+                    db.collection('test').insert({a:1}, function(err, result) {
+                      test.equal(null, err);
+
+                      db1.close();
+
+                      // restart server
+                      configuration.manager.restart(true).then(function() {
+                        test.done();
+                      });
                     });
                   });
+                });
                 });
               });
             });
