@@ -231,7 +231,7 @@ exports['Should correctly place new connections in available list on reconnect']
           console.log("-- newConnections.length :: " + server.s.pool.newConnections.length)
           console.log("-- connectingConnections.length :: " + server.s.pool.connectingConnections.length)
           // console.log(server.s.pool.)
-          test.ok(server.s.pool.inUseConnections.length > 0);
+          test.ok(server.s.pool.availableConnections.length > 0);
           test.equal(0, server.s.pool.inUseConnections.length);
           test.equal(0, server.s.pool.newConnections.length);
           test.equal(0, server.s.pool.connectingConnections.length);
