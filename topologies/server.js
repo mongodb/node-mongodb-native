@@ -202,8 +202,52 @@ var reconnectServer = function(self, state) {
   if(state.pool) state.pool.destroy();
   // Create a new Pool
   state.pool = new Pool(state.options);
-  // Add new connection pool handler
-  state.pool.on('connection', connectionHandler(self, state));
+
+  // Apply all stored authentications
+  var authenticate = function(ismaster, callback) {
+    // Do not authenticate if we have an arbiter
+    if(ismaster && ismaster.arbiterOnly) return callback(null, null);
+    // We need to ensure we have re-authenticated
+    var keys = Object.keys(state.authProviders);
+    if(keys.length == 0) return callback(null, null);
+
+    // Get all connections
+    var connections = state.pool.getAll();
+
+    // Execute all providers
+    var count = keys.length;
+    var error = null;
+
+    // Iterate over keys
+    for(var i = 0; i < keys.length; i++) {
+      state.authProviders[keys[i]].reauthenticate(self, connections, function(err, r) {
+        count = count - 1;
+        if(err) error = err;
+        // We are done
+        if(count == 0) {
+          return callback(error, null);
+        }
+      });
+    }
+  }
+
+  // Attempt to apply authentications with retries
+  var applyAuthentications = function(retries, interval, ismaster, callback) {
+    // Adjust the number of retries
+    retries = retries - 1;
+    // Attempt to authenticate
+    authenticate(ismaster, function(err, r) {
+      if(err && retries == 0) return callback(err);
+      if(err && retries > 0) {
+        return setTimeout(function() {
+          return applyAuthentications(retries, interval, ismaster, callback);
+        }, interval);
+      }
+
+      // Return successful authentication
+      return callback(null, null);
+    });
+  }
 
   //
   // Attempt to connect
@@ -211,17 +255,22 @@ var reconnectServer = function(self, state) {
     // Reset retries
     state.currentReconnectRetry = state.reconnectTries;
 
-    // Set connected state
-    state.state = CONNECTED;
+    // Apply authentication credentials
+    applyAuthentications(self.s.authenticationRetries
+      , self.s.authenticationRetryIntervalMS, self.lastIsMaster(), function(err, r) {
+        // Set connected state
+        state.state = CONNECTED;
 
-    // Add proper handlers
-    state.pool.once('error', self.s.inTopology ? errorHandler(self, state) : reconnectErrorHandler(self, state));
-    state.pool.on('close', closeHandler(self, state));
-    state.pool.on('timeout', timeoutHandler(self, state));
-    state.pool.on('parseError', fatalErrorHandler(self, state));
+        // Add proper handlers
+        state.pool.once('error', self.s.inTopology ? errorHandler(self, state) : reconnectErrorHandler(self, state));
+        state.pool.on('close', closeHandler(self, state));
+        state.pool.on('timeout', timeoutHandler(self, state));
+        state.pool.on('parseError', fatalErrorHandler(self, state));
+        state.pool.on('connection', connectionHandler(self, state));
 
-    // Emit reconnect
-    self.emit('reconnect', self);
+        // Emit reconnect
+        self.emit('reconnect', self);
+    });
   });
 
   //
@@ -381,7 +430,6 @@ var closeHandler = function(self, state) {
 }
 
 var connectHandler = function(self, state) {
-
   // Apply all stored authentications
   var authenticate = function(ismaster, callback) {
     // Do not authenticate if we have an arbiter
@@ -432,7 +480,7 @@ var connectHandler = function(self, state) {
     // Get the actual latency of the ismaster
     var start = new Date().getTime();
     // Execute an ismaster
-    self.command('admin.$cmd', {ismaster:true}, function(err, r) {
+    self.command('admin.$cmd', {ismaster:true}, {bypass:true}, function(err, r) {
       if(err) {
         state.state = DISCONNECTED;
 
@@ -1112,7 +1160,7 @@ Server.prototype.command = function(ns, cmd, options, callback) {
 
   // Topology is not connected, save the call in the provided store to be
   // Executed at some point when the handler deems it's reconnected
-  if(!self.isConnected() && self.s.disconnectHandler != null) {
+  if(!self.s.pool.isConnected() && self.s.disconnectHandler != null && !options.bypass) {
     callback = bindToCurrentDomain(callback);
     return self.s.disconnectHandler.add('command', ns, cmd, options, callback);
   }
