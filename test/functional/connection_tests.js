@@ -402,7 +402,7 @@ exports['Should correctly reconnect and finish query operation'] = {
               test.equal(null, err);
               test.equal(1, doc.a);
               test.equal(2, dbReconnect);
-              test.equal(2, dbClose);
+              test.equal(1, dbClose);
 
               db.close();
               test.done();
