@@ -156,12 +156,14 @@ exports['Should reconnect when initial connection failed'] = {
       });
 
       server.on('connect', function() {
-        // console.log("----------- connect")
         test.done();
       });
 
-      server.once('error', function() {
-        // console.log("----------- error")
+      server.on('reconnect', function() {
+        test.done();
+      });
+
+      server.once('error', function(err) {
         manager.start().then(function() {});
       });
 
@@ -214,8 +216,6 @@ exports['Should correctly place new connections in available list on reconnect']
     });
 
     server.once('reconnect', function() {
-      console.log('!!!!!!!!!!! reconnect')
-
       for(var i = 0; i < 100; i++) {
         server.command("system.$cmd", {ismaster: true}, function(err, result) {
           test.equal(null, err);
@@ -226,11 +226,6 @@ exports['Should correctly place new connections in available list on reconnect']
         test.equal(null, err);
 
         setTimeout(function() {
-          console.log("-- availableConnections.length :: " + server.s.pool.availableConnections.length)
-          console.log("-- inUseConnections.length :: " + server.s.pool.inUseConnections.length)
-          console.log("-- newConnections.length :: " + server.s.pool.newConnections.length)
-          console.log("-- connectingConnections.length :: " + server.s.pool.connectingConnections.length)
-          // console.log(server.s.pool.)
           test.ok(server.s.pool.availableConnections.length > 0);
           test.equal(0, server.s.pool.inUseConnections.length);
           test.equal(0, server.s.pool.newConnections.length);
@@ -240,13 +235,6 @@ exports['Should correctly place new connections in available list on reconnect']
           test.done();
         }, 1000);
       });
-
-
-      // test.equal(true, emittedClose);
-      // test.equal(true, server.isConnected());
-      // test.equal(30, server.s.currentReconnectRetry);
-      // server.destroy();
-      // test.done();
     });
 
     // Start connection

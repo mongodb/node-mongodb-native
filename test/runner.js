@@ -101,7 +101,7 @@ var Configuration = function(options) {
             // Create an instance
             var server = topology(self, mongo);
             console.log("[get connection to topology]");
-            console.dir(server)
+            // console.dir(server)
             // Set up connect
             server.once('connect', function() {
               console.log("[connected to topology]");
