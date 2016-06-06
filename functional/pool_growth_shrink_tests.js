@@ -107,8 +107,14 @@ exports['Destroyed connection should only affect operations on the particular co
         _server.insert('integration_tests.inserts_example1', [{a:i}], {
           writeConcern: {w:1}, ordered:true
         }, function(err, results) {
-          if(err) numberOfErrors += 1;
-          if(results) numberOfSuccesses += 1;
+          if(err) {
+            console.dir(err)
+            numberOfErrors += 1;
+          }
+
+          if(results) {
+            numberOfSuccesses += 1;
+          }
 
           left = left - 1;
           if(left == 0) {
