@@ -104,10 +104,11 @@ var errorHandler = function(self, state) {
       // Notify any strategies for read Preferences about closure
       if(state.readPreferenceStrategies != null) notifyStrategies(self, self.s, 'error', [self]);
       if(state.logger.isInfo()) state.logger.info(f('server %s errored out with %s', self.name, JSON.stringify(err)));
-      // // Flush out all the callbacks
-      // if(state.callbacks) {
-      //   state.callbacks.flushConnection(new MongoError(f("server %s received an error %s", self.name, JSON.stringify(err))), connection);
-      // }
+
+      // Flush out all the callbacks
+      if(state.callbacks) {
+        state.callbacks.flushConnection(new MongoError(f("server %s received an error %s", self.name, JSON.stringify(err))), connection);
+      }
 
       // Emit error event
       if(state.emitError && self.listeners('error').length > 0) self.emit('error', err, self);
@@ -486,10 +487,10 @@ var fatalErrorHandler = function(self, state) {
       // Notify any strategies for read Preferences about closure
       if(state.readPreferenceStrategies != null) notifyStrategies(self, self.s, 'error', [self]);
       if(state.logger.isInfo()) state.logger.info(f('server %s errored out with %s', self.name, JSON.stringify(err)));
-      // // Flush out all the callbacks
-      // if(state.callbacks) {
-      //   state.callbacks.flushConnection(new MongoError(f("server %s received an error %s", self.name, JSON.stringify(err))), connection);
-      // }
+      // Flush out all the callbacks
+      if(state.callbacks) {
+        state.callbacks.flushConnection(new MongoError(f("server %s received an error %s", self.name, JSON.stringify(err))), connection);
+      }
       // Emit error event
       if(self.listeners('error').length > 0) self.emit('error', err, self);
 
@@ -517,10 +518,10 @@ var timeoutHandler = function(self, state) {
       if(state.readPreferenceStrategies != null) notifyStrategies(self, self.s, 'timeout', [self]);
       if(state.logger.isInfo()) state.logger.info(f('server %s timed out', self.name));
 
-      // // Flush out all the callbacks
-      // if(state.callbacks) {
-      //   state.callbacks.flushConnection(new MongoError(f("server %s timed out", self.name)), connection);
-      // }
+      // Flush out all the callbacks
+      if(state.callbacks) {
+        state.callbacks.flushConnection(new MongoError(f("server %s timed out", self.name)), connection);
+      }
       // Emit error event
       self.emit('timeout', err, self);
 
@@ -549,10 +550,10 @@ var closeHandler = function(self, state) {
       if(state.readPreferenceStrategies != null) notifyStrategies(self, self.s, 'close', [self]);
       if(state.logger.isInfo()) state.logger.info(f('server %s closed', self.name));
 
-      // // Flush out all the callbacks
-      // if(state.callbacks) {
-      //   state.callbacks.flushConnection(new MongoError(f("server %s sockets closed", self.name)), connection);
-      // }
+      // Flush out all the callbacks
+      if(state.callbacks) {
+        state.callbacks.flushConnection(new MongoError(f("server %s sockets closed", self.name)), connection);
+      }
 
       // Emit opening server event
       if(self.listeners('serverClosed').length > 0) self.emit('serverClosed', {
