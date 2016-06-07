@@ -499,6 +499,12 @@ Pool.prototype.getAll = function() {
  * @return {boolean}
  */
 Pool.prototype.isConnected = function() {
+  console.log("============= pool isConnected")
+  console.log("pool.availableConnections.length = " + this.availableConnections.length);
+  console.log("pool.inUseConnections.length = " + this.inUseConnections.length);
+  console.log("pool.newConnections.length = " + this.newConnections.length);
+  console.log("pool.connectingConnections.length = " + this.connectingConnections.length);
+
   // Available connections
   for(var i = 0; i < this.availableConnections.length; i++) {
     if(this.availableConnections[i].isConnected()) return true;
