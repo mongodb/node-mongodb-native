@@ -99,6 +99,7 @@ var errorHandler = function(self, state) {
 
     // No more connections left, emit a close
     if(!state.pool.isConnected()) {
+      console.log("======= errorHandler disconnected set")
       // Set disconnected state
       state.state = DISCONNECTED;
       // Notify any strategies for read Preferences about closure
@@ -317,6 +318,7 @@ var reconnectMonitor = function(self, state) {
     // Schedule a new monitoring check
     var tempErrorHandler = function() {
       return function(err) {
+        console.log("!!!!!!!!!!!!!!!!!!! tempErrorHandler disconnected set")
         state.state = DISCONNECTED;
         state.reconnectId = setTimeout(reconnectMonitor(self, self.s), state.reconnectInterval);
         return;
@@ -489,6 +491,7 @@ var fatalErrorHandler = function(self, state) {
 
     // No more connections left, emit a close
     if(!state.pool.isConnected()) {
+      console.log("======= fatalErrorHandler disconnected set")
       // Set disconnected state
       state.state = DISCONNECTED;
       // Notify any strategies for read Preferences about closure
@@ -519,6 +522,7 @@ var timeoutHandler = function(self, state) {
 
     // No more connections left, emit a close
     if(!state.pool.isConnected()) {
+      console.log("======= timeoutHandler disconnected set")
       // Set disconnected state
       state.state = DISCONNECTED;
       // Notify any strategies for read Preferences about closure
@@ -550,6 +554,7 @@ var closeHandler = function(self, state) {
 
     // No more connections left, emit a close
     if(!state.pool.isConnected()) {
+      console.log("======= closeHandler disconnected set")
       // Set state to disconnected
       state.state = DISCONNECTED;
 
@@ -635,6 +640,7 @@ var connectHandler = function(self, state) {
     // Execute an ismaster
     self.command('admin.$cmd', {ismaster:true}, {bypass:true}, function(err, r) {
       if(err) {
+        console.log("======= connectHandler disconnected set")
         state.state = DISCONNECTED;
 
         // Emit opening closed event
@@ -690,6 +696,7 @@ var connectHandler = function(self, state) {
 
         // Validate if we it's a server we can connect to
         if(!supportsServer(state) && state.wireProtocolHandler == null) {
+          console.log("======= not supported disconnected set")
           state.state = DISCONNECTED
           return self.emit('error', new MongoError("non supported server version"), self);
         }
