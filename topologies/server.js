@@ -210,6 +210,11 @@ var reconnectMonitor = function(self, state) {
       return;
     }
     console.log("============= reconnectMonitor 1")
+    console.log("state.state = " + state.state);
+    console.log("pool.availableConnections.length = " + self.s.pool.availableConnections.length);
+    console.log("pool.inUseConnections.length = " + self.s.pool.inUseConnections.length);
+    console.log("pool.newConnections.length = " + self.s.pool.newConnections.length);
+    console.log("pool.connectingConnections.length = " + self.s.pool.connectingConnections.length);
 
     // Flush out any left over callbacks
     if(self && state && state.callbacks) {
