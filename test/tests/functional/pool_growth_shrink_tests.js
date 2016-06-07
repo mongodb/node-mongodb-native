@@ -118,10 +118,10 @@ exports['Destroyed connection should only affect operations on the particular co
 
           left = left - 1;
           if(left == 0) {
-            console.log("--------------------------------------")
-            console.log("numberOfErrors = " + numberOfErrors)
-            console.log("numberOfSuccesses = " + numberOfSuccesses)
-            console.log("numberOfPoolConnectionExpansion = " + numberOfPoolConnectionExpansion)
+            // console.log("--------------------------------------")
+            // console.log("numberOfErrors = " + numberOfErrors)
+            // console.log("numberOfSuccesses = " + numberOfSuccesses)
+            // console.log("numberOfPoolConnectionExpansion = " + numberOfPoolConnectionExpansion)
             test.ok(numberOfErrors >= 0 && numberOfErrors < 20);
             test.ok(numberOfSuccesses == 99 || numberOfSuccesses == 100);
             test.ok(numberOfPoolConnectionExpansion >= 3);
