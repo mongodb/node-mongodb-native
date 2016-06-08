@@ -4,6 +4,7 @@ var Runner = require('integra').Runner
   , Cover = require('integra').Cover
   , RCover = require('integra').RCover
   , f = require('util').format
+  , m = require('mongodb-version-manager')
   , path = require('path')
   , NodeVersionFilter = require('./filters/node_version_filter')
   , MongoDBVersionFilter = require('./filters/mongodb_version_filter')
@@ -101,7 +102,6 @@ var Configuration = function(options) {
             // Create an instance
             var server = topology(self, mongo);
             console.log("[get connection to topology]");
-            // console.dir(server)
             // Set up connect
             server.once('connect', function() {
               console.log("[connected to topology]");
@@ -194,54 +194,51 @@ var runner = new Runner({
 });
 
 var testFiles = [
-    '/test/tests/functional/server_tests.js'
-  , '/test/tests/functional/operations_tests.js'
-  , '/test/tests/functional/basic_auth_tests.js'
-  , '/test/tests/functional/extend_pick_strategy_tests.js'
-  , '/test/tests/functional/mongos_tests.js'
-  , '/test/tests/functional/extend_cursor_tests.js'
-  , '/test/tests/functional/pool_tests.js'
-  , '/test/tests/functional/connection_tests.js'
-  , '/test/tests/functional/rs_topology_tests.js'
-  , '/test/tests/functional/rs_topology_state_tests.js'
-  , '/test/tests/functional/single_topology_tests.js'
-  , '/test/tests/functional/cursor_tests.js'
-  , '/test/tests/functional/error_tests.js'
-  , '/test/tests/functional/tailable_cursor_tests.js'
-  , '/test/tests/functional/operation_example_tests.js'
-  , '/test/tests/functional/replset_failover_tests.js'
-  , '/test/tests/functional/undefined_tests.js'
-  , '/test/tests/functional/pool_growth_shrink_tests.js'
+  // '/test/tests/functional/server_tests.js'
+  //   '/test/tests/functional/server_tests.js'
+  // , '/test/tests/functional/operations_tests.js'
+  // , '/test/tests/functional/basic_auth_tests.js'
+  // , '/test/tests/functional/extend_pick_strategy_tests.js'
+  // , '/test/tests/functional/mongos_tests.js'
+  // , '/test/tests/functional/extend_cursor_tests.js'
+  // , '/test/tests/functional/pool_tests.js'
+  // , '/test/tests/functional/connection_tests.js'
+  // , '/test/tests/functional/rs_topology_tests.js'
+  // , '/test/tests/functional/rs_topology_state_tests.js'
+  // , '/test/tests/functional/single_topology_tests.js'
+  // , '/test/tests/functional/cursor_tests.js'
+  // , '/test/tests/functional/error_tests.js'
+  // , '/test/tests/functional/tailable_cursor_tests.js'
+  // , '/test/tests/functional/operation_example_tests.js'
+  // , '/test/tests/functional/replset_failover_tests.js'
+  // , '/test/tests/functional/undefined_tests.js'
+
+  // Functional 2 tests
+  '/test/tests/functional2/pool_tests.js'
 ]
 
-// Check if we support es6 generators
-try {
-  eval("(function *(){})");
-
-  // Replicaset Mock Tests
-  testFiles.push('/test/tests/functional/rs_mocks/add_remove_tests.js');
-  testFiles.push('/test/tests/functional/rs_mocks/connection_tests.js');
-  testFiles.push('/test/tests/functional/rs_mocks/failover_tests.js');
-  testFiles.push('/test/tests/functional/rs_mocks/monitoring_tests.js');
-  testFiles.push('/test/tests/functional/rs_mocks/read_preferences_tests.js');
-  testFiles.push('/test/tests/functional/rs_mocks/step_down_tests.js');
-  testFiles.push('/test/tests/functional/rs_mocks/all_servers_close_tests.js');
-  testFiles.push('/test/tests/functional/rs_mocks/server_in_recovery_tests.js');
-
-  // Mongos Mock Tests
-  testFiles.push('/test/tests/functional/mongos_mocks/single_proxy_connection_tests.js');
-  testFiles.push('/test/tests/functional/mongos_mocks/multiple_proxies_tests.js');
-  testFiles.push('/test/tests/functional/mongos_mocks/proxy_failover_tests.js');
-  testFiles.push('/test/tests/functional/mongos_mocks/proxy_read_preference_tests.js');
-
-  // // Single server Mock Tests
-  // testFiles.push('/test/tests/functional/single_mocks/timeout_tests.js');
-
-  // SDAM Monitoring tests
-  testFiles.push('/test/tests/functional/sdam_monitoring_mocks/single_topology_tests.js');
-  testFiles.push('/test/tests/functional/sdam_monitoring_mocks/replset_topology_tests.js');
-  testFiles.push('/test/tests/functional/sdam_monitoring_mocks/mongos_topology_tests.js');
-} catch(err) {}
+// // Check if we support es6 generators
+// try {
+//   eval("(function *(){})");
+//
+//   // Replicaset Mock Tests
+//   testFiles.push('/test/tests/functional/rs_mocks/add_remove_tests.js');
+//   testFiles.push('/test/tests/functional/rs_mocks/connection_tests.js');
+//   testFiles.push('/test/tests/functional/rs_mocks/failover_tests.js');
+//   testFiles.push('/test/tests/functional/rs_mocks/monitoring_tests.js');
+//   testFiles.push('/test/tests/functional/rs_mocks/read_preferences_tests.js');
+//   testFiles.push('/test/tests/functional/rs_mocks/step_down_tests.js');
+//   testFiles.push('/test/tests/functional/rs_mocks/all_servers_close_tests.js');
+//
+//   // Mongos Mock Tests
+//   testFiles.push('/test/tests/functional/mongos_mocks/single_proxy_connection_tests.js');
+//   testFiles.push('/test/tests/functional/mongos_mocks/multiple_proxies_tests.js');
+//   testFiles.push('/test/tests/functional/mongos_mocks/proxy_failover_tests.js');
+//   testFiles.push('/test/tests/functional/mongos_mocks/proxy_read_preference_tests.js');
+//
+//   // Single server Mock Tests
+//   testFiles.push('/test/tests/functional/single_mocks/timeout_tests.js');
+// } catch(err) {}
 
 // Add all the tests to run
 testFiles.forEach(function(t) {
@@ -411,8 +408,6 @@ if(argv.t == 'functional') {
     return runner.run(Configuration(config));
   }
 
-  // Ensure we only use mongodb-version if not running against current path mongod process
-  var m = require('mongodb-version-manager')
   // Kill any running MongoDB processes and
   // `install $MONGODB_VERSION` || `use existing installation` || `install stable`
   m(function(err){
