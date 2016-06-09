@@ -79,8 +79,6 @@ function authenticate(pool, auth, connection, cb) {
     throw new MongoError(f('authMechanism %s not supported', mechanism));
   }
 
-  // self.s.authProviders[mechanism].auth.apply(self.s.authProviders[mechanism], [self, connections, db].concat(args.slice(0)).concat([function(err, r) {
-
   // Get the provider
   var provider = pool.authProviders[mechanism];
 
@@ -96,8 +94,33 @@ function authenticate(pool, auth, connection, cb) {
   provider.auth.apply(provider, [write, [connection], db].concat(auth.slice(2)).concat([cb]));
 }
 
-function reauthenticate(connection, cb) {
-  cb(null);
+function reauthenticate(pool, connection, cb) {
+  // Authenticate
+  function authenticateAgainstProvider(pool, connection, providers, cb) {
+    // Finished re-authenticating against providers
+    if(providers.length == 0) return cb();
+    // Get the provider name
+    var provider = pool.authProviders[providers.pop()];
+
+    // The write function used by the authentication mechanism (bypasses external)
+    function write(connection, buffer, callback) {
+      // Set the connection workItem callback
+      connection.workItem = {cb: callback};
+      // Write the buffer out to the connection
+      connection.write(buffer);
+    };
+
+    // Auth provider
+    provider.reauthenticate(write, [connection], function(err, r) {
+      // We got an error return immediately
+      if(err) return cb(err);
+      // Continue authenticating the connection
+      authenticateAgainstProvider(pool, connection, providers, cb);
+    });
+  }
+
+  // Start re-authenticating process
+  authenticateAgainstProvider(pool, connection, Object.keys(pool.authProviders), cb);
 }
 
 function connectionFailureHandler(self, event) {
@@ -138,18 +161,19 @@ function messageHandler(self) {
       try {
         // Parse the message according to the provided options
         message.parse(workItem);
-
-        // Establish if we have an error
-        if(message.documents[0].ok == 0 || message.documents[0]['$err']
-        || message.documents[0]['errmsg'] || message.documents[0]['code']) {
-          return workItem.cb(MongoError.create(message.documents[0]));
-        }
-
-        // Return the documents
-        workItem.cb(null, new CommandResult(message.documents[0], connection));
       } catch(err) {
-        workItem.cb(MongoError.create(err));
+        // console.log("ERROR")
+        return workItem.cb(MongoError.create(err));
       }
+
+      // Establish if we have an error
+      if(message.documents[0].ok == 0 || message.documents[0]['$err']
+      || message.documents[0]['errmsg'] || message.documents[0]['code']) {
+        return workItem.cb(MongoError.create(message.documents[0]));
+      }
+
+      // Return the documents
+      workItem.cb(null, new CommandResult(message.documents[0], connection));
     }
   }
 }
@@ -332,7 +356,7 @@ function _createConnection(self) {
       _connection.once('parseError', connectionFailureHandler(self, 'parseError'));
 
       // Signal
-      reauthenticate(_connection, function(err) {
+      reauthenticate(self, _connection, function(err) {
         // Remove the connection from the connectingConnections list
         removeConnection(self, _connection);
 

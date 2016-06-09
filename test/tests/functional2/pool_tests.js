@@ -207,11 +207,16 @@ exports['Should correctly reclaim immediateRelease socket'] = {
   }
 }
 
-function executeCommand(configuration, db, cmd, cb) {
+function executeCommand(configuration, db, cmd, options, cb) {
   var Pool = require('../../../lib2/connection/pool')
     , MongoError = require('../../../lib2/error')
     , bson = require('bson').BSONPure.BSON
     , Query = require('../../../lib2/connection/commands').Query;
+
+  // Optional options
+  if(typeof options == 'function') cb = options, options = {};
+  // Set the default options object if none passed in
+  options = options || {};
 
   // Attempt to connect
   var pool = new Pool({
@@ -222,6 +227,7 @@ function executeCommand(configuration, db, cmd, cb) {
   pool.on('connect', function(_pool) {
     var query = new Query(new bson(), f('%s.$cmd', db), cmd, {numberToSkip: 0, numberToReturn: 1});
     _pool.write(query.toBin(), {}, function(err, result) {
+      if(err) console.log(err.stack)
       // Close the pool
       _pool.destroy();
       // If we have an error return
@@ -231,7 +237,7 @@ function executeCommand(configuration, db, cmd, cb) {
     });
   });
 
-  pool.connect();
+  pool.connect.apply(pool, options.auth);
 }
 
 exports['Should correctly authenticate using scram-sha-1 using connect auth'] = {
@@ -242,35 +248,121 @@ exports['Should correctly authenticate using scram-sha-1 using connect auth'] = 
       , bson = require('bson').BSONPure.BSON
       , Query = require('../../../lib2/connection/commands').Query;
 
-    executeCommand(configuration, 'admin', {
-      createUser: 'root',
-      pwd: "root",
-      roles: [ { role: "root", db: "admin" } ],
-      digestPassword: true
-    }, function(err, r) {
-      test.equal(null, err);
-      // Attempt to connect
-      var pool = new Pool({
-        host: configuration.host, port: configuration.port, bson: new bson()
-      })
+    // Restart instance
+    configuration.manager.restart().then(function() {
+      executeCommand(configuration, 'admin', {
+        createUser: 'root',
+        pwd: "root",
+        roles: [ { role: "root", db: "admin" } ],
+        digestPassword: true
+      }, function(err, r) {
+        test.equal(null, err);
+        // Attempt to connect
+        var pool = new Pool({
+          host: configuration.host, port: configuration.port, bson: new bson()
+        })
 
-      // Add event listeners
-      pool.on('connect', function(_pool) {
-        _pool.destroy();
-        test.done();
-      })
+        // Add event listeners
+        pool.on('connect', function(_pool) {
+          executeCommand(configuration, 'admin', {
+            dropUser: 'root'
+          }, { auth: ['scram-sha-1', 'admin', 'root', 'root']}, function(err, r) {
+            test.equal(null, err);
 
-      // // Add event listeners
-      // pool.on('error', function(err) {
-      //   console.log("============ ERROR")
-      //   console.log(err.stack)
-      //   process.exit(0)
-      //   pool.destroy();
-      //   test.done();
-      // })
+            _pool.destroy();
+            test.done();
+          });
+        });
 
-      // Start connection
-      pool.connect('scram-sha-1', 'admin', 'root', 'root');
+        // Start connection
+        pool.connect('scram-sha-1', 'admin', 'root', 'root');
+      });
+    });
+  }
+}
+
+exports['Should correctly authenticate using scram-sha-1 using connect auth and maintain auth on new connections'] = {
+  metadata: { requires: { topology: "auth", mongodb: ">=3.0.0" } },
+
+  test: function(configuration, test) {
+    var Pool = require('../../../lib2/connection/pool')
+      , bson = require('bson').BSONPure.BSON
+      , Query = require('../../../lib2/connection/commands').Query;
+
+    // Restart instance
+    configuration.manager.restart().then(function() {
+      executeCommand(configuration, 'admin', {
+        createUser: 'root', pwd: "root", roles: [ { role: "root", db: "admin" } ], digestPassword: true
+      }, function(err, r) {
+        test.equal(null, err);
+
+        executeCommand(configuration, 'test', {
+          createUser: 'admin', pwd: "admin", roles: [ "readWrite", "dbAdmin" ], digestPassword: true
+        }, { auth: ['scram-sha-1', 'admin', 'root', 'root'] }, function(err, r) {
+          test.equal(null, err);
+
+          // Attempt to connect
+          var pool = new Pool({
+            host: configuration.host, port: configuration.port, bson: new bson()
+          })
+
+          var index = 0;
+
+          var messageHandler = function(err, result) {
+            index = index + 1;
+
+            // Tests
+            test.equal(null, err);
+            test.equal(1, result.result.n);
+            // Did we receive an answer for all the messages
+            if(index == 100) {
+              test.equal(5, pool.socketCount());
+
+              pool.destroy();
+              test.done();
+            }
+          }
+
+          // Add event listeners
+          pool.on('connect', function(_pool) {
+            for(var i = 0; i < 10; i++)
+            process.nextTick(function() {
+              var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
+              _pool.write(query.toBin(), messageHandler)
+
+              var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
+              _pool.write(query.toBin(), messageHandler)
+
+              var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
+              _pool.write(query.toBin(), messageHandler)
+
+              var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
+              _pool.write(query.toBin(), messageHandler)
+
+              var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
+              _pool.write(query.toBin(), messageHandler)
+
+              var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
+              _pool.write(query.toBin(), messageHandler)
+
+              var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
+              _pool.write(query.toBin(), messageHandler)
+
+              var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
+              _pool.write(query.toBin(), messageHandler)
+
+              var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
+              _pool.write(query.toBin(), messageHandler)
+
+              var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
+              _pool.write(query.toBin(), messageHandler)
+            });
+          });
+
+          // Start connection
+          pool.connect('scram-sha-1', 'test', 'admin', 'admin');
+        });
+      });
     });
   }
 }
@@ -284,10 +376,8 @@ exports['Should correctly authenticate using scram-sha-1 using connect auth'] = 
 //
 //     // Attempt to connect
 //     var pool = new Pool({
-//         host: configuration.host
-//       , port: configuration.port
-//       , bson: bson
-//     })
+//       host: configuration.host, port: configuration.port, bson: bson
+//     });
 //
 //     // Add event listeners
 //     pool.on('connect', function(_pool) {
