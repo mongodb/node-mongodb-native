@@ -386,6 +386,21 @@ if(argv.t == 'functional') {
     }
   }
 
+  //
+  // Authentication Configuration
+  if(argv.e == 'auth') {
+    config = {
+        host: 'localhost'
+      , port: 27017
+      , skipStart: startupOptions.skipStartup
+      , skipTermination: startupOptions.skipShutdown
+      , manager: new ServerManager('mongod', {
+        dbpath: path.join(path.resolve('db'), f("data-%d", 27017)),
+        auth:null
+      })
+    }
+  }
+
   // If we have a test we are filtering by
   if(argv.f) {
     runner.plugin(new FileFilter(argv.f));

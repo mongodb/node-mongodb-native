@@ -124,7 +124,7 @@ var errorHandler = function(self) {
 }
 
 var timeoutHandler = function(self) {
-  return function() {
+  return function(err) {
     // Debug information
     if(self.logger.isDebug()) self.logger.debug(f('connection %s for [%s:%s] timed out', self.id, self.host, self.port));
     // Emit timeout error

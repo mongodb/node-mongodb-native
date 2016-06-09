@@ -4,7 +4,16 @@ var inherits = require('util').inherits,
   EventEmitter = require('events').EventEmitter,
   Connection = require('./connection'),
   MongoError = require('../error'),
-  Logger = require('./logger');
+  Logger = require('./logger'),
+  f = require('util').format,
+  CommandResult = require('./command_result');
+
+var MongoCR = require('../auth/mongocr')
+  , X509 = require('../auth/x509')
+  , Plain = require('../auth/plain')
+  , GSSAPI = require('../auth/gssapi')
+  , SSPI = require('../auth/sspi')
+  , ScramSHA1 = require('../auth/scram');
 
 var DISCONNECTED = 'disconnected';
 var CONNECTING = 'connecting';
@@ -36,7 +45,8 @@ var Pool = function(options) {
   }, options);
 
   // No bson parser passed in
-  if(!options.bson) throw new Error("must pass in valid bson parser");
+  if(!options.bson || (options.bson
+    && (typeof options.bson.serialize != 'function' || typeof options.bson.deserialize != 'function'))) throw new Error("must pass in valid bson parser");
   // Logger instance
   this.logger = Logger('Pool', options);
   // Pool state
@@ -49,12 +59,41 @@ var Pool = function(options) {
   this.executing = false;
   // Operation work queue
   this.queue = [];
+  // All the authProviders
+  this.authProviders = {
+      'mongocr': new MongoCR(options.bson), 'x509': new X509(options.bson)
+    , 'plain': new Plain(options.bson), 'gssapi': new GSSAPI(options.bson)
+    , 'sspi': new SSPI(options.bson), 'scram-sha-1': new ScramSHA1(options.bson)
+  }
 }
 
 inherits(Pool, EventEmitter);
 
-function authenticate(auth, connection, cb) {
-  if(!auth) return cb(null);
+function authenticate(pool, auth, connection, cb) {
+  if(auth.length == 0) return cb(null);
+  // We need to authenticate the server
+  var mechanism = auth[0];
+  var db = auth[1];
+  // Validate if the mechanism exists
+  if(!pool.authProviders[mechanism]) {
+    throw new MongoError(f('authMechanism %s not supported', mechanism));
+  }
+
+  // self.s.authProviders[mechanism].auth.apply(self.s.authProviders[mechanism], [self, connections, db].concat(args.slice(0)).concat([function(err, r) {
+
+  // Get the provider
+  var provider = pool.authProviders[mechanism];
+
+  // The write function used by the authentication mechanism (bypasses external)
+  function write(connection, buffer, callback) {
+    // Set the connection workItem callback
+    connection.workItem = {cb: callback};
+    // Write the buffer out to the connection
+    connection.write(buffer);
+  };
+
+  // Authenticate using the provided mechanism
+  provider.auth.apply(provider, [write, [connection], db].concat(auth.slice(2)).concat([cb]));
 }
 
 function reauthenticate(connection, cb) {
@@ -96,7 +135,21 @@ function messageHandler(self) {
 
     // Time to dispatch the message if we have a callback
     if(!workItem.immediateRelease) {
-      workItem.cb(message);
+      try {
+        // Parse the message according to the provided options
+        message.parse(workItem);
+
+        // Establish if we have an error
+        if(message.documents[0].ok == 0 || message.documents[0]['$err']
+        || message.documents[0]['errmsg'] || message.documents[0]['code']) {
+          return workItem.cb(MongoError.create(message.documents[0]));
+        }
+
+        // Return the documents
+        workItem.cb(null, new CommandResult(message.documents[0], connection));
+      } catch(err) {
+        workItem.cb(MongoError.create(err));
+      }
     }
   }
 }
@@ -110,6 +163,8 @@ Pool.prototype.socketCount = function() {
 Pool.prototype.connect = function(auth) {
   if(this.state != DISCONNECTED) throw new MongoError('connection in unlawful state ' + this.state);
   var self = this;
+  // Create an array of the arguments
+  var args = Array.prototype.slice.call(arguments, 0);
   // Create a connection
   var connection = new Connection(messageHandler(self), this.options);
   // Add to list of connections
@@ -119,10 +174,14 @@ Pool.prototype.connect = function(auth) {
     if(self.state == DESTROYED) return self.destroy();
 
     // Authenticate
-    authenticate(auth, connection, function(err) {
+    authenticate(self, args, connection, function(err) {
       if(self.state == DESTROYED) return self.destroy();
+
       // We have an error emit it
-      if(err) return self.emit('error', err);
+      if(err) {
+        return self.emit('error', err);
+      }
+
       // Move the active connection
       moveConnectionBetween(connection, self.connectingConnections, self.availableConnections);
       // Emit the connect event
@@ -135,13 +194,26 @@ Pool.prototype.connect = function(auth) {
   connection.once('close', connectionFailureHandler(this, 'close'));
   connection.once('timeout', connectionFailureHandler(this, 'timeout'));
   connection.once('parseError', connectionFailureHandler(this, 'parseError'));
-  // console.log("!!!!!!!!!!!!!!!!!!!!!!! connect")
   // Initite connection
   connection.connect();
 }
 
-Pool.prototype.auth = function() {
+/**
+ * Authenticate using a specified mechanism
+ * @method
+ * @param {string} mechanism The Auth mechanism we are invoking
+ * @param {string} db The db we are invoking the mechanism against
+ * @param {...object} param Parameters for the specific mechanism
+ * @param {authResultCallback} callback A callback function
+ */
+Pool.prototype.auth = function(mechanism, db) {
+  var self = this;
+  var args = Array.prototype.slice.call(arguments, 2);
+  var callback = args.pop();
 
+  // If we don't have the mechanism fail
+  if(self.authProviders[mechanism] == null && mechanism != 'default')
+    throw new MongoError(f("auth provider %s does not exist", mechanism));
 }
 
 Pool.prototype.destroy = function() {
@@ -187,12 +259,15 @@ Pool.prototype.write = function(buffer, options, cb) {
   if(!(typeof cb == 'function')) throw new MongoError('write method must provide a callback');
 
   // Do we have an operation
-  var operation = {buffer:buffer, cb: cb};
+  var operation = {
+    buffer:buffer, cb: cb, raw: false, promoteLongs: true
+  };
 
-  // Do we immediately release the connection back to available (fire and forget)
-  if(options && options.immediateRelease) {
-    operation.immediateRelease = true;
-  }
+  // Set the options for the parsing
+  operation.promoteLongs = options && options.promoteLongs == false ? false : true;
+  operation.raw = options && options.raw == true ? true : false;
+  operation.immediateRelease = options && options.immediateRelease == true ? true : false;
+  operation.documentsReturnedIn = options.documentsReturnedIn;
 
   // Push the operation to the queue of operations in progress
   this.queue.push(operation);
@@ -217,7 +292,6 @@ function removeConnection(self, connection) {
 }
 
 function _createConnection(self) {
-  // console.log("===== _createConnection")
   var connection = new Connection(messageHandler(self), self.options);
 
   // Push the connection
@@ -226,7 +300,6 @@ function _createConnection(self) {
   // Handle any errors
   var tempErrorHandler = function(_connection) {
     return function(err) {
-      console.log("===== _createConnection error")
       // Destroy the connection
       _connection.destroy();
       // Remove the connection from the connectingConnections list
@@ -240,7 +313,6 @@ function _createConnection(self) {
   // Handle successful connection
   var tempConnectHandler = function(_connection) {
     return function() {
-      // console.log("===== _createConnection 1")
       // Destroyed state return
       if(self.state == DESTROYED) {
         // Remove the connection from the list
@@ -271,7 +343,6 @@ function _createConnection(self) {
 
         // Push to available
         self.availableConnections.push(_connection);
-        // console.log("===== _createConnection 3")
         // Execute any work waiting
         _execute(self)();
       });
@@ -299,7 +370,6 @@ function _execute(self) {
 
     // As long as we have available connections
     while(true) {
-      // console.log("====== _execute queue depth :: " + self.queue.length)
       // Total availble connections
       var totalConnections = self.availableConnections.length
         + self.connectingConnections.length
@@ -323,16 +393,9 @@ function _execute(self) {
 
       // Get a connection
       var connection = self.availableConnections.pop();
-      // console.log("======= availableConnections.pop")
       if(connection.isConnected()) {
         // Get the next work item
         var workItem = self.queue.shift();
-
-        // // Add connection to callback so we can flush out
-        // // only ops for that connection on a socket closure
-        // if(workItem.cb) {
-        //   workItem.cb.connection = connection;
-        // }
 
         // Get actual binary commands
         var buffer = workItem.buffer;

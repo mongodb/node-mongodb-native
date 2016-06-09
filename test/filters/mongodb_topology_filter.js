@@ -1,31 +1,20 @@
 "use strict";
 
+// console.log(argv._);
+var argv = require('optimist')
+    .usage('Usage: $0 -t [target] -e [environment] -n [name] -f [filename] -r [smoke report file]')
+    .demand(['t'])
+    .argv;
+
 var MongoDBTopologyFilter = function() {
+  // Keep the server config
   var serverConfig = null;
 
   this.beforeStart = function(object, callback) {
-    // Get the first configuration
-    var configuration = object.configurations[0];
-    
-    // Get the MongoDB topology
-    configuration.newConnection(function(err, connection) {
-      // Run the ismaster command
-      connection.command('system.$cmd', {ismaster:true}, function(err, command) {
-        if(err) return callback(err, null);
-        // Check for topology
-        if(Array.isArray(command.result.hosts)) {
-          serverConfig = 'replicaset';
-        } else if(command.result.msg && command.result.msg == 'isdbgrid') {
-          serverConfig = 'mongos';
-        } else {
-          serverConfig = 'single';
-        }
-
-        // Close the connection
-        connection.destroy();
-        callback();
-      });
-    });
+    // Use the provided environment for the filtering
+    serverConfig = argv.e || 'single';
+    // Finish up
+    callback();
   }
 
 	this.filter = function(test) {
@@ -51,7 +40,7 @@ var MongoDBTopologyFilter = function() {
 
   	// Do not execute the test
   	return true;
-	}	
+	}
 }
 
 module.exports = MongoDBTopologyFilter;
