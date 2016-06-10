@@ -235,6 +235,7 @@ exports['Should correctly recover from a server outage'] = {
     var errorCount = 0;
 
     var messageHandler = function(err, r) {
+      console.log("--- messageHandler :: " + index)
       if(err) errorCount = errorCount + 1;
       index = index + 1;
 
@@ -250,7 +251,9 @@ exports['Should correctly recover from a server outage'] = {
         var query = new Query(new bson(), 'system.$cmd', {ismaster:true}, {numberToSkip: 0, numberToReturn: 1});
         pool.write(query.toBin(), messageHandler);
         if(i == 250) {
+          console.log("==== restart 0")
           configuration.manager.restart(true).then(function() {
+            console.log("==== restart 1")
           });
         }
       }, i);
