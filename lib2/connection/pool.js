@@ -282,6 +282,8 @@ Pool.prototype.connect = function(auth) {
       moveConnectionBetween(connection, self.connectingConnections, self.availableConnections);
       // Emit the connect event
       self.emit('connect', self);
+      // Execute any backed up commands
+      _execute(self)();
     });
   });
 
@@ -468,6 +470,7 @@ Pool.prototype.write = function(buffer, options, cb) {
 
   // Push the operation to the queue of operations in progress
   this.queue.push(operation);
+  // console.log("========= write")
   // Attempt to write all buffers out
   _execute(this)();
 }
