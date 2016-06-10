@@ -74,7 +74,7 @@ var Pool = function(options) {
 inherits(Pool, EventEmitter);
 
 function authenticate(pool, auth, connection, cb) {
-  if(auth.length == 0) return cb(null);
+  if(auth[0] === undefined) return cb(null);
   // We need to authenticate the server
   var mechanism = auth[0];
   var db = auth[1];
@@ -148,7 +148,6 @@ function moveConnectionBetween(connection, from, to) {
 
 function messageHandler(self) {
   return function(message, connection) {
-    // console.log("======= message")
     // Get the callback
     var workItem = connection.workItem;
 
@@ -407,6 +406,21 @@ Pool.prototype.destroy = function() {
     // Destroy connection
     c.destroy();
   });
+
+  // Any operations in flight must be flushed out as an error
+  if(this.inUseConnections.length > 0) {
+    this.inUseConnections.forEach(function(connection) {
+      if(connection.workItem.cb) {
+        connection.workItem.cb(new MongoError('pool destroyed'));
+      }
+    });
+  }
+
+  // Zero out all connections
+  this.inUseConnections = [];
+  this.availableConnections = [];
+  this.nonAuthenticatedConnections = [];
+  this.connectingConnections = [];
 }
 
 /**
@@ -415,14 +429,16 @@ Pool.prototype.destroy = function() {
  * @return {Connection}
  */
 Pool.prototype.write = function(buffer, options, cb) {
-  if(this.state == DESTROYED) {
-    if(cb) cb(new MongoError('pool destroyed'));
-    return;
-  }
-
   // Ensure we have a callback
   if(typeof options == 'function') {
     cb = options, options = {};
+  }
+
+  // Pool was destroyed error out
+  if(this.state == DESTROYED) {
+    // Callback with an error
+    if(cb) cb(new MongoError('pool destroyed'));
+    return;
   }
 
   // We need to have a callback function
