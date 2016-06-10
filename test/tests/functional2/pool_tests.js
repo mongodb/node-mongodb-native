@@ -250,7 +250,7 @@ exports['Should correctly recover from a server outage'] = {
         var query = new Query(new bson(), 'system.$cmd', {ismaster:true}, {numberToSkip: 0, numberToReturn: 1});
         pool.write(query.toBin(), messageHandler);
         if(i == 250) {
-          configuration.manager.restart().then(function() {
+          configuration.manager.restart(true).then(function() {
           });
         }
       }, i);
