@@ -581,7 +581,10 @@ Pool.prototype.write = function(buffer, options, cb) {
   this.queue.push(operation);
   // console.log("========= write")
   // Attempt to write all buffers out
-  _execute(this)();
+  // If we are connected execute otherwise wait for attemptReconnect
+  if(this.state == CONNECTED) {
+    _execute(this)();
+  }
 }
 
 // Remove connection method
