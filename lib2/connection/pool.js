@@ -156,8 +156,7 @@ function connectionFailureHandler(self, event) {
     }
 
     // Start reconnection attempts
-    if(!self.isConnected() && self.options.reconnect && !self.reconnectId) {
-      self.state = DISCONNECTED;
+    if(!self.reconnectId) {
       self.reconnectId = setTimeout(attemptReconnect(self), self.options.reconnectInterval);
     }
   };
@@ -167,6 +166,13 @@ function attemptReconnect(self) {
   return function() {
     console.log("==== attemptReconnect :: " + self.state)
     if(self.state == DESTROYED) return;
+
+    // We are connected do not try again
+    if(self.isConnected()) {
+      self.reconnectId = null;
+      return;
+    }
+
     // If we have failure schedule a retry
     function _connectionFailureHandler(self, event) {
       return function() {
@@ -611,6 +617,10 @@ function _createConnection(self) {
       _connection.destroy();
       // Remove the connection from the connectingConnections list
       removeConnection(self, _connection);
+      // Start reconnection attempts
+      if(!self.reconnectId) {
+        self.reconnectId = setTimeout(attemptReconnect(self), self.options.reconnectInterval);
+      }
     }
   }
 
