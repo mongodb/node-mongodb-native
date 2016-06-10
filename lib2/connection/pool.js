@@ -49,7 +49,7 @@ var Pool = function(options) {
   }, options);
 
   // Current reconnect retries
-  this.retriesLeft = options.reconnectTries;
+  this.retriesLeft = this.options.reconnectTries;
   this.reconnectId = null;
   // No bson parser passed in
   if(!options.bson || (options.bson
@@ -161,70 +161,75 @@ function connectionFailureHandler(self, event) {
 }
 
 function attempReconnect(self) {
-  if(self.state == DESTROYED) return;
-  console.log("========== attempReconnect")
-  // If we have failure schedule a retry
-  function _connectionFailureHandler(self, event) {
-    return function() {
-      self.retriesLeft = self.retriesLeft - 1;
-      // How many retries are left
-      if(self.retriesLeft == 0) {
-        // Destroy the instance
-        self.destroy();
-        // Emit close event
-        self.emit('close', self);
-      } else {
-        self.reconnectId = setTimeout(attempReconnect(self), self.options.reconnectInterval);
+  return function() {
+    if(self.state == DESTROYED) return;
+    // If we have failure schedule a retry
+    function _connectionFailureHandler(self, event) {
+      return function() {
+        self.retriesLeft = self.retriesLeft - 1;
+        // How many retries are left
+        if(self.retriesLeft == 0) {
+          // Destroy the instance
+          self.destroy();
+          // Emit close event
+          self.emit('close', self);
+        } else {
+          self.reconnectId = setTimeout(attempReconnect(self), self.options.reconnectInterval);
+        }
       }
     }
-  }
 
-  // Got a connect handler
-  function _connectHandler(self) {
-    return function() {
-      // Assign
-      var connection = this;
+    // Got a connect handler
+    function _connectHandler(self) {
+      return function() {
+        // Assign
+        var connection = this;
 
-      // Pool destroyed stop the connection
-      if(self.state == DESTROYED) {
-        return connection.destroy();
+        // Pool destroyed stop the connection
+        if(self.state == DESTROYED) {
+          return connection.destroy();
+        }
+
+        // Clear out all handlers
+        handlers.forEach(function(event) {
+          connection.removeAllListeners(event);
+        });
+
+        // Reset reconnect id
+        self.reconnectId = null;
+
+        // Apply pool connection handlers
+        connection.once('error', connectionFailureHandler(self, 'error'));
+        connection.once('close', connectionFailureHandler(self, 'close'));
+        connection.once('timeout', connectionFailureHandler(self, 'timeout'));
+        connection.once('parseError', connectionFailureHandler(self, 'parseError'));
+
+        // Apply any auth to the connection
+        reauthenticate(self, this, function(err) {
+          // Reset retries
+          self.retriesLeft = self.options.reconnectTries;
+          // Push to available connections
+          self.availableConnections.push(connection);
+          // Emit reconnect event
+          self.emit('reconnect', self);
+          // Trigger execute to start everything up again
+          _execute(self)();
+        });
       }
-
-      // Clear out all handlers
-      handlers.forEach(function(event) {
-        connection.removeAllListeners(event);
-      });
-
-      // Reset reconnect id
-      self.reconnectId = null;
-
-      // Apply pool connection handlers
-      connection.once('error', connectionFailureHandler(this, 'error'));
-      connection.once('close', connectionFailureHandler(this, 'close'));
-      connection.once('timeout', connectionFailureHandler(this, 'timeout'));
-      connection.once('parseError', connectionFailureHandler(this, 'parseError'));
-
-      // Apply any auth to the connection
-      reauthenticate(self, this, function(err) {
-        // Reset retries
-        self.retriesLeft = self.options.reconnectTries;
-        // Push to available connections
-        self.availableConnections.push(connection);
-        // Trigger execute to start everything up again
-        _execute(self)();
-      });
     }
-  }
 
-  // Create a connection
-  var connection = new Connection(messageHandler(self), self.options);
-  // Add handlers
-  connection.on('close', _connectionFailureHandler(self, 'close'));
-  connection.on('error', _connectionFailureHandler(self, 'error'));
-  connection.on('timeout', _connectionFailureHandler(self, 'timeout'));
-  connection.on('parseError', _connectionFailureHandler(self, 'parseError'));
-  // On connection
-  connection.on('connect', _connectHandler(self));
+    // Create a connection
+    var connection = new Connection(messageHandler(self), self.options);
+    // Add handlers
+    connection.on('close', _connectionFailureHandler(self, 'close'));
+    connection.on('error', _connectionFailureHandler(self, 'error'));
+    connection.on('timeout', _connectionFailureHandler(self, 'timeout'));
+    connection.on('parseError', _connectionFailureHandler(self, 'parseError'));
+    // On connection
+    connection.on('connect', _connectHandler(self));
+    // Attempt connection
+    connection.connect();
+  }
 }
 
 function moveConnectionBetween(connection, from, to) {
@@ -485,6 +490,11 @@ Pool.prototype.destroy = function() {
   var connections = this.availableConnections
     .concat(this.inUseConnections)
     .concat(this.connectingConnections);
+
+  // Do we have a reconnect attempt running, terminate timeout
+  if(this.reconnectId) {
+    clearTimeout(this.reconnectId);
+  }
 
   // Destroy all the connections
   connections.forEach(function(c) {
