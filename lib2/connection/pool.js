@@ -147,6 +147,7 @@ function connectionFailureHandler(self, event) {
 
     // No more socket available propegate the event
     if(self.socketCount() == 0 && !self.options.reconnect) {
+      self.state = DISCONNECTED;
       // Do not emit error events, they are always close events
       // do not trigger the low level error handler in node
       event = event == 'error' ? 'close' : event;
@@ -155,6 +156,7 @@ function connectionFailureHandler(self, event) {
 
     // Start reconnection attempts
     if(self.socketCount() == 0 && self.options.reconnect && !self.reconnectId) {
+      self.state = DISCONNECTED;
       self.reconnectId = setTimeout(attempReconnect(self), self.options.reconnectInterval);
     }
   };
