@@ -252,8 +252,12 @@ exports['Should correctly recover from a server outage'] = {
         var query = new Query(new bson(), 'system.$cmd', {ismaster:true}, {numberToSkip: 0, numberToReturn: 1});
         pool.write(query.toBin(), messageHandler);
         if(i == 250) {
-          configuration.manager.restart(true).then(function() {
+          configuration.manager.stop(9).then(function() {
+            configuration.manager.start().then(function() {
+            });
           });
+          // configuration.manager.restart(true).then(function() {
+          // });
         }
       }, i);
     }
@@ -306,7 +310,7 @@ exports['Should correctly recover from a longer server outage'] = {
         var query = new Query(new bson(), 'system.$cmd', {ismaster:true}, {numberToSkip: 0, numberToReturn: 1});
         pool.write(query.toBin(), messageHandler);
         if(i == 250) {
-          configuration.manager.stop().then(function() {
+          configuration.manager.stop(9).then(function() {
             setTimeout(function() {
               configuration.manager.start().then(function() {
               });
