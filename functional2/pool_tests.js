@@ -215,6 +215,59 @@ exports['Should correctly error out operations if pool is closed in the middle o
   }
 }
 
+exports['Should correctly recover from a server outage'] = {
+  metadata: { requires: { topology: "single" } },
+
+  test: function(configuration, test) {
+    var Pool = require('../../../lib2/connection/pool')
+      , bson = require('bson').BSONPure.BSON
+      , Query = require('../../../lib2/connection/commands').Query;
+
+    // Attempt to connect
+    var pool = new Pool({
+        host: configuration.host
+      , port: configuration.port
+      , socketTimeout: 3000
+      , bson: new bson()
+    })
+
+    var index = 0;
+    var errorCount = 0;
+
+    var messageHandler = function(err, r) {
+      if(err) errorCount = errorCount + 1;
+      index = index + 1;
+
+      if(index == 500) {
+        test.ok(errorCount >= 0);
+        pool.destroy();
+        test.done();
+      }
+    }
+
+    function execute(i) {
+      setTimeout(function() {
+        var query = new Query(new bson(), 'system.$cmd', {ismaster:true}, {numberToSkip: 0, numberToReturn: 1});
+        pool.write(query.toBin(), messageHandler);
+        if(i == 250) {
+          configuration.manager.restart().then(function() {
+          });
+        }
+      }, i);
+    }
+
+    // Add event listeners
+    pool.on('connect', function(_pool) {
+      for(var i = 0; i < 500; i++) {
+        execute(i);
+      }
+    })
+
+    // Start connection
+    pool.connect();
+  }
+}
+
 exports['Should correctly reclaim immediateRelease socket'] = {
   metadata: { requires: { topology: "single" } },
 
