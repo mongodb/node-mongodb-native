@@ -140,6 +140,9 @@ function connectionFailureHandler(self, event) {
 
     // No more socket available propegate the event
     if(self.socketCount() == 0) {
+      // Do not emit error events, they are always close events
+      // do not trigger the low level error handler in node
+      event = event == 'error' ? 'close' : event;
       self.emit(event, err);
     }
   };
