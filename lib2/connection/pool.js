@@ -156,7 +156,7 @@ function connectionFailureHandler(self, event) {
     }
 
     // Start reconnection attempts
-    if(self.socketCount() == 0 && self.options.reconnect && !self.reconnectId) {
+    if(!self.isConnected() && self.options.reconnect && !self.reconnectId) {
       self.state = DISCONNECTED;
       self.reconnectId = setTimeout(attemptReconnect(self), self.options.reconnectInterval);
     }
@@ -343,6 +343,17 @@ Pool.prototype.socketCount = function() {
   return this.availableConnections.length
     + this.inUseConnections.length
     + this.connectingConnections.length;
+}
+
+Pool.prototype.isConnected = function() {
+  var connections = this.availableConnections
+    .concat(this.inUseConnections)
+    .concat(this.connectingConnections);
+  for(var i = 0; i < connections.length; i++) {
+    if(connections[i].isConnected()) return true;
+  }
+
+  return false;
 }
 
 Pool.prototype.connect = function(auth) {
