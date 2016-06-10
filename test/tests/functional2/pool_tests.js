@@ -229,6 +229,7 @@ exports['Should correctly recover from a server outage'] = {
         host: configuration.host
       , port: configuration.port
       , socketTimeout: 3000
+      , reconnectTries: 120
       , bson: new bson()
     })
 
@@ -252,14 +253,14 @@ exports['Should correctly recover from a server outage'] = {
         var query = new Query(new bson(), 'system.$cmd', {ismaster:true}, {numberToSkip: 0, numberToReturn: 1});
         pool.write(query.toBin(), messageHandler);
         if(i == 250) {
-          configuration.manager.stop(9).then(function() {
-            console.log("=== server stop")
-            configuration.manager.start().then(function() {
-              console.log("=== server start")
-            });
-          });
-          // configuration.manager.restart(true).then(function() {
+          // configuration.manager.stop(9).then(function() {
+          //   console.log("=== server stop")
+          //   configuration.manager.start().then(function() {
+          //     console.log("=== server start")
+          //   });
           // });
+          configuration.manager.restart(true).then(function() {
+          });
         }
       }, i);
     }
@@ -290,6 +291,7 @@ exports['Should correctly recover from a longer server outage'] = {
       , port: configuration.port
       , socketTimeout: 3000
       , bson: new bson()
+      , reconnectTries: 120
     })
 
     var index = 0;
