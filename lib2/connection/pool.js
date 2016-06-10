@@ -41,9 +41,16 @@ var Pool = function(options) {
     ssl: false, checkServerIdentity: false,
     ca: null, cert: null, key: null, passPhrase: null,
     rejectUnauthorized: false,
-    promoteLongs: true
+    promoteLongs: true,
+    // Reconnection options
+    reconnect: true,
+    reconnectInterval: 1000,
+    reconnectTries: 30
   }, options);
 
+  // Current reconnect retries
+  this.retriesLeft = options.reconnectTries;
+  this.reconnectId = null;
   // No bson parser passed in
   if(!options.bson || (options.bson
     && (typeof options.bson.serialize != 'function' || typeof options.bson.deserialize != 'function'))) throw new Error("must pass in valid bson parser");
@@ -139,13 +146,85 @@ function connectionFailureHandler(self, event) {
     }
 
     // No more socket available propegate the event
-    if(self.socketCount() == 0) {
+    if(self.socketCount() == 0 && !self.options.reconnect) {
       // Do not emit error events, they are always close events
       // do not trigger the low level error handler in node
       event = event == 'error' ? 'close' : event;
       self.emit(event, err);
     }
+
+    // Start reconnection attempts
+    if(self.socketCount() == 0 && self.options.reconnect && !self.reconnectId) {
+      self.reconnectId = setTimeout(attempReconnect(self), self.options.reconnectInterval);
+    }
   };
+}
+
+function attempReconnect(self) {
+  if(self.state == DESTROYED) return;
+  console.log("========== attempReconnect")
+  // If we have failure schedule a retry
+  function _connectionFailureHandler(self, event) {
+    return function() {
+      self.retriesLeft = self.retriesLeft - 1;
+      // How many retries are left
+      if(self.retriesLeft == 0) {
+        // Destroy the instance
+        self.destroy();
+        // Emit close event
+        self.emit('close', self);
+      } else {
+        self.reconnectId = setTimeout(attempReconnect(self), self.options.reconnectInterval);
+      }
+    }
+  }
+
+  // Got a connect handler
+  function _connectHandler(self) {
+    return function() {
+      // Assign
+      var connection = this;
+
+      // Pool destroyed stop the connection
+      if(self.state == DESTROYED) {
+        return connection.destroy();
+      }
+
+      // Clear out all handlers
+      handlers.forEach(function(event) {
+        connection.removeAllListeners(event);
+      });
+
+      // Reset reconnect id
+      self.reconnectId = null;
+
+      // Apply pool connection handlers
+      connection.once('error', connectionFailureHandler(this, 'error'));
+      connection.once('close', connectionFailureHandler(this, 'close'));
+      connection.once('timeout', connectionFailureHandler(this, 'timeout'));
+      connection.once('parseError', connectionFailureHandler(this, 'parseError'));
+
+      // Apply any auth to the connection
+      reauthenticate(self, this, function(err) {
+        // Reset retries
+        self.retriesLeft = self.options.reconnectTries;
+        // Push to available connections
+        self.availableConnections.push(connection);
+        // Trigger execute to start everything up again
+        _execute(self)();
+      });
+    }
+  }
+
+  // Create a connection
+  var connection = new Connection(messageHandler(self), self.options);
+  // Add handlers
+  connection.on('close', _connectionFailureHandler(self, 'close'));
+  connection.on('error', _connectionFailureHandler(self, 'error'));
+  connection.on('timeout', _connectionFailureHandler(self, 'timeout'));
+  connection.on('parseError', _connectionFailureHandler(self, 'parseError'));
+  // On connection
+  connection.on('connect', _connectHandler(self));
 }
 
 function moveConnectionBetween(connection, from, to) {
@@ -267,7 +346,6 @@ Pool.prototype.connect = function(auth) {
   // Add listeners to the connection
   connection.once('connect', function(connection) {
     if(self.state == DESTROYED) return self.destroy();
-
     // Authenticate
     authenticate(self, args, connection, function(err) {
       if(self.state == DESTROYED) return self.destroy();
@@ -282,8 +360,6 @@ Pool.prototype.connect = function(auth) {
       moveConnectionBetween(connection, self.connectingConnections, self.availableConnections);
       // Emit the connect event
       self.emit('connect', self);
-      // Execute any backed up commands
-      _execute(self)();
     });
   });
 
@@ -491,6 +567,9 @@ function removeConnection(self, connection) {
   if(remove(connection, self.connectingConnections)) return;
 }
 
+// All event handlers
+var handlers = ["close", "message", "error", "timeout", "parseError", "connect"];
+
 function _createConnection(self) {
   var connection = new Connection(messageHandler(self), self.options);
 
@@ -506,9 +585,6 @@ function _createConnection(self) {
       removeConnection(self, _connection);
     }
   }
-
-  // All event handlers
-  var handlers = ["close", "message", "error", "timeout", "parseError", "connect"];
 
   // Handle successful connection
   var tempConnectHandler = function(_connection) {
