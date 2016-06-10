@@ -157,13 +157,14 @@ function connectionFailureHandler(self, event) {
     // Start reconnection attempts
     if(self.socketCount() == 0 && self.options.reconnect && !self.reconnectId) {
       self.state = DISCONNECTED;
-      self.reconnectId = setTimeout(attempReconnect(self), self.options.reconnectInterval);
+      self.reconnectId = setTimeout(attemptReconnect(self), self.options.reconnectInterval);
     }
   };
 }
 
-function attempReconnect(self) {
+function attemptReconnect(self) {
   return function() {
+    console.log("==== attemptReconnect :: " + self.state)
     if(self.state == DESTROYED) return;
     // If we have failure schedule a retry
     function _connectionFailureHandler(self, event) {
@@ -171,12 +172,13 @@ function attempReconnect(self) {
         self.retriesLeft = self.retriesLeft - 1;
         // How many retries are left
         if(self.retriesLeft == 0) {
+          console.log("==== attemptReconnect :: destroy")
           // Destroy the instance
           self.destroy();
           // Emit close event
           self.emit('close', self);
         } else {
-          self.reconnectId = setTimeout(attempReconnect(self), self.options.reconnectInterval);
+          self.reconnectId = setTimeout(attemptReconnect(self), self.options.reconnectInterval);
         }
       }
     }
@@ -184,6 +186,7 @@ function attempReconnect(self) {
     // Got a connect handler
     function _connectHandler(self) {
       return function() {
+        console.log("==== attemptReconnect :: connect")
         // Assign
         var connection = this;
 
