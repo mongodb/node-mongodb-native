@@ -253,7 +253,9 @@ exports['Should correctly recover from a server outage'] = {
         pool.write(query.toBin(), messageHandler);
         if(i == 250) {
           configuration.manager.stop(9).then(function() {
+            console.log("=== server stop")
             configuration.manager.start().then(function() {
+              console.log("=== server start")
             });
           });
           // configuration.manager.restart(true).then(function() {
@@ -311,8 +313,11 @@ exports['Should correctly recover from a longer server outage'] = {
         pool.write(query.toBin(), messageHandler);
         if(i == 250) {
           configuration.manager.stop(9).then(function() {
+            console.log("=== server stop")
+
             setTimeout(function() {
               configuration.manager.start().then(function() {
+                console.log("=== server start")
               });
             }, 5000);
           });
