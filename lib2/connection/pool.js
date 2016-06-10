@@ -136,7 +136,7 @@ function reauthenticate(pool, connection, cb) {
 
 function connectionFailureHandler(self, event) {
   return function(err) {
-    console.log("== connectionFailureHandler :: " + event)
+    console.log("== connectionFailureHandler :: " + event + " :: " + self.socketCount())
     // console.log("============== this")
     // console.dir(this.workItem)
     removeConnection(self, this);
@@ -581,6 +581,7 @@ function removeConnection(self, connection) {
   if(remove(connection, self.availableConnections)) return;
   if(remove(connection, self.inUseConnections)) return;
   if(remove(connection, self.connectingConnections)) return;
+  if(remove(connection, self.nonAuthenticatedConnections)) return;
 }
 
 // All event handlers
