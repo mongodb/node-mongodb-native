@@ -3,6 +3,7 @@
 var f = require('util').format
   , crypto = require('crypto')
   , require_optional = require('require_optional')
+  , Query = require('../connection/commands').Query
   , MongoError = require('../error');
 
 var AuthSession = function(db, username, password, options) {
@@ -34,7 +35,8 @@ try {
  * @class
  * @return {GSSAPI} A cursor instance
  */
-var GSSAPI = function() {
+var GSSAPI = function(bson) {
+  this.bson = bson;
   this.authStore = [];
 }
 
@@ -138,10 +140,14 @@ var MongoDBGSSAPIFirstStep = function(mongo_auth_process, payload, db, username,
     , autoAuthorize: 1
   };
 
-  // Execute first sasl step
-  server.command("$external.$cmd"
-    , command
-    , { connection: connection }, function(err, r) {
+  // Write the commmand on the connection
+  server(connection, new Query(self.bson, "$external.$cmd", command, {
+    numberToSkip: 0, numberToReturn: 1
+  }).toBin(), function(err, r) {
+  // // Execute first sasl step
+  // server.command("$external.$cmd"
+  //   , command
+  //   , { connection: connection }, function(err, r) {
     if(err) return callback(err, false);
     var doc = r.result;
     // Execute mongodb transition
@@ -165,9 +171,13 @@ var MongoDBGSSAPISecondStep = function(mongo_auth_process, payload, doc, db, use
   };
 
   // Execute the command
-  server.command("$external.$cmd"
-    , command
-    , { connection: connection }, function(err, r) {
+  // Write the commmand on the connection
+  server(connection, new Query(self.bson, "$external.$cmd", command, {
+    numberToSkip: 0, numberToReturn: 1
+  }).toBin(), function(err, r) {
+  // server.command("$external.$cmd"
+  //   , command
+  //   , { connection: connection }, function(err, r) {
     if(err) return callback(err, false);
     var doc = r.result;
     // Call next transition for kerberos
@@ -189,9 +199,13 @@ var MongoDBGSSAPIThirdStep = function(mongo_auth_process, payload, doc, db, user
   };
 
   // Execute the command
-  server.command("$external.$cmd"
-    , command
-    , { connection: connection }, function(err, r) {
+  // server.command("$external.$cmd"
+  //   , command
+  //   , { connection: connection }, function(err, r) {
+  // Write the commmand on the connection
+  server(connection, new Query(self.bson, "$external.$cmd", command, {
+    numberToSkip: 0, numberToReturn: 1
+  }).toBin(), function(err, r) {
     if(err) return callback(err, false);
     mongo_auth_process.transition(null, function(err, payload) {
       if(err) return callback(err, null);

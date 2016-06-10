@@ -79,7 +79,7 @@ exports['Should correctly grow server pool on concurrent operations'] = {
 
     var messageHandler = function(err, result) {
       index = index + 1;
-      // console.dir(response.documents)
+
       test.equal(true, result.result.ismaster);
       // Did we receive an answer for all the messages
       if(index == 100) {
@@ -445,18 +445,12 @@ exports['Should correctly authenticate using scram-sha-1 using auth method'] = {
 
             var messageHandler = function(err, result) {
               index = index + 1;
-              // console.log("============================ done :: " + index)
 
               // Tests
               test.equal(null, err);
               test.equal(1, result.result.n);
               // Did we receive an answer for all the messages
               if(index == 100) {
-                // console.dir("pool.socketCount() = " + pool.socketCount())
-                // console.log("availableConnections = " + pool.availableConnections.length)
-                // console.log("inUseConnections = " + pool.inUseConnections.length)
-                // console.log("connectingConnections = " + pool.connectingConnections.length)
-                // console.log("nonAuthenticatedConnections = " + pool.nonAuthenticatedConnections.length)
                 test.equal(5, pool.socketCount());
                 test.equal(false, error);
 
@@ -467,13 +461,7 @@ exports['Should correctly authenticate using scram-sha-1 using auth method'] = {
 
             // Add event listeners
             pool.on('connect', function(_pool) {
-              // console.log("============ CONNECT:: " + _pool.state)
-
               pool.auth(method, 'test', 'admin', 'admin', function(err, r) {
-                // console.log("============================ err")
-                // console.dir(err)
-                // console.dir(r);
-
                 for(var i = 0; i < 100; i++) {
                   process.nextTick(function() {
                     var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});

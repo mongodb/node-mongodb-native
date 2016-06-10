@@ -3,6 +3,7 @@
 var f = require('util').format
   , crypto = require('crypto')
   , Binary = require('bson').Binary
+  , Query = require('../connection/commands').Query
   , MongoError = require('../error');
 
 var AuthSession = function(db, username, password) {
@@ -22,7 +23,8 @@ AuthSession.prototype.equal = function(session) {
  * @class
  * @return {Plain} A cursor instance
  */
-var Plain = function() {
+var Plain = function(bson) {
+  this.bson = bson;
   this.authStore = [];
 }
 
@@ -64,9 +66,12 @@ Plain.prototype.auth = function(server, connections, db, username, password, cal
       };
 
       // Let's start the process
-      server.command("$external.$cmd"
-        , command
-        , { connection: connection }, function(err, r) {
+      server(connection, new Query(self.bson, "$external.$cmd", command, {
+        numberToSkip: 0, numberToReturn: 1
+      }).toBin(), function(err, r) {
+      // server.command("$external.$cmd"
+      //   , command
+      //   , { connection: connection }, function(err, r) {
         // Adjust count
         count = count - 1;
 

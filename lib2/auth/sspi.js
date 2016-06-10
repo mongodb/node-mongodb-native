@@ -3,6 +3,7 @@
 var f = require('util').format
   , crypto = require('crypto')
   , require_optional = require('require_optional')
+  , Query = require('../connection/commands').Query
   , MongoError = require('../error');
 
 var AuthSession = function(db, username, password, options) {
@@ -34,7 +35,8 @@ try {
  * @class
  * @return {SSPI} A cursor instance
  */
-var SSPI = function() {
+var SSPI = function(bson) {
+  this.bson = bson;
   this.authStore = [];
 }
 
@@ -120,9 +122,12 @@ var SSIPAuthenticate = function(username, password, gssapiServiceName, server, c
   var mongo_auth_process = new MongoAuthProcess(connection.host, connection.port, gssapiServiceName, options);
 
   // Execute first sasl step
-  server.command("$external.$cmd"
-    , command
-    , { connection: connection }, function(err, r) {
+  server(connection, new Query(self.bson, "$external.$cmd", command, {
+    numberToSkip: 0, numberToReturn: 1
+  }).toBin(), function(err, r) {
+  // server.command("$external.$cmd"
+  //   , command
+  //   , { connection: connection }, function(err, r) {
     if(err) return callback(err, false);
     var doc = r.result;
 
@@ -140,9 +145,12 @@ var SSIPAuthenticate = function(username, password, gssapiServiceName, server, c
         };
 
         // Execute the command
-        server.command("$external.$cmd"
-          , command
-          , { connection: connection }, function(err, r) {
+        server(connection, new Query(self.bson, "$external.$cmd", command, {
+          numberToSkip: 0, numberToReturn: 1
+        }).toBin(), function(err, r) {
+        // server.command("$external.$cmd"
+        //   , command
+        //   , { connection: connection }, function(err, r) {
           if(err) return callback(err, false);
           var doc = r.result;
 
@@ -157,9 +165,12 @@ var SSIPAuthenticate = function(username, password, gssapiServiceName, server, c
             };
 
             // Execute the command
-            server.command("$external.$cmd"
-              , command
-              , { connection: connection }, function(err, r) {
+            server(connection, new Query(self.bson, "$external.$cmd", command, {
+              numberToSkip: 0, numberToReturn: 1
+            }).toBin(), function(err, r) {
+            // server.command("$external.$cmd"
+            //   , command
+            //   , { connection: connection }, function(err, r) {
               if(err) return callback(err, false);
               var doc = r.result;
 
@@ -172,9 +183,12 @@ var SSIPAuthenticate = function(username, password, gssapiServiceName, server, c
                 };
 
                 // Execute the command
-                server.command("$external.$cmd"
-                  , command
-                  , { connection: connection }, function(err, r) {
+                server(connection, new Query(self.bson, "$external.$cmd", command, {
+                  numberToSkip: 0, numberToReturn: 1
+                }).toBin(), function(err, r) {
+                // server.command("$external.$cmd"
+                //   , command
+                //   , { connection: connection }, function(err, r) {
                   if(err) return callback(err, false);
                   var doc = r.result;
 

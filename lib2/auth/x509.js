@@ -21,7 +21,8 @@ AuthSession.prototype.equal = function(session) {
  * @class
  * @return {X509} A cursor instance
  */
-var X509 = function() {
+var X509 = function(bson) {
+  this.bson = bson;
   this.authStore = [];
 }
 
@@ -59,9 +60,12 @@ X509.prototype.auth = function(server, connections, db, username, password, call
       };
 
       // Let's start the process
-      server.command("$external.$cmd"
-        , command
-        , { connection: connection }, function(err, r) {
+      server(connection, new Query(self.bson, "$external.$cmd", command, {
+        numberToSkip: 0, numberToReturn: 1
+      }).toBin(), function(err, r) {
+      // server.command("$external.$cmd"
+      //   , command
+      //   , { connection: connection }, function(err, r) {
         // Adjust count
         count = count - 1;
 
