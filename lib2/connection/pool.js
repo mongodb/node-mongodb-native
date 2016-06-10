@@ -129,7 +129,15 @@ function reauthenticate(pool, connection, cb) {
 
 function connectionFailureHandler(self, event) {
   return function(err) {
+    // console.log("============== this")
+    // console.dir(this.workItem)
     removeConnection(self, this);
+
+    // Flush out the callback if there is one
+    if(this.workItem && this.workItem.cb) {
+      this.workItem.cb(err);
+    }
+
     // No more socket available propegate the event
     if(self.socketCount() == 0) {
       self.emit(event, err);
