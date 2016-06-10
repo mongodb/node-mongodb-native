@@ -235,7 +235,7 @@ exports['Should correctly recover from a server outage'] = {
     var errorCount = 0;
 
     var messageHandler = function(err, r) {
-      console.log("--- messageHandler :: " + index)
+      // console.log("--- messageHandler :: " + index)
       if(err) errorCount = errorCount + 1;
       index = index + 1;
 
