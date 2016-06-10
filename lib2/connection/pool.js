@@ -136,6 +136,7 @@ function reauthenticate(pool, connection, cb) {
 
 function connectionFailureHandler(self, event) {
   return function(err) {
+    console.log("== connectionFailureHandler :: " + event)
     // console.log("============== this")
     // console.dir(this.workItem)
     removeConnection(self, this);
