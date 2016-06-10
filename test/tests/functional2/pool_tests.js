@@ -240,8 +240,45 @@ function executeCommand(configuration, db, cmd, options, cb) {
   pool.connect.apply(pool, options.auth);
 }
 
+function locateAuthMethod(configuration, cb) {
+  var Pool = require('../../../lib2/connection/pool')
+    , MongoError = require('../../../lib2/error')
+    , bson = require('bson').BSONPure.BSON
+    , Query = require('../../../lib2/connection/commands').Query;
+
+  // Set up operations
+  var db = 'admin';
+  var cmd = {ismaster:true}
+
+  // Attempt to connect
+  var pool = new Pool({
+    host: configuration.host, port: configuration.port, bson: new bson()
+  });
+
+  // Add event listeners
+  pool.on('connect', function(_pool) {
+    var query = new Query(new bson(), f('%s.$cmd', db), cmd, {numberToSkip: 0, numberToReturn: 1});
+    _pool.write(query.toBin(), {}, function(err, result) {
+      if(err) console.log(err.stack)
+      // Close the pool
+      _pool.destroy();
+      // If we have an error return
+      if(err) return cb(err);
+
+      // Establish the type of auth method
+      if(!result.result.maxWireVersion || result.result.maxWireVersion == 2) {
+        cb(null, 'mongocr');
+      } else {
+        cb(null, 'scram-sha-1');
+      }
+    });
+  });
+
+  pool.connect.apply(pool);
+}
+
 exports['Should correctly authenticate using scram-sha-1 using connect auth'] = {
-  metadata: { requires: { topology: "auth", mongodb: ">=3.0.0" } },
+  metadata: { requires: { topology: "auth" } },
 
   test: function(configuration, test) {
     var Pool = require('../../../lib2/connection/pool')
@@ -250,39 +287,43 @@ exports['Should correctly authenticate using scram-sha-1 using connect auth'] = 
 
     // Restart instance
     configuration.manager.restart().then(function() {
-      executeCommand(configuration, 'admin', {
-        createUser: 'root',
-        pwd: "root",
-        roles: [ { role: "root", db: "admin" } ],
-        digestPassword: true
-      }, function(err, r) {
+      locateAuthMethod(configuration, function(err, method) {
         test.equal(null, err);
-        // Attempt to connect
-        var pool = new Pool({
-          host: configuration.host, port: configuration.port, bson: new bson()
-        })
 
-        // Add event listeners
-        pool.on('connect', function(_pool) {
-          executeCommand(configuration, 'admin', {
-            dropUser: 'root'
-          }, { auth: ['scram-sha-1', 'admin', 'root', 'root']}, function(err, r) {
-            test.equal(null, err);
+        executeCommand(configuration, 'admin', {
+          createUser: 'root',
+          pwd: "root",
+          roles: [ { role: "root", db: "admin" } ],
+          digestPassword: true
+        }, function(err, r) {
+          test.equal(null, err);
+          // Attempt to connect
+          var pool = new Pool({
+            host: configuration.host, port: configuration.port, bson: new bson()
+          })
 
-            _pool.destroy();
-            test.done();
+          // Add event listeners
+          pool.on('connect', function(_pool) {
+            executeCommand(configuration, 'admin', {
+              dropUser: 'root'
+            }, { auth: [method, 'admin', 'root', 'root']}, function(err, r) {
+              test.equal(null, err);
+
+              _pool.destroy();
+              test.done();
+            });
           });
-        });
 
-        // Start connection
-        pool.connect('scram-sha-1', 'admin', 'root', 'root');
+          // Start connection
+          pool.connect(method, 'admin', 'root', 'root');
+        });
       });
     });
   }
 }
 
 exports['Should correctly authenticate using scram-sha-1 using connect auth and maintain auth on new connections'] = {
-  metadata: { requires: { topology: "auth", mongodb: ">=3.0.0" } },
+  metadata: { requires: { topology: "auth" } },
 
   test: function(configuration, test) {
     var Pool = require('../../../lib2/connection/pool')
@@ -290,102 +331,170 @@ exports['Should correctly authenticate using scram-sha-1 using connect auth and 
       , Query = require('../../../lib2/connection/commands').Query;
 
     // Restart instance
-    configuration.manager.restart().then(function() {
-      executeCommand(configuration, 'admin', {
-        createUser: 'root', pwd: "root", roles: [ { role: "root", db: "admin" } ], digestPassword: true
-      }, function(err, r) {
+    configuration.manager.restart(true).then(function() {
+      locateAuthMethod(configuration, function(err, method) {
         test.equal(null, err);
 
-        executeCommand(configuration, 'test', {
-          createUser: 'admin', pwd: "admin", roles: [ "readWrite", "dbAdmin" ], digestPassword: true
-        }, { auth: ['scram-sha-1', 'admin', 'root', 'root'] }, function(err, r) {
+        executeCommand(configuration, 'admin', {
+          createUser: 'root', pwd: "root", roles: [ { role: "root", db: "admin" } ], digestPassword: true
+        }, function(err, r) {
           test.equal(null, err);
 
-          // Attempt to connect
-          var pool = new Pool({
-            host: configuration.host, port: configuration.port, bson: new bson()
-          })
-
-          var index = 0;
-
-          var messageHandler = function(err, result) {
-            index = index + 1;
-
-            // Tests
+          executeCommand(configuration, 'test', {
+            createUser: 'admin', pwd: "admin", roles: [ "readWrite", "dbAdmin" ], digestPassword: true
+          }, { auth: [method, 'admin', 'root', 'root'] }, function(err, r) {
             test.equal(null, err);
-            test.equal(1, result.result.n);
-            // Did we receive an answer for all the messages
-            if(index == 100) {
-              test.equal(5, pool.socketCount());
 
-              pool.destroy();
-              test.done();
+            // Attempt to connect
+            var pool = new Pool({
+              host: configuration.host, port: configuration.port, bson: new bson()
+            })
+
+            var index = 0;
+
+            var messageHandler = function(err, result) {
+              index = index + 1;
+
+              // Tests
+              test.equal(null, err);
+              test.equal(1, result.result.n);
+              // Did we receive an answer for all the messages
+              if(index == 100) {
+                test.equal(5, pool.socketCount());
+
+                pool.destroy();
+                test.done();
+              }
             }
-          }
 
-          // Add event listeners
-          pool.on('connect', function(_pool) {
-            for(var i = 0; i < 10; i++)
-            process.nextTick(function() {
-              var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
-              _pool.write(query.toBin(), messageHandler)
+            // Add event listeners
+            pool.on('connect', function(_pool) {
+              for(var i = 0; i < 10; i++)
+              process.nextTick(function() {
+                var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
+                _pool.write(query.toBin(), messageHandler)
 
-              var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
-              _pool.write(query.toBin(), messageHandler)
+                var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
+                _pool.write(query.toBin(), messageHandler)
 
-              var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
-              _pool.write(query.toBin(), messageHandler)
+                var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
+                _pool.write(query.toBin(), messageHandler)
 
-              var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
-              _pool.write(query.toBin(), messageHandler)
+                var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
+                _pool.write(query.toBin(), messageHandler)
 
-              var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
-              _pool.write(query.toBin(), messageHandler)
+                var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
+                _pool.write(query.toBin(), messageHandler)
 
-              var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
-              _pool.write(query.toBin(), messageHandler)
+                var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
+                _pool.write(query.toBin(), messageHandler)
 
-              var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
-              _pool.write(query.toBin(), messageHandler)
+                var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
+                _pool.write(query.toBin(), messageHandler)
 
-              var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
-              _pool.write(query.toBin(), messageHandler)
+                var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
+                _pool.write(query.toBin(), messageHandler)
 
-              var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
-              _pool.write(query.toBin(), messageHandler)
+                var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
+                _pool.write(query.toBin(), messageHandler)
 
-              var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
-              _pool.write(query.toBin(), messageHandler)
+                var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
+                _pool.write(query.toBin(), messageHandler)
+              });
             });
-          });
 
-          // Start connection
-          pool.connect('scram-sha-1', 'test', 'admin', 'admin');
+            // Start connection
+            pool.connect(method, 'test', 'admin', 'admin');
+          });
         });
       });
     });
   }
 }
 
-// exports['Should correctly authenticate using scram-sha-1 using auth method'] = {
-//   metadata: { requires: { topology: "auth", mongodb: ">=3.0.0" } },
-//
-//   test: function(configuration, test) {
-//     var Pool = require('../../../lib2/connection/pool')
-//       , bson = require('bson').BSONPure.BSON;
-//
-//     // Attempt to connect
-//     var pool = new Pool({
-//       host: configuration.host, port: configuration.port, bson: bson
-//     });
-//
-//     // Add event listeners
-//     pool.on('connect', function(_pool) {
-//       _pool.destroy();
-//       test.done();
-//     })
-//
-//     // Start connection
-//     pool.connect();
-//   }
-// }
+exports['Should correctly authenticate using scram-sha-1 using auth method'] = {
+  metadata: { requires: { topology: "auth" } },
+
+  test: function(configuration, test) {
+    var Pool = require('../../../lib2/connection/pool')
+      , bson = require('bson').BSONPure.BSON
+      , Query = require('../../../lib2/connection/commands').Query;
+
+    // Restart instance
+    configuration.manager.restart(true).then(function() {
+      locateAuthMethod(configuration, function(err, method) {
+        test.equal(null, err);
+
+        executeCommand(configuration, 'admin', {
+          createUser: 'root', pwd: "root", roles: [ { role: "root", db: "admin" } ], digestPassword: true
+        }, function(err, r) {
+          test.equal(null, err);
+
+          executeCommand(configuration, 'test', {
+            createUser: 'admin', pwd: "admin", roles: [ "readWrite", "dbAdmin" ], digestPassword: true
+          }, { auth: [method, 'admin', 'root', 'root'] }, function(err, r) {
+            test.equal(null, err);
+
+            // Attempt to connect
+            var pool = new Pool({
+              host: configuration.host, port: configuration.port, bson: new bson()
+            })
+
+            var index = 0;
+            var error = false;
+
+            var messageHandler = function(err, result) {
+              index = index + 1;
+              // console.log("============================ done :: " + index)
+
+              // Tests
+              test.equal(null, err);
+              test.equal(1, result.result.n);
+              // Did we receive an answer for all the messages
+              if(index == 100) {
+                // console.dir("pool.socketCount() = " + pool.socketCount())
+                // console.log("availableConnections = " + pool.availableConnections.length)
+                // console.log("inUseConnections = " + pool.inUseConnections.length)
+                // console.log("connectingConnections = " + pool.connectingConnections.length)
+                // console.log("nonAuthenticatedConnections = " + pool.nonAuthenticatedConnections.length)
+                test.equal(5, pool.socketCount());
+                test.equal(false, error);
+
+                pool.destroy();
+                test.done();
+              }
+            }
+
+            // Add event listeners
+            pool.on('connect', function(_pool) {
+              // console.log("============ CONNECT:: " + _pool.state)
+
+              pool.auth(method, 'test', 'admin', 'admin', function(err, r) {
+                // console.log("============================ err")
+                // console.dir(err)
+                // console.dir(r);
+
+                for(var i = 0; i < 100; i++) {
+                  process.nextTick(function() {
+                    var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
+                    _pool.write(query.toBin(), messageHandler)
+                  });
+                }
+              });
+
+              for(var i = 0; i < 100; i++) {
+                process.nextTick(function() {
+                  var query = new Query(new bson(), 'system.$cmd', {ismaster:true}, {numberToSkip: 0, numberToReturn: 1});
+                  _pool.write(query.toBin(), function(e, r) {if(e) error = e;});
+                });
+              }
+            });
+
+            // Start connection
+            pool.connect();
+          });
+        });
+      });
+    });
+  }
+}

@@ -4,7 +4,6 @@ var f = require('util').format
   , crypto = require('crypto')
   , Query = require('../connection/commands').Query
   , Binary = require('bson').Binary
-  , BSON = require('bson')
   , MongoError = require('../error');
 
 var AuthSession = function(db, username, password) {

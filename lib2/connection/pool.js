@@ -65,6 +65,10 @@ var Pool = function(options) {
     , 'plain': new Plain(options.bson), 'gssapi': new GSSAPI(options.bson)
     , 'sspi': new SSPI(options.bson), 'scram-sha-1': new ScramSHA1(options.bson)
   }
+  // Are we currently authenticating
+  this.authenticating = false;
+  this.nonAuthenticatedConnections = [];
+  this.authenticatingTimestamp = null;
 }
 
 inherits(Pool, EventEmitter);
@@ -144,37 +148,94 @@ function moveConnectionBetween(connection, from, to) {
 
 function messageHandler(self) {
   return function(message, connection) {
+    // console.log("======= message")
     // Get the callback
     var workItem = connection.workItem;
-    // Clear out workItem
-    connection.workItem = null;
-    // Release the connection back to the pool
-    moveConnectionBetween(connection, self.inUseConnections, self.availableConnections);
 
-    // Keep executing, ensure current message handler does not stop execution
-    process.nextTick(function() {
-      _execute(self)();
-    });
+    function authenticateStragglers(self, connection, callback) {
+      // console.log("!!! authenticateStragglers 0")
+      // Get any non authenticated connections
+      var connections = self.nonAuthenticatedConnections.slice(0);
+      var nonAuthenticatedConnections = self.nonAuthenticatedConnections;
+      self.nonAuthenticatedConnections = [];
 
-    // Time to dispatch the message if we have a callback
-    if(!workItem.immediateRelease) {
-      try {
-        // Parse the message according to the provided options
-        message.parse(workItem);
-      } catch(err) {
-        // console.log("ERROR")
-        return workItem.cb(MongoError.create(err));
+      // Establish if the connection need to be authenticated
+      // Add to authentication list if
+      // 1. we were in an authentication process when the operation was executed
+      // 2. our current authentication timestamp is from the workItem one, meaning an auth has happened
+      if(connection.workItem.authenticating == true
+        || (typeof connection.workItem.authenticatingTimestamp == 'number' && connection.workItem.authenticatingTimestamp != self.authenticatingTimestamp)) {
+          // console.log("!!! authenticateStragglers 0:1")
+          // console.log(connection.workItem.authenticating)
+          // console.log(connection.workItem.authenticatingTimestamp)
+          // console.log(self.authenticatingTimestamp)
+
+        // Add connection to the list
+        connections.push(connection);
       }
 
-      // Establish if we have an error
-      if(message.documents[0].ok == 0 || message.documents[0]['$err']
-      || message.documents[0]['errmsg'] || message.documents[0]['code']) {
-        return workItem.cb(MongoError.create(message.documents[0]));
+      // Clear out workItem
+      connection.workItem = null;
+
+      // No connections need to be re-authenticated
+      if(connections.length == 0) {
+        // Release the connection back to the pool
+        moveConnectionBetween(connection, self.inUseConnections, self.availableConnections);
+        // console.log("=============== authenticateStragglers")
+        // console.log("  self.inUseConnections = " + self.inUseConnections.length)
+        // console.log("  self.availableConnections = " + self.availableConnections.length)
+        // Finish
+        return callback();
       }
 
-      // Return the documents
-      workItem.cb(null, new CommandResult(message.documents[0], connection));
+      // Apply re-authentication to all connections before releasing back to pool
+      var connectionCount = connections.length;
+      // Authenticate all connections
+      for(var i = 0; i < connectionCount; i++) {
+        console.log("  !!! authenticateStragglers 0")
+        reauthenticate(self, connections[i], function(err) {
+          console.log("  !!! authenticateStragglers 1")
+          connectionCount = connectionCount - 1;
+
+          if(connectionCount == 0) {
+            console.log("  !!! authenticateStragglers 2")
+            // Put non authenticated connections in available connections
+            self.availableConnections = self.availableConnections.concat(nonAuthenticatedConnections);
+            // Release the connection back to the pool
+            moveConnectionBetween(connection, self.inUseConnections, self.availableConnections);
+            // Return
+            callback();
+          }
+        });
+      }
     }
+
+    authenticateStragglers(self, connection, function(err) {
+      // Keep executing, ensure current message handler does not stop execution
+      process.nextTick(function() {
+        _execute(self)();
+      });
+
+      // Time to dispatch the message if we have a callback
+      if(!workItem.immediateRelease) {
+        try {
+          // Parse the message according to the provided options
+          message.parse(workItem);
+        } catch(err) {
+          // console.log("ERROR")
+          return workItem.cb(MongoError.create(err));
+        }
+
+        // Establish if we have an error
+        if(message.documents[0].ok == 0 || message.documents[0]['$err']
+        || message.documents[0]['errmsg'] || message.documents[0]['code']) {
+          return workItem.cb(MongoError.create(message.documents[0]));
+        }
+
+        // Return the documents
+        workItem.cb(null, new CommandResult(message.documents[0], connection));
+      }
+    });
   }
 }
 
@@ -205,7 +266,8 @@ Pool.prototype.connect = function(auth) {
       if(err) {
         return self.emit('error', err);
       }
-
+      // Set connected mode
+      self.state = CONNECTED;
       // Move the active connection
       moveConnectionBetween(connection, self.connectingConnections, self.availableConnections);
       // Emit the connect event
@@ -232,12 +294,96 @@ Pool.prototype.connect = function(auth) {
  */
 Pool.prototype.auth = function(mechanism, db) {
   var self = this;
-  var args = Array.prototype.slice.call(arguments, 2);
+  var args = Array.prototype.slice.call(arguments, 0);
   var callback = args.pop();
-
+  // If we are not connected don't allow additonal authentications to happen
+  if(this.state != CONNECTED) throw new MongoError('connection in unlawful state ' + this.state);
   // If we don't have the mechanism fail
   if(self.authProviders[mechanism] == null && mechanism != 'default')
     throw new MongoError(f("auth provider %s does not exist", mechanism));
+
+  // Signal that we are authenticating a new set of credentials
+  this.authenticating = true;
+  this.authenticatingTimestamp = new Date().getTime();
+
+  // Authenticate all live connections
+  function authenticateLiveConnections(self, args, cb) {
+    // console.log("===================== authenticateLiveConnections 0")
+    // Get the current viable connections
+    var connections = self.availableConnections;
+    // Allow nothing else to use the connections while we authenticate them
+    self.availableConnections = [];
+
+    var connectionsCount = connections.length;
+    var error = null;
+    // No connections available, return
+    if(connectionsCount == 0) return callback(null);
+    // console.log("===================== authenticateLiveConnections 1 :: " + connectionsCount)
+    // Authenticate the connections
+    for(var i = 0; i < connections.length; i++) {
+      // console.log("===================== authenticateLiveConnections 2");
+      authenticate(self, args, connections[i], function(err) {
+        // console.log("===================== authenticateLiveConnections 3");
+        connectionsCount = connectionsCount - 1;
+
+        // Store the error
+        if(err) error = err;
+
+        // Processed all connections
+        if(connectionsCount == 0) {
+          // Auth finished
+          self.authenticating = false;
+          // Add the connections back to available connections
+          self.availableConnections = self.availableConnections.concat(connections);
+          // We had an error, return it
+          if(error) return cb(error);
+          cb(null);
+        }
+      });
+    }
+  }
+
+  // // Authenticate all straggler connections
+  // function authenticateStragglerConnections(self, args, cb) {
+  //   // Get the current viable connections
+  //   var connections = self.nonAuthenticatedConnections;
+  //   var connectionsCount = connections.length;
+  //   var error = null;
+  //   // No connections available, return
+  //   if(connectionsCount == 0) return callback(null);
+  //   console.log("===================== authenticateStragglerConnections")
+  //   // Authenticate the connections
+  //   for(var i = 0; i < connections.length; i++) {
+  //     authenticate(self, args, connections[i], function(err) {
+  //       connectionsCount = connectionsCount - 1;
+  //       // Store the error
+  //       if(err) error = err;
+  //
+  //       if(connectionsCount == 0) {
+  //         // Return the connections to avilable connections
+  //         self.availableConnections = self.availableConnections.concat(self.nonAuthenticatedConnections);
+  //         // No more straggler connections left
+  //         self.nonAuthenticatedConnections = [];
+  //         // We had an error, return it
+  //         if(error) return cb(error);
+  //         cb(null);
+  //       }
+  //     });
+  //   }
+  // }
+
+  // Authenticate all live connections
+  authenticateLiveConnections(self, args, function(err) {
+    // Credentials correctly stored in auth provider if successful
+    // Any new connections will now reauthenticate correctly
+    self.authenticating = false;
+    // Return after authentication connections
+    callback(err);
+    // // Authenticate all straggler connections
+    // authenticateStragglerConnections(self, args, function(_err) {
+    //   callback(_err || err);
+    // });
+  });
 }
 
 Pool.prototype.destroy = function() {
@@ -365,10 +511,17 @@ function _createConnection(self) {
           _connection.destroy();
         }
 
-        // Push to available
-        self.availableConnections.push(_connection);
-        // Execute any work waiting
-        _execute(self)();
+        // If we are authenticating at the moment
+        // Do not automatially put in available connections
+        // As we need to apply the credentials first
+        if(self.authenticating) {
+          self.nonAuthenticatedConnections.push(_connection);
+        } else {
+          // Push to available
+          self.availableConnections.push(_connection);
+          // Execute any work waiting
+          _execute(self)();
+        }
       });
     }
   }
@@ -392,53 +545,73 @@ function _execute(self) {
     // Set pool as executing
     self.executing = true;
 
-    // As long as we have available connections
-    while(true) {
-      // Total availble connections
-      var totalConnections = self.availableConnections.length
-        + self.connectingConnections.length
-        + self.inUseConnections.length;
+    // Wait for auth to clear before continuing
+    function waitForAuth(cb) {
+      if(!self.authenticating) return cb();
+      // Wait for a milisecond and try again
+      setTimeout(function() {
+        waitForAuth(cb);
+      }, 1);
+    }
 
-      // Have we not reached the max connection size yet
-      if(self.availableConnections.length == 0
-        && self.connectingConnections.length == 0
-        && totalConnections < self.options.size
-        && self.queue.length > 0) {
-        // Create a new connection
-        _createConnection(self);
-        // Attempt to execute again
-        self.executing = false;
-        return;
-      }
+    // Block on any auth in process
+    waitForAuth(function() {
+      // As long as we have available connections
+      while(true) {
+        // Total availble connections
+        var totalConnections = self.availableConnections.length
+          + self.connectingConnections.length
+          + self.inUseConnections.length;
 
-      // No available connections available
-      if(self.availableConnections.length == 0) break;
-      if(self.queue.length == 0) break;
+        // Have we not reached the max connection size yet
+        if(self.availableConnections.length == 0
+          && self.connectingConnections.length == 0
+          && totalConnections < self.options.size
+          && self.queue.length > 0) {
+          // Create a new connection
+          _createConnection(self);
+          // Attempt to execute again
+          self.executing = false;
+          return;
+        }
 
-      // Get a connection
-      var connection = self.availableConnections.pop();
-      if(connection.isConnected()) {
-        // Get the next work item
-        var workItem = self.queue.shift();
+        // No available connections available
+        if(self.availableConnections.length == 0) break;
+        if(self.queue.length == 0) break;
 
-        // Get actual binary commands
-        var buffer = workItem.buffer;
+        // Get a connection
+        var connection = self.availableConnections.pop();
+        if(connection.isConnected()) {
+          // Get the next work item
+          var workItem = self.queue.shift();
 
-        // Add connection to workers in flight
-        self.inUseConnections.push(connection);
+          // Get actual binary commands
+          var buffer = workItem.buffer;
 
-        // Put operation on the wire
-        connection.write(buffer);
-        // Add current associated callback to the connection
-        connection.workItem = workItem
+          // Add connection to workers in flight
+          self.inUseConnections.push(connection);
 
-        // Fire and forgot message, release the socket
-        if(workItem.immediateRelease) {
-          self.availableConnections.push(connection);
-          self.inUseConnections.pop();
+          // Set current status of authentication process
+          workItem.authenticating = self.authenticating;
+          workItem.authenticatingTimestamp = self.authenticatingTimestamp;
+
+          // Add current associated callback to the connection
+          connection.workItem = workItem
+
+          // Put operation on the wire
+          connection.write(buffer);
+
+          // Fire and forgot message, release the socket
+          if(workItem.immediateRelease && !self.authenticating) {
+            self.inUseConnections.pop();
+            self.availableConnections.push(connection);
+          } else if(workItem.immediateRelease && self.authenticating) {
+            self.inUseConnections.pop();
+            self.nonAuthenticatedConnections.push(connection);
+          }
         }
       }
-    }
+    });
 
     self.executing = false;
   }
