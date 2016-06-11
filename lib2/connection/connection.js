@@ -14,6 +14,8 @@ var _id = 0;
 var debugFields = ['host', 'port', 'size', 'keepAlive', 'keepAliveInitialDelay', 'noDelay'
   , 'connectionTimeout', 'socketTimeout', 'singleBufferSerializtion', 'ssl', 'ca', 'cert'
   , 'rejectUnauthorized', 'promoteLongs', 'checkServerIdentity'];
+var connectionAccounting = false;
+var connections = {};
 
 /**
  * Creates a new Connection instance
@@ -112,10 +114,24 @@ var Connection = function(messageHandler, options) {
 
 inherits(Connection, EventEmitter);
 
+Connection.enableConnectionAccounting = function() {
+  connectionAccounting = true;
+}
+
+Connection.disableConnectionAccounting = function() {
+  connectionAccounting = false;
+  connections = {};
+}
+
+Connection.connections = function() {
+  return connections;
+}
+
 //
 // Connection handlers
 var errorHandler = function(self) {
   return function(err) {
+    if(connectionAccounting) delete connections[self.id];
     // Debug information
     if(self.logger.isDebug()) self.logger.debug(f('connection %s for [%s:%s] errored out with [%s]', self.id, self.host, self.port, JSON.stringify(err)));
     // Emit the error
@@ -125,6 +141,7 @@ var errorHandler = function(self) {
 
 var timeoutHandler = function(self) {
   return function(err) {
+    if(connectionAccounting) delete connections[self.id];
     // Debug information
     if(self.logger.isDebug()) self.logger.debug(f('connection %s for [%s:%s] timed out', self.id, self.host, self.port));
     // Emit timeout error
@@ -136,6 +153,7 @@ var timeoutHandler = function(self) {
 
 var closeHandler = function(self) {
   return function(hadError) {
+    if(connectionAccounting) delete connections[self.id];
     // Debug information
     if(self.logger.isDebug()) self.logger.debug(f('connection %s with for [%s:%s] closed', self.id, self.host, self.port));
     // Emit close event
@@ -318,6 +336,8 @@ var dataHandler = function(self) {
 Connection.prototype.connect = function(_options) {
   var self = this;
   _options = _options || {};
+  // Set the connections
+  if(connectionAccounting) connections[this.id] = this;
   // Check if we are overriding the promoteLongs
   if(typeof _options.promoteLongs == 'boolean') {
     self.responseOptions.promoteLongs = _options.promoteLongs;
@@ -390,6 +410,8 @@ Connection.prototype.connect = function(_options) {
  * @method
  */
 Connection.prototype.destroy = function() {
+  // Set the connections
+  if(connectionAccounting) delete connections[this.id];
   // console.log("=== connection destroy")
   if(this.connection) {
     this.connection.end();

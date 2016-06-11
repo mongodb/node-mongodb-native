@@ -7,7 +7,11 @@ exports['Should correctly connect pool to single server'] = {
 
   test: function(configuration, test) {
     var Pool = require('../../../lib2/connection/pool')
+      , Connection = require('../../../lib2/connection/connection')
       , bson = require('bson').BSONPure.BSON;
+
+    // Enable connections accounting
+    Connection.disableConnectionAccounting();
 
     // Attempt to connect
     var pool = new Pool({
@@ -15,13 +19,15 @@ exports['Should correctly connect pool to single server'] = {
       , port: configuration.port
       , bson: new bson()
       , messageHandler: function() {}
-    })
+    });
 
     // Add event listeners
     pool.on('connect', function(_pool) {
       _pool.destroy();
+      test.equal(0, Object.keys(Connection.connections()).length);
+      Connection.disableConnectionAccounting();
       test.done();
-    })
+    });
 
     // Start connection
     pool.connect();
@@ -33,8 +39,12 @@ exports['Should correctly write ismaster operation to the server'] = {
 
   test: function(configuration, test) {
     var Pool = require('../../../lib2/connection/pool')
+      , Connection = require('../../../lib2/connection/connection')
       , bson = require('bson').BSONPure.BSON
       , Query = require('../../../lib2/connection/commands').Query;
+
+    // Enable connections accounting
+    Connection.disableConnectionAccounting();
 
     // Attempt to connect
     var pool = new Pool({
@@ -50,6 +60,8 @@ exports['Should correctly write ismaster operation to the server'] = {
         test.equal(null, err);
         test.equal(true, result.result.ismaster);
         _pool.destroy();
+        test.equal(0, Object.keys(Connection.connections()).length);
+        Connection.disableConnectionAccounting();
         test.done();
       });
     })
@@ -64,8 +76,12 @@ exports['Should correctly grow server pool on concurrent operations'] = {
 
   test: function(configuration, test) {
     var Pool = require('../../../lib2/connection/pool')
+      , Connection = require('../../../lib2/connection/connection')
       , bson = require('bson').BSONPure.BSON
       , Query = require('../../../lib2/connection/commands').Query;
+
+    // Enable connections accounting
+    Connection.disableConnectionAccounting();
 
     // Index
     var index = 0;
@@ -86,6 +102,8 @@ exports['Should correctly grow server pool on concurrent operations'] = {
         test.equal(5, pool.socketCount());
 
         pool.destroy();
+        test.equal(0, Object.keys(Connection.connections()).length);
+        Connection.disableConnectionAccounting();
         test.done();
       }
     }
@@ -136,8 +154,12 @@ exports['Should correctly write ismaster operation to the server and handle time
 
   test: function(configuration, test) {
     var Pool = require('../../../lib2/connection/pool')
+      , Connection = require('../../../lib2/connection/connection')
       , bson = require('bson').BSONPure.BSON
       , Query = require('../../../lib2/connection/commands').Query;
+
+    // Enable connections accounting
+    Connection.disableConnectionAccounting();
 
     // Attempt to connect
     var pool = new Pool({
@@ -156,6 +178,8 @@ exports['Should correctly write ismaster operation to the server and handle time
 
     pool.on('timeout', function(_pool) {
       pool.destroy();
+      test.equal(0, Object.keys(Connection.connections()).length);
+      Connection.disableConnectionAccounting();
       test.done();
     });
 
@@ -169,8 +193,12 @@ exports['Should correctly error out operations if pool is closed in the middle o
 
   test: function(configuration, test) {
     var Pool = require('../../../lib2/connection/pool')
+      , Connection = require('../../../lib2/connection/connection')
       , bson = require('bson').BSONPure.BSON
       , Query = require('../../../lib2/connection/commands').Query;
+
+    // Enable connections accounting
+    Connection.disableConnectionAccounting();
 
     // Attempt to connect
     var pool = new Pool({
@@ -190,6 +218,8 @@ exports['Should correctly error out operations if pool is closed in the middle o
       if(index == 500) {
         test.ok(errorCount >= 250);
         pool.destroy();
+        test.equal(0, Object.keys(Connection.connections()).length);
+        Connection.disableConnectionAccounting();
         test.done();
       }
     }
@@ -221,8 +251,12 @@ exports['Should correctly recover from a server outage'] = {
 
   test: function(configuration, test) {
     var Pool = require('../../../lib2/connection/pool')
+      , Connection = require('../../../lib2/connection/connection')
       , bson = require('bson').BSONPure.BSON
       , Query = require('../../../lib2/connection/commands').Query;
+
+    // Enable connections accounting
+    Connection.disableConnectionAccounting();
 
     // Attempt to connect
     var pool = new Pool({
@@ -244,6 +278,8 @@ exports['Should correctly recover from a server outage'] = {
       if(index == 500) {
         test.ok(errorCount >= 0);
         pool.destroy();
+        test.equal(0, Object.keys(Connection.connections()).length);
+        Connection.disableConnectionAccounting();
         test.done();
       }
     }
@@ -282,8 +318,12 @@ exports['Should correctly recover from a longer server outage'] = {
 
   test: function(configuration, test) {
     var Pool = require('../../../lib2/connection/pool')
+      , Connection = require('../../../lib2/connection/connection')
       , bson = require('bson').BSONPure.BSON
       , Query = require('../../../lib2/connection/commands').Query;
+
+    // Enable connections accounting
+    Connection.disableConnectionAccounting();
 
     // Attempt to connect
     var pool = new Pool({
@@ -305,6 +345,8 @@ exports['Should correctly recover from a longer server outage'] = {
       if(index == 500) {
         test.ok(errorCount >= 0);
         pool.destroy();
+        test.equal(0, Object.keys(Connection.connections()).length);
+        Connection.disableConnectionAccounting();
         test.done();
       }
     }
@@ -344,8 +386,12 @@ exports['Should correctly reclaim immediateRelease socket'] = {
 
   test: function(configuration, test) {
     var Pool = require('../../../lib2/connection/pool')
+      , Connection = require('../../../lib2/connection/connection')
       , bson = require('bson').BSONPure.BSON
       , Query = require('../../../lib2/connection/commands').Query;
+
+    // Enable connections accounting
+    Connection.disableConnectionAccounting();
 
     // Attempt to connect
     var pool = new Pool({
@@ -372,6 +418,8 @@ exports['Should correctly reclaim immediateRelease socket'] = {
       test.equal(0, index);
 
       pool.destroy();
+      test.equal(0, Object.keys(Connection.connections()).length);
+      Connection.disableConnectionAccounting();
       test.done();
     });
 
@@ -455,8 +503,12 @@ exports['Should correctly authenticate using scram-sha-1 using connect auth'] = 
 
   test: function(configuration, test) {
     var Pool = require('../../../lib2/connection/pool')
+      , Connection = require('../../../lib2/connection/connection')
       , bson = require('bson').BSONPure.BSON
       , Query = require('../../../lib2/connection/commands').Query;
+
+    // Enable connections accounting
+    Connection.disableConnectionAccounting();
 
     // Restart instance
     configuration.manager.restart().then(function() {
@@ -483,6 +535,8 @@ exports['Should correctly authenticate using scram-sha-1 using connect auth'] = 
               test.equal(null, err);
 
               _pool.destroy();
+              test.equal(0, Object.keys(Connection.connections()).length);
+              Connection.disableConnectionAccounting();
               test.done();
             });
           });
@@ -500,8 +554,12 @@ exports['Should correctly authenticate using scram-sha-1 using connect auth and 
 
   test: function(configuration, test) {
     var Pool = require('../../../lib2/connection/pool')
+      , Connection = require('../../../lib2/connection/connection')
       , bson = require('bson').BSONPure.BSON
       , Query = require('../../../lib2/connection/commands').Query;
+
+    // Enable connections accounting
+    Connection.disableConnectionAccounting();
 
     // Restart instance
     configuration.manager.restart(true).then(function() {
@@ -536,6 +594,8 @@ exports['Should correctly authenticate using scram-sha-1 using connect auth and 
                 test.equal(5, pool.socketCount());
 
                 pool.destroy();
+                test.equal(0, Object.keys(Connection.connections()).length);
+                Connection.disableConnectionAccounting();
                 test.done();
               }
             }
@@ -590,8 +650,12 @@ exports['Should correctly authenticate using scram-sha-1 using auth method'] = {
 
   test: function(configuration, test) {
     var Pool = require('../../../lib2/connection/pool')
+      , Connection = require('../../../lib2/connection/connection')
       , bson = require('bson').BSONPure.BSON
       , Query = require('../../../lib2/connection/commands').Query;
+
+    // Enable connections accounting
+    Connection.disableConnectionAccounting();
 
     // Restart instance
     configuration.manager.restart(true).then(function() {
@@ -628,6 +692,8 @@ exports['Should correctly authenticate using scram-sha-1 using auth method'] = {
                 test.equal(false, error);
 
                 pool.destroy();
+                test.equal(0, Object.keys(Connection.connections()).length);
+                Connection.disableConnectionAccounting();
                 test.done();
               }
             }
