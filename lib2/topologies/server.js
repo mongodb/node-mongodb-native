@@ -71,6 +71,90 @@ Server.prototype.connect = function(options) {
   self.s.pool.connect(options.auth)
 }
 
+Server.prototype.getDescription = function() {
+  var self = this;
+}
+
+// Server.prototype.setBSONParserType = function(type) {
+// }
+
+Server.prototype.lastIsMaster = function() {
+  var self = this;
+}
+
+Server.prototype.isMasterLatencyMS = function() {
+}
+
+Server.prototype.unref = function() {
+  // this.s.pool.unref();
+}
+
+Server.prototype.isConnected = function() {
+  // return this.s.state == CONNECTED && this.s.pool.isConnected();
+}
+
+Server.prototype.isDestroyed = function() {
+  // return this.s.state == DESTROYED;
+}
+
+Server.prototype.command = function(ns, cmd, options, callback) {
+  var self = this;
+}
+
+Server.prototype.insert = function(ns, ops, options, callback) {
+  var self = this;
+}
+
+Server.prototype.update = function(ns, ops, options, callback) {
+  var self = this;
+}
+
+Server.prototype.remove = function(ns, ops, options, callback) {
+  var self = this;
+}
+
+Server.prototype.auth = function(mechanism, db) {
+  var self = this;
+}
+
+// Server.prototype.addReadPreferenceStrategy = function(name, strategy) {
+// Server.prototype.addAuthProvider = function(name, provider) {
+
+Server.prototype.equals = function(server) {
+  var self = this;
+}
+
+Server.prototype.connections = function() {
+  var self = this;
+}
+
+Server.prototype.getServer = function(options) {
+  return this;
+}
+
+Server.prototype.getServerFrom = function(connection) {
+  return this;
+}
+
+// Server.prototype.getCallbacks = function() {
+//   return this.s.callbacks;
+// }
+
+// Server.prototype.parserType = function() {
+//   var s = this.s;
+//   if(s.options.bson.serialize.toString().indexOf('[native code]') != -1)
+//     return 'c++';
+//   return 'js';
+// }
+
+Server.prototype.cursor = function(ns, cmd, cursorOptions) {
+  var self = this;
+}
+
+// Server.prototype.getConnection = function(options) {
+//   return this.s.pool.get();
+// }
+
 var listeners = ['close', 'error', 'timeout', 'parseError', 'connect'];
 
 Server.prototype.destroy = function() {

@@ -6,6 +6,7 @@ var inherits = require('util').inherits,
   MongoError = require('../error'),
   Logger = require('./logger'),
   f = require('util').format,
+  Query = require('./commands').Query,
   CommandResult = require('./command_result');
 
 var MongoCR = require('../auth/mongocr')
@@ -74,6 +75,7 @@ var Pool = function(options) {
   }
   // Are we currently authenticating
   this.authenticating = false;
+  this.loggingout = false;
   this.nonAuthenticatedConnections = [];
   this.authenticatingTimestamp = null;
 }
@@ -93,17 +95,17 @@ function authenticate(pool, auth, connection, cb) {
   // Get the provider
   var provider = pool.authProviders[mechanism];
 
-  // The write function used by the authentication mechanism (bypasses external)
-  function write(connection, buffer, callback) {
-    // Set the connection workItem callback
-    connection.workItem = {cb: callback};
-    // Write the buffer out to the connection
-    connection.write(buffer);
-  };
-
   // Authenticate using the provided mechanism
   provider.auth.apply(provider, [write, [connection], db].concat(auth.slice(2)).concat([cb]));
 }
+
+// The write function used by the authentication mechanism (bypasses external)
+function write(connection, buffer, callback) {
+  // Set the connection workItem callback
+  connection.workItem = {cb: callback};
+  // Write the buffer out to the connection
+  connection.write(buffer);
+};
 
 function reauthenticate(pool, connection, cb) {
   // Authenticate
@@ -112,14 +114,6 @@ function reauthenticate(pool, connection, cb) {
     if(providers.length == 0) return cb();
     // Get the provider name
     var provider = pool.authProviders[providers.pop()];
-
-    // The write function used by the authentication mechanism (bypasses external)
-    function write(connection, buffer, callback) {
-      // Set the connection workItem callback
-      connection.workItem = {cb: callback};
-      // Write the buffer out to the connection
-      connection.write(buffer);
-    };
 
     // Auth provider
     provider.reauthenticate(write, [connection], function(err, r) {
@@ -459,47 +453,60 @@ Pool.prototype.auth = function(mechanism, db) {
     }
   }
 
-  // // Authenticate all straggler connections
-  // function authenticateStragglerConnections(self, args, cb) {
-  //   // Get the current viable connections
-  //   var connections = self.nonAuthenticatedConnections;
-  //   var connectionsCount = connections.length;
-  //   var error = null;
-  //   // No connections available, return
-  //   if(connectionsCount == 0) return callback(null);
-  //   console.log("===================== authenticateStragglerConnections")
-  //   // Authenticate the connections
-  //   for(var i = 0; i < connections.length; i++) {
-  //     authenticate(self, args, connections[i], function(err) {
-  //       connectionsCount = connectionsCount - 1;
-  //       // Store the error
-  //       if(err) error = err;
-  //
-  //       if(connectionsCount == 0) {
-  //         // Return the connections to avilable connections
-  //         self.availableConnections = self.availableConnections.concat(self.nonAuthenticatedConnections);
-  //         // No more straggler connections left
-  //         self.nonAuthenticatedConnections = [];
-  //         // We had an error, return it
-  //         if(error) return cb(error);
-  //         cb(null);
-  //       }
-  //     });
-  //   }
-  // }
+  // Wait for a logout in process to happen
+  function waitForLogout(self, cb) {
+    if(!self.loggingout) return cb();
+    setTimeout(function() {
+      waitForLogout(self, cb);
+    }, 1)
+  }
 
-  // Authenticate all live connections
-  authenticateLiveConnections(self, args, function(err) {
-    // Credentials correctly stored in auth provider if successful
-    // Any new connections will now reauthenticate correctly
-    self.authenticating = false;
-    // Return after authentication connections
-    callback(err);
-    // // Authenticate all straggler connections
-    // authenticateStragglerConnections(self, args, function(_err) {
-    //   callback(_err || err);
-    // });
+  // Wait for loggout to finish
+  waitForLogout(self, function() {
+    // Authenticate all live connections
+    authenticateLiveConnections(self, args, function(err) {
+      // Credentials correctly stored in auth provider if successful
+      // Any new connections will now reauthenticate correctly
+      self.authenticating = false;
+      // Return after authentication connections
+      callback(err);
+      // // Authenticate all straggler connections
+      // authenticateStragglerConnections(self, args, function(_err) {
+      //   callback(_err || err);
+      // });
+    });
   });
+}
+
+Pool.prototype.logout = function(dbName, callback) {
+  var self = this;
+  if(typeof dbName != 'string') throw new MongoError('logout method requires a db name as first argument');
+  if(typeof callback != 'function') throw new MongoError('logout method requires a callback');
+
+  // Indicate logout in process
+  this.loggingout = true;
+
+  // Get all relevant connections
+  var connections = self.availableConnections.concat(self.inUseConnections);
+  var count = connections.length;
+  // Store any error
+  var error = null;
+
+  // Send logout command over all the connections
+  for(var i = 0; i < connections.length; i++) {
+    var query = new Query(this.options.bson
+      , f('%s.$cmd', dbName)
+      , {logout:1}, {numberToSkip: 0, numberToReturn: 1});
+    write(connections[i], query.toBin(), function(err, r) {
+      count = count - 1;
+      if(err) error = err;
+
+      if(count == 0) {
+        self.loggingout = false;
+        callback(error);
+      };
+    });
+  }
 }
 
 Pool.prototype.destroy = function() {
