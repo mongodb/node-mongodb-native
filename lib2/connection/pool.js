@@ -356,6 +356,10 @@ Pool.prototype.isConnected = function() {
   return false;
 }
 
+Pool.prototype.isDestroyed = function() {
+  return this.state == DESTROYED;
+}
+
 Pool.prototype.connect = function(auth) {
   if(this.state != DISCONNECTED) throw new MongoError('connection in unlawful state ' + this.state);
   var self = this;

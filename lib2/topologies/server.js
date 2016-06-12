@@ -7,6 +7,7 @@ var inherits = require('util').inherits,
   BSON = require('bson').native().BSON,
   Logger = require('../connection/logger'),
   Pool = require('../connection/pool'),
+  Query = require('../connection/commands').Query,
   PreTwoSixWireProtocolSupport = require('../wireprotocol/2_4_support'),
   TwoSixWireProtocolSupport = require('../wireprotocol/2_6_support'),
   ThreeTwoWireProtocolSupport = require('../wireprotocol/3_2_support');
@@ -31,7 +32,9 @@ var Server = function(options) {
     // Logger
     logger: Logger('Server', options),
     // BSON instance
-    bson: options.bson || new BSON()
+    bson: options.bson || new BSON(),
+    // Pool
+    pool: null
   }
 }
 
@@ -97,8 +100,77 @@ Server.prototype.isDestroyed = function() {
   // return this.s.state == DESTROYED;
 }
 
+function basicValidations(self, options) {
+  if(!self.s.pool) return MongoError.create('server instance is not connected');
+  if(self.s.pool.isDestroyed()) return MongoError.create('server instance pool was destroyed');
+  if(options.readPreference && !(options.readPreference instanceof ReadPreference)) {
+    throw new Error("readPreference must be an instance of ReadPreference");
+  }
+}
+
+function disconnectHandler(self, ns, cmd, options, callback) {
+  // Topology is not connected, save the call in the provided store to be
+  // Executed at some point when the handler deems it's reconnected
+  if(!self.s.pool.isConnected() && self.s.disconnectHandler != null) {
+    callback = bindToCurrentDomain(callback);
+    self.s.disconnectHandler.add('command', ns, cmd, options, callback);
+    return true;
+  }
+
+  // If we have no connection error
+  if(!self.s.pool.isConnected()) {
+    callback(MongoError.create(f("no connection available to server %s", self.name)));
+    return true;
+  }
+}
+
+/**
+ * Execute a command
+ * @method
+ * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+ * @param {object} cmd The command hash
+ * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+ * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
+ * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
+ * @param {Boolean} [options.fullResult=false] Return the full envelope instead of just the result document.
+ * @param {opResultCallback} callback A callback function
+ */
 Server.prototype.command = function(ns, cmd, options, callback) {
   var self = this;
+  if(typeof options == 'function') callback = options, options = {}, options = options || {};
+  var result = basicValidations(self, options);
+  if(result) return callback(result);
+
+  // Debug log
+  if(self.s.logger.isDebug()) self.s.logger.debug(f('executing command [%s] against %s', JSON.stringify({
+    ns: ns, cmd: cmd, options: debugOptions(debugFields, options)
+  }), self.name));
+
+  // If we are not connected or have a disconnectHandler specified
+  if(disconnectHandler(self, ns, cmd, options, callback)) return;
+
+  // Query options
+  var queryOptions = {
+    numberToSkip: 0,
+    numberToReturn: -1,
+    checkKeys: typeof options.checkKeys == 'boolean' ? options.checkKeys: false,
+    serializeFunctions: typeof options.serializeFunctions == 'boolean' ? options.serializeFunctions : false,
+    ignoreUndefined: typeof options.ignoreUndefined == 'boolean' ? options.ignoreUndefined : false
+  };
+
+  // Create a query instance
+  var query = new Query(self.s.bson, ns, cmd, queryOptions);
+  // Set slave OK of the query
+  query.slaveOk = options.readPreference ? options.readPreference.slaveOk() : false;
+
+  // Write options
+  var writeOptions = {
+    raw: typeof options.raw == 'boolean' ? options.raw : false,
+    promoteLongs: typeof options.promoteLongs == 'boolean' ? options.promoteLongs : true
+  };
+
+  // Write the operation to the pool
+  self.s.pool.write(query.toBin(), writeOptions, callback);
 }
 
 Server.prototype.insert = function(ns, ops, options, callback) {
