@@ -216,6 +216,7 @@ exports['Should correctly error out operations if pool is closed in the middle o
       index = index + 1;
 
       if(index == 500) {
+        console.log("== index :: " + index)
         test.ok(errorCount >= 250);
         pool.destroy();
         test.equal(0, Object.keys(Connection.connections()).length);
