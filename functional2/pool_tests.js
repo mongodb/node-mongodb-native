@@ -525,7 +525,7 @@ exports['Should correctly authenticate using scram-sha-1 using connect auth'] = 
     Connection.disableConnectionAccounting();
 
     // Restart instance
-    configuration.manager.restart().then(function() {
+    configuration.manager.restart(true).then(function() {
       locateAuthMethod(configuration, function(err, method) {
         test.equal(null, err);
 
@@ -733,6 +733,134 @@ exports['Should correctly authenticate using scram-sha-1 using auth method'] = {
 
             // Start connection
             pool.connect();
+          });
+        });
+      });
+    });
+  }
+}
+
+exports['Should correctly authenticate using scram-sha-1 using connect auth then logout'] = {
+  metadata: { requires: { topology: "auth" } },
+
+  test: function(configuration, test) {
+    var Pool = require('../../../lib2/connection/pool')
+      , Connection = require('../../../lib2/connection/connection')
+      , bson = require('bson').BSONPure.BSON
+      , Query = require('../../../lib2/connection/commands').Query;
+
+    // Enable connections accounting
+    Connection.disableConnectionAccounting();
+
+    // Restart instance
+    configuration.manager.restart(true).then(function() {
+      locateAuthMethod(configuration, function(err, method) {
+        test.equal(null, err);
+
+        executeCommand(configuration, 'admin', {
+          createUser: 'root', pwd: "root", roles: [ { role: "root", db: "admin" } ], digestPassword: true
+        }, function(err, r) {
+          test.equal(null, err);
+
+          executeCommand(configuration, 'test', {
+            createUser: 'admin', pwd: "admin", roles: [ "readWrite", "dbAdmin" ], digestPassword: true
+          }, { auth: [method, 'admin', 'root', 'root'] }, function(err, r) {
+            test.equal(null, err);
+            // Attempt to connect
+            var pool = new Pool({
+              host: configuration.host, port: configuration.port, bson: new bson()
+            })
+
+            // Add event listeners
+            pool.on('connect', function(_pool) {
+              var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
+              _pool.write(query.toBin(), function(err, r) {
+                test.equal(null, err);
+
+                // Logout pool
+                _pool.logout('test', function(err) {
+                  test.equal(null, err);
+
+                  _pool.write(query.toBin(), function(err, r) {
+                    test.ok(err != null);
+
+                    _pool.destroy();
+                    test.equal(0, Object.keys(Connection.connections()).length);
+                    Connection.disableConnectionAccounting();
+                    test.done();
+                  });
+                });
+              });
+            });
+
+            // Start connection
+            pool.connect(method, 'test', 'admin', 'admin');
+          });
+        });
+      });
+    });
+  }
+}
+
+exports['Should correctly have auth wait for logout to finish'] = {
+  metadata: { requires: { topology: "auth" } },
+
+  test: function(configuration, test) {
+    var Pool = require('../../../lib2/connection/pool')
+      , Connection = require('../../../lib2/connection/connection')
+      , bson = require('bson').BSONPure.BSON
+      , Query = require('../../../lib2/connection/commands').Query;
+
+    // Enable connections accounting
+    Connection.disableConnectionAccounting();
+
+    // Restart instance
+    configuration.manager.restart(true).then(function() {
+      locateAuthMethod(configuration, function(err, method) {
+        test.equal(null, err);
+
+        executeCommand(configuration, 'admin', {
+          createUser: 'root', pwd: "root", roles: [ { role: "root", db: "admin" } ], digestPassword: true
+        }, function(err, r) {
+          test.equal(null, err);
+
+          executeCommand(configuration, 'test', {
+            createUser: 'admin', pwd: "admin", roles: [ "readWrite", "dbAdmin" ], digestPassword: true
+          }, { auth: [method, 'admin', 'root', 'root'] }, function(err, r) {
+            test.equal(null, err);
+            // Attempt to connect
+            var pool = new Pool({
+              host: configuration.host, port: configuration.port, bson: new bson()
+            })
+
+            // Add event listeners
+            pool.on('connect', function(_pool) {
+              var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
+              _pool.write(query.toBin(), function(err, r) {
+                test.equal(null, err);
+
+                // Logout pool
+                _pool.logout('test', function(err) {
+                  test.equal(null, err);
+                });
+
+                pool.auth(method, 'test', 'admin', 'admin', function(err, r) {
+                  test.equal(null, err);
+
+                  _pool.write(query.toBin(), function(err, r) {
+                    test.equal(null, err);
+
+                    _pool.destroy();
+                    test.equal(0, Object.keys(Connection.connections()).length);
+                    Connection.disableConnectionAccounting();
+                    test.done();
+                  });
+                });
+              });
+            });
+
+            // Start connection
+            pool.connect(method, 'test', 'admin', 'admin');
           });
         });
       });
