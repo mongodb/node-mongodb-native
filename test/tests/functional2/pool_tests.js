@@ -336,6 +336,9 @@ exports['Should correctly recover from a longer server outage'] = {
 
     var index = 0;
     var errorCount = 0;
+    var reconnect = false;
+    var stopped = false;
+    var started = false;
 
     var messageHandler = function(err, r) {
       // console.log("--- messageHandler :: " + index)
@@ -343,25 +346,36 @@ exports['Should correctly recover from a longer server outage'] = {
       index = index + 1;
 
       if(index == 500) {
+        // console.log("===================== errorCount :: " + errorCount)
+        // console.dir(r)
         test.ok(errorCount >= 0);
         pool.destroy();
         test.equal(0, Object.keys(Connection.connections()).length);
         Connection.disableConnectionAccounting();
+        // console.log("=====================")
+        // console.dir(reconnect)
+        test.equal(true, stopped);
+        test.equal(true, started);
+        test.equal(true, reconnect);
         test.done();
       }
     }
+
+    pool.on('reconnect', function() {
+      reconnect = true;
+    });
 
     function execute(i) {
       setTimeout(function() {
         var query = new Query(new bson(), 'system.$cmd', {ismaster:true}, {numberToSkip: 0, numberToReturn: 1});
         pool.write(query.toBin(), messageHandler);
         if(i == 250) {
-          configuration.manager.stop(9).then(function() {
-            console.log("=== server stop")
+          configuration.manager.stop().then(function() {
+            stopped = true;
 
             setTimeout(function() {
               configuration.manager.start().then(function() {
-                console.log("=== server start")
+                started = true;
               });
             }, 5000);
           });

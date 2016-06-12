@@ -136,7 +136,7 @@ function reauthenticate(pool, connection, cb) {
 
 function connectionFailureHandler(self, event) {
   return function(err) {
-    console.log("== connectionFailureHandler :: " + event + " :: " + self.socketCount())
+    // console.log("== connectionFailureHandler :: " + event + " :: " + self.socketCount())
     // console.log("============== this")
     // console.dir(this.workItem)
     removeConnection(self, this);
@@ -164,7 +164,7 @@ function connectionFailureHandler(self, event) {
 
 function attemptReconnect(self) {
   return function() {
-    console.log("==== attemptReconnect :: " + self.state)
+    // console.log("==== attemptReconnect :: " + self.state)
     if(self.state == DESTROYED) return;
 
     // We are connected do not try again
@@ -179,7 +179,7 @@ function attemptReconnect(self) {
         self.retriesLeft = self.retriesLeft - 1;
         // How many retries are left
         if(self.retriesLeft == 0) {
-          console.log("==== attemptReconnect :: destroy")
+          // console.log("==== attemptReconnect :: destroy")
           // Destroy the instance
           self.destroy();
           // Emit close event
@@ -193,7 +193,7 @@ function attemptReconnect(self) {
     // Got a connect handler
     function _connectHandler(self) {
       return function() {
-        console.log("==== attemptReconnect :: connect")
+        // console.log("==== attemptReconnect :: connect")
         // Assign
         var connection = this;
 
@@ -298,13 +298,13 @@ function messageHandler(self) {
       var connectionCount = connections.length;
       // Authenticate all connections
       for(var i = 0; i < connectionCount; i++) {
-        console.log("  !!! authenticateStragglers 0")
+        // console.log("  !!! authenticateStragglers 0")
         reauthenticate(self, connections[i], function(err) {
-          console.log("  !!! authenticateStragglers 1")
+          // console.log("  !!! authenticateStragglers 1")
           connectionCount = connectionCount - 1;
 
           if(connectionCount == 0) {
-            console.log("  !!! authenticateStragglers 2")
+            // console.log("  !!! authenticateStragglers 2")
             // Put non authenticated connections in available connections
             self.availableConnections = self.availableConnections.concat(nonAuthenticatedConnections);
             // Release the connection back to the pool
@@ -503,6 +503,7 @@ Pool.prototype.auth = function(mechanism, db) {
 }
 
 Pool.prototype.destroy = function() {
+  // console.log("pool::destroy")
   // Set state to destroyed
   this.state = DESTROYED;
 
@@ -616,6 +617,7 @@ function _createConnection(self) {
   // Handle any errors
   var tempErrorHandler = function(_connection) {
     return function(err) {
+      // console.log("== _createConnection :: error")
       // Destroy the connection
       _connection.destroy();
       // Remove the connection from the connectingConnections list
@@ -630,6 +632,7 @@ function _createConnection(self) {
   // Handle successful connection
   var tempConnectHandler = function(_connection) {
     return function() {
+      // console.log("== _createConnection :: connect")
       // Destroyed state return
       if(self.state == DESTROYED) {
         // Remove the connection from the list
@@ -653,6 +656,7 @@ function _createConnection(self) {
         // Remove the connection from the connectingConnections list
         removeConnection(self, _connection);
 
+        // console.dir(err)
         // Handle error
         if(err) {
           _connection.destroy();

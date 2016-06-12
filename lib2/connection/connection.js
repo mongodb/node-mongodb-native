@@ -131,6 +131,7 @@ Connection.connections = function() {
 // Connection handlers
 var errorHandler = function(self) {
   return function(err) {
+    // console.log("== Connection :: error")
     if(connectionAccounting) delete connections[self.id];
     // Debug information
     if(self.logger.isDebug()) self.logger.debug(f('connection %s for [%s:%s] errored out with [%s]', self.id, self.host, self.port, JSON.stringify(err)));
@@ -141,6 +142,7 @@ var errorHandler = function(self) {
 
 var timeoutHandler = function(self) {
   return function(err) {
+    // console.log("== Connection :: timeout")
     if(connectionAccounting) delete connections[self.id];
     // Debug information
     if(self.logger.isDebug()) self.logger.debug(f('connection %s for [%s:%s] timed out', self.id, self.host, self.port));
@@ -153,6 +155,7 @@ var timeoutHandler = function(self) {
 
 var closeHandler = function(self) {
   return function(hadError) {
+    // console.log("== Connection :: closeHandler")
     if(connectionAccounting) delete connections[self.id];
     // Debug information
     if(self.logger.isDebug()) self.logger.debug(f('connection %s with for [%s:%s] closed', self.id, self.host, self.port));
