@@ -130,9 +130,6 @@ function reauthenticate(pool, connection, cb) {
 
 function connectionFailureHandler(self, event) {
   return function(err) {
-    // console.log("== connectionFailureHandler :: " + event + " :: " + self.socketCount())
-    // console.log("============== this")
-    // console.dir(this.workItem)
     removeConnection(self, this);
 
     // Flush out the callback if there is one
@@ -575,9 +572,6 @@ Pool.prototype.write = function(buffer, options, cb) {
     return;
   }
 
-  // We need to have a callback function
-  if(!(typeof cb == 'function')) throw new MongoError('write method must provide a callback');
-
   // Do we have an operation
   var operation = {
     buffer:buffer, cb: cb, raw: false, promoteLongs: true
@@ -588,6 +582,11 @@ Pool.prototype.write = function(buffer, options, cb) {
   operation.raw = options && options.raw == true ? true : false;
   operation.immediateRelease = options && options.immediateRelease == true ? true : false;
   operation.documentsReturnedIn = options.documentsReturnedIn;
+
+  // We need to have a callback function unless the message returns no response
+  if(!(typeof cb == 'function') && !options.noResponse) {
+    throw new MongoError('write method must provide a callback');
+  }
 
   // Push the operation to the queue of operations in progress
   this.queue.push(operation);
@@ -761,7 +760,13 @@ function _execute(self) {
           connection.workItem = workItem
 
           // Put operation on the wire
-          connection.write(buffer);
+          if(Array.isArray(buffer)) {
+            for(var i = 0; i < buffer.length; i++) {
+              connection.write(buffer[i])
+            }
+          } else {
+            connection.write(buffer);
+          }
 
           // Fire and forgot message, release the socket
           if(workItem.immediateRelease && !self.authenticating) {

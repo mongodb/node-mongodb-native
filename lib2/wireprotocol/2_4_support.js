@@ -24,7 +24,8 @@ var WireProtocol = function() {}
 // Needs to support legacy mass insert as well as ordered/unordered legacy
 // emulation
 //
-WireProtocol.prototype.insert = function(topology, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
+// WireProtocol.prototype.insert = function(topology, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
+WireProtocol.prototype.insert = function(pool, ismaster, ns, bson, ops, options, callback) {
   options = options || {};
   // Default is ordered execution
   var ordered = typeof options.ordered == 'boolean' ? options.ordered : true;
@@ -39,13 +40,13 @@ WireProtocol.prototype.insert = function(topology, ismaster, ns, bson, pool, cal
 
   // We are unordered
   if(!ordered || writeConcern.w == 0) {
-    return executeUnordered('insert', Insert, ismaster, ns, bson, pool, callbacks, ops, options, callback);
+    return executeUnordered('insert', Insert, ismaster, ns, bson, pool, ops, options, callback);
   }
 
-  return executeOrdered('insert', Insert, ismaster, ns, bson, pool, callbacks, ops, options, callback);
+  return executeOrdered('insert', Insert, ismaster, ns, bson, pool, ops, options, callback);
 }
 
-WireProtocol.prototype.update = function(topology, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
+WireProtocol.prototype.update = function(pool, ismaster, ns, bson, ops, options, callback) {
   options = options || {};
   // Default is ordered execution
   var ordered = typeof options.ordered == 'boolean' ? options.ordered : true;
@@ -56,13 +57,13 @@ WireProtocol.prototype.update = function(topology, ismaster, ns, bson, pool, cal
 
   // We are unordered
   if(!ordered || writeConcern.w == 0) {
-    return executeUnordered('update', Update, ismaster, ns, bson, pool, callbacks, ops, options, callback);
+    return executeUnordered('update', Update, ismaster, ns, bson, pool, ops, options, callback);
   }
 
-  return executeOrdered('update', Update, ismaster, ns, bson, pool, callbacks, ops, options, callback);
+  return executeOrdered('update', Update, ismaster, ns, bson, pool, ops, options, callback);
 }
 
-WireProtocol.prototype.remove = function(topology, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
+WireProtocol.prototype.remove = function(pool, ismaster, ns, bson, ops, options, callback) {
   options = options || {};
   // Default is ordered execution
   var ordered = typeof options.ordered == 'boolean' ? options.ordered : true;
@@ -73,10 +74,10 @@ WireProtocol.prototype.remove = function(topology, ismaster, ns, bson, pool, cal
 
   // We are unordered
   if(!ordered || writeConcern.w == 0) {
-    return executeUnordered('remove', Remove, ismaster, ns, bson, pool, callbacks, ops, options, callback);
+    return executeUnordered('remove', Remove, ismaster, ns, bson, pool, ops, options, callback);
   }
 
-  return executeOrdered('remove', Remove, ismaster, ns, bson, pool, callbacks, ops, options, callback);
+  return executeOrdered('remove', Remove, ismaster, ns, bson, pool, ops, options, callback);
 }
 
 WireProtocol.prototype.killCursor = function(bson, ns, cursorId, pool, callbacks, callback) {
@@ -402,13 +403,12 @@ var aggregateWriteOperationResults = function(opType, ops, results, connection) 
 //
 // Execute all inserts in an ordered manner
 //
-var executeOrdered = function(opType ,command, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
+var executeOrdered = function(opType ,command, ismaster, ns, bson, pool, ops, options, callback) {
   var _ops = ops.slice(0);
   // Bind to current domain
   callback = bindToCurrentDomain(callback);
   // Collect all the getLastErrors
   var getLastErrors = [];
-
   // Execute an operation
   var executeOp = function(list, _callback) {
     // No more items in the list
@@ -434,46 +434,39 @@ var executeOrdered = function(opType ,command, ismaster, ns, bson, pool, callbac
       // Add binary message to list of commands to execute
       var commands = [op.toBin()];
 
-      // If write concern 0 don't fire getLastError
-      if(hasWriteConcern(writeConcern)) {
-        var getLastErrorCmd = {getlasterror: 1};
-        // Merge all the fields
-        for(var i = 0; i < writeConcernFields.length; i++) {
-          if(writeConcern[writeConcernFields[i]] != null) {
-            getLastErrorCmd[writeConcernFields[i]] = writeConcern[writeConcernFields[i]];
-          }
+      // Add getLastOrdered
+      var getLastErrorCmd = {getlasterror: 1};
+      // Merge all the fields
+      for(var i = 0; i < writeConcernFields.length; i++) {
+        if(writeConcern[writeConcernFields[i]] != null) {
+          getLastErrorCmd[writeConcernFields[i]] = writeConcern[writeConcernFields[i]];
         }
-
-        // Create a getLastError command
-        var getLastErrorOp = new Query(bson, f("%s.$cmd", db), getLastErrorCmd, {numberToReturn: -1});
-        // Add getLastError command to list of ops to execute
-        commands.push(getLastErrorOp.toBin());
-
-        // getLastError callback
-        var getLastErrorCallback = function(err, result) {
-          if(err) return callback(err);
-          // Get the document
-          var doc = result.documents[0];
-          // Save the getLastError document
-          getLastErrors.push(doc);
-
-          // If we have an error terminate
-          if(doc.ok == 0 || doc.err || doc.errmsg) {
-            return callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, result.connection));
-          }
-
-          // Execute the next op in the list
-          executeOp(list, callback);
-        }
-
-        // Register the callback
-        callbacks.register(getLastErrorOp.requestId, getLastErrorCallback);
-        // Write both commands out at the same time
-        pool.write(commands, getLastErrorCallback);
-      } else {
-        // Write both commands out at the same time
-        pool.write(commands, callback, {immediateRelease:true});
       }
+
+      // Create a getLastError command
+      var getLastErrorOp = new Query(bson, f("%s.$cmd", db), getLastErrorCmd, {numberToReturn: -1});
+      // Add getLastError command to list of ops to execute
+      commands.push(getLastErrorOp.toBin());
+
+      // getLastError callback
+      var getLastErrorCallback = function(err, result) {
+        if(err) return callback(err);
+        // Get the document
+        var doc = result.result;
+        // Save the getLastError document
+        getLastErrors.push(doc);
+
+        // If we have an error terminate
+        if(doc.ok == 0 || doc.err || doc.errmsg) {
+          return callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, result.connection));
+        }
+
+        // Execute the next op in the list
+        executeOp(list, callback);
+      }
+
+      // Write both commands out at the same time
+      pool.write(commands, getLastErrorCallback);
     } catch(err) {
       if(typeof err == 'string') err = new MongoError(err);
       // We have a serialization error, rewrite as a write error to have same behavior as modern
@@ -481,7 +474,8 @@ var executeOrdered = function(opType ,command, ismaster, ns, bson, pool, callbac
       getLastErrors.push({ ok: 1, errmsg: err.message, code: 14 });
       // Return due to an error
       process.nextTick(function() {
-        callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, null));
+        console.dir(err)
+        _callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, null));
       });
     }
   }
@@ -490,7 +484,7 @@ var executeOrdered = function(opType ,command, ismaster, ns, bson, pool, callbac
   executeOp(_ops, callback);
 }
 
-var executeUnordered = function(opType, command, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
+var executeUnordered = function(opType, command, ismaster, ns, bson, pool, ops, options, callback) {
   // Bind to current domain
   callback = bindToCurrentDomain(callback);
   // Total operations to write
@@ -536,7 +530,7 @@ var executeUnordered = function(opType, command, ismaster, ns, bson, pool, callb
             // Update the number of operations executed
             totalOps = totalOps - 1;
             // Save the getLastError document
-            if(!err) getLastErrors[_index] = result.documents[0];
+            if(!err) getLastErrors[_index] = result.result;
             // Check if we are done
             if(totalOps == 0) {
               process.nextTick(function() {
@@ -547,13 +541,10 @@ var executeUnordered = function(opType, command, ismaster, ns, bson, pool, callb
           }
         }
 
-        // Register the callback
-        callbacks.register(getLastErrorOp.requestId, callbackOp(i));
         // Write both commands out at the same time
         pool.write(commands, callbackOp(i));
       } else {
-        // Write both commands out at the same time
-        pool.write(commands, callback, {immediateRelease:true});
+        pool.write(commands, {immediateRelease:true, noResponse:true});
       }
     } catch(err) {
       if(typeof err == 'string') err = new MongoError(err);
@@ -572,7 +563,7 @@ var executeUnordered = function(opType, command, ismaster, ns, bson, pool, callb
   // Empty w:0 return
   if(writeConcern
     && writeConcern.w == 0 && callback) {
-    callback(null, null);
+    callback(null, new CommandResult({ok:1}, null));
   }
 }
 

@@ -40,10 +40,43 @@ var Server = function(options) {
 
 inherits(Server, EventEmitter);
 
+function configureWireProtocolHandler(self, ismaster) {
+  // 3.2 wire protocol handler
+  if(ismaster.maxWireVersion >= 4) {
+    return new ThreeTwoWireProtocolSupport(new TwoSixWireProtocolSupport());
+  }
+
+  // 2.6 wire protocol handler
+  if(ismaster.maxWireVersion >= 2) {
+    return new TwoSixWireProtocolSupport();
+  }
+
+  // 2.4 or earlier wire protocol handler
+  return new PreTwoSixWireProtocolSupport();
+}
+
 var eventHandler = function(self, event) {
   return function(err) {
     if(event == 'connect') {
-      self.emit('connect', self);
+      // Issue an ismaster command at connect
+      // Query options
+      var queryOptions = { numberToSkip: 0, numberToReturn: -1, checkKeys: false, slaveOk: true };
+      // Create a query instance
+      var query = new Query(self.s.bson, 'admin.$cmd', {ismaster:true}, queryOptions);
+      // Execute the ismaster query
+      self.s.pool.write(query.toBin(), {}, function(err, result) {
+        if(err) {
+          self.destroy();
+          return self.emit('error', err);
+        }
+
+        // Save the ismaster
+        self.ismaster = result.result;
+        // Add the correct wire protocol handler
+        self.wireProtocolHandler = configureWireProtocolHandler(self, self.ismaster);
+        // Emit connect
+        self.emit('connect', self);
+      });
     } else if(event == 'error' || event == 'parseError'
       || event == 'close' || event == 'timeout') {
       self.emit(event, err);
@@ -175,14 +208,51 @@ Server.prototype.command = function(ns, cmd, options, callback) {
 
 Server.prototype.insert = function(ns, ops, options, callback) {
   var self = this;
+  // console.log("== server.insert")
+  if(typeof options == 'function') callback = options, options = {}, options = options || {};
+  var result = basicValidations(self, options);
+  if(result) return callback(result);
+
+  // console.log(options)
+  // If we are not connected or have a disconnectHandler specified
+  if(disconnectHandler(self, ns, ops, options, callback)) return;
+  // console.log(options)
+
+  // Setup the docs as an array
+  ops = Array.isArray(ops) ? ops : [ops];
+  // console.log(options)
+  // Execute write
+  return self.wireProtocolHandler.insert(self.s.pool, self.ismaster, ns, self.s.bson, ops, options, callback);
 }
 
 Server.prototype.update = function(ns, ops, options, callback) {
   var self = this;
+  if(typeof options == 'function') callback = options, options = {}, options = options || {};
+  var result = basicValidations(self, options);
+  if(result) return callback(result);
+
+  // If we are not connected or have a disconnectHandler specified
+  if(disconnectHandler(self, ns, ops, options, callback)) return;
+
+  // Setup the docs as an array
+  ops = Array.isArray(ops) ? ops : [ops];
+  // Execute write
+  return self.wireProtocolHandler.update(self.s.pool, self.ismaster, ns, self.s.bson, ops, options, callback);
 }
 
 Server.prototype.remove = function(ns, ops, options, callback) {
   var self = this;
+  if(typeof options == 'function') callback = options, options = {}, options = options || {};
+  var result = basicValidations(self, options);
+  if(result) return callback(result);
+
+  // If we are not connected or have a disconnectHandler specified
+  if(disconnectHandler(self, ns, ops, options, callback)) return;
+
+  // Setup the docs as an array
+  ops = Array.isArray(ops) ? ops : [ops];
+  // Execute write
+  return self.wireProtocolHandler.remove(self.s.pool, self.ismaster, ns, self.s.bson, ops, options, callback);
 }
 
 Server.prototype.auth = function(mechanism, db) {

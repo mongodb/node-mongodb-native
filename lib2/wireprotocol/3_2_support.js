@@ -21,11 +21,12 @@ var WireProtocol = function(legacyWireProtocol) {
 
 //
 // Execute a write operation
-var executeWrite = function(topology, type, opsField, ns, ops, options, callback) {
+var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callback) {
   if(ops.length == 0) throw new MongoError("insert must contain at least one document");
   if(typeof options == 'function') {
     callback = options;
     options = {};
+    options = options || {};
   }
 
   // Split the ns up to get db and collection
@@ -53,28 +54,37 @@ var executeWrite = function(topology, type, opsField, ns, ops, options, callback
 
   // Options object
   var opts = {};
-  if(type == 'insert') opts.checkKeys = true;
+  var queryOptions = { checkKeys : false, numberToSkip: 0, numberToReturn: 1 };
+  if(type == 'insert') queryOptions.checkKeys = true;
+
   // Ensure we support serialization of functions
   if(options.serializeFunctions) opts.serializeFunctions = options.serializeFunctions;
   if(options.ignoreUndefined) opts.ignoreUndefined = options.ignoreUndefined;
-  // Execute command
-  topology.command(f("%s.$cmd", d), writeCommand, opts, callback);
+
+  try {
+    // Create write command
+    var cmd = new Query(bson, f("%s.$cmd", d), writeCommand, queryOptions);
+    // Execute command
+    pool.write(cmd.toBin(), opts, callback);
+  } catch(err) {
+    callback(err);
+  }
 }
 
 //
 // Needs to support legacy mass insert as well as ordered/unordered legacy
 // emulation
 //
-WireProtocol.prototype.insert = function(topology, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
-  executeWrite(topology, 'insert', 'documents', ns, ops, options, callback);
+WireProtocol.prototype.insert = function(pool, ismaster, ns, bson, ops, options, callback) {
+  executeWrite(pool, bson, 'insert', 'documents', ns, ops, options, callback);
 }
 
-WireProtocol.prototype.update = function(topology, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
-  executeWrite(topology, 'update', 'updates', ns, ops, options, callback);
+WireProtocol.prototype.update = function(pool, ismaster, ns, bson, ops, options, callback) {
+  executeWrite(pool, bson, 'update', 'updates', ns, ops, options, callback);
 }
 
-WireProtocol.prototype.remove = function(topology, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
-  executeWrite(topology, 'delete', 'deletes', ns, ops, options, callback);
+WireProtocol.prototype.remove = function(pool, ismaster, ns, bson, ops, options, callback) {
+  executeWrite(pool, bson, 'delete', 'deletes', ns, ops, options, callback);
 }
 
 WireProtocol.prototype.killCursor = function(bson, ns, cursorId, pool, callbacks, callback) {

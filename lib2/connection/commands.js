@@ -67,7 +67,7 @@ var Query = function(bson, ns, query, options) {
 
   // Flags
   this.tailable = false;
-  this.slaveOk = false;
+  this.slaveOk = typeof options.slaveOk == 'boolean'? options.slaveOk : false;
   this.oplogReplay = false;
   this.noCursorTimeout = false;
   this.awaitData = false;
