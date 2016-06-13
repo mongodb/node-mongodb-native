@@ -21,6 +21,8 @@ var CONNECTING = 'connecting';
 var CONNECTED = 'connected';
 var DESTROYED = 'destroyed';
 
+var _id = 0;
+
 var Pool = function(options) {
   var self = this;
   // Add event listener
@@ -49,6 +51,8 @@ var Pool = function(options) {
     reconnectTries: 30
   }, options);
 
+  // Identification information
+  this.id = _id++;
   // Current reconnect retries
   this.retriesLeft = this.options.reconnectTries;
   this.reconnectId = null;
@@ -81,6 +85,24 @@ var Pool = function(options) {
 }
 
 inherits(Pool, EventEmitter);
+
+function stateTransition(self, newState) {
+  var legalTransitions = {
+    'disconnected': [CONNECTING, DESTROYED, DISCONNECTED],
+    'connecting': [CONNECTING, DESTROYED, CONNECTED],
+    'connected': [CONNECTED, DISCONNECTED, DESTROYED],
+    'destroyed': [DESTROYED]
+  }
+
+  // Get current state
+  var legalStates = legalTransitions[self.state];
+  if(legalStates && legalStates.indexOf(newState) != -1) {
+    self.state = newState;
+  } else {
+    self.logger.error(f('Pool with id [%s] failed attempted illegal state transition from [%s] to [%s] only following state allowed [%s]'
+      , self.id, self.state, newState, legalStates));
+  }
+}
 
 function authenticate(pool, auth, connection, cb) {
   if(auth[0] === undefined) return cb(null);
@@ -139,7 +161,10 @@ function connectionFailureHandler(self, event) {
 
     // No more socket available propegate the event
     if(self.socketCount() == 0 && !self.options.reconnect) {
-      self.state = DISCONNECTED;
+      if(self.state != DESTROYED) {
+        stateTransition(self, DISCONNECTED);
+      }
+
       // Do not emit error events, they are always close events
       // do not trigger the low level error handler in node
       event = event == 'error' ? 'close' : event;
@@ -155,7 +180,10 @@ function connectionFailureHandler(self, event) {
 
 function attemptReconnect(self) {
   return function() {
-    // console.log("==== attemptReconnect :: " + self.state)
+    // console.log("==== attemptReconnect start :: " + self.state + " :: " + self.id)
+    // console.log(self.availableConnections.concat(self.inUseConnections.concat(self.connectingConnections)).map(function(x) {
+    //   return x.id
+    // }))
     if(self.state == DESTROYED) return;
 
     // We are connected do not try again
@@ -184,7 +212,7 @@ function attemptReconnect(self) {
     // Got a connect handler
     function _connectHandler(self) {
       return function() {
-        // console.log("==== attemptReconnect :: connect")
+        // console.log("==== asttemptReconnect :: connect :: " + this.id)
         // Assign
         var connection = this;
 
@@ -202,19 +230,23 @@ function attemptReconnect(self) {
         self.reconnectId = null;
 
         // Apply pool connection handlers
-        connection.once('error', connectionFailureHandler(self, 'error'));
-        connection.once('close', connectionFailureHandler(self, 'close'));
-        connection.once('timeout', connectionFailureHandler(self, 'timeout'));
-        connection.once('parseError', connectionFailureHandler(self, 'parseError'));
+        connection.on('error', connectionFailureHandler(self, 'error'));
+        connection.on('close', connectionFailureHandler(self, 'close'));
+        connection.on('timeout', connectionFailureHandler(self, 'timeout'));
+        connection.on('parseError', connectionFailureHandler(self, 'parseError'));
 
         // Apply any auth to the connection
         reauthenticate(self, this, function(err) {
+          // console.log("==== asttemptReconnect :: connect - 2 :: " + connection.id)
           // Reset retries
           self.retriesLeft = self.options.reconnectTries;
           // Push to available connections
           self.availableConnections.push(connection);
           // Emit reconnect event
           self.emit('reconnect', self);
+          // console.log(self.availableConnections.concat(self.inUseConnections.concat(self.connectingConnections)).map(function(x) {
+          //   return x.id
+          // }))
           // Trigger execute to start everything up again
           _execute(self)();
         });
@@ -222,6 +254,7 @@ function attemptReconnect(self) {
     }
 
     // Create a connection
+    // console.log("attemptReconnect :: " + new Date())
     var connection = new Connection(messageHandler(self), self.options);
     // Add handlers
     connection.on('close', _connectionFailureHandler(self, 'close'));
@@ -359,10 +392,14 @@ Pool.prototype.isDestroyed = function() {
 
 Pool.prototype.connect = function(auth) {
   if(this.state != DISCONNECTED) throw new MongoError('connection in unlawful state ' + this.state);
+  // console.log("++ Pool.connect :: " + this.id)
   var self = this;
+  // Transition to connecting state
+  stateTransition(this, CONNECTING);
   // Create an array of the arguments
   var args = Array.prototype.slice.call(arguments, 0);
   // Create a connection
+  // console.log('connect')
   var connection = new Connection(messageHandler(self), this.options);
   // Add to list of connections
   this.connectingConnections.push(connection);
@@ -378,7 +415,7 @@ Pool.prototype.connect = function(auth) {
         return self.emit('error', err);
       }
       // Set connected mode
-      self.state = CONNECTED;
+      stateTransition(self, CONNECTED);
       // Move the active connection
       moveConnectionBetween(connection, self.connectingConnections, self.availableConnections);
       // Emit the connect event
@@ -513,7 +550,7 @@ Pool.prototype.logout = function(dbName, callback) {
 Pool.prototype.destroy = function() {
   // console.log("pool::destroy")
   // Set state to destroyed
-  this.state = DESTROYED;
+  stateTransition(this, DESTROYED);
 
   // Events
   var events = ['error', 'close', 'timeout', 'parseError', 'connect'];
@@ -524,9 +561,7 @@ Pool.prototype.destroy = function() {
     .concat(this.connectingConnections);
 
   // Do we have a reconnect attempt running, terminate timeout
-  if(this.reconnectId) {
-    clearTimeout(this.reconnectId);
-  }
+  clearTimeout(this.reconnectId);
 
   // Destroy all the connections
   connections.forEach(function(c) {
@@ -537,6 +572,10 @@ Pool.prototype.destroy = function() {
     // Destroy connection
     c.destroy();
   });
+
+  // console.log("pool destroy :: " + connections.map(function(x) {
+  //   return x.id
+  // }));
 
   // Any operations in flight must be flushed out as an error
   if(this.inUseConnections.length > 0) {
@@ -619,6 +658,7 @@ function removeConnection(self, connection) {
 var handlers = ["close", "message", "error", "timeout", "parseError", "connect"];
 
 function _createConnection(self) {
+  // console.log("_createConnection")
   var connection = new Connection(messageHandler(self), self.options);
 
   // Push the connection
@@ -627,7 +667,7 @@ function _createConnection(self) {
   // Handle any errors
   var tempErrorHandler = function(_connection) {
     return function(err) {
-      // console.log("== _createConnection :: error")
+      // console.log("== _createConnection :: error :: " + _connection.id)
       // Destroy the connection
       _connection.destroy();
       // Remove the connection from the connectingConnections list
@@ -642,7 +682,7 @@ function _createConnection(self) {
   // Handle successful connection
   var tempConnectHandler = function(_connection) {
     return function() {
-      // console.log("== _createConnection :: connect")
+      // console.log("== _createConnection :: connect :: " + _connection.id)
       // Destroyed state return
       if(self.state == DESTROYED) {
         // Remove the connection from the list
