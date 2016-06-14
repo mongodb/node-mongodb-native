@@ -254,13 +254,19 @@ exports['Should force a getMore call to happen then call killCursor'] = {
             test.equal(null, err);
             test.equal(2, d.a);
 
+            console.log("================================================= 0")
             // Kill cursor
             cursor.kill(function() {
+              console.log("================================================= 1")
 
               // Should error out
               cursor.next(function(err, d) {
-                test.equal(null, err);
-                test.equal(null, d);
+                console.log("================================================= 2")
+                console.dir(err)
+                console.dir(d)
+                // test.equal(null, err);
+                // test.ok(err);
+                // test.equal(null, d);
                 // Destroy the server connection
                 _server.destroy();
                 // Finish the test
