@@ -304,17 +304,20 @@ Cursor.prototype._killcursor = function(callback) {
     return;
   }
 
+  // // Default pool
+  // var pool = this.pool;
+  // // If we have a connection get the corresponding pool
+  // if(this.connection && this.connection.isConnected()) {
+  //   // Get the server
+  //   var server = this.topology.getServerFrom(this.connection);
+  //   // Get the pool
+  //   if(server && server.s.pool) {
+  //     pool = server.s.pool;
+  //   }
+  // }
+
   // Default pool
-  var pool = this.pool;
-  // If we have a connection get the corresponding pool
-  if(this.connection && this.connection.isConnected()) {
-    // Get the server
-    var server = this.topology.getServerFrom(this.connection);
-    // Get the pool
-    if(server && server.s.pool) {
-      pool = server.s.pool;
-    }
-  }
+  var pool = this.server.s.pool;
 
   // Execute command
   this.server.wireProtocolHandler.killCursor(this.bson, this.ns, this.cursorState.cursorId, pool, callback);

@@ -218,3 +218,61 @@ exports['Should force a getMore call to happen'] = {
     server.connect();
   }
 };
+
+exports['Should force a getMore call to happen then call killCursor'] = {
+  metadata: { requires: { topology: "single" } },
+
+  test: function(configuration, test) {
+    var Server = require('../../../lib2/topologies/server')
+      , bson = require('bson').BSONPure.BSON;
+
+    // Attempt to connect
+    var server = new Server({
+      host: configuration.host, port: configuration.port, bson: new bson()
+    });
+
+    var ns = f("%s.cursor4", configuration.db);
+    // Add event listeners
+    server.on('connect', function(_server) {
+      // Execute the write
+      _server.insert(ns, [{a:1}, {a:2}, {a:3}], {
+        writeConcern: {w:1}, ordered:true
+      }, function(err, results) {
+        test.equal(null, err);
+        test.equal(3, results.result.n);
+
+        // Execute find
+        var cursor = _server.cursor(ns, { find: ns, query: {}, batchSize: 2 });
+
+        // Execute next
+        cursor.next(function(err, d) {
+          test.equal(null, err);
+          test.equal(1, d.a);
+
+          // Get the next item
+          cursor.next(function(err, d) {
+            test.equal(null, err);
+            test.equal(2, d.a);
+
+            // Kill cursor
+            cursor.kill(function() {
+
+              // Should error out
+              cursor.next(function(err, d) {
+                test.equal(null, err);
+                test.equal(null, d);
+                // Destroy the server connection
+                _server.destroy();
+                // Finish the test
+                test.done();
+              });
+            });
+          });
+        });
+      });
+    })
+
+    // Start connection
+    server.connect();
+  }
+};

@@ -88,6 +88,7 @@ WireProtocol.prototype.remove = function(pool, ismaster, ns, bson, ops, options,
 }
 
 WireProtocol.prototype.killCursor = function(bson, ns, cursorId, pool, callback) {
+  console.log("======================")
   // Build command namespace
   var parts = ns.split(/\./);
   // Command namespace
@@ -107,18 +108,15 @@ WireProtocol.prototype.killCursor = function(bson, ns, cursorId, pool, callback)
   // Set query flags
   query.slaveOk = true;
 
-  // Execute the kill cursor command
-  if(pool && pool.isConnected()) {
-    pool.write(query.toBin(), callback);
-  }
-
   // Kill cursor callback
-  var killCursorCallback = function(err, r) {
+  var killCursorCallback = function(err, result) {
     if(err) {
       if(typeof callback != 'function') return;
       return callback(err);
     }
 
+    // Result
+    var r = result.message;
     // If we have a timed out query or a cursor that was killed
     if((r.responseFlags & (1 << 0)) != 0) {
       if(typeof callback != 'function') return;
@@ -134,6 +132,12 @@ WireProtocol.prototype.killCursor = function(bson, ns, cursorId, pool, callback)
     if(typeof callback == 'function') {
       callback(null, r.documents[0]);
     }
+  }
+
+  console.log("@@@ write :: " + pool.isConnected())
+  // Execute the kill cursor command
+  if(pool && pool.isConnected()) {
+    pool.write(query.toBin(), killCursorCallback);
   }
 }
 
