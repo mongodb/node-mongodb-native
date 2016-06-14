@@ -85,7 +85,7 @@ WireProtocol.prototype.remove = function(pool, ismaster, ns, bson, ops, options,
   executeWrite(pool, bson, 'delete', 'deletes', ns, ops, options, callback);
 }
 
-WireProtocol.prototype.killCursor = function(bson, ns, cursorId, pool, callbacks, callback) {
+WireProtocol.prototype.killCursor = function(bson, ns, cursorId, pool, callback) {
   // Create a kill cursor command
   var killCursor = new KillCursor(bson, [cursorId]);
   // Execute the kill cursor command
@@ -96,13 +96,15 @@ WireProtocol.prototype.killCursor = function(bson, ns, cursorId, pool, callbacks
   if(callback) callback(null, null);
 }
 
-WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw, connection, callbacks, options, callback) {
+WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw, connection, options, callback) {
   // Create getMore command
   var getMore = new GetMore(bson, ns, cursorState.cursorId, {numberToReturn: batchSize});
 
   // Query callback
-  var queryCallback = function(err, r) {
+  var queryCallback = function(err, result) {
     if(err) return callback(err);
+    // Get the raw message
+    var r = result.message;
 
     // If we have a timed out query or a cursor that was killed
     if((r.responseFlags & (1 << 0)) != 0) {
@@ -132,8 +134,6 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
     queryCallback.promoteLongs = cursorState.promoteLongs;
   }
 
-  // Register a callback
-  callbacks.register(getMore.requestId, queryCallback);
   // Write out the getMore command
   connection.write(getMore.toBin(), queryCallback);
 }

@@ -107,11 +107,11 @@ exports['Should correctly connect server to single instance and execute insert']
 
     // Add event listeners
     server.on('connect', function(server) {
-      server.insert('test.inserts', {a:1}, function(err, r) {
+      server.insert('integration_tests.inserts', {a:1}, function(err, r) {
         test.equal(null, err);
         test.equal(1, r.result.n);
 
-        server.insert('test.inserts', {a:1}, {ordered:false}, function(err, r) {
+        server.insert('integration_tests.inserts', {a:1}, {ordered:false}, function(err, r) {
           test.equal(null, err);
           test.equal(1, r.result.n);
 
@@ -142,11 +142,11 @@ exports['Should correctly connect server to single instance and execute bulk ins
 
     // Add event listeners
     server.on('connect', function(server) {
-      server.insert('test.inserts', [{a:1}, {b:1}], function(err, r) {
+      server.insert('integration_tests.inserts', [{a:1}, {b:1}], function(err, r) {
         test.equal(null, err);
         test.equal(2, r.result.n);
 
-        server.insert('test.inserts', [{a:1}, {b:1}], {ordered:false}, function(err, r) {
+        server.insert('integration_tests.inserts', [{a:1}, {b:1}], {ordered:false}, function(err, r) {
           test.equal(null, err);
           test.equal(2, r.result.n);
 
@@ -177,11 +177,11 @@ exports['Should correctly connect server to single instance and execute insert w
 
     // Add event listeners
     server.on('connect', function(server) {
-      server.insert('test.inserts', {a:1}, {writeConcern: {w:0}}, function(err, r) {
+      server.insert('integration_tests.inserts', {a:1}, {writeConcern: {w:0}}, function(err, r) {
         test.equal(null, err);
         test.equal(1, r.result.ok);
 
-        server.insert('test.inserts', {a:1}, {ordered:false, writeConcern: {w:0}}, function(err, r) {
+        server.insert('integration_tests.inserts', {a:1}, {ordered:false, writeConcern: {w:0}}, function(err, r) {
           test.equal(null, err);
           test.equal(1, r.result.ok);
 

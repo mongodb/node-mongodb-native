@@ -10,7 +10,8 @@ var inherits = require('util').inherits,
   Query = require('../connection/commands').Query,
   PreTwoSixWireProtocolSupport = require('../wireprotocol/2_4_support'),
   TwoSixWireProtocolSupport = require('../wireprotocol/2_6_support'),
-  ThreeTwoWireProtocolSupport = require('../wireprotocol/3_2_support');
+  ThreeTwoWireProtocolSupport = require('../wireprotocol/3_2_support'),
+  BasicCursor = require('../cursor');
 
 var DISCONNECTED = 'disconnected';
 var CONNECTING = 'connecting';
@@ -31,6 +32,8 @@ var Server = function(options) {
     state: DISCONNECTED,
     // Logger
     logger: Logger('Server', options),
+    // Factory overrides
+    Cursor: options.cursorFactory || BasicCursor,
     // BSON instance
     bson: options.bson || new BSON(),
     // Pool
@@ -255,6 +258,27 @@ Server.prototype.remove = function(ns, ops, options, callback) {
   return self.wireProtocolHandler.remove(self.s.pool, self.ismaster, ns, self.s.bson, ops, options, callback);
 }
 
+/**
+ * Get a new cursor
+ * @method
+ * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+ * @param {{object}|{Long}} cmd Can be either a command returning a cursor or a cursorId
+ * @param {object} [options.batchSize=0] Batchsize for the operation
+ * @param {array} [options.documents=[]] Initial documents list for cursor
+ * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+ * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
+ * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
+ * @param {opResultCallback} callback A callback function
+ */
+Server.prototype.cursor = function(ns, cmd, cursorOptions) {
+  var s = this.s;
+  cursorOptions = cursorOptions || {};
+  // Set up final cursor type
+  var FinalCursor = cursorOptions.cursorFactory || s.Cursor;
+  // Return the cursor
+  return new FinalCursor(s.bson, ns, cmd, cursorOptions, this, s.options);
+}
+
 Server.prototype.auth = function(mechanism, db) {
   var self = this;
 }
@@ -288,10 +312,6 @@ Server.prototype.getServerFrom = function(connection) {
 //     return 'c++';
 //   return 'js';
 // }
-
-Server.prototype.cursor = function(ns, cmd, cursorOptions) {
-  var self = this;
-}
 
 // Server.prototype.getConnection = function(options) {
 //   return this.s.pool.get();

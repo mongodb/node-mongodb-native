@@ -363,7 +363,7 @@ function messageHandler(self) {
         }
 
         // Return the documents
-        workItem.cb(null, new CommandResult(message.documents[0], connection));
+        workItem.cb(null, new CommandResult(message.documents[0], connection, message));
       }
     });
   }

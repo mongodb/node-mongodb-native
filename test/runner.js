@@ -215,7 +215,8 @@ var testFiles = [
 
   // Functional 2 tests
   '/test/tests/functional2/pool_tests.js',
-  '/test/tests/functional2/server_tests.js'
+  '/test/tests/functional2/server_tests.js',
+  '/test/tests/functional2/cursor_tests.js'
 ]
 
 // // Check if we support es6 generators
