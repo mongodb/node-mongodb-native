@@ -213,7 +213,7 @@ exports['Should correctly error out operations if pool is closed in the middle o
     var messageHandler = function(err, r) {
       if(err) errorCount = errorCount + 1;
       index = index + 1;
-      console.log("--- messageHandler :: " + index)
+      if(index> 490)console.log("--- messageHandler :: " + index)
 
       if(index == 500) {
         console.log("== index :: " + index)
