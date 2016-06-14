@@ -279,6 +279,8 @@ function moveConnectionBetween(connection, from, to) {
 
 function messageHandler(self) {
   return function(message, connection) {
+    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! message")
+
     // Get the callback
     var workItem = connection.workItem;
 

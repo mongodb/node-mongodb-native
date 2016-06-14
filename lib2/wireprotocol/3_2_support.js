@@ -134,7 +134,6 @@ WireProtocol.prototype.killCursor = function(bson, ns, cursorId, pool, callback)
     }
   }
 
-  console.log("@@@ write :: " + pool.isConnected())
   // Execute the kill cursor command
   if(pool && pool.isConnected()) {
     pool.write(query.toBin(), killCursorCallback);
