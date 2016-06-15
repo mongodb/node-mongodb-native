@@ -111,7 +111,7 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
 
     // If we have a timed out query or a cursor that was killed
     if((r.responseFlags & (1 << 0)) != 0) {
-      return callback(new MongoError("cursor killed or timed out"), null);
+      return callback(new MongoError("cursor does not exist, was killed or timed out"), null);
     }
 
     // Ensure we have a Long valie cursor id

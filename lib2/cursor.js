@@ -610,16 +610,21 @@ var nextFunction = function(self, callback) {
 
       // Execute the next get more
       self._getmore(function(err, doc, connection) {
-        // General error
+        console.log("================= _getmore")
+        console.dir(err)
+        if(err) return handleCallback(callback, err);
+        // // General error
+        // // if(err && err.code != 43) return handleCallback(callback, err);
         // if(err && err.code != 43) return handleCallback(callback, err);
-        if(err && err.code != 43) return handleCallback(callback, err);
-        // No cursor found error from mongos
-        if((err && err.code == 43) || (self.cursorState.documents.length == 0
-          && Long.ZERO.equals(self.cursorState.cursorId) && !self.cmd.tailable)) {
-            self.cursorState.dead = true;
-            // Finished iterating over the cursor
-            return setCursorDeadAndNotified(self, callback);
-          }
+        // // No cursor found error from mongos
+        // if((err && err.code == 43) || (self.cursorState.documents.length == 0
+        //   && Long.ZERO.equals(self.cursorState.cursorId) && !self.cmd.tailable)) {
+        //     self.cursorState.dead = true;
+        //     // Finished iterating over the cursor
+        //     return setCursorDeadAndNotified(self, callback);
+        //   }
+        //
+        // console.log("======================================== VALIDATE")
 
         // Save the returned connection to ensure all getMore's fire over the same connection
         self.connection = connection;

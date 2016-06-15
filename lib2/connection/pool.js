@@ -279,8 +279,6 @@ function moveConnectionBetween(connection, from, to) {
 
 function messageHandler(self) {
   return function(message, connection) {
-    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! message")
-
     // Get the callback
     var workItem = connection.workItem;
 
@@ -354,13 +352,12 @@ function messageHandler(self) {
           // Parse the message according to the provided options
           message.parse(workItem);
         } catch(err) {
-          // console.log("ERROR")
           return workItem.cb(MongoError.create(err));
         }
 
         // Establish if we have an error
-        if(message.documents[0].ok == 0 || message.documents[0]['$err']
-        || message.documents[0]['errmsg'] || message.documents[0]['code']) {
+        if(message.documents[0] && (message.documents[0].ok == 0 || message.documents[0]['$err']
+        || message.documents[0]['errmsg'] || message.documents[0]['code'])) {
           return workItem.cb(MongoError.create(message.documents[0]));
         }
 
@@ -375,6 +372,12 @@ Pool.prototype.socketCount = function() {
   return this.availableConnections.length
     + this.inUseConnections.length
     + this.connectingConnections.length;
+}
+
+Pool.prototype.allConnections = function() {
+  return this.availableConnections
+    .concat(this.inUseConnections)
+    .concat(this.connectingConnections);
 }
 
 Pool.prototype.isConnected = function() {

@@ -60,6 +60,7 @@ function configureWireProtocolHandler(self, ismaster) {
 
 var eventHandler = function(self, event) {
   return function(err) {
+    console.log("========== eventHandler :: " + event)
     if(event == 'connect') {
       // Issue an ismaster command at connect
       // Query options
@@ -81,7 +82,7 @@ var eventHandler = function(self, event) {
         self.emit('connect', self);
       });
     } else if(event == 'error' || event == 'parseError'
-      || event == 'close' || event == 'timeout') {
+      || event == 'close' || event == 'timeout' || event == 'reconnect') {
       self.emit(event, err);
     }
   }
@@ -105,6 +106,7 @@ Server.prototype.connect = function(options) {
   self.s.pool.on('timeout', eventHandler(self, 'timeout'));
   self.s.pool.on('parseError', eventHandler(self, 'parseError'));
   self.s.pool.on('connect', eventHandler(self, 'connect'));
+  self.s.pool.on('reconnect', eventHandler(self, 'reconnect'));
 
   // Connect with optional auth settings
   self.s.pool.connect(options.auth)
