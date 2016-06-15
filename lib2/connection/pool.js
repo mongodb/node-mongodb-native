@@ -86,10 +86,15 @@ var Pool = function(options) {
 
 inherits(Pool, EventEmitter);
 
+Object.defineProperty(Pool.prototype, 'size', {
+  enumerable:true,
+  get: function() { return this.options.size; }
+});
+
 function stateTransition(self, newState) {
   var legalTransitions = {
     'disconnected': [CONNECTING, DESTROYED, DISCONNECTED],
-    'connecting': [CONNECTING, DESTROYED, CONNECTED],
+    'connecting': [CONNECTING, DESTROYED, CONNECTED, DISCONNECTED],
     'connected': [CONNECTED, DISCONNECTED, DESTROYED],
     'destroyed': [DESTROYED]
   }
@@ -152,15 +157,21 @@ function reauthenticate(pool, connection, cb) {
 
 function connectionFailureHandler(self, event) {
   return function(err) {
+    // console.log("=== connectionFailureHandler :: " + event + " :: 0")
+    // console.dir(err)
     removeConnection(self, this);
+    // console.log("=== connectionFailureHandler :: " + event + " :: 1")
 
     // Flush out the callback if there is one
     if(this.workItem && this.workItem.cb) {
+      // console.log("=== connectionFailureHandler :: " + event + " :: 2")
+      // console.log(this.workItem.cb.toString())
       this.workItem.cb(err);
     }
+    // console.log("=== connectionFailureHandler :: " + event + " :: 3")
 
     // No more socket available propegate the event
-    if(self.socketCount() == 0 && !self.options.reconnect) {
+    if(self.socketCount() == 0) {
       if(self.state != DESTROYED) {
         stateTransition(self, DISCONNECTED);
       }
@@ -351,6 +362,8 @@ function messageHandler(self) {
         try {
           // Parse the message according to the provided options
           message.parse(workItem);
+          // console.log("=================================== messageHandler")
+          // console.dir(message.documents)
         } catch(err) {
           return workItem.cb(MongoError.create(err));
         }
@@ -381,12 +394,15 @@ Pool.prototype.allConnections = function() {
 }
 
 Pool.prototype.isConnected = function() {
+  // console.log("Pool :: isConnected")
   var connections = this.availableConnections
     .concat(this.inUseConnections)
     .concat(this.connectingConnections);
   for(var i = 0; i < connections.length; i++) {
     if(connections[i].isConnected()) return true;
   }
+
+  // console.log("Pool :: isConnected :: false")
 
   return false;
 }

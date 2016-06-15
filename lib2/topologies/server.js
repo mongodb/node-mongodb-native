@@ -5,9 +5,11 @@ var inherits = require('util').inherits,
   bindToCurrentDomain = require('../connection/utils').bindToCurrentDomain,
   EventEmitter = require('events').EventEmitter,
   BSON = require('bson').native().BSON,
+  ReadPreference = require('./read_preference'),
   Logger = require('../connection/logger'),
   Pool = require('../connection/pool'),
   Query = require('../connection/commands').Query,
+  MongoError = require('../error'),
   PreTwoSixWireProtocolSupport = require('../wireprotocol/2_4_support'),
   TwoSixWireProtocolSupport = require('../wireprotocol/2_6_support'),
   ThreeTwoWireProtocolSupport = require('../wireprotocol/3_2_support'),
@@ -24,6 +26,9 @@ var Server = function(options) {
   // Add event listener
   EventEmitter.call(this);
 
+  // console.log("********************** CREATE SERVER")
+  // console.dir(options)
+
   // Internal state
   this.s = {
     // Options
@@ -37,11 +42,18 @@ var Server = function(options) {
     // BSON instance
     bson: options.bson || new BSON(),
     // Pool
-    pool: null
+    pool: null,
+    // Disconnect handler
+    disconnectHandler: options.disconnectHandler
   }
 }
 
 inherits(Server, EventEmitter);
+
+Object.defineProperty(Server.prototype, 'name', {
+  enumerable:true,
+  get: function() { return this.s.options.host + ":" + this.s.options.port; }
+});
 
 function configureWireProtocolHandler(self, ismaster) {
   // 3.2 wire protocol handler
@@ -60,7 +72,7 @@ function configureWireProtocolHandler(self, ismaster) {
 
 var eventHandler = function(self, event) {
   return function(err) {
-    console.log("========== eventHandler :: " + event)
+    // console.log("========== server :: eventHandler :: " + event)
     if(event == 'connect') {
       // Issue an ismaster command at connect
       // Query options
@@ -71,7 +83,8 @@ var eventHandler = function(self, event) {
       self.s.pool.write(query.toBin(), {}, function(err, result) {
         if(err) {
           self.destroy();
-          return self.emit('error', err);
+          if(self.listeners('error').length > 0) self.emit('error', err);
+          return;
         }
 
         // Save the ismaster
@@ -98,7 +111,7 @@ Server.prototype.connect = function(options) {
   }
 
   // Create a pool
-  self.s.pool = new Pool(Object.assign(self.s.options, options));
+  self.s.pool = new Pool(Object.assign(self.s.options, options, {bson: this.s.bson}));
 
   // Set up listeners
   self.s.pool.on('close', eventHandler(self, 'close'));
@@ -120,7 +133,7 @@ Server.prototype.getDescription = function() {
 // }
 
 Server.prototype.lastIsMaster = function() {
-  var self = this;
+  return this.ismaster;
 }
 
 Server.prototype.isMasterLatencyMS = function() {
@@ -131,6 +144,7 @@ Server.prototype.unref = function() {
 }
 
 Server.prototype.isConnected = function() {
+  return this.s.pool.isConnected();
   // return this.s.state == CONNECTED && this.s.pool.isConnected();
 }
 
@@ -146,20 +160,26 @@ function basicValidations(self, options) {
   }
 }
 
-function disconnectHandler(self, ns, cmd, options, callback) {
+function disconnectHandler(self, type, ns, cmd, options, callback) {
+  // console.log("  ^^^ disconnectHandler 0")
+  // console.log("  self.s.pool.isConnected() = " + self.s.pool.isConnected())
+  // console.log("  self.s.disconnectHandler != null = " + (self.s.disconnectHandler != null))
   // Topology is not connected, save the call in the provided store to be
   // Executed at some point when the handler deems it's reconnected
   if(!self.s.pool.isConnected() && self.s.disconnectHandler != null) {
     callback = bindToCurrentDomain(callback);
-    self.s.disconnectHandler.add('command', ns, cmd, options, callback);
+    self.s.disconnectHandler.add(type, ns, cmd, options, callback);
     return true;
   }
+  // console.log("  ^^^ disconnectHandler 1")
 
   // If we have no connection error
   if(!self.s.pool.isConnected()) {
     callback(MongoError.create(f("no connection available to server %s", self.name)));
     return true;
   }
+
+  // console.log("  ^^^ disconnectHandler 2")
 }
 
 /**
@@ -174,6 +194,8 @@ function disconnectHandler(self, ns, cmd, options, callback) {
  * @param {opResultCallback} callback A callback function
  */
 Server.prototype.command = function(ns, cmd, options, callback) {
+  // console.log("== Server:: command ");
+  // console.dir(cmd)
   var self = this;
   if(typeof options == 'function') callback = options, options = {}, options = options || {};
   var result = basicValidations(self, options);
@@ -185,7 +207,7 @@ Server.prototype.command = function(ns, cmd, options, callback) {
   }), self.name));
 
   // If we are not connected or have a disconnectHandler specified
-  if(disconnectHandler(self, ns, cmd, options, callback)) return;
+  if(disconnectHandler(self, 'command', ns, cmd, options, callback)) return;
 
   // Query options
   var queryOptions = {
@@ -213,31 +235,41 @@ Server.prototype.command = function(ns, cmd, options, callback) {
 
 Server.prototype.insert = function(ns, ops, options, callback) {
   var self = this;
+  // console.log("== Server:: insert ");
+  // console.dir(ops)
   // console.log("== server.insert")
   if(typeof options == 'function') callback = options, options = {}, options = options || {};
+  // console.log("== Server:: insert 1");
   var result = basicValidations(self, options);
+  // console.log("== Server:: insert 2");
   if(result) return callback(result);
+  // console.log("== Server:: insert 3");
 
   // console.log(options)
   // If we are not connected or have a disconnectHandler specified
-  if(disconnectHandler(self, ns, ops, options, callback)) return;
+  if(disconnectHandler(self, 'insert', ns, ops, options, callback)) return;
   // console.log(options)
+  // console.log("== Server:: insert 4");
 
   // Setup the docs as an array
   ops = Array.isArray(ops) ? ops : [ops];
   // console.log(options)
+  // console.log("== Server:: insert 5");
+
   // Execute write
   return self.wireProtocolHandler.insert(self.s.pool, self.ismaster, ns, self.s.bson, ops, options, callback);
 }
 
 Server.prototype.update = function(ns, ops, options, callback) {
   var self = this;
+  // console.log("== Server:: update ");
+  // console.dir(ops)
   if(typeof options == 'function') callback = options, options = {}, options = options || {};
   var result = basicValidations(self, options);
   if(result) return callback(result);
 
   // If we are not connected or have a disconnectHandler specified
-  if(disconnectHandler(self, ns, ops, options, callback)) return;
+  if(disconnectHandler(self, 'update', ns, ops, options, callback)) return;
 
   // Setup the docs as an array
   ops = Array.isArray(ops) ? ops : [ops];
@@ -247,12 +279,14 @@ Server.prototype.update = function(ns, ops, options, callback) {
 
 Server.prototype.remove = function(ns, ops, options, callback) {
   var self = this;
+  // console.log("== Server:: remove ");
+  // console.dir(ops)
   if(typeof options == 'function') callback = options, options = {}, options = options || {};
   var result = basicValidations(self, options);
   if(result) return callback(result);
 
   // If we are not connected or have a disconnectHandler specified
-  if(disconnectHandler(self, ns, ops, options, callback)) return;
+  if(disconnectHandler(self, 'remove', ns, ops, options, callback)) return;
 
   // Setup the docs as an array
   ops = Array.isArray(ops) ? ops : [ops];
@@ -293,7 +327,7 @@ Server.prototype.equals = function(server) {
 }
 
 Server.prototype.connections = function() {
-  var self = this;
+  return this.s.pool.allConnections();
 }
 
 Server.prototype.getServer = function(options) {

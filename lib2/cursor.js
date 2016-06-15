@@ -172,9 +172,9 @@ Cursor.prototype._find = function(callback) {
   }
 
   var queryCallback = function(err, r) {
-    // console.log("!!!!!!!!!!!!!!!!!!!!! queryCallback")
+    // console.log("!!!!!!!!!!!!!!!!!!!!! _find")
     // console.dir(err)
-    // if(result) console.dir(result.message.documents)
+    // if(r) console.dir(r.message.documents)
     if(err) return callback(err);
 
     // Get the raw message
@@ -257,13 +257,13 @@ Cursor.prototype._find = function(callback) {
     queryCallback.promoteLongs = self.cursorState.promoteLongs;
   }
 
-  console.log("^^^^ _find 0")
+  // console.log("^^^^ _find 0")
   // Write the initial command out
   self.server.s.pool.write(self.query.toBin(), queryCallback);
 }
 
 Cursor.prototype._getmore = function(callback) {
-  console.log("================= Cursor.prototype._getmore")
+  // console.log("================= Cursor.prototype._getmore")
   if(this.logger.isDebug()) this.logger.debug(f("schedule getMore call for query [%s]", JSON.stringify(this.query)))
   // Determine if it's a raw query
   var raw = this.options.raw || this.cmd.raw;
@@ -518,6 +518,7 @@ var setCursorNotified = function(self, callback) {
 var push = Array.prototype.push;
 
 var nextFunction = function(self, callback) {
+  // console.log("core:: nextFunction :: 0")
   // We have notified about it
   if(self.cursorState.notified) {
     return callback(new Error('cursor is exhausted'));
@@ -532,13 +533,18 @@ var nextFunction = function(self, callback) {
   // We have a dead and killed cursor, attempting to call next should error
   if(isCursorDeadAndKilled(self, callback)) return;
 
+  // console.log("core:: nextFunction :: 1")
+
   // We have just started the cursor
   if(!self.cursorState.init) {
+    // console.log("core:: nextFunction :: 2 :: " + self.topology.isConnected(self.options))
     // Topology is not connected, save the call in the provided store to be
     // Executed at some point when the handler deems it's reconnected
     if(!self.topology.isConnected(self.options) && self.disconnectHandler != null) {
       return self.disconnectHandler.addObjectAndMethod('cursor', self, 'next', [callback], callback);
     }
+
+    // console.log("core:: nextFunction :: 3")
 
     try {
       self.server = self.topology.getServer(self.options);
@@ -556,9 +562,10 @@ var nextFunction = function(self, callback) {
     self.cursorState.init = true;
 
     try {
-      console.log("----------------------------- 0")
+      // console.log("----------------------------- 0")
+      // console.dir(self.cmd)
       self.query = self.server.wireProtocolHandler.command(self.bson, self.ns, self.cmd, self.cursorState, self.topology, self.options);
-      console.log("----------------------------- 1")
+      // console.log("----------------------------- 1")
     } catch(err) {
       return callback(err);
     }
@@ -573,14 +580,14 @@ var nextFunction = function(self, callback) {
     // Check if topology is destroyed
     if(self.topology.isDestroyed()) return callback(new MongoError(f('connection destroyed, not possible to instantiate cursor')));
 
-    console.log("----------------------------- 2")
+    // console.log("----------------------------- 2")
     // query, cmd, options, cursorState, callback
     self._find(function(err, r) {
-      console.log("----------------------------- 3")
+      // console.log("----------------------------- 3")
       if(err) return handleCallback(callback, err, null);
-      console.log("----------------------------- 4")
-      console.dir(err)
-      console.dir(r)
+      // console.log("----------------------------- 4")
+      // console.dir(err)
+      // console.dir(r)
 
       if(self.cursorState.documents.length == 0
         && self.cursorState.cursorId && self.cursorState.cursorId.isZero()
@@ -610,8 +617,8 @@ var nextFunction = function(self, callback) {
 
       // Execute the next get more
       self._getmore(function(err, doc, connection) {
-        console.log("================= _getmore")
-        console.dir(err)
+        // console.log("================= _getmore")
+        // console.dir(err)
         if(err) return handleCallback(callback, err);
         // // General error
         // // if(err && err.code != 43) return handleCallback(callback, err);

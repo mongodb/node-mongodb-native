@@ -61,6 +61,13 @@ var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callba
   if(options.serializeFunctions) opts.serializeFunctions = options.serializeFunctions;
   if(options.ignoreUndefined) opts.ignoreUndefined = options.ignoreUndefined;
 
+  // function process(err, r) {
+  //   console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+  //   console.dir(err)
+  //   console.dir(r)
+  //   callback(err, r)
+  // }
+
   try {
     // Create write command
     var cmd = new Query(bson, f("%s.$cmd", d), writeCommand, queryOptions);
@@ -174,7 +181,7 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
   // Query callback
   var queryCallback = function(err, result) {
     if(err) return callback(err);
-    console.log("================ getMore")
+    // console.log("================ getMore")
     // Get the raw message
     var r = result.message;
 
