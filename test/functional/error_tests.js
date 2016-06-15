@@ -246,10 +246,14 @@ exports.shouldCorrectlyHandleThrownErrorInRename = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    var db = configuration.newDbInstance({w:1}, {poolSize:1, socketTimeoutMS:5000, connectTimeoutMS: 5000});
     var domain = require('domain');
     var d = domain.create();
     d.on('error', function(err) {
+      console.log("================= ERROR")
+      db.close();
+      console.dir(db.serverConfig.connections());
+      console.log("================= CLOSED")
       d.dispose();
       test.done();
     })
@@ -259,6 +263,7 @@ exports.shouldCorrectlyHandleThrownErrorInRename = {
         // Execute code
         db.createCollection('shouldCorrectlyHandleThrownErrorInRename', function(err, r) {
           db.collection('shouldCorrectlyHandleThrownError', function(err, collection) {
+            console.log("================= FAIL CALL")
             collection.rename("shouldCorrectlyHandleThrownErrorInRename2", function(err, result) {
               debug(someUndefinedVariable);
             })

@@ -2153,6 +2153,7 @@ exports["Should correctly execute insert with keepGoing option on mongod >= 1.9.
             // Count the number of documents left (should not include the duplicates)
             collection.count(function(err, count) {
               test.equal(3, count);
+              db.close();
               test.done();
             })
           });

@@ -124,19 +124,26 @@ var Configuration = function(options) {
       },
 
       stop: function(callback) {
+        console.log("=================== STOP 0")
         if(skipTermination) return callback();
+        console.log("=================== STOP 1")
         // Stop the servers
         manager.stop().then(function() {
+          console.log("=================== STOP 1")
           callback();
         });
       },
 
       restart: function(options, callback) {
+        console.log("=================== RESTART 0")
         if(typeof options == 'function') callback = options, options = {purge:true, kill:true};
+        console.log("=================== RESTART 1")
         if(skipTermination) return callback();
+        console.log("=================== RESTART 2")
 
         // Stop the servers
         manager.restart().then(function() {
+          console.log("=================== RESTART 3")
           callback();
         });
       },
@@ -236,90 +243,90 @@ var runner = new Runner({
 });
 
 var testFiles = [
-  // Logging tests
-    '/test/functional/logger_tests.js'
-
-  // APM tests
-  , '/test/functional/apm_tests.js'
-
-  // Connection spec tests
-  , '/test/functional/connection_string_spec_tests.js'
-
-  // Replicaset read concern (make sure no illegal state due to teardown tests)
-  , '/test/functional/readconcern_tests.js'
-
-  // Promise tests
-  , '/test/functional/promises_db_tests.js'
-  , '/test/functional/promises_collection_tests.js'
-  , '/test/functional/promises_cursor_tests.js'
-  , '/test/functional/operation_promises_example_tests.js'
-  , '/test/functional/byo_promises_tests.js'
-
-  // Functionality tests
-  , '/test/functional/mongo_client_tests.js'
-  , '/test/functional/collection_tests.js'
-  , '/test/functional/db_tests.js'
-  , '/test/functional/cursor_tests.js'
-  , '/test/functional/insert_tests.js'
-  , '/test/functional/aggregation_tests.js'
-  , '/test/functional/connection_tests.js'
-  , '/test/functional/cursorstream_tests.js'
-  , '/test/functional/custom_pk_tests.js'
-  , '/test/functional/domain_tests.js'
+  // // Logging tests
+  //   '/test/functional/logger_tests.js'
+  //
+  // // APM tests
+  // , '/test/functional/apm_tests.js'
+  //
+  // // Connection spec tests
+  // , '/test/functional/connection_string_spec_tests.js'
+  //
+  // // Replicaset read concern (make sure no illegal state due to teardown tests)
+  // , '/test/functional/readconcern_tests.js'
+  //
+  // // Promise tests
+  // , '/test/functional/promises_db_tests.js'
+  // , '/test/functional/promises_collection_tests.js'
+  // , '/test/functional/promises_cursor_tests.js'
+  // , '/test/functional/operation_promises_example_tests.js'
+  // , '/test/functional/byo_promises_tests.js'
+  //
+  // // Functionality tests
+  // , '/test/functional/mongo_client_tests.js'
+  // , '/test/functional/collection_tests.js'
+  // , '/test/functional/db_tests.js'
+  // , '/test/functional/cursor_tests.js'
+  // , '/test/functional/insert_tests.js'
+  // , '/test/functional/aggregation_tests.js'
+  // , '/test/functional/connection_tests.js'
+  // , '/test/functional/cursorstream_tests.js'
+  // , '/test/functional/custom_pk_tests.js'
+  // , '/test/functional/domain_tests.js'
   , '/test/functional/error_tests.js'
   , '/test/functional/find_tests.js'
-  , '/test/functional/index_tests.js'
-  , '/test/functional/mapreduce_tests.js'
-  , '/test/functional/maxtimems_tests.js'
-  , '/test/functional/multiple_db_tests.js'
-  , '/test/functional/object_id_tests.js'
-  , '/test/functional/raw_tests.js'
-  , '/test/functional/readpreference_tests.js'
-  , '/test/functional/remove_tests.js'
-  , '/test/functional/unicode_tests.js'
-  , '/test/functional/uri_tests.js'
-  , '/test/functional/url_parser_tests.js'
-  , '/test/functional/gridfs_tests.js'
-  , '/test/functional/bulk_tests.js'
-  , '/test/functional/operation_example_tests.js'
-  , '/test/functional/crud_api_tests.js'
-  , '/test/functional/find_and_modify_tests.js'
-  , '/test/functional/document_validation_tests.js'
-  , '/test/functional/ignore_undefined_tests.js'
-  , '/test/functional/mongo_client_options_tests.js'
-  , '/test/functional/decimal128_tests.js'
+  // , '/test/functional/index_tests.js'
+  // , '/test/functional/mapreduce_tests.js'
+  // , '/test/functional/maxtimems_tests.js'
+  // , '/test/functional/multiple_db_tests.js'
+  // , '/test/functional/object_id_tests.js'
+  // , '/test/functional/raw_tests.js'
+  // , '/test/functional/readpreference_tests.js'
+  // , '/test/functional/remove_tests.js'
+  // , '/test/functional/unicode_tests.js'
+  // , '/test/functional/uri_tests.js'
+  // , '/test/functional/url_parser_tests.js'
+  // , '/test/functional/gridfs_tests.js'
+  // , '/test/functional/bulk_tests.js'
+  // , '/test/functional/operation_example_tests.js'
+  // , '/test/functional/crud_api_tests.js'
+  // , '/test/functional/document_validation_tests.js'
+  // , '/test/functional/ignore_undefined_tests.js'
+  // , '/test/functional/mongo_client_options_tests.js'
+  // , '/test/functional/decimal128_tests.js'
+  // , '/test/functional/find_and_modify_tests.js'
 
-  // Replicaset tests
-  , '/test/functional/replset_read_preference_tests.js'
-  , '/test/functional/replset_operations_tests.js'
-  , '/test/functional/replset_failover_tests.js'
-  , '/test/functional/replset_connection_tests.js'
-
-  // Sharding tests
-  , '/test/functional/sharding_failover_tests.js'
-  , '/test/functional/sharding_connection_tests.js'
-  , '/test/functional/sharding_read_preference_tests.js'
-
-  // SSL tests
-  , '/test/functional/ssl_mongoclient_tests.js'
-  , '/test/functional/ssl_validation_tests.js'
-  , '/test/functional/ssl_x509_connect_tests.js'
-
-  // SCRAM tests
-  , '/test/functional/scram_tests.js'
-
-  // LDAP Tests
-  , '/test/functional/ldap_tests.js'
-
-  // Kerberos Tests
-  , '/test/functional/kerberos_tests.js'
-
-  // Authentication Tests
-  , '/test/functional/authentication_tests.js'
-
-  // GridFS
-  , '/test/functional/gridfs_stream_tests.js'
-
+  // // Replicaset tests
+  // , '/test/functional/replset_read_preference_tests.js'
+  // , '/test/functional/replset_operations_tests.js'
+  // , '/test/functional/replset_failover_tests.js'
+  // , '/test/functional/replset_connection_tests.js'
+  //
+  // // Sharding tests
+  // , '/test/functional/sharding_failover_tests.js'
+  // , '/test/functional/sharding_connection_tests.js'
+  // , '/test/functional/sharding_read_preference_tests.js'
+  //
+  // // SSL tests
+  // , '/test/functional/ssl_mongoclient_tests.js'
+  // , '/test/functional/ssl_validation_tests.js'
+  // , '/test/functional/ssl_x509_connect_tests.js'
+  //
+  // // SCRAM tests
+  // , '/test/functional/scram_tests.js'
+  //
+  // // LDAP Tests
+  // , '/test/functional/ldap_tests.js'
+  //
+  // // Kerberos Tests
+  // , '/test/functional/kerberos_tests.js'
+  //
+  // // Authentication Tests
+  // , '/test/functional/authentication_tests.js'
+  //
+  // // GridFS
+  // , '/test/functional/gridfs_stream_tests.js'
+  //
   // // Reconnection tests
   // , '/test/functional/reconnect_tests.js'
 ]
@@ -509,8 +516,9 @@ if(argv.t == 'functional') {
             serverOptions = clone(serverOptions);
             serverOptions.rs_name = 'rs';
             serverOptions.poolSize = 1;
+            serverOptions.autoReconnect = false;
             return new mongo.ReplSet([
-              new mongo.Server(host, port)
+              new mongo.Server(host, port, serverOptions)
             ], serverOptions);
           }
         , manager: new ReplSetManager('mongod', nodes, {
@@ -536,8 +544,11 @@ if(argv.t == 'functional') {
       , skipStart: startupOptions.skipStartup
       , skipTermination: startupOptions.skipShutdown
       , topology: function(host, port, options) {
+        var options = options || {};
+        options.autoReconnect = false;
+
         return new mongo.Mongos([
-          new mongo.Server(host, port, options || {})
+          new mongo.Server(host, port, options)
         ]);
       }, manager: new ShardingManager({
       })

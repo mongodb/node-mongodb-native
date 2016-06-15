@@ -875,6 +875,7 @@ exports['should correctly apply read preference for direct secondary connection'
         setTimeout(function() {
           var url = format("mongodb://localhost:%s/integration_test_?readPreference=nearest"
             , configuration.port + 1);
+          // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! CONNECT")
           // Connect using the MongoClient
           MongoClient.connect(url, function(err, db){
             test.equal(null, err);
@@ -884,6 +885,7 @@ exports['should correctly apply read preference for direct secondary connection'
               test.equal(null, err);
               test.ok(n > 0);
 
+              // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! CONNECT DONE")
               db.close();
               test.done();
             });

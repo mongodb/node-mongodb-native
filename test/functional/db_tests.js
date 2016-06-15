@@ -291,6 +291,7 @@ exports.shouldCorrectlyThrowWhenTryingToReOpenConnection = {
 
         test.ok(false);
       } catch (err) {
+        db.close();
         test.done();
       }
     });
