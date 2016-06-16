@@ -646,9 +646,6 @@ Pool.prototype.destroy = function() {
  * @return {Connection}
  */
 Pool.prototype.write = function(buffer, options, cb) {
-  // console.log("======== Pool:write")
-  // console.dir(options)
-  // console.dir(cb)
   // Ensure we have a callback
   if(typeof options == 'function') {
     cb = options;
@@ -656,6 +653,10 @@ Pool.prototype.write = function(buffer, options, cb) {
 
   // Always have options
   options = options || {};
+
+  // console.log("======== Pool:write")
+  // console.dir(options)
+  // console.dir(cb)
 
   // Pool was destroyed error out
   if(this.state == DESTROYED) {
@@ -682,6 +683,10 @@ Pool.prototype.write = function(buffer, options, cb) {
   if(!(typeof cb == 'function') && !options.noResponse) {
     throw new MongoError('write method must provide a callback');
   }
+
+  // console.log("======== Pool:write")
+  // console.dir(operation)
+  // console.dir(cb)
 
   // Push the operation to the queue of operations in progress
   this.queue.push(operation);

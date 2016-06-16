@@ -244,24 +244,30 @@ Cursor.prototype._find = function(callback) {
     callback(null, null);
   }
 
+  // Options passed to the pool
+  var queryOptions = {};
+
   // If we have a raw query decorate the function
   if(self.options.raw || self.cmd.raw) {
-    queryCallback.raw = self.options.raw || self.cmd.raw;
+    // queryCallback.raw = self.options.raw || self.cmd.raw;
+    queryOptions.raw = self.options.raw || self.cmd.raw;
   }
 
   // Do we have documentsReturnedIn set on the query
   if(typeof self.query.documentsReturnedIn == 'string') {
-    queryCallback.documentsReturnedIn = self.query.documentsReturnedIn;
+    // queryCallback.documentsReturnedIn = self.query.documentsReturnedIn;
+    queryOptions.documentsReturnedIn = self.query.documentsReturnedIn;
   }
 
   // Add promote Long value if defined
   if(typeof self.cursorState.promoteLongs == 'boolean') {
-    queryCallback.promoteLongs = self.cursorState.promoteLongs;
+    // queryCallback.promoteLongs = self.cursorState.promoteLongs;
+    queryOptions.promoteLongs = self.cursorState.promoteLongs;
   }
 
   // console.log("^^^^ _find 0")
   // Write the initial command out
-  self.server.s.pool.write(self.query.toBin(), queryCallback);
+  self.server.s.pool.write(self.query.toBin(), queryOptions, queryCallback);
 }
 
 Cursor.prototype._getmore = function(callback) {
@@ -288,6 +294,8 @@ Cursor.prototype._getmore = function(callback) {
   //     pool = server.s.pool;
   //   }
   // }
+  // console.log("=================================== _getmore")
+  // console.dir(raw)
 
   // We have a wire protocol handler
   this.server.wireProtocolHandler.getMore(this.bson, this.ns, this.cursorState, batchSize, raw, pool, this.options, callback);
