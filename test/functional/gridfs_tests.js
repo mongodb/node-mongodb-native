@@ -3161,36 +3161,6 @@ exports['should not attempt to delete chunks when no file exists'] = {
           });
         });
       });
-
-      // // Execute findOneAndUpdate
-      // collection.findOneAndUpdate({}, {$set: {a:1}}, {fsync:1}, function(err, r) {
-      //   test.equal(null, err);
-      //   test.deepEqual({fsync:1}, started[0].command.writeConcern);
-
-      //   // Cleanup
-      //   started = [];
-      //   succeeded = [];
-
-      //   // Execute findOneAndReplace
-      //   collection.findOneAndReplace({}, {b:1}, {fsync:1}, function(err, r) {
-      //     test.equal(null, err);
-      //     test.deepEqual({fsync:1}, started[0].command.writeConcern);
-
-      //     // Cleanup
-      //     started = [];
-      //     succeeded = [];
-
-      //     // Execute findOneAndReplace
-      //     collection.findOneAndDelete({}, {fsync:1}, function(err, r) {
-      //       test.equal(null, err);
-      //       test.deepEqual({fsync:1}, started[0].command.writeConcern);
-
-      //       listener.uninstrument();
-      //       db.close();
-      //       test.done();
-      //     });
-      //   });
-      // });
     });
   }
 }

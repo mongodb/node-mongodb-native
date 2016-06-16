@@ -272,7 +272,6 @@ var testFiles = [
   , '/test/functional/connection_tests.js'
   , '/test/functional/cursorstream_tests.js'
   , '/test/functional/custom_pk_tests.js'
-  , '/test/functional/domain_tests.js'
   , '/test/functional/error_tests.js'
   , '/test/functional/find_tests.js'
   , '/test/functional/index_tests.js'
