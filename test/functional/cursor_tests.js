@@ -1934,7 +1934,7 @@ exports.shouldCloseDeadTailableCursors = {
           setTimeout(function() {
             test.equal(true, closed);
             test.done();
-          }, 5000)
+          }, 5000) 
         }, 800);
       });
     });
