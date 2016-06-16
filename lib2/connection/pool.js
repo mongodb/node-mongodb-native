@@ -91,6 +91,16 @@ Object.defineProperty(Pool.prototype, 'size', {
   get: function() { return this.options.size; }
 });
 
+Object.defineProperty(Pool.prototype, 'connectionTimeout', {
+  enumerable:true,
+  get: function() { return this.options.connectionTimeout; }
+});
+
+Object.defineProperty(Pool.prototype, 'socketTimeout', {
+  enumerable:true,
+  get: function() { return this.options.socketTimeout; }
+});
+
 function stateTransition(self, newState) {
   var legalTransitions = {
     'disconnected': [CONNECTING, DESTROYED, DISCONNECTED],
@@ -191,6 +201,7 @@ function connectionFailureHandler(self, event) {
 
 function attemptReconnect(self) {
   return function() {
+    self.emit('attemptReconnect', self);
     // console.log("==== attemptReconnect start :: " + self.state + " :: " + self.id)
     // console.log(self.availableConnections.concat(self.inUseConnections.concat(self.connectingConnections)).map(function(x) {
     //   return x.id
@@ -293,6 +304,12 @@ function messageHandler(self) {
     // Get the callback
     var workItem = connection.workItem;
 
+    // Reset the connection timeout if we modified it for
+    // this operation
+    if(workItem.socketTimeout) {
+      connection.resetSocketTimeout();
+    }
+
     function authenticateStragglers(self, connection, callback) {
       // console.log("!!! authenticateStragglers 0")
       // Get any non authenticated connections
@@ -391,6 +408,10 @@ Pool.prototype.allConnections = function() {
   return this.availableConnections
     .concat(this.inUseConnections)
     .concat(this.connectingConnections);
+}
+
+Pool.prototype.get = function() {
+  return this.allConnections()[0];
 }
 
 Pool.prototype.isConnected = function() {
@@ -620,10 +641,15 @@ Pool.prototype.destroy = function() {
  * @return {Connection}
  */
 Pool.prototype.write = function(buffer, options, cb) {
+  // console.log("======== Pool:write")
+  // console.dir(options)
   // Ensure we have a callback
   if(typeof options == 'function') {
     cb = options, options = {};
   }
+
+  // Always have options
+  options = options || {};
 
   // Pool was destroyed error out
   if(this.state == DESTROYED) {
@@ -638,10 +664,12 @@ Pool.prototype.write = function(buffer, options, cb) {
   };
 
   // Set the options for the parsing
-  operation.promoteLongs = options && options.promoteLongs == false ? false : true;
-  operation.raw = options && options.raw == true ? true : false;
-  operation.immediateRelease = options && options.immediateRelease == true ? true : false;
+  operation.promoteLongs = options.promoteLongs == false ? false : true;
+  operation.raw = options.raw == true ? true : false;
+  operation.immediateRelease = options.immediateRelease == true ? true : false;
   operation.documentsReturnedIn = options.documentsReturnedIn;
+  // Optional per operation socketTimeout
+  operation.socketTimeout = options.socketTimeout;
 
   // We need to have a callback function unless the message returns no response
   if(!(typeof cb == 'function') && !options.noResponse) {
@@ -819,6 +847,11 @@ function _execute(self) {
 
           // Add current associated callback to the connection
           connection.workItem = workItem
+
+          // We have a custom socketTimeout
+          if(!workItem.immediateRelease && typeof workItem.socketTimeout == 'number') {
+            connection.setSocketTimeout(workItem.socketTimeout);
+          }
 
           // Put operation on the wire
           if(Array.isArray(buffer)) {

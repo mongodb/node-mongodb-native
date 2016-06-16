@@ -54,9 +54,10 @@ var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callba
   var opts = {};
   var queryOptions = { checkKeys : false, numberToSkip: 0, numberToReturn: 1 };
   if(type == 'insert') queryOptions.checkKeys = true;
+  // Ensure we support serialization of functions
+  if(options.serializeFunctions) queryOptions.serializeFunctions = options.serializeFunctions;
 
   // Ensure we support serialization of functions
-  if(options.serializeFunctions) opts.serializeFunctions = options.serializeFunctions;
   if(options.ignoreUndefined) opts.ignoreUndefined = options.ignoreUndefined;
 
   try {

@@ -44,8 +44,21 @@ var Server = function(options) {
     // Pool
     pool: null,
     // Disconnect handler
-    disconnectHandler: options.disconnectHandler
+    disconnectHandler: options.disconnectHandler,
+    // Monitor thread (keeps the connection alive)
+    monitoring: typeof options.monitoring == 'boolean' ? options.monitoring : true,
+    // Monitoring timeout
+    monitoringInterval: typeof options.monitoringInterval == 'number'
+      ? options.monitoringInterval
+      : 5000
   }
+
+  // console.dir(this.s)
+
+  // Curent ismaster
+  this.ismaster = null;
+  // The monitoringProcessId
+  this.monitoringProcessId = null;
 }
 
 inherits(Server, EventEmitter);
@@ -70,6 +83,37 @@ function configureWireProtocolHandler(self, ismaster) {
   return new PreTwoSixWireProtocolSupport();
 }
 
+function monitoringProcess(self) {
+  return function() {
+    // console.log("#### monitoringProcess")
+    // Pool was destroyed do not continue process
+    if(self.s.pool.isDestroyed()) return;
+    // console.log("#### monitoringProcess 1")
+    // Emit monitoring Process event
+    self.emit('monitoring', self);
+    // console.log("#### monitoringProcess 2")
+    // Perform ismaster call
+    // Query options
+    var queryOptions = { numberToSkip: 0, numberToReturn: -1, checkKeys: false, slaveOk: true };
+    // Create a query instance
+    var query = new Query(self.s.bson, 'admin.$cmd', {ismaster:true}, queryOptions);
+    // console.log("#### monitoringProcess 3")
+    // Execute the ismaster query
+    self.s.pool.write(query.toBin(), {}, function(err, result) {
+      // console.log("#### monitoringProcess 4")
+      if(self.s.pool.isDestroyed()) return;
+      // console.log("#### monitoringProcess 5")
+      // Update the ismaster view if we have a result
+      if(result) {
+        self.ismaster = result.result;
+      }
+      // console.dir("=========== EXECUTE")
+      // Re-schedule the monitoring process
+      self.monitoringProcessId = setTimeout(monitoringProcess(self), self.s.monitoringInterval);
+    });
+  }
+}
+
 var eventHandler = function(self, event) {
   return function(err) {
     // console.log("========== server :: eventHandler :: " + event)
@@ -91,11 +135,17 @@ var eventHandler = function(self, event) {
         self.ismaster = result.result;
         // Add the correct wire protocol handler
         self.wireProtocolHandler = configureWireProtocolHandler(self, self.ismaster);
+        // Have we defined self monitoring
+        if(self.s.monitoring) {
+          // console.log("%%%%%%%%%%%%%%%%%% :: " + self.s.monitoringInterval)
+          self.monitoringProcessId = setTimeout(monitoringProcess(self), self.s.monitoringInterval);
+        }
         // Emit connect
         self.emit('connect', self);
       });
     } else if(event == 'error' || event == 'parseError'
-      || event == 'close' || event == 'timeout' || event == 'reconnect') {
+      || event == 'close' || event == 'timeout' || event == 'reconnect'
+      || event == 'attemptReconnect') {
       self.emit(event, err);
     }
   }
@@ -144,8 +194,8 @@ Server.prototype.unref = function() {
 }
 
 Server.prototype.isConnected = function() {
+  if(!this.s.pool) return false;
   return this.s.pool.isConnected();
-  // return this.s.state == CONNECTED && this.s.pool.isConnected();
 }
 
 Server.prototype.isDestroyed = function() {
@@ -315,10 +365,33 @@ Server.prototype.cursor = function(ns, cmd, cursorOptions) {
   return new FinalCursor(s.bson, ns, cmd, cursorOptions, this, s.options);
 }
 
+/**
+ * Authenticate using a specified mechanism
+ * @method
+ * @param {string} mechanism The Auth mechanism we are invoking
+ * @param {string} db The db we are invoking the mechanism against
+ * @param {...object} param Parameters for the specific mechanism
+ * @param {authResultCallback} callback A callback function
+ */
 Server.prototype.auth = function(mechanism, db) {
   var self = this;
-}
+  // var args = Array.prototype.slice.call(arguments, 2);
 
+  // If we have the default mechanism we pick mechanism based on the wire
+  // protocol max version. If it's >= 3 then scram-sha1 otherwise mongodb-cr
+  if(mechanism == 'default' && self.ismaster && self.ismaster.maxWireVersion >= 3) {
+    mechanism = 'scram-sha-1';
+  } else if(mechanism == 'default') {
+    mechanism = 'mongocr';
+  }
+
+  // Slice all the arguments off
+  var args = Array.prototype.slice.call(arguments, 0);
+  // Set the mechanism
+  args[0] = mechanism;
+  // Apply the arguments to the pool
+  self.s.pool.auth.apply(self.s.pool, args);
+}
 // Server.prototype.addReadPreferenceStrategy = function(name, strategy) {
 // Server.prototype.addAuthProvider = function(name, provider) {
 
@@ -357,6 +430,11 @@ var listeners = ['close', 'error', 'timeout', 'parseError', 'connect'];
 
 Server.prototype.destroy = function() {
   var self = this;
+
+  // Destroy the monitoring process if any
+  if(this.monitoringProcessId) {
+    clearTimeout(this.monitoringProcessId);
+  }
 
   // Remove all listeners
   listeners.forEach(function(event) {

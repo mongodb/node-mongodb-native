@@ -114,6 +114,18 @@ var Connection = function(messageHandler, options) {
 
 inherits(Connection, EventEmitter);
 
+Connection.prototype.setSocketTimeout = function(value) {
+  if(this.connection) {
+    this.connection.setTimeout(value);
+  }
+}
+
+Connection.prototype.resetSocketTimeout = function(value) {
+  if(this.connection) {
+    this.connection.setTimeout(this.socketTimeout);;
+  }
+}
+
 Connection.enableConnectionAccounting = function() {
   connectionAccounting = true;
   connections = {};

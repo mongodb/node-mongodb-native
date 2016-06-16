@@ -56,17 +56,11 @@ var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callba
   var opts = {};
   var queryOptions = { checkKeys : false, numberToSkip: 0, numberToReturn: 1 };
   if(type == 'insert') queryOptions.checkKeys = true;
-
-  // Ensure we support serialization of functions
-  if(options.serializeFunctions) opts.serializeFunctions = options.serializeFunctions;
+  // Serialize pure functions
   if(options.ignoreUndefined) opts.ignoreUndefined = options.ignoreUndefined;
 
-  // function process(err, r) {
-  //   console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-  //   console.dir(err)
-  //   console.dir(r)
-  //   callback(err, r)
-  // }
+  // Ensure we support serialization of functions
+  if(options.serializeFunctions) queryOptions.serializeFunctions = options.serializeFunctions;
 
   try {
     // Create write command
@@ -95,7 +89,7 @@ WireProtocol.prototype.remove = function(pool, ismaster, ns, bson, ops, options,
 }
 
 WireProtocol.prototype.killCursor = function(bson, ns, cursorId, pool, callback) {
-  console.log("======================")
+  // console.log("======================")
   // Build command namespace
   var parts = ns.split(/\./);
   // Command namespace
