@@ -957,6 +957,7 @@ exports['Should fail with w:2 and wtimeout write concern due single mongod insta
 
       // Execute the operations
       batch.execute({w:2, wtimeout:1000}, function(err, result) {
+        // console.dir(err)
         test.ok(err != null);
         test.ok(err.code != null);
         test.ok(err.errmsg != null);
