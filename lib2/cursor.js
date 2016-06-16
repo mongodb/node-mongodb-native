@@ -172,10 +172,12 @@ Cursor.prototype._find = function(callback) {
   }
 
   var queryCallback = function(err, r) {
-    // console.log("!!!!!!!!!!!!!!!!!!!!! _find")
+    // console.log("!!!!!!!!!!!!!!!!!!!!! _find 1")
+    // console.log(callback.toString())
     // console.dir(err)
     // if(r) console.dir(r.message.documents)
     if(err) return callback(err);
+    // console.log("!!!!!!!!!!!!!!!!!!!!! _find 2")
 
     // Get the raw message
     var result = r.message;

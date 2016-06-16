@@ -299,18 +299,6 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
   return query;
 }
 
-/**
- * @ignore
- */
-var bindToCurrentDomain = function(callback) {
-  var domain = process.domain;
-  if(domain == null || callback == null) {
-    return callback;
-  } else {
-    return domain.bind(callback);
-  }
-}
-
 var hasWriteConcern = function(writeConcern) {
   if(writeConcern.w
     || writeConcern.wtimeout
@@ -407,8 +395,6 @@ var aggregateWriteOperationResults = function(opType, ops, results, connection) 
 //
 var executeOrdered = function(opType ,command, ismaster, ns, bson, pool, ops, options, callback) {
   var _ops = ops.slice(0);
-  // Bind to current domain
-  callback = bindToCurrentDomain(callback);
   // Collect all the getLastErrors
   var getLastErrors = [];
   // Execute an operation
@@ -487,8 +473,6 @@ var executeOrdered = function(opType ,command, ismaster, ns, bson, pool, ops, op
 }
 
 var executeUnordered = function(opType, command, ismaster, ns, bson, pool, ops, options, callback) {
-  // Bind to current domain
-  callback = bindToCurrentDomain(callback);
   // Total operations to write
   var totalOps = ops.length;
   // Collect all the getLastErrors

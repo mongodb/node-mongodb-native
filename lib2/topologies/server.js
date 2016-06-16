@@ -2,7 +2,6 @@
 
 var inherits = require('util').inherits,
   f = require('util').format,
-  bindToCurrentDomain = require('../connection/utils').bindToCurrentDomain,
   EventEmitter = require('events').EventEmitter,
   BSON = require('bson').native().BSON,
   ReadPreference = require('./read_preference'),
@@ -14,11 +13,6 @@ var inherits = require('util').inherits,
   TwoSixWireProtocolSupport = require('../wireprotocol/2_6_support'),
   ThreeTwoWireProtocolSupport = require('../wireprotocol/3_2_support'),
   BasicCursor = require('../cursor');
-
-var DISCONNECTED = 'disconnected';
-var CONNECTING = 'connecting';
-var CONNECTED = 'connected';
-var DESTROYED = 'destroyed';
 
 var Server = function(options) {
   options = options || {};
@@ -33,8 +27,6 @@ var Server = function(options) {
   this.s = {
     // Options
     options: options,
-    // State variable
-    state: DISCONNECTED,
     // Logger
     logger: Logger('Server', options),
     // Factory overrides
@@ -155,9 +147,14 @@ Server.prototype.connect = function(options) {
   var self = this;
   options = options || {};
 
+//   if(self.s.pool) {
+//   console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Server.prototype.connect")
+//   console.dir(self.s.pool.state)
+// }
+
   // Do not allow connect to be called on anything that's not disconnected
-  if(self.s.state != DISCONNECTED) {
-    throw MongoError.create(f('server instnace in invalid state %s', self.s.state));
+  if(self.s.pool && !self.s.pool.isDisconnected() && !self.s.pool.isDestroyed()) {
+    throw MongoError.create(f('server instance in invalid state %s', self.s.state));
   }
 
   // Create a pool
@@ -179,9 +176,6 @@ Server.prototype.getDescription = function() {
   var self = this;
 }
 
-// Server.prototype.setBSONParserType = function(type) {
-// }
-
 Server.prototype.lastIsMaster = function() {
   return this.ismaster;
 }
@@ -199,12 +193,18 @@ Server.prototype.isConnected = function() {
 }
 
 Server.prototype.isDestroyed = function() {
-  // return this.s.state == DESTROYED;
+  if(!this.s.pool) return false;
+  return this.s.pool.isDestroyed();
 }
 
-function basicValidations(self, options) {
+function basicWriteValidations(self, options) {
   if(!self.s.pool) return MongoError.create('server instance is not connected');
   if(self.s.pool.isDestroyed()) return MongoError.create('server instance pool was destroyed');
+}
+
+function basicReadValidations(self, options) {
+  basicWriteValidations(self, options);
+
   if(options.readPreference && !(options.readPreference instanceof ReadPreference)) {
     throw new Error("readPreference must be an instance of ReadPreference");
   }
@@ -217,7 +217,6 @@ function disconnectHandler(self, type, ns, cmd, options, callback) {
   // Topology is not connected, save the call in the provided store to be
   // Executed at some point when the handler deems it's reconnected
   if(!self.s.pool.isConnected() && self.s.disconnectHandler != null) {
-    callback = bindToCurrentDomain(callback);
     self.s.disconnectHandler.add(type, ns, cmd, options, callback);
     return true;
   }
@@ -246,9 +245,11 @@ function disconnectHandler(self, type, ns, cmd, options, callback) {
 Server.prototype.command = function(ns, cmd, options, callback) {
   // console.log("== Server:: command ");
   // console.dir(cmd)
+  // console.dir(options)
+  // console.dir(cmd)
   var self = this;
   if(typeof options == 'function') callback = options, options = {}, options = options || {};
-  var result = basicValidations(self, options);
+  var result = basicReadValidations(self, options);
   if(result) return callback(result);
 
   // Debug log
@@ -286,11 +287,12 @@ Server.prototype.command = function(ns, cmd, options, callback) {
 Server.prototype.insert = function(ns, ops, options, callback) {
   var self = this;
   // console.log("== Server:: insert ");
+  // console.dir(options)
   // console.dir(ops)
   // console.log("== server.insert")
   if(typeof options == 'function') callback = options, options = {}, options = options || {};
   // console.log("== Server:: insert 1");
-  var result = basicValidations(self, options);
+  var result = basicWriteValidations(self, options);
   // console.log("== Server:: insert 2");
   if(result) return callback(result);
   // console.log("== Server:: insert 3");
@@ -315,7 +317,7 @@ Server.prototype.update = function(ns, ops, options, callback) {
   // console.log("== Server:: update ");
   // console.dir(ops)
   if(typeof options == 'function') callback = options, options = {}, options = options || {};
-  var result = basicValidations(self, options);
+  var result = basicWriteValidations(self, options);
   if(result) return callback(result);
 
   // If we are not connected or have a disconnectHandler specified
@@ -332,7 +334,7 @@ Server.prototype.remove = function(ns, ops, options, callback) {
   // console.log("== Server:: remove ");
   // console.dir(ops)
   if(typeof options == 'function') callback = options, options = {}, options = options || {};
-  var result = basicValidations(self, options);
+  var result = basicWriteValidations(self, options);
   if(result) return callback(result);
 
   // If we are not connected or have a disconnectHandler specified
@@ -422,9 +424,9 @@ Server.prototype.getServerFrom = function(connection) {
 //   return 'js';
 // }
 
-// Server.prototype.getConnection = function(options) {
-//   return this.s.pool.get();
-// }
+Server.prototype.getConnection = function(options) {
+  return this.s.pool.get();
+}
 
 var listeners = ['close', 'error', 'timeout', 'parseError', 'connect'];
 

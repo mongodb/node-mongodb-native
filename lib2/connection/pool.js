@@ -380,7 +380,7 @@ function messageHandler(self) {
           // Parse the message according to the provided options
           message.parse(workItem);
           // console.log("=================================== messageHandler")
-          // console.dir(message.documents)
+          // console.dir(workItem)
         } catch(err) {
           return workItem.cb(MongoError.create(err));
         }
@@ -388,6 +388,7 @@ function messageHandler(self) {
         // Establish if we have an error
         if(message.documents[0] && (message.documents[0].ok == 0 || message.documents[0]['$err']
         || message.documents[0]['errmsg'] || message.documents[0]['code'])) {
+          // console.log("=================================== messageHandler error")
           return workItem.cb(MongoError.create(message.documents[0]));
         }
 
@@ -430,6 +431,10 @@ Pool.prototype.isConnected = function() {
 
 Pool.prototype.isDestroyed = function() {
   return this.state == DESTROYED;
+}
+
+Pool.prototype.isDisconnected = function() {
+  return this.state == DISCONNECTED;
 }
 
 Pool.prototype.connect = function(auth) {
@@ -643,9 +648,10 @@ Pool.prototype.destroy = function() {
 Pool.prototype.write = function(buffer, options, cb) {
   // console.log("======== Pool:write")
   // console.dir(options)
+  // console.dir(cb)
   // Ensure we have a callback
   if(typeof options == 'function') {
-    cb = options, options = {};
+    cb = options;
   }
 
   // Always have options
@@ -664,9 +670,9 @@ Pool.prototype.write = function(buffer, options, cb) {
   };
 
   // Set the options for the parsing
-  operation.promoteLongs = options.promoteLongs == false ? false : true;
-  operation.raw = options.raw == true ? true : false;
-  operation.immediateRelease = options.immediateRelease == true ? true : false;
+  operation.promoteLongs = typeof options.promoteLongs == 'boolean' ? options.promoteLongs : true;
+  operation.raw = typeof options.raw == 'boolean' ? options.raw : false;
+  operation.immediateRelease = typeof options.immediateRelease == 'boolean' ? options.immediateRelease : false;
   operation.documentsReturnedIn = options.documentsReturnedIn;
   // Optional per operation socketTimeout
   operation.socketTimeout = options.socketTimeout;

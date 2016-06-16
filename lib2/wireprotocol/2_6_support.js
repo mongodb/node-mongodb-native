@@ -56,9 +56,8 @@ var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callba
   if(type == 'insert') queryOptions.checkKeys = true;
   // Ensure we support serialization of functions
   if(options.serializeFunctions) queryOptions.serializeFunctions = options.serializeFunctions;
-
-  // Ensure we support serialization of functions
-  if(options.ignoreUndefined) opts.ignoreUndefined = options.ignoreUndefined;
+  // Do not serialize the undefined fields
+  if(options.ignoreUndefined) queryOptions.ignoreUndefined = options.ignoreUndefined;
 
   try {
     // Create write command
@@ -320,18 +319,6 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
 
   // Return the query
   return query;
-}
-
-/**
- * @ignore
- */
-var bindToCurrentDomain = function(callback) {
-  var domain = process.domain;
-  if(domain == null || callback == null) {
-    return callback;
-  } else {
-    return domain.bind(callback);
-  }
 }
 
 module.exports = WireProtocol;
