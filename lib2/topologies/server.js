@@ -282,7 +282,8 @@ Server.prototype.command = function(ns, cmd, options, callback) {
   // Write options
   var writeOptions = {
     raw: typeof options.raw == 'boolean' ? options.raw : false,
-    promoteLongs: typeof options.promoteLongs == 'boolean' ? options.promoteLongs : true
+    promoteLongs: typeof options.promoteLongs == 'boolean' ? options.promoteLongs : true,
+    command: true
   };
 
   // Write the operation to the pool

@@ -312,7 +312,6 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
       numberToSkip: 0, numberToReturn: -1
     , checkKeys: false, serializeFunctions: serializeFunctions
     , ignoreUndefined: ignoreUndefined
-    , command: true
   });
 
   // Set query flags
