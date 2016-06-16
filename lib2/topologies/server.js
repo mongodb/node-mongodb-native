@@ -14,13 +14,18 @@ var inherits = require('util').inherits,
   ThreeTwoWireProtocolSupport = require('../wireprotocol/3_2_support'),
   BasicCursor = require('../cursor');
 
+// Server instance id
+var serverId = 0;
+
 var Server = function(options) {
   options = options || {};
 
   // Add event listener
   EventEmitter.call(this);
 
-  // console.log("********************** CREATE SERVER")
+  // Server instance id
+  this.id = serverId++;
+  // console.log("**** CREATE SERVER :: " + this.id)
   // console.dir(options)
 
   // Internal state
@@ -77,7 +82,7 @@ function configureWireProtocolHandler(self, ismaster) {
 
 function monitoringProcess(self) {
   return function() {
-    // console.log("#### monitoringProcess")
+    // console.log("#### monitoringProcess :: " + self.id)
     // Pool was destroyed do not continue process
     if(self.s.pool.isDestroyed()) return;
     // console.log("#### monitoringProcess 1")
@@ -281,7 +286,18 @@ Server.prototype.command = function(ns, cmd, options, callback) {
   };
 
   // Write the operation to the pool
-  self.s.pool.write(query.toBin(), writeOptions, callback);
+  self.s.pool.write(query.toBin(), writeOptions, function(err, result) {
+    if(err) return callback(err);
+
+    // Check if the command has an error
+    if(result.result && (result.result.ok == 0 || result.result['$err']
+      || result.result['errmsg'] || result.result['code'])) {
+        return callback(MongoError.create(result.result));
+      }
+
+    // Return the result
+    callback(err, result);
+  });
 }
 
 Server.prototype.insert = function(ns, ops, options, callback) {

@@ -385,12 +385,12 @@ function messageHandler(self) {
           return workItem.cb(MongoError.create(err));
         }
 
-        // Establish if we have an error
-        if(message.documents[0] && (message.documents[0].ok == 0 || message.documents[0]['$err']
-        || message.documents[0]['errmsg'] || message.documents[0]['code'])) {
-          // console.log("=================================== messageHandler error")
-          return workItem.cb(MongoError.create(message.documents[0]));
-        }
+        // // Establish if we have an error
+        // if(message.documents[0] && (message.documents[0].ok == 0 || message.documents[0]['$err']
+        // || message.documents[0]['errmsg'] || message.documents[0]['code'])) {
+        //   // console.log("=================================== messageHandler error")
+        //   return workItem.cb(MongoError.create(message.documents[0]));
+        // }
 
         // Return the documents
         workItem.cb(null, new CommandResult(message.documents[0], connection, message));
