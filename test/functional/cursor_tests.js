@@ -1899,7 +1899,10 @@ exports.shouldCloseDeadTailableCursors = {
           collection.insert({id: i});
         }
 
+        var index = 0;
+
         stream.on('data', function (doc) {
+          console.log("doc :: " + (index++));
         });
 
         stream.on('error', function (err) {
