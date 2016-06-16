@@ -609,8 +609,13 @@ Pool.prototype.destroy = function() {
   // Do we have a reconnect attempt running, terminate timeout
   clearTimeout(this.reconnectId);
 
-  // Destroy all the connections
+  // Destroy all the connections and flush work in progress on
+  // those connections
   connections.forEach(function(c) {
+    if(c.workItem && c.workItem.cb) {
+      c.workItem.cb(new MongoError('pool destroyed'));
+    }
+
     // Remove all listeners
     for(var i = 0; i < events.length; i++) {
       c.removeAllListeners(events[i]);
@@ -619,17 +624,13 @@ Pool.prototype.destroy = function() {
     c.destroy();
   });
 
-  // console.log("pool destroy :: " + connections.map(function(x) {
-  //   return x.id
-  // }));
+  // Flush the queue
+  while(this.queue.length > 0) {
+    var workItem = this.queue.shift();
 
-  // Any operations in flight must be flushed out as an error
-  if(this.inUseConnections.length > 0) {
-    this.inUseConnections.forEach(function(connection) {
-      if(connection.workItem.cb) {
-        connection.workItem.cb(new MongoError('pool destroyed'));
-      }
-    });
+    if(workItem && workItem.cb) {
+      workItem.cb(new MongoError('pool destroyed'));
+    }
   }
 
   // Zero out all connections
