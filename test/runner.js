@@ -262,6 +262,7 @@ var testFiles = [
   // , '/test/functional/operation_promises_example_tests.js'
   // , '/test/functional/byo_promises_tests.js'
 
+
   // Functionality tests
   , '/test/functional/mongo_client_tests.js'
   , '/test/functional/collection_tests.js'
