@@ -51,7 +51,7 @@ var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callba
   }
 
   // Options object
-  var opts = {};
+  var opts = { command: true };
   var queryOptions = { checkKeys : false, numberToSkip: 0, numberToReturn: 1 };
   if(type == 'insert') queryOptions.checkKeys = true;
   // Ensure we support serialization of functions
@@ -312,6 +312,7 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
       numberToSkip: 0, numberToReturn: -1
     , checkKeys: false, serializeFunctions: serializeFunctions
     , ignoreUndefined: ignoreUndefined
+    , command: true
   });
 
   // Set query flags

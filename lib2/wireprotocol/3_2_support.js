@@ -53,7 +53,7 @@ var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callba
   }
 
   // Options object
-  var opts = {};
+  var opts = { command: true };
   var queryOptions = { checkKeys : false, numberToSkip: 0, numberToReturn: 1 };
   if(type == 'insert') queryOptions.checkKeys = true;
 
@@ -137,7 +137,7 @@ WireProtocol.prototype.killCursor = function(bson, ns, cursorId, pool, callback)
 
   // Execute the kill cursor command
   if(pool && pool.isConnected()) {
-    pool.write(query.toBin(), killCursorCallback);
+    pool.write(query.toBin(), { command: true }, killCursorCallback);
   }
 }
 
@@ -223,7 +223,7 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
   }
 
   // Write out the getMore command
-  connection.write(query.toBin(), queryCallback);
+  connection.write(query.toBin(), { command: true }, queryCallback);
 }
 
 WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, options) {
@@ -506,6 +506,7 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
       numberToSkip: 0, numberToReturn: -1
     , checkKeys: false, serializeFunctions: serializeFunctions
     , ignoreUndefined: ignoreUndefined
+    , command: true
   });
 
   // Set query flags

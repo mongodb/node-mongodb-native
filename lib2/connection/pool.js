@@ -385,12 +385,11 @@ function messageHandler(self) {
           return workItem.cb(MongoError.create(err));
         }
 
-        // // Establish if we have an error
-        // if(message.documents[0] && (message.documents[0].ok == 0 || message.documents[0]['$err']
-        // || message.documents[0]['errmsg'] || message.documents[0]['code'])) {
-        //   // console.log("=================================== messageHandler error")
-        //   return workItem.cb(MongoError.create(message.documents[0]));
-        // }
+        // Establish if we have an error
+        if(workItem.command && message.documents[0] && (message.documents[0].ok == 0 || message.documents[0]['$err']
+        || message.documents[0]['errmsg'] || message.documents[0]['code'])) {
+          return workItem.cb(MongoError.create(message.documents[0]));
+        }
 
         // Return the documents
         workItem.cb(null, new CommandResult(message.documents[0], connection, message));
@@ -674,6 +673,7 @@ Pool.prototype.write = function(buffer, options, cb) {
   operation.raw = typeof options.raw == 'boolean' ? options.raw : false;
   operation.immediateRelease = typeof options.immediateRelease == 'boolean' ? options.immediateRelease : false;
   operation.documentsReturnedIn = options.documentsReturnedIn;
+  operation.command = typeof options.command == 'boolean' ? options.command : false;
   // Optional per operation socketTimeout
   operation.socketTimeout = options.socketTimeout;
 

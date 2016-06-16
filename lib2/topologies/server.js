@@ -286,18 +286,19 @@ Server.prototype.command = function(ns, cmd, options, callback) {
   };
 
   // Write the operation to the pool
-  self.s.pool.write(query.toBin(), writeOptions, function(err, result) {
-    if(err) return callback(err);
-
-    // Check if the command has an error
-    if(result.result && (result.result.ok == 0 || result.result['$err']
-      || result.result['errmsg'] || result.result['code'])) {
-        return callback(MongoError.create(result.result));
-      }
-
-    // Return the result
-    callback(err, result);
-  });
+  self.s.pool.write(query.toBin(), writeOptions, callback);
+  // self.s.pool.write(query.toBin(), writeOptions, function(err, result) {
+  //   if(err) return callback(err);
+  //
+  //   // Check if the command has an error
+  //   if(result.result && (result.result.ok == 0 || result.result['$err']
+  //     || result.result['errmsg'] || result.result['code'])) {
+  //       return callback(MongoError.create(result.result));
+  //     }
+  //
+  //   // Return the result
+  //   callback(err, result);
+  // });
 }
 
 Server.prototype.insert = function(ns, ops, options, callback) {
