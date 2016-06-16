@@ -1903,14 +1903,18 @@ exports.shouldCloseDeadTailableCursors = {
         });
 
         stream.on('error', function (err) {
+          console.log("== error")
+          console.dir(err)
           test.ok(err != null);
         });
 
         stream.on('end', function () {
+          console.log("== end")
           closed = true;
         });
 
         stream.on('close', function () {
+          console.log("== close")
           closed = true;
         });
 
