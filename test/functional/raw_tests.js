@@ -19,10 +19,10 @@ exports.shouldCorrectlySaveDocumentsAndReturnAsRaw = {
         collection.insert([{a:1}, {b:2000}, {c:2.3}], {w:1}, function(err, result) {
           // You have to pass at least query + fields before passing options
           collection.find({}, null, {raw:true, batchSize: 2}).toArray(function(err, items) {
-            var objects = []; 
+            var objects = [];
 
             for(var i = 0; i < items.length; i++) {
-              test.ok(Buffer.isBuffer(items[i]));
+              test.ok(Buffer.isBuffer(items[i])); 
               objects.push(new BSON().deserialize(items[i]));
             }
 
