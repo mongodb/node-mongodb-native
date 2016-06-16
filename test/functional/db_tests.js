@@ -75,10 +75,18 @@ exports.shouldCorrectlyPerformAutomaticConnect = {
         var collection = automatic_connect_client.collection('test_object_id_generation_data2');
         // Insert another test document and collect using ObjectId
         collection.insert({"name":"Patty", "age":34}, configuration.writeConcernMax(), function(err, r) {
+          // console.log("----------------------------------------- TEST -1")
+          // console.dir(err)
+          // console.dir(r)
           test.equal(1, r.ops.length);
           test.ok(r.ops[0]._id.toHexString().length == 24);
 
+          // console.log("-------------------------------------- TEST 0")
           collection.findOne({"name":"Patty"}, function(err, document) {
+            // console.log("-------------------------------------- TEST 1")
+            // console.log(r.ops[0])
+            // console.dir(err)
+            // console.log(document)
             test.equal(r.ops[0]._id.toHexString(), document._id.toHexString());
             // Let's close the db
             automatic_connect_client.close();

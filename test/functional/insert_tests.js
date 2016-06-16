@@ -2119,11 +2119,13 @@ exports['Correctly allow forceServerObjectId for insertOne'] = {
 
     var listener = require('../..').instrument(function(err, instrumentations) {});
     listener.on('started', function(event) {
+      console.log("-- started")
       if(event.commandName == 'insert')
         started.push(event);
     });
 
     listener.on('succeeded', function(event) {
+      console.log("-- succeeded")
       if(event.commandName == 'insert')
         succeeded.push(event);
     });
@@ -2133,6 +2135,7 @@ exports['Correctly allow forceServerObjectId for insertOne'] = {
       test.equal(null, err);
 
       db.collection('apm_test').insertOne({a:1}, {forceServerObjectId:true}).then(function(r) {
+        // console.dir(r)
         test.equal(null, err);
         test.equal(undefined, started[0].command.documents[0]._id);
         listener.uninstrument();

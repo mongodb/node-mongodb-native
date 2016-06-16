@@ -8,7 +8,9 @@ exports.shouldFailInsertDueToUniqueIndex = {
     var db = configuration.newDbInstance({w:1}, {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('test_failing_insert_due_to_unique_index');
+      console.log("!!!!!!!!!!!!!!!!!!! ensureIndex 0")
       collection.ensureIndex([['a', 1 ]], {unique:true, w:1}, function(err, indexName) {
+        console.log("!!!!!!!!!!!!!!!!!!! ensureIndex 1")
         test.equal(null, err);
 
         collection.insert({a:2}, {w: 1}, function(err, r) {

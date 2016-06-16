@@ -18,13 +18,16 @@ exports['Should Correctly Do MongoClient with bufferMaxEntries:0 and ordered exe
     }, function(err, db) {
       // Listener for closing event
       var closeListener = function(has_error) {
+        // console.log("!!!!!!!!! closeListener")
         // Let's insert a document
         var collection = db.collection('test_object_id_generation.data2');
         // Insert another test document and collect using ObjectId
         var docs = [];
         for(var i = 0; i < 1500; i++) docs.push({a:i})
 
+        // console.log("!!!!!!!!! closeListener 1")
         collection.insert(docs, configuration.writeConcern(), function(err, ids) {
+          // console.log("!!!!!!!!! closeListener 2")
           test.ok(err != null);
           test.ok(err.message.indexOf("0") != -1)
           // Let's close the db

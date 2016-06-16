@@ -11,10 +11,11 @@ exports['Should correctly start monitoring for single server connection'] = {
     var db = configuration.newDbInstanceWithDomainSocket({w:1}, {poolSize: 1, host: "/tmp/mongodb-27017.sock"});
     db.open(function(err, db) {
       test.equal(null, err);
-      test.ok(db.serverConfig.s.server.s.inquireServerStateTimeout != null);
 
-      db.close();
-      test.done();
+      db.serverConfig.once('monitoring', function() {
+        db.close();
+        test.done();
+      });
     });
   }
 }
@@ -30,7 +31,7 @@ exports['Should correctly disable monitoring for single server connection'] = {
     var db = configuration.newDbInstanceWithDomainSocket({w:1}, {poolSize: 1, host: "/tmp/mongodb-27017.sock", monitoring: false});
     db.open(function(err, db) {
       test.equal(null, err);
-      test.equal(null, db.serverConfig.s.server.s.inquireServerStateTimeout);
+      test.equal(false, db.serverConfig.s.server.s.monitoring);
 
       db.close();
       test.done();
@@ -159,11 +160,14 @@ exports['Should fail to connect using non-domain socket with undefined port'] = 
 function connectionTester(test, testName, callback) {
   return function(err, db) {
     test.equal(err, null);
+
     db.collection(testName, function(err, collection) {
       test.equal(err, null);
       var doc = {foo:123};
+
       collection.insert({foo:123}, {w:1}, function(err, docs) {
         test.equal(err, null);
+
         db.dropDatabase(function(err, done) {
           test.equal(err, null);
           test.ok(done);
@@ -402,7 +406,7 @@ exports['Should correctly reconnect and finish query operation'] = {
               test.equal(null, err);
               test.equal(1, doc.a);
               test.equal(2, dbReconnect);
-              test.equal(1, dbClose);
+              test.equal(2, dbClose);
 
               db.close();
               test.done();
