@@ -218,13 +218,13 @@ exports['Should correctly error out operations if pool is closed in the middle o
       if(index> 490)console.log("--- messageHandler :: " + index)
 
       if(index == 500) {
-        console.log("== index :: " + index)
-        console.log(" errorCount = " + errorCount)
+        // console.log("== index :: " + index)
+        // console.log(" errorCount = " + errorCount)
         // console.dir(err)
         // console.dir(r)
         test.ok(errorCount >= 250);
         pool.destroy();
-        console.log("=================== " + Object.keys(Connection.connections()).length)
+        // console.log("=================== " + Object.keys(Connection.connections()).length)
         // test.equal(0, Object.keys(Connection.connections()).length);
         Connection.disableConnectionAccounting();
         test.done();
