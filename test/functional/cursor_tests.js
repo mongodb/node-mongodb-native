@@ -2645,6 +2645,8 @@ exports['Should report database name and collection name'] = {
         test.equal(null, err);
         test.equal('myCollection', cursor.namespace.collection);
         test.equal('integration_tests', cursor.namespace.database);
+
+        db.close();
         test.done();
       });
     });

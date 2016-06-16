@@ -2119,13 +2119,11 @@ exports['Correctly allow forceServerObjectId for insertOne'] = {
 
     var listener = require('../..').instrument(function(err, instrumentations) {});
     listener.on('started', function(event) {
-      console.log("-- started")
       if(event.commandName == 'insert')
         started.push(event);
     });
 
     listener.on('succeeded', function(event) {
-      console.log("-- succeeded")
       if(event.commandName == 'insert')
         succeeded.push(event);
     });
