@@ -266,3 +266,90 @@ exports['Should correctly connect server to single instance and execute remove']
     server.connect();
   }
 }
+
+/**
+ * @ignore
+ */
+exports['Should correctly recover with multiple restarts'] = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Server = require('../../../lib2/topologies/server')
+      , bson = require('bson').BSONPure.BSON;
+
+    var done = false;
+
+    // Attempt to connect
+    var server = new Server({
+        host: configuration.host
+      , port: configuration.port
+      , bson: new bson()
+    })
+
+    // Add event listeners
+    server.on('connect', function(_server) {
+      var count = 1;
+      var allDone = 0;
+      var ns = "integration_tests.t";
+
+      var execute = function() {
+        if(!done) {
+          server.insert(ns, {a:1, count: count}, function(err, r) {
+            count = count + 1;
+
+            // Execute find
+            var cursor = _server.cursor(ns, {
+              find: ns, query: {}, batchSize: 2
+            });
+
+            // Execute next
+            cursor.next(function(err, d) {
+              setTimeout(execute, 500);
+            });
+          })
+        } else {
+          server.insert(ns, {a:1, count: count}, function(err, r) {
+            test.equal(null, err);
+
+            // Execute find
+            var cursor = _server.cursor(ns, {
+              find: ns, query: {}, batchSize: 2
+            });
+
+            // Execute next
+            cursor.next(function(err, d) {
+              test.equal(null, err);
+              server.destroy();
+              test.done();
+            });
+          })
+        }
+      }
+
+      setTimeout(execute, 500);
+    });
+
+    var count = 2
+
+    var restartServer = function() {
+      if(count == 0) {
+        done = true;
+        return;
+      }
+
+      count = count - 1;
+
+      configuration.manager.stop().then(function() {
+        setTimeout(function() {
+          configuration.manager.start().then(function() {
+            setTimeout(restartServer, 1000);
+          });
+        }, 2000);
+      });
+    }
+
+    setTimeout(restartServer, 1000);
+    server.connect();
+  }
+}
