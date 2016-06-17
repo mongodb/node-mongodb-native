@@ -51,24 +51,31 @@ exports['Should correctly recover when bufferMaxEntries: -1 and multiple restart
         reconnectTries : 1000,
         reconnectInterval : 1000
       }}, function(err, db) {
+        // console.log("======================================= 0")
         var col = db.collection('t');
         var count = 1;
         var allDone = 0;
 
         var execute = function() {
           if(!done) {
+            // console.log("======================================= 1:1")
             col.insertOne({a:1, count: count}, function(err, r) {
+              // console.log("======================================= 1:2")
               count = count + 1;
 
               col.findOne({}, function(err, doc) {
+                // console.log("======================================= 1:3")
                 setTimeout(execute, 500);
               });
             })
           } else {
+            // console.log("======================================= 2:1")
             col.insertOne({a:1, count: count}, function(err, r) {
+              // console.log("======================================= 2:2")
               test.equal(null, err);
 
               col.findOne({}, function(err, doc) {
+                // console.log("======================================= 2:3")
                 test.equal(null, err);
                 db.close();
                 test.done();
@@ -83,7 +90,9 @@ exports['Should correctly recover when bufferMaxEntries: -1 and multiple restart
     var count = 2
 
     var restartServer = function() {
+      // console.log("==== restartServer 1")
       if(count == 0) {
+        // console.log("==== restartServer DONE")
         done = true;
         return;
       }
@@ -91,8 +100,11 @@ exports['Should correctly recover when bufferMaxEntries: -1 and multiple restart
       count = count - 1;
 
       configuration.manager.stop().then(function() {
+        // console.log("==== restartServer 2")
         setTimeout(function() {
+          // console.log("==== restartServer 3")
           configuration.manager.start().then(function() {
+            // console.log("==== restartServer 4")
             setTimeout(restartServer, 1000);
           });
         }, 2000);

@@ -133,7 +133,7 @@ exports['Pass the logLevel down through the options'] = {
     var MongoClient = configuration.require.MongoClient
       , Logger = configuration.require.Logger;
 
-    Logger.filter('class', ['Server']);
+    Logger.filter('class', ['Cursor']);
     var logged = false;
 
     MongoClient.connect('mongodb://localhost:27017/test', {

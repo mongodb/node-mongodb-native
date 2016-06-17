@@ -243,25 +243,24 @@ var runner = new Runner({
 });
 
 var testFiles = [
-  // // Logging tests
-  //   '/test/functional/logger_tests.js'
-  //
-  // // APM tests
-  // , '/test/functional/apm_tests.js'
-  //
-  // // Connection spec tests
-  // , '/test/functional/connection_string_spec_tests.js'
-  //
+  // Logging tests
+    '/test/functional/logger_tests.js'
+
+  // APM tests
+  , '/test/functional/apm_tests.js'
+
+  // Connection spec tests
+  , '/test/functional/connection_string_spec_tests.js'
+
   // // Replicaset read concern (make sure no illegal state due to teardown tests)
   // , '/test/functional/readconcern_tests.js'
-  //
-  // // Promise tests
-  // , '/test/functional/promises_db_tests.js'
-  // , '/test/functional/promises_collection_tests.js'
-  // , '/test/functional/promises_cursor_tests.js'
-  // , '/test/functional/operation_promises_example_tests.js'
-  // , '/test/functional/byo_promises_tests.js'
 
+  // Promise tests
+  , '/test/functional/promises_db_tests.js'
+  , '/test/functional/promises_collection_tests.js'
+  , '/test/functional/promises_cursor_tests.js'
+  , '/test/functional/operation_promises_example_tests.js'
+  , '/test/functional/byo_promises_tests.js'
 
   // Functionality tests
   , '/test/functional/mongo_client_tests.js'
@@ -323,12 +322,12 @@ var testFiles = [
   //
   // // Authentication Tests
   // , '/test/functional/authentication_tests.js'
-  //
-  // // GridFS
-  // , '/test/functional/gridfs_stream_tests.js'
-  //
-  // // Reconnection tests
-  // , '/test/functional/reconnect_tests.js'
+
+  // GridFS
+  , '/test/functional/gridfs_stream_tests.js'
+
+  // Reconnection tests
+  , '/test/functional/reconnect_tests.js'
 ]
 
 // Check if we support es6 generators
