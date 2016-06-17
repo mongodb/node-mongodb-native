@@ -201,8 +201,8 @@ function connectionFailureHandler(self, event) {
 
 function attemptReconnect(self) {
   return function() {
-    self.emit('attemptReconnect', self);
     // console.log("==== attemptReconnect start :: " + self.state + " :: " + self.id)
+    self.emit('attemptReconnect', self);
     // console.log(self.availableConnections.concat(self.inUseConnections.concat(self.connectingConnections)).map(function(x) {
     //   return x.id
     // }))
@@ -226,6 +226,7 @@ function attemptReconnect(self) {
           // Emit close event
           self.emit('close', self);
         } else {
+          // console.log("==== attemptReconnect :: retry")
           self.reconnectId = setTimeout(attemptReconnect(self), self.options.reconnectInterval);
         }
       }
@@ -259,7 +260,6 @@ function attemptReconnect(self) {
 
         // Apply any auth to the connection
         reauthenticate(self, this, function(err) {
-          // console.log("==== asttemptReconnect :: connect - 2 :: " + connection.id)
           // Reset retries
           self.retriesLeft = self.options.reconnectTries;
           // Push to available connections
@@ -269,6 +269,8 @@ function attemptReconnect(self) {
           // console.log(self.availableConnections.concat(self.inUseConnections.concat(self.connectingConnections)).map(function(x) {
           //   return x.id
           // }))
+          // console.log("==== asttemptReconnect :: connect :: 2 :: " + connection.id)
+          // console.log("  queue.length = " + self.queue.length)
           // Trigger execute to start everything up again
           _execute(self)();
         });
@@ -462,8 +464,10 @@ Pool.prototype.connect = function(auth) {
       }
       // Set connected mode
       stateTransition(self, CONNECTED);
+
       // Move the active connection
       moveConnectionBetween(connection, self.connectingConnections, self.availableConnections);
+
       // Emit the connect event
       self.emit('connect', self);
     });
@@ -654,7 +658,7 @@ Pool.prototype.write = function(buffer, options, cb) {
   // Always have options
   options = options || {};
 
-  // console.log("======== Pool:write")
+  // console.log("======== Pool:write :: " + this.state)
   // console.dir(options)
   // console.dir(cb)
 
@@ -692,10 +696,9 @@ Pool.prototype.write = function(buffer, options, cb) {
   this.queue.push(operation);
   // console.log("========= write")
   // Attempt to write all buffers out
-  // If we are connected execute otherwise wait for attemptReconnect
-  if(this.state == CONNECTED) {
-    _execute(this)();
-  }
+
+  // Attempt to execute the operation
+  _execute(this)();
 }
 
 // Remove connection method
