@@ -30,14 +30,14 @@ var Logger = function(className, options) {
   this.className = className;
 
   // Current logger
-  if(currentLogger == null && options.logger) {
+  if(options.logger) {
     currentLogger = options.logger;
   } else if(currentLogger == null) {
     currentLogger = console.log;
   }
 
   // Set level of logging, default is error
-  if(level == null) {
+  if(options.loggerLevel) {
     level = options.loggerLevel || 'error';
   }
 

@@ -6,6 +6,7 @@ var inherits = require('util').inherits,
   BSON = require('bson').native().BSON,
   ReadPreference = require('./read_preference'),
   Logger = require('../connection/logger'),
+  debugOptions = require('../connection/utils').debugOptions,
   Pool = require('../connection/pool'),
   Query = require('../connection/commands').Query,
   MongoError = require('../error'),
@@ -13,6 +14,11 @@ var inherits = require('util').inherits,
   TwoSixWireProtocolSupport = require('../wireprotocol/2_6_support'),
   ThreeTwoWireProtocolSupport = require('../wireprotocol/3_2_support'),
   BasicCursor = require('../cursor');
+
+// Used for filtering out fields for loggin
+var debugFields = ['reconnect', 'reconnectTries', 'reconnectInterval', 'emitError', 'cursorFactory', 'host'
+  , 'port', 'size', 'keepAlive', 'keepAliveInitialDelay', 'noDelay', 'connectionTimeout', 'checkServerIdentity'
+  , 'socketTimeout', 'singleBufferSerializtion', 'ssl', 'ca', 'cert', 'key', 'rejectUnauthorized', 'promoteLongs'];
 
 // Server instance id
 var serverId = 0;

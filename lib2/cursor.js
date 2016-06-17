@@ -112,7 +112,7 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
   }
 
   // Logger
-  this.logger = Logger('Cursor', options);
+  this.logger = Logger('Cursor', topologyOptions);
 
   //
   // Did we pass in a cursor id
