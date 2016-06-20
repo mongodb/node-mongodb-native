@@ -15,7 +15,7 @@ exports['Should correctly execute state machine tests'] = {
       return x.indexOf('.json') != -1;
     })
     // .filter(function(x) {
-    //   return x.indexOf('use_setversion_without_electionid.json') != -1;
+    //   return x.indexOf('equal_electionids.json') != -1;
     // });
     // console.dir(entries)
 
@@ -38,8 +38,15 @@ function executeEntry(test, path) {
 
   console.log(f("+ Starting: %s [%s]", description, path.split(/\//).pop()));
 
+  // Get replicaset name if any
+  var match = uri.match(/replicaSet\=[a-z|A-Z|0-9]*/)
+  // console.log("============ 0")
+  var replicaSet = match ? match.toString().split(/=/)[1] : null;
+  // Replicaset
+  // console.log(replicaSet)
+
   // Create a replset state
-  var state = new ReplSetState();
+  var state = new ReplSetState({setName: replicaSet});
 
   // Get all the server instances
   var parts = uri.split('mongodb://')[1].split("/")[0].split(',')
@@ -139,14 +146,23 @@ function executePhase(test, state, phase) {
 
     // test.deepEqual(outcome.servers[name], state.set[name]);
   } catch(e) {
-    console.log("========================== 0")
-    console.dir(outcome.servers)
-    console.log("========================== 1")
-    console.dir(state.set)
-    process.exit(0)
+    // console.log("========================== 0")
+    // console.dir(outcome.servers)
+    // console.log("========================== 1")
+    // console.dir(state.set)
+    // process.exit(0)
   }
     // console.log("========================== 2")
   }
+
+  // // Check the topology type
+  // console.log("========================================")
+  // console.log("outcome.topologyType = " + outcome.topologyType)
+  // console.log("state.topologyType = " + state.topologyType)
+  // console.log("outcome.setName = " + outcome.setName)
+  // console.log("state.setName = " + state.setName)
+  test.equal(outcome.topologyType, state.topologyType);
+  test.equal(outcome.setName, state.setName);
 
   // console.dir(state.set)
   // process.exit(0)
