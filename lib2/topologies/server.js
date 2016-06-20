@@ -422,7 +422,9 @@ Server.prototype.auth = function(mechanism, db) {
 // Server.prototype.addAuthProvider = function(name, provider) {
 
 Server.prototype.equals = function(server) {
-  var self = this;
+  if(typeof server == 'string') return this.name == server;
+  if(server.name) return this.name == server.name;
+  return false;
 }
 
 Server.prototype.connections = function() {

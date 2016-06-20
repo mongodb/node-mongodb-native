@@ -100,7 +100,9 @@ var ReplSet = function(seedlist, options) {
     // Seedlist
     seedlist: seedlist,
     // Replicaset state
-    replicaSetState: new ReplSetState({setName: options.setName})
+    replicaSetState: new ReplSetState({setName: options.setName}),
+    // Current servers we are connecting to
+    connectingServers: []
   }
 
   // Add forwarding of events from state handler
@@ -119,31 +121,70 @@ var ReplSet = function(seedlist, options) {
 
 inherits(ReplSet, EventEmitter);
 
+function handleInitialConnectEvent(self, event) {
+  return function(err) {
+    // Check the type of server
+    if(event == 'connect') {
+      self.s.replicaSetState.update(this);
+    } else {
+      // Emit failure to connect
+      self.emit('failed', this);
+      // Remove from the state
+      self.s.replicaSetState.remove(this);
+    }
+
+    // Remove from the list from connectingServers
+    for(var i = 0; i < self.s.connectingServers.length; i++) {
+      if(self.s.connectingServers[i].equals(this)) {
+        self.s.connectingServers.splice(i, 1);
+      }
+    }
+
+    // console.log("============================================= " + event)
+    // console.log("self.state = " + self.state)
+    // console.log("self.s.replicaSetState.hasPrimaryAndSecondary() = " + self.s.replicaSetState.hasPrimaryAndSecondary())
+    // console.log("self.s.replicaSetState.hasSecondary() = " + self.s.replicaSetState.hasSecondary())
+    // console.log("self.s.options.secondaryOnlyConnectionAllowed = " + self.s.options.secondaryOnlyConnectionAllowed)
+    // // console.dir(err)
+    // // console.dir(self.s.options)
+    //
+    // console.log("========================== 0")
+
+    // try {
+    //   self.s.replicaSetState.hasPrimaryAndSecondary()
+    //   self.s.replicaSetState.hasSecondary()
+    // } catch(e) {
+    //   console.log("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
+    //   console.log(e.stack)
+    // }
+
+    // Do we have a primary and secondary
+    if(self.state == CONNECTING
+      && self.s.replicaSetState.hasPrimaryAndSecondary()) {
+        console.log("========================== 0")
+        // Transition to connected
+        stateTransition(self, CONNECTED);
+        // Emit connected sign
+        self.emit('connect', self);
+    } else if(self.state == CONNECTING
+      && self.s.replicaSetState.hasSecondary()
+      && self.s.options.secondaryOnlyConnectionAllowed) {
+        console.log("========================== 1")
+        // Transition to connected
+        stateTransition(self, CONNECTED);
+        // Emit connected sign
+        self.emit('connect', self);
+    } else if(self.state == CONNECTING
+      && self.s.connectingServers.length == 0) {
+        console.log("========================== 2")
+        self.emit('error', new MongoError('no primary found in replicaset'));
+    }
+  };
+}
+
 function connectServers(self, servers) {
-  function handleInitialConnectEvent(event) {
-    return function(err) {
-      if(event == 'connect') {
-        self.s.replicaSetState.update(this);
-      }
-
-      // Do we have a primary and secondary
-      if(self.state == CONNECTING
-        && self.s.replicaSetState.hasPrimaryAndSecondary()) {
-          // Transition to connected
-          stateTransition(self, CONNECTED);
-          // Emit connected sign
-          self.emit('connect', self);
-      } else if(self.state == CONNECTING
-        && self.s.replicaSetState.hasSecondary()
-        && self.s.options.secondaryOnlyConnectionAllowed) {
-          // Transition to connected
-          stateTransition(self, CONNECTED);
-          // Emit connected sign
-          self.emit('connect', self);
-      }
-    };
-  }
-
+  // Update connectingServers
+  self.s.connectingServers = self.s.connectingServers.concat(servers);
   // Start all the servers
   while(servers.length > 0) {
     // Get the first server
@@ -151,11 +192,11 @@ function connectServers(self, servers) {
     // Add the server to the state
     self.s.replicaSetState.update(server);
     // Add event handlers
-    server.once('close', handleInitialConnectEvent('close'));
-    server.once('timeout', handleInitialConnectEvent('timeout'));
-    server.once('parseError', handleInitialConnectEvent('parseError'));
-    server.once('error', handleInitialConnectEvent('error'));
-    server.once('connect', handleInitialConnectEvent('connect'));
+    server.once('close', handleInitialConnectEvent(self, 'close'));
+    server.once('timeout', handleInitialConnectEvent(self, 'timeout'));
+    server.once('parseError', handleInitialConnectEvent(self, 'parseError'));
+    server.once('error', handleInitialConnectEvent(self, 'error'));
+    server.once('connect', handleInitialConnectEvent(self, 'connect'));
     // Start connection
     server.connect();
   }
