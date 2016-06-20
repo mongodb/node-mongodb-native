@@ -121,29 +121,29 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
         size: 1
     });
 
-    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    console.dir(ReplSet)
-
     server.on('joined', function(_type) {
       if(_type == 'arbiter' || _type == 'secondary' || _type == 'primary') {
-        if(server.s.replState.secondaries.length == 1
-          && server.s.replState.arbiters.length == 1
-          && server.s.replState.primary) {
-            test.equal(1, server.s.replState.secondaries.length);
-            test.equal('localhost:32001', server.s.replState.secondaries[0].name);
+        // console.log("!!!!!!!!!!!!!!!!! joined :: " + _type)
+        // console.log("server.s.replicaSetState.secondaries = " + server.s.replicaSetState.secondaries.length)
+        // console.log("server.s.replicaSetState.arbiters = " + server.s.replicaSetState.arbiters.length)
 
-            test.equal(1, server.s.replState.arbiters.length);
-            test.equal('localhost:32002', server.s.replState.arbiters[0].name);
+        if(server.s.replicaSetState.secondaries.length == 1
+          && server.s.replicaSetState.arbiters.length == 1
+          && server.s.replicaSetState.primary) {
+            test.equal(1, server.s.replicaSetState.secondaries.length);
+            test.equal('localhost:32001', server.s.replicaSetState.secondaries[0].name);
 
-            test.ok(server.s.replState.primary != null);
-            test.equal('localhost:32000', server.s.replState.primary.name);
+            test.equal(1, server.s.replicaSetState.arbiters.length);
+            test.equal('localhost:32002', server.s.replicaSetState.arbiters[0].name);
+
+            test.ok(server.s.replicaSetState.primary != null);
+            test.equal('localhost:32000', server.s.replicaSetState.primary.name);
 
             primaryServer.destroy();
             firstSecondaryServer.destroy();
             arbiterServer.destroy();
             server.destroy();
             running = false;
-
             test.done();
           }
       }
