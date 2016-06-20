@@ -46,8 +46,20 @@ ReplSetState.prototype.hasPrimaryAndSecondary = function(server) {
   return this.primary && this.secondaries.length > 0;
 }
 
+ReplSetState.prototype.hasPrimary = function(server) {
+  return this.primary != null;
+}
+
 ReplSetState.prototype.hasSecondary = function(server) {
   return this.secondaries.length > 0;
+}
+
+ReplSetState.prototype.allServers = function() {
+  var servers = this.primary ? [this.primary] : [];
+  servers = servers.concat(this.secondaries);
+  servers = servers.concat(this.arbiters);
+  servers = servers.concat(this.passives);
+  return servers;
 }
 
 ReplSetState.prototype.destroy = function() {
@@ -67,10 +79,13 @@ ReplSetState.prototype.destroy = function() {
 }
 
 ReplSetState.prototype.remove = function(server) {
-  this.set[server.name].type = ServerType.Unknown;
-  this.set[server.name].electionId = null;
-  this.set[server.name].setName = null;
-  this.set[server.name].setVersion = null;
+  // If we have it in the set remove it
+  if(this.set[server.name]) {
+    this.set[server.name].type = ServerType.Unknown;
+    this.set[server.name].electionId = null;
+    this.set[server.name].setName = null;
+    this.set[server.name].setVersion = null;
+  }
 
   // Remove from any lists
   if(this.primary && this.primary.equals(server)) {
@@ -90,6 +105,10 @@ ReplSetState.prototype.update = function(server) {
   var self = this;
   // Get the current ismaster
   var ismaster = server.lastIsMaster();
+//   if(global.debug) {
+//   console.log("========================== update")
+//   console.dir(ismaster)
+// }
 
   //
   // Add any hosts
@@ -102,6 +121,13 @@ ReplSetState.prototype.update = function(server) {
 
     // Add all hosts as unknownServers
     for(var i = 0; i < hosts.length; i++) {
+      // Add to the list of unknown server
+      if(this.unknownServers.indexOf(hosts[i]) == -1 && !this.set[hosts[i]]) {
+        // console.log("============ push unknownServers :: " + hosts[i])
+        // console.dir(this.set[hosts[i]])
+        this.unknownServers.push(hosts[i]);
+      }
+
       if(!this.set[hosts[i]]) {
         this.set[hosts[i]] = {
           type: ServerType.Unknown,
@@ -109,11 +135,6 @@ ReplSetState.prototype.update = function(server) {
           setName: null,
           setVersion: null
         }
-      }
-
-      // Add to the list of unknown server
-      if(this.unknownServers.indexOf(hosts[i]) == -1) {
-        this.unknownServers.push(hosts[i]);
       }
     }
   }
@@ -125,7 +146,19 @@ ReplSetState.prototype.update = function(server) {
     self.set[server.name] = {
       type: ServerType.Unknown, setVersion: null, electionId: null, setName: null
     }
-    addToList(self, ServerType.Unknown, ismaster, server, this.unknownServers);
+    // console.log("======== addToList unknownServers 0 :: " + server.name)
+    // Update set information about the server instance
+    self.set[server.name].type = ServerType.Unknown;
+    self.set[server.name].electionId = ismaster ? ismaster.electionId : ismaster;
+    self.set[server.name].setName = ismaster ? ismaster.setName : ismaster;
+    self.set[server.name].setVersion = ismaster ? ismaster.setVersion : ismaster;
+
+    if(self.unknownServers.indexOf(server.name) == -1) {
+      self.unknownServers.push(server.name);
+    }
+
+    // addToList(self, ServerType.Unknown, ismaster, server, this.unknownServers);
+    // console.log("======== addToList unknownServers 1")
     // Set the topology
     return false;
   }
@@ -189,9 +222,15 @@ ReplSetState.prototype.update = function(server) {
     // Set the topology
     this.topologyType = TopologyType.ReplicaSetWithPrimary;
     if(ismaster.setName) this.setName = ismaster.setName;
+    // console.log("========================= joined primary")
+    removeFrom(server, self.unknownServers);
     self.emit('joined', 'primary', server);
     return true;
   } else if(ismaster.ismaster && ismaster.setName) {
+    if(this.primary.equals(server)) {
+      return false;
+    }
+
     // Get the electionIds
     var currentElectionId = self.set[self.primary.name].electionId;
     var currentSetVersion = self.set[self.primary.name].setVersion;
@@ -257,6 +296,8 @@ ReplSetState.prototype.update = function(server) {
     // Set the topology
     this.topologyType = TopologyType.ReplicaSetWithPrimary;
     if(ismaster.setName) this.setName = ismaster.setName;
+    removeFrom(server, self.unknownServers);
+    // console.log("========================= joined primary 2")
     self.emit('joined', 'primary', server);
     return true;
   }
@@ -303,14 +344,25 @@ ReplSetState.prototype.update = function(server) {
   if(ismaster.secondary && ismaster.setName
     && !inList(ismaster, server, this.secondaries)
     && this.setName && this.setName == ismaster.setName) {
+      // console.log("========================== update 1 :: " + server.name)
+      // console.log("ismaster.secondary = " + ismaster.secondary)
+      // console.log("ismaster.setName = " + ismaster.setName)
+      // console.log("this.setName = " + this.setName)
+      // console.log("this.secondaries.length = " + this.secondaries.map(function(x) {
+      //   return x.name
+      // }))
+
+
     addToList(self, ServerType.RSSecondary, ismaster, server, this.secondaries);
     // Set the topology
     this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.ReplicaSetNoPrimary;
     if(ismaster.setName) this.setName = ismaster.setName;
+    removeFrom(server, self.unknownServers);
     self.emit('joined', 'secondary', server);
     return true;
   }
 
+  // console.log("========================== update 2")
   //
   // Arbiter handling
   //
@@ -321,6 +373,7 @@ ReplSetState.prototype.update = function(server) {
     // Set the topology
     this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.ReplicaSetNoPrimary;
     if(ismaster.setName) this.setName = ismaster.setName;
+    removeFrom(server, self.unknownServers);
     self.emit('joined', 'arbiter', server);
     return true;
   }
@@ -335,6 +388,7 @@ ReplSetState.prototype.update = function(server) {
     // Set the topology
     this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.ReplicaSetNoPrimary;
     if(ismaster.setName) this.setName = ismaster.setName;
+    removeFrom(server, self.unknownServers);
     self.emit('joined', 'secondary', server);
     return true;
   }

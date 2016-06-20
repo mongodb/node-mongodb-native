@@ -21,7 +21,9 @@ var debugFields = ['reconnect', 'reconnectTries', 'reconnectInterval', 'emitErro
   , 'socketTimeout', 'singleBufferSerializtion', 'ssl', 'ca', 'cert', 'key', 'rejectUnauthorized', 'promoteLongs'];
 
 // Server instance id
-var serverId = 0;
+var id = 0;
+var serverAccounting = false;
+var servers = {};
 
 var Server = function(options) {
   options = options || {};
@@ -30,7 +32,7 @@ var Server = function(options) {
   EventEmitter.call(this);
 
   // Server instance id
-  this.id = serverId++;
+  this.id = id++;
   // console.log("**** CREATE SERVER :: " + this.id)
   // console.dir(options)
 
@@ -65,6 +67,19 @@ var Server = function(options) {
 }
 
 inherits(Server, EventEmitter);
+
+Server.enableServerAccounting = function() {
+  serverAccounting = true;
+  servers = {};
+}
+
+Server.disableServerAccounting = function() {
+  serverAccounting = false;
+}
+
+Server.servers = function() {
+  return servers;
+}
 
 Object.defineProperty(Server.prototype, 'name', {
   enumerable:true,
@@ -149,6 +164,13 @@ var eventHandler = function(self, event) {
     } else if(event == 'error' || event == 'parseError'
       || event == 'close' || event == 'timeout' || event == 'reconnect'
       || event == 'attemptReconnect') {
+
+      // Remove server instance from accounting
+      if(serverAccounting && ['close', 'timeout', 'error', 'parseError'].indexOf(event) != -1) {
+        delete servers[this.id];
+      }
+
+      // Emit the event
       self.emit(event, err);
     }
   }
@@ -157,6 +179,9 @@ var eventHandler = function(self, event) {
 Server.prototype.connect = function(options) {
   var self = this;
   options = options || {};
+
+  // Set the connections
+  if(serverAccounting) servers[this.id] = this;
 
 //   if(self.s.pool) {
 //   console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Server.prototype.connect")
@@ -294,18 +319,6 @@ Server.prototype.command = function(ns, cmd, options, callback) {
 
   // Write the operation to the pool
   self.s.pool.write(query.toBin(), writeOptions, callback);
-  // self.s.pool.write(query.toBin(), writeOptions, function(err, result) {
-  //   if(err) return callback(err);
-  //
-  //   // Check if the command has an error
-  //   if(result.result && (result.result.ok == 0 || result.result['$err']
-  //     || result.result['errmsg'] || result.result['code'])) {
-  //       return callback(MongoError.create(result.result));
-  //     }
-  //
-  //   // Return the result
-  //   callback(err, result);
-  // });
 }
 
 Server.prototype.insert = function(ns, ops, options, callback) {
@@ -458,6 +471,9 @@ var listeners = ['close', 'error', 'timeout', 'parseError', 'connect'];
 
 Server.prototype.destroy = function() {
   var self = this;
+
+  // Set the connections
+  if(serverAccounting) delete servers[this.id];
 
   // Destroy the monitoring process if any
   if(this.monitoringProcessId) {
