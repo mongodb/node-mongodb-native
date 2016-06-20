@@ -42,14 +42,28 @@ var ReplSetState = function(options) {
 
 inherits(ReplSetState, EventEmitter);
 
-function removeFrom(server, list) {
-  for(var i = 0; i < list.length; i++) {
-    if(list[i].equals && list[i].equals(server)) {
-      return list.splice(i, 1);
-    } else if(typeof list[i] == 'string' && list[i] == server.name) {
-      return list.splice(i, 1);
-    }
-  }
+ReplSetState.prototype.hasPrimaryAndSecondary = function(server) {
+  return this.primary && this.secondaries.length > 0;
+}
+
+ReplSetState.prototype.hasSecondary = function(server) {
+  return this.secondaries.length > 0;
+}
+
+ReplSetState.prototype.destroy = function() {
+  // Destroy all sockets
+  if(this.primary) this.primary.destroy();
+  this.secondaries.forEach(function(x) { x.destroy(); });
+  this.arbiters.forEach(function(x) { x.destroy(); });
+  this.passives.forEach(function(x) { x.destroy(); });
+  this.ghosts.forEach(function(x) { x.destroy(); });
+  // Clear out the complete state
+  this.secondaries = [];
+  this.arbiters = [];
+  this.passives = [];
+  this.ghosts = [];
+  this.unknownServers = [];
+  this.set = {};
 }
 
 ReplSetState.prototype.remove = function(server) {
@@ -175,6 +189,7 @@ ReplSetState.prototype.update = function(server) {
     // Set the topology
     this.topologyType = TopologyType.ReplicaSetWithPrimary;
     if(ismaster.setName) this.setName = ismaster.setName;
+    self.emit('joined', 'primary', server);
     return true;
   } else if(ismaster.ismaster && ismaster.setName) {
     // Get the electionIds
@@ -227,6 +242,9 @@ ReplSetState.prototype.update = function(server) {
       type: ServerType.Unknown, setVersion: null,
       electionId: null, setName: null
     }
+
+    // Signal primary left
+    self.emit('left', 'primary', this.primary);
     // Destroy the instance
     self.primary.destroy();
     // Set the new instance
@@ -239,6 +257,7 @@ ReplSetState.prototype.update = function(server) {
     // Set the topology
     this.topologyType = TopologyType.ReplicaSetWithPrimary;
     if(ismaster.setName) this.setName = ismaster.setName;
+    self.emit('joined', 'primary', server);
     return true;
   }
 
@@ -288,6 +307,7 @@ ReplSetState.prototype.update = function(server) {
     // Set the topology
     this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.ReplicaSetNoPrimary;
     if(ismaster.setName) this.setName = ismaster.setName;
+    self.emit('joined', 'secondary', server);
     return true;
   }
 
@@ -301,6 +321,7 @@ ReplSetState.prototype.update = function(server) {
     // Set the topology
     this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.ReplicaSetNoPrimary;
     if(ismaster.setName) this.setName = ismaster.setName;
+    self.emit('joined', 'arbiter', server);
     return true;
   }
 
@@ -314,6 +335,7 @@ ReplSetState.prototype.update = function(server) {
     // Set the topology
     this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.ReplicaSetNoPrimary;
     if(ismaster.setName) this.setName = ismaster.setName;
+    self.emit('joined', 'secondary', server);
     return true;
   }
 
@@ -321,6 +343,7 @@ ReplSetState.prototype.update = function(server) {
   // Remove the primary
   //
   if(this.set[server.name] && this.set[server.name].type == ServerType.RSPrimary) {
+    self.emit('left', 'primary', this.primary);
     this.primary.destroy();
     this.primary = null;
     this.topologyType = TopologyType.ReplicaSetNoPrimary;
@@ -377,6 +400,16 @@ function compareObjectIds(id1, id2) {
   }
 
   return x < y ? -1 : y < x ? 1 : 0;
+}
+
+function removeFrom(server, list) {
+  for(var i = 0; i < list.length; i++) {
+    if(list[i].equals && list[i].equals(server)) {
+      return list.splice(i, 1);
+    } else if(typeof list[i] == 'string' && list[i] == server.name) {
+      return list.splice(i, 1);
+    }
+  }
 }
 
 module.exports = ReplSetState;

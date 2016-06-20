@@ -217,7 +217,7 @@ var testFiles = [
   // '/test/tests/functional2/pool_tests.js',
   // '/test/tests/functional2/server_tests.js',
   // '/test/tests/functional2/cursor_tests.js',
-  '/test/tests/functional2/replset_state_tests.js'
+  // '/test/tests/functional2/replset_state_tests.js'
 ]
 
 // Check if we support es6 generators
@@ -226,7 +226,7 @@ try {
 
 //   // Replicaset Mock Tests
 //   testFiles.push('/test/tests/functional/rs_mocks/add_remove_tests.js');
-  // testFiles.push('/test/tests/functional2/rs_mocks/connection_tests.js');
+  testFiles.push('/test/tests/functional2/rs_mocks/connection_tests.js');
 //   testFiles.push('/test/tests/functional/rs_mocks/failover_tests.js');
 //   testFiles.push('/test/tests/functional/rs_mocks/monitoring_tests.js');
 //   testFiles.push('/test/tests/functional/rs_mocks/read_preferences_tests.js');
