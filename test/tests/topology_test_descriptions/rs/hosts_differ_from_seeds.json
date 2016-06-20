@@ -1,31 +1,31 @@
 {
-    "description": "Host list differs from seeds", 
+    "description": "Host list differs from seeds",
     "phases": [
         {
             "outcome": {
                 "servers": {
                     "b:27017": {
-                        "setName": null, 
+                        "setName": null,
                         "type": "Unknown"
                     }
-                }, 
-                "setName": "rs", 
-                "topologyType": "ReplicaSetNoPrimary"
-            }, 
+                },
+                "setName": "rs",
+                "topologyType": "ReplicaSetWithPrimary"
+            },
             "responses": [
                 [
-                    "a:27017", 
+                    "a:27017",
                     {
                         "hosts": [
                             "b:27017"
-                        ], 
-                        "ismaster": true, 
-                        "ok": 1, 
+                        ],
+                        "ismaster": true,
+                        "ok": 1,
                         "setName": "rs"
                     }
                 ]
             ]
         }
-    ], 
+    ],
     "uri": "mongodb://a/?replicaSet=rs"
 }

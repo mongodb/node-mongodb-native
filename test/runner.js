@@ -213,10 +213,10 @@ var testFiles = [
   // , '/test/tests/functional/replset_failover_tests.js'
   // , '/test/tests/functional/undefined_tests.js'
 
-  // Functional 2 tests
-  '/test/tests/functional2/pool_tests.js',
-  '/test/tests/functional2/server_tests.js',
-  '/test/tests/functional2/cursor_tests.js',
+  // // Functional 2 tests
+  // '/test/tests/functional2/pool_tests.js',
+  // '/test/tests/functional2/server_tests.js',
+  // '/test/tests/functional2/cursor_tests.js',
   '/test/tests/functional2/replset_state_tests.js'
 ]
 

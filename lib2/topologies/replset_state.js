@@ -17,12 +17,13 @@ var ServerType = {
   'RSOther': 'RSOther', 'RSGhost': 'RSGhost', 'Unknown': 'Unknown'
 };
 
-var ReplSetState = function() {
+var ReplSetState = function(options) {
+  options = options || {};
   // Add event listener
   EventEmitter.call(this);
   // Topology state
-  this.state = TopologyType.Unknown;
-  this.setName = null;
+  this.topologyType = TopologyType.ReplicaSetNoPrimary;
+  this.setName = options.setName;
 
   // Server set
   this.set = {};
@@ -41,11 +42,34 @@ var ReplSetState = function() {
 
 inherits(ReplSetState, EventEmitter);
 
+function removeFrom(server, list) {
+  for(var i = 0; i < list.length; i++) {
+    if(list[i].equals && list[i].equals(server)) {
+      return list.splice(i, 1);
+    } else if(typeof list[i] == 'string' && list[i] == server.name) {
+      return list.splice(i, 1);
+    }
+  }
+}
+
 ReplSetState.prototype.remove = function(server) {
   this.set[server.name].type = ServerType.Unknown;
   this.set[server.name].electionId = null;
   this.set[server.name].setName = null;
   this.set[server.name].setVersion = null;
+
+  // Remove from any lists
+  if(this.primary && this.primary.equals(server)) {
+    this.primary = null;
+    this.topologyType = TopologyType.ReplicaSetNoPrimary;
+  }
+
+  // Remove from any other server lists
+  removeFrom(server, this.secondaries);
+  removeFrom(server, this.arbiters);
+  removeFrom(server, this.passives);
+  removeFrom(server, this.ghosts);
+  removeFrom(server, this.unknownServers);
 }
 
 ReplSetState.prototype.update = function(server) {
@@ -72,6 +96,11 @@ ReplSetState.prototype.update = function(server) {
           setVersion: null
         }
       }
+
+      // Add to the list of unknown server
+      if(this.unknownServers.indexOf(hosts[i]) == -1) {
+        this.unknownServers.push(hosts[i]);
+      }
     }
   }
 
@@ -83,6 +112,14 @@ ReplSetState.prototype.update = function(server) {
       type: ServerType.Unknown, setVersion: null, electionId: null, setName: null
     }
     addToList(self, ServerType.Unknown, ismaster, server, this.unknownServers);
+    // Set the topology
+    return false;
+  }
+
+  //
+  // Is this a mongos
+  //
+  if(ismaster && ismaster.msg == 'isdbgrid') {
     return false;
   }
 
@@ -90,13 +127,43 @@ ReplSetState.prototype.update = function(server) {
   // Standalone server, destroy and return
   //
   if(ismaster && ismaster.ismaster && !ismaster.setName) {
+    this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.Unknown;
+    return false;
+  }
+
+  //
+  // If the .me field does not match the passed in server
+  //
+  if(ismaster.me && ismaster.me != server.name) {
+    if(this.primary && !this.primary.equals(server)) {
+      this.topologyType = TopologyType.ReplicaSetWithPrimary;
+    } else {
+      this.topologyType = TopologyType.ReplicaSetNoPrimary;
+    }
+
     return false;
   }
 
   //
   // Primary handling
   //
-  if(!this.primary && ismaster.ismaster) {
+  if(!this.primary && ismaster.ismaster && ismaster.setName) {
+    var ismasterElectionId = server.lastIsMaster().electionId;
+    if(this.setName && this.setName != ismaster.setName) {
+      this.topologyType = TopologyType.ReplicaSetNoPrimary;
+      return false;
+    }
+
+    if(!this.maxElectionId && ismasterElectionId) {
+      this.maxElectionId = ismasterElectionId;
+    } else if(this.maxElectionId && ismasterElectionId) {
+      var result = compareObjectIds(this.maxElectionId, ismasterElectionId);
+
+      if(result == 1 || result == 0) {
+        return false;
+      }
+    }
+
     self.primary = server;
     self.set[server.name] = {
       type: ServerType.RSPrimary,
@@ -105,8 +172,11 @@ ReplSetState.prototype.update = function(server) {
       setName: ismaster.setName
     }
 
+    // Set the topology
+    this.topologyType = TopologyType.ReplicaSetWithPrimary;
+    if(ismaster.setName) this.setName = ismaster.setName;
     return true;
-  } else if(ismaster.ismaster) {
+  } else if(ismaster.ismaster && ismaster.setName) {
     // Get the electionIds
     var currentElectionId = self.set[self.primary.name].electionId;
     var currentSetVersion = self.set[self.primary.name].setVersion;
@@ -117,6 +187,12 @@ ReplSetState.prototype.update = function(server) {
 
     // If we do not have the same rs name
     if(currentSetName && currentSetName != ismasterSetName) {
+      if(!this.primary.equals(server)) {
+        this.topologyType = TopologyType.ReplicaSetWithPrimary;
+      } else {
+        this.topologyType = TopologyType.ReplicaSetNoPrimary;
+      }
+
       return false;
     }
 
@@ -129,9 +205,6 @@ ReplSetState.prototype.update = function(server) {
       } else if(result == 0 && (currentSetVersion > ismasterSetVersion)) {
         return false;
       }
-
-      // // Update the max election Id
-      // this.maxElectionId = ismasterElectionId;
     } else if(!currentElectionId && ismasterElectionId
       && currentSetVersion && ismasterSetVersion) {
         if(ismasterSetVersion < currentSetVersion) {
@@ -144,7 +217,7 @@ ReplSetState.prototype.update = function(server) {
     } else if(this.maxElectionId && ismasterElectionId) {
       var result = compareObjectIds(this.maxElectionId, ismasterElectionId);
 
-      if(result == 1 || result == 0) {
+      if(result == 1) {
         return false;
       }
     }
@@ -163,6 +236,9 @@ ReplSetState.prototype.update = function(server) {
       type: ServerType.RSPrimary, setVersion: ismaster.setVersion,
       electionId: ismaster.electionId, setName: ismaster.setName
     }
+    // Set the topology
+    this.topologyType = TopologyType.ReplicaSetWithPrimary;
+    if(ismaster.setName) this.setName = ismaster.setName;
     return true;
   }
 
@@ -180,6 +256,12 @@ ReplSetState.prototype.update = function(server) {
       type: ServerType.RSGhost, setVersion: null,
       electionId: null, setName: null
     }
+
+    // Set the topology
+    this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.ReplicaSetNoPrimary;
+    if(ismaster.setName) this.setName = ismaster.setName;
+
+    // Set the topology
     return false;
   }
 
@@ -190,33 +272,62 @@ ReplSetState.prototype.update = function(server) {
       type: ServerType.RSOther, setVersion: null,
       electionId: null, setName: ismaster.setName
     }
+    // Set the topology
+    this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.ReplicaSetNoPrimary;
+    if(ismaster.setName) this.setName = ismaster.setName;
     return false;
   }
 
   //
   // Secondary handling
   //
-  if(ismaster.secondary && ismaster.setName && !inList(ismaster, server, this.secondaries)) {
+  if(ismaster.secondary && ismaster.setName
+    && !inList(ismaster, server, this.secondaries)
+    && this.setName && this.setName == ismaster.setName) {
     addToList(self, ServerType.RSSecondary, ismaster, server, this.secondaries);
+    // Set the topology
+    this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.ReplicaSetNoPrimary;
+    if(ismaster.setName) this.setName = ismaster.setName;
     return true;
   }
 
   //
   // Arbiter handling
   //
-  if(ismaster.arbiterOnly && ismaster.setName && !inList(ismaster, server, this.arbiters)) {
+  if(ismaster.arbiterOnly && ismaster.setName
+    && !inList(ismaster, server, this.arbiters)
+    && this.setName && this.setName == ismaster.setName) {
     addToList(self, ServerType.RSArbiter, ismaster, server, this.arbiters);
+    // Set the topology
+    this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.ReplicaSetNoPrimary;
+    if(ismaster.setName) this.setName = ismaster.setName;
     return true;
   }
 
   //
   // Passive handling
   //
-  if(ismaster.passive && ismaster.setName && !inList(ismaster, server, this.passives)) {
+  if(ismaster.passive && ismaster.setName
+    && !inList(ismaster, server, this.passives)
+    && this.setName && this.setName == ismaster.setName) {
     addToList(self, ServerType.RSSecondary, ismaster, server, this.passives);
+    // Set the topology
+    this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.ReplicaSetNoPrimary;
+    if(ismaster.setName) this.setName = ismaster.setName;
     return true;
   }
 
+  //
+  // Remove the primary
+  //
+  if(this.set[server.name] && this.set[server.name].type == ServerType.RSPrimary) {
+    this.primary.destroy();
+    this.primary = null;
+    this.topologyType = TopologyType.ReplicaSetNoPrimary;
+    return false;
+  }
+
+  this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.ReplicaSetNoPrimary;
   return false;
 }
 
