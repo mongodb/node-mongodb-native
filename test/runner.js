@@ -216,16 +216,17 @@ var testFiles = [
   // Functional 2 tests
   '/test/tests/functional2/pool_tests.js',
   '/test/tests/functional2/server_tests.js',
-  '/test/tests/functional2/cursor_tests.js'
+  '/test/tests/functional2/cursor_tests.js',
+  '/test/tests/functional2/replset_state_tests.js'
 ]
 
-// // Check if we support es6 generators
-// try {
-//   eval("(function *(){})");
-//
+// Check if we support es6 generators
+try {
+  eval("(function *(){})");
+
 //   // Replicaset Mock Tests
 //   testFiles.push('/test/tests/functional/rs_mocks/add_remove_tests.js');
-//   testFiles.push('/test/tests/functional/rs_mocks/connection_tests.js');
+  // testFiles.push('/test/tests/functional2/rs_mocks/connection_tests.js');
 //   testFiles.push('/test/tests/functional/rs_mocks/failover_tests.js');
 //   testFiles.push('/test/tests/functional/rs_mocks/monitoring_tests.js');
 //   testFiles.push('/test/tests/functional/rs_mocks/read_preferences_tests.js');
@@ -240,7 +241,7 @@ var testFiles = [
 //
 //   // Single server Mock Tests
 //   testFiles.push('/test/tests/functional/single_mocks/timeout_tests.js');
-// } catch(err) {}
+} catch(err) {}
 
 // Add all the tests to run
 testFiles.forEach(function(t) {

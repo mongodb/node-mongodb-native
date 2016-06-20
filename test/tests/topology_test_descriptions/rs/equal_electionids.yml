@@ -12,6 +12,7 @@ phases: [
                 ismaster: true,
                 hosts: ["a:27017", "b:27017"],
                 setName: "rs",
+                setVersion: 1,
                 electionId: {"$oid": "000000000000000000000001"}
             }],
             ["b:27017", {
@@ -19,6 +20,7 @@ phases: [
                 ismaster: true,
                 hosts: ["a:27017", "b:27017"],
                 setName: "rs",
+                setVersion: 1,
                 electionId: {"$oid": "000000000000000000000001"}
             }]
         ],
@@ -28,12 +30,14 @@ phases: [
             servers: {
                 "a:27017": {
                     type: "Unknown",
-                    setName:,
-                    electionId:,
+                    setName: ,
+                    setVersion: ,
+                    electionId:
                 },
                 "b:27017": {
                     type: "RSPrimary",
                     setName: "rs",
+                    setVersion: 1,
                     electionId: {"$oid": "000000000000000000000001"}
                 }
             },

@@ -20,7 +20,7 @@
 module.exports = {
     MongoError: require('./lib2/error')
   , Server: require('./lib2/topologies/server')
-  , ReplSet: require('./lib/topologies/replset')
+  , ReplSet: require('./lib2/topologies/replset')
   , Mongos: require('./lib/topologies/mongos')
   , Logger: require('./lib2/connection/logger')
   , Cursor: require('./lib2/cursor')

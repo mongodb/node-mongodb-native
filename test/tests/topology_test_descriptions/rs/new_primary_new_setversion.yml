@@ -1,4 +1,4 @@
-description: "New primary with greater setVersion and electionId"
+description: "New primary with greater setVersion"
 
 uri: "mongodb://a/?replicaSet=rs"
 
@@ -36,7 +36,7 @@ phases: [
         }
     },
 
-    # B is elected.
+    # RS is reconfigured and B is elected.
     {
         responses: [
             ["b:27017", {
@@ -44,8 +44,8 @@ phases: [
                 ismaster: true,
                 hosts: ["a:27017", "b:27017"],
                 setName: "rs",
-                setVersion: 1,
-                electionId: {"$oid": "000000000000000000000002"}
+                setVersion: 2,
+                electionId: {"$oid": "000000000000000000000001"}
             }]
         ],
 
@@ -59,8 +59,8 @@ phases: [
                 "b:27017": {
                     type: "RSPrimary",
                     setName: "rs",
-                    setVersion: 1,
-                    electionId: {"$oid": "000000000000000000000002"}
+                    setVersion: 2,
+                    electionId: {"$oid": "000000000000000000000001"}
                 }
             },
             topologyType: "ReplicaSetWithPrimary",
@@ -90,7 +90,7 @@ phases: [
                 "b:27017": {
                     type: "RSPrimary",
                     setName: "rs",
-                    setVersion: 1,
+                    setVersion: 2,
                     electionId: {"$oid": "000000000000000000000002"}
                 }
             },
