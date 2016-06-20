@@ -1,4 +1,4 @@
-description: "Primary with no electionId, then a primary with electionId"
+description: "Primaries with and without electionIds"
 
 uri: "mongodb://a/?replicaSet=rs"
 
@@ -10,7 +10,8 @@ phases: [
             ["a:27017", {
                 ok: 1,
                 ismaster: true,
-                hosts: ["a:27017", "b:27017"],
+                hosts: ["a:27017", "b:27017", "c:27017"],
+                setVersion: 1,
                 setName: "rs"
             }]
         ],
@@ -20,11 +21,17 @@ phases: [
                 "a:27017": {
                     type: "RSPrimary",
                     setName: "rs",
+                    setVersion: 1,
                     electionId:
                 },
                 "b:27017": {
                     type: "Unknown",
-                    setName:,
+                    setName: ,
+                    electionId:
+                },
+                "c:27017": {
+                    type: "Unknown",
+                    setName: ,
                     electionId:
                 }
             },
@@ -39,9 +46,10 @@ phases: [
             ["b:27017", {
                 ok: 1,
                 ismaster: true,
-                hosts: ["a:27017", "b:27017"],
+                hosts: ["a:27017", "b:27017", "c:27017"],
                 setName: "rs",
-                electionId: {"$oid": "000000000000000000000001"}
+                setVersion: 1,
+                electionId: {"$oid": "000000000000000000000002"}
             }]
         ],
 
@@ -49,13 +57,19 @@ phases: [
             servers: {
                 "a:27017": {
                     type: "Unknown",
-                    setName:,
+                    setName: ,
                     electionId:
                 },
                 "b:27017": {
                     type: "RSPrimary",
                     setName: "rs",
-                    electionId: {"$oid": "000000000000000000000001"}
+                    setVersion: 1,
+                    electionId: {"$oid": "000000000000000000000002"}
+                },
+                "c:27017": {
+                    type: "Unknown",
+                    setName: ,
+                    electionId:
                 }
             },
             topologyType: "ReplicaSetWithPrimary",
@@ -69,7 +83,8 @@ phases: [
             ["a:27017", {
                 ok: 1,
                 ismaster: true,
-                hosts: ["a:27017", "b:27017"],
+                hosts: ["a:27017", "b:27017", "c:27017"],
+                setVersion: 1,
                 setName: "rs"
             }]
         ],
@@ -78,17 +93,59 @@ phases: [
                 "a:27017": {
                     type: "RSPrimary",
                     setName: "rs",
+                    setVersion: 1,
                     electionId:
                 },
                 "b:27017": {
                     type: "Unknown",
-                    setName:,
+                    setName: ,
+                    electionId:
+                },
+                "c:27017": {
+                    type: "Unknown",
+                    setName: ,
                     electionId:
                 }
             },
             topologyType: "ReplicaSetWithPrimary",
             setName: "rs",
-            # But we remember old electionId.
+        }
+    },
+
+    # But we remember B's electionId, so when we finally hear from C
+    # claiming it is primary, we ignore it due to its outdated electionId
+    {
+        responses: [
+            ["c:27017", {
+                ok: 1,
+                ismaster: true,
+                hosts: ["a:27017", "b:27017", "c:27017"],
+                setName: "rs",
+                setVersion: 1,
+                electionId: {"$oid": "000000000000000000000001"}
+            }]
+        ],
+        outcome: {
+            servers: {
+                # Still primary.
+                "a:27017": {
+                    type: "RSPrimary",
+                    setName: "rs",
+                    electionId:
+                },
+                "b:27017": {
+                    type: "Unknown",
+                    setName: ,
+                    electionId:
+                },
+                "c:27017": {
+                    type: "Unknown",
+                    setName: ,
+                    electionId:
+                }
+            },
+            topologyType: "ReplicaSetWithPrimary",
+            setName: "rs",
         }
     }
 ]

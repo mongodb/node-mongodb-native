@@ -5,7 +5,6 @@
             "outcome": {
                 "servers": {
                     "a:27017": {
-                        "address": "a:27017", 
                         "setName": null, 
                         "type": "Unknown"
                     }
