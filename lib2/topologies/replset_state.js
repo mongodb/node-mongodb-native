@@ -227,9 +227,6 @@ ReplSetState.prototype.update = function(server) {
     self.emit('joined', 'primary', server);
     return true;
   } else if(ismaster.ismaster && ismaster.setName) {
-    if(this.primary.equals(server)) {
-      return false;
-    }
 
     // Get the electionIds
     var currentElectionId = self.set[self.primary.name].electionId;
@@ -239,8 +236,15 @@ ReplSetState.prototype.update = function(server) {
     var ismasterSetVersion = server.lastIsMaster().setVersion;
     var ismasterSetName = server.lastIsMaster().setName;
 
+    // Is it the same server instance
+    if(this.primary.equals(server) && currentSetName == ismasterSetName) {
+      // console.log("=================== 1:1")
+      return false;
+    }
+
     // If we do not have the same rs name
     if(currentSetName && currentSetName != ismasterSetName) {
+      // console.log("=================== 2")
       if(!this.primary.equals(server)) {
         this.topologyType = TopologyType.ReplicaSetWithPrimary;
       } else {

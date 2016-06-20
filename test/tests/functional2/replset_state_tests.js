@@ -15,7 +15,7 @@ exports['Should correctly execute state machine tests'] = {
       return x.indexOf('.json') != -1;
     })
     // .filter(function(x) {
-    //   return x.indexOf('equal_electionids.json') != -1;
+    //   return x.indexOf('primary_changes_set_name.json') != -1;
     // });
     // console.dir(entries)
 
