@@ -1,51 +1,51 @@
 {
-    "description": "Primary changes setName", 
+    "description": "Primary changes setName",
     "phases": [
         {
             "outcome": {
                 "servers": {
                     "a:27017": {
-                        "setName": "rs", 
+                        "setName": "rs",
                         "type": "RSPrimary"
                     }
-                }, 
-                "setName": "rs", 
+                },
+                "setName": "rs",
                 "topologyType": "ReplicaSetWithPrimary"
-            }, 
+            },
             "responses": [
                 [
-                    "a:27017", 
+                    "a:27017",
                     {
                         "hosts": [
                             "a:27017"
-                        ], 
-                        "ismaster": true, 
-                        "ok": 1, 
+                        ],
+                        "ismaster": true,
+                        "ok": 1,
                         "setName": "rs"
                     }
                 ]
             ]
-        }, 
+        },
         {
             "outcome": {
-                "servers": {}, 
-                "setName": "rs", 
+                "servers": {},
+                "setName": "rs",
                 "topologyType": "ReplicaSetNoPrimary"
-            }, 
+            },
             "responses": [
                 [
-                    "a:27017", 
+                    "a:27017",
                     {
                         "hosts": [
                             "a:27017"
-                        ], 
-                        "ismaster": true, 
-                        "ok": 1, 
+                        ],
+                        "ismaster": true,
+                        "ok": 1,
                         "setName": "wrong"
                     }
                 ]
             ]
         }
-    ], 
+    ],
     "uri": "mongodb://a/?replicaSet=rs"
 }
