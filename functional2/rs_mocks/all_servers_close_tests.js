@@ -184,11 +184,11 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
               // console.dir(server.s.replicaSetState.secondaries)
               // console.log("------------------------------- step 7 : 1")
               // console.dir(server.s.replicaSetState.arbiters)
-              // console.dir(err)
-              // if(r)console.dir(r.result)
-              // console.log("_server.s.replicaSetState.primary != null = " + (_server.s.replicaSetState.primary != null))
-              // console.log("_server.s.replicaSetState.secondaries.length = " + _server.s.replicaSetState.secondaries.length)
-              // console.log("_server.s.replicaSetState.arbiters.length = " + _server.s.replicaSetState.arbiters.length)
+              console.dir(err)
+              if(r)console.dir(r.result)
+              console.log("_server.s.replicaSetState.primary != null = " + (_server.s.replicaSetState.primary != null))
+              console.log("_server.s.replicaSetState.secondaries.length = " + _server.s.replicaSetState.secondaries.length)
+              console.log("_server.s.replicaSetState.arbiters.length = " + _server.s.replicaSetState.arbiters.length)
               test.equal(null, err);
               test.ok(_server.s.replicaSetState.primary != null);
               test.equal(1, _server.s.replicaSetState.secondaries.length);
