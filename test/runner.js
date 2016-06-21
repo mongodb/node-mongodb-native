@@ -229,9 +229,9 @@ try {
   testFiles.push('/test/tests/functional2/rs_mocks/connection_tests.js');
   testFiles.push('/test/tests/functional2/rs_mocks/failover_tests.js');
   testFiles.push('/test/tests/functional2/rs_mocks/step_down_tests.js');
-    testFiles.push('/test/tests/functional2/rs_mocks/all_servers_close_tests.js');
+  testFiles.push('/test/tests/functional2/rs_mocks/all_servers_close_tests.js');
+  testFiles.push('/test/tests/functional2/rs_mocks/read_preferences_tests.js');
 //   testFiles.push('/test/tests/functional/rs_mocks/monitoring_tests.js');
-//   testFiles.push('/test/tests/functional/rs_mocks/read_preferences_tests.js');
 //
 //   // Mongos Mock Tests
 //   testFiles.push('/test/tests/functional/mongos_mocks/single_proxy_connection_tests.js');

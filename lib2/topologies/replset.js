@@ -109,7 +109,11 @@ var ReplSet = function(seedlist, options) {
     // Minimum heartbeat frequency used if we detect a server close
     minHeartbeatFrequencyMS: 500,
     // Disconnect handler
-    disconnectHandler: options.disconnectHandler
+    disconnectHandler: options.disconnectHandler,
+    // Server selection index
+    index: 0,
+    // Acceptable latency window for nearest reads
+    acceptableLatency: options.acceptableLatency || 15
   }
 
   // Add forwarding of events from state handler
@@ -131,6 +135,7 @@ function attemptReconnect(self) {
   self.haTimeoutId = setTimeout(function() {
     // console.log("---- attemptReconnect")
     if(self.state == DESTROYED) return;
+    // console.log("---- attemptReconnect 1")
     // Get all known hosts
     var keys = Object.keys(self.s.replicaSetState.set);
     var servers = keys.map(function(x) {
@@ -138,6 +143,7 @@ function attemptReconnect(self) {
         host: x.split(':')[0], port: parseInt(x.split(':')[1], 10)
       }, self.s.options));
     });
+    // console.log("---- attemptReconnect 2 :: " + servers.length)
 
     // Create the list of servers
     var connectingServers = servers.slice(0);
@@ -145,15 +151,11 @@ function attemptReconnect(self) {
     // Handle all events coming from servers
     function _handleEvent(self, event) {
       return function(err) {
+        // console.log("---- attemptReconnect :: _handleEvent :: " + event)
+        // console.dir(err)
         if(event == 'connect') {
           // Update the replicaset state
           self.s.replicaSetState.update(this);
-          // Remove the server from our list
-          for(var i = 0; i < connectingServers.length; i++) {
-            if(connectingServers[i].equals(this)) {
-              connectingServers.splice(i, 1);
-            }
-          }
 
           // Remove the handlers
           for(var i = 0; i < handlers.length; i++) {
@@ -167,6 +169,13 @@ function attemptReconnect(self) {
           this.on('parseError', handleEvent(self, 'parseError'));
         }
 
+        // Remove the server from our list
+        for(var i = 0; i < connectingServers.length; i++) {
+          if(connectingServers[i].equals(this)) {
+            connectingServers.splice(i, 1);
+          }
+        }
+
         // Destroy the instance
         if(self.state == DESTROYED) {
           this.destroy();
@@ -174,6 +183,7 @@ function attemptReconnect(self) {
 
         // Done with the reconnection attempt
         if(connectingServers.length == 0) {
+          // console.log("---- attemptReconnect done")
           if(self.state == DESTROYED) return;
 
           // Do we have a primary
@@ -280,6 +290,9 @@ function topologyMonitor(self) {
     // If the count is zero schedule a new fast
     // console.log("+ topologyMonitor 1 :: count :: " + count)
     function pingServer(_self, _server, cb) {
+      // Measure running time
+      var start = new Date().getTime();
+      // Execute ismaster
       _server.command('admin.$cmd', {ismaster:true}, function(err, r) {
         if(self.state == DESTROYED) {
           _server.destroy();
@@ -289,6 +302,7 @@ function topologyMonitor(self) {
         if(r) {
           // Update the server ismaster
           _server.ismaster = r.result;
+          _server.lastIsMasterMS = new Date().getTime() - start;
           // console.log("============= got ismaster from " + _server.name)
           // console.dir(_server.ismaster)
           // console.dir(r.result)
@@ -501,17 +515,139 @@ function clearCredentials(state, ns) {
 }
 
 //
+// Filter serves by tags
+var filterByTags = function(readPreference, servers) {
+  if(readPreference.tags == null) return servers;
+  var filteredServers = [];
+  var tagsArray = Array.isArray(readPreference.tags) ? readPreference.tags : [readPreference.tags];
+
+  // Iterate over the tags
+  for(var j = 0; j < tagsArray.length; j++) {
+    var tags = tagsArray[j];
+
+    // Iterate over all the servers
+    for(var i = 0; i < servers.length; i++) {
+      var serverTag = servers[i].lastIsMaster().tags || {};
+      // console.log("==== filter server :: " + servers[i].name)
+      // console.dir(serverTag)
+      // Did we find the a matching server
+      var found = true;
+      // Check if the server is valid
+      for(var name in tags) {
+        // console.log("== compare :: " + name)
+        // console.log("serverTag[name] == " + serverTag[name])
+        // console.log("tags[name] == " + tags[name])
+        if(serverTag[name] != tags[name]) found = false;
+      }
+      // console.dir(found)
+
+      // Add to candidate list
+      if(found) {
+        filteredServers.push(servers[i]);
+      }
+    }
+
+    // We found servers by the highest priority
+    if(found) break;
+  }
+
+  // Returned filtered servers
+  return filteredServers;
+}
+
+function pickNearest(self, set, readPreference) {
+  // Only get primary and secondaries as seeds
+  var seeds = {};
+  var servers = [];
+  if(set.primary) {
+    servers.push(set.primary);
+  }
+  // console.log("!!!!!!!!!!!!!!!!!!! pickNearest 0")
+
+  for(var i = 0; i < set.secondaries.length; i++) {
+    servers.push(set.secondaries[i]);
+  }
+
+  // console.log("!!!!!!!!!!!!!!!!!!! pickNearest 1")
+  // console.dir(readPreference)
+
+  // Filter by tags
+  servers = filterByTags(readPreference, servers);
+
+  // // Transform the list
+  // var serverList = [];
+  // // for(var name in seeds) {
+  // for(var i = 0; i < servers.length; i++) {
+  //   // serverList.push({name: servers[i].name, time: self.s.pings[servers[i].name] || 0});
+  // }
+  // console.log("!!!!!!!!!!!!!!!!!!! pickNearest 2")
+
+  // Sort by time
+  servers.sort(function(a, b) {
+    // return a.time > b.time;
+    return a.lastIsMasterMS > b.lastIsMasterMS
+  });
+
+  // console.log("!!!!!!!!!!!!!!!!!!! pickNearest 3")
+
+  // Locate lowest time (picked servers are lowest time + acceptable Latency margin)
+  var lowest = servers.length > 0 ? servers[0].lastIsMasterMS : 0;
+
+  // console.log("!!!!!!!!!!!!!!!!!!! pickNearest 4 :: " + servers.length + " :: " + lowest)
+
+  // Filter by latency
+  servers = servers.filter(function(s) {
+    // console.dir(self.s)
+    // console.log("==== filter")
+    // console.log("  s.lastIsMasterMS = " + s.lastIsMasterMS)
+    // console.log("  lowest + self.s.acceptableLatency = " + (lowest + self.s.acceptableLatency))
+    return s.lastIsMasterMS <= lowest + self.s.acceptableLatency;
+  });
+  // console.log("!!!!!!!!!!!!!!!!!!! pickNearest 5 :: " + servers.length)
+
+  // No servers, default to primary
+  if(servers.length == 0 && set.primary) {
+    // if(self.s.logger.isInfo()) self.s.logger.info(f('picked primary server [%s]', set.primary.name));
+    return set.primary;
+  } else if(servers.length == 0) {
+    return null
+  }
+  // console.log("!!!!!!!!!!!!!!!!!!! pickNearest 6")
+
+  // // We picked first server
+  // if(self.s.logger.isInfo()) self.s.logger.info(f('picked server [%s] with ping latency [%s]', serverList[0].name, serverList[0].time));
+
+  // Add to the index
+  self.s.index = self.s.index + 1;
+  // Select the index
+  self.s.index = self.s.index % servers.length;
+  // console.log("!!!!!!!!!!!!!!!!!!! pickNearest 7")
+  // console.log(servers.map(function(x) { return x.name}))
+
+  // Return the first server of the sorted and filtered list
+  return servers[self.s.index];
+}
+
+//
 // Pick a server based on readPreference
 function pickServer(self, s, readPreference) {
+  // console.log("============== pickServer")
+  // console.dir(readPreference)
   // If no read Preference set to primary by default
   readPreference = readPreference || ReadPreference.primary;
 
   // Do we have a custom readPreference strategy, use it
-  if(s.readPreferenceStrategies != null && s.readPreferenceStrategies[readPreference.preference] != null) {
-    if(s.readPreferenceStrategies[readPreference.preference] == null) throw new MongoError(f("cannot locate read preference handler for %s", readPreference.preference));
-    var server = s.readPreferenceStrategies[readPreference.preference].pickServer(s.replicaSetState, readPreference);
+  // if(s.readPreferenceStrategies != null && s.readPreferenceStrategies[readPreference.preference] != null) {
+    // if(s.readPreferenceStrategies[readPreference.preference] == null) throw new MongoError(f("cannot locate read preference handler for %s", readPreference.preference));
+    // var server = s.readPreferenceStrategies[readPreference.preference].pickServer(s.replicaSetState, readPreference);
     // if(s.debug) self.emit('pickedServer', readPreference, server);
-    return server;
+  //   return server;
+  // }
+
+  // Do we have the nearest readPreference
+  if(readPreference.preference == 'nearest') {
+    // console.log("============ nearest")
+    return pickNearest(self, s.replicaSetState, readPreference);
   }
 
   // Get all the secondaries
@@ -534,25 +670,23 @@ function pickServer(self, s, readPreference) {
       return new MongoError("no primary server available");
     }
 
-  // Secondary
-  if(readPreference.equals(ReadPreference.secondary)) {
-    s.index = (s.index + 1) % secondaries.length;
-    return secondaries[s.index];
-  }
-
-  // Secondary preferred
-  if(readPreference.equals(ReadPreference.secondaryPreferred)) {
+  // Secondary preferred or just secondaries
+  if(readPreference.equals(ReadPreference.secondaryPreferred)
+    || readPreference.equals(ReadPreference.secondary)) {
     if(secondaries.length > 0) {
+      // console.log("==================== secondaries :: " + secondaries.length)
       // Apply tags if present
       var servers = filterByTags(readPreference, secondaries);
+      // console.log("==================== servers :: " + servers.length)
       // If have a matching server pick one otherwise fall through to primary
       if(servers.length > 0) {
         s.index = (s.index + 1) % servers.length;
+        // console.log("==================== servers :: " + s.index)
         return servers[s.index];
       }
     }
 
-    return s.replicaSetState.primary;
+    return readPreference.equals(ReadPreference.secondaryPreferred) ? s.replicaSetState.primary : null;
   }
 
   // Primary preferred
@@ -594,7 +728,7 @@ ReplSet.prototype.command = function(ns, cmd, options, callback) {
   var self = this;
 
   // Establish readPreference
-  var readPreference = options.readPreference ? ReadPreference.primary : options.readPreference
+  var readPreference = options.readPreference ? options.readPreference : ReadPreference.primary;
 
   // Pick a server
   var server = pickServer(self, self.s, readPreference);

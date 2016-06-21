@@ -62,6 +62,8 @@ var Server = function(options) {
 
   // Curent ismaster
   this.ismaster = null;
+  // Current ping time
+  this.lastIsMasterMS = -1;
   // The monitoringProcessId
   this.monitoringProcessId = null;
 }
