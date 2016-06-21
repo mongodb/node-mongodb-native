@@ -93,12 +93,22 @@ ReplSetState.prototype.remove = function(server) {
     this.topologyType = TopologyType.ReplicaSetNoPrimary;
   }
 
+  // Remove type
+  var removeType = null;
+
   // Remove from any other server lists
-  removeFrom(server, this.secondaries);
-  removeFrom(server, this.arbiters);
-  removeFrom(server, this.passives);
+  removeType = removeFrom(server, this.secondaries) ? 'secondary' : removeType;
+  removeType = removeFrom(server, this.arbiters) ? 'arbiter' : removeType;
+  removeType = removeFrom(server, this.passives) ? 'secondary' : removeType;
   removeFrom(server, this.ghosts);
   removeFrom(server, this.unknownServers);
+
+  // console.log("======== remove :: " + removeType + " :: " + server.name)
+  // console.log(Object.keys(this.set))
+  // Do we have a removeType
+  if(removeType) {
+    this.emit('left', removeType, server);
+  }
 }
 
 ReplSetState.prototype.update = function(server) {
@@ -122,7 +132,8 @@ ReplSetState.prototype.update = function(server) {
     // Add all hosts as unknownServers
     for(var i = 0; i < hosts.length; i++) {
       // Add to the list of unknown server
-      if(this.unknownServers.indexOf(hosts[i]) == -1 && !this.set[hosts[i]]) {
+      if(this.unknownServers.indexOf(hosts[i]) == -1
+        && (!this.set[hosts[i]] || this.set[hosts[i]].type == ServerType.Unknown)) {
         // console.log("============ push unknownServers :: " + hosts[i])
         // console.dir(this.set[hosts[i]])
         this.unknownServers.push(hosts[i]);
@@ -137,6 +148,9 @@ ReplSetState.prototype.update = function(server) {
         }
       }
     }
+
+    // console.log("================== hosts :: ")
+    // console.dir(this.unknownServers)
   }
 
   //
@@ -175,6 +189,7 @@ ReplSetState.prototype.update = function(server) {
   //
   if(ismaster && ismaster.ismaster && !ismaster.setName) {
     this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.Unknown;
+    this.remove(server);
     return false;
   }
 
@@ -463,11 +478,15 @@ function compareObjectIds(id1, id2) {
 function removeFrom(server, list) {
   for(var i = 0; i < list.length; i++) {
     if(list[i].equals && list[i].equals(server)) {
-      return list.splice(i, 1);
+      list.splice(i, 1);
+      return true;
     } else if(typeof list[i] == 'string' && list[i] == server.name) {
-      return list.splice(i, 1);
+      list.splice(i, 1);
+      return true;
     }
   }
+
+  return false;
 }
 
 module.exports = ReplSetState;
