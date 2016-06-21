@@ -4,7 +4,7 @@ exports['Should correctly connect to a replicaset and select the correct tagged 
       generators: true,
       topology: "single"
     },
-    ignore: { travis:true }
+    // ignore: { travis:true }
   },
 
   test: function(configuration, test) {
@@ -844,7 +844,7 @@ exports['Should correctly connect to a replicaset and perform correct nearness r
       generators: true,
       topology: "single"
     },
-    ignore: { travis:true }
+    // ignore: { travis:true }
   },
 
   test: function(configuration, test) {
@@ -1023,7 +1023,7 @@ exports['Should correctly connect to a replicaset and perform correct nearness r
       generators: true,
       topology: "single"
     },
-    ignore: { travis:true }
+    // ignore: { travis:true }
   },
 
   test: function(configuration, test) {

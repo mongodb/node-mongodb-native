@@ -22,7 +22,7 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
       generators: true,
       topology: "single"
     },
-    ignore: { travis:true }
+    // ignore: { travis:true }
   },
 
   test: function(configuration, test) {
