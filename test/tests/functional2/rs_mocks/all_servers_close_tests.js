@@ -151,7 +151,7 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
         _server.insert(f("%s.inserts", configuration.db), [{a:1}], {
           writeConcern: {w:1}, ordered:true
         }, function(err, results) {
-          if(results) console.log("insert success")
+          // if(results) console.log("insert success")
           // console.log("!!!!!!!!! RESULt")
           // if(results)console.dir(results.result)
         });

@@ -692,8 +692,13 @@ Pool.prototype.write = function(buffer, options, cb) {
   // console.dir(operation)
   // console.dir(cb)
 
-  // Push the operation to the queue of operations in progress
-  this.queue.push(operation);
+  // If we have a monitoring operation schedule as the very first operation
+  // Otherwise add to back of queue
+  if(options.monitoring) {
+    this.queue.unshift(operation);
+  } else {
+    this.queue.push(operation);
+  }
   // console.log("========= write")
   // Attempt to write all buffers out
 

@@ -295,7 +295,7 @@ function topologyMonitor(self) {
       // Measure running time
       var start = new Date().getTime();
       // Execute ismaster
-      _server.command('admin.$cmd', {ismaster:true}, function(err, r) {
+      _server.command('admin.$cmd', {ismaster:true}, {monitoring: true}, function(err, r) {
         console.log("================ pingServer 1 :: " + _server.name)
         if(self.state == DESTROYED) {
           _server.destroy();
