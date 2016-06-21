@@ -1,10 +1,7 @@
 TODO
-====
-- Enable all auth mechanisms to work on 1:n passed in connections instead of using the pool.getAll
-- Ensure new connections are authenticated if needed
-- Closing connections should only affect operations on that connection
-  + Add connection to callbackstore callbacks
-  + Flush connection callbacks
-- What does reconnect mean ?
-  + Server
-  + ReplSet
+======
+- Add a test when the replset topology gives up trying to reconnect
+  - Should emit destroy event and shut down
+- Add a test when the mongos topology gives up trying to reconnect
+  - Should emit destroy event and shut down
+- Add Server accounting and connection accounting to test cases
