@@ -185,6 +185,7 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
               // console.dir(server.s.replicaSetState.secondaries)
               // console.log("------------------------------- step 7 : 1")
               // console.dir(server.s.replicaSetState.arbiters)
+              console.log("============================================= 0")
               console.dir(err)
               if(r)console.dir(r.result)
               console.log("_server.s.replicaSetState.primary != null = " + (_server.s.replicaSetState.primary != null))
@@ -195,13 +196,21 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
               // test.equal(1, _server.s.replicaSetState.secondaries.length);
               // test.equal(1, _server.s.replicaSetState.arbiters.length);
 
-              primaryServer.destroy();
-              firstSecondaryServer.destroy();
-              arbiterServer.destroy();
-              server.destroy();
-              running = false;
+              setTimeout(function() {
+                console.log("============================================= 1")
+                if(r)console.dir(r.result)
+                console.log("_server.s.replicaSetState.primary != null = " + (_server.s.replicaSetState.primary != null))
+                console.log("_server.s.replicaSetState.secondaries.length = " + _server.s.replicaSetState.secondaries.length)
+                console.log("_server.s.replicaSetState.arbiters.length = " + _server.s.replicaSetState.arbiters.length)
 
-              test.done();
+                primaryServer.destroy();
+                firstSecondaryServer.destroy();
+                arbiterServer.destroy();
+                server.destroy();
+                running = false;
+
+                test.done();                
+              }, 10000)
             });
           }, 10000);
         }, 2500);
@@ -383,7 +392,7 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
 //               arbiterServer.destroy();
 //               server.destroy();
 //               running = false;
-// 
+//
 //               test.done();
 //             });
 //           }, 5000);
