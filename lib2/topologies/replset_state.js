@@ -82,6 +82,7 @@ ReplSetState.prototype.destroy = function() {
 }
 
 ReplSetState.prototype.remove = function(server) {
+  console.log("================================== remove :: " + server.name)
   // If we have it in the set remove it
   if(this.set[server.name]) {
     this.set[server.name].type = ServerType.Unknown;
