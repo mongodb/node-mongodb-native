@@ -229,7 +229,9 @@ function connectNewServers(self, servers, callback) {
         // Update the state with the new server
         var result = self.s.replicaSetState.update(this);
         console.log("=============== connectNewServers :: _handleEvent 1 :: " + result)
-
+        console.log("primary :: " + (self.s.replicaSetState.primary != null))
+        console.log("secondaries :: " + self.s.replicaSetState.secondaries.length)
+        console.log("arbiters :: " + self.s.replicaSetState.arbiters.length)
 
         // Remove the handlers
         for(var i = 0; i < handlers.length; i++) {
@@ -324,10 +326,10 @@ function topologyMonitor(self) {
         count = count - 1;
 
         if(count == 0) {
-          // console.log("++++++++++++++++++++++++++++++ 1")
-          // console.log(self.s.replicaSetState.unknownServers.map(function(x) {
-          //   return x;
-          // }));
+          console.log("++++++++++++++++++++++++++++++ 1")
+          console.log(self.s.replicaSetState.unknownServers.map(function(x) {
+            return x;
+          }));
 
           if(self.state == DESTROYED) return;
           // Attempt to connect to any unknown servers
