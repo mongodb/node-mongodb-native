@@ -83,6 +83,20 @@ ReplSetState.prototype.destroy = function() {
 
 ReplSetState.prototype.remove = function(server) {
   console.log("================================== remove :: " + server.name)
+
+  // Only remove if the current server is not connected
+  var servers = this.primary ? [this.primary] : [];
+  servers = servers.concat(this.secondaries);
+  servers = servers.concat(this.arbiters);
+  servers = servers.concat(this.passives);
+
+  // Check if it's active and this is just a failed connection attempt
+  for(var i = 0; i < servers.length; i++) {
+    if(servers[i].equals(server) && servers[i].isConnected()) {
+      return;
+    }
+  }
+
   // If we have it in the set remove it
   if(this.set[server.name]) {
     this.set[server.name].type = ServerType.Unknown;
