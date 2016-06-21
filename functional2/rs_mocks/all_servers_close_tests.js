@@ -209,7 +209,7 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
                 server.destroy();
                 running = false;
 
-                test.done();                
+                test.done();
               }, 10000)
             });
           }, 10000);
