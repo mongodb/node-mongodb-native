@@ -151,23 +151,24 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
         _server.insert(f("%s.inserts", configuration.db), [{a:1}], {
           writeConcern: {w:1}, ordered:true
         }, function(err, results) {
+          if(results) console.log("insert success")
           // console.log("!!!!!!!!! RESULt")
           // if(results)console.dir(results.result)
         });
         // console.log("------------------------------- step 0 : 2 ")
       }
-      // console.log("------------------------------- step 0 : 1")
+      console.log("------------------------------- step 0 : 1")
 
       setTimeout(function() {
-        // console.log("------------------------------- step 1 ")
+        console.log("------------------------------- step 1 ")
         die = true;
 
         setTimeout(function() {
-          // console.log("------------------------------- step 2 ")
+          console.log("------------------------------- step 2 ")
           die = false;
 
           setTimeout(function() {
-            // console.log("------------------------------- step 5 : 0")
+            console.log("------------------------------- step 5 : 0")
             // console.dir(server.s.replicaSetState.primary)
             // console.log("------------------------------- step 6 : 0")
             // console.dir(server.s.replicaSetState.secondaries)
@@ -176,7 +177,7 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
 
             // console.log("------------------------------- step 3 ")
             _server.command('admin.$cmd', {ismaster:true}, function(err, r) {
-              // console.log("------------------------------- step 4 : 1")
+              console.log("------------------------------- step 4 : 1")
               // console.dir(err)
               // console.log("------------------------------- step 5 : 1")
               // console.dir(server.s.replicaSetState.primary)

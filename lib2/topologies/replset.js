@@ -312,6 +312,7 @@ function topologyMonitor(self) {
           _self.s.replicaSetState.update(_server);
         }
         console.log("================ pingServer 2 :: " + _server.name)
+        console.dir(err)
 
         cb(err, r);
       });
