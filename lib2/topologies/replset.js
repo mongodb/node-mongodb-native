@@ -107,7 +107,9 @@ var ReplSet = function(seedlist, options) {
     // Ha interval
     haInterval: options.haInterval ? options.haInterval : 10000,
     // Minimum heartbeat frequency used if we detect a server close
-    minHeartbeatFrequencyMS: 500
+    minHeartbeatFrequencyMS: 500,
+    // Disconnect handler
+    disconnectHandler: options.disconnectHandler
   }
 
   // Add forwarding of events from state handler
@@ -207,11 +209,15 @@ function connectNewServers(self, servers, callback) {
   // Handle events
   var _handleEvent = function(self, event) {
     return function(err, r) {
-      // console.log("=============== connectNewServers :: _handleEvent :: " + event)
+      // console.log("=============== connectNewServers :: _handleEvent :: " + this.name)
       count = count - 1;
 
       if(event == 'connect') {
         // console.log("=============== connectNewServers :: _handleEvent 1")
+        // console.dir(this.ismaster)
+        // console.log(self.s.replicaSetState.update(this));
+
+        // Update the state with the new server
         self.s.replicaSetState.update(this);
 
         // Remove the handlers
@@ -283,6 +289,8 @@ function topologyMonitor(self) {
         if(r) {
           // Update the server ismaster
           _server.ismaster = r.result;
+          // console.log("============= got ismaster from " + _server.name)
+          // console.dir(_server.ismaster)
           // console.dir(r.result)
           _self.s.replicaSetState.update(_server);
         }
@@ -359,6 +367,7 @@ function handleInitialConnectEvent(self, event) {
         stateTransition(self, CONNECTED);
         // Start the topology monitor
         topologyMonitor(self);
+        // console.log("===================== connect 0")
         // Emit connected sign
         self.emit('connect', self);
     } else if(self.state == CONNECTING
@@ -369,6 +378,7 @@ function handleInitialConnectEvent(self, event) {
         stateTransition(self, CONNECTED);
         // Start the topology monitor
         topologyMonitor(self);
+        // console.log("===================== connect 1")
         // Emit connected sign
         self.emit('connect', self);
     } else if(self.state == CONNECTING
@@ -418,6 +428,200 @@ ReplSet.prototype.destroy = function() {
   this.s.replicaSetState.destroy();
   // Transition state
   stateTransition(this, DESTROYED);
+}
+
+// function basicWriteValidations(self, options) {
+//   if(!self.s.pool) return MongoError.create('server instance is not connected');
+//   if(self.s.pool.isDestroyed()) return MongoError.create('server instance pool was destroyed');
+// }
+
+function basicReadPreferenceValidation(self, options) {
+  if(options.readPreference && !(options.readPreference instanceof ReadPreference)) {
+    throw new Error("readPreference must be an instance of ReadPreference");
+  }
+}
+
+//
+// Execute write operation
+var executeWriteOperation = function(self, op, ns, ops, options, callback) {
+  // console.log("== executeWriteOperation 0")
+  if(typeof options == 'function') callback = options, options = {}, options = options || {};
+  // Ensure we have no options
+  options = options || {};
+  // No server returned we had an error
+  if(self.s.replicaSetState.primary == null) {
+    return callback(new MongoError("no primary server found"));
+  }
+
+  // Handler
+  var handler = function(err, r) {
+    // // We have a no master error, immediately refresh the view of the replicaset
+    // if((notMasterError(r) || notMasterError(err)) && !self.s.highAvailabilityProcessRunning) {
+    //   // Set he current interval to minHeartbeatFrequencyMS
+    //   self.s.currentHaInterval = self.s.minHeartbeatFrequencyMS;
+    //   // Attempt to locate the current master immediately
+    //   replicasetInquirer(self, self.s, true)();
+    // }
+    // Return the result
+    callback(err, r);
+  }
+
+  // // Add operationId if existing
+  // if(callback.operationId) handler.operationId = callback.operationId;
+  // Execute the command
+  self.s.replicaSetState.primary[op](ns, ops, options, handler);
+}
+
+/**
+ * Insert one or more documents
+ * @method
+ * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+ * @param {array} ops An array of documents to insert
+ * @param {boolean} [options.ordered=true] Execute in order or out of order
+ * @param {object} [options.writeConcern={}] Write concern for the operation
+ * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
+ * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
+ * @param {opResultCallback} callback A callback function
+ */
+ReplSet.prototype.insert = function(ns, ops, options, callback) {
+  if(typeof options == 'function') callback = options, options = {}, options = options || {};
+  if(this.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
+
+  // Not connected but we have a disconnecthandler
+  if(!this.s.replicaSetState.hasPrimary() && this.s.disconnectHandler != null) {
+    return this.s.disconnectHandler.add('insert', ns, ops, options, callback);
+  }
+
+  // Execute write operation
+  executeWriteOperation(this, 'insert', ns, ops, options, callback);
+}
+
+function clearCredentials(state, ns) {
+
+}
+
+//
+// Pick a server based on readPreference
+function pickServer(self, s, readPreference) {
+  // If no read Preference set to primary by default
+  readPreference = readPreference || ReadPreference.primary;
+
+  // Do we have a custom readPreference strategy, use it
+  if(s.readPreferenceStrategies != null && s.readPreferenceStrategies[readPreference.preference] != null) {
+    if(s.readPreferenceStrategies[readPreference.preference] == null) throw new MongoError(f("cannot locate read preference handler for %s", readPreference.preference));
+    var server = s.readPreferenceStrategies[readPreference.preference].pickServer(s.replicaSetState, readPreference);
+    // if(s.debug) self.emit('pickedServer', readPreference, server);
+    return server;
+  }
+
+  // Get all the secondaries
+  var secondaries = s.replicaSetState.secondaries;
+
+  // Check if we can satisfy and of the basic read Preferences
+  if(readPreference.equals(ReadPreference.secondary)
+    && secondaries.length == 0) {
+      return new MongoError("no secondary server available");
+    }
+
+  if(readPreference.equals(ReadPreference.secondaryPreferred)
+    && secondaries.length == 0
+    && s.replicaSetState.primary == null) {
+      return new MongoError("no secondary or primary server available");
+    }
+
+  if(readPreference.equals(ReadPreference.primary)
+    && s.replicaSetState.primary == null) {
+      return new MongoError("no primary server available");
+    }
+
+  // Secondary
+  if(readPreference.equals(ReadPreference.secondary)) {
+    s.index = (s.index + 1) % secondaries.length;
+    return secondaries[s.index];
+  }
+
+  // Secondary preferred
+  if(readPreference.equals(ReadPreference.secondaryPreferred)) {
+    if(secondaries.length > 0) {
+      // Apply tags if present
+      var servers = filterByTags(readPreference, secondaries);
+      // If have a matching server pick one otherwise fall through to primary
+      if(servers.length > 0) {
+        s.index = (s.index + 1) % servers.length;
+        return servers[s.index];
+      }
+    }
+
+    return s.replicaSetState.primary;
+  }
+
+  // Primary preferred
+  if(readPreference.equals(ReadPreference.primaryPreferred)) {
+    if(s.replicaSetState.primary) return s.replicaSetState.primary;
+
+    if(secondaries.length > 0) {
+      // Apply tags if present
+      var servers = filterByTags(readPreference, secondaries);
+      // If have a matching server pick one otherwise fall through to primary
+      if(servers.length > 0) {
+        s.index = (s.index + 1) % servers.length;
+        return servers[s.index];
+      }
+
+      // Throw error a we have not valid secondary or primary servers
+      return new MongoError("no secondary or primary server available");
+    }
+  }
+
+  // Return the primary
+  return s.replicaSetState.primary;
+}
+
+/**
+ * Execute a command
+ * @method
+ * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+ * @param {object} cmd The command hash
+ * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+ * @param {Connection} [options.connection] Specify connection object to execute command against
+ * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
+ * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
+ * @param {opResultCallback} callback A callback function
+ */
+ReplSet.prototype.command = function(ns, cmd, options, callback) {
+  if(typeof options == 'function') callback = options, options = {}, options = options || {};
+  if(this.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
+  var self = this;
+
+  // Establish readPreference
+  var readPreference = options.readPreference ? ReadPreference.primary : options.readPreference
+
+  // Pick a server
+  var server = pickServer(self, self.s, readPreference);
+  if(!(server instanceof Server)) return callback(server);
+
+  // Topology is not connected, save the call in the provided store to be
+  // Executed at some point when the handler deems it's reconnected
+  if(!server && this.s.disconnectHandler != null) {
+    return this.s.disconnectHandler.add('command', ns, cmd, options, callback);
+  }
+
+  // No server returned we had an error
+  if(server == null) {
+    return callback(new MongoError(f("no server found that matches the provided readPreference %s", readPreference)));
+  }
+
+  // Execute the command
+  server.command(ns, cmd, options, function(err, r) {
+    // Was it a logout command clear any credentials
+    if(cmd.logout) clearCredentials(self.s, ns);
+    // // We have a no master error, immediately refresh the view of the replicaset
+    // if((notMasterError(r) || notMasterError(err)) && !self.s.highAvailabilityProcessRunning) {
+    //   replicasetInquirer(self, self.s, true)();
+    // }
+    // Return the error
+    callback(err, r);
+  });
 }
 
 module.exports = ReplSet;
