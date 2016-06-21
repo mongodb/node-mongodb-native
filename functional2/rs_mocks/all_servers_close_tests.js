@@ -157,18 +157,18 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
         });
         // console.log("------------------------------- step 0 : 2 ")
       }
-      console.log("------------------------------- step 0 : 1")
+      // console.log("------------------------------- step 0 : 1")
 
       setTimeout(function() {
-        console.log("------------------------------- step 1 ")
+        // console.log("------------------------------- step 1 ")
         die = true;
 
         setTimeout(function() {
-          console.log("------------------------------- step 2 ")
+          // console.log("------------------------------- step 2 ")
           die = false;
 
           setTimeout(function() {
-            console.log("------------------------------- step 5 : 0")
+            // console.log("------------------------------- step 5 : 0")
             // console.dir(server.s.replicaSetState.primary)
             // console.log("------------------------------- step 6 : 0")
             // console.dir(server.s.replicaSetState.secondaries)
@@ -177,7 +177,7 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
 
             // console.log("------------------------------- step 3 ")
             _server.command('admin.$cmd', {ismaster:true}, function(err, r) {
-              console.log("------------------------------- step 4 : 1")
+              // console.log("------------------------------- step 4 : 1")
               // console.dir(err)
               // console.log("------------------------------- step 5 : 1")
               // console.dir(server.s.replicaSetState.primary)
@@ -190,10 +190,10 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
               console.log("_server.s.replicaSetState.primary != null = " + (_server.s.replicaSetState.primary != null))
               console.log("_server.s.replicaSetState.secondaries.length = " + _server.s.replicaSetState.secondaries.length)
               console.log("_server.s.replicaSetState.arbiters.length = " + _server.s.replicaSetState.arbiters.length)
-              // test.equal(null, err);
-              // test.ok(_server.s.replicaSetState.primary != null);
-              // test.equal(1, _server.s.replicaSetState.secondaries.length);
-              // test.equal(1, _server.s.replicaSetState.arbiters.length);
+              test.equal(null, err);
+              test.ok(_server.s.replicaSetState.primary != null);
+              test.equal(1, _server.s.replicaSetState.secondaries.length);
+              test.equal(1, _server.s.replicaSetState.arbiters.length);
 
               primaryServer.destroy();
               firstSecondaryServer.destroy();
