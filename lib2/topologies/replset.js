@@ -291,11 +291,12 @@ function topologyMonitor(self) {
     // If the count is zero schedule a new fast
     console.log("+ topologyMonitor 1 :: count :: " + count)
     function pingServer(_self, _server, cb) {
-      console.log("================ pingServer :: " + _server.name)
+      console.log("================ pingServer 0 :: " + _server.name)
       // Measure running time
       var start = new Date().getTime();
       // Execute ismaster
       _server.command('admin.$cmd', {ismaster:true}, function(err, r) {
+        console.log("================ pingServer 1 :: " + _server.name)
         if(self.state == DESTROYED) {
           _server.destroy();
           cb(err, r);
@@ -310,6 +311,7 @@ function topologyMonitor(self) {
           // console.dir(r.result)
           _self.s.replicaSetState.update(_server);
         }
+        console.log("================ pingServer 2 :: " + _server.name)
 
         cb(err, r);
       });
