@@ -214,21 +214,22 @@ function attemptReconnect(self) {
 function connectNewServers(self, servers, callback) {
   // Count lefts
   var count = servers.length;
-  // console.log("=============== connectNewServers :: " + count)
+  console.log("=============== connectNewServers :: " + count)
 
   // Handle events
   var _handleEvent = function(self, event) {
     return function(err, r) {
-      // console.log("=============== connectNewServers :: _handleEvent :: " + this.name)
+      console.log("=============== connectNewServers :: _handleEvent :: " + this.name)
       count = count - 1;
 
       if(event == 'connect') {
-        // console.log("=============== connectNewServers :: _handleEvent 1")
         // console.dir(this.ismaster)
         // console.log(self.s.replicaSetState.update(this));
 
         // Update the state with the new server
-        self.s.replicaSetState.update(this);
+        var result = self.s.replicaSetState.update(this);
+        console.log("=============== connectNewServers :: _handleEvent 1 :: " + result)
+
 
         // Remove the handlers
         for(var i = 0; i < handlers.length; i++) {
@@ -290,6 +291,7 @@ function topologyMonitor(self) {
     // If the count is zero schedule a new fast
     console.log("+ topologyMonitor 1 :: count :: " + count)
     function pingServer(_self, _server, cb) {
+      console.log("================ pingServer :: " + _server.name)
       // Measure running time
       var start = new Date().getTime();
       // Execute ismaster
