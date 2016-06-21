@@ -82,7 +82,7 @@ ReplSetState.prototype.destroy = function() {
 }
 
 ReplSetState.prototype.remove = function(server) {
-  console.log("================================== remove :: " + server.name)
+  // console.log("================================== remove :: " + server.name)
 
   // Only remove if the current server is not connected
   var servers = this.primary ? [this.primary] : [];
