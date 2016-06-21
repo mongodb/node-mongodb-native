@@ -345,6 +345,7 @@ function topologyMonitor(self) {
 
 function handleEvent(self, event) {
   return function(err) {
+    console.log("$$$$ handleEvent :: " + event)
     self.s.replicaSetState.remove(this);
   }
 }
