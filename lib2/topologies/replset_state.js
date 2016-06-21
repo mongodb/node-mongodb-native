@@ -81,7 +81,8 @@ ReplSetState.prototype.destroy = function() {
   this.set = {};
 }
 
-ReplSetState.prototype.remove = function(server) {
+ReplSetState.prototype.remove = function(server, options) {
+  options = options || {};
   // console.log("================================== remove :: " + server.name)
 
   // Only remove if the current server is not connected
@@ -92,7 +93,12 @@ ReplSetState.prototype.remove = function(server) {
 
   // Check if it's active and this is just a failed connection attempt
   for(var i = 0; i < servers.length; i++) {
-    if(servers[i].equals(server) && servers[i].isConnected()) {
+    if(!options.force && servers[i].equals(server) && servers[i].isConnected && servers[i].isConnected()) {
+      // console.log("============== removing server")
+      // console.dir(server.ismaster)
+      // console.log("============== current server")
+      // console.dir(servers[i].ismaster)
+      // console.log("================================== remove :: " + server.name)
       return;
     }
   }
@@ -218,7 +224,7 @@ ReplSetState.prototype.update = function(server) {
   //
   if(ismaster && ismaster.ismaster && !ismaster.setName) {
     this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.Unknown;
-    this.remove(server);
+    this.remove(server, {force:true});
     return false;
   }
 
