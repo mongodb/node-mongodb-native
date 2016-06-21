@@ -133,9 +133,9 @@ inherits(ReplSet, EventEmitter);
 
 function attemptReconnect(self) {
   self.haTimeoutId = setTimeout(function() {
-    // console.log("---- attemptReconnect")
+    console.log("---- attemptReconnect")
     if(self.state == DESTROYED) return;
-    // console.log("---- attemptReconnect 1")
+    console.log("---- attemptReconnect 1")
     // Get all known hosts
     var keys = Object.keys(self.s.replicaSetState.set);
     var servers = keys.map(function(x) {
@@ -143,7 +143,7 @@ function attemptReconnect(self) {
         host: x.split(':')[0], port: parseInt(x.split(':')[1], 10)
       }, self.s.options));
     });
-    // console.log("---- attemptReconnect 2 :: " + servers.length)
+    console.log("---- attemptReconnect 2 :: " + servers.length)
 
     // Create the list of servers
     var connectingServers = servers.slice(0);
@@ -151,7 +151,7 @@ function attemptReconnect(self) {
     // Handle all events coming from servers
     function _handleEvent(self, event) {
       return function(err) {
-        // console.log("---- attemptReconnect :: _handleEvent :: " + event)
+        console.log("---- attemptReconnect :: _handleEvent :: " + event)
         // console.dir(err)
         if(event == 'connect') {
           // Update the replicaset state
@@ -183,7 +183,7 @@ function attemptReconnect(self) {
 
         // Done with the reconnection attempt
         if(connectingServers.length == 0) {
-          // console.log("---- attemptReconnect done")
+          console.log("---- attemptReconnect done")
           if(self.state == DESTROYED) return;
 
           // Do we have a primary
@@ -214,12 +214,12 @@ function attemptReconnect(self) {
 function connectNewServers(self, servers, callback) {
   // Count lefts
   var count = servers.length;
-  // console.log("=============== connectNewServers :: " + count)
+  console.log("=============== connectNewServers :: " + count)
 
   // Handle events
   var _handleEvent = function(self, event) {
     return function(err, r) {
-      // console.log("=============== connectNewServers :: _handleEvent :: " + this.name)
+      console.log("=============== connectNewServers :: _handleEvent :: " + this.name)
       count = count - 1;
 
       if(event == 'connect') {
@@ -228,7 +228,7 @@ function connectNewServers(self, servers, callback) {
 
         // Update the state with the new server
         var result = self.s.replicaSetState.update(this);
-        // console.log("=============== connectNewServers :: _handleEvent 1 :: " + result)
+        console.log("=============== connectNewServers :: _handleEvent 1 :: " + result)
 
 
         // Remove the handlers
@@ -272,8 +272,8 @@ function connectNewServers(self, servers, callback) {
 
 function topologyMonitor(self) {
   self.haTimeoutId = setTimeout(function() {
-    // console.log("===================== topologyMonitor")
-    // console.log("+ topologyMonitor 0")
+    console.log("===================== topologyMonitor")
+    console.log("+ topologyMonitor 0")
     if(self.state == DESTROYED) return;
     // Get the connectingServers
     var connectingServers = self.s.replicaSetState.allServers();
@@ -289,14 +289,14 @@ function topologyMonitor(self) {
     if(count == 0) return attemptReconnect(self);
 
     // If the count is zero schedule a new fast
-    // console.log("+ topologyMonitor 1 :: count :: " + count)
+    console.log("+ topologyMonitor 1 :: count :: " + count)
     function pingServer(_self, _server, cb) {
-      // console.log("================ pingServer 0 :: " + _server.name)
+      console.log("================ pingServer 0 :: " + _server.name)
       // Measure running time
       var start = new Date().getTime();
       // Execute ismaster
       _server.command('admin.$cmd', {ismaster:true}, {monitoring: true}, function(err, r) {
-        // console.log("================ pingServer 1 :: " + _server.name)
+        console.log("================ pingServer 1 :: " + _server.name)
         if(self.state == DESTROYED) {
           _server.destroy();
           cb(err, r);
