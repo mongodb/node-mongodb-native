@@ -222,6 +222,7 @@ exports['Should correctly error out operations if pool is closed in the middle o
         // console.log(" errorCount = " + errorCount)
         // console.dir(err)
         // console.dir(r)
+        console.dir(errorCount)
         test.ok(errorCount >= 250);
         pool.destroy();
         // console.log("=================== " + Object.keys(Connection.connections()).length)
@@ -235,7 +236,7 @@ exports['Should correctly error out operations if pool is closed in the middle o
       setTimeout(function() {
         var query = new Query(new bson(), 'system.$cmd', {ismaster:true}, {numberToSkip: 0, numberToReturn: 1});
         pool.write(query.toBin(), messageHandler);
-        if(i == 250) {
+        if(i == 249) {
           pool.destroy();
         }
       }, i);
