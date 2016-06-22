@@ -225,11 +225,11 @@ function attemptReconnect(self) {
         self.retriesLeft = self.retriesLeft - 1;
         // How many retries are left
         if(self.retriesLeft == 0) {
-          // console.log("==== attemptReconnect :: destroy")
           // Destroy the instance
           self.destroy();
           // Emit close event
-          self.emit('close', self);
+          self.emit('reconnectFailed'
+            , new MongoError(f('failed to reconnect after %s attempts with interval %s ms', self.options.reconnectTries, self.options.reconnectInterval)));
         } else {
           // console.log("==== attemptReconnect :: retry")
           self.reconnectId = setTimeout(attemptReconnect(self), self.options.reconnectInterval);

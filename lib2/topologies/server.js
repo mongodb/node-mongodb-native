@@ -36,6 +36,9 @@ var Server = function(options) {
   // console.log("**** CREATE SERVER :: " + this.id)
   // console.dir(options)
 
+  // Reconnect retries
+  var reconnectTries = options.reconnectTries || 30;
+
   // Internal state
   this.s = {
     // Options
@@ -66,6 +69,8 @@ var Server = function(options) {
   this.lastIsMasterMS = -1;
   // The monitoringProcessId
   this.monitoringProcessId = null;
+  // Initial connection
+  this.initalConnect = true;
 }
 
 inherits(Server, EventEmitter);
@@ -151,6 +156,8 @@ var eventHandler = function(self, event) {
           return;
         }
 
+        // Ensure no error emitted after initial connect when reconnecting
+        self.initalConnect = false;
         // Save the ismaster
         self.ismaster = result.result;
         // Add the correct wire protocol handler
@@ -165,11 +172,23 @@ var eventHandler = function(self, event) {
       });
     } else if(event == 'error' || event == 'parseError'
       || event == 'close' || event == 'timeout' || event == 'reconnect'
-      || event == 'attemptReconnect') {
+      || event == 'attemptReconnect' || 'reconnectFailed') {
 
       // Remove server instance from accounting
-      if(serverAccounting && ['close', 'timeout', 'error', 'parseError'].indexOf(event) != -1) {
+      if(serverAccounting && ['close', 'timeout', 'error', 'parseError', 'reconnectFailed'].indexOf(event) != -1) {
         delete servers[this.id];
+      }
+
+      // Reconnect failed return error
+      if(event == 'reconnectFailed') {
+        return self.emit('error', err);
+      }
+
+      // On first connect fail
+      if(self.s.pool.state == 'disconnected' && self.initalConnect && ['close', 'timeout', 'error', 'parseError'].indexOf(event) != -1) {
+        // console.log("!!!!!!!!!!! EMIT 2 :: " + event + " :: " + self.initalConnect + " :: " + self.id)
+        self.initalConnect = false;
+        return self.emit('error', new MongoError(f('failed to connect to server [%s] on first connect', self.name)));
       }
 
       // Emit the event
@@ -205,6 +224,7 @@ Server.prototype.connect = function(options) {
   self.s.pool.on('parseError', eventHandler(self, 'parseError'));
   self.s.pool.on('connect', eventHandler(self, 'connect'));
   self.s.pool.on('reconnect', eventHandler(self, 'reconnect'));
+  self.s.pool.on('reconnectFailed', eventHandler(self, 'reconnectFailed'));
 
   // Connect with optional auth settings
   self.s.pool.connect(options.auth)
