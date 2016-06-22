@@ -156,7 +156,7 @@ exports['Successfully add a new secondary server to the set'] = {
     var arbiters = {};
 
     server.on('joined', function(_type, _server) {
-      // console.log("----------- joined :: " + _type + " :: " + _server.name)
+      // console.log("----------- joined -- :: " + _type + " :: " + _server.name)
       if(_type == 'arbiter') {
         arbiters[_server.name] = _server;
         // Flip the ismaster message
@@ -170,6 +170,7 @@ exports['Successfully add a new secondary server to the set'] = {
           test.ok(secondaries['localhost:32003'] != null);
           test.ok(arbiters['localhost:32002'] != null);
 
+          // console.log("################## FINSIHED ADD SECONDary")
           // Finish up the test
           running = false;
           primaryServer.destroy();
@@ -382,6 +383,7 @@ exports['Successfully remove a secondary server from the set'] = {
         test.ok(server.s.replicaSetState.primary != null);
         test.equal('localhost:32000', server.s.replicaSetState.primary.name);
 
+        // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!! FINISHED TEST")
         primaryServer.destroy();
         firstSecondaryServer.destroy();
         secondSecondaryServer.destroy();

@@ -185,16 +185,16 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
               // console.dir(server.s.replicaSetState.secondaries)
               // console.log("------------------------------- step 7 : 1")
               // console.dir(server.s.replicaSetState.arbiters)
-              console.log("============================================= 0")
-              console.dir(err)
-              if(r)console.dir(r.result)
-              console.log("_server.s.replicaSetState.primary != null = " + (_server.s.replicaSetState.primary != null))
-              console.log("_server.s.replicaSetState.secondaries.length = " + _server.s.replicaSetState.secondaries.length)
-              console.log("_server.s.replicaSetState.arbiters.length = " + _server.s.replicaSetState.arbiters.length)
-              // test.equal(null, err);
-              // test.ok(_server.s.replicaSetState.primary != null);
-              // test.equal(1, _server.s.replicaSetState.secondaries.length);
-              // test.equal(1, _server.s.replicaSetState.arbiters.length);
+              // console.log("============================================= 0")
+              // console.dir(err)
+              // if(r)console.dir(r.result)
+              // console.log("_server.s.replicaSetState.primary != null = " + (_server.s.replicaSetState.primary != null))
+              // console.log("_server.s.replicaSetState.secondaries.length = " + _server.s.replicaSetState.secondaries.length)
+              // console.log("_server.s.replicaSetState.arbiters.length = " + _server.s.replicaSetState.arbiters.length)
+              test.equal(null, err);
+              test.ok(_server.s.replicaSetState.primary != null);
+              test.equal(1, _server.s.replicaSetState.secondaries.length);
+              test.equal(1, _server.s.replicaSetState.arbiters.length);
 
               // setTimeout(function() {
               //   console.log("============================================= 1")
@@ -404,6 +404,7 @@ exports['Successfully come back from a dead replicaset that has been unavailable
     server.on('fullsetup', function(_server) {});
     // Gives proxies a chance to boot up
     setTimeout(function() {
+      // console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ CONNECT")
       server.connect();
     }, 100)
   }

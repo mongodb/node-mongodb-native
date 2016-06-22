@@ -222,7 +222,7 @@ exports['Should correctly error out operations if pool is closed in the middle o
         // console.log(" errorCount = " + errorCount)
         // console.dir(err)
         // console.dir(r)
-        console.dir(errorCount)
+        // console.dir(errorCount)
         test.ok(errorCount >= 250);
         pool.destroy();
         // console.log("=================== " + Object.keys(Connection.connections()).length)
