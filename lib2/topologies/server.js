@@ -222,7 +222,7 @@ Server.prototype.isMasterLatencyMS = function() {
 }
 
 Server.prototype.unref = function() {
-  // this.s.pool.unref();
+  this.s.pool.unref();
 }
 
 Server.prototype.isConnected = function() {

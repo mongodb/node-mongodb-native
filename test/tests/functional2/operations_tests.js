@@ -464,10 +464,13 @@ exports['Should correctly execute unref and finish all operations'] = {
         var left = 100;
 
         for(var i = 0; i < 100; i++) {
+          // console.log("================ ")
           // Execute the write
           _server.insert(f("%s.inserts_unref", configuration.db), [{a:i}], {
             writeConcern: {w:1}, ordered:true
           }, function(err, results) {
+            // console.log("============= inserted")
+            // console.dir(err)
             left = left - 1;
             test.equal(null, err);
             test.equal(1, results.result.n);
@@ -478,6 +481,9 @@ exports['Should correctly execute unref and finish all operations'] = {
                 // Add event listeners
                 server.on('connect', function(_server) {
                   _server.command(f("%s.$cmd", configuration.db), {count: 'inserts_unref'}, function(e, result) {
+                    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                    // console.dir(e)
+                    // if(result)console.dir(result.result)
                     test.equal(null, err);
                     test.equal(100, result.result.n);
 

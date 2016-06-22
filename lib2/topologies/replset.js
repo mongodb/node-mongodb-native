@@ -5,6 +5,7 @@ var inherits = require('util').inherits,
   EventEmitter = require('events').EventEmitter,
   BSON = require('bson').native().BSON,
   ReadPreference = require('./read_preference'),
+  BasicCursor = require('../cursor'),
   Logger = require('../connection/logger'),
   debugOptions = require('../connection/utils').debugOptions,
   MongoError = require('../error'),
@@ -119,8 +120,12 @@ var ReplSet = function(seedlist, options) {
   // Internal state
   this.s = {
     options: Object.assign({}, options),
+    // BSON instance
+    bson: options.bson || new BSON(),
     // Uniquely identify the replicaset instance
     id: replSetId++,
+    // Factory overrides
+    Cursor: options.cursorFactory || BasicCursor,
     // Logger instance
     logger: Logger('ReplSet', options),
     // Seedlist
@@ -548,16 +553,58 @@ ReplSet.prototype.destroy = function() {
   });
 }
 
+ReplSet.prototype.unref = function() {
+  // console.log("------------------ 0")
+  this.s.replicaSetState.allServers().forEach(function(x) {
+    x.unref();
+  });
+
+  // console.log("------------------ 1")
+  clearTimeout(this.haTimeoutId);
+  // console.log("------------------ 2")
+}
+
 ReplSet.prototype.lastIsMaster = function() {
   // console.log("=== lastIsMaster")
+  return this.s.replicaSetState.primary
+    ? this.s.replicaSetState.primary.lastIsMaster() : null;
 }
 
 ReplSet.prototype.isConnected = function(options) {
   // console.log("=== isConnected")
+  options = options || {};
+  // If we specified a read preference check if we are connected to something
+  // than can satisfy this
+  if(options.readPreference
+    && options.readPreference.equals(ReadPreference.secondary)) {
+    return this.s.replicaSetState.hasSecondary();
+  }
+
+  if(options.readPreference
+    && options.readPreference.equals(ReadPreference.primary)) {
+    return this.s.replicaSetState.hasPrimary();
+  }
+
+  if(options.readPreference
+    && options.readPreference.equals(ReadPreference.primaryPreferred)) {
+    return this.s.replicaSetState.hasSecondary() || this.s.replicaSetState.hasPrimary();
+  }
+
+  if(options.readPreference
+    && options.readPreference.equals(ReadPreference.secondaryPreferred)) {
+    return this.s.replicaSetState.hasSecondary() || this.s.replicaSetState.hasPrimary();
+  }
+
+  if(this.s.secondaryOnlyConnectionAllowed
+    && this.s.replicaSetState.hasSecondary()) {
+      return true;
+  }
+
+  return this.s.replicaSetState.hasPrimary();
 }
 
 ReplSet.prototype.isDestroyed = function() {
-  // console.log("=== isDestroyed")
+  // console.log("=== isDestroyed :: " + this.state == DESTROYED)
   return this.state == DESTROYED;
 }
 
@@ -567,7 +614,10 @@ ReplSet.prototype.equals = function(server) {
 
 ReplSet.prototype.getServer = function(options) {
   // console.log("=== getServer")
-  return this;
+  // Ensure we have no options
+  options = options || {};
+  // Pick the right server based on readPreference
+  return pickServer(this, this.s, options.readPreference);
 }
 
 ReplSet.prototype.getServerFrom = function(connection) {
@@ -815,6 +865,9 @@ function pickNearest(self, set, readPreference) {
 function pickServer(self, s, readPreference) {
   // console.log("============== pickServer")
   // console.dir(readPreference)
+  // console.log("self.s.replicaSetState.primary = " + self.s.replicaSetState.primary != null);
+  // console.log("self.s.replicaSetState.secondaries = " + self.s.replicaSetState.secondaries.length);
+  // console.log("self.s.replicaSetState.arbiters = " + self.s.replicaSetState.arbiters.length);
   // If no read Preference set to primary by default
   readPreference = readPreference || ReadPreference.primary;
 
@@ -939,6 +992,24 @@ ReplSet.prototype.command = function(ns, cmd, options, callback) {
     // Return the error
     callback(err, r);
   });
+}
+
+/**
+ * Perform one or more remove operations
+ * @method
+ * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+ * @param {{object}|{Long}} cmd Can be either a command returning a cursor or a cursorId
+ * @param {object} [options.batchSize=0] Batchsize for the operation
+ * @param {array} [options.documents=[]] Initial documents list for cursor
+ * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+ * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
+ * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
+ * @param {opResultCallback} callback A callback function
+ */
+ReplSet.prototype.cursor = function(ns, cmd, cursorOptions) {
+  cursorOptions = cursorOptions || {};
+  var FinalCursor = cursorOptions.cursorFactory || this.s.Cursor;
+  return new FinalCursor(this.s.bson, ns, cmd, cursorOptions, this, this.s.options);
 }
 
 module.exports = ReplSet;

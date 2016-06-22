@@ -265,9 +265,16 @@ Cursor.prototype._find = function(callback) {
     queryOptions.promoteLongs = self.cursorState.promoteLongs;
   }
 
+  // try {
   // console.log("^^^^ _find 0")
+  // console.dir(self.server != null)
+  // console.dir(self.server.s.pool != null)
   // Write the initial command out
   self.server.s.pool.write(self.query.toBin(), queryOptions, queryCallback);
+  // console.log("^^^^ _find 1")
+// } catch(e) {
+//   console.log(e.stack)
+// }
 }
 
 Cursor.prototype._getmore = function(callback) {
@@ -557,8 +564,12 @@ var nextFunction = function(self, callback) {
     // console.log("core:: nextFunction :: 3")
 
     try {
+      // console.log("============================= 0")
       self.server = self.topology.getServer(self.options);
+      // console.log("============================= 1")
     } catch(err) {
+      // console.log("============================= err")
+      // console.dir(err)
       // Handle the error and add object to next method call
       if(self.disconnectHandler != null) {
         return self.disconnectHandler.addObjectAndMethod('cursor', self, 'next', [callback], callback);
@@ -568,14 +579,16 @@ var nextFunction = function(self, callback) {
       return callback(err);
     }
 
+    // console.log("=== server :: " + (self.server != null))
+
     // Set as init
     self.cursorState.init = true;
 
     try {
-      // console.log("----------------------------- 0")
+      // console.log("----------------------------- 0 write")
       // console.dir(self.cmd)
       self.query = self.server.wireProtocolHandler.command(self.bson, self.ns, self.cmd, self.cursorState, self.topology, self.options);
-      // console.log("----------------------------- 1")
+      // console.log("----------------------------- 1 write")
     } catch(err) {
       return callback(err);
     }

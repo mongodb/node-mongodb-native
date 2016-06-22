@@ -13,16 +13,22 @@ exports['Should correctly execute insert culling undefined'] = {
     configuration.newTopology(function(err, server) {
       // Add event listeners
       server.on('connect', function(_server) {
+        // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!! 0")
         // Drop collection
         _server.command(f('%s.$cmd', configuration.db), {drop: 'insert1'}, function() {
+          // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!! 1")
           var ns = f("%s.insert1", configuration.db);
           var objectId = new ObjectId();
           // Execute the write
           _server.insert(ns, [{_id: objectId, a:1, b:undefined}], {
             writeConcern: {w:1}, ordered:true, ignoreUndefined:true
           }, function(err, results) {
+            // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!! 2")
+            // console.dir(err)
+            // if(results) console.dir(results.result)
             test.equal(null, err);
             test.equal(1, results.result.n);
+            // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!! 3")
 
             // Execute find
             var cursor = _server.cursor(ns, {
@@ -30,9 +36,13 @@ exports['Should correctly execute insert culling undefined'] = {
               , query: {_id: objectId}
               , batchSize: 2
             });
+            // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!! 4")
 
             // Execute next
             cursor.next(function(err, d) {
+              // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!! 5")
+              // console.dir(err)
+              // console.dir(d)
               test.equal(null, err);
               test.ok(d.b === undefined);
 

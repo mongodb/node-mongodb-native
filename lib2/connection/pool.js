@@ -602,6 +602,23 @@ Pool.prototype.logout = function(dbName, callback) {
   }
 }
 
+/**
+ * Unref the pool
+ * @method
+ */
+Pool.prototype.unref = function() {
+  // console.log("========== pool unref 0")
+  // Get all the known connections
+  var connections = this.availableConnections
+    .concat(this.inUseConnections)
+    .concat(this.connectingConnections);
+    // console.log("========== pool unref 1")
+  connections.forEach(function(c) {
+    c.unref();
+  });
+  // console.log("========== pool unref 2")
+}
+
 // Events
 var events = ['error', 'close', 'timeout', 'parseError', 'connect'];
 
