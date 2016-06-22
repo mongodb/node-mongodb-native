@@ -146,7 +146,7 @@ function attemptReconnect(self) {
     // console.log("---- attemptReconnect 2 :: " + servers.length)
 
     // Create the list of servers
-    var connectingServers = servers.slice(0);
+    self.s.connectingServers = servers.slice(0);
 
     // Handle all events coming from servers
     function _handleEvent(self, event) {
@@ -170,9 +170,9 @@ function attemptReconnect(self) {
         }
 
         // Remove the server from our list
-        for(var i = 0; i < connectingServers.length; i++) {
-          if(connectingServers[i].equals(this)) {
-            connectingServers.splice(i, 1);
+        for(var i = 0; i < self.s.connectingServers.length; i++) {
+          if(self.s.connectingServers[i].equals(this)) {
+            self.s.connectingServers.splice(i, 1);
           }
         }
 
@@ -182,7 +182,7 @@ function attemptReconnect(self) {
         }
 
         // Done with the reconnection attempt
-        if(connectingServers.length == 0) {
+        if(self.s.connectingServers.length == 0) {
           // console.log("---- attemptReconnect done")
           if(self.state == DESTROYED) return;
 
@@ -448,6 +448,10 @@ ReplSet.prototype.destroy = function() {
   if(this.haTimeoutId) clearTimeout(this.haTimeoutId);
   // Destroy the replicaset
   this.s.replicaSetState.destroy();
+  // Destroy all connecting servers
+  this.s.connectingServers.forEach(function(x) {
+    x.destroy();
+  });
   // Transition state
   stateTransition(this, DESTROYED);
 }

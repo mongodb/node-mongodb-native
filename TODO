@@ -1,7 +1,14 @@
 TODO
 ======
 - Add a test when the replset topology gives up trying to reconnect
-  - Should emit destroy event and shut down
+  - Should emit destroy event and shut down.
 - Add a test when the mongos topology gives up trying to reconnect
-  - Should emit destroy event and shut down
-- Add Server accounting and connection accounting to test cases
+  - Should emit destroy event and shut down.
+- Add Server accounting and connection accounting to test cases.
+- Handle replicaset authentication.
+
+DONE
+======
+- Replset connectingservers as part of main state
+- Allow pool to go into DESTROYING mode to drain any queued operations
+  before closing itself.

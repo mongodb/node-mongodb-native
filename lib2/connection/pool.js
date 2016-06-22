@@ -19,6 +19,7 @@ var MongoCR = require('../auth/mongocr')
 var DISCONNECTED = 'disconnected';
 var CONNECTING = 'connecting';
 var CONNECTED = 'connected';
+var DESTROYING = 'destroying';
 var DESTROYED = 'destroyed';
 
 var _id = 0;
@@ -103,9 +104,10 @@ Object.defineProperty(Pool.prototype, 'socketTimeout', {
 
 function stateTransition(self, newState) {
   var legalTransitions = {
-    'disconnected': [CONNECTING, DESTROYED, DISCONNECTED],
-    'connecting': [CONNECTING, DESTROYED, CONNECTED, DISCONNECTED],
-    'connected': [CONNECTED, DISCONNECTED, DESTROYED],
+    'disconnected': [CONNECTING, DESTROYING, DISCONNECTED],
+    'connecting': [CONNECTING, DESTROYING, CONNECTED, DISCONNECTED],
+    'connected': [CONNECTED, DISCONNECTED, DESTROYING],
+    'destroying': [DESTROYING, DESTROYED],
     'destroyed': [DESTROYED]
   }
 
@@ -597,51 +599,104 @@ Pool.prototype.logout = function(dbName, callback) {
   }
 }
 
+// Events
+var events = ['error', 'close', 'timeout', 'parseError', 'connect'];
+
 Pool.prototype.destroy = function() {
-  // console.log("pool::destroy")
+  var self = this;
+  // Do not try again if the pool is already dead
+  if(this.state == DESTROYED) return;
   // Set state to destroyed
-  stateTransition(this, DESTROYED);
+  stateTransition(this, DESTROYING);
 
-  // Events
-  var events = ['error', 'close', 'timeout', 'parseError', 'connect'];
+  // Wait for the operations to drain before we close the pool
+  function checkStatus() {
+    // console.log("========= destroy :: checkStatus 0")
+    if(self.queue.length == 0) {
+      // console.log("========= destroy :: checkStatus 1")
+      // Get all the known connections
+      var connections = self.availableConnections
+        .concat(self.inUseConnections)
+        .concat(self.connectingConnections);
 
-  // Get all the known connections
-  var connections = this.availableConnections
-    .concat(this.inUseConnections)
-    .concat(this.connectingConnections);
+      // Check if we have any in flight operations
+      for(var i = 0; i < connections.length; i++) {
+        // There is an operation still in flight, reschedule a
+        // check waiting for it to drain
+        if(connections[i].workItem) {
+          return setTimeout(checkStatus, 1);
+        }
+      }
 
-  // Do we have a reconnect attempt running, terminate timeout
-  clearTimeout(this.reconnectId);
+      // Destroy all connections
+      connections.forEach(function(c) {
+        // Remove all listeners
+        for(var i = 0; i < events.length; i++) {
+          c.removeAllListeners(events[i]);
+        }
+        // Destroy connection
+        c.destroy();
+      });
 
-  // Destroy all the connections and flush work in progress on
-  // those connections
-  connections.forEach(function(c) {
-    if(c.workItem && c.workItem.cb) {
-      c.workItem.cb(new MongoError('pool destroyed'));
-    }
+      // Zero out all connections
+      self.inUseConnections = [];
+      self.availableConnections = [];
+      self.nonAuthenticatedConnections = [];
+      self.connectingConnections = [];
 
-    // Remove all listeners
-    for(var i = 0; i < events.length; i++) {
-      c.removeAllListeners(events[i]);
-    }
-    // Destroy connection
-    c.destroy();
-  });
-
-  // Flush the queue
-  while(this.queue.length > 0) {
-    var workItem = this.queue.shift();
-
-    if(workItem && workItem.cb) {
-      workItem.cb(new MongoError('pool destroyed'));
+      // Set state to destroyed
+      stateTransition(self, DESTROYED);
+    } else {
+      setTimeout(checkStatus, 1);
     }
   }
 
-  // Zero out all connections
-  this.inUseConnections = [];
-  this.availableConnections = [];
-  this.nonAuthenticatedConnections = [];
-  this.connectingConnections = [];
+  // Initiate drain of operations
+  checkStatus();
+
+  // // Events
+  // var events = ['error', 'close', 'timeout', 'parseError', 'connect'];
+  //
+  // // Get all the known connections
+  // var connections = this.availableConnections
+  //   .concat(this.inUseConnections)
+  //   .concat(this.connectingConnections);
+  //
+  // // Do we have a reconnect attempt running, terminate timeout
+  // clearTimeout(this.reconnectId);
+  //
+  // // force a last round of execution
+  // _execute(this)();
+
+  // // Destroy all the connections and flush work in progress on
+  // // those connections
+  // connections.forEach(function(c) {
+  //   if(c.workItem && c.workItem.cb) {
+  //     c.workItem.cb(new MongoError('pool destroyed'));
+  //   }
+  //
+  //   // Remove all listeners
+  //   for(var i = 0; i < events.length; i++) {
+  //     c.removeAllListeners(events[i]);
+  //   }
+  //   // Destroy connection
+  //   c.destroy();
+  // });
+  //
+  // // Flush the queue
+  // while(this.queue.length > 0) {
+  //   var workItem = this.queue.shift();
+  //
+  //   if(workItem && workItem.cb) {
+  //     workItem.cb(new MongoError('pool destroyed'));
+  //   }
+  // }
+
+  // // Zero out all connections
+  // this.inUseConnections = [];
+  // this.availableConnections = [];
+  // this.nonAuthenticatedConnections = [];
+  // this.connectingConnections = [];
 }
 
 /**
@@ -663,7 +718,7 @@ Pool.prototype.write = function(buffer, options, cb) {
   // console.dir(cb)
 
   // Pool was destroyed error out
-  if(this.state == DESTROYED) {
+  if(this.state == DESTROYED || this.state == DESTROYING) {
     // Callback with an error
     if(cb) cb(new MongoError('pool destroyed'));
     return;
