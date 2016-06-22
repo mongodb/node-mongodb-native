@@ -11,12 +11,37 @@ var inherits = require('util').inherits,
   Server = require('./server'),
   ReplSetState = require('./replset_state');
 
+var MongoCR = require('../auth/mongocr')
+  , X509 = require('../auth/x509')
+  , Plain = require('../auth/plain')
+  , GSSAPI = require('../auth/gssapi')
+  , SSPI = require('../auth/sspi')
+  , ScramSHA1 = require('../auth/scram');
+
 //
 // States
 var DISCONNECTED = 'disconnected';
 var CONNECTING = 'connecting';
 var CONNECTED = 'connected';
 var DESTROYED = 'destroyed';
+
+function stateTransition(self, newState) {
+  var legalTransitions = {
+    'disconnected': [CONNECTING, DESTROYED, DISCONNECTED],
+    'connecting': [CONNECTING, DESTROYED, CONNECTED, DISCONNECTED],
+    'connected': [CONNECTED, DISCONNECTED, DESTROYED],
+    'destroyed': [DESTROYED]
+  }
+
+  // Get current state
+  var legalStates = legalTransitions[self.state];
+  if(legalStates && legalStates.indexOf(newState) != -1) {
+    self.state = newState;
+  } else {
+    self.logger.error(f('Pool with id [%s] failed attempted illegal state transition from [%s] to [%s] only following state allowed [%s]'
+      , self.id, self.state, newState, legalStates));
+  }
+}
 
 //
 // ReplSet instance id
@@ -116,6 +141,15 @@ var ReplSet = function(seedlist, options) {
     acceptableLatency: options.acceptableLatency || 15
   }
 
+  // console.log("== create ReplSet :: " + this.s.id)
+
+  // All the authProviders
+  this.authProviders = options.authProviders || {
+      'mongocr': new MongoCR(options.bson), 'x509': new X509(options.bson)
+    , 'plain': new Plain(options.bson), 'gssapi': new GSSAPI(options.bson)
+    , 'sspi': new SSPI(options.bson), 'scram-sha-1': new ScramSHA1(options.bson)
+  }
+
   // Add forwarding of events from state handler
   var types = ['joined', 'left'];
   types.forEach(function(x) {
@@ -141,7 +175,7 @@ function attemptReconnect(self) {
     var servers = keys.map(function(x) {
       return new Server(Object.assign({
         host: x.split(':')[0], port: parseInt(x.split(':')[1], 10)
-      }, self.s.options));
+      }, self.s.options, { authProviders: self.authProviders}));
     });
     // console.log("---- attemptReconnect 2 :: " + servers.length)
 
@@ -151,6 +185,11 @@ function attemptReconnect(self) {
     // Handle all events coming from servers
     function _handleEvent(self, event) {
       return function(err) {
+        // Destroy the instance
+        if(self.state == DESTROYED) {
+          return this.destroy();
+        }
+
         // console.log("---- attemptReconnect :: _handleEvent :: " + event)
         // console.dir(err)
         if(event == 'connect') {
@@ -174,11 +213,6 @@ function attemptReconnect(self) {
           if(self.s.connectingServers[i].equals(this)) {
             self.s.connectingServers.splice(i, 1);
           }
-        }
-
-        // Destroy the instance
-        if(self.state == DESTROYED) {
-          this.destroy();
         }
 
         // Done with the reconnection attempt
@@ -222,6 +256,11 @@ function connectNewServers(self, servers, callback) {
       // console.log("=============== connectNewServers :: _handleEvent :: " + this.name)
       count = count - 1;
 
+      // Destroyed
+      if(self.state == DESTROYED) {
+        return this.destroy();
+      }
+
       if(event == 'connect') {
         // console.dir(this.ismaster)
         // console.log(self.s.replicaSetState.update(this));
@@ -260,7 +299,7 @@ function connectNewServers(self, servers, callback) {
     var server = new Server(Object.assign({
       host: servers[i].split(':')[0],
       port: parseInt(servers[i].split(':')[1], 10)
-    }, self.s.options));
+    }, self.s.options, { authProviders: self.authProviders}));
     // console.log("=============== connectNewServers - 2")
     // Add temp handlers
     server.once('connect', _handleEvent(self, 'connect'));
@@ -272,7 +311,10 @@ function connectNewServers(self, servers, callback) {
   }
 }
 
-function topologyMonitor(self) {
+function topologyMonitor(self, options) {
+  options = options || {};
+
+  // Set momitoring timeout
   self.haTimeoutId = setTimeout(function() {
     // console.log("===================== topologyMonitor")
     // console.log("+ topologyMonitor 0")
@@ -301,7 +343,7 @@ function topologyMonitor(self) {
         // console.log("================ pingServer 1 :: " + _server.name)
         if(self.state == DESTROYED) {
           _server.destroy();
-          cb(err, r);
+          return cb(err, r);
         }
 
         if(r) {
@@ -334,25 +376,66 @@ function topologyMonitor(self) {
           if(self.state == DESTROYED) return;
           // Attempt to connect to any unknown servers
           connectNewServers(self, self.s.replicaSetState.unknownServers, function(err, cb) {
+            if(self.state == DESTROYED) return;
+            // console.log("111 connectNewServers")
+            // Check if we have an options.haInterval (meaning it was triggered from connect)
+            if(options.haInterval) {
+              // Do we have a primary and secondary
+              if(self.state == CONNECTING
+                && self.s.replicaSetState.hasPrimaryAndSecondary()) {
+                  // console.log("========================== 0 :: " + self.s.id)
+                  // Transition to connected
+                  stateTransition(self, CONNECTED);
+                  // // Start the topology monitor
+                  // topologyMonitor(self);
+                  // console.log("===================== connect 0")
+                  // Emit connected sign
+                  self.emit('connect', self);
+              } else if(self.state == CONNECTING
+                && self.s.replicaSetState.hasSecondary()
+                && self.s.options.secondaryOnlyConnectionAllowed) {
+                  // console.log("========================== 1 :: " + self.s.id)
+                  // Transition to connected
+                  stateTransition(self, CONNECTED);
+                  // // Start the topology monitor
+                  // topologyMonitor(self);
+                  // console.log("===================== connect 1")
+                  // Emit connected sign
+                  self.emit('connect', self);
+              } else if(self.state == CONNECTING) {
+                  // console.log("========================== 2 :: " + self.s.id)
+                  self.emit('error', new MongoError('no primary found in replicaset'));
+                // Destroy the topology
+                return self.destroy();
+              }
+            }
+
+            // console.log("========================== 3 :: " + self.s.id)
             // console.log("!!!!!!!!!!!!!!!!!! topologyMonitor")
             topologyMonitor(self);
           });
         }
       });
     }
-  }, self.s.haInterval)
+  }, options.haInterval || self.s.haInterval)
 }
 
 function handleEvent(self, event) {
   return function(err) {
-    // console.log("$$$$ handleEvent :: " + event)
+    // console.log("$$$$ handleEvent :: " + event + " :: " + self.s.id)
+    if(self.state == DESTROYED) return;
     self.s.replicaSetState.remove(this);
   }
 }
 
 function handleInitialConnectEvent(self, event) {
   return function(err) {
-    // console.log("========= handleInitialConnectEvent :: " + event)
+    // console.log("========= handleInitialConnectEvent :: " + event + " :: " + this.name)
+    // Destroy the instance
+    if(self.state == DESTROYED) {
+      return this.destroy();
+    }
+
     // Check the type of server
     if(event == 'connect') {
       // Update the state
@@ -371,6 +454,7 @@ function handleInitialConnectEvent(self, event) {
       // Emit failure to connect
       self.emit('failed', this);
       // Remove from the state
+      // console.log("== handleInitialConnectEvent :: " + event + " :: " + self.s.id)
       self.s.replicaSetState.remove(this);
     }
 
@@ -381,33 +465,38 @@ function handleInitialConnectEvent(self, event) {
       }
     }
 
-    // Do we have a primary and secondary
-    if(self.state == CONNECTING
-      && self.s.replicaSetState.hasPrimaryAndSecondary()) {
-        // console.log("========================== 0")
-        // Transition to connected
-        stateTransition(self, CONNECTED);
-        // Start the topology monitor
-        topologyMonitor(self);
-        // console.log("===================== connect 0")
-        // Emit connected sign
-        self.emit('connect', self);
-    } else if(self.state == CONNECTING
-      && self.s.replicaSetState.hasSecondary()
-      && self.s.options.secondaryOnlyConnectionAllowed) {
-        // console.log("========================== 1")
-        // Transition to connected
-        stateTransition(self, CONNECTED);
-        // Start the topology monitor
-        topologyMonitor(self);
-        // console.log("===================== connect 1")
-        // Emit connected sign
-        self.emit('connect', self);
-    } else if(self.state == CONNECTING
-      && self.s.connectingServers.length == 0) {
-        // console.log("========================== 2")
-        self.emit('error', new MongoError('no primary found in replicaset'));
+    // Trigger topologyMonitor
+    if(self.s.connectingServers.length == 0) {
+      topologyMonitor(self, {haInterval: 1});
     }
+
+    // // Do we have a primary and secondary
+    // if(self.state == CONNECTING
+    //   && self.s.replicaSetState.hasPrimaryAndSecondary()) {
+    //     // console.log("========================== 0")
+    //     // Transition to connected
+    //     stateTransition(self, CONNECTED);
+    //     // Start the topology monitor
+    //     topologyMonitor(self);
+    //     // console.log("===================== connect 0")
+    //     // Emit connected sign
+    //     self.emit('connect', self);
+    // } else if(self.state == CONNECTING
+    //   && self.s.replicaSetState.hasSecondary()
+    //   && self.s.options.secondaryOnlyConnectionAllowed) {
+    //     // console.log("========================== 1")
+    //     // Transition to connected
+    //     stateTransition(self, CONNECTED);
+    //     // Start the topology monitor
+    //     topologyMonitor(self);
+    //     // console.log("===================== connect 1")
+    //     // Emit connected sign
+    //     self.emit('connect', self);
+    // } else if(self.state == CONNECTING
+    //   && self.s.connectingServers.length == 0) {
+    //     // console.log("========================== 2")
+    //     self.emit('error', new MongoError('no primary found in replicaset'));
+    // }
   };
 }
 
@@ -432,12 +521,13 @@ function connectServers(self, servers) {
 }
 
 ReplSet.prototype.connect = function() {
+  // console.log("=== connect")
   var self = this;
   // Set connecting state
   stateTransition(this, CONNECTING);
   // Create server instances
   var servers = this.s.seedlist.map(function(x) {
-    return new Server(Object.assign(x, self.s.options));
+    return new Server(Object.assign(x, self.s.options), { authProviders: self.authProviders});
   });
 
   // Start all server connections
@@ -445,6 +535,10 @@ ReplSet.prototype.connect = function() {
 }
 
 ReplSet.prototype.destroy = function() {
+  // console.log("=== ReplSet :: destroy :: " + this.s.id)
+  // Transition state
+  stateTransition(this, DESTROYED);
+  // Clear out any monitoring process
   if(this.haTimeoutId) clearTimeout(this.haTimeoutId);
   // Destroy the replicaset
   this.s.replicaSetState.destroy();
@@ -452,14 +546,39 @@ ReplSet.prototype.destroy = function() {
   this.s.connectingServers.forEach(function(x) {
     x.destroy();
   });
-  // Transition state
-  stateTransition(this, DESTROYED);
 }
 
-// function basicWriteValidations(self, options) {
-//   if(!self.s.pool) return MongoError.create('server instance is not connected');
-//   if(self.s.pool.isDestroyed()) return MongoError.create('server instance pool was destroyed');
-// }
+ReplSet.prototype.lastIsMaster = function() {
+  // console.log("=== lastIsMaster")
+}
+
+ReplSet.prototype.isConnected = function(options) {
+  // console.log("=== isConnected")
+}
+
+ReplSet.prototype.isDestroyed = function() {
+  // console.log("=== isDestroyed")
+  return this.state == DESTROYED;
+}
+
+ReplSet.prototype.equals = function(server) {
+  // console.log("=== equals")
+}
+
+ReplSet.prototype.getServer = function(options) {
+  // console.log("=== getServer")
+  return this;
+}
+
+ReplSet.prototype.getServerFrom = function(connection) {
+  // console.log("=== getServerFrom")
+  return this;
+}
+
+ReplSet.prototype.getConnection = function(options) {
+  // console.log("=== getConnection")
+  return this.s.pool.get();
+}
 
 function basicReadPreferenceValidation(self, options) {
   if(options.readPreference && !(options.readPreference instanceof ReadPreference)) {
@@ -510,6 +629,7 @@ var executeWriteOperation = function(self, op, ns, ops, options, callback) {
  * @param {opResultCallback} callback A callback function
  */
 ReplSet.prototype.insert = function(ns, ops, options, callback) {
+  // console.log("--------- insert")
   if(typeof options == 'function') callback = options, options = {}, options = options || {};
   if(this.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
 
@@ -524,6 +644,56 @@ ReplSet.prototype.insert = function(ns, ops, options, callback) {
 
 function clearCredentials(state, ns) {
 
+}
+
+/**
+ * Perform one or more update operations
+ * @method
+ * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+ * @param {array} ops An array of updates
+ * @param {boolean} [options.ordered=true] Execute in order or out of order
+ * @param {object} [options.writeConcern={}] Write concern for the operation
+ * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
+ * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
+ * @param {opResultCallback} callback A callback function
+ */
+ReplSet.prototype.update = function(ns, ops, options, callback) {
+  // console.log("--------- update")
+  if(typeof options == 'function') callback = options, options = {}, options = options || {};
+  if(this.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
+
+  // Not connected but we have a disconnecthandler
+  if(!this.s.replicaSetState.hasPrimary() && this.s.disconnectHandler != null) {
+    return this.s.disconnectHandler.add('insert', ns, ops, options, callback);
+  }
+
+  // Execute write operation
+  executeWriteOperation(this, 'update', ns, ops, options, callback);
+}
+
+/**
+ * Perform one or more remove operations
+ * @method
+ * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
+ * @param {array} ops An array of removes
+ * @param {boolean} [options.ordered=true] Execute in order or out of order
+ * @param {object} [options.writeConcern={}] Write concern for the operation
+ * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
+ * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
+ * @param {opResultCallback} callback A callback function
+ */
+ReplSet.prototype.remove = function(ns, ops, options, callback) {
+  // console.log("--------- remove")
+  if(typeof options == 'function') callback = options, options = {}, options = options || {};
+  if(this.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
+
+  // Not connected but we have a disconnecthandler
+  if(!this.s.replicaSetState.hasPrimary() && this.s.disconnectHandler != null) {
+    return this.s.disconnectHandler.add('insert', ns, ops, options, callback);
+  }
+
+  // Execute write operation
+  executeWriteOperation(this, 'remove', ns, ops, options, callback);
 }
 
 //
@@ -735,6 +905,7 @@ function pickServer(self, s, readPreference) {
  * @param {opResultCallback} callback A callback function
  */
 ReplSet.prototype.command = function(ns, cmd, options, callback) {
+  // console.log("--------- command")
   if(typeof options == 'function') callback = options, options = {}, options = options || {};
   if(this.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
   var self = this;

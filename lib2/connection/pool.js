@@ -72,8 +72,11 @@ var Pool = function(options) {
   this.executing = false;
   // Operation work queue
   this.queue = [];
+  // console.log("=========== determine authProviders")
+  // console.log(" == options.authProviders :: " + (options.authProviders != null))
+
   // All the authProviders
-  this.authProviders = {
+  this.authProviders = options.authProviders || {
       'mongocr': new MongoCR(options.bson), 'x509': new X509(options.bson)
     , 'plain': new Plain(options.bson), 'gssapi': new GSSAPI(options.bson)
     , 'sspi': new SSPI(options.bson), 'scram-sha-1': new ScramSHA1(options.bson)
@@ -653,50 +656,6 @@ Pool.prototype.destroy = function() {
 
   // Initiate drain of operations
   checkStatus();
-
-  // // Events
-  // var events = ['error', 'close', 'timeout', 'parseError', 'connect'];
-  //
-  // // Get all the known connections
-  // var connections = this.availableConnections
-  //   .concat(this.inUseConnections)
-  //   .concat(this.connectingConnections);
-  //
-  // // Do we have a reconnect attempt running, terminate timeout
-  // clearTimeout(this.reconnectId);
-  //
-  // // force a last round of execution
-  // _execute(this)();
-
-  // // Destroy all the connections and flush work in progress on
-  // // those connections
-  // connections.forEach(function(c) {
-  //   if(c.workItem && c.workItem.cb) {
-  //     c.workItem.cb(new MongoError('pool destroyed'));
-  //   }
-  //
-  //   // Remove all listeners
-  //   for(var i = 0; i < events.length; i++) {
-  //     c.removeAllListeners(events[i]);
-  //   }
-  //   // Destroy connection
-  //   c.destroy();
-  // });
-  //
-  // // Flush the queue
-  // while(this.queue.length > 0) {
-  //   var workItem = this.queue.shift();
-  //
-  //   if(workItem && workItem.cb) {
-  //     workItem.cb(new MongoError('pool destroyed'));
-  //   }
-  // }
-
-  // // Zero out all connections
-  // this.inUseConnections = [];
-  // this.availableConnections = [];
-  // this.nonAuthenticatedConnections = [];
-  // this.connectingConnections = [];
 }
 
 /**

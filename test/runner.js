@@ -114,6 +114,7 @@ var Configuration = function(options) {
             });
 
             // Connect
+            console.log("[connecting to topology]");
             server.connect();
           }).catch(function(err) {
             console.log(err.stack);
@@ -217,7 +218,13 @@ var testFiles = [
   '/test/tests/functional2/pool_tests.js',
   '/test/tests/functional2/server_tests.js',
   '/test/tests/functional2/cursor_tests.js',
-  '/test/tests/functional2/replset_state_tests.js'
+  '/test/tests/functional2/replset_state_tests.js',
+  '/test/tests/functional2/extend_cursor_tests.js',
+  '/test/tests/functional2/undefined_tests.js',
+  '/test/tests/functional2/tailable_cursor_tests.js',
+  '/test/tests/functional2/error_tests.js',
+  '/test/tests/functional2/operations_tests.js',
+  '/test/tests/functional2/operation_example_tests.js'
 ]
 
 // Check if we support es6 generators
@@ -231,7 +238,7 @@ try {
   testFiles.push('/test/tests/functional2/rs_mocks/step_down_tests.js');
   testFiles.push('/test/tests/functional2/rs_mocks/all_servers_close_tests.js');
   testFiles.push('/test/tests/functional2/rs_mocks/read_preferences_tests.js');
-//   testFiles.push('/test/tests/functional/rs_mocks/monitoring_tests.js');
+  testFiles.push('/test/tests/functional2/rs_mocks/monitoring_tests.js');
 //
 //   // Mongos Mock Tests
 //   testFiles.push('/test/tests/functional/mongos_mocks/single_proxy_connection_tests.js');
