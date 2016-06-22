@@ -360,7 +360,7 @@ exports['Should correctly reconnect to server with automatic reconnect enabled']
     requires: {
       topology: "single"
     },
-    ignore: { travis:true }
+    // ignore: { travis:true }
   },
 
   test: function(configuration, test) {
@@ -425,7 +425,7 @@ exports['Should correctly reconnect to server with automatic reconnect disabled'
     requires: {
       topology: "single"
     },
-    ignore: { travis:true }
+    // ignore: { travis:true }
   },
 
   test: function(configuration, test) {
@@ -488,7 +488,7 @@ exports['Should reconnect when initial connection failed'] = {
     requires: {
       topology: 'single'
     },
-    ignore: { travis:true }
+    // ignore: { travis:true }
   },
 
   test: function(configuration, test) {
@@ -535,7 +535,7 @@ exports['Should correctly place new connections in available list on reconnect']
     requires: {
       topology: "single"
     },
-    ignore: { travis:true }
+    // ignore: { travis:true }
   },
 
   test: function(configuration, test) {
