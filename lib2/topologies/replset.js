@@ -180,7 +180,9 @@ function attemptReconnect(self) {
     var servers = keys.map(function(x) {
       return new Server(Object.assign({
         host: x.split(':')[0], port: parseInt(x.split(':')[1], 10)
-      }, self.s.options, { authProviders: self.authProviders, reconnect:false}));
+      }, self.s.options, {
+        authProviders: self.authProviders, reconnect:false, monitoring: false
+      }));
     });
     // console.log("---- attemptReconnect 2 :: " + servers.length)
 
@@ -304,7 +306,9 @@ function connectNewServers(self, servers, callback) {
     var server = new Server(Object.assign({
       host: servers[i].split(':')[0],
       port: parseInt(servers[i].split(':')[1], 10)
-    }, self.s.options, { authProviders: self.authProviders, reconnect:false}));
+    }, self.s.options, {
+      authProviders: self.authProviders, reconnect:false, monitoring: false
+    }));
     // console.log("=============== connectNewServers - 2")
     // Add temp handlers
     server.once('connect', _handleEvent(self, 'connect'));
@@ -317,6 +321,7 @@ function connectNewServers(self, servers, callback) {
 }
 
 function topologyMonitor(self, options) {
+  // console.log("===================== topologyMonitor :: 1 ")
   options = options || {};
 
   // Set momitoring timeout
@@ -345,7 +350,9 @@ function topologyMonitor(self, options) {
       var start = new Date().getTime();
       // Execute ismaster
       _server.command('admin.$cmd', {ismaster:true}, {monitoring: true}, function(err, r) {
+        // if(err) console.dir(err)
         // console.log("================ pingServer 1 :: " + _server.name)
+        // console.dir(err)
         if(self.state == DESTROYED) {
           _server.destroy();
           return cb(err, r);
@@ -395,8 +402,10 @@ function topologyMonitor(self, options) {
                   // topologyMonitor(self);
                   // console.log("===================== connect 0")
                   // Emit connected sign
-                  self.emit('connect', self);
-                  self.emit('fullsetup', self);
+                  process.nextTick(function() {
+                    self.emit('connect', self);
+                    self.emit('fullsetup', self);
+                  });
               } else if(self.state == CONNECTING
                 && self.s.replicaSetState.hasSecondary()
                 && self.s.options.secondaryOnlyConnectionAllowed) {
@@ -407,7 +416,9 @@ function topologyMonitor(self, options) {
                   // topologyMonitor(self);
                   // console.log("===================== connect 1")
                   // Emit connected sign
-                  self.emit('connect', self);
+                  process.nextTick(function() {
+                    self.emit('connect', self);
+                  });
               } else if(self.state == CONNECTING) {
                   // console.log("========================== 2 :: " + self.s.id)
                   self.emit('error', new MongoError('no primary found in replicaset'));
@@ -428,7 +439,7 @@ function topologyMonitor(self, options) {
 
 function handleEvent(self, event) {
   return function(err) {
-    // console.log("$$$$ handleEvent :: " + event + " :: " + self.s.id)
+    // console.log("$$$$ handleEvent :: " + event + " :: " + self.s.id + " :: " + this.name)
     if(self.state == DESTROYED) return;
     self.s.replicaSetState.remove(this);
   }
@@ -534,7 +545,9 @@ ReplSet.prototype.connect = function() {
   // console.log("=== Replset.connect")
   // Create server instances
   var servers = this.s.seedlist.map(function(x) {
-    return new Server(Object.assign(x, self.s.options, { authProviders: self.authProviders, reconnect:false}));
+    return new Server(Object.assign(x, self.s.options, {
+      authProviders: self.authProviders, reconnect:false, monitoring:false
+    }));
   });
 
   // Start all server connections

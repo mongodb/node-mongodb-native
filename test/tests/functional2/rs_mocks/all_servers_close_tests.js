@@ -144,7 +144,7 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
       // console.log("------------------------------- step 0 ")
       // console.dir(_server)
 
-      for(var i = 0; i < 100000; i++) {
+      for(var i = 0; i < 10000; i++) {
         // console.log("------------------------------- step 0 : 1 ")
         // console.log(server.insert)
         // Execute the write

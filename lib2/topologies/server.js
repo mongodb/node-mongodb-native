@@ -349,6 +349,9 @@ Server.prototype.command = function(ns, cmd, options, callback) {
     monitoring: typeof options.monitoring == 'boolean' ? options.monitoring : false,
   };
 
+  // console.log("!!!!!!!!!!!!!! WRITE command")
+  // console.dir(cmd)
+  // console.dir(writeOptions)
   // Write the operation to the pool
   self.s.pool.write(query.toBin(), writeOptions, callback);
 }
@@ -493,17 +496,6 @@ Server.prototype.getServer = function(options) {
 Server.prototype.getServerFrom = function(connection) {
   return this;
 }
-
-// Server.prototype.getCallbacks = function() {
-//   return this.s.callbacks;
-// }
-
-// Server.prototype.parserType = function() {
-//   var s = this.s;
-//   if(s.options.bson.serialize.toString().indexOf('[native code]') != -1)
-//     return 'c++';
-//   return 'js';
-// }
 
 Server.prototype.getConnection = function(options) {
   return this.s.pool.get();

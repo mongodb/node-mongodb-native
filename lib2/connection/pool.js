@@ -180,13 +180,15 @@ function reauthenticate(pool, connection, cb) {
 
 function connectionFailureHandler(self, event) {
   return function(err) {
-    // console.log("=== connectionFailureHandler :: " + event + " :: 0")
+    // console.log("=== connectionFailureHandler :: " + event + " :: 0 " + " ::" + this.id + " :: " + (this.workItem != null))
     // console.dir(err)
     removeConnection(self, this);
     // console.log("=== connectionFailureHandler :: " + event + " :: 1")
+    // console.dir(this.workItem)
 
     // Flush out the callback if there is one
     if(this.workItem && this.workItem.cb) {
+      // console.log("==== connectionFailureHandler :: " + this.id)
       // console.log("=== connectionFailureHandler :: " + event + " :: 2")
       // console.log(this.workItem.cb.toString())
       this.workItem.cb(err);
@@ -316,6 +318,7 @@ function moveConnectionBetween(connection, from, to) {
 
 function messageHandler(self) {
   return function(message, connection) {
+    // console.log("==== messageHandler :: " + connection.id)
     // Get the callback
     var workItem = connection.workItem;
 
@@ -400,7 +403,7 @@ function messageHandler(self) {
           return workItem.cb(MongoError.create(err));
         }
 
-        // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! messageHandler :: " + connection.id)
         // console.dir(workItem.command)
         // console.dir(err)
         // console.dir(message.documents)
@@ -408,9 +411,12 @@ function messageHandler(self) {
         // Establish if we have an error
         if(workItem.command && message.documents[0] && (message.documents[0].ok == 0 || message.documents[0]['$err']
         || message.documents[0]['errmsg'] || message.documents[0]['code'])) {
+          // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! messageHandler :: " + connection.id + " :: 0")
           return workItem.cb(MongoError.create(message.documents[0]));
         }
 
+        // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! messageHandler :: " + connection.id + " :: 1")
+        // console.log(workItem.cb.toString())
         // Return the documents
         workItem.cb(null, new CommandResult(message.documents[0], connection, message));
       }
@@ -746,6 +752,7 @@ Pool.prototype.write = function(buffer, options, cb) {
   operation.command = typeof options.command == 'boolean' ? options.command : false;
   // Optional per operation socketTimeout
   operation.socketTimeout = options.socketTimeout;
+  operation.monitoring = options.monitoring;
 
   // We need to have a callback function unless the message returns no response
   if(!(typeof cb == 'function') && !options.noResponse) {
@@ -871,8 +878,20 @@ function _createConnection(self) {
   connection.connect();
 }
 
+function flushMonitoringOperations(queue) {
+  // console.log("=== flushMonitoringOperations")
+  for(var i = 0; i < queue.length; i++) {
+    if(queue[i].monitoring) {
+      var workItem = queue[i];
+      queue.splice(i, 1);
+      workItem.cb(new MongoError('no connection available for monitoring'));
+    }
+  }
+}
+
 function _execute(self) {
   return function() {
+    // console.log("=== _execute 0")
     if(self.state == DESTROYED) return;
     // Already executing, skip
     if(self.executing) return;
@@ -892,6 +911,7 @@ function _execute(self) {
     waitForAuth(function() {
       // As long as we have available connections
       while(true) {
+        // console.log("=== _execute 1")
         // Total availble connections
         var totalConnections = self.availableConnections.length
           + self.connectingConnections.length
@@ -902,6 +922,8 @@ function _execute(self) {
           && self.connectingConnections.length == 0
           && totalConnections < self.options.size
           && self.queue.length > 0) {
+          // // Flush any monitoring operations
+          // flushMonitoringOperations(self.queue);
           // Create a new connection
           _createConnection(self);
           // Attempt to execute again
@@ -909,13 +931,21 @@ function _execute(self) {
           return;
         }
 
-        // No available connections available
-        if(self.availableConnections.length == 0) break;
+        // No available connections available, flush any monitoring ops
+        if(self.availableConnections.length == 0) {
+          // Flush any monitoring operations
+          flushMonitoringOperations(self.queue);
+          break;
+        }
+
+        // No queue break
         if(self.queue.length == 0) break;
 
+        // console.log("=== _execute 1")
         // Get a connection
         var connection = self.availableConnections.pop();
         if(connection.isConnected()) {
+          // console.log("--- available connection")
           // Get the next work item
           var workItem = self.queue.shift();
 
@@ -937,6 +967,8 @@ function _execute(self) {
             connection.setSocketTimeout(workItem.socketTimeout);
           }
 
+          // console.log("--- write connection :: " + connection.id + " :: " + (connection.workItem != null))
+
           // Put operation on the wire
           if(Array.isArray(buffer)) {
             for(var i = 0; i < buffer.length; i++) {
@@ -954,6 +986,8 @@ function _execute(self) {
             self.inUseConnections.pop();
             self.nonAuthenticatedConnections.push(connection);
           }
+        } else {
+          flushMonitoringOperations(self.queue);
         }
       }
     });
