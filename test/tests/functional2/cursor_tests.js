@@ -351,7 +351,7 @@ exports['Should force a getMore call to happen then call killCursor'] = {
 
 exports['Should fail cursor correctly after server restart'] = {
   metadata: {
-    requires: { topology: ["single", "replicaset", "mongos"] }
+    requires: { topology: ["single"] }
   },
 
   test: function(configuration, test) {
@@ -410,7 +410,7 @@ exports['Should fail cursor correctly after server restart'] = {
 
 exports['Should finish cursor correctly after all sockets to pool destroyed'] = {
   metadata: {
-    requires: { topology: ["single", "replicaset", "mongos"] }
+    requires: { topology: ["single"] }
   },
 
   test: function(configuration, test) {

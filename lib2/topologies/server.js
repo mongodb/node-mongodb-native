@@ -191,6 +191,11 @@ var eventHandler = function(self, event) {
         return self.emit('error', new MongoError(f('failed to connect to server [%s] on first connect', self.name)));
       }
 
+      // Reconnect event, emit the server
+      if(event == 'reconnect') {
+        return self.emit(event, self);
+      }
+
       // Emit the event
       self.emit(event, err);
     }

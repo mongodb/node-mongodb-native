@@ -226,6 +226,9 @@ var testFiles = [
 try {
   eval("(function *(){})");
 
+  // Single server Mock Tests
+  testFiles.push('/test/tests/functional2/single_mocks/timeout_tests.js');
+
   // Replicaset Mock Tests
   testFiles.push('/test/tests/functional2/rs_mocks/add_remove_tests.js');
   testFiles.push('/test/tests/functional2/rs_mocks/connection_tests.js');
@@ -234,15 +237,12 @@ try {
   testFiles.push('/test/tests/functional2/rs_mocks/all_servers_close_tests.js');
   testFiles.push('/test/tests/functional2/rs_mocks/read_preferences_tests.js');
   testFiles.push('/test/tests/functional2/rs_mocks/monitoring_tests.js');
-//
+
 //   // Mongos Mock Tests
 //   testFiles.push('/test/tests/functional/mongos_mocks/single_proxy_connection_tests.js');
 //   testFiles.push('/test/tests/functional/mongos_mocks/multiple_proxies_tests.js');
 //   testFiles.push('/test/tests/functional/mongos_mocks/proxy_failover_tests.js');
 //   testFiles.push('/test/tests/functional/mongos_mocks/proxy_read_preference_tests.js');
-//
-//   // Single server Mock Tests
-//   testFiles.push('/test/tests/functional/single_mocks/timeout_tests.js');
 } catch(err) {}
 
 // Add all the tests to run
