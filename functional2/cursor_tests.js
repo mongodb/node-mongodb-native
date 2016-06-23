@@ -5,7 +5,9 @@ var f = require('util').format,
   executeCommand = require('./shared').executeCommand;
 
 exports['Should iterate cursor'] = {
-  metadata: { requires: { topology: "single" } },
+  metadata: {
+    requires: { topology: ["single", "replicaset", "mongos"] }
+  },
 
   test: function(configuration, test) {
     var Server = require('../../../lib2/topologies/server')
@@ -59,7 +61,9 @@ exports['Should iterate cursor'] = {
 }
 
 exports['Should iterate cursor but readBuffered'] = {
-  metadata: { requires: { topology: "single" } },
+  metadata: {
+    requires: { topology: ["single", "replicaset", "mongos"] }
+  },
 
   test: function(configuration, test) {
     var Server = require('../../../lib2/topologies/server')
@@ -116,7 +120,9 @@ exports['Should iterate cursor but readBuffered'] = {
 }
 
 exports['Should callback exhausted cursor with error'] = {
-  metadata: { requires: { topology: "single" } },
+  metadata: {
+    requires: { topology: ["single", "replicaset", "mongos"] }
+  },
 
   test: function(configuration, test) {
     var Server = require('../../../lib2/topologies/server')
@@ -169,7 +175,9 @@ exports['Should callback exhausted cursor with error'] = {
 };
 
 exports['Should force a getMore call to happen'] = {
-  metadata: { requires: { topology: "single" } },
+  metadata: {
+    requires: { topology: ["single", "replicaset", "mongos"] }
+  },
 
   test: function(configuration, test) {
     var Server = require('../../../lib2/topologies/server')
@@ -222,7 +230,9 @@ exports['Should force a getMore call to happen'] = {
 };
 
 exports['Should force a getMore call to happen then call killCursor'] = {
-  metadata: { requires: { topology: "single" } },
+  metadata: {
+    requires: { topology: ["single", "replicaset", "mongos"] }
+  },
 
   test: function(configuration, test) {
     var Server = require('../../../lib2/topologies/server')
@@ -280,7 +290,9 @@ exports['Should force a getMore call to happen then call killCursor'] = {
 };
 
 exports['Should force a getMore call to happen then call killCursor'] = {
-  metadata: { requires: { topology: "single" } },
+  metadata: {
+    requires: { topology: ["single", "replicaset", "mongos"] }
+  },
 
   test: function(configuration, test) {
     var Server = require('../../../lib2/topologies/server')
@@ -338,7 +350,9 @@ exports['Should force a getMore call to happen then call killCursor'] = {
 };
 
 exports['Should fail cursor correctly after server restart'] = {
-  metadata: { requires: { topology: "single" } },
+  metadata: {
+    requires: { topology: ["single", "replicaset", "mongos"] }
+  },
 
   test: function(configuration, test) {
     var Server = require('../../../lib2/topologies/server')
@@ -395,7 +409,9 @@ exports['Should fail cursor correctly after server restart'] = {
 };
 
 exports['Should finish cursor correctly after all sockets to pool destroyed'] = {
-  metadata: { requires: { topology: "single" } },
+  metadata: {
+    requires: { topology: ["single", "replicaset", "mongos"] }
+  },
 
   test: function(configuration, test) {
     var Server = require('../../../lib2/topologies/server')

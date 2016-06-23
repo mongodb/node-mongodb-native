@@ -287,6 +287,7 @@ exports['Should correctly recover from a server outage'] = {
       index = index + 1;
 
       if(index == 500 && !executed) {
+        // console.log("!!!!!!!!!!!!!!!!!! DONE")
         executed = true;
         test.ok(errorCount >= 0);
         // console.log(Object.keys(Connection.connections()))
@@ -306,7 +307,9 @@ exports['Should correctly recover from a server outage'] = {
         var query = new Query(new bson(), 'system.$cmd', {ismaster:true}, {numberToSkip: 0, numberToReturn: 1});
         pool.write(query.toBin(), messageHandler);
         if(i == 250) {
+          // console.log("!!!!!!!!!!! execute")
           configuration.manager.restart(true).then(function() {
+            // console.log("!!!!!!!!!!! execute 1")
           });
         }
       }, 1);
@@ -564,34 +567,34 @@ exports['Should correctly authenticate using scram-sha-1 using connect auth and 
               for(var i = 0; i < 10; i++)
               process.nextTick(function() {
                 var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
-                _pool.write(query.toBin(), messageHandler)
+                _pool.write(query.toBin(), {command:true}, messageHandler)
 
                 var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
-                _pool.write(query.toBin(), messageHandler)
+                _pool.write(query.toBin(), {command:true}, messageHandler)
 
                 var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
-                _pool.write(query.toBin(), messageHandler)
+                _pool.write(query.toBin(), {command:true}, messageHandler)
 
                 var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
-                _pool.write(query.toBin(), messageHandler)
+                _pool.write(query.toBin(), {command:true}, messageHandler)
 
                 var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
-                _pool.write(query.toBin(), messageHandler)
+                _pool.write(query.toBin(), {command:true}, messageHandler)
 
                 var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
-                _pool.write(query.toBin(), messageHandler)
+                _pool.write(query.toBin(), {command:true}, messageHandler)
 
                 var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
-                _pool.write(query.toBin(), messageHandler)
+                _pool.write(query.toBin(), {command:true}, messageHandler)
 
                 var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
-                _pool.write(query.toBin(), messageHandler)
+                _pool.write(query.toBin(), {command:true}, messageHandler)
 
                 var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
-                _pool.write(query.toBin(), messageHandler)
+                _pool.write(query.toBin(), {command:true}, messageHandler)
 
                 var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
-                _pool.write(query.toBin(), messageHandler)
+                _pool.write(query.toBin(), {command:true}, messageHandler)
               });
             });
 
@@ -664,7 +667,7 @@ exports['Should correctly authenticate using scram-sha-1 using auth method'] = {
                 for(var i = 0; i < 100; i++) {
                   process.nextTick(function() {
                     var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
-                    _pool.write(query.toBin(), messageHandler)
+                    _pool.write(query.toBin(), {command:true}, messageHandler)
                   });
                 }
               });
@@ -672,7 +675,7 @@ exports['Should correctly authenticate using scram-sha-1 using auth method'] = {
               for(var i = 0; i < 100; i++) {
                 process.nextTick(function() {
                   var query = new Query(new bson(), 'system.$cmd', {ismaster:true}, {numberToSkip: 0, numberToReturn: 1});
-                  _pool.write(query.toBin(), function(e, r) {if(e) error = e;});
+                  _pool.write(query.toBin(), {command:true}, function(e, r) {if(e) error = e;});
                 });
               }
             });
@@ -720,14 +723,14 @@ exports['Should correctly authenticate using scram-sha-1 using connect auth then
             // Add event listeners
             pool.on('connect', function(_pool) {
               var query = new Query(new bson(), 'test.$cmd', {insert:'test', documents:[{a:1}]}, {numberToSkip: 0, numberToReturn: 1});
-              _pool.write(query.toBin(), function(err, r) {
+              _pool.write(query.toBin(), {command:true}, function(err, r) {
                 test.equal(null, err);
 
                 // Logout pool
                 _pool.logout('test', function(err) {
                   test.equal(null, err);
 
-                  _pool.write(query.toBin(), function(err, r) {
+                  _pool.write(query.toBin(), {command:true}, function(err, r) {
                     test.ok(err != null);
 
                     _pool.destroy();

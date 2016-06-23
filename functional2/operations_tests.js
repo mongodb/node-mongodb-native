@@ -24,7 +24,7 @@ exports['Should correctly connect using server object'] = {
 
 exports['Should correctly execute command'] = {
   metadata: {
-    requires: {}
+    requires: { topology: ["single", "replicaset", "mongos"] }
   },
 
   test: function(configuration, test) {
@@ -53,7 +53,7 @@ exports['Should correctly execute command'] = {
 
 exports['Should correctly execute write'] = {
   metadata: {
-    requires: {}
+    requires: { topology: ["single", "replicaset", "mongos"] }
   },
 
   test: function(configuration, test) {
@@ -81,7 +81,7 @@ exports['Should correctly execute write'] = {
 
 exports['Should correctly execute find'] = {
   metadata: {
-    requires: {}
+    requires: { topology: ["single", "replicaset", "mongos"] }
   },
 
   test: function(configuration, test) {
@@ -132,7 +132,7 @@ exports['Should correctly execute find'] = {
 
 exports['Should correctly execute find with limit and skip'] = {
   metadata: {
-    requires: {}
+    requires: { topology: ["single", "replicaset", "mongos"] }
   },
 
   test: function(configuration, test) {
@@ -185,7 +185,7 @@ exports['Should correctly execute find with limit and skip'] = {
 
 exports['Should correctly execute find against document with result array field'] = {
   metadata: {
-    requires: {}
+    requires: { topology: ["single", "replicaset", "mongos"] }
   },
 
   test: function(configuration, test) {
@@ -234,6 +234,7 @@ exports['Should correctly execute find against document with result array field'
 exports['Should correctly execute aggregation command'] = {
   metadata: {
     requires: {
+      topology: ["single", "replicaset", "mongos"],
       mongodb: ">=2.6.0"
     }
   },
@@ -291,8 +292,8 @@ exports['Should correctly execute aggregation command'] = {
 exports['Should correctly execute query against cursorId'] = {
   metadata: {
     requires: {
-        mongodb: ">=2.6.0"
-      , topology: "replicaset"
+      mongodb: ">=2.6.0",
+      topology: ["single", "replicaset", "mongos"]
     }
   },
 
@@ -353,7 +354,8 @@ exports['Should correctly execute query against cursorId'] = {
 exports['Should correctly kill command cursor'] = {
   metadata: {
     requires: {
-      mongodb: ">=2.6.0"
+      mongodb: ">=2.6.0",
+      topology: ["single", "replicaset", "mongos"]
     }
   },
 
@@ -404,7 +406,7 @@ exports['Should correctly kill command cursor'] = {
 exports['Should correctly kill find command cursor'] = {
   metadata: {
     requires: {
-      topology: "single"
+      topology: ["single", "replicaset", "mongos"]
     }
   },
 
