@@ -10,7 +10,6 @@ exports['Should correctly execute insert culling undefined'] = {
   },
 
   test: function(configuration, test) {
-    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!! 0")
     configuration.newTopology(function(err, server) {
       // Add event listeners
       server.on('connect', function(_server) {
