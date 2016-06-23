@@ -54,6 +54,7 @@ var Pool = function(options) {
 
   // Identification information
   this.id = _id++;
+  // console.log("=========== new Pool :: " + this.options.reconnect + " ::" + this.id)
   // Current reconnect retries
   this.retriesLeft = this.options.reconnectTries;
   this.reconnectId = null;
@@ -205,7 +206,7 @@ function connectionFailureHandler(self, event) {
     }
 
     // Start reconnection attempts
-    if(!self.reconnectId) {
+    if(!self.reconnectId && self.options.reconnect) {
       self.reconnectId = setTimeout(attemptReconnect(self), self.options.reconnectInterval);
     }
   };
@@ -805,7 +806,7 @@ function _createConnection(self) {
       // Remove the connection from the connectingConnections list
       removeConnection(self, _connection);
       // Start reconnection attempts
-      if(!self.reconnectId) {
+      if(!self.reconnectId && self.options.reconnect) {
         self.reconnectId = setTimeout(attemptReconnect(self), self.options.reconnectInterval);
       }
     }

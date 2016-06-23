@@ -180,7 +180,7 @@ function attemptReconnect(self) {
     var servers = keys.map(function(x) {
       return new Server(Object.assign({
         host: x.split(':')[0], port: parseInt(x.split(':')[1], 10)
-      }, self.s.options, { authProviders: self.authProviders}));
+      }, self.s.options, { authProviders: self.authProviders, reconnect:false}));
     });
     // console.log("---- attemptReconnect 2 :: " + servers.length)
 
@@ -304,7 +304,7 @@ function connectNewServers(self, servers, callback) {
     var server = new Server(Object.assign({
       host: servers[i].split(':')[0],
       port: parseInt(servers[i].split(':')[1], 10)
-    }, self.s.options, { authProviders: self.authProviders}));
+    }, self.s.options, { authProviders: self.authProviders, reconnect:false}));
     // console.log("=============== connectNewServers - 2")
     // Add temp handlers
     server.once('connect', _handleEvent(self, 'connect'));
@@ -396,6 +396,7 @@ function topologyMonitor(self, options) {
                   // console.log("===================== connect 0")
                   // Emit connected sign
                   self.emit('connect', self);
+                  self.emit('fullsetup', self);
               } else if(self.state == CONNECTING
                 && self.s.replicaSetState.hasSecondary()
                 && self.s.options.secondaryOnlyConnectionAllowed) {
@@ -530,9 +531,10 @@ ReplSet.prototype.connect = function() {
   var self = this;
   // Set connecting state
   stateTransition(this, CONNECTING);
+  // console.log("=== Replset.connect")
   // Create server instances
   var servers = this.s.seedlist.map(function(x) {
-    return new Server(Object.assign(x, self.s.options), { authProviders: self.authProviders});
+    return new Server(Object.assign(x, self.s.options, { authProviders: self.authProviders, reconnect:false}));
   });
 
   // Start all server connections

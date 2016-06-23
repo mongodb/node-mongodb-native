@@ -219,7 +219,8 @@ var testFiles = [
   '/test/tests/functional2/error_tests.js',
   '/test/tests/functional2/operations_tests.js',
   '/test/tests/functional2/operation_example_tests.js',
-  '/test/tests/functional2/basic_single_server_auth_tests.js'
+  '/test/tests/functional2/basic_single_server_auth_tests.js',
+  '/test/tests/functional2/replset_tests.js'
 ]
 
 // Check if we support es6 generators
