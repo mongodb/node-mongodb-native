@@ -138,16 +138,23 @@ function authenticate(pool, auth, connection, cb) {
   var provider = pool.authProviders[mechanism];
 
   // Authenticate using the provided mechanism
-  provider.auth.apply(provider, [write, [connection], db].concat(auth.slice(2)).concat([cb]));
+  provider.auth.apply(provider, [write(pool), [connection], db].concat(auth.slice(2)).concat([cb]));
 }
 
 // The write function used by the authentication mechanism (bypasses external)
-function write(connection, buffer, callback) {
-  // Set the connection workItem callback
-  connection.workItem = {cb: callback};
-  // Write the buffer out to the connection
-  connection.write(buffer);
-};
+function write(self) {
+  return function(connection, buffer, callback) {
+    // Ensure we stop auth if pool was destroyed
+    if(self.state == DESTROYED || self.state == DESTROYING) {
+      return callback(new MongoError('pool destroyed'));
+    }
+    // Set the connection workItem callback
+    connection.workItem = {cb: callback, command: true};
+    // Write the buffer out to the connection
+    connection.write(buffer);
+  };
+}
+
 
 function reauthenticate(pool, connection, cb) {
   // Authenticate
@@ -158,7 +165,7 @@ function reauthenticate(pool, connection, cb) {
     var provider = pool.authProviders[providers.pop()];
 
     // Auth provider
-    provider.reauthenticate(write, [connection], function(err, r) {
+    provider.reauthenticate(write(pool), [connection], function(err, r) {
       // We got an error return immediately
       if(err) return cb(err);
       // Continue authenticating the connection
@@ -392,6 +399,11 @@ function messageHandler(self) {
           return workItem.cb(MongoError.create(err));
         }
 
+        // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        // console.dir(workItem.command)
+        // console.dir(err)
+        // console.dir(message.documents)
+
         // Establish if we have an error
         if(workItem.command && message.documents[0] && (message.documents[0].ok == 0 || message.documents[0]['$err']
         || message.documents[0]['errmsg'] || message.documents[0]['code'])) {
@@ -422,7 +434,12 @@ Pool.prototype.get = function() {
 }
 
 Pool.prototype.isConnected = function() {
-  // console.log("Pool :: isConnected")
+  // We are in a destroyed state
+  if(this.state == DESTROYED || this.state == 'DESTROYING') {
+    return false;
+  }
+
+  // Get connections
   var connections = this.availableConnections
     .concat(this.inUseConnections)
     .concat(this.connectingConnections);
@@ -430,8 +447,12 @@ Pool.prototype.isConnected = function() {
     if(connections[i].isConnected()) return true;
   }
 
-  // console.log("Pool :: isConnected :: false")
+  // Might be authenticating, but we are still connected
+  if(connections.length == 0 && this.authenticating) {
+    return true
+  }
 
+  // Not connected
   return false;
 }
 
@@ -590,7 +611,9 @@ Pool.prototype.logout = function(dbName, callback) {
     var query = new Query(this.options.bson
       , f('%s.$cmd', dbName)
       , {logout:1}, {numberToSkip: 0, numberToReturn: 1});
-    write(connections[i], query.toBin(), function(err, r) {
+      // console.log("### 0")
+    write(self)(connections[i], query.toBin(), function(err, r) {
+      // console.log("### 1")
       count = count - 1;
       if(err) error = err;
 
@@ -623,17 +646,19 @@ Pool.prototype.unref = function() {
 var events = ['error', 'close', 'timeout', 'parseError', 'connect'];
 
 Pool.prototype.destroy = function() {
+  // console.log("destroy =========================== 0")
   var self = this;
   // Do not try again if the pool is already dead
   if(this.state == DESTROYED) return;
   // Set state to destroyed
   stateTransition(this, DESTROYING);
 
+  // console.log("destroy =========================== 1")
   // Wait for the operations to drain before we close the pool
   function checkStatus() {
     // console.log("========= destroy :: checkStatus 0")
     if(self.queue.length == 0) {
-      // console.log("========= destroy :: checkStatus 1")
+      // console.log("========= destroy :: checkStatus 1:0")
       // Get all the known connections
       var connections = self.availableConnections
         .concat(self.inUseConnections)
@@ -648,6 +673,8 @@ Pool.prototype.destroy = function() {
         }
       }
 
+      // console.log("========= destroy :: checkStatus 1:1")
+
       // Destroy all connections
       connections.forEach(function(c) {
         // Remove all listeners
@@ -658,15 +685,20 @@ Pool.prototype.destroy = function() {
         c.destroy();
       });
 
+      // console.log("========= destroy :: checkStatus 1:2")
+
       // Zero out all connections
       self.inUseConnections = [];
       self.availableConnections = [];
       self.nonAuthenticatedConnections = [];
       self.connectingConnections = [];
 
+      // console.log("========= destroy :: checkStatus 1:3")
+
       // Set state to destroyed
       stateTransition(self, DESTROYED);
     } else {
+      // console.log("========= destroy :: checkStatus 2")
       setTimeout(checkStatus, 1);
     }
   }

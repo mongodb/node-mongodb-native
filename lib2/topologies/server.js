@@ -227,7 +227,11 @@ Server.prototype.connect = function(options) {
   self.s.pool.on('reconnectFailed', eventHandler(self, 'reconnectFailed'));
 
   // Connect with optional auth settings
-  self.s.pool.connect(options.auth)
+  if(options.auth) {
+    self.s.pool.connect.apply(self.s.pool, options.auth);
+  } else {
+    self.s.pool.connect();
+  }
 }
 
 Server.prototype.getDescription = function() {
@@ -425,6 +429,16 @@ Server.prototype.cursor = function(ns, cmd, cursorOptions) {
   var FinalCursor = cursorOptions.cursorFactory || s.Cursor;
   // Return the cursor
   return new FinalCursor(s.bson, ns, cmd, cursorOptions, this, s.options);
+}
+
+/**
+ * Logout from a database
+ * @method
+ * @param {string} db The db we are logging out from
+ * @param {authResultCallback} callback A callback function
+ */
+Server.prototype.logout = function(dbName, callback) {
+  this.s.pool.logout(dbName, callback);
 }
 
 /**

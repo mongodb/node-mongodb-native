@@ -6,10 +6,11 @@ var f = require('util').format
 
 exports['Should correctly execute insert culling undefined'] = {
   metadata: {
-    requires: {}
+    requires: { topology: ["single", "replicaset", "mongos"] }
   },
 
   test: function(configuration, test) {
+    console.log("!!!!!!!!!!!!!!!!!!!!!!!!!! 0")
     configuration.newTopology(function(err, server) {
       // Add event listeners
       server.on('connect', function(_server) {
@@ -63,7 +64,7 @@ exports['Should correctly execute insert culling undefined'] = {
 
 exports['Should correctly execute update culling undefined'] = {
   metadata: {
-    requires: {}
+    requires: { topology: ["single", "replicaset", "mongos"] }
   },
 
   test: function(configuration, test) {
@@ -112,7 +113,7 @@ exports['Should correctly execute update culling undefined'] = {
 
 exports['Should correctly execute remove culling undefined'] = {
   metadata: {
-    requires: {}
+    requires: { topology: ["single", "replicaset", "mongos"] }
   },
 
   test: function(configuration, test) {
@@ -158,7 +159,7 @@ exports['Should correctly execute remove culling undefined'] = {
 
 exports['Should correctly execute remove not culling undefined'] = {
   metadata: {
-    requires: {}
+    requires: { topology: ["single", "replicaset", "mongos"] }
   },
 
   test: function(configuration, test) {

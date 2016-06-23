@@ -4,9 +4,7 @@ var f = require('util').format;
 
 exports['should return helpful error when geoHaystack fails'] = {
   metadata: {
-    requires: {
-      topology: 'single'
-    }
+    requires: { topology: ["single", "replicaset", "mongos"] }
   },
 
   test: function(configuration, test) {

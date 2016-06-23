@@ -318,8 +318,8 @@ exports['Example of simple insert into db using ReplSet'] = {
       , port: configuration.port
     }];
 
-    var options = { 
-      setName: configuration.setName 
+    var options = {
+      setName: configuration.setName
     };
 
     // Attempt to connect
@@ -373,8 +373,8 @@ exports['Example of update using ReplSet instance'] = {
       , port: configuration.port
     }];
 
-    var options = { 
-      setName: configuration.setName 
+    var options = {
+      setName: configuration.setName
     };
 
     // Attempt to connect
@@ -438,8 +438,8 @@ exports['Example of remove using ReplSet instance'] = {
       , port: configuration.port
     }];
 
-    var options = { 
-      setName: configuration.setName 
+    var options = {
+      setName: configuration.setName
     };
 
     // Attempt to connect
@@ -503,8 +503,8 @@ exports['Example of cursor using ReplSet instance'] = {
       , port: configuration.port
     }];
 
-    var options = { 
-      setName: configuration.setName 
+    var options = {
+      setName: configuration.setName
     };
 
     // Attempt to connect
@@ -570,8 +570,8 @@ exports['Example of command using ReplSet instance'] = {
       , port: configuration.port
     }];
 
-    var options = { 
-      setName: configuration.setName 
+    var options = {
+      setName: configuration.setName
     };
 
     // Attempt to connect
