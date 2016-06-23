@@ -243,7 +243,7 @@ The insert command will return a results object that contains several fields tha
 
 * **result** Contains the result document from MongoDB
 * **ops** Contains the documents inserted with added **_id** fields
-* **connection** Contains the connection used to perform the insert
+* **collection** Contains the collection used to perform the insert
 
 Let's add call the **insertDocuments** command to the **MongoClient.connect** method callback.
 
