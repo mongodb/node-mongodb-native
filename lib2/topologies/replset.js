@@ -382,37 +382,38 @@ function connectNewServers(self, servers, callback) {
 
   // No new servers
   if(count == 0) return callback();
+
+  // Execute method
+  function execute(_server, i) {
+    setTimeout(function() {
+      // console.log("===== REPLSET CREATE SERVER 1 :: " + self.s.id)
+      // Destroyed
+      if(self.state == DESTROYED) {
+        return;
+      }
+
+      // Create a new server instance
+      var server = new Server(Object.assign({
+        host: _server.split(':')[0],
+        port: parseInt(_server.split(':')[1], 10)
+      }, self.s.options, {
+        // reconnect:false, monitoring: false
+        authProviders: self.authProviders, reconnect:false, monitoring: false
+      }));
+      // console.log("=============== connectNewServers - 2")
+      // Add temp handlers
+      server.once('connect', _handleEvent(self, 'connect'));
+      server.once('close', _handleEvent(self, 'close'));
+      server.once('timeout', _handleEvent(self, 'timeout'));
+      server.once('error', _handleEvent(self, 'error'));
+      server.once('parseError', _handleEvent(self, 'parseError'));
+      // console.log("-------- connect 1 :: 0")
+      server.connect(self.s.connectOptions);
+    }, i);
+  }
+
   // Create new instances
   for(var i = 0; i < servers.length; i++) {
-    function execute(_server, i) {
-      setTimeout(function() {
-        // console.log("===== REPLSET CREATE SERVER 1 :: " + self.s.id)
-        // Destroyed
-        if(self.state == DESTROYED) {
-          return;
-        }
-
-        // Create a new server instance
-        var server = new Server(Object.assign({
-          host: _server.split(':')[0],
-          port: parseInt(_server.split(':')[1], 10)
-        }, self.s.options, {
-          // reconnect:false, monitoring: false
-          authProviders: self.authProviders, reconnect:false, monitoring: false
-        }));
-        // console.log("=============== connectNewServers - 2")
-        // Add temp handlers
-        server.once('connect', _handleEvent(self, 'connect'));
-        server.once('close', _handleEvent(self, 'close'));
-        server.once('timeout', _handleEvent(self, 'timeout'));
-        server.once('error', _handleEvent(self, 'error'));
-        server.once('parseError', _handleEvent(self, 'parseError'));
-        // console.log("-------- connect 1 :: 0")
-        server.connect(self.s.connectOptions);
-      }, i);
-    }
-
-
     // console.log("=============== connectNewServers - 0")
     // console.log("===== CREATE CREARE SERVER 1")
     execute(servers[i], i);
@@ -1224,34 +1225,16 @@ ReplSet.prototype.auth = function(mechanism, db) {
   }
 }
 
-// // Apply credentials to any nonAuthenticatedServers
-// function applyCredentialsToNonAuthenticatedServers(self, cb) {
-//   console.log("======== applyCredentialsToNonAuthenticatedServers")
-//   if(self.nonAuthenticatedServers.length == 0) return cb();
-//   console.log("======== applyCredentialsToNonAuthenticatedServers 1")
-//   var count = self.nonAuthenticatedServers.length;
-//   var errors = [];
-//
-//   for(var i = 0; i < self.nonAuthenticatedServers.length; i++) {
-//     function execute(_server) {
-//       applyCredentials(_server, 0, self.credentials, function(err, r) {
-//         count = count - 1;
-//         // Save error
-//         if(err) errors.push({name: _server.name, err: err});
-//         // All done
-//         if(count == 0) {
-//           self.
-//           // Return error if we have more than one error message
-//           cb(errors.length > 0 ? MongoError.create({
-//             message: 'failed authentication', errors: errors
-//           }) : null);
-//         }
-//       });
-//     }
-//
-//     execute(self.nonAuthenticatedServers[i]);
-//   }
+// /**
+//  * Logout from a database
+//  * @method
+//  * @param {string} db The db we are logging out from
+//  * @param {authResultCallback} callback A callback function
+//  */
+// Server.prototype.logout = function(dbName, callback) {
+//   this.s.pool.logout(dbName, callback);
 // }
+// ReplSet.prototype.logout = function(mechanism, db) {
 
 /**
  * Perform one or more remove operations
