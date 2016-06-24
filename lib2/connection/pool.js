@@ -493,6 +493,9 @@ Pool.prototype.connect = function(auth) {
 
       // We have an error emit it
       if(err) {
+        // Destroy the pool
+        self.destroy();
+        // Emit the error
         return self.emit('error', err);
       }
       // Set connected mode
@@ -529,9 +532,11 @@ Pool.prototype.auth = function(mechanism, db) {
   var callback = args.pop();
   // If we are not connected don't allow additonal authentications to happen
   if(this.state != CONNECTED) throw new MongoError('connection in unlawful state ' + this.state);
+
   // If we don't have the mechanism fail
-  if(self.authProviders[mechanism] == null && mechanism != 'default')
+  if(self.authProviders[mechanism] == null && mechanism != 'default') {
     throw new MongoError(f("auth provider %s does not exist", mechanism));
+  }
 
   // Signal that we are authenticating a new set of credentials
   this.authenticating = true;
@@ -582,10 +587,14 @@ Pool.prototype.auth = function(mechanism, db) {
     }, 1)
   }
 
+  // console.log("$$$$$$$$$$$ Pool auth 0")
   // Wait for loggout to finish
   waitForLogout(self, function() {
+    // console.log("$$$$$$$$$$$ Pool auth 1")
     // Authenticate all live connections
     authenticateLiveConnections(self, args, function(err) {
+      // console.log("$$$$$$$$$$$ Pool auth 2")
+      // console.dir(err)
       // Credentials correctly stored in auth provider if successful
       // Any new connections will now reauthenticate correctly
       self.authenticating = false;

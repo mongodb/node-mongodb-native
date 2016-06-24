@@ -223,6 +223,7 @@ var dataHandler = function(self) {
               sizeOfMessage:self.sizeOfMessage,
               bytesRead:self.bytesRead,
               stubBuffer:self.stubBuffer}};
+              // console.log("=== connection parseError 0")
             // We got a parse Error fire it off then keep going
             self.emit("parseError", errorObject, self);
           }
@@ -269,6 +270,7 @@ var dataHandler = function(self) {
                 bytesRead: self.bytesRead,
                 stubBuffer: self.stubBuffer}};
               // We got a parse Error fire it off then keep going
+              // console.log("=== connection parseError 1")
               self.emit("parseError", errorObject, self);
               return;
             }
@@ -300,12 +302,9 @@ var dataHandler = function(self) {
                 // Emit the message
                 self.messageHandler(new Response(self.bson, emitBuffer, self.responseOptions), self);
               } catch (err) {
-                var errorObject = {err:"socketHandler", trace:err, bin:self.buffer, parseState:{
-                  sizeOfMessage:self.sizeOfMessage,
-                  bytesRead:self.bytesRead,
-                  stubBuffer:self.stubBuffer}};
-                // We got a parse Error fire it off then keep going
-                self.emit("parseError", errorObject, self);
+                console.log("=== connection parseError 2")
+                console.log(err.stack)
+                self.emit("parseError", err, self);
               }
             } else if(sizeOfMessage <= 4 || sizeOfMessage > self.maxBsonMessageSize) {
               var errorObject = {err:"socketHandler", trace:null, bin:data, parseState:{
@@ -314,6 +313,7 @@ var dataHandler = function(self) {
                 buffer:null,
                 stubBuffer:null}};
               // We got a parse Error fire it off then keep going
+              // console.log("=== connection parseError 3")
               self.emit("parseError", errorObject, self);
 
               // Clear out the state of the parser

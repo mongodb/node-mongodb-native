@@ -71,6 +71,8 @@ var Server = function(options) {
   this.monitoringProcessId = null;
   // Initial connection
   this.initalConnect = true;
+  // Wire protocol handler
+  this.wireProtocolHandler = null;
 }
 
 inherits(Server, EventEmitter);
@@ -142,7 +144,9 @@ function monitoringProcess(self) {
 var eventHandler = function(self, event) {
   return function(err) {
     // console.log("========== server :: eventHandler :: " + event)
+    // console.log(err.stack)
     if(event == 'connect') {
+      // console.log("========= server connect")
       // Issue an ismaster command at connect
       // Query options
       var queryOptions = { numberToSkip: 0, numberToReturn: -1, checkKeys: false, slaveOk: true };
@@ -150,6 +154,8 @@ var eventHandler = function(self, event) {
       var query = new Query(self.s.bson, 'admin.$cmd', {ismaster:true}, queryOptions);
       // Execute the ismaster query
       self.s.pool.write(query.toBin(), {}, function(err, result) {
+        // console.log("========= server connect 1")
+        // console.dir(err)
         if(err) {
           self.destroy();
           if(self.listeners('error').length > 0) self.emit('error', err);
@@ -476,8 +482,6 @@ Server.prototype.auth = function(mechanism, db) {
   // Apply the arguments to the pool
   self.s.pool.auth.apply(self.s.pool, args);
 }
-// Server.prototype.addReadPreferenceStrategy = function(name, strategy) {
-// Server.prototype.addAuthProvider = function(name, provider) {
 
 Server.prototype.equals = function(server) {
   if(typeof server == 'string') return this.name == server;
@@ -503,7 +507,8 @@ Server.prototype.getConnection = function(options) {
 
 var listeners = ['close', 'error', 'timeout', 'parseError', 'connect'];
 
-Server.prototype.destroy = function() {
+Server.prototype.destroy = function(options) {
+  options = options || {};
   var self = this;
 
   // Set the connections
@@ -513,6 +518,9 @@ Server.prototype.destroy = function() {
   if(this.monitoringProcessId) {
     clearTimeout(this.monitoringProcessId);
   }
+
+  // Emit close event
+  if(options.emitClose) self.emit('close', self);
 
   // Remove all listeners
   listeners.forEach(function(event) {

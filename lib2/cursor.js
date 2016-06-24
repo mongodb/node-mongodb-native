@@ -173,6 +173,9 @@ Cursor.prototype._find = function(callback) {
 
   var queryCallback = function(err, r) {
     // console.log("!!!!!!!!!!!!!!!!!!!!! _find 1")
+    // if(r) {
+    //   console.dir(r.connection.options.port)
+    // }
     // console.log(callback.toString())
     // console.dir(err)
     // if(r) console.dir(r.message.documents)

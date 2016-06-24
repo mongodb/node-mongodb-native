@@ -177,6 +177,7 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
 
             // console.log("------------------------------- step 3 ")
             _server.command('admin.$cmd', {ismaster:true}, function(err, r) {
+              // console.dir(err)
               // console.log("------------------------------- step 4 : 1")
               // console.dir(err)
               // console.log("------------------------------- step 5 : 1")

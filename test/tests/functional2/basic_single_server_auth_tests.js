@@ -4,6 +4,49 @@ var f = require('util').format,
   locateAuthMethod = require('./shared').locateAuthMethod,
   executeCommand = require('./shared').executeCommand;
 
+exports['Should fail to authenticate server using scram-sha-1 using connect auth'] = {
+  metadata: { requires: { topology: "auth" } },
+
+  test: function(configuration, test) {
+    var Server = require('../../../lib2/topologies/server')
+      , Connection = require('../../../lib2/connection/connection')
+      , bson = require('bson').BSONPure.BSON
+      , Query = require('../../../lib2/connection/commands').Query;
+
+    // Enable connections accounting
+    Connection.enableConnectionAccounting();
+
+    // Restart instance
+    configuration.manager.restart(true).then(function() {
+      locateAuthMethod(configuration, function(err, method) {
+        test.equal(null, err);
+
+        executeCommand(configuration, 'admin', {
+          createUser: 'root',
+          pwd: "root",
+          roles: [ { role: "root", db: "admin" } ],
+          digestPassword: true
+        }, function(err, r) {
+          test.equal(null, err);
+
+          var server = new Server({
+            host: configuration.host, port: configuration.port, bson: new bson()
+          });
+
+          server.on('error', function() {
+            // console.log("=================== " + Object.keys(Connection.connections()).length)
+            test.equal(0, Object.keys(Connection.connections()).length);
+            Connection.disableConnectionAccounting();
+            test.done();
+          });
+
+          server.connect({auth: [method, 'admin', 'root2', 'root']});
+        });
+      });
+    });
+  }
+}
+
 exports['Should correctly authenticate server using scram-sha-1 using connect auth'] = {
   metadata: { requires: { topology: "auth" } },
 

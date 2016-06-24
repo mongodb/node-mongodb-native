@@ -213,12 +213,13 @@ exports['Should correctly recover from an immediate shutdown mid insert'] = {
       host: 'localhost',
       port: '37017',
       connectionTimeout: 3000,
-      socketTimeout: 1000,
+      socketTimeout: 2000,
       size: 1
     });
 
     // Add event listeners
     server.once('connect', function(_server) {
+      // console.log("!!!! server connect")
       var docs = [];
       // Create big insert message
       for(var i = 0; i < 1000; i++) {
@@ -263,15 +264,18 @@ exports['Should correctly recover from an immediate shutdown mid insert'] = {
     });
 
     server.once('reconnect', function(_server) {
+      // console.log("!!!! server reconnect")
+      // console.dir(_server)
       _server.insert('test.test', [{created:new Date()}], function(err, r) {
         test.ok(brokenPipe);
-        server.destroy();
+        _server.destroy();
         running = false;
         test.done();
       });
     });
 
     server.on('error', function(){});
+    // console.log("!!! connect")
     server.connect();
   }
 }

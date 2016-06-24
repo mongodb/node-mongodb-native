@@ -350,15 +350,21 @@ exports['Successfully remove a secondary server from the set'] = {
 
       // primary, secondary and arbiter have joined
       if(joined == 4) {
+        // console.log("TEST 0")
         test.equal(2, server.s.replicaSetState.secondaries.length);
+        // console.log("TEST 1")
         test.equal('localhost:32001', server.s.replicaSetState.secondaries[0].name);
         test.equal('localhost:32003', server.s.replicaSetState.secondaries[1].name);
+        // console.log("TEST 2")
 
         test.equal(1, server.s.replicaSetState.arbiters.length);
         test.equal('localhost:32002', server.s.replicaSetState.arbiters[0].name);
+        // console.log("TEST 3")
 
         test.ok(server.s.replicaSetState.primary != null);
+        // console.log("TEST 4")
         test.equal('localhost:32000', server.s.replicaSetState.primary.name);
+        // console.log("TEST 5")
         // console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
         // global.debug=true
         // Flip the ismaster message

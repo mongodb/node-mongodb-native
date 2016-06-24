@@ -495,7 +495,12 @@ exports['Fail to connect due to missing primary'] = {
         size: 1
     });
 
+    server.on('connect', function(error) {
+      // console.log("--------------- connect")
+    });
+
     server.on('error', function(error) {
+      // console.log("--------------- error")
       server.destroy();
       firstSecondaryServer.destroy();
       running = false;
@@ -504,6 +509,7 @@ exports['Fail to connect due to missing primary'] = {
 
     // Gives proxies a chance to boot up
     setTimeout(function() {
+      // console.log("--------------- connect 1")
       server.connect();
     }, 100)
   }

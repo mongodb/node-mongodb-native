@@ -139,6 +139,7 @@ ReplSetState.prototype.remove = function(server, options) {
 
 ReplSetState.prototype.update = function(server) {
   var self = this;
+  if(!server)console.log("!!!!!!!!!!!! UPDATE WITH NO SERVER")
   // Get the current ismaster
   var ismaster = server.lastIsMaster();
 //   if(global.debug) {
