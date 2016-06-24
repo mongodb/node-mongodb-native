@@ -116,6 +116,7 @@ var removeConnection = function(self, connection) {
 
 var errorHandler = function(self) {
   return function(err, connection) {
+    // console.log("!!!!!!!!!!!! errorHandler pool")
     if(self.logger.isDebug()) self.logger.debug(f('pool [%s] errored out [%s] with connection [%s]', this.dead, JSON.stringify(err), JSON.stringify(connection)));
     // Destroy the connection
     connection.destroy();
@@ -130,6 +131,7 @@ var errorHandler = function(self) {
 
 var timeoutHandler = function(self) {
   return function(err, connection) {
+    // console.log("!!!!!!!!!!!! timeoutHandler pool")
     if(self.logger.isDebug()) self.logger.debug(f('pool [%s] timed out [%s] with connection [%s]', this.dead, JSON.stringify(err), JSON.stringify(connection)));
     // Destroy the connection
     connection.destroy();
@@ -144,6 +146,7 @@ var timeoutHandler = function(self) {
 
 var closeHandler = function(self) {
   return function(err, connection) {
+    // console.log("!!!!!!!!!!!! closeHandler pool")
     if(self.logger.isDebug()) self.logger.debug(f('pool [%s] closed [%s] with connection [%s]', this.dead, JSON.stringify(err), JSON.stringify(connection)));
     // Destroy the connection
     connection.destroy();
@@ -158,6 +161,7 @@ var closeHandler = function(self) {
 
 var parseErrorHandler = function(self) {
   return function(err, connection) {
+    // console.log("!!!!!!!!!!!! parseErrorHandler pool")
     if(self.logger.isDebug()) self.logger.debug(f('pool [%s] errored out [%s] with connection [%s]', this.dead, JSON.stringify(err), JSON.stringify(connection)));
     // Destroy the connection
     connection.destroy();
