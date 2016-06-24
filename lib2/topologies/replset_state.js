@@ -139,7 +139,6 @@ ReplSetState.prototype.remove = function(server, options) {
 
 ReplSetState.prototype.update = function(server) {
   var self = this;
-  if(!server)console.log("!!!!!!!!!!!! UPDATE WITH NO SERVER")
   // Get the current ismaster
   var ismaster = server.lastIsMaster();
 //   if(global.debug) {
@@ -454,6 +453,7 @@ ReplSetState.prototype.update = function(server) {
   if(ismaster.secondary && ismaster.setName
     && !inList(ismaster, server, this.secondaries)
     && this.setName && this.setName == ismaster.setName) {
+      // console.log("---- secondary :: " + )
       // console.log("========================== update 1 :: " + server.name)
       // console.log("ismaster.secondary = " + ismaster.secondary)
       // console.log("ismaster.setName = " + ismaster.setName)

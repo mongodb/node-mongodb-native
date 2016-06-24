@@ -12,6 +12,7 @@ exports['Should correctly connect to a replicaset and select the correct tagged 
     var ReplSet = configuration.require.ReplSet,
       ObjectId = configuration.require.BSON.ObjectId,
       ReadPreference = configuration.require.ReadPreference,
+      Connection = require('../../../../lib2/connection/connection'),
       Long = configuration.require.BSON.Long,
       co = require('co'),
       mockupdb = require('../../../mock');
@@ -106,6 +107,7 @@ exports['Should correctly connect to a replicaset and select the correct tagged 
     });
 
     // console.log("--------------------------------------------- -2")
+    Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000 },
@@ -154,7 +156,11 @@ exports['Should correctly connect to a replicaset and select the correct tagged 
           server.destroy();
           running = false;
 
-          test.done();
+          setTimeout(function() {
+            test.equal(0, Object.keys(Connection.connections()).length);
+            Connection.disableConnectionAccounting();
+            test.done();
+          }, 1000);
           return;
         });
       }
@@ -183,6 +189,7 @@ exports['Should correctly connect to a replicaset and select the primary server'
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet,
       ObjectId = configuration.require.BSON.ObjectId,
+      Connection = require('../../../../lib2/connection/connection'),
       ReadPreference = configuration.require.ReadPreference,
       Long = configuration.require.BSON.Long,
       co = require('co'),
@@ -277,6 +284,7 @@ exports['Should correctly connect to a replicaset and select the primary server'
       });
     });
 
+    Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000 },
@@ -310,7 +318,11 @@ exports['Should correctly connect to a replicaset and select the primary server'
             server.destroy();
             running = false;
 
-            test.done();
+            setTimeout(function() {
+              test.equal(0, Object.keys(Connection.connections()).length);
+              Connection.disableConnectionAccounting();
+              test.done();
+            }, 1000);
             return;
           });
         }, 500);
@@ -338,6 +350,7 @@ exports['Should correctly round robin secondary reads'] = {
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet,
       ObjectId = configuration.require.BSON.ObjectId,
+      Connection = require('../../../../lib2/connection/connection'),
       ReadPreference = configuration.require.ReadPreference,
       Long = configuration.require.BSON.Long,
       co = require('co'),
@@ -432,6 +445,7 @@ exports['Should correctly round robin secondary reads'] = {
       });
     });
 
+    Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000 },
@@ -486,7 +500,11 @@ exports['Should correctly round robin secondary reads'] = {
                 server.destroy();
                 running = false;
 
-                test.done();
+                setTimeout(function() {
+                  test.equal(0, Object.keys(Connection.connections()).length);
+                  Connection.disableConnectionAccounting();
+                  test.done();
+                }, 1000);
                 return;
               });
             });
@@ -517,6 +535,7 @@ exports['Should correctly fall back to a secondary server if the readPreference 
     var ReplSet = configuration.require.ReplSet,
       ObjectId = configuration.require.BSON.ObjectId,
       ReadPreference = configuration.require.ReadPreference,
+      Connection = require('../../../../lib2/connection/connection'),
       Long = configuration.require.BSON.Long,
       MongoError = configuration.require.MongoError,
       co = require('co'),
@@ -600,6 +619,7 @@ exports['Should correctly fall back to a secondary server if the readPreference 
       }
     };
 
+    Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000,
@@ -645,7 +665,11 @@ exports['Should correctly fall back to a secondary server if the readPreference 
                 _server.destroy();
                 running = false;
 
-                test.done();
+                setTimeout(function() {
+                  test.equal(0, Object.keys(Connection.connections()).length);
+                  Connection.disableConnectionAccounting();
+                  test.done();
+                }, 1000);
                 return;
               });
             }, 2500);
@@ -675,6 +699,7 @@ exports['Should correctly fallback to secondaries when primary not available'] =
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet,
       ObjectId = configuration.require.BSON.ObjectId,
+      Connection = require('../../../../lib2/connection/connection'),
       ReadPreference = configuration.require.ReadPreference,
       Long = configuration.require.BSON.Long,
       co = require('co'),
@@ -770,6 +795,7 @@ exports['Should correctly fallback to secondaries when primary not available'] =
       });
     });
 
+    Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000 },
@@ -820,7 +846,11 @@ exports['Should correctly fallback to secondaries when primary not available'] =
                 server.destroy();
                 running = false;
 
-                test.done();
+                setTimeout(function() {
+                  test.equal(0, Object.keys(Connection.connections()).length);
+                  Connection.disableConnectionAccounting();
+                  test.done();
+                }, 1000);
               });
             });
           });
@@ -852,6 +882,7 @@ exports['Should correctly connect to a replicaset and perform correct nearness r
     var ReplSet = configuration.require.ReplSet,
       ObjectId = configuration.require.BSON.ObjectId,
       ReadPreference = configuration.require.ReadPreference,
+      Connection = require('../../../../lib2/connection/connection'),
       Long = configuration.require.BSON.Long,
       co = require('co'),
       mockupdb = require('../../../mock');
@@ -946,6 +977,7 @@ exports['Should correctly connect to a replicaset and perform correct nearness r
     });
 
     // console.log("--------------------------------------------- -2")
+    Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000 },
@@ -999,7 +1031,11 @@ exports['Should correctly connect to a replicaset and perform correct nearness r
           server.destroy();
           running = false;
 
-          test.done();
+          setTimeout(function() {
+            test.equal(0, Object.keys(Connection.connections()).length);
+            Connection.disableConnectionAccounting();
+            test.done();
+          }, 1000);
           return;
         });
       }
@@ -1030,6 +1066,7 @@ exports['Should correctly connect to a replicaset and perform correct nearness r
     // console.log("--------------------------------------------- -3")
     var ReplSet = configuration.require.ReplSet,
       ObjectId = configuration.require.BSON.ObjectId,
+      Connection = require('../../../../lib2/connection/connection'),
       ReadPreference = configuration.require.ReadPreference,
       Long = configuration.require.BSON.Long,
       co = require('co'),
@@ -1125,6 +1162,7 @@ exports['Should correctly connect to a replicaset and perform correct nearness r
     });
 
     // console.log("--------------------------------------------- -2")
+    Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000 },
@@ -1177,7 +1215,11 @@ exports['Should correctly connect to a replicaset and perform correct nearness r
           server.destroy();
           running = false;
 
-          test.done();
+          setTimeout(function() {
+            test.equal(0, Object.keys(Connection.connections()).length);
+            Connection.disableConnectionAccounting();
+            test.done();
+          }, 1000);
           return;
         });
       }

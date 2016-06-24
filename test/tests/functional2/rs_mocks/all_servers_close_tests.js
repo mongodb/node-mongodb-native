@@ -27,6 +27,7 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
 
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet,
+      Connection = require('../../../../lib2/connection/connection'),
       ObjectId = configuration.require.BSON.ObjectId,
       ReadPreference = configuration.require.ReadPreference,
       Long = configuration.require.BSON.Long,
@@ -127,6 +128,7 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
       });
     });
 
+    Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000 },
@@ -210,7 +212,11 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
                 server.destroy();
                 running = false;
 
-                test.done();
+                setTimeout(function() {
+                  test.equal(0, Object.keys(Connection.connections()).length);
+                  Connection.disableConnectionAccounting();
+                  test.done();
+                }, 1000);
               // }, 10000)
             });
           }, 10000);
@@ -239,6 +245,7 @@ exports['Successfully come back from a dead replicaset that has been unavailable
     var ReplSet = configuration.require.ReplSet,
       ObjectId = configuration.require.BSON.ObjectId,
       ReadPreference = configuration.require.ReadPreference,
+      Connection = require('../../../../lib2/connection/connection'),
       Long = configuration.require.BSON.Long,
       co = require('co'),
       mockupdb = require('../../../mock');
@@ -338,6 +345,7 @@ exports['Successfully come back from a dead replicaset that has been unavailable
       });
     });
 
+    Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000 },
@@ -394,7 +402,11 @@ exports['Successfully come back from a dead replicaset that has been unavailable
               server.destroy();
               running = false;
 
-              test.done();
+              setTimeout(function() {
+                test.equal(0, Object.keys(Connection.connections()).length);
+                Connection.disableConnectionAccounting();
+                test.done();
+              }, 1000);
             });
           }, 5000);
         }, 25000);

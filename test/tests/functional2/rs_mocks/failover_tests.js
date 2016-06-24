@@ -26,6 +26,7 @@ exports['Successfully failover to new primary'] = {
     var ReplSet = configuration.require.ReplSet,
       Server = configuration.require.Server,
       ObjectId = configuration.require.BSON.ObjectId,
+      Connection = require('../../../../lib2/connection/connection'),
       ReadPreference = configuration.require.ReadPreference,
       Long = configuration.require.BSON.Long,
       co = require('co'),
@@ -143,6 +144,7 @@ exports['Successfully failover to new primary'] = {
       });
     });
 
+    Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000 },
@@ -213,7 +215,11 @@ exports['Successfully failover to new primary'] = {
             // console.log("======================================")
             // console.log(Object.keys(Server.servers()))
 
-            test.done();
+            setTimeout(function() {
+              test.equal(0, Object.keys(Connection.connections()).length);
+              Connection.disableConnectionAccounting();
+              test.done();
+            }, 1000);
           }
         });
 

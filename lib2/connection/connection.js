@@ -50,6 +50,7 @@ var Connection = function(messageHandler, options) {
   this.options = options || {};
   // Identification information
   this.id = _id++;
+  // console.log("============= CREATE connection :: " + this.id)
   // Logger instance
   this.logger = Logger('Connection', options);
   // No bson parser passed in
@@ -145,6 +146,7 @@ var errorHandler = function(self) {
   return function(err) {
     // console.log("== Connection :: error :: " + self.id)
     if(connectionAccounting) delete connections[self.id];
+    // console.log("============= DESTROY connection :: " + self.id)
     // console.log("connection::error " + self.id)
     // Debug information
     if(self.logger.isDebug()) self.logger.debug(f('connection %s for [%s:%s] errored out with [%s]', self.id, self.host, self.port, JSON.stringify(err)));
@@ -155,6 +157,7 @@ var errorHandler = function(self) {
 
 var timeoutHandler = function(self) {
   return function(err) {
+    // console.log("============= DESTROY connection :: " + self.id)
     // console.log("== Connection :: timeout :: " + self.id)
     if(connectionAccounting) delete connections[self.id];
     // console.log("connection::timeout " + self.id)
@@ -169,6 +172,7 @@ var timeoutHandler = function(self) {
 
 var closeHandler = function(self) {
   return function(hadError) {
+    // console.log("============= DESTROY connection :: " + self.id)
     // console.log("== Connection :: closeHandler :: " + self.id)
     if(connectionAccounting) delete connections[self.id];
     // console.log("connection::close " + self.id)
@@ -302,8 +306,8 @@ var dataHandler = function(self) {
                 // Emit the message
                 self.messageHandler(new Response(self.bson, emitBuffer, self.responseOptions), self);
               } catch (err) {
-                console.log("=== connection parseError 2")
-                console.log(err.stack)
+                // console.log("=== connection parseError 2")
+                // console.log(err.stack)
                 self.emit("parseError", err, self);
               }
             } else if(sizeOfMessage <= 4 || sizeOfMessage > self.maxBsonMessageSize) {
@@ -448,6 +452,7 @@ Connection.prototype.unref = function() {
 Connection.prototype.destroy = function() {
   // Set the connections
   if(connectionAccounting) delete connections[this.id];
+  // console.log("============= DESTROY connection :: " + this.id)
   // console.log("connection::destroy " + this.id)
   // console.log("=== connection destroy")
   if(this.connection) {

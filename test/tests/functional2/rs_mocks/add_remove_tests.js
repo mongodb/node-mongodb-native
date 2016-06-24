@@ -26,6 +26,7 @@ exports['Successfully add a new secondary server to the set'] = {
     var ReplSet = configuration.require.ReplSet,
       ObjectId = configuration.require.BSON.ObjectId,
       ReadPreference = configuration.require.ReadPreference,
+      Connection = require('../../../../lib2/connection/connection'),
       Long = configuration.require.BSON.Long,
       co = require('co'),
       mockupdb = require('../../../mock');
@@ -140,6 +141,7 @@ exports['Successfully add a new secondary server to the set'] = {
       });
     });
 
+    Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000 },
@@ -178,7 +180,12 @@ exports['Successfully add a new secondary server to the set'] = {
           secondSecondaryServer.destroy();
           arbiterServer.destroy();
           server.destroy();
-          test.done();
+
+          setTimeout(function() {
+            test.equal(0, Object.keys(Connection.connections()).length);
+            Connection.disableConnectionAccounting();
+            test.done();
+          }, 3000);
         }
       }
     });
@@ -211,6 +218,7 @@ exports['Successfully remove a secondary server from the set'] = {
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet,
       ObjectId = configuration.require.BSON.ObjectId,
+      Connection = require('../../../../lib2/connection/connection'),
       ReadPreference = configuration.require.ReadPreference,
       Long = configuration.require.BSON.Long,
       co = require('co'),
@@ -329,6 +337,7 @@ exports['Successfully remove a secondary server from the set'] = {
       });
     });
 
+    Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000 },
@@ -397,7 +406,11 @@ exports['Successfully remove a secondary server from the set'] = {
         server.destroy();
         running = false;
 
-        test.done();
+        setTimeout(function() {
+          test.equal(0, Object.keys(Connection.connections()).length);
+          Connection.disableConnectionAccounting();
+          test.done();
+        }, 2000);
       }
     });
 
@@ -428,6 +441,7 @@ exports['Successfully remove and re-add secondary server to the set'] = {
     var ReplSet = configuration.require.ReplSet,
       ObjectId = configuration.require.BSON.ObjectId,
       ReadPreference = configuration.require.ReadPreference,
+      Connection = require('../../../../lib2/connection/connection'),
       Long = configuration.require.BSON.Long,
       co = require('co'),
       mockupdb = require('../../../mock');
@@ -553,6 +567,8 @@ exports['Successfully remove and re-add secondary server to the set'] = {
       });
     });
 
+    Connection.enableConnectionAccounting();
+    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! NEW REPLSET")
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000 },
@@ -593,10 +609,16 @@ exports['Successfully remove and re-add secondary server to the set'] = {
         firstSecondaryServer.destroy();
         secondSecondaryServer.destroy();
         arbiterServer.destroy();
+        // console.log("!!!!!!!!!!!!!!!!!!!!!!!! KILL")
         server.destroy();
         running = false;
 
-        test.done();
+        setTimeout(function() {
+          // console.log(Object.keys(Connection.connections()))
+          test.equal(0, Object.keys(Connection.connections()).length);
+          Connection.disableConnectionAccounting();
+          test.done();
+        }, 3000);
       }, 6000);
     }, 3000);
 

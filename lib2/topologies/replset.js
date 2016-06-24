@@ -185,6 +185,7 @@ function attemptReconnect(self) {
     // console.log("---- attemptReconnect 1")
     // Get all known hosts
     var keys = Object.keys(self.s.replicaSetState.set);
+    // console.log("===== REPLSET CREATE SERVER 0 :: " + self.s.id)
     var servers = keys.map(function(x) {
       return new Server(Object.assign({
         host: x.split(':')[0], port: parseInt(x.split(':')[1], 10)
@@ -241,19 +242,26 @@ function attemptReconnect(self) {
         // Connect and not authenticating
         if(event == 'connect' && !self.authenticating) {
           applyCredentials(this, 0, self.credentials, function(err) {
-            // Update the replicaset state
-            self.s.replicaSetState.update(_self);
-
-            // Remove the handlers
-            for(var i = 0; i < handlers.length; i++) {
-              _self.removeAllListeners(handlers[i]);
+            if(self.state == DESTROYED) {
+              return _self.destroy();
             }
 
-            // Add stable state handlers
-            _self.on('error', handleEvent(self, 'error'));
-            _self.on('close', handleEvent(self, 'close'));
-            _self.on('timeout', handleEvent(self, 'timeout'));
-            _self.on('parseError', handleEvent(self, 'parseError'));
+            // Update the replicaset state
+            if(self.s.replicaSetState.update(_self)) {
+              // Remove the handlers
+              for(var i = 0; i < handlers.length; i++) {
+                _self.removeAllListeners(handlers[i]);
+              }
+
+              // Add stable state handlers
+              _self.on('error', handleEvent(self, 'error'));
+              _self.on('close', handleEvent(self, 'close'));
+              _self.on('timeout', handleEvent(self, 'timeout'));
+              _self.on('parseError', handleEvent(self, 'parseError'));
+            } else {
+              _self.destroy();
+            }
+
             done();
           });
         } else if(event == 'connect' && self.authenticating) {
@@ -308,6 +316,8 @@ function connectNewServers(self, servers, callback) {
   // Handle events
   var _handleEvent = function(self, event) {
     return function(err, r) {
+      // console.log("===== _handleEvent :: " + event + " :: " + this.id)
+      // console.dir(err)
       var _self = this;
       // console.log("=============== connectNewServers :: _handleEvent :: " + this.name)
       count = count - 1;
@@ -319,28 +329,39 @@ function connectNewServers(self, servers, callback) {
 
       if(event == 'connect' && !self.authenticating) {
         return applyCredentials(this, 0, self.credentials, function(err) {
+          // console.log("===== 0 :: " + _self.id + " :: " + _self.name)
+          // Destroyed
+          if(self.state == DESTROYED) {
+            return _self.destroy();
+          }
+          // console.log("===== 1 :: " + _self.id + " :: " + _self.name)
 
         // reauthenticate(self.credentials, this, function() {
           // console.dir(this.ismaster)
           // console.log(self.s.replicaSetState.update(this));
-
-          // Update the state with the new server
           var result = self.s.replicaSetState.update(_self);
-          // console.log("=============== connectNewServers :: _handleEvent 1 :: " + result)
-          // console.log("primary :: " + (self.s.replicaSetState.primary != null))
-          // console.log("secondaries :: " + self.s.replicaSetState.secondaries.length)
-          // console.log("arbiters :: " + self.s.replicaSetState.arbiters.length)
+          // Update the state with the new server
+          if(result) {
+            // console.log("=============== connectNewServers :: _handleEvent 1 :: " + result)
+            // console.log("primary :: " + (self.s.replicaSetState.primary != null))
+            // console.log("secondaries :: " + self.s.replicaSetState.secondaries.length)
+            // console.log("arbiters :: " + self.s.replicaSetState.arbiters.length)
 
-          // Remove the handlers
-          for(var i = 0; i < handlers.length; i++) {
-            _self.removeAllListeners(handlers[i]);
+            // Remove the handlers
+            for(var i = 0; i < handlers.length; i++) {
+              _self.removeAllListeners(handlers[i]);
+            }
+
+            // Add stable state handlers
+            _self.on('error', handleEvent(self, 'error'));
+            _self.on('close', handleEvent(self, 'close'));
+            _self.on('timeout', handleEvent(self, 'timeout'));
+            _self.on('parseError', handleEvent(self, 'parseError'));
+          } else {
+            _self.destroy();
           }
 
-          // Add stable state handlers
-          _self.on('error', handleEvent(self, 'error'));
-          _self.on('close', handleEvent(self, 'close'));
-          _self.on('timeout', handleEvent(self, 'timeout'));
-          _self.on('parseError', handleEvent(self, 'parseError'));
+          // console.log("===== 2 :: " + _self.id + " :: " + result + " :: " + _self.name)
 
           // Are we done finish up callback
           if(count == 0) { callback(); }
@@ -363,24 +384,38 @@ function connectNewServers(self, servers, callback) {
   if(count == 0) return callback();
   // Create new instances
   for(var i = 0; i < servers.length; i++) {
+    function execute(_server, i) {
+      setTimeout(function() {
+        // console.log("===== REPLSET CREATE SERVER 1 :: " + self.s.id)
+        // Destroyed
+        if(self.state == DESTROYED) {
+          return;
+        }
+
+        // Create a new server instance
+        var server = new Server(Object.assign({
+          host: _server.split(':')[0],
+          port: parseInt(_server.split(':')[1], 10)
+        }, self.s.options, {
+          // reconnect:false, monitoring: false
+          authProviders: self.authProviders, reconnect:false, monitoring: false
+        }));
+        // console.log("=============== connectNewServers - 2")
+        // Add temp handlers
+        server.once('connect', _handleEvent(self, 'connect'));
+        server.once('close', _handleEvent(self, 'close'));
+        server.once('timeout', _handleEvent(self, 'timeout'));
+        server.once('error', _handleEvent(self, 'error'));
+        server.once('parseError', _handleEvent(self, 'parseError'));
+        // console.log("-------- connect 1 :: 0")
+        server.connect(self.s.connectOptions);
+      }, i);
+    }
+
+
     // console.log("=============== connectNewServers - 0")
-    // Create a new server instance
-    var server = new Server(Object.assign({
-      host: servers[i].split(':')[0],
-      port: parseInt(servers[i].split(':')[1], 10)
-    }, self.s.options, {
-      // reconnect:false, monitoring: false
-      authProviders: self.authProviders, reconnect:false, monitoring: false
-    }));
-    // console.log("=============== connectNewServers - 2")
-    // Add temp handlers
-    server.once('connect', _handleEvent(self, 'connect'));
-    server.once('close', _handleEvent(self, 'close'));
-    server.once('timeout', _handleEvent(self, 'timeout'));
-    server.once('error', _handleEvent(self, 'error'));
-    server.once('parseError', _handleEvent(self, 'parseError'));
-    // console.log("-------- connect 1 :: 0")
-    server.connect(self.s.connectOptions);
+    // console.log("===== CREATE CREARE SERVER 1")
+    execute(servers[i], i);
     // console.log("-------- connect 1 :: 1")
   }
 }
@@ -520,6 +555,7 @@ function topologyMonitor(self, options) {
 
 function handleEvent(self, event) {
   return function(err) {
+    // console.log("===== handleEvent :: " + event + " :: " + this.is)
     // console.log("$$$$ handleEvent :: " + event + " :: " + self.s.id + " :: " + this.name)
     if(self.state == DESTROYED) return;
     self.s.replicaSetState.remove(this);
@@ -538,17 +574,21 @@ function handleInitialConnectEvent(self, event) {
     // Check the type of server
     if(event == 'connect') {
       // Update the state
-      self.s.replicaSetState.update(this);
-      // Remove the handlers
-      for(var i = 0; i < handlers.length; i++) {
-        this.removeAllListeners(handlers[i]);
-      }
+      var result = self.s.replicaSetState.update(this);
+      if(result) {
+        // Remove the handlers
+        for(var i = 0; i < handlers.length; i++) {
+          this.removeAllListeners(handlers[i]);
+        }
 
-      // Add stable state handlers
-      this.on('error', handleEvent(self, 'error'));
-      this.on('close', handleEvent(self, 'close'));
-      this.on('timeout', handleEvent(self, 'timeout'));
-      this.on('parseError', handleEvent(self, 'parseError'));
+        // Add stable state handlers
+        this.on('error', handleEvent(self, 'error'));
+        this.on('close', handleEvent(self, 'close'));
+        this.on('timeout', handleEvent(self, 'timeout'));
+        this.on('parseError', handleEvent(self, 'parseError'));
+      } else {
+        this.destroy();
+      }
     } else {
       // Emit failure to connect
       self.emit('failed', this);
@@ -623,6 +663,7 @@ ReplSet.prototype.connect = function(options) {
   // Set connecting state
   stateTransition(this, CONNECTING);
   // console.log("=== Replset.connect")
+  // console.log("===== REPLSET CREATE SERVER::connect " + this.s.id)
   // Create server instances
   var servers = this.s.seedlist.map(function(x) {
     return new Server(Object.assign(x, self.s.options, {
@@ -1144,7 +1185,7 @@ ReplSet.prototype.auth = function(mechanism, db) {
       if(err) errors.push({name: server.name, err: err});
       // We are done
       if(count == 0) {
-        console.log("^^^ ReplSet.prototype.auth 1")
+        // console.log("^^^ ReplSet.prototype.auth 1")
         // Add successful credentials
         if(errors.length == 0) {
           addCredentials(self, db, argsWithoutCallback);

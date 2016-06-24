@@ -508,6 +508,7 @@ Server.prototype.getConnection = function(options) {
 var listeners = ['close', 'error', 'timeout', 'parseError', 'connect'];
 
 Server.prototype.destroy = function(options) {
+  // console.log("**** DESTROY SERVER :: " + this.id)
   options = options || {};
   var self = this;
 

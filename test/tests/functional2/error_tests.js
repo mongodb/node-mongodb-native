@@ -13,6 +13,7 @@ exports['should return helpful error when geoHaystack fails'] = {
       server.on('connect', function(_server) {
         _server.command('system.$cmd', {geoNear: ns}, {}, function(err, result) {
           test.ok(/can\'t find ns/.test(err));
+          _server.destroy();
           test.done();
         });
       });

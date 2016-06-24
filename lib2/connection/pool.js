@@ -181,6 +181,7 @@ function reauthenticate(pool, connection, cb) {
 function connectionFailureHandler(self, event) {
   return function(err) {
     // console.log("=== connectionFailureHandler :: " + event + " :: 0 " + " ::" + this.id + " :: " + (this.workItem != null))
+    // console.log(this.workItem)
     // console.dir(err)
     removeConnection(self, this);
     // console.log("=== connectionFailureHandler :: " + event + " :: 1")
@@ -188,10 +189,12 @@ function connectionFailureHandler(self, event) {
 
     // Flush out the callback if there is one
     if(this.workItem && this.workItem.cb) {
+      var workItem = this.workItem;
+      this.workItem = null;
       // console.log("==== connectionFailureHandler :: " + this.id)
       // console.log("=== connectionFailureHandler :: " + event + " :: 2")
       // console.log(this.workItem.cb.toString())
-      this.workItem.cb(err);
+      workItem.cb(err);
     }
     // console.log("=== connectionFailureHandler :: " + event + " :: 3")
 
@@ -294,6 +297,7 @@ function attemptReconnect(self) {
 
     // Create a connection
     // console.log("attemptReconnect :: " + new Date())
+    // console.log("--- pool create new connection 2 :: " + self.id)
     var connection = new Connection(messageHandler(self), self.options);
     // Add handlers
     connection.on('close', _connectionFailureHandler(self, 'close'));
@@ -404,6 +408,7 @@ function messageHandler(self) {
         }
 
         // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! messageHandler :: " + connection.id)
+        // console.dir(connection.workItem == null)
         // console.dir(workItem.command)
         // console.dir(err)
         // console.dir(message.documents)
@@ -481,6 +486,7 @@ Pool.prototype.connect = function(auth) {
   var args = Array.prototype.slice.call(arguments, 0);
   // Create a connection
   // console.log('connect')
+  // console.log("--- pool create new connection 0 :: " + this.id)
   var connection = new Connection(messageHandler(self), this.options);
   // Add to list of connections
   this.connectingConnections.push(connection);
@@ -808,6 +814,7 @@ var handlers = ["close", "message", "error", "timeout", "parseError", "connect"]
 
 function _createConnection(self) {
   // console.log("_createConnection")
+  // console.log("--- pool create new connection 1 :: " + self.id)
   var connection = new Connection(messageHandler(self), self.options);
 
   // Push the connection
@@ -852,13 +859,16 @@ function _createConnection(self) {
 
       // Signal
       reauthenticate(self, _connection, function(err) {
+        if(self.state == DESTROYED) {
+          return _connection.destroy();
+        }
         // Remove the connection from the connectingConnections list
         removeConnection(self, _connection);
 
         // console.dir(err)
         // Handle error
         if(err) {
-          _connection.destroy();
+          return _connection.destroy();
         }
 
         // If we are authenticating at the moment

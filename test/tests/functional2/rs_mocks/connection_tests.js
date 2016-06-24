@@ -25,6 +25,7 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet,
       ObjectId = configuration.require.BSON.ObjectId,
+      Connection = require('../../../../lib2/connection/connection'),
       ReadPreference = configuration.require.ReadPreference,
       Long = configuration.require.BSON.Long,
       co = require('co'),
@@ -109,6 +110,7 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
       });
     });
 
+    Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000 },
@@ -144,7 +146,12 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
             arbiterServer.destroy();
             server.destroy();
             running = false;
-            test.done();
+
+            setTimeout(function() {
+              test.equal(0, Object.keys(Connection.connections()).length);
+              Connection.disableConnectionAccounting();
+              test.done();
+            }, 1000);
           }
       }
     });
@@ -170,6 +177,7 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
 
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet,
+      Connection = require('../../../../lib2/connection/connection'),
       ObjectId = configuration.require.BSON.ObjectId,
       ReadPreference = configuration.require.ReadPreference,
       Long = configuration.require.BSON.Long,
@@ -255,6 +263,7 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
       });
     });
 
+    Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32002 }], {
@@ -288,7 +297,12 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary and 1 arb
             arbiterServer.destroy();
             server.destroy();
             running = false;
-            test.done();
+
+            setTimeout(function() {
+              test.equal(0, Object.keys(Connection.connections()).length);
+              Connection.disableConnectionAccounting();
+              test.done();
+            }, 1000);
           }
       }
     });
@@ -316,6 +330,7 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary but missi
     var ReplSet = configuration.require.ReplSet,
       ObjectId = configuration.require.BSON.ObjectId,
       ReadPreference = configuration.require.ReadPreference,
+      Connection = require('../../../../lib2/connection/connection'),
       Long = configuration.require.BSON.Long,
       co = require('co'),
       mockupdb = require('../../../mock');
@@ -379,6 +394,7 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary but missi
       });
     });
 
+    Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000 },
@@ -407,7 +423,12 @@ exports['Successful connection to replicaset of 1 primary, 1 secondary but missi
       primaryServer.destroy();
       firstSecondaryServer.destroy();
       server.destroy();
-      test.done();
+
+      setTimeout(function() {
+        test.equal(0, Object.keys(Connection.connections()).length);
+        Connection.disableConnectionAccounting();
+        test.done();
+      }, 1000);
     }
 
     // Joined
@@ -442,6 +463,7 @@ exports['Fail to connect due to missing primary'] = {
     var ReplSet = configuration.require.ReplSet,
       ObjectId = configuration.require.BSON.ObjectId,
       ReadPreference = configuration.require.ReadPreference,
+      Connection = require('../../../../lib2/connection/connection'),
       Long = configuration.require.BSON.Long,
       co = require('co'),
       mockupdb = require('../../../mock');
@@ -483,6 +505,7 @@ exports['Fail to connect due to missing primary'] = {
       });
     });
 
+    Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000 },
@@ -504,7 +527,12 @@ exports['Fail to connect due to missing primary'] = {
       server.destroy();
       firstSecondaryServer.destroy();
       running = false;
-      test.done();
+
+      setTimeout(function() {
+        test.equal(0, Object.keys(Connection.connections()).length);
+        Connection.disableConnectionAccounting();
+        test.done();
+      }, 1000);
     });
 
     // Gives proxies a chance to boot up
@@ -526,6 +554,7 @@ exports['Successful connection to replicaset of 0 primary, 1 secondary and 1 arb
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet,
       ObjectId = configuration.require.BSON.ObjectId,
+      Connection = require('../../../../lib2/connection/connection'),
       ReadPreference = configuration.require.ReadPreference,
       Long = configuration.require.BSON.Long,
       co = require('co'),
@@ -589,6 +618,7 @@ exports['Successful connection to replicaset of 0 primary, 1 secondary and 1 arb
       });
     });
 
+    Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000 },
@@ -617,7 +647,12 @@ exports['Successful connection to replicaset of 0 primary, 1 secondary and 1 arb
           arbiterServer.destroy();
           server.destroy();
           running = false;
-          test.done();
+
+          setTimeout(function() {
+            test.equal(0, Object.keys(Connection.connections()).length);
+            Connection.disableConnectionAccounting();
+            test.done();
+          }, 1000);
         }
     });
 
