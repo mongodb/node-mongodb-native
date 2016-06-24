@@ -4,7 +4,7 @@ var fs = require('fs')
   , f = require('util').format;
 
 var restartAndDone = function(configuration, test) {
-  configuration.manager.restart().then(function() {
+  configuration.manager.restart(9, {waitMS:2000}).then(function() {
     test.done();
   });
 }
@@ -15,11 +15,14 @@ exports['Discover arbiters'] = {
 
   test: function(configuration, test) {
     var Server = configuration.require.Server
+      , Connection = require('../../../lib2/connection/connection')
       , ReplSet = configuration.require.ReplSet
       , manager = configuration.manager;
 
     // Get the primary server
     manager.primary().then(function(manager) {
+      // Enable connections accounting
+      Connection.enableConnectionAccounting();
       // Attempt to connect
       var server = new ReplSet([{
           host: manager.host
@@ -32,8 +35,13 @@ exports['Discover arbiters'] = {
         // console.log("======================= joined :: " + _type + " :: " + server.name)
         if(_type == 'arbiter') {
           server.destroy();
-          test.done();
-          // restartAndDone(configuration, test);
+
+          setTimeout(function() {
+            // console.log(Object.keys(Connection.connections()))
+            test.equal(0, Object.keys(Connection.connections()).length);
+            Connection.disableConnectionAccounting();
+            test.done();
+          }, 1000);
         }
       });
 
@@ -49,11 +57,14 @@ exports['Discover passives'] = {
 
   test: function(configuration, test) {
     var Server = configuration.require.Server
+      , Connection = require('../../../lib2/connection/connection')
       , ReplSet = configuration.require.ReplSet
       , manager = configuration.manager;
 
     // Get the primary server
     manager.primary().then(function(manager) {
+      // Enable connections accounting
+      Connection.enableConnectionAccounting();
       // Attempt to connect
       var server = new ReplSet([{
           host: manager.host
@@ -69,7 +80,12 @@ exports['Discover passives'] = {
           // console.log("=== ")
           // console.dir(_server.lastIsMaster())
           server.destroy();
-          test.done();
+
+          setTimeout(function() {
+            test.equal(0, Object.keys(Connection.connections()).length);
+            Connection.disableConnectionAccounting();
+            test.done();
+          }, 1000);
           // restartAndDone(configuration, test);
         }
       });
@@ -86,11 +102,14 @@ exports['Discover primary'] = {
 
   test: function(configuration, test) {
     var Server = configuration.require.Server
+      , Connection = require('../../../lib2/connection/connection')
       , ReplSet = configuration.require.ReplSet
       , manager = configuration.manager;
 
     // Get the primary server
     manager.primary().then(function(manager) {
+      // Enable connections accounting
+      Connection.enableConnectionAccounting();
       // Attempt to connect
       var server = new ReplSet([{
           host: manager.host
@@ -102,7 +121,12 @@ exports['Discover primary'] = {
       server.on('joined', function(_type, _server) {
         if(_type == 'primary') {
           server.destroy();
-          test.done();
+
+          setTimeout(function() {
+            test.equal(0, Object.keys(Connection.connections()).length);
+            Connection.disableConnectionAccounting();
+            test.done();
+          }, 1000);
           // restartAndDone(configuration, test);
         }
       });
@@ -119,11 +143,14 @@ exports['Discover secondaries'] = {
 
   test: function(configuration, test) {
     var Server = configuration.require.Server
+      , Connection = require('../../../lib2/connection/connection')
       , ReplSet = configuration.require.ReplSet
       , manager = configuration.manager;
 
     // Get the primary server
     manager.primary().then(function(manager) {
+      // Enable connections accounting
+      Connection.enableConnectionAccounting();
       // Attempt to connect
       var server = new ReplSet([{
           host: manager.host
@@ -137,7 +164,12 @@ exports['Discover secondaries'] = {
         if(_type == 'secondary') count = count + 1;
         if(count == 2) {
           server.destroy();
-          test.done();
+
+          setTimeout(function() {
+            test.equal(0, Object.keys(Connection.connections()).length);
+            Connection.disableConnectionAccounting();
+            test.done();
+          }, 1000);
           // restartAndDone(configuration, test);
         }
       });
@@ -154,6 +186,7 @@ exports['Replica set discovery'] = {
 
   test: function(configuration, test) {
     var Server = configuration.require.Server
+      , Connection = require('../../../lib2/connection/connection')
       , ReplSet = configuration.require.ReplSet
       , manager = configuration.manager;
 
@@ -161,6 +194,8 @@ exports['Replica set discovery'] = {
     var state = {'primary':1, 'secondary': 2, 'arbiter': 1, 'passive': 1};
     // Get the primary server
     manager.primary().then(function(manager) {
+      // Enable connections accounting
+      Connection.enableConnectionAccounting();
       // Attempt to connect
       var server = new ReplSet([{
           host: manager.host
@@ -181,7 +216,12 @@ exports['Replica set discovery'] = {
           && state.arbiter == 0
           && state.passive == 0) {
           server.destroy();
-          test.done();
+
+          setTimeout(function() {
+            test.equal(0, Object.keys(Connection.connections()).length);
+            Connection.disableConnectionAccounting();
+            test.done();
+          }, 1000);
           // restartAndDone(configuration, test);
         }
       });
@@ -202,6 +242,7 @@ exports['Host list differs from seeds'] = {
 
   test: function(configuration, test) {
     var Server = configuration.require.Server
+      , Connection = require('../../../lib2/connection/connection')
       , ReplSet = configuration.require.ReplSet
       , manager = configuration.manager;
 
@@ -209,20 +250,19 @@ exports['Host list differs from seeds'] = {
     var state = {'primary':1, 'secondary': 2, 'arbiter': 1, 'passive': 1};
     // Get the primary server
     manager.primary().then(function(manager) {
-      console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! STARTING")
+      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! STARTING")
+      Connection.enableConnectionAccounting();
       // Attempt to connect
       var server = new ReplSet([{
-          host: manager.host
-        , port: manager.port
+        host: manager.host, port: manager.port
       }, {
-          host: 'localhost'
-        , port: 41000
+        host: 'localhost', port: 41000
       }], {
         setName: configuration.setName
       });
 
       server.on('joined', function(_type, _server) {
-        console.log("======= joined :: " + _type + " :: " + _server.name)
+        // console.log("======= joined :: " + _type + " :: " + _server.name)
         if(_type == 'secondary' && _server.lastIsMaster().passive) {
           state['passive'] = state['passive'] - 1;
         } else {
@@ -236,8 +276,13 @@ exports['Host list differs from seeds'] = {
           && state.arbiter == 0
           && state.passive == 0) {
           server.destroy();
-          test.done();
+
+          setTimeout(function() {
+            test.equal(0, Object.keys(Connection.connections()).length);
+            Connection.disableConnectionAccounting();
+            test.done();
           // restartAndDone(configuration, test);
+          }, 1000);
         }
       });
 
@@ -258,23 +303,24 @@ exports['Ghost discovered/Member brought up as standalone'] = {
   test: function(configuration, test) {
     var Server = configuration.require.Server
       , ServerManager = require('mongodb-topology-manager').Server
+      , Connection = require('../../../lib2/connection/connection')
       , ReplSet = configuration.require.ReplSet
       , manager = configuration.manager;
 
     // State
     var state = {'primary':1, 'secondary': 1, 'arbiter': 1, 'passive': 1};
-    console.log("------------------------ 0")
+    // console.log("------------------------ 0")
     // Get the primary server
     manager.primary().then(function(primaryManager) {
-      console.log("------------------------ 1")
+      // console.log("------------------------ 1")
       // Get the secondary server
       manager.secondaries().then(function(managers) {
-        console.log("------------------------ 2")
+        // console.log("------------------------ 2")
         var serverManager = managers[0];
 
         // Stop the secondary
         serverManager.stop().then(function() {
-          console.log("------------------------ 3")
+          // console.log("------------------------ 3")
           // Start a new server manager
           var nonReplSetMember = new ServerManager('mongod', {
             bind_ip: serverManager.host,
@@ -284,7 +330,7 @@ exports['Ghost discovered/Member brought up as standalone'] = {
 
           // Start a non replset member
           nonReplSetMember.start().then(function() {
-            console.log("------------------------ 4")
+            // console.log("------------------------ 4")
             var config = [{
                 host: primaryManager.host
               , port: primaryManager.port
@@ -293,45 +339,58 @@ exports['Ghost discovered/Member brought up as standalone'] = {
             var options = {
               setName: configuration.setName
             };
-            console.log("------------------------ 4:1")
+            // console.log("------------------------ 4:1")
 
             // Wait for primary
             manager.waitForPrimary().then(function() {
-              console.log("------------------------ 5")
+              // console.log("------------------------ 5")
 
+              // Enable connections accounting
+              Connection.enableConnectionAccounting();
               // Attempt to connect
-              var server = new ReplSet(config, options);
-              server.on('joined', function(_type, _server) {
-                console.log("------------------------ 6")
-                console.log("======= joined :: " + _type + " :: " + _server.name)
+              var replset = new ReplSet(config, options);
+              replset.on('joined', function(_type, _server) {
+                // console.log("------------------------ 6")
+                // console.log("======= joined :: " + _type + " :: " + _server.name)
                 if(_type == 'secondary' && _server.lastIsMaster().passive) {
                   state['passive'] = state['passive'] - 1;
                 } else {
                   state[_type] = state[_type] - 1;
                 }
-                console.dir(state)
+                // console.dir(state)
 
                 if(state.primary == 0
                   && state.secondary == 0
                   && state.arbiter == 0
                   && state.passive == 0) {
-                    console.log("------------------------ 7")
-                  server.destroy();
+                    // console.log("------------------------ 7")
+                  replset.destroy();
+                  // setTimeout(function() {
+                    // console.log("=================== " + Object.keys(Connection.connections()).length)
+                    // console.dir(Object.keys(Connection.connections()));
+                  setTimeout(function() {
+                    test.equal(0, Object.keys(Connection.connections()).length);
+                    Connection.disableConnectionAccounting();
+                  //   console.log("------------------------ 8")
+                  //   // test.done();
+                  //   restartAndDone(configuration, test);
+                  // }, 1000)
 
-                  // Stop the normal server
-                  nonReplSetMember.stop().then(function() {
-                    console.log("------------------------ 8")
-                    // Restart the secondary server
-                    serverManager.start().then(function() {
-                      console.log("------------------------ 9")
-                      restartAndDone(configuration, test);
+                    // Stop the normal server
+                    nonReplSetMember.stop().then(function() {
+                      // console.log("------------------------ 8")
+                      // Restart the secondary server
+                      serverManager.start().then(function() {
+                        // console.log("------------------------ 8")
+                        restartAndDone(configuration, test);
+                      });
                     });
-                  });
+                  }, 1000);
                 }
               });
 
               // Start connection
-              server.connect();
+              replset.connect();
             });
           });
         });
@@ -350,15 +409,19 @@ exports['Member removed by reconfig'] = {
 
   test: function(configuration, test) {
     var Server = configuration.require.Server
+      , Connection = require('../../../lib2/connection/connection')
       , ReplSet = configuration.require.ReplSet
       , manager = configuration.manager;
 
     // State
     var state = {'primary':[], 'secondary': [], 'arbiter': [], 'passive': []};
+    // console.log("============================= 0")
     // Get the primary server
     manager.primary().then(function(primaryServerManager) {
+      // console.log("============================= 1")
       // Get the secondary server
       manager.secondaries().then(function(managers) {
+        // console.log("============================= 2")
         var secondaryServerManager = managers[0];
 
         var config = [{
@@ -372,10 +435,14 @@ exports['Member removed by reconfig'] = {
 
         // Contains the details for the removed server
         var removedServer = false;
+        // console.log("============================= 3")
+        // Enable connections accounting
+        Connection.enableConnectionAccounting();
+        // console.log("============================= 4")
         // Attempt to connect
         var server = new ReplSet(config, options);
         server.on('fullsetup', function(_server) {
-          console.log("------------------------------------------ 0")
+          // console.log("------------------------------------------ 0")
           // Save number of secondaries
           var numberOfSecondaries = server.s.replicaSetState.secondaries.length;
           var numberOfArbiters = server.s.replicaSetState.arbiters.length;
@@ -383,61 +450,44 @@ exports['Member removed by reconfig'] = {
 
           // Let's listen to changes
           server.on('left', function(_t, _server) {
-            console.log("--------- left :: " + _t + " :: " + _server.name)
+            // console.log("--------- left :: " + _t + " :: " + _server.name)
             if(_server.s.options.port == secondaryServerManager.options.port) {
-              console.log("server.state.primary = " + (server.s.replicaSetState.primary != null))
-              console.log("numberOfSecondaries = " + numberOfSecondaries)
-              console.log("server.state.secondaries.length = " + server.s.replicaSetState.secondaries.length)
-              console.log("server.state.arbiters.length = " + server.s.replicaSetState.arbiters.length)
-              console.log("server.state.passives.length = " + server.s.replicaSetState.passives.length)
+              // console.log("server.state.primary = " + (server.s.replicaSetState.primary != null))
+              // console.log("numberOfSecondaries = " + numberOfSecondaries)
+              // console.log("server.state.secondaries.length = " + server.s.replicaSetState.secondaries.length)
+              // console.log("server.state.arbiters.length = " + server.s.replicaSetState.arbiters.length)
+              // console.log("server.state.passives.length = " + server.s.replicaSetState.passives.length)
                 test.ok(server.s.replicaSetState.primary != null);
                 test.ok(server.s.replicaSetState.secondaries.length < numberOfSecondaries);
                 test.equal(1, server.s.replicaSetState.arbiters.length);
                 server.destroy();
-                restartAndDone(configuration, test);
+
+                setTimeout(function() {
+                  // console.log("=================== 0")
+                  // console.dir(Object.keys(Connection.connections()))
+                  test.equal(0, Object.keys(Connection.connections()).length);
+                  // console.log("=================== 1")
+                  Connection.disableConnectionAccounting();
+                  restartAndDone(configuration, test);
+                }, 5000);
               //   test.equal(1, server.s.replicaSetState.passives.length);
             }
           });
 
           server.on('joined', function(_t, _server) {
-            // console.log("--------- joined :: " + _t + " :: " + _server.name)
-            // // if(_t == 'primary') {
-            // if(removedServer) {
-            //   console.log("------------------------------------------ 4")
-            //   console.log("server.state.primary = " + (server.state.primary != null))
-            //   console.log("numberOfSecondaries = " + numberOfSecondaries)
-            //   console.log("server.state.secondaries.length = " + server.s.replicaSetState.secondaries.length)
-            //   console.log("server.state.arbiters.length = " + server.s.replicaSetState.arbiters.length)
-            //   console.log("server.state.passives.length = " + server.s.replicaSetState.passives.length)
-            //   test.ok(server.s.replicaSetState.primary != null);
-            //   test.ok(server.s.replicaSetState.secondaries.length > numberOfSecondaries);
-            //   test.equal(1, server.s.replicaSetState.arbiters.length);
-            //   test.equal(1, server.s.replicaSetState.passives.length);
-            //   server.destroy();
-            //
-            //   console.log("------------------------------------------ 5")
-            //
-            //   // // Add a new member to the set
-            //   // manager.addMember(secondaryServerManager, {
-            //   //   returnImmediately: false, force:false
-            //   // }).then(function(x) {
-            //     // console.log("------------------------------------------ 6")
-            //     restartAndDone(configuration, test);
-            //   // });
-            // }
           });
 
-          console.log("------------------------------------------ 1")
-          console.dir(secondaryServerManager.options)
+          // console.log("------------------------------------------ 1")
+          // console.dir(secondaryServerManager.options)
           // Remove the secondary server
           manager.removeMember(secondaryServerManager, {
             returnImmediately: false, force: false, skipWait:true
           }).then(function() {
-            console.log("------------------------------------------ 2")
+            // console.log("------------------------------------------ 2")
 
             // // Step down primary and block until we have a new primary
             // manager.stepDownPrimary(false, {stepDownSecs: 10}).then(function() {
-            //   console.log("------------------------------------------ 3")
+              // console.log("------------------------------------------ 3")
             setTimeout(function() {
               removedServer = true;
 
@@ -446,6 +496,7 @@ exports['Member removed by reconfig'] = {
           });
         });
 
+        // console.log("============================= 5")
         // Start connection
         server.connect();
       });

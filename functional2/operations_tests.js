@@ -5,7 +5,7 @@ var f = require('util').format
 
 exports['Should correctly connect using server object'] = {
   metadata: {
-    requires: {}
+    requires: { topology: ["single", "replicaset", "mongos"] }
   },
 
   test: function(configuration, test) {

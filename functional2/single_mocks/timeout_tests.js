@@ -86,7 +86,7 @@ exports['Should correctly timeout socket operation and then correctly re-execute
     });
 
     // Attempt to connect
-    var server = new Server({
+    var replset = new Server({
       host: 'localhost',
       port: '37017',
       connectionTimeout: 3000,
@@ -94,32 +94,40 @@ exports['Should correctly timeout socket operation and then correctly re-execute
       size: 1
     });
 
+    // Not done
+    var done = false;
+
     // Add event listeners
-    server.once('connect', function(_server) {
+    replset.once('connect', function(_server) {
+      // console.log("======= 0")
       _server.insert('test.test', [{created:new Date()}], function(err, r) {
+        // console.log("======= 1")
         test.ok(err != null);
+        // console.dir(err)
 
-        // Not done
-        var done = false;
+        function wait() {
+          setTimeout(function() {
+            _server.insert('test.test', [{created:new Date()}], function(err, r) {
+              if(r && !done) {
+                // console.log("======= 3")
+                done = true;
+                test.equal(37017, r.connection.port);
+                replset.destroy();
+                running = false;
+                test.done();
+              } else {
+                wait();
+              }
+            });
+          }, 500);
+        }
 
-        // Run an interval
-        var intervalId = setInterval(function() {
-          _server.insert('test.test', [{created:new Date()}], function(err, r) {
-            if(r && !done) {
-              done = true;
-              clearInterval(intervalId);
-              test.equal(37017, r.connection.port);
-              server.destroy();
-              running = false;
-              test.done();
-            }
-          });
-        }, 500);
+        wait();
       });
     });
 
-    server.on('error', function(){});
-    server.connect();
+    replset.on('error', function(){});
+    replset.connect();
   }
 }
 

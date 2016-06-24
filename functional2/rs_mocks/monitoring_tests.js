@@ -9,6 +9,7 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet,
       ObjectId = configuration.require.BSON.ObjectId,
+      Connection = require('../../../../lib2/connection/connection'),
       co = require('co'),
       mockupdb = require('../../../mock');
 
@@ -138,6 +139,7 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
       }, 5000);
     });
 
+    Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000 },
@@ -176,7 +178,11 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
               server.destroy();
               running = false;
 
-              test.done();
+              setTimeout(function() {
+                test.equal(0, Object.keys(Connection.connections()).length);
+                Connection.disableConnectionAccounting();
+                test.done();
+              }, 1000);
               return;
             }
 
