@@ -10,9 +10,13 @@ function executeCommand(configuration, db, cmd, options, cb) {
   // Set the default options object if none passed in
   options = options || {};
 
+  // Alternative options
+  var host = options.host || configuration.host;
+  var port = options.port || configuration.port;
+
   // Attempt to connect
   var pool = new Pool({
-    host: configuration.host, port: configuration.port, bson: new bson()
+    host: host, port: port, bson: new bson()
   });
 
   // Add event listeners
