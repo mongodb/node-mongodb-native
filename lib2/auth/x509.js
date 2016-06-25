@@ -119,6 +119,18 @@ var addAuthSession = function(authStore, session) {
 }
 
 /**
+ * Remove authStore credentials
+ * @method
+ * @param {string} db Name of database we are removing authStore details about
+ * @return {object}
+ */
+X509.prototype.logout = function(dbName) {
+  this.authStore = this.authStore.filter(function(x) {
+    return x.db != dbName;
+  });
+}
+
+/**
  * Re authenticate pool
  * @method
  * @param {{Server}|{ReplSet}|{Mongos}} server Topology the authentication method is being called on

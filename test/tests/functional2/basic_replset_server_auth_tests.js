@@ -275,6 +275,93 @@ exports['Should correctly authenticate using auth method instead of connect'] = 
   }
 }
 
+exports['Should correctly authenticate using auth method instead of connect and logout user'] = {
+  metadata: { requires: { topology: "auth" } },
+
+  test: function(configuration, test) {
+    var ReplSet = require('../../../lib2/topologies/replset')
+      , Connection = require('../../../lib2/connection/connection')
+      , bson = require('bson').BSONPure.BSON
+      , Query = require('../../../lib2/connection/commands').Query;
+
+      // console.log("------------------------------ -3")
+    setUp(configuration, function(err, replicasetManager) {
+      // console.log("------------------------------ -2")
+      // Enable connections accounting
+      Connection.enableConnectionAccounting();
+
+      locateAuthMethod(configuration, function(err, method) {
+        test.equal(null, err);
+
+        executeCommand(configuration, 'admin', {
+          createUser: 'root',
+          pwd: "root",
+          roles: [ { role: "root", db: "admin" } ],
+          digestPassword: true
+        }, {
+          host: 'localhost', port: 31000
+        }, function(err, r) {
+          test.equal(null, err);
+          // process.exit(0)
+
+          // console.log("------------------------------ -1")
+          // Attempt to connect
+          var server = new ReplSet([{
+            host: 'localhost', port: 31000
+          }], {
+            setName: 'rs'
+          });
+
+          server.on('connect', function(_server) {
+            // console.log("----------------- 0")
+            //{auth: [method, 'admin', 'root', 'root']}
+            // Attempt authentication
+            _server.auth(method, 'admin', 'root', 'root', function(err, r) {
+              // console.log("----------------- 1")
+              _server.insert('test.test', [{a:1}], function(err, r) {
+                // console.log("----------------- 2")
+                test.equal(null, err);
+                test.equal(1, r.result.n);
+
+                // console.log("----------------- 3")
+                _server.logout('admin', function(err ,r) {
+                  // console.log("----------------- 4")
+                  test.equal(null, err);
+
+                  _server.insert('test.test', [{a:1}], function(err, r) {
+                    // console.log("=====================================")
+                    // console.dir(err)
+                    if(r) console.dir(r.result)
+
+                    executeCommand(configuration, 'admin', {
+                      dropUser: 'root'
+                    }, {
+                        auth: [method, 'admin', 'root', 'root']
+                      , host: 'localhost', port: 31000
+                    }, function(err, r) {
+                      test.equal(null, err);
+
+                      _server.destroy();
+                      // console.log("=================== " + Object.keys(Connection.connections()).length)
+                      test.equal(0, Object.keys(Connection.connections()).length);
+                      Connection.disableConnectionAccounting();
+
+                      replicasetManager.stop().then(function() {
+                        test.done();
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          });
+
+          server.connect();
+        });
+      });
+    });
+  }
+}
 
 
 

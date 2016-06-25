@@ -452,6 +452,7 @@ Server.prototype.cursor = function(ns, cmd, cursorOptions) {
  * @param {authResultCallback} callback A callback function
  */
 Server.prototype.logout = function(dbName, callback) {
+  // console.log("======== logging out server db " + dbName + " :: " + this.name)
   this.s.pool.logout(dbName, callback);
 }
 

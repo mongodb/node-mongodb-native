@@ -170,10 +170,6 @@ var ReplSet = function(seedlist, options) {
   this.haTimeoutId = null;
   // Are we authenticating
   this.authenticating = false;
-  // // Servers that need to be authenticated
-  // this.nonAuthenticatedServers = [];
-  // Current credentials used for auth
-  this.credentials = [];
 }
 
 inherits(ReplSet, EventEmitter);
@@ -241,7 +237,7 @@ function attemptReconnect(self) {
 
         // Connect and not authenticating
         if(event == 'connect' && !self.authenticating) {
-          applyCredentials(this, 0, self.credentials, function(err) {
+          // applyCredentials(this, 0, self.credentials, function(err) {
             if(self.state == DESTROYED) {
               return _self.destroy();
             }
@@ -263,7 +259,7 @@ function attemptReconnect(self) {
             }
 
             done();
-          });
+          // });
         } else if(event == 'connect' && self.authenticating) {
           this.destroy();
           // console.log("============ add to nonAuthenticatedServers 1")
@@ -290,23 +286,23 @@ function attemptReconnect(self) {
   }, self.s.minHeartbeatFrequencyMS);
 }
 
-// Apply all the credentials serially
-function applyCredentials(server, index, credentials, callback) {
-  // console.log("== applyCredentials 0")
-  // Do not apply credentials if we have an arbiter
-  if(server.lastIsMaster() && server.lastIsMaster().arbiterOnly) return callback();
-  // console.log("== applyCredentials 1")
-  // Done applying the credentials return
-  if(index >= credentials.length || credentials.length == 0) return callback();
-  // console.log("== applyCredentials 2")
-  // Apply the credential
-  server.auth.apply(server, credentials[index].concat([function(err, r) {
-    // console.log("== applyCredentials 3")
-    if(err) return callback(err);
-    // console.log("== applyCredentials 4")
-    applyCredentials(server, index + 1, credentials, callback);
-  }]));
-}
+// // Apply all the credentials serially
+// function applyCredentials(server, index, credentials, callback) {
+//   // console.log("== applyCredentials 0")
+//   // Do not apply credentials if we have an arbiter
+//   if(server.lastIsMaster() && server.lastIsMaster().arbiterOnly) return callback();
+//   // console.log("== applyCredentials 1")
+//   // Done applying the credentials return
+//   if(index >= credentials.length || credentials.length == 0) return callback();
+//   // console.log("== applyCredentials 2")
+//   // Apply the credential
+//   server.auth.apply(server, credentials[index].concat([function(err, r) {
+//     // console.log("== applyCredentials 3")
+//     if(err) return callback(err);
+//     // console.log("== applyCredentials 4")
+//     applyCredentials(server, index + 1, credentials, callback);
+//   }]));
+// }
 
 function connectNewServers(self, servers, callback) {
   // Count lefts
@@ -328,7 +324,7 @@ function connectNewServers(self, servers, callback) {
       }
 
       if(event == 'connect' && !self.authenticating) {
-        return applyCredentials(this, 0, self.credentials, function(err) {
+        // return applyCredentials(this, 0, self.credentials, function(err) {
           // console.log("===== 0 :: " + _self.id + " :: " + _self.name)
           // Destroyed
           if(self.state == DESTROYED) {
@@ -365,7 +361,7 @@ function connectNewServers(self, servers, callback) {
 
           // Are we done finish up callback
           if(count == 0) { callback(); }
-        });
+        // });
       } else if(event == 'connect' && self.authenticating) {
         this.destroy();
         // console.log("============ add to nonAuthenticatedServers 0")
@@ -418,12 +414,6 @@ function connectNewServers(self, servers, callback) {
     // console.log("===== CREATE CREARE SERVER 1")
     execute(servers[i], i);
     // console.log("-------- connect 1 :: 1")
-  }
-}
-
-function addConnectionAuth(self) {
-  if(self.s.connectOptions && self.s.connectOptions.auth) {
-    addCredentials(self, self.s.connectOptions.auth[1], self.s.connectOptions.auth);
   }
 }
 
@@ -517,8 +507,6 @@ function topologyMonitor(self, options) {
                   // console.log("========================== 0 :: " + self.s.id)
                   // Transition to connected
                   stateTransition(self, CONNECTED);
-                  // Do we have connectAuth options
-                  addConnectionAuth(self);
                   // Emit connected sign
                   process.nextTick(function() {
                     self.emit('connect', self);
@@ -530,13 +518,12 @@ function topologyMonitor(self, options) {
                   // console.log("========================== 1 :: " + self.s.id)
                   // Transition to connected
                   stateTransition(self, CONNECTED);
-                  // Do we have connectAuth options
-                  addConnectionAuth(self);
                   // Emit connected sign
                   process.nextTick(function() {
                     self.emit('connect', self);
                   });
               } else if(self.state == CONNECTING) {
+                console.dir(self.s.replicaSetState.set)
                   // console.log("========================== 2 :: " + self.s.id)
                   self.emit('error', new MongoError('no primary found in replicaset'));
                 // Destroy the topology
@@ -631,29 +618,6 @@ function connectServers(self, servers) {
     server.connect(self.s.connectOptions);
     // console.log("-------- connect 2 :: 1")
   }
-}
-
-// Add the new credential for a db, removing the old
-// credential from the cache
-function addCredentials(s, db, argsWithoutCallback) {
-  // Remove any credentials for the db
-  clearCredentials(s, db + ".dummy");
-  // Add new credentials to list
-  s.credentials.push(argsWithoutCallback);
-}
-
-// Clear out credentials for a namespace
-function clearCredentials(s, ns) {
-  var db = ns.split('.')[0];
-  var filteredCredentials = [];
-
-  // Filter out all credentials for the db the user is logging out off
-  for(var i = 0; i < s.credentials.length; i++) {
-    if(s.credentials[i][1] != db) filteredCredentials.push(s.credentials[i]);
-  }
-
-  // Set new list of credentials
-  s.credentials = filteredCredentials;
 }
 
 ReplSet.prototype.connect = function(options) {
@@ -835,9 +799,9 @@ ReplSet.prototype.insert = function(ns, ops, options, callback) {
   executeWriteOperation(this, 'insert', ns, ops, options, callback);
 }
 
-function clearCredentials(state, ns) {
-
-}
+// function clearCredentials(state, ns) {
+//
+// }
 
 /**
  * Perform one or more update operations
@@ -1127,7 +1091,7 @@ ReplSet.prototype.command = function(ns, cmd, options, callback) {
   // Execute the command
   server.command(ns, cmd, options, function(err, r) {
     // Was it a logout command clear any credentials
-    if(cmd.logout) clearCredentials(self.s, ns);
+    // if(cmd.logout) clearCredentials(self.s, ns);
     // // We have a no master error, immediately refresh the view of the replicaset
     // if((notMasterError(r) || notMasterError(err)) && !self.s.highAvailabilityProcessRunning) {
     //   replicasetInquirer(self, self.s, true)();
@@ -1159,7 +1123,7 @@ ReplSet.prototype.auth = function(mechanism, db) {
 
   // Are we already authenticating, throw
   if(this.authenticating) {
-    throw new MongoError('authentication allready in process');
+    throw new MongoError('authentication or logout allready in process');
   }
 
   // Set to authenticating
@@ -1187,11 +1151,6 @@ ReplSet.prototype.auth = function(mechanism, db) {
       // We are done
       if(count == 0) {
         // console.log("^^^ ReplSet.prototype.auth 1")
-        // Add successful credentials
-        if(errors.length == 0) {
-          addCredentials(self, db, argsWithoutCallback);
-        }
-
         // Auth is done
         self.authenticating = false;
 
@@ -1225,16 +1184,58 @@ ReplSet.prototype.auth = function(mechanism, db) {
   }
 }
 
-// /**
-//  * Logout from a database
-//  * @method
-//  * @param {string} db The db we are logging out from
-//  * @param {authResultCallback} callback A callback function
-//  */
-// Server.prototype.logout = function(dbName, callback) {
-//   this.s.pool.logout(dbName, callback);
-// }
-// ReplSet.prototype.logout = function(mechanism, db) {
+/**
+ * Logout from a database
+ * @method
+ * @param {string} db The db we are logging out from
+ * @param {authResultCallback} callback A callback function
+ */
+ReplSet.prototype.logout = function(dbName, callback) {
+  var self = this;
+  // Are we authenticating or logging out, throw
+  if(this.authenticating) {
+    throw new MongoError('authentication or logout allready in process');
+  }
+
+  // Ensure no new members are processed while logging out
+  this.authenticating = true;
+
+  // console.log("==== logout 0")
+  // Remove from all auth providers (avoid any reaplication of the auth details)
+  var providers = Object.keys(this.authProviders);
+  for(var i = 0; i < providers.length; i++) {
+    this.authProviders[providers[i]].logout(dbName);
+  }
+  // console.log("==== logout 1")
+
+  // Now logout all the servers
+  var servers = this.s.replicaSetState.allServers();
+  var count = servers.length;
+  if(count == 0) return callback();
+  var errors = [];
+  // console.log("==== logout 2")
+
+  // Execute logout on all server instances
+  for(var i = 0; i < servers.length; i++) {
+    servers[i].logout(dbName, function(err) {
+      count = count - 1;
+      if(err) errors.push({name: server.name, err: err});
+
+      if(count == 0) {
+        // console.log("==== logout 3")
+        // Do not block new operations
+        self.authenticating = false;
+        // If we have one or more errors
+        if(errors.length) return callback(MongoError.create({
+          message: f('logout failed against db %s', dbName), errors: errors
+        }), false);
+
+        // No errors
+        callback();
+      }
+    });
+  }
+}
 
 /**
  * Perform one or more remove operations

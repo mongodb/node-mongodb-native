@@ -144,6 +144,18 @@ MongoCR.prototype.auth = function(server, connections, db, username, password, c
 }
 
 /**
+ * Remove authStore credentials
+ * @method
+ * @param {string} db Name of database we are removing authStore details about
+ * @return {object}
+ */
+MongoCR.prototype.logout = function(dbName) {
+  this.authStore = this.authStore.filter(function(x) {
+    return x.db != dbName;
+  });
+}
+
+/**
  * Re authenticate pool
  * @method
  * @param {{Server}|{ReplSet}|{Mongos}} server Topology the authentication method is being called on

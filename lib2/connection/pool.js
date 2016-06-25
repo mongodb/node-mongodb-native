@@ -524,6 +524,26 @@ Pool.prototype.connect = function(auth) {
   connection.connect();
 }
 
+// /**
+//  * Reauthenticates the pool using the current provider credentials
+//  * @method
+//  * @param {authResultCallback} callback A callback function
+//  */
+// Pool.prototype.reauthenticate = function(cb) {
+//   // Finished re-authenticating against providers
+//   if(providers.length == 0) return cb();
+//   // Get the provider name
+//   var provider = pool.authProviders[providers.pop()];
+//
+//   // Auth provider
+//   provider.reauthenticate(write(pool), [connection], function(err, r) {
+//     // We got an error return immediately
+//     if(err) return cb(err);
+//     // Continue authenticating the connection
+//     authenticateAgainstProvider(pool, connection, providers, cb);
+//   });
+// }
+
 /**
  * Authenticate using a specified mechanism
  * @method
@@ -627,6 +647,11 @@ Pool.prototype.logout = function(dbName, callback) {
   var count = connections.length;
   // Store any error
   var error = null;
+  // console.log("=========== logout how many connections :: " + count)
+  // console.log(" self.availableConnections = " + self.availableConnections.length)
+  // console.log(" self.inUseConnections = " + self.inUseConnections.length)
+  // console.log(" self.nonAuthenticatedConnections = " + self.nonAuthenticatedConnections.length)
+  // console.log(" self.connectingConnections = " + self.connectingConnections.length)
 
   // Send logout command over all the connections
   for(var i = 0; i < connections.length; i++) {
