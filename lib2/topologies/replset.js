@@ -145,7 +145,9 @@ var ReplSet = function(seedlist, options) {
     // Acceptable latency window for nearest reads
     acceptableLatency: options.acceptableLatency || 15,
     // Connect function options passed in
-    connectOptions: {}
+    connectOptions: {},
+    // Are we running in debug mode
+    debug: typeof options.debug == 'boolean' ? options.debug : false
   }
 
   // console.log("== create ReplSet :: " + this.s.id)
@@ -511,6 +513,7 @@ function topologyMonitor(self, options) {
                   process.nextTick(function() {
                     self.emit('connect', self);
                     self.emit('fullsetup', self);
+                    self.emit('all', self);
                   });
               } else if(self.state == CONNECTING
                 && self.s.replicaSetState.hasSecondary()
@@ -672,6 +675,16 @@ ReplSet.prototype.lastIsMaster = function() {
     ? this.s.replicaSetState.primary.lastIsMaster() : null;
 }
 
+ReplSet.prototype.connections = function() {
+  var servers = this.s.replicaSetState.allServers();
+  var connections = [];
+  for(var i = 0; i < servers.length; i++) {
+    connections = connections.concat(servers[i].connections());
+  }
+
+  return connections;
+}
+
 ReplSet.prototype.isConnected = function(options) {
   // console.log("=== isConnected")
   options = options || {};
@@ -723,8 +736,14 @@ ReplSet.prototype.getServer = function(options) {
   // console.log("=== getServer")
   // Ensure we have no options
   options = options || {};
-  // Pick the right server based on readPreference
-  return pickServer(this, this.s, options.readPreference);
+  // Pick the right server baspickServerd on readPreference
+  var server = pickServer(this, this.s, options.readPreference);
+  if(this.s.debug) this.emit('pickedServer', options.readPreference, server);
+  return server;
+}
+
+ReplSet.prototype.getServers = function() {
+  return this.s.replicaSetState.allServers();
 }
 
 ReplSet.prototype.getServerFrom = function(connection) {
@@ -1076,6 +1095,7 @@ ReplSet.prototype.command = function(ns, cmd, options, callback) {
   // Pick a server
   var server = pickServer(self, self.s, readPreference);
   if(!(server instanceof Server)) return callback(server);
+  if(self.s.debug) self.emit('pickedServer', ReadPreference.primary, server);
 
   // Topology is not connected, save the call in the provided store to be
   // Executed at some point when the handler deems it's reconnected

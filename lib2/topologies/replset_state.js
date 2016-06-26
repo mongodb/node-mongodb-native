@@ -57,10 +57,11 @@ ReplSetState.prototype.hasSecondary = function(server) {
   return this.secondaries.length > 0;
 }
 
-ReplSetState.prototype.allServers = function() {
+ReplSetState.prototype.allServers = function(options) {
+  options = options || {};
   var servers = this.primary ? [this.primary] : [];
   servers = servers.concat(this.secondaries);
-  servers = servers.concat(this.arbiters);
+  if(!options.ignoreArbiters) servers = servers.concat(this.arbiters);
   servers = servers.concat(this.passives);
   return servers;
 }

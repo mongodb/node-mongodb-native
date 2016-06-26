@@ -1,4 +1,4 @@
-"use strict";
+// "use strict";
 
 var inherits = require('util').inherits,
   EventEmitter = require('events').EventEmitter,
@@ -407,11 +407,13 @@ function messageHandler(self) {
           return workItem.cb(MongoError.create(err));
         }
 
-        // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! messageHandler :: " + connection.id)
-        // console.dir(connection.workItem == null)
-        // console.dir(workItem.command)
-        // console.dir(err)
-        // console.dir(message.documents)
+        // if(global.debug){
+          // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! messageHandler :: " + connection.id)
+        //   // console.dir(connection.workItem == null)
+        //   // console.dir(workItem.command)
+        //   // console.dir(err)
+          // console.dir(message.documents)
+        // }
 
         // Establish if we have an error
         if(workItem.command && message.documents[0] && (message.documents[0].ok == 0 || message.documents[0]['$err']
@@ -419,6 +421,9 @@ function messageHandler(self) {
           // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! messageHandler :: " + connection.id + " :: 0")
           return workItem.cb(MongoError.create(message.documents[0]));
         }
+
+        // console.log("-------- 0")
+        // console.dir(message.documents)
 
         // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! messageHandler :: " + connection.id + " :: 1")
         // console.log(workItem.cb.toString())

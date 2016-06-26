@@ -1,4 +1,4 @@
-"use strict";
+// "use strict";
 
 var Long = require('bson').Long
   , Logger = require('./connection/logger')
@@ -172,7 +172,9 @@ Cursor.prototype._find = function(callback) {
   }
 
   var queryCallback = function(err, r) {
-    // console.log("!!!!!!!!!!!!!!!!!!!!! _find 1")
+    // console.log("!!!!!!!!!!!!!!!!!!!!! _find queryCallback 1")
+    // console.dir(err);
+    // if(r) console.dir(r.message.documents)
     // if(r) {
     //   console.dir(r.connection.options.port)
     // }
@@ -270,6 +272,7 @@ Cursor.prototype._find = function(callback) {
 
   // try {
   // console.log("^^^^ _find 0")
+  // console.dir(self.cmd)
   // console.dir(self.server != null)
   // console.dir(self.server.s.pool != null)
   // Write the initial command out
@@ -538,6 +541,7 @@ var setCursorNotified = function(self, callback) {
 var push = Array.prototype.push;
 
 var nextFunction = function(self, callback) {
+  // console.log("----- nextFunction 0")
   // console.log("core:: nextFunction :: 0")
   // We have notified about it
   if(self.cursorState.notified) {
@@ -557,6 +561,7 @@ var nextFunction = function(self, callback) {
 
   // We have just started the cursor
   if(!self.cursorState.init) {
+    // console.log("----- nextFunction 1")
     // console.log("core:: nextFunction :: 2 :: " + self.topology.isConnected(self.options))
     // Topology is not connected, save the call in the provided store to be
     // Executed at some point when the handler deems it's reconnected
@@ -567,9 +572,9 @@ var nextFunction = function(self, callback) {
     // console.log("core:: nextFunction :: 3")
 
     try {
-      // console.log("============================= 0")
+      // console.log("============== nextFunction 1 : 0")
       self.server = self.topology.getServer(self.options);
-      // console.log("============================= 1")
+      // console.log("============== nextFunction 1 : 1")
     } catch(err) {
       // console.log("============================= err")
       // console.dir(err)
@@ -581,6 +586,9 @@ var nextFunction = function(self, callback) {
       // Otherwise return the error
       return callback(err);
     }
+
+    // console.log("----- nextFunction 2")
+    // console.dir(self.cmd)
 
     // console.log("=== server :: " + (self.server != null))
 

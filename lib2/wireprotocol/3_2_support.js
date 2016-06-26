@@ -1,4 +1,4 @@
-"use strict";
+// "use strict";
 
 var Insert = require('./commands').Insert
   , Update = require('./commands').Update
@@ -42,10 +42,15 @@ var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callba
   writeCommand[opsField] = ops;
   writeCommand.ordered = ordered;
 
+  // console.log("======= insert 0")
+
   // Did we specify a write concern
   if(writeConcern && Object.keys(writeConcern).length > 0) {
     writeCommand.writeConcern = writeConcern;
   }
+
+  // console.log("======= insert 1")
+  // console.dir(writeCommand.writeConcern)
 
   // Do we have bypassDocumentValidation set, then enable it on the write command
   if(typeof options.bypassDocumentValidation == 'boolean') {
@@ -172,12 +177,16 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
   // Set query flags
   query.slaveOk = true;
 
+  // console.log("============ call getMore 0")
   // Query callback
   var queryCallback = function(err, result) {
+    // console.log("============ call getMore 2")
+    // console.dir(err)
     if(err) return callback(err);
     // console.log("================ getMore")
     // Get the raw message
     var r = result.message;
+    // console.dir(r.documents)
 
     // If we have a timed out query or a cursor that was killed
     if((r.responseFlags & (1 << 0)) != 0) {
@@ -227,6 +236,8 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
 
   // Write out the getMore command
   connection.write(query.toBin(), queryOptions, queryCallback);
+  global.debug = true
+  // console.log("============ call getMore 1")
 }
 
 WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, options) {
@@ -457,7 +468,7 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
 
   // Build Query object
   var query = new Query(bson, commandns, findCmd, {
-      numberToSkip: 0, numberToReturn: -1
+      numberToSkip: 0, numberToReturn: 1
     , checkKeys: false, returnFieldSelector: null
     , serializeFunctions: serializeFunctions, ignoreUndefined: ignoreUndefined
   });

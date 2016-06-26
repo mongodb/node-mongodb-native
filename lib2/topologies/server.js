@@ -318,7 +318,7 @@ function disconnectHandler(self, type, ns, cmd, options, callback) {
 Server.prototype.command = function(ns, cmd, options, callback) {
   // console.log("== Server:: command ");
   // console.dir(cmd)
-  // console.dir(options)
+  // console.dir(options.readPreference)
   // console.dir(cmd)
   var self = this;
   if(typeof options == 'function') callback = options, options = {}, options = options || {};
