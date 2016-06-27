@@ -172,8 +172,6 @@ exports['Should correctly return failing Promise when no document array passed i
       : f('%s?%s', url, 'maxPoolSize=100');
 
     MongoClient.connect(url).then(function(db) {
-      test.equal(1, db.serverConfig.connections().length);
-
       db.collection('insertMany_Promise_error').insertMany({a:1}).then(function(r) {
       }).catch(function(e) {
         test.ok(e != null);
@@ -197,8 +195,6 @@ exports['Should correctly return failing Promise when array passed into insertOn
       : f('%s?%s', url, 'maxPoolSize=100');
 
     MongoClient.connect(url).then(function(db) {
-      test.equal(1, db.serverConfig.connections().length);
-
       db.collection('insertOne_Promise_error').insertOne([{a:1}]).then(function(r) {
       }).catch(function(e) {
         test.ok(e != null);

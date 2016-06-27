@@ -2807,7 +2807,6 @@ exports.shouldCorrectlyLogoutFromTheDatabaseWithPromises = {
         // Authenticate
         db.authenticate('user3', 'name').then(function(result) {
           test.equal(true, result);
-
           // Logout the db
           db.logout().then(function(result) {
             test.equal(true, result);

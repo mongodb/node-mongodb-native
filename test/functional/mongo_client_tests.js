@@ -304,9 +304,12 @@ exports['Should correctly set MaxPoolSize on replicaset server'] = {
       : f('%s?%s', url, 'maxPoolSize=100');
 
     MongoClient.connect(url, {}, function(err, db) {
+      // console.log("============================= 0")
+      // console.dir(db.serverConfig.connections().length)
       test.ok(db.serverConfig.connections().length >= 1);
 
-      db.on('all', function() {
+      // db.on('all', function() {
+        // console.log("============================= 1")
         var connections = db.serverConfig.connections();
 
         for(var i = 0; i < connections.length; i++) {
@@ -314,27 +317,36 @@ exports['Should correctly set MaxPoolSize on replicaset server'] = {
           test.equal(120000, connections[i].socketTimeout);
         }
 
+        // console.log("============================= 2")
+
         db.close();
 
         MongoClient.connect(url, {
           connectTimeoutMS: 15000,
           socketTimeoutMS: 30000
         }, function(err, db) {
+          // console.log("============================= 3")
           test.ok(db.serverConfig.connections().length >= 1);
+          // console.log("============================= 4")
 
-          db.on('all', function() {
+          // db.on('all', function() {
+            // console.log("============================= 5")
             var connections = db.serverConfig.connections();
+
+            // console.log("============================= 6")
 
             for(var i = 0; i < connections.length; i++) {
               test.equal(15000, connections[i].connectionTimeout);
               test.equal(30000, connections[i].socketTimeout);
             }
 
+            // console.log("============================= 7")
+
             db.close();
             test.done();
-          });
+          // });
         });
-      });
+      // });
     });
   }
 }

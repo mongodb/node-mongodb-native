@@ -1466,6 +1466,8 @@ exports.handleBSONTypeInsertsCorrectly = {
                     test.ok(doc.maxkey instanceof MaxKey);
 
                     collection.findOne({"code": new Code("function () {}", {a: 77})}, function(err, doc) {
+                      console.dir(err)
+                      console.dir(doc)
                       test.equal(null, err);
                       test.ok(doc != null);
                       db.close();

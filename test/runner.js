@@ -94,8 +94,10 @@ var Configuration = function(options) {
   return function(context) {
     return {
       start: function(callback) {
+        // console.log("------------ start 0")
         var self = this;
         if(skipStart) return callback();
+        // console.log("------------ start 1")
 
         // Purge the database
         manager.purge().then(function() {
@@ -124,8 +126,10 @@ var Configuration = function(options) {
       },
 
       stop: function(callback) {
+        console.log("------------ stop 0")
         // console.log("=================== STOP 0")
         if(skipTermination) return callback();
+        console.log("------------ stop 1")
         // console.log("=================== STOP 1")
         // Stop the servers
         manager.stop().then(function() {
@@ -135,11 +139,13 @@ var Configuration = function(options) {
       },
 
       restart: function(options, callback) {
+        console.log("------------ restart 0")
         // console.log("=================== RESTART 0")
         if(typeof options == 'function') callback = options, options = {purge:true, kill:true};
         // console.log("=================== RESTART 1")
         if(skipTermination) return callback();
         // console.log("=================== RESTART 2")
+        console.log("------------ restart 1")
 
         // Stop the servers
         manager.restart().then(function() {
@@ -246,14 +252,14 @@ var testFiles = [
   // Logging tests
     '/test/functional/logger_tests.js'
 
-  // APM tests
-  , '/test/functional/apm_tests.js'
+  // // APM tests
+  // , '/test/functional/apm_tests.js'
 
   // Connection spec tests
   , '/test/functional/connection_string_spec_tests.js'
 
-  // // Replicaset read concern (make sure no illegal state due to teardown tests)
-  // , '/test/functional/readconcern_tests.js'
+  // Replicaset read concern (make sure no illegal state due to teardown tests)
+  , '/test/functional/readconcern_tests.js'
 
   // Promise tests
   , '/test/functional/promises_db_tests.js'
@@ -295,12 +301,12 @@ var testFiles = [
   , '/test/functional/decimal128_tests.js'
   , '/test/functional/find_and_modify_tests.js'
 
-  // // Replicaset tests
-  // , '/test/functional/replset_read_preference_tests.js'
-  // , '/test/functional/replset_operations_tests.js'
-  // , '/test/functional/replset_failover_tests.js'
-  // , '/test/functional/replset_connection_tests.js'
-  //
+  // Replicaset tests
+  , '/test/functional/replset_read_preference_tests.js'
+  , '/test/functional/replset_operations_tests.js'
+  , '/test/functional/replset_failover_tests.js'
+  , '/test/functional/replset_connection_tests.js'
+
   // // Sharding tests
   // , '/test/functional/sharding_failover_tests.js'
   // , '/test/functional/sharding_connection_tests.js'
@@ -430,12 +436,15 @@ if(argv.t == 'functional') {
       return runner.run(Configuration(_config));
     }
 
+    console.log("!!!!!!!!!!! RUN 0")
     // Kill any running MongoDB processes and
     // `install $MONGODB_VERSION` || `use existing installation` || `install stable`
     m(function(err){
+      console.log("!!!!!!!!!!! RUN 1")
       if(err) return console.error(err) && process.exit(1);
 
       m.current(function(err, version){
+        console.log("!!!!!!!!!!! RUN 2")
         if(err) return console.error(err) && process.exit(1);
         console.log('Running tests against MongoDB version `%s`', version);
         // Run the configuration
@@ -447,6 +456,7 @@ if(argv.t == 'functional') {
   //
   // Replicaset configuration
   if(argv.e == 'replicaset') {
+    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     // Establish the server version
     new ServerManager('mongod').discover().then(function(r) {
       // The individual nodes

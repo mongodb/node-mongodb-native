@@ -3,6 +3,7 @@
 var f = require('util').format;
 
 var restartAndDone = function(configuration, test) {
+  // console.log("-- restartAndDone")
   configuration.manager.restart().then(function() {
     test.done();
   });
@@ -658,54 +659,54 @@ exports['Should Fail due to bufferMaxEntries = 0 not causing any buffering'] = {
   }
 }
 
-exports['Should correctly receive ping and ha events'] = {
-  metadata: { requires: { topology: 'replicaset' } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var ReplSet = configuration.require.ReplSet
-      , Server = configuration.require.Server
-      , Db = configuration.require.Db;
-
-    // Replica configuration
-    var replSet = new ReplSet([
-        new Server(configuration.host, configuration.port),
-        new Server(configuration.host, configuration.port + 1),
-        new Server(configuration.host, configuration.port + 2)
-      ],
-      {rs_name:configuration.replicasetName}
-    );
-
-    // Open the db connection
-    new Db('integration_test_', replSet, {w:1}).open(function(err, db) {
-      test.equal(null, err)
-      var ha_connect = false;
-      var ha_ismaster = false;
-      var ping = false;
-
-      // Listen to the ha and ping events
-      db.serverConfig.once("ha_connect", function(err) {
-        ha_connect = true;
-      });
-
-      db.serverConfig.once("ha_ismaster", function(err, result) {
-        ha_ismaster = true;
-      });
-
-      db.serverConfig.once("ping", function(err, r) {
-        ping = true;
-      });
-
-      var interval = setInterval(function() {
-        if(ping && ha_connect && ha_ismaster) {
-          clearInterval(interval);
-          db.close();
-          test.done();
-        }
-      }, 100);
-    });
-  }
-}
+// exports['Should correctly receive ping and ha events'] = {
+//   metadata: { requires: { topology: 'replicaset' } },
+//
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var ReplSet = configuration.require.ReplSet
+//       , Server = configuration.require.Server
+//       , Db = configuration.require.Db;
+//
+//     // Replica configuration
+//     var replSet = new ReplSet([
+//         new Server(configuration.host, configuration.port),
+//         new Server(configuration.host, configuration.port + 1),
+//         new Server(configuration.host, configuration.port + 2)
+//       ],
+//       {rs_name:configuration.replicasetName}
+//     );
+//
+//     // Open the db connection
+//     new Db('integration_test_', replSet, {w:1}).open(function(err, db) {
+//       test.equal(null, err)
+//       var ha_connect = false;
+//       var ha_ismaster = false;
+//       var ping = false;
+//
+//       // Listen to the ha and ping events
+//       db.serverConfig.once("ha_connect", function(err) {
+//         ha_connect = true;
+//       });
+//
+//       db.serverConfig.once("ha_ismaster", function(err, result) {
+//         ha_ismaster = true;
+//       });
+//
+//       db.serverConfig.once("ping", function(err, r) {
+//         ping = true;
+//       });
+//
+//       var interval = setInterval(function() {
+//         if(ping && ha_connect && ha_ismaster) {
+//           clearInterval(interval);
+//           db.close();
+//           test.done();
+//         }
+//       }, 100);
+//     });
+//   }
+// }
 
 /**
  * @ignore
@@ -880,6 +881,7 @@ exports['Should Correctly remove server going into recovery mode'] = {
 
         db1.open(function(err, db1) {
           test.equal(null, err);
+          global.debug = true
 
           db1.admin().command({ replSetMaintenance: 1 }, function(err, result) {
           });
@@ -912,6 +914,7 @@ exports['Should return single server direct connection when replicaSet not provi
     MongoClient.connect(url, function(err, db) {
       test.equal(null, err);
       test.ok(db.serverConfig instanceof Server);
+      db.close();
 
       test.done();
     });
@@ -936,6 +939,7 @@ exports['Should not give an error when using a two server seeds and no setName']
 
     MongoClient.connect(url, function(err, db) {
       test.equal(null, err);
+      db.close();
 
       test.done();
     });
@@ -976,19 +980,26 @@ exports['Should correctly connect to arbiter with single connection'] = {
 
     // Replset start port
     configuration.manager.arbiters().then(function(managers) {
+      console.log("=========================== 0")
       // Get the arbiters
       var host = managers[0].host;
       var port = managers[0].port;
       var db = new Db('integration_test_', new Server(host, port), {w:1});
+      console.log("=========================== 0")
+      console.log("host = " + host)
+      console.log("port = " + port)
 
       db.open(function(err, p_db) {
+        console.log("=========================== 1")
         test.equal(null, err);
 
         p_db.command({ismaster: true}, function(err, result) {
+          console.log("=========================== 2")
           test.equal(null, err);
 
           // Should fail
           p_db.collection('t').insert({a:1}, function(err, r) {
+            console.log("=========================== 3")
             test.ok(err != null);
 
             p_db.close();
@@ -1056,22 +1067,31 @@ exports['Replicaset connection where a server is standalone'] = {
         dbpath: primaryServerManager.options.dbpath
       });
 
+      console.log("-------------------------------- 0")
       // Stop the primary
       primaryServerManager.stop().then(function(err, r) {
+        console.log("-------------------------------- 1")
         nonReplSetMember.purge().then(function() {
+          console.log("-------------------------------- 2")
           // Start a non replset member
           nonReplSetMember.start().then(function() {
+            console.log("-------------------------------- 3")
 
             configuration.manager.waitForPrimary().then(function() {
+              console.log("-------------------------------- 4")
               var url = f("mongodb://localhost:%s,localhost:%s,localhost:%s/integration_test_?replicaSet=%s"
                     , configuration.port, configuration.port + 1, configuration.port + 2, configuration.replicasetName)
+
               // Attempt to connect using MongoClient uri
               MongoClient.connect(url, function(err, db) {
+                console.log("-------------------------------- 5")
                 test.equal(null, err);
                 test.ok(db.serverConfig instanceof ReplSet);
+                db.close();
 
                 // Stop the normal server
                 nonReplSetMember.stop().then(function() {
+                  console.log("-------------------------------- 6")
                   restartAndDone(configuration, test);
                 });
               });

@@ -33,7 +33,7 @@ exports['Should Correctly Pick lowest ping time'] = {
         new Server(configuration.host, configuration.port + 1),
         new Server(configuration.host, configuration.port + 2)
       ],
-      {strategy:'ping', secondaryAcceptableLatencyMS: 5, rs_name:configuration.replicasetName, debug:true}
+      {secondaryAcceptableLatencyMS: 5, rs_name:configuration.replicasetName, debug:true}
     );
 
     // Open the database
@@ -46,69 +46,93 @@ exports['Should Correctly Pick lowest ping time'] = {
 
         var time = 10;
 
-        // Nearest strategy
-        var nearest = db.serverConfig.replset.readPreferenceStrategies['nearest'];
+        // // Nearest strategy
+        // var nearest = db.serverConfig.replset.readPreferenceStrategies['nearest'];
 
         // Sorted by time
         var byTime = [];
+        // console.log("============== server servers")
+        var byTime = db.serverConfig.replset.getServers({ignoreArbiters:true});
+        byTime.forEach(function(s) {
+          s.lastIsMasterMS = time;
+          time = time + 10;
+        });
 
-        // Set the ping times
-        var keys = Object.keys(nearest.data);
-        for(var i = 0; i < keys.length; i++) {
-          nearest.data[keys[i]] = time;
-          if(keys[i] != result.primary)
-            byTime.push(keys[i]);
-          time += 10;
-        }
+        // console.dir(result)
 
-        // Set primary to the highest ping time
-        nearest.data[result.primary] = time;
-        byTime.push(result.primary);
+        // // Set the ping times
+        // var keys = Object.keys(nearest.data);
+        // for(var i = 0; i < keys.length; i++) {
+        //   nearest.data[keys[i]] = time;
+        //   if(keys[i] != result.primary)
+        //     byTime.push(keys[i]);
+        //   time += 10;
+        // }
+
+        // // Set primary to the highest ping time
+        // nearest.data[result.primary] = time;
+        // byTime.push(result.primary);
+        //
 
         var secondaries = [];
-        result.hosts.forEach(function(s) {
+        var hosts = result.hosts.concat(result.passives || []);
+        hosts.forEach(function(s) {
           if(result.primary != s && result.arbiters.indexOf(s) == -1)
             secondaries.push(s);
         });
 
-        // Last server picked
-        var lastServer = null;
+        // // Last server picked
+        // var lastServer = null;
 
         // Pick the server
         db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
-          test.equal(byTime[0], server.name);
+          // console.log("======================== 1")
+          // console.log(" byTime[0].name = " + byTime[0].name)
+          // console.log(" server.name = " + server.name)
+          test.equal(byTime[0].name, server.name);
         });
 
+        // console.log("======================== 0")
         // Attempt to perform a read
         db.collection('somecollection').findOne({}, {readPreference: new ReadPreference(ReadPreference.NEAREST)}, function(err, doc) {
+          // console.log("======================== 2")
           test.equal(null, err);
 
           // Pick the server
           db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+            // console.log("======================== 3")
             test.ok(secondaries.indexOf(server.name) != -1);
           });
 
           // Attempt to perform a read
           db.collection('somecollection').findOne({}, {readPreference: new ReadPreference(ReadPreference.SECONDARY)}, function(err, doc) {
+            // console.log("======================== 4")
             test.equal(null, err);
 
             // Pick the server
             db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+              // console.log("======================== 5")
+              // console.dir(secondaries)
+              // console.dir(server.name)
+              // process.exit(0)
               // test.equal('localhost:31001', server.name);
               test.ok(secondaries.indexOf(server.name) != -1);
             });
 
             // Attempt to perform a read
             db.collection('somecollection').findOne({}, {readPreference: new ReadPreference(ReadPreference.SECONDARY_PREFERRED)}, function(err, doc) {
+              // console.log("======================== 6")
               test.equal(null, err);
 
               // Pick the server
               db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+                // console.log("======================== 6")
                 test.equal('localhost:31000', server.name);
               });
 
               // Attempt to perform a read
               db.collection('somecollection').findOne({}, {readPreference: new ReadPreference(ReadPreference.PRIMARY)}, function(err, doc) {
+                // console.log("======================== 8")
                 test.equal(null, err);
 
                 // Close db
@@ -153,8 +177,6 @@ exports['Should Correctly vary read server when using readpreference NEAREST'] =
     // Open the database
     var db = new Db('integration_test_', replSet, {w:1, readPreference: ReadPreference.NEAREST});
     db.on("fullsetup", function() {
-      // Nearest strategy
-      var nearest = db.serverConfig.replset.readPreferenceStrategies['nearest'];
       // Servers viewed
       var viewedServers = {};
 
@@ -434,7 +456,8 @@ exports['Should Set read preference at collection level using createCollection m
         });
 
         // Grab the collection
-        db.createCollection("read_preferences_all_levels_0", {readPreference:ReadPreference.SECONDARY}, function(err, collection) {
+        db.createCollection("read_preferences_all_levels_1", {readPreference:ReadPreference.SECONDARY}, function(err, collection) {
+          console.dir(err)
           test.equal(null, err);
 
           // Pick the server
@@ -612,22 +635,29 @@ exports['Set read preference at db level'] = {
     // Connect to the db
     db.on("fullsetup", function() {
       db.command({ismaster:true}, function(err, result) {
+        // console.log("--------------- 0")
         // Filter out the secondaries
         var secondaries = {};
-        result.hosts.forEach(function(s) {
+        var hosts = result.hosts.concat(result.passives || []);
+        hosts.forEach(function(s) {
           if(result.primary != s && result.arbiters.indexOf(s) == -1)
             secondaries[s] = s;
         });
+        // console.log("--------------- 1")
 
         db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+          // console.log("--------------- 4")
           test.ok(secondaries[server.name] != null);
         });
+        // console.log("--------------- 2")
 
         // Grab the collection
-        var collection = db.collection("read_preferences_all_levels_0");
+        var collection = db.collection("read_preferences_all_levels_2");
         // Attempt to read (should fail due to the server not being a primary);
         var cursor = collection.find()
+        // console.log("--------------- 3")
         cursor.toArray(function(err, items) {
+          // console.log("--------------- 5")
           // Does not get called or we don't care
           test.equal(ReadPreference.SECONDARY, cursor.readPreference.preference)
           db.close();
@@ -684,7 +714,7 @@ exports['Set read preference at collection level using collection method'] = {
         });
 
         // Grab the collection
-        var collection = db.collection("read_preferences_all_levels_0", {readPreference:new ReadPreference(ReadPreference.SECONDARY)});
+        var collection = db.collection("read_preferences_all_levels_3", {readPreference:new ReadPreference(ReadPreference.SECONDARY)});
         // Attempt to read (should fail due to the server not being a primary);
         var cursor = collection.find()
         cursor.toArray(function(err, items) {

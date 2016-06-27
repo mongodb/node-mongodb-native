@@ -3400,8 +3400,11 @@ exports.shouldCorrectlyLogoutFromTheDatabase = {
         db.authenticate('user3', 'name', function(err, result) {
           test.equal(true, result);
 
+          // console.log("--------- 0")
           // Logout the db
           db.logout(function(err, result) {
+            // console.log("---------- 1")
+            // console.dir(result)
             test.equal(true, result);
 
             // Remove the user
