@@ -126,26 +126,24 @@ var Configuration = function(options) {
       },
 
       stop: function(callback) {
-        console.log("------------ stop 0")
         // console.log("=================== STOP 0")
         if(skipTermination) return callback();
-        console.log("------------ stop 1")
         // console.log("=================== STOP 1")
         // Stop the servers
-        manager.stop().then(function() {
+        manager.stop(9).then(function() {
           // console.log("=================== STOP 1")
           callback();
         });
       },
 
       restart: function(options, callback) {
-        console.log("------------ restart 0")
+        // console.log("------------ restart 0")
         // console.log("=================== RESTART 0")
         if(typeof options == 'function') callback = options, options = {purge:true, kill:true};
         // console.log("=================== RESTART 1")
         if(skipTermination) return callback();
         // console.log("=================== RESTART 2")
-        console.log("------------ restart 1")
+        // console.log("------------ restart 1")
 
         // Stop the servers
         manager.restart().then(function() {
