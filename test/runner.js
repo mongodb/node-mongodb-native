@@ -239,6 +239,7 @@ try {
   testFiles.push('/test/tests/functional2/rs_mocks/all_servers_close_tests.js');
   testFiles.push('/test/tests/functional2/rs_mocks/read_preferences_tests.js');
   testFiles.push('/test/tests/functional2/rs_mocks/monitoring_tests.js');
+  testFiles.push('/test/tests/functional2/rs_mocks/maintanance_mode_tests.js');
 
 //   // Mongos Mock Tests
 //   testFiles.push('/test/tests/functional/mongos_mocks/single_proxy_connection_tests.js');

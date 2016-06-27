@@ -1,4 +1,4 @@
-"use strict"
+// "use strict"
 
 var inherits = require('util').inherits,
   f = require('util').format,
@@ -178,9 +178,9 @@ inherits(ReplSet, EventEmitter);
 
 function attemptReconnect(self) {
   self.haTimeoutId = setTimeout(function() {
-    // console.log("---- attemptReconnect")
+    // if(global.debug)console.log("---- attemptReconnect")
     if(self.state == DESTROYED) return;
-    // console.log("---- attemptReconnect 1")
+    // if(global.debug)console.log("---- attemptReconnect 1")
     // Get all known hosts
     var keys = Object.keys(self.s.replicaSetState.set);
     // console.log("===== REPLSET CREATE SERVER 0 :: " + self.s.id)
@@ -200,7 +200,7 @@ function attemptReconnect(self) {
     // Handle all events coming from servers
     function _handleEvent(self, event) {
       return function(err) {
-        // console.log("== _handleEvent :: " + event)
+        // if(global.debug) console.log("== _handleEvent :: " + event + " :: " + this.name)
         // console.dir(err)
         // Destroy the instance
         if(self.state == DESTROYED) {
@@ -216,7 +216,15 @@ function attemptReconnect(self) {
 
             // Do we have a primary
             if(self.s.replicaSetState.hasPrimary()) {
+              // If we have a primary and a disconnect handler, execute
+              // buffered operations
+              if(self.s.replicaSetState.hasPrimaryAndSecondary() && self.s.disconnectHandler) {
+                self.s.disconnectHandler.execute();
+              }
+
+              // Connect any missing servers
               connectNewServers(self, self.s.replicaSetState.unknownServers, function(err, cb) {
+                // Go back to normal topology monitoring
                 topologyMonitor(self);
               });
             } else {
@@ -288,24 +296,6 @@ function attemptReconnect(self) {
   }, self.s.minHeartbeatFrequencyMS);
 }
 
-// // Apply all the credentials serially
-// function applyCredentials(server, index, credentials, callback) {
-//   // console.log("== applyCredentials 0")
-//   // Do not apply credentials if we have an arbiter
-//   if(server.lastIsMaster() && server.lastIsMaster().arbiterOnly) return callback();
-//   // console.log("== applyCredentials 1")
-//   // Done applying the credentials return
-//   if(index >= credentials.length || credentials.length == 0) return callback();
-//   // console.log("== applyCredentials 2")
-//   // Apply the credential
-//   server.auth.apply(server, credentials[index].concat([function(err, r) {
-//     // console.log("== applyCredentials 3")
-//     if(err) return callback(err);
-//     // console.log("== applyCredentials 4")
-//     applyCredentials(server, index + 1, credentials, callback);
-//   }]));
-// }
-
 function connectNewServers(self, servers, callback) {
   // Count lefts
   var count = servers.length;
@@ -314,7 +304,7 @@ function connectNewServers(self, servers, callback) {
   // Handle events
   var _handleEvent = function(self, event) {
     return function(err, r) {
-      // console.log("===== _handleEvent :: " + event + " :: " + this.id)
+      // if(global.debug)console.log("===== _handleEvent :: " + event + " :: " + this.id)
       // console.dir(err)
       var _self = this;
       // console.log("=============== connectNewServers :: _handleEvent :: " + this.name)
@@ -425,10 +415,17 @@ function topologyMonitor(self, options) {
 
   // Set momitoring timeout
   self.haTimeoutId = setTimeout(function() {
-    // console.log("===================== topologyMonitor")
+    // if(global.debug)console.log("===================== topologyMonitor")
     // console.dir(self.state)
     // console.log("+ topologyMonitor 0")
     if(self.state == DESTROYED) return;
+
+    // If we have a primary and a disconnect handler, execute
+    // buffered operations
+    if(self.s.replicaSetState.hasPrimaryAndSecondary() && self.s.disconnectHandler) {
+      self.s.disconnectHandler.execute();
+    }
+
     // Get the connectingServers
     var connectingServers = self.s.replicaSetState.allServers();
     // console.log(connectingServers.map(function(x) {
@@ -452,13 +449,13 @@ function topologyMonitor(self, options) {
     // If the count is zero schedule a new fast
     // console.log("+ topologyMonitor 1 :: count :: " + count)
     function pingServer(_self, _server, cb) {
-      // console.log("================ pingServer 0 :: " + _server.name)
+      // if(global.debug)console.log("================ pingServer 0 :: " + _server.name)
       // Measure running time
       var start = new Date().getTime();
       // Execute ismaster
       _server.command('admin.$cmd', {ismaster:true}, {monitoring: true}, function(err, r) {
         // if(err) console.dir(err)
-        // console.log("================ pingServer 1 :: " + _server.name)
+        // if(global.debug)console.log("================ pingServer 1 :: " + _server.name)
         // console.dir(err)
         if(self.state == DESTROYED) {
           _server.destroy();
@@ -547,7 +544,7 @@ function topologyMonitor(self, options) {
 function handleEvent(self, event) {
   return function(err) {
     // console.log("===== handleEvent :: " + event + " :: " + this.is)
-    // console.log("$$$$ handleEvent :: " + event + " :: " + self.s.id + " :: " + this.name)
+    // if(global.debug)console.log("$$$$ handleEvent :: " + event + " :: " + self.s.id + " :: " + this.name)
     if(self.state == DESTROYED) return;
     self.s.replicaSetState.remove(this);
   }

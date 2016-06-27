@@ -229,6 +229,14 @@ ReplSetState.prototype.update = function(server) {
     return false;
   }
 
+  //
+  // Server in maintanance mode
+  //
+  if(ismaster && !ismaster.ismaster && !ismaster.secondary && !ismaster.arbiterOnly) {
+    this.remove(server, {force:true});
+    return false;
+  }
+
   // console.log("=== ReplSetState.prototype.update 5")
 
   //
