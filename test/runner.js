@@ -250,8 +250,8 @@ var testFiles = [
   // Logging tests
     '/test/functional/logger_tests.js'
 
-  // // APM tests
-  // , '/test/functional/apm_tests.js'
+  // APM tests
+  , '/test/functional/apm_tests.js'
 
   // Connection spec tests
   , '/test/functional/connection_string_spec_tests.js'
@@ -323,9 +323,9 @@ var testFiles = [
   //
   // // Kerberos Tests
   // , '/test/functional/kerberos_tests.js'
-  //
-  // // Authentication Tests
-  // , '/test/functional/authentication_tests.js'
+
+  // Authentication Tests
+  , '/test/functional/authentication_tests.js'
 
   // GridFS
   , '/test/functional/gridfs_stream_tests.js'
@@ -337,8 +337,8 @@ var testFiles = [
 // Check if we support es6 generators
 try {
   eval("(function *(){})");
-  // Generator tests
-  testFiles.push('/test/functional/operation_generators_example_tests.js');
+  // // Generator tests
+  // testFiles.push('/test/functional/operation_generators_example_tests.js');
 } catch(err) {}
 
 // Add all the tests to run
