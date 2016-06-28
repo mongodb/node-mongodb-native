@@ -46,26 +46,8 @@ function stateTransition(self, newState) {
 
 //
 // ReplSet instance id
-var replSetId = 1;
+var id = 1;
 var handlers = ['connect', 'close', 'error', 'timeout', 'parseError'];
-
-function stateTransition(self, newState) {
-  var legalTransitions = {
-    'disconnected': [CONNECTING, DESTROYED, DISCONNECTED],
-    'connecting': [CONNECTING, DESTROYED, CONNECTED, DISCONNECTED],
-    'connected': [CONNECTED, DISCONNECTED, DESTROYED],
-    'destroyed': [DESTROYED]
-  }
-
-  // Get current state
-  var legalStates = legalTransitions[self.state];
-  if(legalStates && legalStates.indexOf(newState) != -1) {
-    self.state = newState;
-  } else {
-    self.logger.error(f('Replicaset with id [%s] failed attempted illegal state transition from [%s] to [%s] only following state allowed [%s]'
-      , self.id, self.state, newState, legalStates));
-  }
-}
 
 /**
  * Creates a new Replset instance
@@ -118,15 +100,15 @@ var ReplSet = function(seedlist, options) {
   EventEmitter.call(this);
 
   // Get replSet Id
-  var id = replSetId++;
+  this.id = id++;
 
   // Internal state
   this.s = {
     options: Object.assign({}, options),
     // BSON instance
     bson: options.bson || new BSON(),
-    // Uniquely identify the replicaset instance
-    id: id,
+    // // Uniquely identify the replicaset instance
+    // id: id,
     // Factory overrides
     Cursor: options.cursorFactory || BasicCursor,
     // Logger instance
@@ -135,7 +117,7 @@ var ReplSet = function(seedlist, options) {
     seedlist: seedlist,
     // Replicaset state
     replicaSetState: new ReplSetState({
-      id: id, setName: options.setName
+      id: this.id, setName: options.setName
     }),
     // Current servers we are connecting to
     connectingServers: [],
@@ -686,7 +668,7 @@ ReplSet.prototype.connect = function(options) {
   });
 
   // Emit the topology opening event
-  emitSDAMEvent(this, 'topologyOpening', { topologyId: this.s.id });
+  emitSDAMEvent(this, 'topologyOpening', { topologyId: this.id });
 
   // Start all server connections
   connectServers(self, servers);
@@ -707,7 +689,7 @@ ReplSet.prototype.destroy = function() {
   });
 
   // Emit toplogy closing event
-  emitSDAMEvent(this, 'topologyClosed', { topologyId: this.s.id });
+  emitSDAMEvent(this, 'topologyClosed', { topologyId: this.id });
 }
 
 ReplSet.prototype.unref = function() {
@@ -796,11 +778,6 @@ ReplSet.prototype.getServer = function(options) {
 
 ReplSet.prototype.getServers = function() {
   return this.s.replicaSetState.allServers();
-}
-
-ReplSet.prototype.getServerFrom = function(connection) {
-  // console.log("=== getServerFrom")
-  return this;
 }
 
 ReplSet.prototype.getConnection = function(options) {

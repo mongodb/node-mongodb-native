@@ -536,10 +536,6 @@ Server.prototype.getServer = function(options) {
   return this;
 }
 
-Server.prototype.getServerFrom = function(connection) {
-  return this;
-}
-
 Server.prototype.getConnection = function(options) {
   return this.s.pool.get();
 }
