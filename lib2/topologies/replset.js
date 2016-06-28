@@ -117,13 +117,16 @@ var ReplSet = function(seedlist, options) {
   // Add event listener
   EventEmitter.call(this);
 
+  // Get replSet Id
+  var id = replSetId++;
+
   // Internal state
   this.s = {
     options: Object.assign({}, options),
     // BSON instance
     bson: options.bson || new BSON(),
     // Uniquely identify the replicaset instance
-    id: replSetId++,
+    id: id,
     // Factory overrides
     Cursor: options.cursorFactory || BasicCursor,
     // Logger instance
@@ -131,7 +134,9 @@ var ReplSet = function(seedlist, options) {
     // Seedlist
     seedlist: seedlist,
     // Replicaset state
-    replicaSetState: new ReplSetState({setName: options.setName}),
+    replicaSetState: new ReplSetState({
+      id: id, setName: options.setName
+    }),
     // Current servers we are connecting to
     connectingServers: [],
     // Ha interval
@@ -151,6 +156,9 @@ var ReplSet = function(seedlist, options) {
   }
 
   // console.log("== create ReplSet :: " + this.s.id)
+
+  // Add handler for topology change
+  this.s.replicaSetState.on('topologyDescriptionChanged', function(r) { self.emit('topologyDescriptionChanged', r); });
 
   // All the authProviders
   this.authProviders = options.authProviders || {
@@ -178,7 +186,7 @@ inherits(ReplSet, EventEmitter);
 
 function attemptReconnect(self) {
   self.haTimeoutId = setTimeout(function() {
-    // if(global.debug)console.log("---- attemptReconnect")
+    // if(global.debug)console.log("---- attemptReconnect :: " + self.s.id)
     if(self.state == DESTROYED) return;
     // if(global.debug)console.log("---- attemptReconnect 1")
     // Get all known hosts
@@ -188,8 +196,7 @@ function attemptReconnect(self) {
       return new Server(Object.assign({
         host: x.split(':')[0], port: parseInt(x.split(':')[1], 10)
       }, self.s.options, {
-        // reconnect:false, monitoring: false
-        authProviders: self.authProviders, reconnect:false, monitoring: false
+        authProviders: self.authProviders, reconnect:false, monitoring: false, inTopology: true
       }));
     });
     // console.log("---- attemptReconnect 2 :: " + servers.length)
@@ -289,6 +296,12 @@ function attemptReconnect(self) {
       server.once('timeout', _handleEvent(self, 'timeout'));
       server.once('error', _handleEvent(self, 'error'));
       server.once('parseError', _handleEvent(self, 'parseError'));
+
+      // SDAM Monitoring events
+      server.on('serverOpening', function(e) { self.emit('serverOpening', e); });
+      server.on('serverDescriptionChanged', function(e) { self.emit('serverDescriptionChanged', e); });
+      server.on('serverClosed', function(e) { self.emit('serverClosed', e); });
+
       // console.log("-------- connect 3 :: 0")
       server.connect(self.s.connectOptions);
       // console.log("-------- connect 3 :: 1")
@@ -385,8 +398,7 @@ function connectNewServers(self, servers, callback) {
         host: _server.split(':')[0],
         port: parseInt(_server.split(':')[1], 10)
       }, self.s.options, {
-        // reconnect:false, monitoring: false
-        authProviders: self.authProviders, reconnect:false, monitoring: false
+        authProviders: self.authProviders, reconnect:false, monitoring: false, inTopology: true
       }));
       // console.log("=============== connectNewServers - 2")
       // Add temp handlers
@@ -395,6 +407,11 @@ function connectNewServers(self, servers, callback) {
       server.once('timeout', _handleEvent(self, 'timeout'));
       server.once('error', _handleEvent(self, 'error'));
       server.once('parseError', _handleEvent(self, 'parseError'));
+
+      // SDAM Monitoring events
+      server.on('serverOpening', function(e) { self.emit('serverOpening', e); });
+      server.on('serverDescriptionChanged', function(e) { self.emit('serverDescriptionChanged', e); });
+      server.on('serverClosed', function(e) { self.emit('serverClosed', e); });
       // console.log("-------- connect 1 :: 0")
       server.connect(self.s.connectOptions);
     }, i);
@@ -415,6 +432,7 @@ function topologyMonitor(self, options) {
 
   // Set momitoring timeout
   self.haTimeoutId = setTimeout(function() {
+    // console.log("===================== topologyMonitor :: " + self.s.id)
     // if(global.debug)console.log("===================== topologyMonitor")
     // console.dir(self.state)
     // console.log("+ topologyMonitor 0")
@@ -452,6 +470,14 @@ function topologyMonitor(self, options) {
       // if(global.debug)console.log("================ pingServer 0 :: " + _server.name)
       // Measure running time
       var start = new Date().getTime();
+
+      // server.on('serverHeartbeatStarted', function(e) { self.emit('serverHeartbeatStarted', e); });
+      // server.on('serverHeartbeatSucceeded', function(e) { self.emit('serverHeartbeatSucceeded', e); });
+      // server.on('serverHearbeatFailed', function(e) { self.emit('serverHearbeatFailed', e); });
+
+      // Emit the server heartbeat start
+      emitSDAMEvent(self, 'serverHeartbeatStarted', { connectionId: _server.name });
+
       // Execute ismaster
       _server.command('admin.$cmd', {ismaster:true}, {monitoring: true}, function(err, r) {
         // if(err) console.dir(err)
@@ -462,17 +488,26 @@ function topologyMonitor(self, options) {
           return cb(err, r);
         }
 
+        // Calculate latency
+        var latencyMS = new Date().getTime() - start;
+
         // We had an error, remove it from the state
         if(err) {
+          // Emit the server heartbeat failure
+          emitSDAMEvent(self, 'serverHearbeatFailed', { durationMS: latencyMS, failure: err, connectionId: _server.name });
+          // Remove the server from the state
           _self.s.replicaSetState.remove(_server);
         } else {
           // Update the server ismaster
           _server.ismaster = r.result;
-          _server.lastIsMasterMS = new Date().getTime() - start;
+          _server.lastIsMasterMS = latencyMS;
           // console.log("============= got ismaster from " + _server.name)
           // console.dir(_server.ismaster)
           // console.dir(r.result)
           _self.s.replicaSetState.update(_server);
+
+          // Server heart beat event
+          emitSDAMEvent(self, 'serverHeartbeatSucceeded', { durationMS: latencyMS, reply: r.result, connectionId: _server.name });
         }
         // console.log("================ pingServer 2 :: " + _server.name)
         // console.dir(err)
@@ -613,10 +648,24 @@ function connectServers(self, servers) {
     server.once('parseError', handleInitialConnectEvent(self, 'parseError'));
     server.once('error', handleInitialConnectEvent(self, 'error'));
     server.once('connect', handleInitialConnectEvent(self, 'connect'));
+    // SDAM Monitoring events
+    server.on('serverOpening', function(e) { self.emit('serverOpening', e); });
+    server.on('serverDescriptionChanged', function(e) { self.emit('serverDescriptionChanged', e); });
+    server.on('serverClosed', function(e) { self.emit('serverClosed', e); });
     // console.log("-------- connect 2 :: 0")
     // Start connection
     server.connect(self.s.connectOptions);
     // console.log("-------- connect 2 :: 1")
+  }
+}
+
+/**
+ * Emit event if it exists
+ * @method
+ */
+function emitSDAMEvent(self, event, description) {
+  if(self.listeners(event).length > 0) {
+    self.emit(event, description);
   }
 }
 
@@ -628,14 +677,16 @@ ReplSet.prototype.connect = function(options) {
   // Set connecting state
   stateTransition(this, CONNECTING);
   // console.log("=== Replset.connect")
-  // console.log("===== REPLSET CREATE SERVER::connect " + this.s.id)
+  // console.log("===== REPLSET CREATE ::connect " + this.s.id)
   // Create server instances
   var servers = this.s.seedlist.map(function(x) {
     return new Server(Object.assign(x, self.s.options, {
-      // reconnect:false, monitoring:false
-      authProviders: self.authProviders, reconnect:false, monitoring:false
+      authProviders: self.authProviders, reconnect:false, monitoring:false, inTopology: true
     }));
   });
+
+  // Emit the topology opening event
+  emitSDAMEvent(this, 'topologyOpening', { topologyId: this.s.id });
 
   // Start all server connections
   connectServers(self, servers);
@@ -649,10 +700,14 @@ ReplSet.prototype.destroy = function() {
   if(this.haTimeoutId) clearTimeout(this.haTimeoutId);
   // Destroy the replicaset
   this.s.replicaSetState.destroy();
+
   // Destroy all connecting servers
   this.s.connectingServers.forEach(function(x) {
     x.destroy();
   });
+
+  // Emit toplogy closing event
+  emitSDAMEvent(this, 'topologyClosed', { topologyId: this.s.id });
 }
 
 ReplSet.prototype.unref = function() {

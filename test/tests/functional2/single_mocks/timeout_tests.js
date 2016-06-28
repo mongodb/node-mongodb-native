@@ -50,7 +50,7 @@ exports['Should correctly timeout socket operation and then correctly re-execute
 
     // Boot the mock
     co(function*() {
-      server = yield mockupdb.createServer(37017, 'localhost');
+      server = yield mockupdb.createServer(37019, 'localhost');
 
       // Primary state machine
       co(function*() {
@@ -88,7 +88,7 @@ exports['Should correctly timeout socket operation and then correctly re-execute
     // Attempt to connect
     var replset = new Server({
       host: 'localhost',
-      port: '37017',
+      port: '37019',
       connectionTimeout: 3000,
       socketTimeout: 1000,
       size: 1
@@ -111,7 +111,7 @@ exports['Should correctly timeout socket operation and then correctly re-execute
               if(r && !done) {
                 // console.log("======= 3")
                 done = true;
-                test.equal(37017, r.connection.port);
+                test.equal(37019, r.connection.port);
                 replset.destroy();
                 running = false;
                 test.done();

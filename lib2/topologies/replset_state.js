@@ -28,6 +28,10 @@ var ReplSetState = function(options) {
   // Server set
   this.set = {};
 
+  // Unpacked options
+  this.id = options.id;
+  this.setName = options.setName;
+
   // Server side
   this.primary = null;
   this.secondaries = [];
@@ -41,6 +45,10 @@ var ReplSetState = function(options) {
   // Status
   this.maxElectionId = null;
   this.maxSetVersion = 0;
+  // Description of the Replicaset
+  this.replicasetDescription = {
+    "topologyType": "Unknown", "servers": []
+  };
 }
 
 inherits(ReplSetState, EventEmitter);
@@ -306,8 +314,12 @@ ReplSetState.prototype.update = function(server) {
     // console.log("=== ReplSetState.prototype.update 6:1:4")
     // console.log("========================= joined primary")
     removeFrom(server, self.unknownServers);
+    removeFrom(server, self.secondaries);
+    removeFrom(server, self.passives);
     // console.log("=== ReplSetState.prototype.update 6:1:5")
     self.emit('joined', 'primary', server);
+    // console.log("------------------------- 0")
+    emitTopologyDescriptionChanged(self);
     return true;
   } else if(ismaster.ismaster && ismaster.setName) {
     // console.log("=== ReplSetState.prototype.update 6:2")
@@ -407,8 +419,12 @@ ReplSetState.prototype.update = function(server) {
     this.topologyType = TopologyType.ReplicaSetWithPrimary;
     if(ismaster.setName) this.setName = ismaster.setName;
     removeFrom(server, self.unknownServers);
+    removeFrom(server, self.secondaries);
+    removeFrom(server, self.passives);
     // console.log("========================= joined primary 2")
     self.emit('joined', 'primary', server);
+    // console.log("------------------------- 1")
+    emitTopologyDescriptionChanged(self);
     return true;
   }
 
@@ -477,7 +493,18 @@ ReplSetState.prototype.update = function(server) {
     this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.ReplicaSetNoPrimary;
     if(ismaster.setName) this.setName = ismaster.setName;
     removeFrom(server, self.unknownServers);
+
+    // Remove primary
+    if(this.primary && this.primary.name == server.name) {
+      // console.log("## primary left")
+      server.destroy();
+      this.primary = null;
+      self.emit('left', 'primary', server);
+    }
+
     self.emit('joined', 'secondary', server);
+    // console.log("------------------------- 2")
+    emitTopologyDescriptionChanged(self);
     return true;
   }
 
@@ -496,6 +523,8 @@ ReplSetState.prototype.update = function(server) {
     if(ismaster.setName) this.setName = ismaster.setName;
     removeFrom(server, self.unknownServers);
     self.emit('joined', 'arbiter', server);
+    // console.log("------------------------- 3")
+    emitTopologyDescriptionChanged(self);
     return true;
   }
 
@@ -512,7 +541,18 @@ ReplSetState.prototype.update = function(server) {
     this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.ReplicaSetNoPrimary;
     if(ismaster.setName) this.setName = ismaster.setName;
     removeFrom(server, self.unknownServers);
+
+    // Remove primary
+    if(this.primary && this.primary.name == server.name) {
+      // console.log("## primary left")
+      server.destroy();
+      this.primary = null;
+      self.emit('left', 'primary', server);
+    }
+
     self.emit('joined', 'secondary', server);
+    // console.log("------------------------- 4")
+    emitTopologyDescriptionChanged(self);
     return true;
   }
 
@@ -522,6 +562,7 @@ ReplSetState.prototype.update = function(server) {
   // Remove the primary
   //
   if(this.set[server.name] && this.set[server.name].type == ServerType.RSPrimary) {
+    // console.log("====================== LEFT PRIMARY")
     self.emit('left', 'primary', this.primary);
     this.primary.destroy();
     this.primary = null;
@@ -595,6 +636,123 @@ function removeFrom(server, list) {
   }
 
   return false;
+}
+
+function emitTopologyDescriptionChanged(self) {
+  // console.log("---------------------------------- 0")
+  if(self.listeners('topologyDescriptionChanged').length > 0) {
+    var topology = 'Unknown';
+    var setName = self.setName;
+
+    // console.log("  ---------------------------------- 1")
+
+    if(self.hasPrimaryAndSecondary()) {
+      topology = 'ReplicaSetWithPrimary';
+    } else if(!self.hasPrimary() && self.hasSecondary()) {
+      topology = 'ReplicaSetNoPrimary';
+    }
+
+    // console.log("  ---------------------------------- 2")
+
+    // Generate description
+    var description = {
+      topologyType: topology,
+      setName: setName,
+      servers: []
+    }
+
+    // console.log("  ---------------------------------- 3")
+
+    // Add the primary to the list
+    if(self.hasPrimary()) {
+      // console.log("    ---------- primary")
+      var desc = self.primary.getDescription();
+      desc.type = 'RSPrimary';
+      description.servers.push(desc);
+    }
+
+    // Add all the secondaries
+    description.servers = description.servers.concat(self.secondaries.map(function(x) {
+      // console.log("    ---------- secondary")
+      // return self.set[x.name];
+      var description = x.getDescription();
+      description.type = 'RSSecondary';
+      return description;
+    }));
+
+    // Add all the arbiters
+    description.servers = description.servers.concat(self.arbiters.map(function(x) {
+      // console.log("    ---------- arbiter")
+      // return self.set[x.name];
+      var description = x.getDescription();
+      description.type = 'RSArbiter';
+      return description;
+    }));
+
+    // Add all the passives
+    description.servers = description.servers.concat(self.passives.map(function(x) {
+      // console.log("    ---------- passives")
+      // return self.set[x.name];
+      var description = x.getDescription();
+      description.type = 'RSSecondary';
+      return description;
+    }));
+
+    // console.log("---------------------------------- 4")
+
+    // Create the result
+    var result = {
+      topologyId: self.id,
+      previousDescription: self.replicasetDescription,
+      newDescription: description,
+      diff: diff(self.replicasetDescription, description)
+    };
+
+    // console.log("---------------------------------- 5")
+
+    // Emit the topologyDescription change
+    self.emit('topologyDescriptionChanged', result);
+
+    // Set the new description
+    self.replicasetDescription = description;
+  }
+}
+
+function diff(previous, current) {
+  // Difference document
+  var diff = {
+    servers: []
+  }
+
+  // Previous entry
+  if(!previous) {
+    previous = { servers: [] };
+  }
+
+  // Got through all the servers
+  for(var i = 0; i < previous.servers.length; i++) {
+    var prevServer = previous.servers[i];
+
+    // Go through all current servers
+    for(var j = 0; j < current.servers.length; j++) {
+      var currServer = current.servers[j];
+
+      // Matching server
+      if(prevServer.address === currServer.address) {
+        // We had a change in state
+        if(prevServer.type != currServer.type) {
+          diff.servers.push({
+            address: prevServer.address,
+            from: prevServer.type,
+            to: currServer.type
+          });
+        }
+      }
+    }
+  }
+
+  // Return difference
+  return diff;
 }
 
 module.exports = ReplSetState;

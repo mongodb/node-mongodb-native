@@ -208,7 +208,7 @@ var testFiles = [
   // , '/test/tests/functional/replset_failover_tests.js'
   // , '/test/tests/functional/undefined_tests.js'
 
-  // Functional 2 tests
+  // Functional tests
   '/test/tests/functional2/pool_tests.js',
   '/test/tests/functional2/server_tests.js',
   '/test/tests/functional2/cursor_tests.js',
@@ -240,6 +240,10 @@ try {
   testFiles.push('/test/tests/functional2/rs_mocks/read_preferences_tests.js');
   testFiles.push('/test/tests/functional2/rs_mocks/monitoring_tests.js');
   testFiles.push('/test/tests/functional2/rs_mocks/maintanance_mode_tests.js');
+
+  // SDAM Tests
+  testFiles.push('/test/tests/functional2/sdam_monitoring_mocks/single_topology_tests.js');
+  testFiles.push('/test/tests/functional2/sdam_monitoring_mocks/replset_topology_tests.js');
 
 //   // Mongos Mock Tests
 //   testFiles.push('/test/tests/functional/mongos_mocks/single_proxy_connection_tests.js');

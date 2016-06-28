@@ -13,7 +13,8 @@ var inherits = require('util').inherits,
   PreTwoSixWireProtocolSupport = require('../wireprotocol/2_4_support'),
   TwoSixWireProtocolSupport = require('../wireprotocol/2_6_support'),
   ThreeTwoWireProtocolSupport = require('../wireprotocol/3_2_support'),
-  BasicCursor = require('../cursor');
+  BasicCursor = require('../cursor'),
+  sdam = require('./shared');
 
 // Used for filtering out fields for loggin
 var debugFields = ['reconnect', 'reconnectTries', 'reconnectInterval', 'emitError', 'cursorFactory', 'host'
@@ -55,10 +56,14 @@ var Server = function(options) {
     disconnectHandler: options.disconnectHandler,
     // Monitor thread (keeps the connection alive)
     monitoring: typeof options.monitoring == 'boolean' ? options.monitoring : true,
+    // Is the server in a topology
+    inTopology: typeof options.inTopology == 'boolean' ? options.inTopology : false,
     // Monitoring timeout
     monitoringInterval: typeof options.monitoringInterval == 'number'
       ? options.monitoringInterval
-      : 5000
+      : 5000,
+    // Topology id
+    topologyId: -1
   }
 
   // console.dir(this.s)
@@ -173,6 +178,17 @@ var eventHandler = function(self, event) {
           // console.log("%%%%%%%%%%%%%%%%%% :: " + self.s.monitoringInterval)
           self.monitoringProcessId = setTimeout(monitoringProcess(self), self.s.monitoringInterval);
         }
+
+        // Emit server description changed if something listening
+        sdam.emitServerDescriptionChanged(self, {
+          address: self.name, arbiters: [], hosts: [], passives: [], type: !self.s.inTopology ? 'Standalone' : sdam.getTopologyType(self)
+        });
+
+        // Emit topology description changed if something listening
+        sdam.emitTopologyDescriptionChanged(self, {
+          topologyType: 'Single', servers: [{address: self.name, arbiters: [], hosts: [], passives: [], type: 'Standalone'}]
+        });
+
         // Emit connect
         self.emit('connect', self);
       });
@@ -182,6 +198,11 @@ var eventHandler = function(self, event) {
 
       // Remove server instance from accounting
       if(serverAccounting && ['close', 'timeout', 'error', 'parseError', 'reconnectFailed'].indexOf(event) != -1) {
+        // Emit toplogy opening event if not in topology
+        if(!self.s.inTopology) {
+          self.emit('topologyOpening', { topologyId: self.id });
+        }
+
         delete servers[this.id];
       }
 
@@ -215,11 +236,6 @@ Server.prototype.connect = function(options) {
   // Set the connections
   if(serverAccounting) servers[this.id] = this;
 
-//   if(self.s.pool) {
-//   console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Server.prototype.connect")
-//   console.dir(self.s.pool.state)
-// }
-
   // Do not allow connect to be called on anything that's not disconnected
   if(self.s.pool && !self.s.pool.isDisconnected() && !self.s.pool.isDestroyed()) {
     throw MongoError.create(f('server instance in invalid state %s', self.s.state));
@@ -237,6 +253,17 @@ Server.prototype.connect = function(options) {
   self.s.pool.on('reconnect', eventHandler(self, 'reconnect'));
   self.s.pool.on('reconnectFailed', eventHandler(self, 'reconnectFailed'));
 
+  // Emit toplogy opening event if not in topology
+  if(!self.s.inTopology) {
+    this.emit('topologyOpening', { topologyId: self.id });
+  }
+
+  // Emit opening server event
+  self.emit('serverOpening', {
+    topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.id,
+    address: self.name
+  });
+
   // Connect with optional auth settings
   if(options.auth) {
     self.s.pool.connect.apply(self.s.pool, options.auth);
@@ -246,7 +273,18 @@ Server.prototype.connect = function(options) {
 }
 
 Server.prototype.getDescription = function() {
-  var self = this;
+  var ismaster = this.ismaster || {};
+  var description = {
+    type: sdam.getTopologyType(this),
+    address: this.name,
+  };
+
+  // Add fields if available
+  if(ismaster.hosts) description.hosts = ismaster.hosts;
+  if(ismaster.arbiters) description.arbiters = ismaster.arbiters;
+  if(ismaster.passives) description.passives = ismaster.passives;
+  if(ismaster.setName) description.setName = ismaster.setName;
+  return description;
 }
 
 Server.prototype.lastIsMaster = function() {
@@ -524,10 +562,23 @@ Server.prototype.destroy = function(options) {
   // Emit close event
   if(options.emitClose) self.emit('close', self);
 
+  // Emit destroy event
+  if(options.emitDestroy) self.emit('destroy', self);
+
   // Remove all listeners
   listeners.forEach(function(event) {
     self.s.pool.removeAllListeners(event);
   });
+
+  // Emit opening server event
+  if(self.listeners('serverClosed').length > 0) self.emit('serverClosed', {
+    topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.id, address: self.name
+  });
+
+  // Emit toplogy opening event if not in topology
+  if(self.listeners('topologyClosed').length > 0 && !self.s.inTopology) {
+    self.emit('topologyClosed', { topologyId: self.id });
+  }
 
   // Destroy the pool
   this.s.pool.destroy();
