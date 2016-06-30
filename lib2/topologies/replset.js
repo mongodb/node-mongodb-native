@@ -107,8 +107,6 @@ var ReplSet = function(seedlist, options) {
     options: Object.assign({}, options),
     // BSON instance
     bson: options.bson || new BSON(),
-    // // Uniquely identify the replicaset instance
-    // id: id,
     // Factory overrides
     Cursor: options.cursorFactory || BasicCursor,
     // Logger instance
@@ -165,6 +163,10 @@ var ReplSet = function(seedlist, options) {
 }
 
 inherits(ReplSet, EventEmitter);
+
+Object.defineProperty(ReplSet.prototype, 'type', {
+  enumerable:true, get: function() { return 'replset'; }
+});
 
 function attemptReconnect(self) {
   self.haTimeoutId = setTimeout(function() {
@@ -311,51 +313,29 @@ function connectNewServers(self, servers, callback) {
       }
 
       if(event == 'connect' && !self.authenticating) {
-        // return applyCredentials(this, 0, self.credentials, function(err) {
-          // console.log("===== 0 :: " + _self.id + " :: " + _self.name)
-          // Destroyed
-          if(self.state == DESTROYED) {
-            return _self.destroy();
-          }
-          // console.log("===== 1 :: " + _self.id + " :: " + _self.name)
+        // Destroyed
+        if(self.state == DESTROYED) {
+          return _self.destroy();
+        }
 
-        // reauthenticate(self.credentials, this, function() {
-          // console.dir(this.ismaster)
-          // console.log(self.s.replicaSetState.update(this));
-          var result = self.s.replicaSetState.update(_self);
-          // Update the state with the new server
-          if(result) {
-            // console.log("=============== connectNewServers :: _handleEvent 1 :: " + result)
-            // console.log("primary :: " + (self.s.replicaSetState.primary != null))
-            // console.log("secondaries :: " + self.s.replicaSetState.secondaries.length)
-            // console.log("arbiters :: " + self.s.replicaSetState.arbiters.length)
-
-            // Remove the handlers
-            for(var i = 0; i < handlers.length; i++) {
-              _self.removeAllListeners(handlers[i]);
-            }
-
-            // Add stable state handlers
-            _self.on('error', handleEvent(self, 'error'));
-            _self.on('close', handleEvent(self, 'close'));
-            _self.on('timeout', handleEvent(self, 'timeout'));
-            _self.on('parseError', handleEvent(self, 'parseError'));
-          } else {
-            _self.destroy();
+        var result = self.s.replicaSetState.update(_self);
+        // Update the state with the new server
+        if(result) {
+          // Remove the handlers
+          for(var i = 0; i < handlers.length; i++) {
+            _self.removeAllListeners(handlers[i]);
           }
 
-          // console.log("===== 2 :: " + _self.id + " :: " + result + " :: " + _self.name)
-
-          // Are we done finish up callback
-          if(count == 0) { callback(); }
-        // });
+          // Add stable state handlers
+          _self.on('error', handleEvent(self, 'error'));
+          _self.on('close', handleEvent(self, 'close'));
+          _self.on('timeout', handleEvent(self, 'timeout'));
+          _self.on('parseError', handleEvent(self, 'parseError'));
+        } else {
+          _self.destroy();
+        }
       } else if(event == 'connect' && self.authenticating) {
         this.destroy();
-        // console.log("============ add to nonAuthenticatedServers 0")
-        // Add to list of nonAuthenticatedServers
-        // self.nonAuthenticatedServers.push(this);
-        // Are we done finish up callback
-        // if(count == 0) { callback(); }
       }
 
       // Are we done finish up callback
@@ -693,6 +673,8 @@ ReplSet.prototype.destroy = function() {
 }
 
 ReplSet.prototype.unref = function() {
+  // Transition state
+  stateTransition(this, DESTROYED);
   // console.log("------------------ 0")
   this.s.replicaSetState.allServers().forEach(function(x) {
     x.unref();
@@ -762,10 +744,6 @@ ReplSet.prototype.isDestroyed = function() {
   return this.state == DESTROYED;
 }
 
-ReplSet.prototype.equals = function(server) {
-  // console.log("=== equals")
-}
-
 ReplSet.prototype.getServer = function(options) {
   // console.log("=== getServer")
   // Ensure we have no options
@@ -778,11 +756,6 @@ ReplSet.prototype.getServer = function(options) {
 
 ReplSet.prototype.getServers = function() {
   return this.s.replicaSetState.allServers();
-}
-
-ReplSet.prototype.getConnection = function(options) {
-  // console.log("=== getConnection")
-  return this.s.pool.get();
 }
 
 function basicReadPreferenceValidation(self, options) {
@@ -1138,16 +1111,7 @@ ReplSet.prototype.command = function(ns, cmd, options, callback) {
   }
 
   // Execute the command
-  server.command(ns, cmd, options, function(err, r) {
-    // Was it a logout command clear any credentials
-    // if(cmd.logout) clearCredentials(self.s, ns);
-    // // We have a no master error, immediately refresh the view of the replicaset
-    // if((notMasterError(r) || notMasterError(err)) && !self.s.highAvailabilityProcessRunning) {
-    //   replicasetInquirer(self, self.s, true)();
-    // }
-    // Return the error
-    callback(err, r);
-  });
+  server.command(ns, cmd, options, callback);
 }
 
 /**

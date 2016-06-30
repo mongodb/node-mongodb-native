@@ -21,7 +21,7 @@ module.exports = {
     MongoError: require('./lib2/error')
   , Server: require('./lib2/topologies/server')
   , ReplSet: require('./lib2/topologies/replset')
-  , Mongos: require('./lib/topologies/mongos')
+  , Mongos: require('./lib2/topologies/mongos')
   , Logger: require('./lib2/connection/logger')
   , Cursor: require('./lib2/cursor')
   , ReadPreference: require('./lib2/topologies/read_preference')

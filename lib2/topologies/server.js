@@ -82,6 +82,10 @@ var Server = function(options) {
 
 inherits(Server, EventEmitter);
 
+Object.defineProperty(Server.prototype, 'type', {
+  enumerable:true, get: function() { return 'server'; }
+});
+
 Server.enableServerAccounting = function() {
   serverAccounting = true;
   servers = {};

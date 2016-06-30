@@ -466,6 +466,9 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
     };
   }
 
+  // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+  // console.dir(findCmd)
+
   // Build Query object
   var query = new Query(bson, commandns, findCmd, {
       numberToSkip: 0, numberToReturn: 1
