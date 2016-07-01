@@ -272,7 +272,10 @@ exports['Should correctly connect server to single instance and execute remove']
  * @ignore
  */
 exports['Should correctly recover with multiple restarts'] = {
-  metadata: { requires: { topology: ['single'] } },
+  metadata: {
+    requires: { topology: ['single'] },
+    ignore: { travis: true }
+  },
 
   // The actual test we wish to run
   test: function(configuration, test) {
