@@ -305,16 +305,16 @@ var testFiles = [
   , '/test/functional/replset_failover_tests.js'
   , '/test/functional/replset_connection_tests.js'
 
-  // // Sharding tests
-  // , '/test/functional/sharding_failover_tests.js'
-  // , '/test/functional/sharding_connection_tests.js'
-  // , '/test/functional/sharding_read_preference_tests.js'
-  //
-  // // SSL tests
-  // , '/test/functional/ssl_mongoclient_tests.js'
-  // , '/test/functional/ssl_validation_tests.js'
-  // , '/test/functional/ssl_x509_connect_tests.js'
-  //
+  // Sharding tests
+  , '/test/functional/sharding_failover_tests.js'
+  , '/test/functional/sharding_connection_tests.js'
+  , '/test/functional/sharding_read_preference_tests.js'
+
+  // SSL tests
+  , '/test/functional/ssl_mongoclient_tests.js'
+  , '/test/functional/ssl_validation_tests.js'
+  , '/test/functional/ssl_x509_connect_tests.js'
+
   // // SCRAM tests
   // , '/test/functional/scram_tests.js'
   //
@@ -337,8 +337,8 @@ var testFiles = [
 // Check if we support es6 generators
 try {
   eval("(function *(){})");
-  // // Generator tests
-  // testFiles.push('/test/functional/operation_generators_example_tests.js');
+  // Generator tests
+  testFiles.push('/test/functional/operation_generators_example_tests.js');
 } catch(err) {}
 
 // Add all the tests to run

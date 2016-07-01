@@ -37,7 +37,7 @@ exports.shouldCorrectlyCommunicateUsingSSLSocket = {
         setTimeout(function() {
           // Connect
           MongoClient.connect("mongodb://localhost:27019/test?ssl=true", {
-            server: { sslValidate: false }
+            sslValidate: false
           }, function(err, db) {
             test.equal(null, err);
             test.ok(db != null);
@@ -90,10 +90,8 @@ exports.shouldCorrectlyValidateServerCertificate = {
         setTimeout(function() {
           // Connect and validate the server certificate
           MongoClient.connect("mongodb://server:27019/test?ssl=true&maxPoolSize=1", {
-            server: {
-                sslValidate:true
-              , sslCA:ca
-            }
+              sslValidate:true
+            , sslCA:ca
           }, function(err, db) {
             test.equal(null, err);
             test.ok(db != null);
@@ -149,14 +147,12 @@ exports['should correctly validate ssl certificate and ignore server certificate
         setTimeout(function() {
           // Connect and validate the server certificate
           MongoClient.connect("mongodb://server:27019/test?ssl=true&maxPoolSize=1", {
-            server: {
-                sslValidate:true
-              , checkServerIdentity: function() {
-                checkServerIdentityCalled = true;
-                return undefined;
-              }
-              , sslCA:ca
+              sslValidate:true
+            , checkServerIdentity: function() {
+              checkServerIdentityCalled = true;
+              return undefined;
             }
+            , sslCA:ca
           }, function(err, db) {
             test.equal(null, err);
             test.ok(db != null);
@@ -210,10 +206,8 @@ exports['should fail to validate certificate due to illegal host name'] = {
         setTimeout(function() {
           // Connect and validate the server certificate
           MongoClient.connect("mongodb://localhost:27017/test?ssl=true&maxPoolSize=1", {
-            server: {
-                sslValidate:true
-              , sslCA:ca
-            }
+              sslValidate:true
+            , sslCA:ca
           }, function(err, db) {
             test.ok(err != null);
 
@@ -267,13 +261,11 @@ exports.shouldCorrectlyValidatePresentedServerCertificateAndPresentValidCertific
         setTimeout(function() {
           // Connect and validate the server certificate
           MongoClient.connect("mongodb://server:27019/test?ssl=true&maxPoolSize=1", {
-            server: {
-                sslValidate:true
-              , sslCA:ca
-              , sslKey:key
-              , sslCert:cert
-              , sslPass:'10gen'
-            }
+              sslValidate:true
+            , sslCA:ca
+            , sslKey:key
+            , sslCert:cert
+            , sslPass:'10gen'
           }, function(err, db) {
             test.equal(null, err);
             test.ok(db != null);
@@ -334,14 +326,12 @@ exports.shouldValidatePresentedServerCertificateButPresentInvalidCertificate = {
 
           // Connect and validate the server certificate
           MongoClient.connect("mongodb://server:27019/test?ssl=true&maxPoolSize=1", {
-            server: {
-                ssl:true
-              , sslValidate:true
-              , sslCA:ca
-              , sslKey:key
-              , sslCert:cert
-              , sslPass:'10gen'
-            }
+              ssl:true
+            , sslValidate:true
+            , sslCA:ca
+            , sslKey:key
+            , sslCert:cert
+            , sslPass:'10gen'
           }, function(err, db) {
             test.ok(err != null);
 
@@ -393,16 +383,18 @@ exports.shouldCorrectlyValidatePresentedServerCertificateAndInvalidKey = {
       // Start the server
       serverManager.start().then(function() {
         setTimeout(function() {
+          // console.log("============================== 0")
+          // console.dir(key)
           // Connect and validate the server certificate
           MongoClient.connect("mongodb://server:27019/test?ssl=true&maxPoolSize=1", {
-            server: {
-                sslValidate:true
-              , sslCA:ca
-              , sslKey:key
-              , sslCert:cert
-              , sslPass:'10gen'
-            }
+              sslValidate:true
+            , sslCA:ca
+            , sslKey:key
+            , sslCert:cert
+            , sslPass:'10gen'
           }, function(err, db) {
+            // console.log("============================== 1")
+            // console.dir(err)
             test.ok(err != null);
 
             serverManager.stop().then(function() {
@@ -509,11 +501,9 @@ exports['should correctly connect using SSL to ReplSetManager'] = {
         setTimeout(function() {
           // Connect and validate the server certificate
           MongoClient.connect("mongodb://server:31000,server:31001,server:31002/test?ssl=true&replicaSet=rs&maxPoolSize=1", {
-            replSet: {
-                ssl:true
-              , sslValidate:false
-              , sslCA:ca
-            }
+              ssl:true
+            , sslValidate:false
+            , sslCA:ca
           }, function(err, db) {
             if(err) console.dir(err)
             test.equal(null, err);
@@ -582,12 +572,10 @@ exports.shouldCorrectlySendCertificateToReplSetAndValidateServerCertificate = {
         setTimeout(function() {
           // Connect and validate the server certificate
           MongoClient.connect("mongodb://server:31000,server:31001/test?ssl=true&replicaSet=rs&maxPoolSize=1", {
-            replSet: {
-                sslValidate:false
-              , sslCA:ca
-              , sslKey:key
-              , sslCert:cert
-            }
+              sslValidate:false
+            , sslCA:ca
+            , sslKey:key
+            , sslCert:cert
           }, function(err, db) {
             if(err) console.dir(err);
             test.equal(null, err);
@@ -662,13 +650,11 @@ exports.shouldSendWrongCertificateToReplSetAndValidateServerCertificate = {
 
           // Connect and validate the server certificate
           MongoClient.connect("mongodb://server:31000,server:31001/test?ssl=true&replicaSet=rs&maxPoolSize=1", {
-            replSet: {
-                sslValidate:true
-              , sslCA:ca
-              , sslKey:key
-              , sslCert:cert
-              , sslPass: '10gen'
-            }
+              sslValidate:true
+            , sslCA:ca
+            , sslKey:key
+            , sslCert:cert
+            , sslPass: '10gen'
           }, function(err, db) {
             test.ok(err != null)
 
@@ -735,15 +721,14 @@ exports['should correctly to replicaset using ssl connect with password'] = {
         setTimeout(function() {
           // Connect and validate the server certificate
           MongoClient.connect("mongodb://server:31000,server:31001/test?ssl=true&replicaSet=rs&maxPoolSize=1", {
-            replSet: {
-                sslValidate:true
-              , sslCA:ca
-              , sslKey:key
-              , sslCert:cert
-              , sslPass: '10gen'
-            }
+              sslValidate:true
+            , sslCA:ca
+            , sslKey:key
+            , sslCert:cert
+            , sslPass: '10gen'
           }, function(err, db) {
             test.equal(null, err)
+            db.close();
 
             replicasetManager.stop().then(function() {
               test.done();
@@ -804,10 +789,8 @@ exports['should correctly connect using ssl with sslValidation turned off'] = {
         setTimeout(function() {
           // Connect and validate the server certificate
           MongoClient.connect("mongodb://server:31000,server:31001/test?ssl=true&replicaSet=rs&maxPoolSize=1", {
-            replSet: {
-                ssl:true
-              , sslValidate:false
-            }
+              ssl:true
+            , sslValidate:false
           }, function(err, db) {
             test.equal(null, err);
             test.ok(db != null);
@@ -869,41 +852,54 @@ exports['should correctly connect using SSL to replicaset with requireSSL'] = {
       replSet: 'rs', ssl:true, rejectUnauthorized: false, ca: ca, host: 'server'
     });
 
+    // console.log("---------------------------- 0")
+
     replicasetManager.purge().then(function() {
+      // console.log("---------------------------- 1")
       // Start the server
       replicasetManager.start().then(function() {
+        // console.log("---------------------------- 2")
         setTimeout(function() {
+          // console.log("---------------------------- 3")
           // Connect and validate the server certificate
           MongoClient.connect("mongodb://server:31000,server:31001,server:31002/test?replicaSet=rs", {
-            replSet: {
-                ssl:true
-              , sslKey: key
-              , sslCert: cert
-              , sslCA:ca
-            }
+              ssl:true
+            , sslKey: key
+            , sslCert: cert
+            , sslCA:ca
           }, function(err, db) {
-            if(err) console.dir(err)
+            // console.log("---------------------------- 4")
+            // if(err) console.dir(err)
             test.equal(null, err);
             test.ok(db != null);
             var sets = [{}];
 
             var interval = setInterval(function() {
+              // console.log("---------------------------- 5:1")
+
               db.command({ismaster:true}, {readPreference:'nearest', full:true}, function(e, r) {
+                // console.log("---------------------------- 5:2")
                 // Add seen servers to list
                 if(r) {
                   sets[sets.length - 1][r.connection.port] = true;
                 }
               });
-            }, 100)
+            }, 500)
 
             setTimeout(function() {
+              // console.log("---------------------------- 6")
               // Force a reconnect of a server
-              var secondary = db.serverConfig.s.replset.state.secondaries[0]
-              secondary.destroy(true, false);
+              var secondary = db.serverConfig.s.replset.s.replicaSetState.secondaries[0]
+              // console.log("---------------------------- 6:1")
+              secondary.destroy({emitClose:true});
+              // console.log("---------------------------- 6:2")
               sets.push({});
+              // console.log("---------------------------- 6:3")
 
               db.serverConfig.once('joined', function(t, o, s) {
+                // console.log("---------------------------- 7")
                 setTimeout(function() {
+                  // console.log("---------------------------- 8")
                   clearInterval(interval);
 
                   test.ok(sets[0][31000]);
@@ -917,9 +913,10 @@ exports['should correctly connect using SSL to replicaset with requireSSL'] = {
                   db.close();
 
                   replicasetManager.stop().then(function() {
+                    // console.log("---------------------------- 9")
                     test.done();
                   });
-                }, 1000);
+                }, 5000);
               });
             }, 2000)
           });

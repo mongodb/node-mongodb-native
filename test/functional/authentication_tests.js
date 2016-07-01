@@ -228,6 +228,8 @@ exports['Should correctly authenticate against admin db'] = {
 
                   // Attempt to save a document
                   db.collection('test').insert({a:1}, function(err, result) {
+                    // console.log("++++++++++++++++++ logout")
+                    // console.dir(err)
                     test.ok(err != null);
                     db1.close();
 
@@ -419,31 +421,31 @@ exports['Should correctly reapply the authentications'] = {
                 // Bounce server
                 configuration.manager.restart(false).then(function() {
                   db.admin().authenticate("admin", "admin", function(err, result) {
-                  // Reconnect should reapply the credentials
-                  db.collection('test').insert({a:1}, function(err, result) {
-                    test.equal(null, err);
-                  });
+                    // Reconnect should reapply the credentials
+                    db.collection('test').insert({a:1}, function(err, result) {
+                      test.equal(null, err);
+                    });
 
-                  db.collection('test').insert({a:1}, function(err, result) {
-                    test.equal(null, err);
-                  });
+                    db.collection('test').insert({a:1}, function(err, result) {
+                      test.equal(null, err);
+                    });
 
-                  db.collection('test').insert({a:1}, function(err, result) {
-                    test.equal(null, err);
-                  });
+                    db.collection('test').insert({a:1}, function(err, result) {
+                      test.equal(null, err);
+                    });
 
-                  // Reconnect should reapply the credentials
-                  db.collection('test').insert({a:1}, function(err, result) {
-                    test.equal(null, err);
+                    // Reconnect should reapply the credentials
+                    db.collection('test').insert({a:1}, function(err, result) {
+                      test.equal(null, err);
 
-                    db1.close();
+                      db1.close();
 
-                    // restart server
-                    configuration.manager.restart(true).then(function() {
-                      test.done();
+                      // restart server
+                      configuration.manager.restart(true).then(function() {
+                        test.done();
+                      });
                     });
                   });
-                });
                 });
               });
             });
@@ -609,6 +611,7 @@ var setUp = function(configuration, options, callback) {
     }
   }]
 
+  // console.log("--------------------- setup 0")
   // Merge in any node start up options
   for(var i = 0; i < nodes.length; i++) {
     for(var name in rsOptions.server) {
@@ -618,14 +621,20 @@ var setUp = function(configuration, options, callback) {
 
   // Create a manager
   var replicasetManager = new ReplSetManager('mongod', nodes, rsOptions.client);
+  // console.log("--------------------- setup 1")
   // Purge the set
   replicasetManager.purge().then(function() {
+    // console.log("--------------------- setup 2")
     // Start the server
     replicasetManager.start().then(function() {
+      // console.log("--------------------- setup 3")
       setTimeout(function() {
+        // console.log("--------------------- setup 4")
         callback(null, replicasetManager);
       }, 10000);
     }).catch(function(e) {
+      console.log(e.stack)
+      process.exit(0);
       // // console.dir(e);
     });
   });
@@ -643,7 +652,9 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
       , Server = configuration.require.Server
       , ReplSet = configuration.require.ReplSet;
 
+      console.log("--------------------- -2")
     setUp(configuration, function(err, replicasetManager) {
+      console.log("--------------------- -1")
       var replSet = new ReplSet( [
           new Server( 'localhost', 31000),
           new Server( 'localhost', 31001)
@@ -651,13 +662,17 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
         {rs_name: 'rs', poolSize:1}
       );
 
+      console.log("--------------------- 0")
       // Connect
       new Db('replicaset_test_auth', replSet, {w:1}).open(function(err, db) {
+        console.log("--------------------- 1")
         // Add a user
         db.admin().addUser("root", "root", {w:3, wtimeout: 25000}, function(err, result) {
+          console.log("--------------------- 2")
           test.equal(null, err);
 
           db.admin().authenticate("root", "root", function(err, result) {
+            console.log("--------------------- 3")
             test.equal(null, err);
             test.ok(result);
 
@@ -668,13 +683,16 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
               user: 'root',
               password: 'root'
             }).then(function() {
+              console.log("--------------------- 4")
 
               db.collection('replicaset_test_auth').insert({a:1}, {w:1}, function(err, result) {
+                console.log("--------------------- 5")
                 test.equal(null, err);
 
                 db.close();
 
                 replicasetManager.stop().then(function() {
+                  console.log("--------------------- 6")
                   test.done();
                 });
               });
