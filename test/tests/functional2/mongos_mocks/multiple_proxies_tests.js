@@ -105,15 +105,22 @@ exports['Should correctly load-balance the operations'] = {
 
       // Add event listeners
       server.once('connect', function(_server) {
+        console.log("=================================== 0")
         _server.insert('test.test', [{created:new Date()}], function(err, r) {
+          console.log("=================================== 1")
+          if(r) console.log(r.connection.port)
           test.equal(null, err);
           test.equal(52000, r.connection.port);
 
           _server.insert('test.test', [{created:new Date()}], function(err, r) {
+            console.log("=================================== 2")
+            if(r) console.log(r.connection.port)
             test.equal(null, err);
             test.equal(52001, r.connection.port);
 
             _server.insert('test.test', [{created:new Date()}], function(err, r) {
+              console.log("=================================== 3")
+              if(r) console.log(r.connection.port)
               test.equal(null, err);
               test.equal(52000, r.connection.port);
 
