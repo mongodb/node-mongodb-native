@@ -170,12 +170,12 @@ Object.defineProperty(ReplSet.prototype, 'type', {
 
 function attemptReconnect(self) {
   self.haTimeoutId = setTimeout(function() {
-    if(global.debug)console.log("---- attemptReconnect :: " + self.s.id)
+    // if(global.debug)console.log("---- attemptReconnect :: " + self.s.id)
     if(self.state == DESTROYED) return;
     // if(global.debug)console.log("---- attemptReconnect 1")
     // Get all known hosts
     var keys = Object.keys(self.s.replicaSetState.set);
-    console.log("===== REPLSET CREATE SERVER 0 :: " + self.s.id)
+    // console.log("===== REPLSET CREATE SERVER 0 :: " + self.s.id)
     var servers = keys.map(function(x) {
       return new Server(Object.assign({}, self.s.options, {
         host: x.split(':')[0], port: parseInt(x.split(':')[1], 10)

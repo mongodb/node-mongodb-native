@@ -524,7 +524,7 @@ function topologyMonitor(self, options) {
           emitSDAMEvent(self, 'serverHearbeatFailed', { durationMS: latencyMS, failure: err, connectionId: _server.name });
           // Move from connected proxies to disconnected proxies
           moveServerFrom(self.connectedProxies, self.disconnectedProxies, _server);
-          console.log("------------------------ 0")
+          // console.log("------------------------ 0")
           // Emit left event
           self.emit('left', 'mongos', _server);
           _server.destroy();
