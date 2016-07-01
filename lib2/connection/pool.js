@@ -82,6 +82,9 @@ var Pool = function(options) {
     , 'plain': new Plain(options.bson), 'gssapi': new GSSAPI(options.bson)
     , 'sspi': new SSPI(options.bson), 'scram-sha-1': new ScramSHA1(options.bson)
   }
+
+  // console.log("======== CREATE POOL")
+  // console.dir(options)
   // Are we currently authenticating
   this.authenticating = false;
   this.loggingout = false;
@@ -542,8 +545,13 @@ Pool.prototype.connect = function(auth) {
   connection.once('close', connectionFailureHandler(this, 'close'));
   connection.once('timeout', connectionFailureHandler(this, 'timeout'));
   connection.once('parseError', connectionFailureHandler(this, 'parseError'));
-  // Initite connection
-  connection.connect();
+
+  try {
+    connection.connect();
+  } catch(err) {
+    // SSL or something threw on connect
+    self.emit('error', err);
+  }
 }
 
 /**
