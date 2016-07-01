@@ -292,6 +292,17 @@ function handleInitialConnectEvent(self, event) {
     if(self.connectingProxies.length == 0) {
       // Emit connected if we are connected
       if(self.connectedProxies.length > 0) {
+        // console.log("********************** connect 0 :: " + self.connectingProxies.length)
+        // Set initial lowerBoundLatency
+        for(var i = 0; i < self.connectedProxies.length; i++) {
+          // console.log("self.connectingProxies[i].lastIsMasterMS == " + self.connectedProxies[i].lastIsMasterMS)
+          // Adjust lower bound
+          if(self.lowerBoundLatency > self.connectedProxies[i].lastIsMasterMS) {
+            self.lowerBoundLatency = self.connectedProxies[i].lastIsMasterMS;
+          }
+        }
+        // console.log("********************** connect 1 :: " + self.lowerBoundLatency)
+
         // Set the state to connected
         stateTransition(self, CONNECTED);
         // Emit the connect event
@@ -345,19 +356,25 @@ function connectProxies(self, servers) {
 }
 
 function pickProxy(self) {
-  // console.log("============ pickProxy :: " + self.connectedProxies.length)
-  // console.log("============ pickProxy :: index :: " + self.index)
+  // console.log("=== pickProxy 0 :: " + self.connectedProxies.length)
+  // console.log("=== pickProxy 1 :: index :: " + self.index)
 
   // Get the currently connected Proxies
   var connectedProxies = self.connectedProxies.slice(0);
 
   // Filter out the possible servers
   connectedProxies = connectedProxies.filter(function(server) {
+    // console.log("==== filter :: " + server.name)
+    // console.log("server.lastIsMasterMS = " + server.lastIsMasterMS)
+    // console.log("self.lowerBoundLatency = " + self.lowerBoundLatency)
+    // console.log("self.s.localThresholdMS = " + self.s.localThresholdMS)
     if((server.lastIsMasterMS <= (self.lowerBoundLatency + self.s.localThresholdMS))
       && server.isConnected()) {
       return true;
     }
   });
+
+  // console.log("=== pickProxy 2 :: " + connectedProxies.length)
 
   // Get proxy
   var proxy = connectedProxies[self.index % connectedProxies.length];

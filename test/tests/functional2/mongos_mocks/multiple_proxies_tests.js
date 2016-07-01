@@ -166,8 +166,6 @@ exports['Should ignore one of the mongos instances due to being outside the late
     var mongos1 = null;
     var mongos2 = null;
     var running = true;
-    // Current index for the ismaster
-    var currentStep = 0;
     // Primary stop responding
     var stopRespondingPrimary = false;
 
@@ -216,8 +214,11 @@ exports['Should ignore one of the mongos instances due to being outside the late
       co(function*() {
         while(running) {
           var request = yield mongos2.receive();
+          // console.log(" do something 0")
+          var s = new Date().getTime();
           // Delay all the operations by 500 ms
           yield timeoutPromise(500);
+          // console.log(" do something 1 :: " + (new Date().getTime() - s))
           // Get the document
           var doc = request.document;
           if(doc.ismaster) {
@@ -226,12 +227,11 @@ exports['Should ignore one of the mongos instances due to being outside the late
             request.reply({ok:1, n:doc.documents, lastOp: new Date()});
           }
         }
-      }); 
+      });
 
       // Start dropping the packets
       setTimeout(function() {
         stopRespondingPrimary = true;
-        currentIsMasterState = 1;
       }, 5000);
     });
 

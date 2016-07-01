@@ -149,8 +149,12 @@ function monitoringProcess(self) {
     // Create a query instance
     var query = new Query(self.s.bson, 'admin.$cmd', {ismaster:true}, queryOptions);
     // console.log("#### monitoringProcess 3")
+    // Get start time
+    var start = new Date().getTime();
     // Execute the ismaster query
     self.s.pool.write(query.toBin(), {}, function(err, result) {
+      // Set initial lastIsMasterMS
+      self.lastIsMasterMS = new Date().getTime() - start;
       // console.log("#### monitoringProcess 4")
       if(self.s.pool.isDestroyed()) return;
       // console.log("#### monitoringProcess 5")
@@ -176,8 +180,12 @@ var eventHandler = function(self, event) {
       var queryOptions = { numberToSkip: 0, numberToReturn: -1, checkKeys: false, slaveOk: true };
       // Create a query instance
       var query = new Query(self.s.bson, 'admin.$cmd', {ismaster:true}, queryOptions);
+      // Get start time
+      var start = new Date().getTime();
       // Execute the ismaster query
       self.s.pool.write(query.toBin(), {}, function(err, result) {
+        // Set initial lastIsMasterMS
+        self.lastIsMasterMS = new Date().getTime() - start;
         // console.log("========= server connect 1")
         // console.dir(err)
         if(err) {
