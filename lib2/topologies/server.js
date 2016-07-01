@@ -119,6 +119,21 @@ function configureWireProtocolHandler(self, ismaster) {
   return new PreTwoSixWireProtocolSupport();
 }
 
+function disconnectHandler(self, type, ns, cmd, options, callback) {
+  // Topology is not connected, save the call in the provided store to be
+  // Executed at some point when the handler deems it's reconnected
+  if(!self.s.pool.isConnected() && self.s.disconnectHandler != null) {
+    self.s.disconnectHandler.add(type, ns, cmd, options, callback);
+    return true;
+  }
+
+  // If we have no connection error
+  if(!self.s.pool.isConnected()) {
+    callback(MongoError.create(f("no connection available to server %s", self.name)));
+    return true;
+  }
+}
+
 function monitoringProcess(self) {
   return function() {
     // console.log("#### monitoringProcess :: " + self.id)
@@ -325,27 +340,6 @@ function basicReadValidations(self, options) {
   }
 }
 
-function disconnectHandler(self, type, ns, cmd, options, callback) {
-  // console.log("  ^^^ disconnectHandler 0")
-  // console.log("  self.s.pool.isConnected() = " + self.s.pool.isConnected())
-  // console.log("  self.s.disconnectHandler != null = " + (self.s.disconnectHandler != null))
-  // Topology is not connected, save the call in the provided store to be
-  // Executed at some point when the handler deems it's reconnected
-  if(!self.s.pool.isConnected() && self.s.disconnectHandler != null) {
-    self.s.disconnectHandler.add(type, ns, cmd, options, callback);
-    return true;
-  }
-  // console.log("  ^^^ disconnectHandler 1")
-
-  // If we have no connection error
-  if(!self.s.pool.isConnected()) {
-    callback(MongoError.create(f("no connection available to server %s", self.name)));
-    return true;
-  }
-
-  // console.log("  ^^^ disconnectHandler 2")
-}
-
 /**
  * Execute a command
  * @method
@@ -494,7 +488,6 @@ Server.prototype.cursor = function(ns, cmd, cursorOptions) {
  * @param {authResultCallback} callback A callback function
  */
 Server.prototype.logout = function(dbName, callback) {
-  // console.log("======== logging out server db " + dbName + " :: " + this.name)
   this.s.pool.logout(dbName, callback);
 }
 
@@ -522,6 +515,17 @@ Server.prototype.auth = function(mechanism, db) {
   var args = Array.prototype.slice.call(arguments, 0);
   // Set the mechanism
   args[0] = mechanism;
+  // Get the callback
+  var callback = args[args.length - 1];
+
+  // console.log("@@@@@@@@@@@@@@@@@@ auth :: " + this.isConnected())
+
+  // If we are not connected or have a disconnectHandler specified
+  //function disconnectHandler(self, type, ns, cmd, options, callback) {
+  if(disconnectHandler(self, 'auth', db, args, {}, callback)) {
+    return;
+  }
+
   // Apply the arguments to the pool
   self.s.pool.auth.apply(self.s.pool, args);
 }

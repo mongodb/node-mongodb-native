@@ -152,9 +152,12 @@ ScramSHA1.prototype.auth = function(server, connections, db, username, password,
 
     // Finish up
     var finish = function(_count, _numberOfValidConnections) {
+      // console.log("=== _count :: " + _count + " :: " + _numberOfValidConnections)
       if(_count == 0 && _numberOfValidConnections > 0) {
+        // console.log("!!!!!!!! auth session 0")
         // Store the auth details
         addAuthSession(self.authStore, new AuthSession(db, username, password));
+        // console.log("!!!!!!!! auth session 1")
         // Return correct authentication
         return callback(null, true);
       } else if(_count == 0) {

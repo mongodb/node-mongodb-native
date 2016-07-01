@@ -415,6 +415,9 @@ function messageHandler(self) {
           // console.dir(message.documents)
         // }
 
+        // console.log("-------- 0")
+        // console.dir(message.documents)
+
         // Establish if we have an error
         if(workItem.command && message.documents[0] && (message.documents[0].ok == 0 || message.documents[0]['$err']
         || message.documents[0]['errmsg'] || message.documents[0]['code'])) {
@@ -498,8 +501,9 @@ Pool.prototype.connect = function(auth) {
   // Add listeners to the connection
   connection.once('connect', function(connection) {
     if(self.state == DESTROYED) return self.destroy();
-    // Authenticate
-    authenticate(self, args, connection, function(err) {
+
+    // Apply any store credentials
+    reauthenticate(self, connection, function(err) {
       if(self.state == DESTROYED) return self.destroy();
 
       // We have an error emit it
@@ -509,14 +513,27 @@ Pool.prototype.connect = function(auth) {
         // Emit the error
         return self.emit('error', err);
       }
-      // Set connected mode
-      stateTransition(self, CONNECTED);
 
-      // Move the active connection
-      moveConnectionBetween(connection, self.connectingConnections, self.availableConnections);
+      // Authenticate
+      authenticate(self, args, connection, function(err) {
+        if(self.state == DESTROYED) return self.destroy();
 
-      // Emit the connect event
-      self.emit('connect', self);
+        // We have an error emit it
+        if(err) {
+          // Destroy the pool
+          self.destroy();
+          // Emit the error
+          return self.emit('error', err);
+        }
+        // Set connected mode
+        stateTransition(self, CONNECTED);
+
+        // Move the active connection
+        moveConnectionBetween(connection, self.connectingConnections, self.availableConnections);
+
+        // Emit the connect event
+        self.emit('connect', self);
+      });
     });
   });
 
@@ -528,26 +545,6 @@ Pool.prototype.connect = function(auth) {
   // Initite connection
   connection.connect();
 }
-
-// /**
-//  * Reauthenticates the pool using the current provider credentials
-//  * @method
-//  * @param {authResultCallback} callback A callback function
-//  */
-// Pool.prototype.reauthenticate = function(cb) {
-//   // Finished re-authenticating against providers
-//   if(providers.length == 0) return cb();
-//   // Get the provider name
-//   var provider = pool.authProviders[providers.pop()];
-//
-//   // Auth provider
-//   provider.reauthenticate(write(pool), [connection], function(err, r) {
-//     // We got an error return immediately
-//     if(err) return cb(err);
-//     // Continue authenticating the connection
-//     authenticateAgainstProvider(pool, connection, providers, cb);
-//   });
-// }
 
 /**
  * Authenticate using a specified mechanism
@@ -562,7 +559,7 @@ Pool.prototype.auth = function(mechanism, db) {
   var args = Array.prototype.slice.call(arguments, 0);
   var callback = args.pop();
   // If we are not connected don't allow additonal authentications to happen
-  if(this.state != CONNECTED) throw new MongoError('connection in unlawful state ' + this.state);
+  // if(this.state != CONNECTED) throw new MongoError('connection in unlawful state ' + this.state);
 
   // If we don't have the mechanism fail
   if(self.authProviders[mechanism] == null && mechanism != 'default') {

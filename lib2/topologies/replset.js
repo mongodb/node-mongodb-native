@@ -177,9 +177,9 @@ function attemptReconnect(self) {
     var keys = Object.keys(self.s.replicaSetState.set);
     // console.log("===== REPLSET CREATE SERVER 0 :: " + self.s.id)
     var servers = keys.map(function(x) {
-      return new Server(Object.assign({
+      return new Server(Object.assign({}, self.s.options, {
         host: x.split(':')[0], port: parseInt(x.split(':')[1], 10)
-      }, self.s.options, {
+      }, {
         authProviders: self.authProviders, reconnect:false, monitoring: false, inTopology: true
       }));
     });
@@ -356,10 +356,10 @@ function connectNewServers(self, servers, callback) {
       }
 
       // Create a new server instance
-      var server = new Server(Object.assign({
+      var server = new Server(Object.assign({}, self.s.options, {
         host: _server.split(':')[0],
         port: parseInt(_server.split(':')[1], 10)
-      }, self.s.options, {
+      }, {
         authProviders: self.authProviders, reconnect:false, monitoring: false, inTopology: true
       }));
       // console.log("=============== connectNewServers - 2")
@@ -642,7 +642,7 @@ ReplSet.prototype.connect = function(options) {
   // console.log("===== REPLSET CREATE ::connect " + this.s.id)
   // Create server instances
   var servers = this.s.seedlist.map(function(x) {
-    return new Server(Object.assign(x, self.s.options, {
+    return new Server(Object.assign({}, self.s.options, x, {
       authProviders: self.authProviders, reconnect:false, monitoring:false, inTopology: true
     }));
   });
@@ -771,28 +771,14 @@ var executeWriteOperation = function(self, op, ns, ops, options, callback) {
   if(typeof options == 'function') callback = options, options = {}, options = options || {};
   // Ensure we have no options
   options = options || {};
+
   // No server returned we had an error
   if(self.s.replicaSetState.primary == null) {
     return callback(new MongoError("no primary server found"));
   }
 
-  // Handler
-  var handler = function(err, r) {
-    // // We have a no master error, immediately refresh the view of the replicaset
-    // if((notMasterError(r) || notMasterError(err)) && !self.s.highAvailabilityProcessRunning) {
-    //   // Set he current interval to minHeartbeatFrequencyMS
-    //   self.s.currentHaInterval = self.s.minHeartbeatFrequencyMS;
-    //   // Attempt to locate the current master immediately
-    //   replicasetInquirer(self, self.s, true)();
-    // }
-    // Return the result
-    callback(err, r);
-  }
-
-  // // Add operationId if existing
-  // if(callback.operationId) handler.operationId = callback.operationId;
   // Execute the command
-  self.s.replicaSetState.primary[op](ns, ops, options, handler);
+  self.s.replicaSetState.primary[op](ns, ops, options, callback);
 }
 
 /**
@@ -1137,6 +1123,12 @@ ReplSet.prototype.auth = function(mechanism, db) {
   // Are we already authenticating, throw
   if(this.authenticating) {
     throw new MongoError('authentication or logout allready in process');
+  }
+
+  // Topology is not connected, save the call in the provided store to be
+  // Executed at some point when the handler deems it's reconnected
+  if(!self.s.replicaSetState.hasPrimary() && self.s.disconnectHandler != null) {
+    return self.s.disconnectHandler.add('auth', db, allArgs, {}, callback);
   }
 
   // Set to authenticating
