@@ -430,6 +430,8 @@ Server.prototype.insert = function(ns, ops, options, callback) {
   // console.log(options)
   // console.log("== Server:: insert 5");
 
+
+
   // Execute write
   return self.wireProtocolHandler.insert(self.s.pool, self.ismaster, ns, self.s.bson, ops, options, callback);
 }

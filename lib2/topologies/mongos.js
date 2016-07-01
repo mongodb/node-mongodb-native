@@ -311,26 +311,34 @@ function connectProxies(self, servers) {
   // console.log(self.connectingProxies.map(function(x) { return x.name}))
   // Update connectingProxies
   self.connectingProxies = self.connectingProxies.concat(servers);
+
+  // Index used to interleaf the server connects, avoiding
+  // runtime issues on io constrained vm's
+  var timeoutInterval = 0;
+
+  function connect(server, timeoutInterval) {
+    setTimeout(function() {
+      // console.log("========== connect server :: " + server.name)
+      // Add event handlers
+      server.once('close', handleInitialConnectEvent(self, 'close'));
+      server.once('timeout', handleInitialConnectEvent(self, 'timeout'));
+      server.once('parseError', handleInitialConnectEvent(self, 'parseError'));
+      server.once('error', handleInitialConnectEvent(self, 'error'));
+      server.once('connect', handleInitialConnectEvent(self, 'connect'));
+      // SDAM Monitoring events
+      server.on('serverOpening', function(e) { self.emit('serverOpening', e); });
+      server.on('serverDescriptionChanged', function(e) { self.emit('serverDescriptionChanged', e); });
+      server.on('serverClosed', function(e) { self.emit('serverClosed', e); });
+      // Start connection
+      server.connect(self.s.connectOptions);
+    }, timeoutInterval);
+  }
   // console.log("------------ connectProxies 1 :: " + self.connectingProxies.length)
   // console.log(servers.map(function(x) { return x.name}))
   // console.log(self.connectingProxies.map(function(x) { return x.name}))
   // Start all the servers
   while(servers.length > 0) {
-    // Get the first server
-    var server = servers.shift();
-    // console.log("========== connect server :: " + server.name)
-    // Add event handlers
-    server.once('close', handleInitialConnectEvent(self, 'close'));
-    server.once('timeout', handleInitialConnectEvent(self, 'timeout'));
-    server.once('parseError', handleInitialConnectEvent(self, 'parseError'));
-    server.once('error', handleInitialConnectEvent(self, 'error'));
-    server.once('connect', handleInitialConnectEvent(self, 'connect'));
-    // SDAM Monitoring events
-    server.on('serverOpening', function(e) { self.emit('serverOpening', e); });
-    server.on('serverDescriptionChanged', function(e) { self.emit('serverDescriptionChanged', e); });
-    server.on('serverClosed', function(e) { self.emit('serverClosed', e); });
-    // Start connection
-    server.connect(self.s.connectOptions);
+    connect(servers.shift(), timeoutInterval++);
   }
 
   // console.log("------------ connectProxies 2")
@@ -480,7 +488,7 @@ function topologyMonitor(self, options) {
     }
 
     // Get the connectingServers
-    var proxies = self.connectedProxies;
+    var proxies = self.connectedProxies.slice(0);
     // console.log("--- connectingProxies :: " + self.connectingProxies.length)
     // console.log("--- connectedProxies :: " + self.connectedProxies.length)
     // console.log("--- disconnectedProxies :: " + self.disconnectedProxies.length)
@@ -503,8 +511,10 @@ function topologyMonitor(self, options) {
       // Emit the server heartbeat start
       emitSDAMEvent(self, 'serverHeartbeatStarted', { connectionId: _server.name });
 
+      // console.log("%%%%%%%%%%%%%%%%%% 0")
       // Execute ismaster
       _server.command('admin.$cmd', {ismaster:true}, {monitoring: true}, function(err, r) {
+        // console.log("%%%%%%%%%%%%%%%%%% 1")
         if(self.state == DESTROYED) {
           _server.destroy();
           return cb(err, r);
@@ -543,6 +553,7 @@ function topologyMonitor(self, options) {
 
     // No proxies initiate monitor again
     if(proxies.length == 0) {
+      // console.log("---- topologyMonitor 1")
       // Attempt to connect to any unknown servers
       return reconnectProxies(self, self.disconnectedProxies, function(err, cb) {
         if(self.state == DESTROYED) return;
@@ -562,13 +573,16 @@ function topologyMonitor(self, options) {
       });
     }
 
-    // console.log("$$$ 1")
+    // console.log("$$$ 1 :: " + proxies.length)
     // Ping all servers
     for(var i = 0; i < proxies.length; i++) {
+      // console.log("---- topologyMonitor 2")
       pingServer(self, proxies[i], function(err, r) {
         count = count - 1;
+        // console.log("---- topologyMonitor 3 :: " + count)
 
         if(count == 0) {
+          // console.log("---- topologyMonitor 4")
           if(self.state == DESTROYED) return;
 
           // console.log("$$$ 2")

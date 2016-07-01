@@ -272,23 +272,31 @@ function attemptReconnect(self) {
       }
     }
 
+    // Index used to interleaf the server connects, avoiding
+    // runtime issues on io constrained vm's
+    var timeoutInterval = 0;
+
+    function connect(server, timeoutInterval) {
+      setTimeout(function() {
+        server.once('connect', _handleEvent(self, 'connect'));
+        server.once('close', _handleEvent(self, 'close'));
+        server.once('timeout', _handleEvent(self, 'timeout'));
+        server.once('error', _handleEvent(self, 'error'));
+        server.once('parseError', _handleEvent(self, 'parseError'));
+
+        // SDAM Monitoring events
+        server.on('serverOpening', function(e) { self.emit('serverOpening', e); });
+        server.on('serverDescriptionChanged', function(e) { self.emit('serverDescriptionChanged', e); });
+        server.on('serverClosed', function(e) { self.emit('serverClosed', e); });
+
+        // console.log("-------- connect 3 :: 0")
+        server.connect(self.s.connectOptions);
+      }, timeoutInterval);
+    }
+
     // Connect all servers
     while(servers.length > 0) {
-      var server = servers.shift();
-      server.once('connect', _handleEvent(self, 'connect'));
-      server.once('close', _handleEvent(self, 'close'));
-      server.once('timeout', _handleEvent(self, 'timeout'));
-      server.once('error', _handleEvent(self, 'error'));
-      server.once('parseError', _handleEvent(self, 'parseError'));
-
-      // SDAM Monitoring events
-      server.on('serverOpening', function(e) { self.emit('serverOpening', e); });
-      server.on('serverDescriptionChanged', function(e) { self.emit('serverDescriptionChanged', e); });
-      server.on('serverClosed', function(e) { self.emit('serverClosed', e); });
-
-      // console.log("-------- connect 3 :: 0")
-      server.connect(self.s.connectOptions);
-      // console.log("-------- connect 3 :: 1")
+      connect(servers.shift(), timeoutInterval++);
     }
   }, self.s.minHeartbeatFrequencyMS);
 }
@@ -606,26 +614,34 @@ function handleInitialConnectEvent(self, event) {
 function connectServers(self, servers) {
   // Update connectingServers
   self.s.connectingServers = self.s.connectingServers.concat(servers);
+
+  // Index used to interleaf the server connects, avoiding
+  // runtime issues on io constrained vm's
+  var timeoutInterval = 0;
+
+  function connect(server, timeoutInterval) {
+    setTimeout(function() {
+      // Add the server to the state
+      self.s.replicaSetState.update(server);
+      // Add event handlers
+      server.once('close', handleInitialConnectEvent(self, 'close'));
+      server.once('timeout', handleInitialConnectEvent(self, 'timeout'));
+      server.once('parseError', handleInitialConnectEvent(self, 'parseError'));
+      server.once('error', handleInitialConnectEvent(self, 'error'));
+      server.once('connect', handleInitialConnectEvent(self, 'connect'));
+      // SDAM Monitoring events
+      server.on('serverOpening', function(e) { self.emit('serverOpening', e); });
+      server.on('serverDescriptionChanged', function(e) { self.emit('serverDescriptionChanged', e); });
+      server.on('serverClosed', function(e) { self.emit('serverClosed', e); });
+      // console.log("-------- connect 2 :: 0")
+      // Start connection
+      server.connect(self.s.connectOptions);
+    }, timeoutInterval);
+  }
+
   // Start all the servers
   while(servers.length > 0) {
-    // Get the first server
-    var server = servers.shift();
-    // Add the server to the state
-    self.s.replicaSetState.update(server);
-    // Add event handlers
-    server.once('close', handleInitialConnectEvent(self, 'close'));
-    server.once('timeout', handleInitialConnectEvent(self, 'timeout'));
-    server.once('parseError', handleInitialConnectEvent(self, 'parseError'));
-    server.once('error', handleInitialConnectEvent(self, 'error'));
-    server.once('connect', handleInitialConnectEvent(self, 'connect'));
-    // SDAM Monitoring events
-    server.on('serverOpening', function(e) { self.emit('serverOpening', e); });
-    server.on('serverDescriptionChanged', function(e) { self.emit('serverDescriptionChanged', e); });
-    server.on('serverClosed', function(e) { self.emit('serverClosed', e); });
-    // console.log("-------- connect 2 :: 0")
-    // Start connection
-    server.connect(self.s.connectOptions);
-    // console.log("-------- connect 2 :: 1")
+    connect(servers.shift(), timeoutInterval++);
   }
 }
 

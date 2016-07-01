@@ -230,11 +230,15 @@ exports['Should correctly bring back proxy and use it'] = {
 
     // Add event listeners
     server.once('fullsetup', function(_server) {
+      // console.log("====================================== 0")
       var intervalId = setInterval(function() {
+        // console.log("====================================== 1")
         server.insert('test.test', [{created:new Date()}], function(err, r) {
+          // console.log("====================================== 2")
           // If we have a successful insert
           // validate that it's the expected proxy
           if(r) {
+            // console.log("====================================== 3 :: " + r.connection.port)
             clearInterval(intervalId);
             test.equal(52001, r.connection.port);
 
@@ -243,10 +247,12 @@ exports['Should correctly bring back proxy and use it'] = {
 
             // Perform interval inserts waiting for both proxies to come back
             var intervalId2 = setInterval(function() {
+              // console.log("====================================== 4")
               // Bring back the missing proxy
               if(currentStep == 0) currentStep = currentStep + 1;
               // Perform inserts
               server.insert('test.test', [{created:new Date()}], function(err, r) {
+                // console.log("====================================== 5 :: " + r.connection.port)
                 if(r) {
                   proxies[r.connection.port] = true
                 }
@@ -403,7 +409,7 @@ exports['Should correctly bring back both proxies and use it'] = {
               if(Object.keys(proxies).length == 2) {
                 clearInterval(intervalId2);
                 intervalId2 = null;
-                
+
                 running = false;
                 server.destroy();
                 mongos1.destroy();
