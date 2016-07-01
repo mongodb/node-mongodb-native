@@ -287,6 +287,7 @@ exports['Should ignore one of the mongos instances due to being outside the late
 
               server2.insert('test.test', [{created:new Date()}], function(err, r) {
                 console.log("---------------------------------------------- 6")
+                if(r)console.dir(r.connection.port)
                 test.equal(null, err);
                 test.equal(52001, r.connection.port);
 
