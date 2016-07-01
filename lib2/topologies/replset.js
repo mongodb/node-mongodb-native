@@ -170,12 +170,12 @@ Object.defineProperty(ReplSet.prototype, 'type', {
 
 function attemptReconnect(self) {
   self.haTimeoutId = setTimeout(function() {
-    // if(global.debug)console.log("---- attemptReconnect :: " + self.s.id)
+    if(global.debug)console.log("---- attemptReconnect :: " + self.s.id)
     if(self.state == DESTROYED) return;
     // if(global.debug)console.log("---- attemptReconnect 1")
     // Get all known hosts
     var keys = Object.keys(self.s.replicaSetState.set);
-    // console.log("===== REPLSET CREATE SERVER 0 :: " + self.s.id)
+    console.log("===== REPLSET CREATE SERVER 0 :: " + self.s.id)
     var servers = keys.map(function(x) {
       return new Server(Object.assign({}, self.s.options, {
         host: x.split(':')[0], port: parseInt(x.split(':')[1], 10)
@@ -394,17 +394,20 @@ function topologyMonitor(self, options) {
 
   // Set momitoring timeout
   self.haTimeoutId = setTimeout(function() {
-    // console.log("===================== topologyMonitor :: " + self.s.id)
+    // console.log("===================== topologyMonitor :: 0 :: " + self.id)
     // if(global.debug)console.log("===================== topologyMonitor")
     // console.dir(self.state)
     // console.log("+ topologyMonitor 0")
     if(self.state == DESTROYED) return;
+    // console.log("===================== topologyMonitor ::  1 :: " + self.id)
 
     // If we have a primary and a disconnect handler, execute
     // buffered operations
     if(self.s.replicaSetState.hasPrimaryAndSecondary() && self.s.disconnectHandler) {
       self.s.disconnectHandler.execute();
     }
+
+    // console.log("===================== topologyMonitor ::  2 :: " + self.id)
 
     // Get the connectingServers
     var connectingServers = self.s.replicaSetState.allServers();
@@ -426,10 +429,14 @@ function topologyMonitor(self, options) {
       return self.emit('error', new MongoError('no valid replicaset members found'));
     }
 
+    // console.log("===================== topologyMonitor ::  3 :: " + self.id)
+    // console.dir(count)
+    // console.dir(options)
+
     // If the count is zero schedule a new fast
     // console.log("+ topologyMonitor 1 :: count :: " + count)
     function pingServer(_self, _server, cb) {
-      // if(global.debug)console.log("================ pingServer 0 :: " + _server.name)
+      // console.log("================ pingServer 0 :: " + _server.name)
       // Measure running time
       var start = new Date().getTime();
 
@@ -443,7 +450,7 @@ function topologyMonitor(self, options) {
       // Execute ismaster
       _server.command('admin.$cmd', {ismaster:true}, {monitoring: true}, function(err, r) {
         // if(err) console.dir(err)
-        // if(global.debug)console.log("================ pingServer 1 :: " + _server.name)
+        // console.log("================ pingServer 1 :: " + _server.name)
         // console.dir(err)
         if(self.state == DESTROYED) {
           _server.destroy();
@@ -480,6 +487,7 @@ function topologyMonitor(self, options) {
 
     // Ping all servers
     for(var i = 0; i < connectingServers.length; i++) {
+      // console.log("+++++++++ schedule server")
       pingServer(self, connectingServers[i], function(err, r) {
         count = count - 1;
 
@@ -540,7 +548,7 @@ function topologyMonitor(self, options) {
 
 function handleEvent(self, event) {
   return function(err) {
-    // console.log("===== handleEvent :: " + event + " :: " + this.is)
+    // console.log("===== handleEvent :: " + event + " :: " + this.name)
     // if(global.debug)console.log("$$$$ handleEvent :: " + event + " :: " + self.s.id + " :: " + this.name)
     if(self.state == DESTROYED) return;
     self.s.replicaSetState.remove(this);
@@ -1079,11 +1087,12 @@ ReplSet.prototype.command = function(ns, cmd, options, callback) {
 
   // Establish readPreference
   var readPreference = options.readPreference ? options.readPreference : ReadPreference.primary;
-
+  // console.log("!!! repflset command 0")
   // Pick a server
   var server = pickServer(self, self.s, readPreference);
   if(!(server instanceof Server)) return callback(server);
   if(self.s.debug) self.emit('pickedServer', ReadPreference.primary, server);
+  // console.log("!!! replset command 1")
 
   // Topology is not connected, save the call in the provided store to be
   // Executed at some point when the handler deems it's reconnected
@@ -1091,10 +1100,14 @@ ReplSet.prototype.command = function(ns, cmd, options, callback) {
     return this.s.disconnectHandler.add('command', ns, cmd, options, callback);
   }
 
+  // console.log("!!! replset command 2")
+
   // No server returned we had an error
   if(server == null) {
     return callback(new MongoError(f("no server found that matches the provided readPreference %s", readPreference)));
   }
+
+  // console.log("!!! replset command 3")
 
   // Execute the command
   server.command(ns, cmd, options, callback);

@@ -92,7 +92,7 @@ ReplSetState.prototype.destroy = function() {
 
 ReplSetState.prototype.remove = function(server, options) {
   options = options || {};
-  // console.log("================================== remove :: " + server.name)
+  // console.log("================================== remove 0 :: " + server.name)
 
   // Only remove if the current server is not connected
   var servers = this.primary ? [this.primary] : [];
@@ -107,7 +107,8 @@ ReplSetState.prototype.remove = function(server, options) {
       // console.dir(server.ismaster)
       // console.log("============== current server")
       // console.dir(servers[i].ismaster)
-      // console.log("================================== remove :: " + server.name)
+      // console.log("================================== remove 1 :: " + server.name)
+      // console.log("=== " + (servers[i] === server))
       return;
     }
   }
@@ -138,6 +139,7 @@ ReplSetState.prototype.remove = function(server, options) {
   removeFrom(server, this.unknownServers);
 
   // console.log("=================================== remove :: " + removeType)
+  // console.log(this.allServers().map(function(x) { return x.name }))
   // console.log("======== remove :: " + removeType + " :: " + server.name)
   // console.log(Object.keys(this.set))
   // Do we have a removeType

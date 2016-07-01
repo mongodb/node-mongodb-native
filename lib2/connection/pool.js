@@ -227,7 +227,7 @@ function attemptReconnect(self) {
     // console.log(self.availableConnections.concat(self.inUseConnections.concat(self.connectingConnections)).map(function(x) {
     //   return x.id
     // }))
-    if(self.state == DESTROYED) return;
+    if(self.state == DESTROYED || self.state == DESTROYING) return;
 
     // We are connected do not try again
     if(self.isConnected()) {
@@ -261,7 +261,7 @@ function attemptReconnect(self) {
         var connection = this;
 
         // Pool destroyed stop the connection
-        if(self.state == DESTROYED) {
+        if(self.state == DESTROYED || self.state == DESTROYING) {
           return connection.destroy();
         }
 
@@ -457,10 +457,12 @@ Pool.prototype.get = function() {
 }
 
 Pool.prototype.isConnected = function() {
+  // console.log("   ^^ isConnected 0 :: " + this.id)
   // We are in a destroyed state
-  if(this.state == DESTROYED || this.state == 'DESTROYING') {
+  if(this.state == DESTROYED || this.state == DESTROYING) {
     return false;
   }
+  // console.log("   ^^ isConnected 1 :: " + this.id)
 
   // Get connections
   var connections = this.availableConnections
@@ -469,18 +471,20 @@ Pool.prototype.isConnected = function() {
   for(var i = 0; i < connections.length; i++) {
     if(connections[i].isConnected()) return true;
   }
+  // console.log("   ^^ isConnected 2 :: " + this.id)
 
   // Might be authenticating, but we are still connected
   if(connections.length == 0 && this.authenticating) {
     return true
   }
+  // console.log("   ^^ isConnected 3 :: " + this.id)
 
   // Not connected
   return false;
 }
 
 Pool.prototype.isDestroyed = function() {
-  return this.state == DESTROYED;
+  return this.state == DESTROYED || this.state == DESTROYING;
 }
 
 Pool.prototype.isDisconnected = function() {
@@ -503,11 +507,11 @@ Pool.prototype.connect = function(auth) {
   this.connectingConnections.push(connection);
   // Add listeners to the connection
   connection.once('connect', function(connection) {
-    if(self.state == DESTROYED) return self.destroy();
+    if(self.state == DESTROYED || self.state == DESTROYING) return self.destroy();
 
     // Apply any store credentials
     reauthenticate(self, connection, function(err) {
-      if(self.state == DESTROYED) return self.destroy();
+      if(self.state == DESTROYED || self.state == DESTROYING) return self.destroy();
 
       // We have an error emit it
       if(err) {
@@ -519,7 +523,7 @@ Pool.prototype.connect = function(auth) {
 
       // Authenticate
       authenticate(self, args, connection, function(err) {
-        if(self.state == DESTROYED) return self.destroy();
+        if(self.state == DESTROYED || self.state == DESTROYING) return self.destroy();
 
         // We have an error emit it
         if(err) {
@@ -703,12 +707,15 @@ Pool.prototype.unref = function() {
 var events = ['error', 'close', 'timeout', 'parseError', 'connect'];
 
 Pool.prototype.destroy = function() {
+  // console.log("   ^^ destroy 0 :: " + this.id)
   // console.log("destroy =========================== 0")
   var self = this;
   // Do not try again if the pool is already dead
-  if(this.state == DESTROYED) return;
+  if(this.state == DESTROYED || self.state == DESTROYING) return;
+  // console.log("   ^^ destroy 1 :: " + this.id)
   // Set state to destroyed
   stateTransition(this, DESTROYING);
+  // console.log("   ^^ destroy 2 :: " + this.id)
 
   // console.log("destroy =========================== 1")
   // Wait for the operations to drain before we close the pool
@@ -751,6 +758,7 @@ Pool.prototype.destroy = function() {
       self.connectingConnections = [];
 
       // console.log("========= destroy :: checkStatus 1:3")
+      // console.log("   ^^ destroy 3 :: " + this.id)
 
       // Set state to destroyed
       stateTransition(self, DESTROYED);
@@ -875,7 +883,7 @@ function _createConnection(self) {
     return function() {
       // console.log("== _createConnection :: connect :: " + _connection.id)
       // Destroyed state return
-      if(self.state == DESTROYED) {
+      if(self.state == DESTROYED || self.state == DESTROYING) {
         // Remove the connection from the list
         removeConnection(self, _connection);
         return _connection.destroy();
@@ -894,7 +902,7 @@ function _createConnection(self) {
 
       // Signal
       reauthenticate(self, _connection, function(err) {
-        if(self.state == DESTROYED) {
+        if(self.state == DESTROYED || self.state == DESTROYING) {
           return _connection.destroy();
         }
         // Remove the connection from the connectingConnections list

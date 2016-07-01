@@ -122,7 +122,7 @@ function configureWireProtocolHandler(self, ismaster) {
 function disconnectHandler(self, type, ns, cmd, options, callback) {
   // Topology is not connected, save the call in the provided store to be
   // Executed at some point when the handler deems it's reconnected
-  if(!self.s.pool.isConnected() && self.s.disconnectHandler != null) {
+  if(!self.s.pool.isConnected() && self.s.disconnectHandler != null && !options.monitoring) {
     self.s.disconnectHandler.add(type, ns, cmd, options, callback);
     return true;
   }
@@ -361,13 +361,19 @@ Server.prototype.command = function(ns, cmd, options, callback) {
   var result = basicReadValidations(self, options);
   if(result) return callback(result);
 
+  // console.log("  -- server command 0")
+
   // Debug log
   if(self.s.logger.isDebug()) self.s.logger.debug(f('executing command [%s] against %s', JSON.stringify({
     ns: ns, cmd: cmd, options: debugOptions(debugFields, options)
   }), self.name));
 
+  // console.log("  -- server command 1")
+
   // If we are not connected or have a disconnectHandler specified
   if(disconnectHandler(self, 'command', ns, cmd, options, callback)) return;
+
+  // console.log("  -- server command 2")
 
   // Query options
   var queryOptions = {
@@ -390,6 +396,8 @@ Server.prototype.command = function(ns, cmd, options, callback) {
     command: true,
     monitoring: typeof options.monitoring == 'boolean' ? options.monitoring : false,
   };
+
+  // console.log("  -- server command 3")
 
   // console.log("!!!!!!!!!!!!!! WRITE command")
   // console.dir(cmd)
@@ -564,10 +572,16 @@ Server.prototype.destroy = function(options) {
   }
 
   // Emit close event
-  if(options.emitClose) self.emit('close', self);
+  if(options.emitClose) {
+    // console.log("=========== 0")
+    self.emit('close', self);
+  }
 
   // Emit destroy event
-  if(options.emitDestroy) self.emit('destroy', self);
+  if(options.emitDestroy) {
+    // console.log("=========== 1")
+    self.emit('destroy', self);
+  }
 
   // Remove all listeners
   listeners.forEach(function(event) {

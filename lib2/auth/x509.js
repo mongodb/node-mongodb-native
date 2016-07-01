@@ -2,6 +2,7 @@
 
 var f = require('util').format
   , crypto = require('crypto')
+  , Query = require('../connection/commands').Query
   , MongoError = require('../error');
 
 var AuthSession = function(db, username, password) {
