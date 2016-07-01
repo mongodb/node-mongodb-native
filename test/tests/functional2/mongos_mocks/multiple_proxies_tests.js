@@ -226,7 +226,7 @@ exports['Should ignore one of the mongos instances due to being outside the late
             request.reply({ok:1, n:doc.documents, lastOp: new Date()});
           }
         }
-      });
+      }); 
 
       // Start dropping the packets
       setTimeout(function() {
