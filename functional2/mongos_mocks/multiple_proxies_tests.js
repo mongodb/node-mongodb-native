@@ -1,3 +1,5 @@
+"use strict"
+
 var timeoutPromise = function(timeout) {
   return new Promise(function(resolve, reject) {
     setTimeout(function() {
@@ -28,6 +30,7 @@ exports['Should correctly load-balance the operations'] = {
     var currentStep = 0;
     // Primary stop responding
     var stopRespondingPrimary = false;
+    var port = null;
 
     // Extend the object
     var extend = function(template, fields) {
@@ -105,24 +108,29 @@ exports['Should correctly load-balance the operations'] = {
 
       // Add event listeners
       server.once('connect', function(_server) {
-        console.log("=================================== 0")
+        // console.log("=================================== 0")
         _server.insert('test.test', [{created:new Date()}], function(err, r) {
-          console.log("=================================== 1")
-          if(r) console.log(r.connection.port)
+          // console.log("=================================== 1")
+          // if(r) console.log(r.connection.port)
           test.equal(null, err);
-          test.equal(52000, r.connection.port);
+          test.ok(r.connection.port == 52000 || r.connection.port == 52001);
+          global.port = r.connection.port == 52000 ? 52001 : 52000;
+          // console.log("=================================== 1 :: " + global.port)
 
           _server.insert('test.test', [{created:new Date()}], function(err, r) {
-            console.log("=================================== 2")
-            if(r) console.log(r.connection.port)
+            // console.log("=================================== 2 :: " + global.port)
+            // if(r) console.log(r.connection.port)
+            // console.dir(r)
+
             test.equal(null, err);
-            test.equal(52001, r.connection.port);
+            test.equal(global.port, r.connection.port);
+            global.port = r.connection.port == 52000 ? 52001 : 52000;
 
             _server.insert('test.test', [{created:new Date()}], function(err, r) {
-              console.log("=================================== 3")
-              if(r) console.log(r.connection.port)
+              // console.log("=================================== 3 :: " + global.port)
+              // if(r) console.log(r.connection.port)
               test.equal(null, err);
-              test.equal(52000, r.connection.port);
+              test.equal(global.port, r.connection.port);
 
               running = false;
               server.destroy();
@@ -208,8 +216,8 @@ exports['Should ignore one of the mongos instances due to being outside the late
       co(function*() {
         while(running) {
           var request = yield mongos2.receive();
-          // Delay all the operations by 100 ms
-          yield timeoutPromise(200);
+          // Delay all the operations by 500 ms
+          yield timeoutPromise(500);
           // Get the document
           var doc = request.document;
           if(doc.ismaster) {
