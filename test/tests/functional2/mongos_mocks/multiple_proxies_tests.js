@@ -289,7 +289,7 @@ exports['Should ignore one of the mongos instances due to being outside the late
                 console.log("---------------------------------------------- 6")
                 if(r)console.dir(r.connection.port)
                 test.equal(null, err);
-                test.equal(52001, r.connection.port);
+                test.equal(52000, r.connection.port);
 
                 server2.destroy();
                 mongos1.destroy();
