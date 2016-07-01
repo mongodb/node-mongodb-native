@@ -99,6 +99,7 @@ exports['Should correctly load-balance the operations'] = {
         connectionTimeout: 3000,
         socketTimeout: 1000,
         haInterval: 1000,
+        localThresholdMS: 500,
         size: 1
       });
 
@@ -231,18 +232,18 @@ exports['Should ignore one of the mongos instances due to being outside the late
       size: 1
     });
 
-    // console.log("---------------------------------------------- 0")
+    console.log("---------------------------------------------- 0")
     // Add event listeners
     server.once('fullsetup', function(_server) {
-      // console.log("---------------------------------------------- 1")
+      console.log("---------------------------------------------- 1")
       server.insert('test.test', [{created:new Date()}], function(err, r) {
-        // console.log("---------------------------------------------- 2")
+        console.log("---------------------------------------------- 2")
         test.equal(null, err);
         test.equal(52000, r.connection.port);
 
         server.insert('test.test', [{created:new Date()}], function(err, r) {
-          // console.log("---------------------------------------------- 3")
-          // if(r) console.log(r.connection.port)
+          console.log("---------------------------------------------- 3")
+          if(r) console.log(r.connection.port)
           test.equal(null, err);
           test.equal(52000, r.connection.port);
 
@@ -262,15 +263,15 @@ exports['Should ignore one of the mongos instances due to being outside the late
 
           // Add event listeners
           server2.once('fullsetup', function(_server) {
-            // console.log("---------------------------------------------- 4")
+            console.log("---------------------------------------------- 4")
             server2.insert('test.test', [{created:new Date()}], function(err, r) {
-              // console.log("---------------------------------------------- 5")
-              // if(r)console.dir(r.connection.port)
+              console.log("---------------------------------------------- 5")
+              if(r)console.dir(r.connection.port)
               test.equal(null, err);
               test.equal(52000, r.connection.port);
 
               server2.insert('test.test', [{created:new Date()}], function(err, r) {
-                // console.log("---------------------------------------------- 6")
+                console.log("---------------------------------------------- 6")
                 test.equal(null, err);
                 test.equal(52001, r.connection.port);
 
