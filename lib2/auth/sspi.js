@@ -70,7 +70,7 @@ SSPI.prototype.auth = function(server, connections, db, username, password, opti
     // Execute MongoCR
     var execute = function(connection) {
       // Start Auth process for a connection
-      SSIPAuthenticate(username, password, gssapiServiceName, server, connection, options, function(err, r) {
+      SSIPAuthenticate(self, username, password, gssapiServiceName, server, connection, options, function(err, r) {
         // Adjust count
         count = count - 1;
 
@@ -109,7 +109,7 @@ SSPI.prototype.auth = function(server, connections, db, username, password, opti
   }
 }
 
-var SSIPAuthenticate = function(username, password, gssapiServiceName, server, connection, options, callback) {
+var SSIPAuthenticate = function(self, username, password, gssapiServiceName, server, connection, options, callback) {
   // Build Authentication command to send to MongoDB
   var command = {
       saslStart: 1

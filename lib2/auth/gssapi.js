@@ -70,7 +70,7 @@ GSSAPI.prototype.auth = function(server, connections, db, username, password, op
     // Execute MongoCR
     var execute = function(connection) {
       // Start Auth process for a connection
-      GSSAPIInitialize(db, username, password, db, gssapiServiceName, server, connection, options, function(err, r) {
+      GSSAPIInitialize(self, db, username, password, db, gssapiServiceName, server, connection, options, function(err, r) {
         // Adjust count
         count = count - 1;
 
@@ -111,7 +111,7 @@ GSSAPI.prototype.auth = function(server, connections, db, username, password, op
 
 //
 // Initialize step
-var GSSAPIInitialize = function(db, username, password, authdb, gssapiServiceName, server, connection, options, callback) {
+var GSSAPIInitialize = function(self, db, username, password, authdb, gssapiServiceName, server, connection, options, callback) {
   // Create authenticator
   var mongo_auth_process = new MongoAuthProcess(connection.host, connection.port, gssapiServiceName, options);
 
@@ -124,14 +124,14 @@ var GSSAPIInitialize = function(db, username, password, authdb, gssapiServiceNam
       if(err) return callback(err, false);
 
       // Call the next db step
-      MongoDBGSSAPIFirstStep(mongo_auth_process, payload, db, username, password, authdb, server, connection, callback);
+      MongoDBGSSAPIFirstStep(self, mongo_auth_process, payload, db, username, password, authdb, server, connection, callback);
     });
   });
 }
 
 //
 // Perform first step against mongodb
-var MongoDBGSSAPIFirstStep = function(mongo_auth_process, payload, db, username, password, authdb, server, connection, callback) {
+var MongoDBGSSAPIFirstStep = function(self, mongo_auth_process, payload, db, username, password, authdb, server, connection, callback) {
   // Build the sasl start command
   var command = {
       saslStart: 1
@@ -155,14 +155,14 @@ var MongoDBGSSAPIFirstStep = function(mongo_auth_process, payload, db, username,
       if(err) return callback(err, false);
 
       // MongoDB API Second Step
-      MongoDBGSSAPISecondStep(mongo_auth_process, payload, doc, db, username, password, authdb, server, connection, callback);
+      MongoDBGSSAPISecondStep(self, mongo_auth_process, payload, doc, db, username, password, authdb, server, connection, callback);
     });
   });
 }
 
 //
 // Perform first step against mongodb
-var MongoDBGSSAPISecondStep = function(mongo_auth_process, payload, doc, db, username, password, authdb, server, connection, callback) {
+var MongoDBGSSAPISecondStep = function(self, mongo_auth_process, payload, doc, db, username, password, authdb, server, connection, callback) {
   // Build Authentication command to send to MongoDB
   var command = {
       saslContinue: 1
@@ -185,12 +185,12 @@ var MongoDBGSSAPISecondStep = function(mongo_auth_process, payload, doc, db, use
       if(err) return callback(err, false);
 
       // Call the last and third step
-      MongoDBGSSAPIThirdStep(mongo_auth_process, payload, doc, db, username, password, authdb, server, connection, callback);
+      MongoDBGSSAPIThirdStep(self, mongo_auth_process, payload, doc, db, username, password, authdb, server, connection, callback);
     });
   });
 }
 
-var MongoDBGSSAPIThirdStep = function(mongo_auth_process, payload, doc, db, username, password, authdb, server, connection, callback) {
+var MongoDBGSSAPIThirdStep = function(self, mongo_auth_process, payload, doc, db, username, password, authdb, server, connection, callback) {
   // Build final command
   var command = {
       saslContinue: 1
