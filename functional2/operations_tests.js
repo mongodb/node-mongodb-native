@@ -460,7 +460,9 @@ exports['Should correctly execute unref and finish all operations'] = {
   },
 
   test: function(configuration, test) {
+    // console.log("================ -- 0")
     configuration.newTopology(function(err, server) {
+      // console.log("================ -- 1")
       // Add event listeners
       server.on('connect', function(_server) {
         var left = 100;
