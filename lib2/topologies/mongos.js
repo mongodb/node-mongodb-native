@@ -630,7 +630,7 @@ Mongos.prototype.lastIsMaster = function() {
  */
 Mongos.prototype.unref = function(emitClose) {
   // Transition state
-  stateTransition(this, DESTROYED);
+  stateTransition(this, DISCONNECTED);
   // Get all proxies
   var proxies = self.connectedProxies.concat(self.connectingProxies);
   proxies.forEach(function(x) {

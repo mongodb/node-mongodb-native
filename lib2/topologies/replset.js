@@ -698,7 +698,7 @@ ReplSet.prototype.destroy = function() {
 
 ReplSet.prototype.unref = function() {
   // Transition state
-  stateTransition(this, DESTROYED);
+  stateTransition(this, DISCONNECTED);
   // console.log("------------------ 0")
   this.s.replicaSetState.allServers().forEach(function(x) {
     x.unref();
