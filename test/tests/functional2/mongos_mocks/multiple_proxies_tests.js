@@ -270,7 +270,7 @@ exports['Should ignore one of the mongos instances due to being outside the late
               { host: 'localhost', port: 52001 },
             ], {
             connectionTimeout: 3000,
-            localThresholdMS: 500,
+            localThresholdMS: 1000,
             socketTimeout: 1000,
             haInterval: 1000,
             size: 1
@@ -289,7 +289,7 @@ exports['Should ignore one of the mongos instances due to being outside the late
                 console.log("---------------------------------------------- 6")
                 if(r)console.dir(r.connection.port)
                 test.equal(null, err);
-                test.equal(52000, r.connection.port);
+                test.equal(52001, r.connection.port);
 
                 server2.destroy();
                 mongos1.destroy();
