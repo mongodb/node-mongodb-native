@@ -328,7 +328,10 @@ exports['Should correctly recover from a server outage'] = {
 }
 
 exports['Should correctly recover from a longer server outage'] = {
-  metadata: { requires: { topology: "single" } },
+  metadata: {
+    requires: { topology: "single" },
+    ignore: { travis:true }
+  },
 
   test: function(configuration, test) {
     var Pool = require('../../../lib2/connection/pool')
