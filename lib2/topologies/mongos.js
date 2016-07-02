@@ -364,10 +364,10 @@ function pickProxy(self) {
 
   // Filter out the possible servers
   connectedProxies = connectedProxies.filter(function(server) {
-    // console.log("==== filter :: " + server.name)
-    // console.log("server.lastIsMasterMS = " + server.lastIsMasterMS)
-    // console.log("self.lowerBoundLatency = " + self.lowerBoundLatency)
-    // console.log("self.s.localThresholdMS = " + self.s.localThresholdMS)
+    console.log("==== filter :: " + server.name)
+    console.log("server.lastIsMasterMS = " + server.lastIsMasterMS)
+    console.log("self.lowerBoundLatency = " + self.lowerBoundLatency)
+    console.log("self.s.localThresholdMS = " + self.s.localThresholdMS)
     if((server.lastIsMasterMS <= (self.lowerBoundLatency + self.s.localThresholdMS))
       && server.isConnected()) {
       return true;
