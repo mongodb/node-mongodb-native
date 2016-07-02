@@ -491,7 +491,7 @@ exports['Should reconnect when initial connection failed'] = {
     requires: {
       topology: 'single'
     },
-    // ignore: { travis:true }
+    ignore: { travis:true }
   },
 
   test: function(configuration, test) {
