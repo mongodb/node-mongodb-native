@@ -317,12 +317,12 @@ var testFiles = [
 
   // // SCRAM tests
   // , '/test/functional/scram_tests.js'
-  //
-  // // LDAP Tests
-  // , '/test/functional/ldap_tests.js'
-  //
-  // // Kerberos Tests
-  // , '/test/functional/kerberos_tests.js'
+
+  // LDAP Tests
+  , '/test/functional/ldap_tests.js'
+
+  // Kerberos Tests
+  , '/test/functional/kerberos_tests.js'
 
   // Authentication Tests
   , '/test/functional/authentication_tests.js'
