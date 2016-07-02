@@ -65,7 +65,7 @@ exports['Should correctly timeout socket operation and then correctly re-execute
           } else if(doc.insert && currentStep == 1) {
             // Stop responding to any calls (emulate dropping packets on the floor)
             if(stopRespondingPrimary) {
-              yield timeoutPromise(1500);
+              yield timeoutPromise(3000);
               continue;
             }
 
