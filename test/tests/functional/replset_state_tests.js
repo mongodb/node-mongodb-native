@@ -4,7 +4,7 @@ var f = require('util').format,
   fs = require('fs'),
   url = require('url'),
   ObjectId = require('bson').ObjectId,
-  ReplSetState = require('../../../lib2/topologies/replset_state');
+  ReplSetState = require('../../../lib/topologies/replset_state');
 
 exports['Should correctly execute state machine tests'] = {
   metadata: { requires: { topology: "single" } },

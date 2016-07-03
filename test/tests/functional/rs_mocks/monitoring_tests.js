@@ -9,6 +9,7 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet,
       ObjectId = configuration.require.BSON.ObjectId,
+      Connection = require('../../../../lib/connection/connection'),
       co = require('co'),
       mockupdb = require('../../../mock');
 
@@ -132,11 +133,13 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
 
       // Start dropping the packets
       setTimeout(function() {
+        // console.log("======================== stopRespondingPrimary")
         stopRespondingPrimary = true;
         currentIsMasterState = 1;
       }, 5000);
     });
 
+    Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000 },
@@ -150,11 +153,15 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
     });
 
     // Add event listeners
-    server.on('fullsetup', function(_server) {
+    server.on('connect', function(_server) {
       // Set up a write
       function schedule() {
+        // console.log("==================================== schedule 0")
         setTimeout(function() {
+          // console.log("==================================== schedule 1")
           _server.insert('test.test', [{created:new Date()}], function(err, r) {
+            // console.log("==================================== insert")
+            // if(r) console.log(r.connection.port)
             // Did we switch servers
             if(r && r.connection.port == 32001) {
               test.ok(stopRespondingPrimary);
@@ -171,7 +178,11 @@ exports['Should correctly connect to a replicaset where the primary hangs causin
               server.destroy();
               running = false;
 
-              test.done();
+              setTimeout(function() {
+                test.equal(0, Object.keys(Connection.connections()).length);
+                Connection.disableConnectionAccounting();
+                test.done();
+              }, 1000);
               return;
             }
 

@@ -26,6 +26,7 @@ exports['Successfully add a new secondary server to the set'] = {
     var ReplSet = configuration.require.ReplSet,
       ObjectId = configuration.require.BSON.ObjectId,
       ReadPreference = configuration.require.ReadPreference,
+      Connection = require('../../../../lib/connection/connection'),
       Long = configuration.require.BSON.Long,
       co = require('co'),
       mockupdb = require('../../../mock');
@@ -140,6 +141,7 @@ exports['Successfully add a new secondary server to the set'] = {
       });
     });
 
+    Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000 },
@@ -156,7 +158,7 @@ exports['Successfully add a new secondary server to the set'] = {
     var arbiters = {};
 
     server.on('joined', function(_type, _server) {
-      // console.log("----------- joined :: " + _type + " :: " + _server.name)
+      // console.log("----------- joined -- :: " + _type + " :: " + _server.name)
       if(_type == 'arbiter') {
         arbiters[_server.name] = _server;
         // Flip the ismaster message
@@ -170,6 +172,7 @@ exports['Successfully add a new secondary server to the set'] = {
           test.ok(secondaries['localhost:32003'] != null);
           test.ok(arbiters['localhost:32002'] != null);
 
+          // console.log("################## FINSIHED ADD SECONDary")
           // Finish up the test
           running = false;
           primaryServer.destroy();
@@ -177,7 +180,12 @@ exports['Successfully add a new secondary server to the set'] = {
           secondSecondaryServer.destroy();
           arbiterServer.destroy();
           server.destroy();
-          test.done();
+
+          setTimeout(function() {
+            test.equal(0, Object.keys(Connection.connections()).length);
+            Connection.disableConnectionAccounting();
+            test.done();
+          }, 3000);
         }
       }
     });
@@ -210,6 +218,7 @@ exports['Successfully remove a secondary server from the set'] = {
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet,
       ObjectId = configuration.require.BSON.ObjectId,
+      Connection = require('../../../../lib/connection/connection'),
       ReadPreference = configuration.require.ReadPreference,
       Long = configuration.require.BSON.Long,
       co = require('co'),
@@ -328,6 +337,7 @@ exports['Successfully remove a secondary server from the set'] = {
       });
     });
 
+    Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000 },
@@ -344,23 +354,28 @@ exports['Successfully remove a secondary server from the set'] = {
     var joined = 0;
 
     server.on('joined', function(_type, _server) {
-      // console.log("----- joined :: " + _type + " :: " + _server)
+      // console.log("----- joined :: " + _type + " :: " + _server.name)
       joined = joined + 1;
 
       // primary, secondary and arbiter have joined
       if(joined == 4) {
-        // test.equal(true, server.__connected);
+        // console.log("TEST 0")
+        test.equal(2, server.s.replicaSetState.secondaries.length);
+        // console.log("TEST 1")
+        test.equal('localhost:32001', server.s.replicaSetState.secondaries[0].name);
+        test.equal('localhost:32003', server.s.replicaSetState.secondaries[1].name);
+        // console.log("TEST 2")
 
-        test.equal(2, server.s.replState.secondaries.length);
-        test.equal('localhost:32001', server.s.replState.secondaries[0].name);
-        test.equal('localhost:32003', server.s.replState.secondaries[1].name);
+        test.equal(1, server.s.replicaSetState.arbiters.length);
+        test.equal('localhost:32002', server.s.replicaSetState.arbiters[0].name);
+        // console.log("TEST 3")
 
-        test.equal(1, server.s.replState.arbiters.length);
-        test.equal('localhost:32002', server.s.replState.arbiters[0].name);
-
-        test.ok(server.s.replState.primary != null);
-        test.equal('localhost:32000', server.s.replState.primary.name);
-
+        test.ok(server.s.replicaSetState.primary != null);
+        // console.log("TEST 4")
+        test.equal('localhost:32000', server.s.replicaSetState.primary.name);
+        // console.log("TEST 5")
+        // console.log("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        // global.debug=true
         // Flip the ismaster message
         currentIsMasterIndex = currentIsMasterIndex + 1;
       }
@@ -374,15 +389,16 @@ exports['Successfully remove a secondary server from the set'] = {
         // console.log("-------------------------------------------- done")
         // console.log(server.connections().map(function(x) { return x.port; }))
 
-        test.equal(1, server.s.replState.secondaries.length);
-        test.equal('localhost:32001', server.s.replState.secondaries[0].name);
+        test.equal(1, server.s.replicaSetState.secondaries.length);
+        test.equal('localhost:32001', server.s.replicaSetState.secondaries[0].name);
 
-        test.equal(1, server.s.replState.arbiters.length);
-        test.equal('localhost:32002', server.s.replState.arbiters[0].name);
+        test.equal(1, server.s.replicaSetState.arbiters.length);
+        test.equal('localhost:32002', server.s.replicaSetState.arbiters[0].name);
 
-        test.ok(server.s.replState.primary != null);
-        test.equal('localhost:32000', server.s.replState.primary.name);
+        test.ok(server.s.replicaSetState.primary != null);
+        test.equal('localhost:32000', server.s.replicaSetState.primary.name);
 
+        // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!! FINISHED TEST")
         primaryServer.destroy();
         firstSecondaryServer.destroy();
         secondSecondaryServer.destroy();
@@ -390,7 +406,11 @@ exports['Successfully remove a secondary server from the set'] = {
         server.destroy();
         running = false;
 
-        test.done();
+        setTimeout(function() {
+          test.equal(0, Object.keys(Connection.connections()).length);
+          Connection.disableConnectionAccounting();
+          test.done();
+        }, 2000);
       }
     });
 
@@ -421,6 +441,7 @@ exports['Successfully remove and re-add secondary server to the set'] = {
     var ReplSet = configuration.require.ReplSet,
       ObjectId = configuration.require.BSON.ObjectId,
       ReadPreference = configuration.require.ReadPreference,
+      Connection = require('../../../../lib/connection/connection'),
       Long = configuration.require.BSON.Long,
       co = require('co'),
       mockupdb = require('../../../mock');
@@ -546,6 +567,8 @@ exports['Successfully remove and re-add secondary server to the set'] = {
       });
     });
 
+    Connection.enableConnectionAccounting();
+    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! NEW REPLSET")
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000 },
@@ -561,37 +584,43 @@ exports['Successfully remove and re-add secondary server to the set'] = {
     var secondaries = {};
     var arbiters = {};
 
-    server.on('joined', function(_type, _server) {
-      // console.log("---------------------------------- joined :: " + _type + " :: " + _server.name)
-      if(_type == 'arbiter') {
-        if(currentIsMasterIndex < 2) {
-          currentIsMasterIndex = currentIsMasterIndex + 1;
-        }
+    setTimeout(function() {
+      // console.log("================= 0:0")
+      // console.log(server.s.replicaSetState.set)
+      test.equal('RSPrimary', server.s.replicaSetState.set['localhost:32000'].type);
+      test.equal('RSSecondary', server.s.replicaSetState.set['localhost:32001'].type);
+      test.equal('RSArbiter', server.s.replicaSetState.set['localhost:32002'].type);
+      test.equal('RSSecondary', server.s.replicaSetState.set['localhost:32003'].type);
+      currentIsMasterIndex = currentIsMasterIndex + 1;
 
-        arbiters[_server.name] = _server;
-      } else if(_type == 'secondary') {
-        // test.equal(true, server.__connected);
+      // Wait for another sweep
+      setTimeout(function() {
+        // console.log("================= 0:1")
+        // console.log(server.s.replicaSetState.set)
+        test.equal('RSPrimary', server.s.replicaSetState.set['localhost:32000'].type);
+        test.equal('RSSecondary', server.s.replicaSetState.set['localhost:32001'].type);
+        test.equal('RSArbiter', server.s.replicaSetState.set['localhost:32002'].type);
+        test.equal('RSSecondary', server.s.replicaSetState.set['localhost:32003'].type);
+        test.equal(2, server.s.replicaSetState.secondaries.length);
+        test.equal(1, server.s.replicaSetState.arbiters.length);
+        test.ok(server.s.replicaSetState.primary);
 
-        secondaries[_server.name] = _server;
+        primaryServer.destroy();
+        firstSecondaryServer.destroy();
+        secondSecondaryServer.destroy();
+        arbiterServer.destroy();
+        // console.log("!!!!!!!!!!!!!!!!!!!!!!!! KILL")
+        server.destroy();
+        running = false;
 
-        if(Object.keys(secondaries).length == 2) {
-          test.ok(secondaries['localhost:32001'] != null);
-          test.ok(secondaries['localhost:32003'] != null);
-          test.ok(arbiters['localhost:32002'] != null);
-          test.ok(server.s.replState.primary != null);
-          test.equal('localhost:32000', server.s.replState.primary.name);
-
-          primaryServer.destroy();
-          firstSecondaryServer.destroy();
-          secondSecondaryServer.destroy();
-          arbiterServer.destroy();
-          server.destroy();
-          running = false;
-
+        setTimeout(function() {
+          // console.log(Object.keys(Connection.connections()))
+          test.equal(0, Object.keys(Connection.connections()).length);
+          Connection.disableConnectionAccounting();
           test.done();
-        }
-      }
-    });
+        }, 3000);
+      }, 6000);
+    }, 3000);
 
     server.on('error', function(){});
 
@@ -600,17 +629,17 @@ exports['Successfully remove and re-add secondary server to the set'] = {
       if(_type == 'secondary' && _server.name == 'localhost:32003') {
         // test.equal(true, server.__connected);
 
-        test.equal(1, server.s.replState.secondaries.length);
-        test.equal('localhost:32001', server.s.replState.secondaries[0].name);
+        test.equal(1, server.s.replicaSetState.secondaries.length);
+        test.equal('localhost:32001', server.s.replicaSetState.secondaries[0].name);
 
-        test.equal(1, server.s.replState.arbiters.length);
-        test.equal('localhost:32002', server.s.replState.arbiters[0].name);
+        test.equal(1, server.s.replicaSetState.arbiters.length);
+        test.equal('localhost:32002', server.s.replicaSetState.arbiters[0].name);
 
-        test.ok(server.s.replState.primary != null);
-        test.equal('localhost:32000', server.s.replState.primary.name);
-
+        test.ok(server.s.replicaSetState.primary != null);
+        test.equal('localhost:32000', server.s.replicaSetState.primary.name);
         // Flip the ismaster message
         currentIsMasterIndex = currentIsMasterIndex + 1;
+        // global.debug=true
       }
     });
 

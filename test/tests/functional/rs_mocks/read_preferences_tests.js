@@ -4,13 +4,15 @@ exports['Should correctly connect to a replicaset and select the correct tagged 
       generators: true,
       topology: "single"
     },
-    ignore: { travis:true }
+    // ignore: { travis:true }
   },
 
   test: function(configuration, test) {
+    // console.log("--------------------------------------------- -3")
     var ReplSet = configuration.require.ReplSet,
       ObjectId = configuration.require.BSON.ObjectId,
       ReadPreference = configuration.require.ReadPreference,
+      Connection = require('../../../../lib/connection/connection'),
       Long = configuration.require.BSON.Long,
       co = require('co'),
       mockupdb = require('../../../mock');
@@ -104,6 +106,8 @@ exports['Should correctly connect to a replicaset and select the correct tagged 
       });
     });
 
+    // console.log("--------------------------------------------- -2")
+    Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000 },
@@ -116,10 +120,13 @@ exports['Should correctly connect to a replicaset and select the correct tagged 
         size: 1
     });
 
+    // console.log("--------------------------------------------- -1")
     // Add event listeners
-    server.on('all', function(_server) {
+    server.on('connect', function(_server) {
+      // console.log("--------------------------------------------- 0")
       // Set up a write
       function schedule() {
+        // console.log("--------------------------------------------- 1")
         // Perform a find
         _server.command('test.test', {
             count: 'test.test'
@@ -127,13 +134,21 @@ exports['Should correctly connect to a replicaset and select the correct tagged 
         }, {
           readPreference: new ReadPreference('secondary', {loc:'dc'})
         }, function(err, r) {
+          // console.log("--------------------------------------------- 2")
           // console.dir(err)
-          test.equal(err, null);
-          if(!(r.connection.port == 32002 || r.connection.port == 31000)) {
-            console.log(r.connection.port);
-          }
+          // console.dir(r)
+          // if(r) {
+          //   console.dir(r.connection.port)
+          //   console.dir(r.result)
+          // }
 
-          test.ok(r.connection.port == 32002 || r.connection.port == 31000);
+          // // console.dir(err)
+          test.equal(err, null);
+          test.ok(r.connection.port == 32002);
+          // if(!r.connection.port == 32002) {
+          //   console.log(r.connection.port);
+          // }
+          //
 
           primaryServer.destroy();
           firstSecondaryServer.destroy();
@@ -141,7 +156,11 @@ exports['Should correctly connect to a replicaset and select the correct tagged 
           server.destroy();
           running = false;
 
-          test.done();
+          setTimeout(function() {
+            test.equal(0, Object.keys(Connection.connections()).length);
+            Connection.disableConnectionAccounting();
+            test.done();
+          }, 1000);
           return;
         });
       }
@@ -170,6 +189,7 @@ exports['Should correctly connect to a replicaset and select the primary server'
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet,
       ObjectId = configuration.require.BSON.ObjectId,
+      Connection = require('../../../../lib/connection/connection'),
       ReadPreference = configuration.require.ReadPreference,
       Long = configuration.require.BSON.Long,
       co = require('co'),
@@ -264,6 +284,7 @@ exports['Should correctly connect to a replicaset and select the primary server'
       });
     });
 
+    Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000 },
@@ -277,7 +298,7 @@ exports['Should correctly connect to a replicaset and select the primary server'
     });
 
     // Add event listeners
-    server.on('fullsetup', function(_server) {
+    server.on('connect', function(_server) {
       // Set up a write
       function schedule() {
         setTimeout(function() {
@@ -297,7 +318,11 @@ exports['Should correctly connect to a replicaset and select the primary server'
             server.destroy();
             running = false;
 
-            test.done();
+            setTimeout(function() {
+              test.equal(0, Object.keys(Connection.connections()).length);
+              Connection.disableConnectionAccounting();
+              test.done();
+            }, 1000);
             return;
           });
         }, 500);
@@ -325,6 +350,7 @@ exports['Should correctly round robin secondary reads'] = {
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet,
       ObjectId = configuration.require.BSON.ObjectId,
+      Connection = require('../../../../lib/connection/connection'),
       ReadPreference = configuration.require.ReadPreference,
       Long = configuration.require.BSON.Long,
       co = require('co'),
@@ -419,6 +445,7 @@ exports['Should correctly round robin secondary reads'] = {
       });
     });
 
+    Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000 },
@@ -432,7 +459,7 @@ exports['Should correctly round robin secondary reads'] = {
     });
 
     // Add event listeners
-    server.on('fullsetup', function(_server) {
+    server.on('connect', function(_server) {
       // Set up a write
       function schedule() {
         setTimeout(function() {
@@ -473,7 +500,11 @@ exports['Should correctly round robin secondary reads'] = {
                 server.destroy();
                 running = false;
 
-                test.done();
+                setTimeout(function() {
+                  test.equal(0, Object.keys(Connection.connections()).length);
+                  Connection.disableConnectionAccounting();
+                  test.done();
+                }, 1000);
                 return;
               });
             });
@@ -504,6 +535,7 @@ exports['Should correctly fall back to a secondary server if the readPreference 
     var ReplSet = configuration.require.ReplSet,
       ObjectId = configuration.require.BSON.ObjectId,
       ReadPreference = configuration.require.ReadPreference,
+      Connection = require('../../../../lib/connection/connection'),
       Long = configuration.require.BSON.Long,
       MongoError = configuration.require.MongoError,
       co = require('co'),
@@ -587,6 +619,7 @@ exports['Should correctly fall back to a secondary server if the readPreference 
       }
     };
 
+    Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000,
@@ -602,7 +635,7 @@ exports['Should correctly fall back to a secondary server if the readPreference 
     });
 
     // Add event listeners
-    server.on('fullsetup', function(_server) {
+    server.on('connect', function(_server) {
       function schedule() {
         setTimeout(function() {
           // Perform a find
@@ -632,7 +665,11 @@ exports['Should correctly fall back to a secondary server if the readPreference 
                 _server.destroy();
                 running = false;
 
-                test.done();
+                setTimeout(function() {
+                  test.equal(0, Object.keys(Connection.connections()).length);
+                  Connection.disableConnectionAccounting();
+                  test.done();
+                }, 1000);
                 return;
               });
             }, 2500);
@@ -662,6 +699,7 @@ exports['Should correctly fallback to secondaries when primary not available'] =
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet,
       ObjectId = configuration.require.BSON.ObjectId,
+      Connection = require('../../../../lib/connection/connection'),
       ReadPreference = configuration.require.ReadPreference,
       Long = configuration.require.BSON.Long,
       co = require('co'),
@@ -757,6 +795,7 @@ exports['Should correctly fallback to secondaries when primary not available'] =
       });
     });
 
+    Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000 },
@@ -770,7 +809,7 @@ exports['Should correctly fallback to secondaries when primary not available'] =
     });
 
     // Add event listeners
-    server.on('fullsetup', function(_server) {
+    server.on('connect', function(_server) {
       // Set up a write
       function schedule() {
         // Perform a find
@@ -807,7 +846,11 @@ exports['Should correctly fallback to secondaries when primary not available'] =
                 server.destroy();
                 running = false;
 
-                test.done();
+                setTimeout(function() {
+                  test.equal(0, Object.keys(Connection.connections()).length);
+                  Connection.disableConnectionAccounting();
+                  test.done();
+                }, 1000);
               });
             });
           });
@@ -816,6 +859,375 @@ exports['Should correctly fallback to secondaries when primary not available'] =
 
       // Schedule an insert
       schedule();
+    });
+
+    // Gives proxies a chance to boot up
+    setTimeout(function() {
+      server.connect();
+    }, 100)
+  }
+}
+
+exports['Should correctly connect to a replicaset and perform correct nearness read'] = {
+  metadata: {
+    requires: {
+      generators: true,
+      topology: "single"
+    },
+    // ignore: { travis:true }
+  },
+
+  test: function(configuration, test) {
+    // console.log("--------------------------------------------- -3")
+    var ReplSet = configuration.require.ReplSet,
+      ObjectId = configuration.require.BSON.ObjectId,
+      ReadPreference = configuration.require.ReadPreference,
+      Connection = require('../../../../lib/connection/connection'),
+      Long = configuration.require.BSON.Long,
+      co = require('co'),
+      mockupdb = require('../../../mock');
+
+    // Contain mock server
+    var primaryServer = null;
+    var firstSecondaryServer = null;
+    var secondSecondaryServer = null;
+    var running = true;
+    var electionIds = [new ObjectId(), new ObjectId()];
+
+    // Extend the object
+    var extend = function(template, fields) {
+      for(var name in template) fields[name] = template[name];
+      return fields;
+    }
+
+    // Default message fields
+    var defaultFields = {
+      "setName": "rs", "setVersion": 1, "electionId": electionIds[0],
+      "maxBsonObjectSize" : 16777216, "maxMessageSizeBytes" : 48000000,
+      "maxWriteBatchSize" : 1000, "localTime" : new Date(), "maxWireVersion" : 4,
+      "minWireVersion" : 0, "ok" : 1, "hosts": ["localhost:32000", "localhost:32001", "localhost:32002"]
+    }
+
+    // Primary server states
+    var primary = [extend(defaultFields, {
+      "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
+    })];
+
+    // Primary server states
+    var firstSecondary = [extend(defaultFields, {
+      "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
+    })];
+
+    // Primary server states
+    var secondSecondary = [extend(defaultFields, {
+      "ismaster":false, "secondary":true, "me": "localhost:32002", "primary": "localhost:32000", "tags" : { "loc" : "dc" }
+    })];
+
+    // Boot the mock
+    co(function*() {
+      primaryServer = yield mockupdb.createServer(32000, 'localhost');
+      firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
+      secondSecondaryServer = yield mockupdb.createServer(32002, 'localhost');
+
+      // Primary state machine
+      co(function*() {
+        while(running) {
+          var request = yield primaryServer.receive();
+          // Get the document
+          var doc = request.document;
+          if(doc.ismaster) {
+            request.reply(primary[0]);
+          } else if(doc.count) {
+            request.reply({ "waitedMS" : Long.ZERO, "n" : 1, "ok" : 1});
+          }
+        }
+      });
+
+      // First secondary state machine
+      co(function*() {
+        while(running) {
+          var request = yield firstSecondaryServer.receive();
+          var doc = request.document;
+
+          if(doc.ismaster) {
+            request.reply(firstSecondary[0]);
+          } else if(doc.count) {
+            request.reply({ "waitedMS" : Long.ZERO, "n" : 1, "ok" : 1});
+          }
+        }
+      }).catch(function(err) {
+        console.log(err.stack);
+      });
+
+      // Second secondary state machine
+      co(function*() {
+        while(running) {
+          var request = yield secondSecondaryServer.receive();
+          var doc = request.document;
+
+          if(doc.ismaster) {
+            request.reply(secondSecondary[0]);
+          } else if(doc.count) {
+            request.reply({ "waitedMS" : Long.ZERO, "n" : 1, "ok" : 1});
+          }
+        }
+      }).catch(function(err) {
+        console.log(err.stack);
+      });
+    });
+
+    // console.log("--------------------------------------------- -2")
+    Connection.enableConnectionAccounting();
+    // Attempt to connect
+    var server = new ReplSet([
+      { host: 'localhost', port: 32000 },
+      { host: 'localhost', port: 32001 },
+      { host: 'localhost', port: 32002 }], {
+        setName: 'rs',
+        connectionTimeout: 3000,
+        socketTimeout: 0,
+        haInterval: 1000,
+        size: 1
+    });
+
+    // console.log("--------------------------------------------- -1")
+    // Add event listeners
+    server.on('connect', function(_server) {
+      // console.log("--------------------------------------------- 0")
+      // Set up a write
+      function schedule() {
+        _server.s.replicaSetState.secondaries = _server.s.replicaSetState.secondaries.map(function(x, i) {
+          x.lastIsMasterMS = i * 20;
+          return x;
+        });
+
+        // console.log("--------------------------------------------- 1")
+        // Perform a find
+        _server.command('test.test', {
+            count: 'test.test'
+          , batchSize: 2
+        }, {
+          readPreference: new ReadPreference('nearest')
+        }, function(err, r) {
+          // console.log("--------------------------------------------- 2")
+          // console.dir(err)
+          // // console.dir(r)
+          // if(r) {
+          //   console.dir(r.connection.port)
+          //   console.dir(r.result)
+          // }
+
+          // // console.dir(err)
+          test.equal(err, null);
+          test.ok(r.connection.port == 32000 || r.connection.port == 32001);
+          // if(!r.connection.port == 32002) {
+          //   console.log(r.connection.port);
+          // }
+          //
+
+          primaryServer.destroy();
+          firstSecondaryServer.destroy();
+          secondSecondaryServer.destroy();
+          server.destroy();
+          running = false;
+
+          setTimeout(function() {
+            test.equal(0, Object.keys(Connection.connections()).length);
+            Connection.disableConnectionAccounting();
+            test.done();
+          }, 1000);
+          return;
+        });
+      }
+
+      // Schedule an insert
+      setTimeout(function() {
+        schedule();
+      }, 2000);
+    });
+
+    // Gives proxies a chance to boot up
+    setTimeout(function() {
+      server.connect();
+    }, 100)
+  }
+}
+
+exports['Should correctly connect to a replicaset and perform correct nearness read with tag'] = {
+  metadata: {
+    requires: {
+      generators: true,
+      topology: "single"
+    },
+    // ignore: { travis:true }
+  },
+
+  test: function(configuration, test) {
+    // console.log("--------------------------------------------- -3")
+    var ReplSet = configuration.require.ReplSet,
+      ObjectId = configuration.require.BSON.ObjectId,
+      Connection = require('../../../../lib/connection/connection'),
+      ReadPreference = configuration.require.ReadPreference,
+      Long = configuration.require.BSON.Long,
+      co = require('co'),
+      mockupdb = require('../../../mock');
+
+    // Contain mock server
+    var primaryServer = null;
+    var firstSecondaryServer = null;
+    var secondSecondaryServer = null;
+    var running = true;
+    var electionIds = [new ObjectId(), new ObjectId()];
+
+    // Extend the object
+    var extend = function(template, fields) {
+      for(var name in template) fields[name] = template[name];
+      return fields;
+    }
+
+    // Default message fields
+    var defaultFields = {
+      "setName": "rs", "setVersion": 1, "electionId": electionIds[0],
+      "maxBsonObjectSize" : 16777216, "maxMessageSizeBytes" : 48000000,
+      "maxWriteBatchSize" : 1000, "localTime" : new Date(), "maxWireVersion" : 4,
+      "minWireVersion" : 0, "ok" : 1, "hosts": ["localhost:32000", "localhost:32001", "localhost:32002"]
+    }
+
+    // Primary server states
+    var primary = [extend(defaultFields, {
+      "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
+    })];
+
+    // Primary server states
+    var firstSecondary = [extend(defaultFields, {
+      "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "dc" }
+    })];
+
+    // Primary server states
+    var secondSecondary = [extend(defaultFields, {
+      "ismaster":false, "secondary":true, "me": "localhost:32002", "primary": "localhost:32000", "tags" : { "loc" : "dc" }
+    })];
+
+    // Boot the mock
+    co(function*() {
+      primaryServer = yield mockupdb.createServer(32000, 'localhost');
+      firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
+      secondSecondaryServer = yield mockupdb.createServer(32002, 'localhost');
+
+      // Primary state machine
+      co(function*() {
+        while(running) {
+          var request = yield primaryServer.receive();
+          // Get the document
+          var doc = request.document;
+          if(doc.ismaster) {
+            request.reply(primary[0]);
+          } else if(doc.count) {
+            request.reply({ "waitedMS" : Long.ZERO, "n" : 1, "ok" : 1});
+          }
+        }
+      });
+
+      // First secondary state machine
+      co(function*() {
+        while(running) {
+          var request = yield firstSecondaryServer.receive();
+          var doc = request.document;
+
+          if(doc.ismaster) {
+            request.reply(firstSecondary[0]);
+          } else if(doc.count) {
+            request.reply({ "waitedMS" : Long.ZERO, "n" : 1, "ok" : 1});
+          }
+        }
+      }).catch(function(err) {
+        console.log(err.stack);
+      });
+
+      // Second secondary state machine
+      co(function*() {
+        while(running) {
+          var request = yield secondSecondaryServer.receive();
+          var doc = request.document;
+
+          if(doc.ismaster) {
+            request.reply(secondSecondary[0]);
+          } else if(doc.count) {
+            request.reply({ "waitedMS" : Long.ZERO, "n" : 1, "ok" : 1});
+          }
+        }
+      }).catch(function(err) {
+        console.log(err.stack);
+      });
+    });
+
+    // console.log("--------------------------------------------- -2")
+    Connection.enableConnectionAccounting();
+    // Attempt to connect
+    var server = new ReplSet([
+      { host: 'localhost', port: 32000 },
+      { host: 'localhost', port: 32001 },
+      { host: 'localhost', port: 32002 }], {
+        setName: 'rs',
+        connectionTimeout: 3000,
+        socketTimeout: 0,
+        haInterval: 1000,
+        size: 1
+    });
+
+    // console.log("--------------------------------------------- -1")
+    // Add event listeners
+    server.on('connect', function(_server) {
+      // console.log("--------------------------------------------- 0")
+      // Set up a write
+      function schedule() {
+        _server.s.replicaSetState.secondaries = _server.s.replicaSetState.secondaries.map(function(x, i) {
+          x.lastIsMasterMS = i * 20;
+          return x;
+        });
+
+        // console.log("--------------------------------------------- 1")
+        // Perform a find
+        _server.command('test.test', {
+            count: 'test.test'
+          , batchSize: 2
+        }, {
+          readPreference: new ReadPreference('nearest', {loc: 'dc'})
+        }, function(err, r) {
+          // console.log("--------------------------------------------- 2")
+          // console.dir(err)
+          // // console.dir(r)
+          // if(r) {
+          //   console.dir(r.connection.port)
+          //   console.dir(r.result)
+          // }
+
+          // // console.dir(err)
+          test.equal(err, null);
+          test.ok(r.connection.port == 32001 || r.connection.port == 32002);
+          // if(!r.connection.port == 32002) {
+          //   console.log(r.connection.port);
+          // }
+
+          primaryServer.destroy();
+          firstSecondaryServer.destroy();
+          secondSecondaryServer.destroy();
+          server.destroy();
+          running = false;
+
+          setTimeout(function() {
+            test.equal(0, Object.keys(Connection.connections()).length);
+            Connection.disableConnectionAccounting();
+            test.done();
+          }, 1000);
+          return;
+        });
+      }
+
+      // Schedule an insert
+      setTimeout(function() {
+        schedule();
+      }, 2000);
     });
 
     // Gives proxies a chance to boot up

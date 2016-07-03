@@ -4,9 +4,7 @@ var f = require('util').format;
 
 exports['should return helpful error when geoHaystack fails'] = {
   metadata: {
-    requires: {
-      topology: 'single'
-    }
+    requires: { topology: ["single", "replicaset", "mongos"] }
   },
 
   test: function(configuration, test) {
@@ -15,6 +13,7 @@ exports['should return helpful error when geoHaystack fails'] = {
       server.on('connect', function(_server) {
         _server.command('system.$cmd', {geoNear: ns}, {}, function(err, result) {
           test.ok(/can\'t find ns/.test(err));
+          _server.destroy();
           test.done();
         });
       });

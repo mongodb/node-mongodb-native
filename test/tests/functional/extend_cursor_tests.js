@@ -7,9 +7,7 @@ var inherits = require('util').inherits
 
 exports['Should correctly extend the cursor with custom implementation'] = {
   metadata: {
-    requires: {
-      topology: "single"
-    }
+    requires: { topology: ["single", "replicaset", "mongos"] }
   },
 
   test: function(configuration, test) {
@@ -37,7 +35,7 @@ exports['Should correctly extend the cursor with custom implementation'] = {
         var items = [];
 
         getAllNexts(items, function(err, r) {
-          if(err) return callback(err, null);          
+          if(err) return callback(err, null);
           callback(null, items);
         });
       }
@@ -69,7 +67,7 @@ exports['Should correctly extend the cursor with custom implementation'] = {
           , query: {}
         });
 
-        // Force a single 
+        // Force a single
         // Logger.setLevel('debug');
         // Set the batch size
         cursor.batchSize = 2;

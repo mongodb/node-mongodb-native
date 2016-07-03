@@ -7,6 +7,7 @@ exports['Should correctly timeout mongos socket operation and then correctly re-
   },
 
   test: function(configuration, test) {
+    // console.log("--------------------------------------- -1")
     var Mongos = configuration.require.Mongos,
       ObjectId = configuration.require.BSON.ObjectId,
       co = require('co'),
@@ -88,6 +89,7 @@ exports['Should correctly timeout mongos socket operation and then correctly re-
       }, 500);
     });
 
+    // console.log("--------------------------------------- 0")
     // Attempt to connect
     var _server = new Mongos([
         { host: 'localhost', port: 52000 },
@@ -101,11 +103,17 @@ exports['Should correctly timeout mongos socket operation and then correctly re-
     // Are we done
     var done = false;
 
+    // console.log("--------------------------------------- 1")
     // Add event listeners
     _server.once('connect', function() {
+      // console.log("--------------------------------------- 3")
       // Run an interval
       var intervalId = setInterval(function() {
+        // console.log("--------------------------------------- 4")
         _server.insert('test.test', [{created:new Date()}], function(err, r) {
+          // console.log("--------------------------------------- 5")
+          // console.dir(err)
+          // if(r) console.dir(r.connection)
           // console.log("-------------------------------- insert attempt")
           // console.dir(err)
           if(r && !done) {
@@ -120,6 +128,7 @@ exports['Should correctly timeout mongos socket operation and then correctly re-
       }, 500);
     });
 
+    // console.log("--------------------------------------- 2")
     _server.on('error', function(){});
     _server.connect();
   }

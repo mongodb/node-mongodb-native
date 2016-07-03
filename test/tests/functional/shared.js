@@ -1,9 +1,9 @@
 function executeCommand(configuration, db, cmd, options, cb) {
-  var Pool = require('../../../lib2/connection/pool')
+  var Pool = require('../../../lib/connection/pool')
     , f = require('util').format
-    , MongoError = require('../../../lib2/error')
+    , MongoError = require('../../../lib/error')
     , bson = require('bson').BSONPure.BSON
-    , Query = require('../../../lib2/connection/commands').Query;
+    , Query = require('../../../lib/connection/commands').Query;
 
   // Optional options
   if(typeof options == 'function') cb = options, options = {};
@@ -37,11 +37,11 @@ function executeCommand(configuration, db, cmd, options, cb) {
 }
 
 function locateAuthMethod(configuration, cb) {
-  var Pool = require('../../../lib2/connection/pool')
-    , MongoError = require('../../../lib2/error')
+  var Pool = require('../../../lib/connection/pool')
+    , MongoError = require('../../../lib/error')
     , bson = require('bson').BSONPure.BSON
     , f = require('util').format
-    , Query = require('../../../lib2/connection/commands').Query;
+    , Query = require('../../../lib/connection/commands').Query;
 
   // Set up operations
   var db = 'admin';

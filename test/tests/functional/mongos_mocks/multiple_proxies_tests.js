@@ -1,3 +1,5 @@
+"use strict"
+
 var timeoutPromise = function(timeout) {
   return new Promise(function(resolve, reject) {
     setTimeout(function() {
@@ -28,6 +30,7 @@ exports['Should correctly load-balance the operations'] = {
     var currentStep = 0;
     // Primary stop responding
     var stopRespondingPrimary = false;
+    var port = null;
 
     // Extend the object
     var extend = function(template, fields) {
@@ -99,22 +102,35 @@ exports['Should correctly load-balance the operations'] = {
         connectionTimeout: 3000,
         socketTimeout: 1000,
         haInterval: 1000,
+        localThresholdMS: 500,
         size: 1
       });
 
       // Add event listeners
       server.once('connect', function(_server) {
+        // console.log("=================================== 0")
         _server.insert('test.test', [{created:new Date()}], function(err, r) {
+          // console.log("=================================== 1")
+          // if(r) console.log(r.connection.port)
           test.equal(null, err);
-          test.equal(52000, r.connection.port);
+          test.ok(r.connection.port == 52000 || r.connection.port == 52001);
+          global.port = r.connection.port == 52000 ? 52001 : 52000;
+          // console.log("=================================== 1 :: " + global.port)
 
           _server.insert('test.test', [{created:new Date()}], function(err, r) {
+            // console.log("=================================== 2 :: " + global.port)
+            // if(r) console.log(r.connection.port)
+            // console.dir(r)
+
             test.equal(null, err);
-            test.equal(52001, r.connection.port);
+            test.equal(global.port, r.connection.port);
+            global.port = r.connection.port == 52000 ? 52001 : 52000;
 
             _server.insert('test.test', [{created:new Date()}], function(err, r) {
+              // console.log("=================================== 3 :: " + global.port)
+              // if(r) console.log(r.connection.port)
               test.equal(null, err);
-              test.equal(52000, r.connection.port);
+              test.equal(global.port, r.connection.port);
 
               running = false;
               server.destroy();
@@ -150,8 +166,6 @@ exports['Should ignore one of the mongos instances due to being outside the late
     var mongos1 = null;
     var mongos2 = null;
     var running = true;
-    // Current index for the ismaster
-    var currentStep = 0;
     // Primary stop responding
     var stopRespondingPrimary = false;
 
@@ -200,8 +214,11 @@ exports['Should ignore one of the mongos instances due to being outside the late
       co(function*() {
         while(running) {
           var request = yield mongos2.receive();
-          // Delay all the operations by 100 ms
-          yield timeoutPromise(100);
+          // console.log(" do something 0")
+          var s = new Date().getTime();
+          // Delay all the operations by 500 ms
+          yield timeoutPromise(500);
+          // console.log(" do something 1 :: " + (new Date().getTime() - s))
           // Get the document
           var doc = request.document;
           if(doc.ismaster) {
@@ -215,7 +232,6 @@ exports['Should ignore one of the mongos instances due to being outside the late
       // Start dropping the packets
       setTimeout(function() {
         stopRespondingPrimary = true;
-        currentIsMasterState = 1;
       }, 5000);
     });
 
@@ -231,13 +247,18 @@ exports['Should ignore one of the mongos instances due to being outside the late
       size: 1
     });
 
+    console.log("---------------------------------------------- 0")
     // Add event listeners
     server.once('fullsetup', function(_server) {
+      console.log("---------------------------------------------- 1")
       server.insert('test.test', [{created:new Date()}], function(err, r) {
+        console.log("---------------------------------------------- 2")
         test.equal(null, err);
         test.equal(52000, r.connection.port);
 
         server.insert('test.test', [{created:new Date()}], function(err, r) {
+          console.log("---------------------------------------------- 3")
+          if(r) console.log(r.connection.port)
           test.equal(null, err);
           test.equal(52000, r.connection.port);
 
@@ -249,7 +270,7 @@ exports['Should ignore one of the mongos instances due to being outside the late
               { host: 'localhost', port: 52001 },
             ], {
             connectionTimeout: 3000,
-            localThresholdMS: 500,
+            localThresholdMS: 1000,
             socketTimeout: 1000,
             haInterval: 1000,
             size: 1
@@ -257,13 +278,18 @@ exports['Should ignore one of the mongos instances due to being outside the late
 
           // Add event listeners
           server2.once('fullsetup', function(_server) {
+            console.log("---------------------------------------------- 4")
             server2.insert('test.test', [{created:new Date()}], function(err, r) {
+              console.log("---------------------------------------------- 5")
+              if(r)console.dir(r.connection.port)
               test.equal(null, err);
-              test.equal(52001, r.connection.port);
+              test.equal(52000, r.connection.port);
 
               server2.insert('test.test', [{created:new Date()}], function(err, r) {
+                console.log("---------------------------------------------- 6")
+                if(r)console.dir(r.connection.port)
                 test.equal(null, err);
-                test.equal(52000, r.connection.port);
+                test.equal(52001, r.connection.port);
 
                 server2.destroy();
                 mongos1.destroy();

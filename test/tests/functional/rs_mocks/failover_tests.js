@@ -24,7 +24,9 @@ exports['Successfully failover to new primary'] = {
 
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet,
+      Server = configuration.require.Server,
       ObjectId = configuration.require.BSON.ObjectId,
+      Connection = require('../../../../lib/connection/connection'),
       ReadPreference = configuration.require.ReadPreference,
       Long = configuration.require.BSON.Long,
       co = require('co'),
@@ -142,6 +144,7 @@ exports['Successfully failover to new primary'] = {
       });
     });
 
+    Connection.enableConnectionAccounting();
     // Attempt to connect
     var server = new ReplSet([
       { host: 'localhost', port: 32000 },
@@ -154,11 +157,15 @@ exports['Successfully failover to new primary'] = {
         size: 1
     });
 
+    Server.enableServerAccounting();
+
     server.on('connect', function(e) {
       server.__connected = true;
+      // console.log("========================================== 0")
 
       // Perform the two steps
       setTimeout(function() {
+        // console.log("========================================== 1")
         die = true;
         currentIsMasterIndex = currentIsMasterIndex + 1;
 
@@ -183,20 +190,20 @@ exports['Successfully failover to new primary'] = {
 
           // Got both events
           if(joinedEvents == 3) {
-            test.equal(true, server.__connected);
+            // test.equal(true, server.__connected);
 
             // console.log("--------------------------------- state")
-            // console.log(server.s.replState.primary != null)
-            // console.log(server.s.replState.secondaries.length)
-            // console.log(server.s.replState.arbiters.length)
-            // console.log(server.s.replState.passives.length)
+            // console.log(server.s.replicaSetState.primary != null)
+            // console.log(server.s.replicaSetState.secondaries.length)
+            // console.log(server.s.replicaSetState.arbiters.length)
+            // console.log(server.s.replicaSetState.passives.length)
 
-            test.equal(2, server.s.replState.secondaries.length);
-            test.ok(['localhost:32002', 'localhost:32000'].indexOf(server.s.replState.secondaries[0].name) != -1);
-            test.ok(['localhost:32002', 'localhost:32000'].indexOf(server.s.replState.secondaries[1].name) != -1);
+            test.equal(2, server.s.replicaSetState.secondaries.length);
+            test.ok(['localhost:32002', 'localhost:32000'].indexOf(server.s.replicaSetState.secondaries[0].name) != -1);
+            test.ok(['localhost:32002', 'localhost:32000'].indexOf(server.s.replicaSetState.secondaries[1].name) != -1);
 
-            test.ok(server.s.replState.primary != null);
-            test.equal('localhost:32001', server.s.replState.primary.name);
+            test.ok(server.s.replicaSetState.primary != null);
+            test.equal('localhost:32001', server.s.replicaSetState.primary.name);
 
             primaryServer.destroy();
             firstSecondaryServer.destroy();
@@ -204,11 +211,23 @@ exports['Successfully failover to new primary'] = {
             server.destroy();
             running = false;
 
-            test.done();
+            Server.disableServerAccounting();
+            // console.log("======================================")
+            // console.log(Object.keys(Server.servers()))
+
+            setTimeout(function() {
+              test.equal(0, Object.keys(Connection.connections()).length);
+              Connection.disableConnectionAccounting();
+              test.done();
+            }, 1000);
           }
         });
 
         setTimeout(function() {
+          // console.log("SWITCH VIEW 2")
+          // console.log("SWITCH VIEW 2")
+          // console.log("SWITCH VIEW 2")
+          // global.debug = true;
           die = false;
           currentIsMasterIndex = currentIsMasterIndex + 1;
         }, 2500);
@@ -216,9 +235,6 @@ exports['Successfully failover to new primary'] = {
     });
 
     server.on('error', function(){});
-
-    // Add event listeners
-    server.on('fullsetup', function(_server) {});
     // Gives proxies a chance to boot up
     setTimeout(function() {
       server.connect();

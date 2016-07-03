@@ -8,10 +8,10 @@ exports['Should fail to authenticate server using scram-sha-1 using connect auth
   metadata: { requires: { topology: "auth" } },
 
   test: function(configuration, test) {
-    var Server = require('../../../lib2/topologies/server')
-      , Connection = require('../../../lib2/connection/connection')
+    var Server = require('../../../lib/topologies/server')
+      , Connection = require('../../../lib/connection/connection')
       , bson = require('bson').BSONPure.BSON
-      , Query = require('../../../lib2/connection/commands').Query;
+      , Query = require('../../../lib/connection/commands').Query;
 
     // Enable connections accounting
     Connection.enableConnectionAccounting();
@@ -51,10 +51,10 @@ exports['Should correctly authenticate server using scram-sha-1 using connect au
   metadata: { requires: { topology: "auth" } },
 
   test: function(configuration, test) {
-    var Server = require('../../../lib2/topologies/server')
-      , Connection = require('../../../lib2/connection/connection')
+    var Server = require('../../../lib/topologies/server')
+      , Connection = require('../../../lib/connection/connection')
       , bson = require('bson').BSONPure.BSON
-      , Query = require('../../../lib2/connection/commands').Query;
+      , Query = require('../../../lib/connection/commands').Query;
 
     // Enable connections accounting
     Connection.enableConnectionAccounting();
@@ -101,10 +101,10 @@ exports['Should correctly authenticate server using scram-sha-1 using connect au
   metadata: { requires: { topology: "auth" } },
 
   test: function(configuration, test) {
-    var Server = require('../../../lib2/topologies/server')
-      , Connection = require('../../../lib2/connection/connection')
+    var Server = require('../../../lib/topologies/server')
+      , Connection = require('../../../lib/connection/connection')
       , bson = require('bson').BSONPure.BSON
-      , Query = require('../../../lib2/connection/commands').Query;
+      , Query = require('../../../lib/connection/commands').Query;
 
     // Enable connections accounting
     Connection.enableConnectionAccounting();
@@ -179,10 +179,10 @@ exports['Should correctly authenticate server using scram-sha-1 using auth metho
   metadata: { requires: { topology: "auth" } },
 
   test: function(configuration, test) {
-    var Server = require('../../../lib2/topologies/server')
-      , Connection = require('../../../lib2/connection/connection')
+    var Server = require('../../../lib/topologies/server')
+      , Connection = require('../../../lib/connection/connection')
       , bson = require('bson').BSONPure.BSON
-      , Query = require('../../../lib2/connection/commands').Query;
+      , Query = require('../../../lib/connection/commands').Query;
 
     // Enable connections accounting
     Connection.enableConnectionAccounting();
@@ -264,10 +264,10 @@ exports['Should correctly authenticate server using scram-sha-1 using connect au
   metadata: { requires: { topology: "auth" } },
 
   test: function(configuration, test) {
-    var Server = require('../../../lib2/topologies/server')
-      , Connection = require('../../../lib2/connection/connection')
+    var Server = require('../../../lib/topologies/server')
+      , Connection = require('../../../lib/connection/connection')
       , bson = require('bson').BSONPure.BSON
-      , Query = require('../../../lib2/connection/commands').Query;
+      , Query = require('../../../lib/connection/commands').Query;
 
     // Enable connections accounting
     Connection.enableConnectionAccounting();
@@ -328,10 +328,10 @@ exports['Should correctly have server auth wait for logout to finish'] = {
   metadata: { requires: { topology: "auth" } },
 
   test: function(configuration, test) {
-    var Server = require('../../../lib2/topologies/server')
-      , Connection = require('../../../lib2/connection/connection')
+    var Server = require('../../../lib/topologies/server')
+      , Connection = require('../../../lib/connection/connection')
       , bson = require('bson').BSONPure.BSON
-      , Query = require('../../../lib2/connection/commands').Query;
+      , Query = require('../../../lib/connection/commands').Query;
 
     // Enable connections accounting
     Connection.enableConnectionAccounting();
