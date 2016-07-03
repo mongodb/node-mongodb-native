@@ -315,8 +315,8 @@ var testFiles = [
   , '/test/functional/ssl_validation_tests.js'
   , '/test/functional/ssl_x509_connect_tests.js'
 
-  // // SCRAM tests
-  // , '/test/functional/scram_tests.js'
+  // SCRAM tests
+  , '/test/functional/scram_tests.js'
 
   // LDAP Tests
   , '/test/functional/ldap_tests.js'

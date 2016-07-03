@@ -23,6 +23,7 @@ exports['Should correctly stop reconnection attempts after limit reached'] = {
         db.collection('waiting_for_reconnect').insert({a:1}, function(err, r) {
           // console.log("----------- 2")
           // console.dir(err)
+          // console.dir(err)
           test.ok(err != null);
           db.close();
 
