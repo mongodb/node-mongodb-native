@@ -50,7 +50,7 @@ exports['Should correctly timeout socket operation and then correctly re-execute
 
     // Boot the mock
     co(function*() {
-      server = yield mockupdb.createServer(37017, 'localhost');
+      server = yield mockupdb.createServer(37019, 'localhost');
 
       // Primary state machine
       co(function*() {
@@ -65,7 +65,7 @@ exports['Should correctly timeout socket operation and then correctly re-execute
           } else if(doc.insert && currentStep == 1) {
             // Stop responding to any calls (emulate dropping packets on the floor)
             if(stopRespondingPrimary) {
-              yield timeoutPromise(1500);
+              yield timeoutPromise(3000);
               continue;
             }
 
@@ -86,40 +86,48 @@ exports['Should correctly timeout socket operation and then correctly re-execute
     });
 
     // Attempt to connect
-    var server = new Server({
+    var replset = new Server({
       host: 'localhost',
-      port: '37017',
+      port: '37019',
       connectionTimeout: 3000,
       socketTimeout: 1000,
       size: 1
     });
 
+    // Not done
+    var done = false;
+
     // Add event listeners
-    server.once('connect', function(_server) {
+    replset.once('connect', function(_server) {
+      // console.log("======= 0")
       _server.insert('test.test', [{created:new Date()}], function(err, r) {
+        // console.log("======= 1")
         test.ok(err != null);
+        // console.dir(err)
 
-        // Not done
-        var done = false;
+        function wait() {
+          setTimeout(function() {
+            _server.insert('test.test', [{created:new Date()}], function(err, r) {
+              if(r && !done) {
+                // console.log("======= 3")
+                done = true;
+                test.equal(37019, r.connection.port);
+                replset.destroy();
+                running = false;
+                test.done();
+              } else {
+                wait();
+              }
+            });
+          }, 500);
+        }
 
-        // Run an interval
-        var intervalId = setInterval(function() {
-          _server.insert('test.test', [{created:new Date()}], function(err, r) {
-            if(r && !done) {
-              done = true;
-              clearInterval(intervalId);
-              test.equal(37017, r.connection.port);
-              server.destroy();
-              running = false;
-              test.done();
-            }
-          });
-        }, 500);
+        wait();
       });
     });
 
-    server.on('error', function(){});
-    server.connect();
+    replset.on('error', function(){});
+    replset.connect();
   }
 }
 
@@ -213,12 +221,13 @@ exports['Should correctly recover from an immediate shutdown mid insert'] = {
       host: 'localhost',
       port: '37017',
       connectionTimeout: 3000,
-      socketTimeout: 1000,
+      socketTimeout: 2000,
       size: 1
     });
 
     // Add event listeners
     server.once('connect', function(_server) {
+      // console.log("!!!! server connect")
       var docs = [];
       // Create big insert message
       for(var i = 0; i < 1000; i++) {
@@ -263,15 +272,18 @@ exports['Should correctly recover from an immediate shutdown mid insert'] = {
     });
 
     server.once('reconnect', function(_server) {
+      // console.log("!!!! server reconnect")
+      // console.dir(_server)
       _server.insert('test.test', [{created:new Date()}], function(err, r) {
         test.ok(brokenPipe);
-        server.destroy();
+        _server.destroy();
         running = false;
         test.done();
       });
     });
 
     server.on('error', function(){});
+    // console.log("!!! connect")
     server.connect();
   }
 }

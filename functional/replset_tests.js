@@ -15,7 +15,7 @@ exports['Discover arbiters'] = {
 
   test: function(configuration, test) {
     var Server = configuration.require.Server
-      , Connection = require('../../../lib2/connection/connection')
+      , Connection = require('../../../lib/connection/connection')
       , ReplSet = configuration.require.ReplSet
       , manager = configuration.manager;
 
@@ -57,7 +57,7 @@ exports['Discover passives'] = {
 
   test: function(configuration, test) {
     var Server = configuration.require.Server
-      , Connection = require('../../../lib2/connection/connection')
+      , Connection = require('../../../lib/connection/connection')
       , ReplSet = configuration.require.ReplSet
       , manager = configuration.manager;
 
@@ -102,7 +102,7 @@ exports['Discover primary'] = {
 
   test: function(configuration, test) {
     var Server = configuration.require.Server
-      , Connection = require('../../../lib2/connection/connection')
+      , Connection = require('../../../lib/connection/connection')
       , ReplSet = configuration.require.ReplSet
       , manager = configuration.manager;
 
@@ -143,7 +143,7 @@ exports['Discover secondaries'] = {
 
   test: function(configuration, test) {
     var Server = configuration.require.Server
-      , Connection = require('../../../lib2/connection/connection')
+      , Connection = require('../../../lib/connection/connection')
       , ReplSet = configuration.require.ReplSet
       , manager = configuration.manager;
 
@@ -186,7 +186,7 @@ exports['Replica set discovery'] = {
 
   test: function(configuration, test) {
     var Server = configuration.require.Server
-      , Connection = require('../../../lib2/connection/connection')
+      , Connection = require('../../../lib/connection/connection')
       , ReplSet = configuration.require.ReplSet
       , manager = configuration.manager;
 
@@ -242,7 +242,7 @@ exports['Host list differs from seeds'] = {
 
   test: function(configuration, test) {
     var Server = configuration.require.Server
-      , Connection = require('../../../lib2/connection/connection')
+      , Connection = require('../../../lib/connection/connection')
       , ReplSet = configuration.require.ReplSet
       , manager = configuration.manager;
 
@@ -303,7 +303,7 @@ exports['Ghost discovered/Member brought up as standalone'] = {
   test: function(configuration, test) {
     var Server = configuration.require.Server
       , ServerManager = require('mongodb-topology-manager').Server
-      , Connection = require('../../../lib2/connection/connection')
+      , Connection = require('../../../lib/connection/connection')
       , ReplSet = configuration.require.ReplSet
       , manager = configuration.manager;
 
@@ -409,7 +409,7 @@ exports['Member removed by reconfig'] = {
 
   test: function(configuration, test) {
     var Server = configuration.require.Server
-      , Connection = require('../../../lib2/connection/connection')
+      , Connection = require('../../../lib/connection/connection')
       , ReplSet = configuration.require.ReplSet
       , manager = configuration.manager;
 

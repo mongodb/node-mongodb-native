@@ -77,10 +77,10 @@ exports['Should fail to authenticat emitting an error due to it being the initia
   metadata: { requires: { topology: "auth" } },
 
   test: function(configuration, test) {
-    var ReplSet = require('../../../lib2/topologies/replset')
-      , Connection = require('../../../lib2/connection/connection')
+    var ReplSet = require('../../../lib/topologies/replset')
+      , Connection = require('../../../lib/connection/connection')
       , bson = require('bson').BSONPure.BSON
-      , Query = require('../../../lib2/connection/commands').Query;
+      , Query = require('../../../lib/connection/commands').Query;
 
     setUp(configuration, function(err, replicasetManager) {
       // Enable connections accounting
@@ -142,10 +142,10 @@ exports['Should correctly authenticate server using scram-sha-1 using connect au
   metadata: { requires: { topology: "auth" } },
 
   test: function(configuration, test) {
-    var ReplSet = require('../../../lib2/topologies/replset')
-      , Connection = require('../../../lib2/connection/connection')
+    var ReplSet = require('../../../lib/topologies/replset')
+      , Connection = require('../../../lib/connection/connection')
       , bson = require('bson').BSONPure.BSON
-      , Query = require('../../../lib2/connection/commands').Query;
+      , Query = require('../../../lib/connection/commands').Query;
 
     setUp(configuration, function(err, replicasetManager) {
       // Enable connections accounting
@@ -209,10 +209,10 @@ exports['Should correctly authenticate using auth method instead of connect'] = 
   metadata: { requires: { topology: "auth" } },
 
   test: function(configuration, test) {
-    var ReplSet = require('../../../lib2/topologies/replset')
-      , Connection = require('../../../lib2/connection/connection')
+    var ReplSet = require('../../../lib/topologies/replset')
+      , Connection = require('../../../lib/connection/connection')
       , bson = require('bson').BSONPure.BSON
-      , Query = require('../../../lib2/connection/commands').Query;
+      , Query = require('../../../lib/connection/commands').Query;
 
     setUp(configuration, function(err, replicasetManager) {
       // Enable connections accounting
@@ -279,10 +279,10 @@ exports['Should correctly authenticate using auth method instead of connect and 
   metadata: { requires: { topology: "auth" } },
 
   test: function(configuration, test) {
-    var ReplSet = require('../../../lib2/topologies/replset')
-      , Connection = require('../../../lib2/connection/connection')
+    var ReplSet = require('../../../lib/topologies/replset')
+      , Connection = require('../../../lib/connection/connection')
       , bson = require('bson').BSONPure.BSON
-      , Query = require('../../../lib2/connection/commands').Query;
+      , Query = require('../../../lib/connection/commands').Query;
 
       // console.log("------------------------------ -3")
     setUp(configuration, function(err, replicasetManager) {
@@ -385,10 +385,10 @@ exports['Should correctly authenticate using auth method instead of connect and 
 //   metadata: { requires: { topology: "auth" } },
 //
 //   test: function(configuration, test) {
-//     var Server = require('../../../lib2/topologies/server')
-//       , Connection = require('../../../lib2/connection/connection')
+//     var Server = require('../../../lib/topologies/server')
+//       , Connection = require('../../../lib/connection/connection')
 //       , bson = require('bson').BSONPure.BSON
-//       , Query = require('../../../lib2/connection/commands').Query;
+//       , Query = require('../../../lib/connection/commands').Query;
 //
 //     // Enable connections accounting
 //     Connection.enableConnectionAccounting();
@@ -463,10 +463,10 @@ exports['Should correctly authenticate using auth method instead of connect and 
 //   metadata: { requires: { topology: "auth" } },
 //
 //   test: function(configuration, test) {
-//     var Server = require('../../../lib2/topologies/server')
-//       , Connection = require('../../../lib2/connection/connection')
+//     var Server = require('../../../lib/topologies/server')
+//       , Connection = require('../../../lib/connection/connection')
 //       , bson = require('bson').BSONPure.BSON
-//       , Query = require('../../../lib2/connection/commands').Query;
+//       , Query = require('../../../lib/connection/commands').Query;
 //
 //     // Enable connections accounting
 //     Connection.enableConnectionAccounting();
@@ -548,10 +548,10 @@ exports['Should correctly authenticate using auth method instead of connect and 
 //   metadata: { requires: { topology: "auth" } },
 //
 //   test: function(configuration, test) {
-//     var Server = require('../../../lib2/topologies/server')
-//       , Connection = require('../../../lib2/connection/connection')
+//     var Server = require('../../../lib/topologies/server')
+//       , Connection = require('../../../lib/connection/connection')
 //       , bson = require('bson').BSONPure.BSON
-//       , Query = require('../../../lib2/connection/commands').Query;
+//       , Query = require('../../../lib/connection/commands').Query;
 //
 //     // Enable connections accounting
 //     Connection.enableConnectionAccounting();
@@ -612,10 +612,10 @@ exports['Should correctly authenticate using auth method instead of connect and 
 //   metadata: { requires: { topology: "auth" } },
 //
 //   test: function(configuration, test) {
-//     var Server = require('../../../lib2/topologies/server')
-//       , Connection = require('../../../lib2/connection/connection')
+//     var Server = require('../../../lib/topologies/server')
+//       , Connection = require('../../../lib/connection/connection')
 //       , bson = require('bson').BSONPure.BSON
-//       , Query = require('../../../lib2/connection/commands').Query;
+//       , Query = require('../../../lib/connection/commands').Query;
 //
 //     // Enable connections accounting
 //     Connection.enableConnectionAccounting();

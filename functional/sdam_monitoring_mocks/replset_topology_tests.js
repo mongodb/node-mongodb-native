@@ -226,6 +226,7 @@ exports['Successful emit SDAM monitoring events for replicaset'] = {
               // console.log(JSON.stringify(responses['topologyDescriptionChanged'], null, 2))
 
               for(var i = 0; i < expectedResults.length; i++) {
+                // console.log("================= expectedResults :: " + i)
                 try {
                   test.deepEqual(expectedResults[i], responses['topologyDescriptionChanged'][i]);
                 } catch(e) {
@@ -233,6 +234,7 @@ exports['Successful emit SDAM monitoring events for replicaset'] = {
                   console.log(JSON.stringify(expectedResults[i], null, 2))
                   console.log("----------------------------- got ")
                   console.log(JSON.stringify(responses['topologyDescriptionChanged'][i], null, 2))
+                  process.exit(0)
                 }
               }
 
@@ -248,8 +250,8 @@ exports['Successful emit SDAM monitoring events for replicaset'] = {
       server.connect();
     }, 100)
 
-    var expectedResults = [{
-      "topologyId": server.s.id,
+    var document1 = {
+      "topologyId": server.id,
       "previousDescription": {
         "topologyType": "Unknown",
         "servers": []
@@ -275,8 +277,10 @@ exports['Successful emit SDAM monitoring events for replicaset'] = {
       "diff": {
         "servers": []
       }
-    }, {
-      "topologyId": server.s.id,
+    };
+
+    var document2 = {
+      "topologyId": server.id,
       "previousDescription": {
         "topologyType": "Unknown",
         "setName": "rs",
@@ -328,8 +332,10 @@ exports['Successful emit SDAM monitoring events for replicaset'] = {
       "diff": {
         "servers": []
       }
-    }, {
-      "topologyId": server.s.id,
+    };
+
+    var document3 = {
+      "topologyId": server.id,
       "previousDescription": {
         "topologyType": "ReplicaSetWithPrimary",
         "setName": "rs",
@@ -405,8 +411,10 @@ exports['Successful emit SDAM monitoring events for replicaset'] = {
       "diff": {
         "servers": []
       }
-    }, {
-      "topologyId": server.s.id,
+    };
+
+    var document4 = {
+      "topologyId": server.id,
       "previousDescription": {
         "topologyType": "ReplicaSetWithPrimary",
         "setName": "rs",
@@ -500,9 +508,10 @@ exports['Successful emit SDAM monitoring events for replicaset'] = {
           }
         ]
       }
-    },
-    {
-      "topologyId": server.s.id,
+    };
+
+    var document5 = {
+      "topologyId": server.id,
       "previousDescription": {
         "topologyType": "ReplicaSetNoPrimary",
         "setName": "rs",
@@ -596,6 +605,8 @@ exports['Successful emit SDAM monitoring events for replicaset'] = {
           }
         ]
       }
-    }];
+    };
+
+    var expectedResults = [document1, document2, document3, document4, document5];
   }
 }

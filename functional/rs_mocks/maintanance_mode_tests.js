@@ -25,7 +25,7 @@ exports['Successfully detect server in maintanance mode'] = {
   test: function(configuration, test) {
     var ReplSet = configuration.require.ReplSet,
       ObjectId = configuration.require.BSON.ObjectId,
-      Connection = require('../../../../lib2/connection/connection'),
+      Connection = require('../../../../lib/connection/connection'),
       ReadPreference = configuration.require.ReadPreference,
       Long = configuration.require.BSON.Long,
       co = require('co'),

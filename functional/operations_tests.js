@@ -5,7 +5,7 @@ var f = require('util').format
 
 exports['Should correctly connect using server object'] = {
   metadata: {
-    requires: {}
+    requires: { topology: ["single", "replicaset", "mongos"] }
   },
 
   test: function(configuration, test) {
@@ -24,7 +24,7 @@ exports['Should correctly connect using server object'] = {
 
 exports['Should correctly execute command'] = {
   metadata: {
-    requires: {}
+    requires: { topology: ["single", "replicaset", "mongos"] }
   },
 
   test: function(configuration, test) {
@@ -53,7 +53,7 @@ exports['Should correctly execute command'] = {
 
 exports['Should correctly execute write'] = {
   metadata: {
-    requires: {}
+    requires: { topology: ["single", "replicaset", "mongos"] }
   },
 
   test: function(configuration, test) {
@@ -81,7 +81,7 @@ exports['Should correctly execute write'] = {
 
 exports['Should correctly execute find'] = {
   metadata: {
-    requires: {}
+    requires: { topology: ["single", "replicaset", "mongos"] }
   },
 
   test: function(configuration, test) {
@@ -132,7 +132,7 @@ exports['Should correctly execute find'] = {
 
 exports['Should correctly execute find with limit and skip'] = {
   metadata: {
-    requires: {}
+    requires: { topology: ["single", "replicaset", "mongos"] }
   },
 
   test: function(configuration, test) {
@@ -185,7 +185,7 @@ exports['Should correctly execute find with limit and skip'] = {
 
 exports['Should correctly execute find against document with result array field'] = {
   metadata: {
-    requires: {}
+    requires: { topology: ["single", "replicaset", "mongos"] }
   },
 
   test: function(configuration, test) {
@@ -234,6 +234,7 @@ exports['Should correctly execute find against document with result array field'
 exports['Should correctly execute aggregation command'] = {
   metadata: {
     requires: {
+      topology: ["single", "replicaset", "mongos"],
       mongodb: ">=2.6.0"
     }
   },
@@ -291,8 +292,8 @@ exports['Should correctly execute aggregation command'] = {
 exports['Should correctly execute query against cursorId'] = {
   metadata: {
     requires: {
-        mongodb: ">=2.6.0"
-      , topology: "replicaset"
+      mongodb: ">=2.6.0",
+      topology: ["single", "replicaset", "mongos"]
     }
   },
 
@@ -350,33 +351,11 @@ exports['Should correctly execute query against cursorId'] = {
   }
 }
 
-exports['Should correctly correctly handle domain'] = {
-  metadata: {},
-
-  test: function(configuration, test) {
-    var domain = require('domain');
-    var d = domain.create();
-    d.once('error', function(err) {
-      d.exit();
-      d.dispose();
-      test.done()
-    })
-
-    configuration.newConnection(function(err, connection) {
-      d.run(function() {
-        connection.command('system.$cmd', {ismaster:true}, function() {
-          testdfdma();
-          test.ok(false);
-        });
-      });
-    })
-  }
-}
-
 exports['Should correctly kill command cursor'] = {
   metadata: {
     requires: {
-      mongodb: ">=2.6.0"
+      mongodb: ">=2.6.0",
+      topology: ["single", "replicaset", "mongos"]
     }
   },
 
@@ -427,7 +406,7 @@ exports['Should correctly kill command cursor'] = {
 exports['Should correctly kill find command cursor'] = {
   metadata: {
     requires: {
-      topology: "single"
+      topology: ["single", "replicaset", "mongos"]
     }
   },
 
@@ -481,16 +460,21 @@ exports['Should correctly execute unref and finish all operations'] = {
   },
 
   test: function(configuration, test) {
+    // console.log("================ -- 0")
     configuration.newTopology(function(err, server) {
+      // console.log("================ -- 1")
       // Add event listeners
       server.on('connect', function(_server) {
         var left = 100;
 
         for(var i = 0; i < 100; i++) {
+          // console.log("================ ")
           // Execute the write
           _server.insert(f("%s.inserts_unref", configuration.db), [{a:i}], {
             writeConcern: {w:1}, ordered:true
           }, function(err, results) {
+            // console.log("============= inserted")
+            // console.dir(err)
             left = left - 1;
             test.equal(null, err);
             test.equal(1, results.result.n);
@@ -501,6 +485,9 @@ exports['Should correctly execute unref and finish all operations'] = {
                 // Add event listeners
                 server.on('connect', function(_server) {
                   _server.command(f("%s.$cmd", configuration.db), {count: 'inserts_unref'}, function(e, result) {
+                    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                    // console.dir(e)
+                    // if(result)console.dir(result.result)
                     test.equal(null, err);
                     test.equal(100, result.result.n);
 
