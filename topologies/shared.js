@@ -23,7 +23,7 @@ var emitServerDescriptionChanged = function(self, description) {
   if(self.listeners('serverDescriptionChanged').length > 0) {
     // Emit the server description changed events
     self.emit('serverDescriptionChanged', {
-      topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.s.id, address: self.name,
+      topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.id, address: self.name,
       previousDescription: getPreviousDescription(self),
       newDescription: description
     });
@@ -49,7 +49,7 @@ var emitTopologyDescriptionChanged = function(self, description) {
   if(self.listeners('topologyDescriptionChanged').length > 0) {
     // Emit the server description changed events
     self.emit('topologyDescriptionChanged', {
-      topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.s.id, address: self.name,
+      topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.id, address: self.name,
       previousDescription: getPreviousTopologyDescription(self),
       newDescription: description
     });
@@ -67,7 +67,7 @@ var changedIsMaster = function(self, currentIsmaster, ismaster) {
 
 var getTopologyType = function(self, ismaster) {
   if(!ismaster) {
-    ismaster = self.s.ismaster;
+    ismaster = self.ismaster;
   }
 
   if(!ismaster) return 'Unknown';

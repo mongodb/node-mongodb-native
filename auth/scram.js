@@ -2,6 +2,7 @@
 
 var f = require('util').format
   , crypto = require('crypto')
+  , Query = require('../connection/commands').Query
   , Binary = require('bson').Binary
   , MongoError = require('../error');
 
@@ -24,7 +25,8 @@ var id = 0;
  * @class
  * @return {ScramSHA1} A cursor instance
  */
-var ScramSHA1 = function() {
+var ScramSHA1 = function(bson) {
+  this.bson = bson;
   this.authStore = [];
   this.id = id++;
 }
@@ -150,9 +152,12 @@ ScramSHA1.prototype.auth = function(server, connections, db, username, password,
 
     // Finish up
     var finish = function(_count, _numberOfValidConnections) {
+      // console.log("=== _count :: " + _count + " :: " + _numberOfValidConnections)
       if(_count == 0 && _numberOfValidConnections > 0) {
+        // console.log("!!!!!!!! auth session 0")
         // Store the auth details
         addAuthSession(self.authStore, new AuthSession(db, username, password));
+        // console.log("!!!!!!!! auth session 1")
         // Return correct authentication
         return callback(null, true);
       } else if(_count == 0) {
@@ -170,10 +175,10 @@ ScramSHA1.prototype.auth = function(server, connections, db, username, password,
       finish(count, numberOfValidConnections);
     }
 
-    // Execute start sasl command
-    server.command(f("%s.$cmd", db)
-      , cmd, { connection: connection }, function(err, r) {
-
+    // Write the commmand on the connection
+    server(connection, new Query(self.bson, f("%s.$cmd", db), cmd, {
+      numberToSkip: 0, numberToReturn: 1
+    }).toBin(), function(err, r) {
       // Do we have an error, handle it
       if(handleError(err, r) == false) {
         count = count - 1;
@@ -250,22 +255,26 @@ ScramSHA1.prototype.auth = function(server, connections, db, username, password,
 
       //
       // Execute sasl continue
-      server.command(f("%s.$cmd", db)
-        , cmd, { connection: connection }, function(err, r) {
-          if(r && r.result.done == false) {
-            var cmd = {
-                saslContinue: 1
-              , conversationId: r.result.conversationId
-              , payload: new Buffer(0)
-            }
-
-            server.command(f("%s.$cmd", db)
-              , cmd, { connection: connection }, function(err, r) {
-                handleEnd(err, r);
-            });
-          } else {
-            handleEnd(err, r);
+      // Write the commmand on the connection
+      server(connection, new Query(self.bson, f("%s.$cmd", db), cmd, {
+        numberToSkip: 0, numberToReturn: 1
+      }).toBin(), function(err, r) {
+        if(r && r.result.done == false) {
+          var cmd = {
+              saslContinue: 1
+            , conversationId: r.result.conversationId
+            , payload: new Buffer(0)
           }
+
+          // Write the commmand on the connection
+          server(connection, new Query(self.bson, f("%s.$cmd", db), cmd, {
+            numberToSkip: 0, numberToReturn: 1
+          }).toBin(), function(err, r) {
+            handleEnd(err, r);
+          });
+        } else {
+          handleEnd(err, r);
+        }
       });
     });
   }
@@ -294,6 +303,18 @@ var addAuthSession = function(authStore, session) {
   }
 
   if(!found) authStore.push(session);
+}
+
+/**
+ * Remove authStore credentials
+ * @method
+ * @param {string} db Name of database we are removing authStore details about
+ * @return {object}
+ */
+ScramSHA1.prototype.logout = function(dbName) {
+  this.authStore = this.authStore.filter(function(x) {
+    return x.db != dbName;
+  });
 }
 
 /**

@@ -39,6 +39,6 @@ MongoError.create = function(options) {
 }
 
 // Extend JavaScript error
-MongoError.prototype = new Error; 
+MongoError.prototype = new Error;
 
 module.exports = MongoError;

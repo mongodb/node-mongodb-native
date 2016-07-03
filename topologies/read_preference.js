@@ -5,12 +5,12 @@ var needSlaveOk = ['primaryPreferred', 'secondary', 'secondaryPreferred', 'neare
 /**
  * @fileOverview The **ReadPreference** class is a class that represents a MongoDB ReadPreference and is
  * used to construct connections.
- * 
+ *
  * @example
  * var ReplSet = require('mongodb-core').ReplSet
  *   , ReadPreference = require('mongodb-core').ReadPreference
  *   , assert = require('assert');
- * 
+ *
  * var server = new ReplSet([{host: 'localhost', port: 30000}], {setName: 'rs'});
  * // Wait for the connection event
  * server.on('connect', function(server) {
@@ -21,7 +21,7 @@ var needSlaveOk = ['primaryPreferred', 'secondary', 'secondaryPreferred', 'neare
  *     server.destroy();
  *   });
  * });
- * 
+ *
  * // Start connecting
  * server.connect();
  */

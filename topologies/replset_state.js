@@ -1,567 +1,602 @@
-"use strict";
+"use strict"
 
-var Logger = require('../connection/logger')
-  , f = require('util').format
-  , ObjectId = require('bson').ObjectId
-  , MongoError = require('../error');
+var inherits = require('util').inherits,
+  f = require('util').format,
+  EventEmitter = require('events').EventEmitter,
+  ObjectId = require('bson').ObjectId;
 
-var DISCONNECTED = 'disconnected';
-var CONNECTING = 'connecting';
-var CONNECTED = 'connected';
-var DESTROYED = 'destroyed';
+var TopologyType = {
+  'Single': 'Single', 'ReplicaSetNoPrimary': 'ReplicaSetNoPrimary',
+  'ReplicaSetWithPrimary': 'ReplicaSetWithPrimary', 'Sharded': 'Sharded',
+  'Unknown': 'Unknown'
+};
 
-/**
- * Creates a new Replicaset State object
- * @class
- * @property {object} primary Primary property
- * @property {array} secondaries List of secondaries
- * @property {array} arbiters List of arbiters
- * @return {State} A cursor instance
- */
-var State = function(replSet, options) {
-  this.replSet = replSet;
-  this.options = options;
-  this.secondaries = [];
-  this.arbiters = [];
-  this.passives = [];
-  this.primary = null;
-  // Initial state is disconnected
-  this.state = DISCONNECTED;
-  // Current electionId
-  this.electionId = null;
-  // Get a logger instance
-  this.logger = Logger('ReplSet', options);
+var ServerType = {
+  'Standalone': 'Standalone', 'Mongos': 'Mongos', 'PossiblePrimary': 'PossiblePrimary',
+  'RSPrimary': 'RSPrimary', 'RSSecondary': 'RSSecondary', 'RSArbiter': 'RSArbiter',
+  'RSOther': 'RSOther', 'RSGhost': 'RSGhost', 'Unknown': 'Unknown'
+};
+
+var ReplSetState = function(options) {
+  options = options || {};
+  // Add event listener
+  EventEmitter.call(this);
+  // Topology state
+  this.topologyType = TopologyType.ReplicaSetNoPrimary;
+  this.setName = options.setName;
+
+  // Server set
+  this.set = {};
+
   // Unpacked options
   this.id = options.id;
   this.setName = options.setName;
-  this.connectingServers = {};
-  this.secondaryOnlyConnectionAllowed = options.secondaryOnlyConnectionAllowed;
+
+  // Server side
+  this.primary = null;
+  this.secondaries = [];
+  this.arbiters = [];
+  this.passives = [];
+  this.ghosts = [];
+  // Current unknown hosts
+  this.unknownServers = [];
+  // In set status
+  this.set = {};
+  // Status
+  this.maxElectionId = null;
+  this.maxSetVersion = 0;
   // Description of the Replicaset
-  this.replicasetDescription = null;
-}
-
-/**
- * Is there a secondary connected
- * @method
- * @return {boolean}
- */
-State.prototype.resetDescription = function() {
   this.replicasetDescription = {
-    "topologyType": "Unknown",
-    "servers": []
-  }
+    "topologyType": "Unknown", "servers": []
+  };
 }
 
-function diff(previous, current) {
-  // Difference document
-  var diff = {
-    servers: []
-  }
+inherits(ReplSetState, EventEmitter);
 
-  // Got through all the servers
-  for(var i = 0; i < previous.servers.length; i++) {
-    var prevServer = previous.servers[i];
-
-    // Go through all current servers
-    for(var j = 0; j < current.servers.length; j++) {
-      var currServer = current.servers[j];
-
-      // Matching server
-      if(prevServer.address === currServer.address) {
-        // We had a change in state
-        if(prevServer.type != currServer.type) {
-          diff.servers.push({
-            address: prevServer.address,
-            from: prevServer.type,
-            to: currServer.type
-          });
-        }
-      }
-    }
-  }
-
-  // Return difference
-  return diff;
+ReplSetState.prototype.hasPrimaryAndSecondary = function(server) {
+  return this.primary && this.secondaries.length > 0;
 }
 
-function emitTopologyDescriptionChanged(self) {
-  if(self.replSet.listeners('topologyDescriptionChanged').length > 0) {
-    var topology = 'Unknown';
-    var setName = self.setName;
-
-    if(self.isPrimaryConnected() && self.isSecondaryConnected()) {
-      topology = 'ReplicaSetWithPrimary';
-    } else if(!self.isPrimaryConnected() && self.isSecondaryConnected()) {
-      topology = 'ReplicaSetNoPrimary';
-    }
-
-    // Generate description
-    var description = {
-      topologyType: topology,
-      setName: setName,
-      servers: []
-    }
-
-    // Add the primary to the list
-    if(self.isPrimaryConnected()) {
-      var desc = self.primary.getDescription();
-      desc.type = 'RSPrimary';
-      description.servers.push(desc);
-    }
-
-    // Add all the secondaries
-    description.servers = description.servers.concat(self.secondaries.map(function(x) {
-      var description = x.getDescription();
-      description.type = 'RSSecondary';
-      return description;
-    }));
-
-    // Add all the arbiters
-    description.servers = description.servers.concat(self.arbiters.map(function(x) {
-      var description = x.getDescription();
-      return description;
-    }));
-
-    // Add all the passives
-    description.servers = description.servers.concat(self.passives.map(function(x) {
-      var description = x.getDescription();
-      description.type = 'RSSecondary';
-      return description;
-    }));
-
-    // Create the result
-    var result = {
-      topologyId: self.id,
-      previousDescription: self.replicasetDescription,
-      newDescription: description,
-      diff: diff(self.replicasetDescription, description)
-    };
-
-    // Emit the topologyDescription change
-    self.replSet.emit('topologyDescriptionChanged', result);
-
-    // Set the new description
-    self.replicasetDescription = description;
-  }
+ReplSetState.prototype.hasPrimary = function(server) {
+  return this.primary != null;
 }
 
-/**
- * Is there a secondary connected
- * @method
- * @return {boolean}
- */
-State.prototype.isSecondaryConnected = function() {
-  for(var i = 0; i < this.secondaries.length; i++) {
-    if(this.secondaries[i].isConnected()) return true;
-  }
-
-  return false;
+ReplSetState.prototype.hasSecondary = function(server) {
+  return this.secondaries.length > 0;
 }
 
-/**
- * Is there a primary connection
- * @method
- * @return {boolean}
- */
-State.prototype.isPrimaryConnected = function() {
-  return this.primary != null && this.primary.isConnected();
-}
-
-/**
- * Is the given address the primary
- * @method
- * @param {string} address Server address
- * @return {boolean}
- */
-State.prototype.isPrimary = function(address) {
-  if(this.primary == null) return false;
-  return this.primary && this.primary.equals(address);
-}
-
-/**
- * Is the given address a secondary
- * @method
- * @param {string} address Server address
- * @return {boolean}
- */
-State.prototype.isSecondary = function(address) {
-  // Check if the server is a secondary at the moment
-  for(var i = 0; i < this.secondaries.length; i++) {
-    if(this.secondaries[i].equals(address)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-/**
- * Is the given address a secondary
- * @method
- * @param {string} address Server address
- * @return {boolean}
- */
-State.prototype.isPassive = function(address) {
-  // Check if the server is a secondary at the moment
-  for(var i = 0; i < this.passives.length; i++) {
-    if(this.passives[i].equals(address)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-State.prototype.clearConnectingServers = function() {
-  for(var name in this.connectingServers) {
-    if(typeof this.connectingServers[name].destroy == 'function') {
-      this.connectingServers[name].destroy();
-    }
-  }
-
-  this.connectingServers = {};
-}
-
-State.prototype.removeConnectingServer = function(address) {
-  if(this.connectingServers[address]) {
-    if(this.connectingServers[address].destroy) {
-      this.connectingServers[address].destroy();
-    }
-  }
-
-  delete this.connectingServers[address];
-}
-
-State.prototype.addConnectingServer = function(host, object) {
-  this.connectingServers[host] = object;
-}
-
-State.prototype.isConnectingServer = function(host) {
-  return this.connectingServers[host] != null;
-}
-
-State.prototype.connectingServersCount = function() {
-  return Object.keys(this.connectingServers).length;
-}
-
-/**
- * Does the replicaset contain this server
- * @method
- * @param {string} address Server address
- * @return {boolean}
- */
-State.prototype.contains = function(address) {
-  if(this.primary && this.primary.equals(address)) return true;
-  for(var i = 0; i < this.secondaries.length; i++) {
-    if(this.secondaries[i].equals(address)) return true;
-  }
-
-  for(var i = 0; i < this.arbiters.length; i++) {
-    if(this.arbiters[i].equals(address)) return true;
-  }
-
-  for(var i = 0; i < this.passives.length; i++) {
-    if(this.passives[i].equals(address)) return true;
-  }
-
-  return false;
-}
-
-/**
- * Return all the valid and non passive secondaries
- * @method
- * @return {Array[Server]}
- */
-State.prototype.getSecondaries = function() {
-  // Filter out any non connected servers
-  this.secondaries = this.secondaries.filter(function(server) {
-    return server.isConnected();
-  });
-
-  // Filter out any hidden secondaries
-  return this.secondaries.filter(function(server) {
-    return server.lastIsMaster().hidden ? false : true;
-  });
-}
-
-/**
- * Clean out all dead connections
- * @method
- */
-State.prototype.clean = function() {
-  var self = this;
-  var disconnectedServers = [];
-
-  if(this.primary != null && !this.primary.isConnected()) {
-    disconnectedServers.push(this.primary);
-    this.primary = null;
-  }
-
-  // Filter out disconnected servers
-  this.secondaries = this.secondaries.filter(function(s) {
-    if(!s.isConnected()) disconnectedServers.push(s);
-    return s.isConnected();
-  });
-
-  // Filter out disconnected servers
-  this.arbiters = this.arbiters.filter(function(s) {
-    if(!s.isConnected()) disconnectedServers.push(s);
-    return s.isConnected();
-  });
-
-  // Filter out disconnected servers
-  this.passives = this.passives.filter(function(s) {
-    if(!s.isConnected()) disconnectedServers.push(s);
-    return s.isConnected();
-  });
-
-  return disconnectedServers;
-}
-
-/**
- * Unref state
- * @method
- */
-State.prototype.unref = function() {
-  if(this.primary) this.primary.unref();
-  this.secondaries.forEach(function(s) {
-    s.unref();
-  });
-  this.arbiters.forEach(function(s) {
-    s.unref();
-  });
-}
-
-// Remove listeners
-var events = ['timeout', 'error', 'close', 'joined', 'left',
-  'serverOpening', 'serverDescriptionChanged', 'serverHeartbeatStarted',
-  'serverHeartbeatSucceeded', 'serverHearbeatFailed', 'serverClosed'];
-
-var removeEvents = function(s) {
-  events.forEach(function(e) {
-    s.removeAllListeners(e);
-  });
-}
-
-/**
- * Destroy state
- * @method
- */
-State.prototype.destroy = function() {
-  this.state = DESTROYED;
-
-  if(this.primary) {
-    this.primary.destroy();
-    removeEvents(this.primary);
-  }
-
-  this.secondaries.forEach(function(s) {
-    s.destroy();
-    removeEvents(s);
-  });
-
-  this.arbiters.forEach(function(s) {
-    s.destroy();
-    removeEvents(s);
-  });
-}
-
-/**
- * Remove server from state
- * @method
- * @param {Server} Server to remove
- * @return {string} Returns type of server removed (primary|secondary)
- */
-State.prototype.remove = function(server) {
-  if(this.primary && this.primary.equals(server)) {
-    this.primary = null;
-  }
-
-  var length = this.arbiters.length;
-  // Filter out the server from the arbiters
-  this.arbiters = this.arbiters.filter(function(s) {
-    return !s.equals(server);
-  });
-  if(this.arbiters.length < length) return 'arbiter';
-
-  var length = this.passives.length;
-  // Filter out the server from the passives
-  this.passives = this.passives.filter(function(s) {
-    return !s.equals(server);
-  });
-
-  // We have removed a passive
-  if(this.passives.length < length)  {
-    // Ensure we removed it from the list of secondaries as well if it exists
-    this.secondaries = this.secondaries.filter(function(s) {
-      return !s.equals(server);
-    });
-  }
-
-  // Filter out the server from the secondaries
-  this.secondaries = this.secondaries.filter(function(s) {
-    return !s.equals(server);
-  });
-
-  // Get the isMaster
-  var isMaster = server.lastIsMaster();
-  // Return primary if the server was primary
-  if(isMaster.ismaster && isMaster.hosts) return 'primary';
-  if(isMaster.ismaster) return 'secondary';
-  if(isMaster.secondary) return 'secondary';
-  if(isMaster.passive) return 'passive';
-  return 'arbiter';
-}
-
-/**
- * Get the server by name
- * @method
- * @param {string} address Server address
- * @return {Server}
- */
-State.prototype.get = function(server) {
-  var found = false;
-  // All servers to search
+ReplSetState.prototype.allServers = function(options) {
+  options = options || {};
   var servers = this.primary ? [this.primary] : [];
   servers = servers.concat(this.secondaries);
-  // Locate the server
-  for(var i = 0; i < servers.length; i++) {
-    if(servers[i].equals(server)) {
-      return servers[i];
-    }
-  }
-}
-
-/**
- * Get all the servers in the set
- * @method
- * @param {boolean} [options.includeArbiters] Include Arbiters in returned server list
- * @return {array}
- */
-State.prototype.getAll = function(options) {
-  options = options || {};
-  var servers = [];
-  if(this.primary) servers.push(this.primary);
-  servers = servers.concat(this.secondaries);
-
-  // Include the arbiters
-  if(options.includeArbiters) {
-    servers = servers.concat(this.arbiters);
-  }
-
+  if(!options.ignoreArbiters) servers = servers.concat(this.arbiters);
+  servers = servers.concat(this.passives);
   return servers;
 }
 
-/**
- * All raw connections
- * @method
- * @param {boolean} [options.includeArbiters] Include Arbiters in returned server list
- * @return {array}
- */
-State.prototype.getAllConnections = function(options) {
+ReplSetState.prototype.destroy = function() {
+  // Destroy all sockets
+  if(this.primary) this.primary.destroy();
+  this.secondaries.forEach(function(x) { x.destroy(); });
+  this.arbiters.forEach(function(x) { x.destroy(); });
+  this.passives.forEach(function(x) { x.destroy(); });
+  this.ghosts.forEach(function(x) { x.destroy(); });
+  // Clear out the complete state
+  this.secondaries = [];
+  this.arbiters = [];
+  this.passives = [];
+  this.ghosts = [];
+  this.unknownServers = [];
+  this.set = {};
+}
+
+ReplSetState.prototype.remove = function(server, options) {
   options = options || {};
-  var connections = [];
-  if(this.primary) connections = connections.concat(this.primary.connections());
-  this.secondaries.forEach(function(s) {
-    connections = connections.concat(s.connections());
-  })
+  // console.log("================================== remove 0 :: " + server.name)
 
-  // Include the arbiters
-  if(options.includeArbiters) {
-    this.arbiters.forEach(function(s) {
-      connections = connections.concat(s.connections());
-    })
+  // Only remove if the current server is not connected
+  var servers = this.primary ? [this.primary] : [];
+  servers = servers.concat(this.secondaries);
+  servers = servers.concat(this.arbiters);
+  servers = servers.concat(this.passives);
+
+  // Check if it's active and this is just a failed connection attempt
+  for(var i = 0; i < servers.length; i++) {
+    if(!options.force && servers[i].equals(server) && servers[i].isConnected && servers[i].isConnected()) {
+      // console.log("============== removing server")
+      // console.dir(server.ismaster)
+      // console.log("============== current server")
+      // console.dir(servers[i].ismaster)
+      // console.log("================================== remove 1 :: " + server.name)
+      // console.log("=== " + (servers[i] === server))
+      return;
+    }
   }
 
-  return connections;
-}
+  // If we have it in the set remove it
+  if(this.set[server.name]) {
+    this.set[server.name].type = ServerType.Unknown;
+    this.set[server.name].electionId = null;
+    this.set[server.name].setName = null;
+    this.set[server.name].setVersion = null;
+  }
 
-/**
- * Return JSON object
- * @method
- * @return {object}
- */
-State.prototype.toJSON = function() {
-  return {
-      primary: this.primary ? this.primary.lastIsMaster().me : null
-    , secondaries: this.secondaries.map(function(s) {
-      return s.lastIsMaster().me
-    })
+  // Remove type
+  var removeType = null;
+
+  // Remove from any lists
+  if(this.primary && this.primary.equals(server)) {
+    this.primary = null;
+    this.topologyType = TopologyType.ReplicaSetNoPrimary;
+    removeType = 'primary';
+  }
+
+  // Remove from any other server lists
+  removeType = removeFrom(server, this.secondaries) ? 'secondary' : removeType;
+  removeType = removeFrom(server, this.arbiters) ? 'arbiter' : removeType;
+  removeType = removeFrom(server, this.passives) ? 'secondary' : removeType;
+  removeFrom(server, this.ghosts);
+  removeFrom(server, this.unknownServers);
+
+  // console.log("=================================== remove :: " + removeType)
+  // console.log(this.allServers().map(function(x) { return x.name }))
+  // console.log("======== remove :: " + removeType + " :: " + server.name)
+  // console.log(Object.keys(this.set))
+  // Do we have a removeType
+  if(removeType) {
+    this.emit('left', removeType, server);
   }
 }
 
-/**
- * Returns the last known ismaster document for this server
- * @method
- * @return {object}
- */
-State.prototype.lastIsMaster = function() {
-  if(this.primary) return this.primary.lastIsMaster();
-  if(this.secondaries.length > 0) return this.secondaries[0].lastIsMaster();
-  return {};
-}
+ReplSetState.prototype.update = function(server) {
+  var self = this;
+  // Get the current ismaster
+  var ismaster = server.lastIsMaster();
+//   if(global.debug) {
+//   console.log("========================== update")
+//   console.dir(ismaster)
+// }
 
-/**
- * Promote server to primary
- * @method
- * @param {Server} server Server we wish to promote
- */
-State.prototype.promotePrimary = function(server) {
-  var currentServer = this.get(server);
-  // Server does not exist in the state, add it as new primary
-  if(currentServer == null) {
-    this.primary = server;
-    return;
+  // console.log("=== ReplSetState.prototype.update 0")
+  // console.dir(ismaster)
+
+  //
+  // Add any hosts
+  //
+  if(ismaster) {
+    // Join all the possible new hosts
+    var hosts = Array.isArray(ismaster.hosts) ? ismaster.hosts : [];
+    hosts = hosts.concat(Array.isArray(ismaster.arbiters) ? ismaster.arbiters : []);
+    hosts = hosts.concat(Array.isArray(ismaster.passives) ? ismaster.passives : []);
+
+    // Add all hosts as unknownServers
+    for(var i = 0; i < hosts.length; i++) {
+      // Add to the list of unknown server
+      if(this.unknownServers.indexOf(hosts[i]) == -1
+        && (!this.set[hosts[i]] || this.set[hosts[i]].type == ServerType.Unknown)) {
+        // console.log("============ push unknownServers :: " + hosts[i])
+        // console.dir(this.set[hosts[i]])
+        this.unknownServers.push(hosts[i]);
+      }
+
+      if(!this.set[hosts[i]]) {
+        this.set[hosts[i]] = {
+          type: ServerType.Unknown,
+          electionId: null,
+          setName: null,
+          setVersion: null
+        }
+      }
+    }
+
+    // console.log("================== hosts :: ")
+    // console.dir(this.unknownServers)
   }
 
-  // We found a server, make it primary and remove it from the secondaries
-  // Remove the server first
-  this.remove(currentServer);
-  // Set as primary
-  this.primary = currentServer;
+  // console.log("=== ReplSetState.prototype.update 2")
+
+  //
+  // Unknown server
+  //
+  if(!ismaster && !inList(ismaster, server, this.unknownServers)) {
+    self.set[server.name] = {
+      type: ServerType.Unknown, setVersion: null, electionId: null, setName: null
+    }
+    // console.log("======== addToList unknownServers 0 :: " + server.name)
+    // Update set information about the server instance
+    self.set[server.name].type = ServerType.Unknown;
+    self.set[server.name].electionId = ismaster ? ismaster.electionId : ismaster;
+    self.set[server.name].setName = ismaster ? ismaster.setName : ismaster;
+    self.set[server.name].setVersion = ismaster ? ismaster.setVersion : ismaster;
+
+    if(self.unknownServers.indexOf(server.name) == -1) {
+      self.unknownServers.push(server.name);
+    }
+
+    // addToList(self, ServerType.Unknown, ismaster, server, this.unknownServers);
+    // console.log("======== addToList unknownServers 1")
+    // Set the topology
+    return false;
+  }
+
+  // console.log("=== ReplSetState.prototype.update 3")
+
+  //
+  // Is this a mongos
+  //
+  if(ismaster && ismaster.msg == 'isdbgrid') {
+    return false;
+  }
+
+  // console.log("=== ReplSetState.prototype.update 4")
+
+  //
+  // Standalone server, destroy and return
+  //
+  if(ismaster && ismaster.ismaster && !ismaster.setName) {
+    this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.Unknown;
+    this.remove(server, {force:true});
+    return false;
+  }
+
+  //
+  // Server in maintanance mode
+  //
+  if(ismaster && !ismaster.ismaster && !ismaster.secondary && !ismaster.arbiterOnly) {
+    this.remove(server, {force:true});
+    return false;
+  }
+
+  // console.log("=== ReplSetState.prototype.update 5")
+
+  //
+  // If the .me field does not match the passed in server
+  //
+  if(ismaster.me && ismaster.me != server.name) {
+    if(this.primary && !this.primary.equals(server)) {
+      this.topologyType = TopologyType.ReplicaSetWithPrimary;
+    } else {
+      this.topologyType = TopologyType.ReplicaSetNoPrimary;
+    }
+
+    return false;
+  }
+
+  // console.log("=== ReplSetState.prototype.update 6")
+
+  //
+  // Primary handling
+  //
+  if(!this.primary && ismaster.ismaster && ismaster.setName) {
+    // console.log("=== ReplSetState.prototype.update 6:1")
+    var ismasterElectionId = server.lastIsMaster().electionId;
+    if(this.setName && this.setName != ismaster.setName) {
+      this.topologyType = TopologyType.ReplicaSetNoPrimary;
+      return false;
+    }
+
+    if(!this.maxElectionId && ismasterElectionId) {
+      this.maxElectionId = ismasterElectionId;
+    } else if(this.maxElectionId && ismasterElectionId) {
+      var result = compareObjectIds(this.maxElectionId, ismasterElectionId);
+      // Get the electionIds
+      var ismasterSetVersion = server.lastIsMaster().setVersion;
+
+      // if(result == 1 || result == 0) {
+      if(result == 1) {
+        this.topologyType = TopologyType.ReplicaSetNoPrimary;
+        return false;
+      } else if(result == 0 && ismasterSetVersion) {
+        if(ismasterSetVersion < this.maxSetVersion) {
+          this.topologyType = TopologyType.ReplicaSetNoPrimary;
+          return false;
+        }
+      }
+
+      this.maxSetVersion = ismasterSetVersion;
+      this.maxElectionId = ismasterElectionId;
+      // console.log("======================= MAX")
+      // console.log("maxSetVersion = " + this.maxSetVersion)
+      // console.log("maxElectionId = " + this.maxElectionId)
+    }
+    // console.log("=== ReplSetState.prototype.update 6:1:2")
+
+    self.primary = server;
+    self.set[server.name] = {
+      type: ServerType.RSPrimary,
+      setVersion: ismaster.setVersion,
+      electionId: ismaster.electionId,
+      setName: ismaster.setName
+    }
+    // console.log("=== ReplSetState.prototype.update 6:1:3")
+
+    // Set the topology
+    this.topologyType = TopologyType.ReplicaSetWithPrimary;
+    if(ismaster.setName) this.setName = ismaster.setName;
+    // console.log("=== ReplSetState.prototype.update 6:1:4")
+    // console.log("========================= joined primary")
+    removeFrom(server, self.unknownServers);
+    removeFrom(server, self.secondaries);
+    removeFrom(server, self.passives);
+    // console.log("=== ReplSetState.prototype.update 6:1:5")
+    self.emit('joined', 'primary', server);
+    // console.log("------------------------- 0")
+    emitTopologyDescriptionChanged(self);
+    return true;
+  } else if(ismaster.ismaster && ismaster.setName) {
+    // console.log("=== ReplSetState.prototype.update 6:2")
+    // console.log("========== existing primary 0")
+
+    // Get the electionIds
+    var currentElectionId = self.set[self.primary.name].electionId;
+    var currentSetVersion = self.set[self.primary.name].setVersion;
+    var currentSetName = self.set[self.primary.name].setName;
+    var ismasterElectionId = server.lastIsMaster().electionId;
+    var ismasterSetVersion = server.lastIsMaster().setVersion;
+    var ismasterSetName = server.lastIsMaster().setName;
+
+    // Is it the same server instance
+    if(this.primary.equals(server)
+      && currentSetName == ismasterSetName) {
+        // console.log("========== existing primary 1")
+        // console.log("=================== 1:1")
+        return false;
+    }
+
+    // If we do not have the same rs name
+    if(currentSetName && currentSetName != ismasterSetName) {
+      // console.log("========== existing primary 2")
+      // console.log("=================== 2")
+      if(!this.primary.equals(server)) {
+        this.topologyType = TopologyType.ReplicaSetWithPrimary;
+      } else {
+        this.topologyType = TopologyType.ReplicaSetNoPrimary;
+      }
+
+      return false;
+    }
+
+    // Check if we need to replace the server
+    if(currentElectionId && ismasterElectionId) {
+      var result = compareObjectIds(currentElectionId, ismasterElectionId);
+      // console.log("========== existing primary 3")
+
+      if(result == 1) {
+        return false;
+      } else if(result == 0 && (currentSetVersion > ismasterSetVersion)) {
+        return false;
+      }
+    } else if(!currentElectionId && ismasterElectionId
+      && ismasterSetVersion) {
+        // console.log("========== existing primary 4")
+        if(ismasterSetVersion < this.maxSetVersion) {
+          return false;
+        }
+    }
+
+    if(!this.maxElectionId && ismasterElectionId) {
+      this.maxElectionId = ismasterElectionId;
+    } else if(this.maxElectionId && ismasterElectionId) {
+      var result = compareObjectIds(this.maxElectionId, ismasterElectionId);
+      // console.log("========== existing primary 5")
+
+      if(result == 1) {
+        return false;
+      } else if(result == 0 && currentSetVersion && ismasterSetVersion) {
+        if(ismasterSetVersion < this.maxSetVersion) {
+          return false;
+        }
+      }
+
+
+      this.maxElectionId = ismasterElectionId;
+      this.maxSetVersion = ismasterSetVersion;
+
+      // console.log("!! maxElectionId :: " + this.maxElectionId)
+      // console.log("!! maxSetVersion :: " + this.maxSetVersion)
+    }
+
+    // console.log("========== existing primary 6")
+
+    // Modify the entry to unknown
+    self.set[self.primary.name] = {
+      type: ServerType.Unknown, setVersion: null,
+      electionId: null, setName: null
+    }
+
+    // Signal primary left
+    self.emit('left', 'primary', this.primary);
+    // Destroy the instance
+    self.primary.destroy();
+    // Set the new instance
+    self.primary = server;
+    // Set the set information
+    self.set[server.name] = {
+      type: ServerType.RSPrimary, setVersion: ismaster.setVersion,
+      electionId: ismaster.electionId, setName: ismaster.setName
+    }
+    // console.log("========== existing primary 7")
+
+    // Set the topology
+    this.topologyType = TopologyType.ReplicaSetWithPrimary;
+    if(ismaster.setName) this.setName = ismaster.setName;
+    removeFrom(server, self.unknownServers);
+    removeFrom(server, self.secondaries);
+    removeFrom(server, self.passives);
+    // console.log("========================= joined primary 2")
+    self.emit('joined', 'primary', server);
+    // console.log("------------------------- 1")
+    emitTopologyDescriptionChanged(self);
+    return true;
+  }
+
+  // console.log("=== ReplSetState.prototype.update 7")
+
+  // A possible instance
+  if(!this.primary && ismaster.primary) {
+    self.set[ismaster.primary] = {
+      type: ServerType.PossiblePrimary, setVersion: null,
+      electionId: null, setName: null
+    }
+  }
+
+  // console.log("=== ReplSetState.prototype.update 8")
+
+  // A RSGhost instance
+  if(ismaster.isreplicaset) {
+    self.set[server.name] = {
+      type: ServerType.RSGhost, setVersion: null,
+      electionId: null, setName: null
+    }
+
+    // Set the topology
+    this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.ReplicaSetNoPrimary;
+    if(ismaster.setName) this.setName = ismaster.setName;
+
+    // Set the topology
+    return false;
+  }
+
+  // console.log("=== ReplSetState.prototype.update 9")
+
+  // A RSOther instance
+  if((ismaster.setName && ismaster.hidden)
+    || (ismaster.setName && !ismaster.ismaster && !ismaster.secondary && !ismaster.arbiterOnly && !ismaster.passive)) {
+    self.set[server.name] = {
+      type: ServerType.RSOther, setVersion: null,
+      electionId: null, setName: ismaster.setName
+    }
+    // Set the topology
+    this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.ReplicaSetNoPrimary;
+    if(ismaster.setName) this.setName = ismaster.setName;
+    return false;
+  }
+
+  // console.log("=== ReplSetState.prototype.update 10")
+
+  //
+  // Secondary handling
+  //
+  if(ismaster.secondary && ismaster.setName
+    && !inList(ismaster, server, this.secondaries)
+    && this.setName && this.setName == ismaster.setName) {
+      // console.log("---- secondary :: " + )
+      // console.log("========================== update 1 :: " + server.name)
+      // console.log("ismaster.secondary = " + ismaster.secondary)
+      // console.log("ismaster.setName = " + ismaster.setName)
+      // console.log("this.setName = " + this.setName)
+      // console.log("this.secondaries.length = " + this.secondaries.map(function(x) {
+      //   return x.name
+      // }))
+
+
+    addToList(self, ServerType.RSSecondary, ismaster, server, this.secondaries);
+    // Set the topology
+    this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.ReplicaSetNoPrimary;
+    if(ismaster.setName) this.setName = ismaster.setName;
+    removeFrom(server, self.unknownServers);
+
+    // Remove primary
+    if(this.primary && this.primary.name == server.name) {
+      // console.log("## primary left")
+      server.destroy();
+      this.primary = null;
+      self.emit('left', 'primary', server);
+    }
+
+    self.emit('joined', 'secondary', server);
+    // console.log("------------------------- 2")
+    emitTopologyDescriptionChanged(self);
+    return true;
+  }
+
+  // console.log("=== ReplSetState.prototype.update 11")
+
+  // console.log("========================== update 2")
+  //
+  // Arbiter handling
+  //
+  if(ismaster.arbiterOnly && ismaster.setName
+    && !inList(ismaster, server, this.arbiters)
+    && this.setName && this.setName == ismaster.setName) {
+    addToList(self, ServerType.RSArbiter, ismaster, server, this.arbiters);
+    // Set the topology
+    this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.ReplicaSetNoPrimary;
+    if(ismaster.setName) this.setName = ismaster.setName;
+    removeFrom(server, self.unknownServers);
+    self.emit('joined', 'arbiter', server);
+    // console.log("------------------------- 3")
+    emitTopologyDescriptionChanged(self);
+    return true;
+  }
+
+  // console.log("=== ReplSetState.prototype.update 12")
+
+  //
+  // Passive handling
+  //
+  if(ismaster.passive && ismaster.setName
+    && !inList(ismaster, server, this.passives)
+    && this.setName && this.setName == ismaster.setName) {
+    addToList(self, ServerType.RSSecondary, ismaster, server, this.passives);
+    // Set the topology
+    this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.ReplicaSetNoPrimary;
+    if(ismaster.setName) this.setName = ismaster.setName;
+    removeFrom(server, self.unknownServers);
+
+    // Remove primary
+    if(this.primary && this.primary.name == server.name) {
+      // console.log("## primary left")
+      server.destroy();
+      this.primary = null;
+      self.emit('left', 'primary', server);
+    }
+
+    self.emit('joined', 'secondary', server);
+    // console.log("------------------------- 4")
+    emitTopologyDescriptionChanged(self);
+    return true;
+  }
+
+  // console.log("=== ReplSetState.prototype.update 13")
+
+  //
+  // Remove the primary
+  //
+  if(this.set[server.name] && this.set[server.name].type == ServerType.RSPrimary) {
+    // console.log("====================== LEFT PRIMARY")
+    self.emit('left', 'primary', this.primary);
+    this.primary.destroy();
+    this.primary = null;
+    this.topologyType = TopologyType.ReplicaSetNoPrimary;
+    return false;
+  }
+
+  // console.log("=== ReplSetState.prototype.update 14")
+
+  this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.ReplicaSetNoPrimary;
+  return false;
 }
 
-var add = function(self, list, server) {
-  // Check if the server is contained in the list
+function inList(ismaster, server, list) {
   for(var i = 0; i < list.length; i++) {
-    if(list[i].equals(server)) return false;
+    if(list[i].name == server.name) return true;
   }
 
-  // Add serer to list
+  return false;
+}
+
+function addToList(self, type, ismaster, server, list) {
+  // Update set information about the server instance
+  self.set[server.name].type = type;
+  self.set[server.name].electionId = ismaster ? ismaster.electionId : ismaster;
+  self.set[server.name].setName = ismaster ? ismaster.setName : ismaster;
+  self.set[server.name].setVersion = ismaster ? ismaster.setVersion : ismaster;
+  // Add to the list
   list.push(server);
-
-  // Return true
-  return true;
 }
 
-/**
- * Add server to list of secondaries
- * @method
- * @param {Server} server Server we wish to add
- */
-State.prototype.addSecondary = function(server) {
-  return add(this, this.secondaries, server);
-}
-
-/**
- * Add server to list of arbiters
- * @method
- * @param {Server} server Server we wish to add
- */
-State.prototype.addArbiter = function(server) {
-  return add(this, this.arbiters, server);
-}
-
-/**
- * Add server to list of passives
- * @method
- * @param {Server} server Server we wish to add
- */
-State.prototype.addPassive = function(server) {
-  return add(this, this.passives, server);
-}
-
-var compareObjectIds = function(id1, id2) {
+function compareObjectIds(id1, id2) {
   var a = new Buffer(id1.toHexString(), 'hex');
   var b = new Buffer(id2.toHexString(), 'hex');
 
@@ -591,138 +626,135 @@ var compareObjectIds = function(id1, id2) {
   return x < y ? -1 : y < x ? 1 : 0;
 }
 
-/**
- * Update the state given a specific ismaster result
- * @method
- * @param {object} ismaster IsMaster result
- * @param {Server} server IsMaster Server source
- */
-State.prototype.update = function(ismaster, server) {
-  var self = this;
-
-  // Perform a cleanup before performing the update
-  this.clean();
-
-  // Not in a known connection valid state
-  if((!ismaster.ismaster && !ismaster.secondary && !ismaster.arbiterOnly) || !Array.isArray(ismaster.hosts)) {
-    // Remove the state
-    var result = self.remove(server);
-    if(self.state == CONNECTED)  {
-      if(self.logger.isInfo()) self.logger.info(f('[%s] removing %s from set', self.id, ismaster.me));
-      self.replSet.emit('left', result, server);
+function removeFrom(server, list) {
+  for(var i = 0; i < list.length; i++) {
+    if(list[i].equals && list[i].equals(server)) {
+      list.splice(i, 1);
+      return true;
+    } else if(typeof list[i] == 'string' && list[i] == server.name) {
+      list.splice(i, 1);
+      return true;
     }
-
-    emitTopologyDescriptionChanged(this);
-    return false;
   }
 
-  // Set the setName if it's not set from the first server
-  if(self.setName == null && ismaster.setName) {
-    if(self.logger.isInfo()) self.logger.info(f('[%s] setting setName to %s', self.id, ismaster.setName));
-    self.setName = ismaster.setName;
-  }
-
-  // Check if the replicaset name matches the provided one
-  if(ismaster.setName && self.setName != ismaster.setName) {
-    if(self.logger.isError()) self.logger.error(f('[%s] server in replset %s is not part of the specified setName %s', self.id, ismaster.setName, self.setName));
-    self.remove(server);
-    self.replSet.emit('error', new MongoError("provided setName for Replicaset Connection does not match setName found in server seedlist"));
-    emitTopologyDescriptionChanged(this);
-    return false;
-  }
-
-  // Log information
-  if(self.logger.isInfo()) self.logger.info(f('[%s] updating replicaset state %s', self.id, JSON.stringify(this)));
-
-  // It's a master set it
-  if(ismaster.ismaster && self.setName == ismaster.setName && !self.isPrimary(ismaster.me)) {
-    // Check if the electionId is not null
-    if(ismaster.electionId instanceof ObjectId && self.electionId instanceof ObjectId) {
-      if(compareObjectIds(self.electionId, ismaster.electionId) == -1) {
-        self.electionId = ismaster.electionId;
-      } else if(compareObjectIds(self.electionId, ismaster.electionId) == 0) {
-        self.electionId = ismaster.electionId;
-      } else {
-        return false;
-      }
-    }
-
-    // Initial electionId
-    if(ismaster.electionId instanceof ObjectId && self.electionId == null) {
-      self.electionId = ismaster.electionId;
-    }
-
-    // Promote to primary
-    self.promotePrimary(server);
-    // Log change of primary
-    if(self.logger.isInfo()) self.logger.info(f('[%s] promoting %s to primary', self.id, ismaster.me));
-    // Emit primary
-    self.replSet.emit('joined', 'primary', this.primary);
-
-    // Emit the description change
-    emitTopologyDescriptionChanged(this);
-
-    // We are connected
-    if(self.state == CONNECTING) {
-      self.state = CONNECTED;
-      self.replSet.emit('connect', self.replSet);
-    } else {
-      self.state = CONNECTED;
-      self.replSet.emit('reconnect', server);
-    }
-  } else if(!ismaster.ismaster && self.setName == ismaster.setName
-    && ismaster.arbiterOnly) {
-      if(self.addArbiter(server)) {
-        if(self.logger.isInfo()) self.logger.info(f('[%s] promoting %s to arbiter', self.id, ismaster.me));
-        self.replSet.emit('joined', 'arbiter', server);
-        emitTopologyDescriptionChanged(this);
-        return true;
-      };
-
-      return false;
-  } else if(!ismaster.ismaster && self.setName == ismaster.setName
-    && ismaster.secondary && ismaster.passive) {
-      if(self.addPassive(server) && self.addSecondary(server)) {
-        if(self.logger.isInfo()) self.logger.info(f('[%s] promoting %s to passive', self.id, ismaster.me));
-        self.replSet.emit('joined', 'passive', server);
-
-        // If we have secondaryOnlyConnectionAllowed and just a passive it's
-        // still a valid connection
-        if(self.secondaryOnlyConnectionAllowed && self.state == CONNECTING) {
-          self.state = CONNECTED;
-          self.replSet.emit('connect', self.replSet);
-        }
-
-        emitTopologyDescriptionChanged(this);
-        return true;
-      };
-
-      return false;
-  } else if(!ismaster.ismaster && self.setName == ismaster.setName
-    && ismaster.secondary) {
-      if(self.addSecondary(server)) {
-        if(self.logger.isInfo()) self.logger.info(f('[%s] promoting %s to secondary', self.id, ismaster.me));
-        self.replSet.emit('joined', 'secondary', server);
-
-        // Is this the primary right now
-        if(self.primary && self.primary.name == server.name) {
-          self.primary = null;
-        }
-
-        if(self.secondaryOnlyConnectionAllowed && self.state == CONNECTING) {
-          self.state = CONNECTED;
-          self.replSet.emit('connect', self.replSet);
-        }
-
-        emitTopologyDescriptionChanged(this);
-        return true;
-      };
-
-      return false;
-  }
-
-  // Return update applied
-  return true;
+  return false;
 }
 
-module.exports = State;
+function emitTopologyDescriptionChanged(self) {
+  // console.log("---------------------------------- 0")
+  if(self.listeners('topologyDescriptionChanged').length > 0) {
+    var topology = 'Unknown';
+    var setName = self.setName;
+
+    // console.log("  ---------------------------------- 1")
+
+    if(self.hasPrimaryAndSecondary()) {
+      topology = 'ReplicaSetWithPrimary';
+    } else if(!self.hasPrimary() && self.hasSecondary()) {
+      topology = 'ReplicaSetNoPrimary';
+    }
+
+    // console.log("  ---------------------------------- 2")
+
+    // Generate description
+    var description = {
+      topologyType: topology,
+      setName: setName,
+      servers: []
+    }
+
+    // console.log("  ---------------------------------- 3")
+
+    // Add the primary to the list
+    if(self.hasPrimary()) {
+      // console.log("    ---------- primary")
+      var desc = self.primary.getDescription();
+      desc.type = 'RSPrimary';
+      description.servers.push(desc);
+    }
+
+    // Add all the secondaries
+    description.servers = description.servers.concat(self.secondaries.map(function(x) {
+      // console.log("    ---------- secondary")
+      // return self.set[x.name];
+      var description = x.getDescription();
+      description.type = 'RSSecondary';
+      return description;
+    }));
+
+    // Add all the arbiters
+    description.servers = description.servers.concat(self.arbiters.map(function(x) {
+      // console.log("    ---------- arbiter")
+      // return self.set[x.name];
+      var description = x.getDescription();
+      description.type = 'RSArbiter';
+      return description;
+    }));
+
+    // Add all the passives
+    description.servers = description.servers.concat(self.passives.map(function(x) {
+      // console.log("    ---------- passives")
+      // return self.set[x.name];
+      var description = x.getDescription();
+      description.type = 'RSSecondary';
+      return description;
+    }));
+
+    // console.log("---------------------------------- 4")
+
+    // Create the result
+    var result = {
+      topologyId: self.id,
+      previousDescription: self.replicasetDescription,
+      newDescription: description,
+      diff: diff(self.replicasetDescription, description)
+    };
+
+    // console.log("---------------------------------- 5")
+
+    // Emit the topologyDescription change
+    self.emit('topologyDescriptionChanged', result);
+
+    // Set the new description
+    self.replicasetDescription = description;
+  }
+}
+
+function diff(previous, current) {
+  // Difference document
+  var diff = {
+    servers: []
+  }
+
+  // Previous entry
+  if(!previous) {
+    previous = { servers: [] };
+  }
+
+  // Got through all the servers
+  for(var i = 0; i < previous.servers.length; i++) {
+    var prevServer = previous.servers[i];
+
+    // Go through all current servers
+    for(var j = 0; j < current.servers.length; j++) {
+      var currServer = current.servers[j];
+
+      // Matching server
+      if(prevServer.address === currServer.address) {
+        // We had a change in state
+        if(prevServer.type != currServer.type) {
+          diff.servers.push({
+            address: prevServer.address,
+            from: prevServer.type,
+            to: currServer.type
+          });
+        }
+      }
+    }
+  }
+
+  // Return difference
+  return diff;
+}
+
+module.exports = ReplSetState;

@@ -11,9 +11,10 @@ var setProperty = require('../connection/utils').setProperty
  * @param {Connection} connection A connection instance associated with this result
  * @return {CommandResult} A cursor instance
  */
-var CommandResult = function(result, connection) {
+var CommandResult = function(result, connection, message) {
   this.result = result;
   this.connection = connection;
+  this.message = message;
 }
 
 /**

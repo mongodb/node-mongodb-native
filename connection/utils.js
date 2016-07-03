@@ -60,26 +60,8 @@ var debugOptions = function(debugFields, options) {
   return finaloptions;
 }
 
-/**
- * @ignore
- */
-var bindToCurrentDomain = function(callback) {
-  var domain = process.domain;
-  if(domain == null || callback == null) return callback;
-  var boundCallback = domain.bind(callback);
-
-  // Copy all fields over
-  for(var name in callback) {
-    boundCallback[name] = callback[name];
-  }
-
-  // Return the bound callback
-  return boundCallback;
-}
-
 exports.setProperty = setProperty;
 exports.getProperty = getProperty;
 exports.getSingleProperty = getSingleProperty;
 exports.copy = copy;
-exports.bindToCurrentDomain = bindToCurrentDomain;
 exports.debugOptions = debugOptions;
