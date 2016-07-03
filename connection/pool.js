@@ -222,7 +222,6 @@ function connectionFailureHandler(self, event) {
 
 function attemptReconnect(self) {
   return function() {
-    // console.log("==== attemptReconnect start :: " + self.state + " :: " + self.id)
     self.emit('attemptReconnect', self);
     // console.log(self.availableConnections.concat(self.inUseConnections.concat(self.connectingConnections)).map(function(x) {
     //   return x.id

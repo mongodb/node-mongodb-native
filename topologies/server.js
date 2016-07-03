@@ -235,7 +235,13 @@ var eventHandler = function(self, event) {
 
       // Reconnect failed return error
       if(event == 'reconnectFailed') {
-        return self.emit('error', err);
+        self.emit('reconnectFailed', err);
+        // Emit error if any listeners
+        if(self.listeners('error').length > 0) {
+          self.emit('error', err);
+        }
+        // Terminate
+        return;
       }
 
       // On first connect fail
