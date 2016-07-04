@@ -146,7 +146,7 @@ var errorHandler = function(self) {
   return function(err) {
     // console.log("== Connection :: error :: " + self.id)
     if(connectionAccounting) delete connections[self.id];
-    // console.log("============= DESTROY connection :: " + self.id)
+    // console.log("============= DESTROY connection :: " + self.id + " " + self.host)
     // console.log("connection::error " + self.id)
     // Debug information
     if(self.logger.isDebug()) self.logger.debug(f('connection %s for [%s:%s] errored out with [%s]', self.id, self.host, self.port, JSON.stringify(err)));
@@ -160,7 +160,7 @@ var timeoutHandler = function(self) {
     // console.log("============= DESTROY connection :: " + self.id)
     // console.log("== Connection :: timeout :: " + self.id)
     if(connectionAccounting) delete connections[self.id];
-    // console.log("connection::timeout " + self.id)
+    // console.log("connection::timeout " + self.id + " " + self.host)
     // Debug information
     if(self.logger.isDebug()) self.logger.debug(f('connection %s for [%s:%s] timed out', self.id, self.host, self.port));
     // Emit timeout error
@@ -175,7 +175,7 @@ var closeHandler = function(self) {
     // console.log("============= DESTROY connection :: " + self.id)
     // console.log("== Connection :: closeHandler :: " + self.id)
     if(connectionAccounting) delete connections[self.id];
-    // console.log("connection::close " + self.id)
+    // console.log("connection::close " + self.id + " " + self.host)
     // Debug information
     if(self.logger.isDebug()) self.logger.debug(f('connection %s with for [%s:%s] closed', self.id, self.host, self.port));
     // if(hadError) console.log("==== had error " + self.id)

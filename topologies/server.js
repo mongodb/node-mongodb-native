@@ -222,15 +222,17 @@ var eventHandler = function(self, event) {
     } else if(event == 'error' || event == 'parseError'
       || event == 'close' || event == 'timeout' || event == 'reconnect'
       || event == 'attemptReconnect' || 'reconnectFailed') {
+        // console.log("========== server :: eventHandler :: " + event + " :: 0")
 
       // Remove server instance from accounting
       if(serverAccounting && ['close', 'timeout', 'error', 'parseError', 'reconnectFailed'].indexOf(event) != -1) {
+        // console.log("========== server :: eventHandler :: " + event + " :: " + self.id + " " + self.s.options.port)
         // Emit toplogy opening event if not in topology
         if(!self.s.inTopology) {
           self.emit('topologyOpening', { topologyId: self.id });
         }
 
-        delete servers[this.id];
+        delete servers[self.id];
       }
 
       // Reconnect failed return error
@@ -268,6 +270,8 @@ Server.prototype.connect = function(options) {
 
   // Set the connections
   if(serverAccounting) servers[this.id] = this;
+
+  // console.log("** CREATE SERVER :: "+ this.id + " :: " + this.name)
 
   // Do not allow connect to be called on anything that's not disconnected
   if(self.s.pool && !self.s.pool.isDisconnected() && !self.s.pool.isDestroyed()) {
@@ -409,6 +413,8 @@ Server.prototype.command = function(ns, cmd, options, callback) {
     promoteLongs: typeof options.promoteLongs == 'boolean' ? options.promoteLongs : true,
     command: true,
     monitoring: typeof options.monitoring == 'boolean' ? options.monitoring : false,
+    // // debug
+    // cmd: cmd
   };
 
   // console.log("  -- server command 3")
@@ -575,7 +581,7 @@ Server.prototype.getConnection = function(options) {
 var listeners = ['close', 'error', 'timeout', 'parseError', 'connect'];
 
 Server.prototype.destroy = function(options) {
-  // console.log("**** DESTROY SERVER :: " + this.id)
+  // console.log("**** DESTROY SERVER :: " + this.id + " " +  this.s.options.port)
   options = options || {};
   var self = this;
 
