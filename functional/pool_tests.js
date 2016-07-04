@@ -438,8 +438,10 @@ exports['Should correctly reclaim immediateRelease socket'] = {
 
     // Add event listeners
     pool.on('connect', function(_pool) {
+      // console.log("============================== 0")
       var query = new Query(new bson(), 'system.$cmd', {ismaster:true}, {numberToSkip: 0, numberToReturn: 1});
       _pool.write(query.toBin(), {immediateRelease: true}, function() {
+        // console.log("============================== 1")
         index = index + 1;
       });
 
@@ -447,6 +449,7 @@ exports['Should correctly reclaim immediateRelease socket'] = {
     })
 
     pool.on('timeout', function(err, _pool) {
+      // console.log("============================== 2")
       test.equal(0, index);
 
       pool.destroy();
