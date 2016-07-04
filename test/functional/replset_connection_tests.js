@@ -1114,7 +1114,7 @@ exports['Should Correctly remove server going into recovery mode'] = {
             done = true;
             // Return to working state
             db1.admin().command({ replSetMaintenance: 0 }, function(err, result) {
-              console.dir(err)
+              // console.dir(err)
               db.close();
               db1.close();
 
