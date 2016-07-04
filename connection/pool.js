@@ -990,7 +990,7 @@ function _execute(self) {
     waitForAuth(function() {
       // As long as we have available connections
       while(true) {
-        if(self.state == DESTROYED) return;
+        // if(self.state == DESTROYED) return;
         // console.log("=== _execute 1")
         // Total availble connections
         var totalConnections = self.availableConnections.length
@@ -1020,28 +1020,28 @@ function _execute(self) {
 
         // No queue break
         if(self.queue.length == 0) {
-          // We are in the process of destroying the pool
-          // and we have run out of operations, close connections and
-          // perform cleanup.
-          if(self.state == DESTROYING) {
-            // console.log("+++ DESTROY THE POOL")
-            // Get all the known connections
-            var connections = self.availableConnections
-              .concat(self.inUseConnections)
-              .concat(self.nonAuthenticatedConnections)
-              .concat(self.connectingConnections);
-            // Destroy all connections
-            connections.forEach(function(c) {
-              // Remove all listeners
-              for(var i = 0; i < events.length; i++) {
-                c.removeAllListeners(events[i]);
-              }
-              // Destroy connection
-              c.destroy();
-            });
-
-            return;
-          }
+          // // We are in the process of destroying the pool
+          // // and we have run out of operations, close connections and
+          // // perform cleanup.
+          // if(self.state == DESTROYING) {
+          //   // console.log("+++ DESTROY THE POOL")
+          //   // Get all the known connections
+          //   var connections = self.availableConnections
+          //     .concat(self.inUseConnections)
+          //     .concat(self.nonAuthenticatedConnections)
+          //     .concat(self.connectingConnections);
+          //   // Destroy all connections
+          //   connections.forEach(function(c) {
+          //     // Remove all listeners
+          //     for(var i = 0; i < events.length; i++) {
+          //       c.removeAllListeners(events[i]);
+          //     }
+          //     // Destroy connection
+          //     c.destroy();
+          //   });
+          //
+          //   return;
+          // }
 
           break;
         }
