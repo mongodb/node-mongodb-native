@@ -1,8 +1,9 @@
-1.3.22
+2.0.0
 -----------------
-* Disabled single server self monitoring for replicaset and mongos topologies and moved logic into higher topology layer, ensuring single servers will never always correctly timeout if they for some reason are orphaned by the replicaset or mongos topology.
-* reset socketTimeout which may have been overwritten during a monitoring operation (Issue #102, https://github.com/nbrachet).
-* Simplified authentication and re-authentication and allowing for retries on failure.
+* Moved all authentication and handling of growing/shrinking of pool connections into actual pool.
+* All authentication methods now handle both auth/reauthenticate and logout events.
+* Introduced logout method to get rid of onAll option for logout command.
+* Updated bson to 0.5.0 that includes Decimal128 support.
 
 1.3.21 2016-05-30
 -----------------
