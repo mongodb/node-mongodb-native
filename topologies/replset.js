@@ -909,7 +909,6 @@ function pickNearest(self, set, readPreference) {
 
   // No servers, default to primary
   if(servers.length == 0 && set.primary) {
-    // if(self.s.logger.isInfo()) self.s.logger.info(f('picked primary server [%s]', set.primary.name));
     return set.primary;
   } else if(servers.length == 0) {
     return null
