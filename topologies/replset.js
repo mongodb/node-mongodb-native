@@ -1,4 +1,4 @@
-// "use strict"
+"use strict"
 
 var inherits = require('util').inherits,
   f = require('util').format,
@@ -64,7 +64,6 @@ var handlers = ['connect', 'close', 'error', 'timeout', 'parseError'];
  * @param {boolean} [options.noDelay=true] TCP Connection no delay
  * @param {number} [options.connectionTimeout=10000] TCP Connection timeout setting
  * @param {number} [options.socketTimeout=0] TCP Socket timeout setting
- * @param {number} [options.monitoringSocketTimeout=30000] TCP Socket timeout setting for replicaset monitoring socket
  * @param {boolean} [options.singleBufferSerializtion=true] Serialize into single buffer, trade of peak memory for serialization speed
  * @param {boolean} [options.ssl=false] Use SSL for connection
  * @param {boolean|function} [options.checkServerIdentity=true] Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.
@@ -81,6 +80,16 @@ var handlers = ['connect', 'close', 'error', 'timeout', 'parseError'];
  * @fires ReplSet#ha
  * @fires ReplSet#joined
  * @fires ReplSet#left
+ * @fires ReplSet#failed
+ * @fires ReplSet#fullsetup
+ * @fires ReplSet#all
+ * @fires ReplSet#error
+ * @fires ReplSet#serverHeartbeatStarted
+ * @fires ReplSet#serverHeartbeatSucceeded
+ * @fires ReplSet#serverHeartbeatFailed
+ * @fires ReplSet#topologyOpening
+ * @fires ReplSet#topologyClosed
+ * @fires ReplSet#topologyDescriptionChanged
  */
 var ReplSet = function(seedlist, options) {
   var self = this;
@@ -178,10 +187,6 @@ function attemptReconnect(self) {
         authProviders: self.authProviders, reconnect:false, monitoring: false, inTopology: true
       }));
     });
-
-    // servers.forEach(function(x) {
-    //   console.log("^^ ReplSet::attemptReconnect create server :: " + x.id + " " + x.name)
-    // })
 
     // Create the list of servers
     self.s.connectingServers = servers.slice(0);
@@ -582,6 +587,11 @@ function emitSDAMEvent(self, event, description) {
   }
 }
 
+/**
+ * Initiate server connect
+ * @method
+ * @param {array} [options.auth=null] Array of auth options to apply on connect
+ */
 ReplSet.prototype.connect = function(options) {
   var self = this;
   // Add any connect level options to the internal state
@@ -595,10 +605,6 @@ ReplSet.prototype.connect = function(options) {
     }));
   });
 
-  // servers.forEach(function(x) {
-  //   console.log("^^ ReplSet::connect create server :: " + x.id + " " + x.name)
-  // })
-
   // Emit the topology opening event
   emitSDAMEvent(this, 'topologyOpening', { topologyId: this.id });
 
@@ -606,6 +612,10 @@ ReplSet.prototype.connect = function(options) {
   connectServers(self, servers);
 }
 
+/**
+ * Destroy the server connection
+ * @method
+ */
 ReplSet.prototype.destroy = function() {
   // Transition state
   stateTransition(this, DESTROYED);
@@ -623,6 +633,10 @@ ReplSet.prototype.destroy = function() {
   emitSDAMEvent(this, 'topologyClosed', { topologyId: this.id });
 }
 
+/**
+ * Unref all connections belong to this server
+ * @method
+ */
 ReplSet.prototype.unref = function() {
   // Transition state
   stateTransition(this, DISCONNECTED);
@@ -634,11 +648,21 @@ ReplSet.prototype.unref = function() {
   clearTimeout(this.haTimeoutId);
 }
 
+/**
+ * Returns the last known ismaster document for this server
+ * @method
+ * @return {object}
+ */
 ReplSet.prototype.lastIsMaster = function() {
   return this.s.replicaSetState.primary
     ? this.s.replicaSetState.primary.lastIsMaster() : null;
 }
 
+/**
+ * All raw connections
+ * @method
+ * @return {Connection[]}
+ */
 ReplSet.prototype.connections = function() {
   var servers = this.s.replicaSetState.allServers();
   var connections = [];
@@ -649,6 +673,12 @@ ReplSet.prototype.connections = function() {
   return connections;
 }
 
+/**
+ * Figure out if the server is connected
+ * @method
+ * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+ * @return {boolean}
+ */
 ReplSet.prototype.isConnected = function(options) {
   options = options || {};
 
@@ -686,10 +716,21 @@ ReplSet.prototype.isConnected = function(options) {
   return this.s.replicaSetState.hasPrimary();
 }
 
+/**
+ * Figure out if the replicaset instance was destroyed by calling destroy
+ * @method
+ * @return {boolean}
+ */
 ReplSet.prototype.isDestroyed = function() {
   return this.state == DESTROYED;
 }
 
+/**
+ * Get server
+ * @method
+ * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
+ * @return {Server}
+ */
 ReplSet.prototype.getServer = function(options) {
   // Ensure we have no options
   options = options || {};
@@ -699,6 +740,11 @@ ReplSet.prototype.getServer = function(options) {
   return server;
 }
 
+/**
+ * Get all connected servers
+ * @method
+ * @return {Server[]}
+ */
 ReplSet.prototype.getServers = function() {
   return this.s.replicaSetState.allServers();
 }
@@ -1132,5 +1178,121 @@ ReplSet.prototype.cursor = function(ns, cmd, cursorOptions) {
   var FinalCursor = cursorOptions.cursorFactory || this.s.Cursor;
   return new FinalCursor(this.s.bson, ns, cmd, cursorOptions, this, this.s.options);
 }
+
+/**
+ * A replset connect event, used to verify that the connection is up and running
+ *
+ * @event ReplSet#connect
+ * @type {ReplSet}
+ */
+
+/**
+ * A replset reconnect event, used to verify that the topology reconnected
+ *
+ * @event ReplSet#reconnect
+ * @type {ReplSet}
+ */
+
+/**
+ * A replset fullsetup event, used to signal that all topology members have been contacted.
+ *
+ * @event ReplSet#fullsetup
+ * @type {ReplSet}
+ */
+
+/**
+ * A replset all event, used to signal that all topology members have been contacted.
+ *
+ * @event ReplSet#all
+ * @type {ReplSet}
+ */
+
+/**
+ * A replset failed event, used to signal that initial replset connection failed.
+ *
+ * @event ReplSet#failed
+ * @type {ReplSet}
+ */
+
+/**
+ * A server member left the replicaset
+ *
+ * @event ReplSet#left
+ * @type {function}
+ * @param {string} type The type of member that left (primary|secondary|arbiter)
+ * @param {Server} server The server object that left
+ */
+
+/**
+ * A server member joined the replicaset
+ *
+ * @event ReplSet#joined
+ * @type {function}
+ * @param {string} type The type of member that joined (primary|secondary|arbiter)
+ * @param {Server} server The server object that joined
+ */
+
+/**
+ * A server opening SDAM monitoring event
+ *
+ * @event ReplSet#serverOpening
+ * @type {object}
+ */
+
+/**
+ * A server closed SDAM monitoring event
+ *
+ * @event ReplSet#serverClosed
+ * @type {object}
+ */
+
+/**
+ * A server description SDAM change monitoring event
+ *
+ * @event ReplSet#serverDescriptionChanged
+ * @type {object}
+ */
+
+/**
+ * A topology open SDAM event
+ *
+ * @event ReplSet#topologyOpening
+ * @type {object}
+ */
+
+/**
+ * A topology closed SDAM event
+ *
+ * @event ReplSet#topologyClosed
+ * @type {object}
+ */
+
+/**
+ * A topology structure SDAM change event
+ *
+ * @event ReplSet#topologyDescriptionChanged
+ * @type {object}
+ */
+
+/**
+ * A topology serverHeartbeatStarted SDAM event
+ *
+ * @event ReplSet#serverHeartbeatStarted
+ * @type {object}
+ */
+
+/**
+ * A topology serverHearbeatFailed SDAM event
+ *
+ * @event ReplSet#serverHearbeatFailed
+ * @type {object}
+ */
+
+/**
+ * A topology serverHeartbeatSucceeded SDAM change event
+ *
+ * @event ReplSet#serverHeartbeatSucceeded
+ * @type {object}
+ */
 
 module.exports = ReplSet;

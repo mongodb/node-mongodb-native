@@ -24,6 +24,36 @@ var DESTROYED = 'destroyed';
 
 var _id = 0;
 
+/**
+ * Creates a new Pool instance
+ * @class
+ * @param {string} options.host The server host
+ * @param {number} options.port The server port
+ * @param {number} [options.size=1] Max server connection pool size
+ * @param {boolean} [options.reconnect=true] Server will attempt to reconnect on loss of connection
+ * @param {number} [options.reconnectTries=30] Server attempt to reconnect #times
+ * @param {number} [options.reconnectInterval=1000] Server will wait # milliseconds between retries
+ * @param {boolean} [options.keepAlive=true] TCP Connection keep alive enabled
+ * @param {number} [options.keepAliveInitialDelay=0] Initial delay before TCP keep alive enabled
+ * @param {boolean} [options.noDelay=true] TCP Connection no delay
+ * @param {number} [options.connectionTimeout=0] TCP Connection timeout setting
+ * @param {number} [options.socketTimeout=0] TCP Socket timeout setting
+ * @param {number} [options.monitoringSocketTimeout=30000] TCP Socket timeout setting for replicaset monitoring socket
+ * @param {boolean} [options.ssl=false] Use SSL for connection
+ * @param {boolean|function} [options.checkServerIdentity=true] Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.
+ * @param {Buffer} [options.ca] SSL Certificate store binary buffer
+ * @param {Buffer} [options.cert] SSL Certificate binary buffer
+ * @param {Buffer} [options.key] SSL Key file binary buffer
+ * @param {string} [options.passPhrase] SSL Certificate pass phrase
+ * @param {boolean} [options.rejectUnauthorized=false] Reject unauthorized server certificates
+ * @param {boolean} [options.promoteLongs=true] Convert Long values from the db into Numbers if they fit into 53 bits
+ * @fires Pool#connect
+ * @fires Pool#close
+ * @fires Pool#error
+ * @fires Pool#timeout
+ * @fires Pool#parseError
+ * @return {Pool} A cursor instance
+ */
 var Pool = function(options) {
   var self = this;
   // Add event listener
@@ -389,22 +419,42 @@ function messageHandler(self) {
   }
 }
 
+/**
+ * Return the total socket count in the pool.
+ * @method
+ * @return {Number} The number of socket available.
+ */
 Pool.prototype.socketCount = function() {
   return this.availableConnections.length
     + this.inUseConnections.length
     + this.connectingConnections.length;
 }
 
+/**
+ * Return all pool connections
+ * @method
+ * @return {Connectio[]} The pool connections
+ */
 Pool.prototype.allConnections = function() {
   return this.availableConnections
     .concat(this.inUseConnections)
     .concat(this.connectingConnections);
 }
 
+/**
+ * Get a pool connection (round-robin)
+ * @method
+ * @return {Connection}
+ */
 Pool.prototype.get = function() {
   return this.allConnections()[0];
 }
 
+/**
+ * Is the pool connected
+ * @method
+ * @return {boolean}
+ */
 Pool.prototype.isConnected = function() {
   // We are in a destroyed state
   if(this.state == DESTROYED || this.state == DESTROYING) {
@@ -428,14 +478,28 @@ Pool.prototype.isConnected = function() {
   return false;
 }
 
+/**
+ * Was the pool destroyed
+ * @method
+ * @return {boolean}
+ */
 Pool.prototype.isDestroyed = function() {
   return this.state == DESTROYED || this.state == DESTROYING;
 }
 
+/**
+ * Is the pool in a disconnected state
+ * @method
+ * @return {boolean}
+ */
 Pool.prototype.isDisconnected = function() {
   return this.state == DISCONNECTED;
 }
 
+/**
+ * Connect pool
+ * @method
+ */
 Pool.prototype.connect = function(auth) {
   if(this.state != DISCONNECTED) throw new MongoError('connection in unlawful state ' + this.state);
   var self = this;
@@ -586,6 +650,12 @@ Pool.prototype.auth = function(mechanism, db) {
   });
 }
 
+/**
+ * Logout all users against a database
+ * @method
+ * @param {string} dbName The database name
+ * @param {authResultCallback} callback A callback function
+ */
 Pool.prototype.logout = function(dbName, callback) {
   var self = this;
   if(typeof dbName != 'string') throw new MongoError('logout method requires a db name as first argument');
@@ -634,6 +704,10 @@ Pool.prototype.unref = function() {
 // Events
 var events = ['error', 'close', 'timeout', 'parseError', 'connect'];
 
+/**
+ * Destroy pool
+ * @method
+ */
 Pool.prototype.destroy = function() {
   var self = this;
   // Do not try again if the pool is already dead
@@ -953,5 +1027,61 @@ function _execute(self) {
     self.executing = false;
   }
 }
+
+/**
+ * A server connect event, used to verify that the connection is up and running
+ *
+ * @event Pool#connect
+ * @type {Pool}
+ */
+
+/**
+ * A server reconnect event, used to verify that pool reconnected.
+ *
+ * @event Pool#reconnect
+ * @type {Pool}
+ */
+
+/**
+ * The server connection closed, all pool connections closed
+ *
+ * @event Pool#close
+ * @type {Pool}
+ */
+
+/**
+ * The server connection caused an error, all pool connections closed
+ *
+ * @event Pool#error
+ * @type {Pool}
+ */
+
+/**
+ * The server connection timed out, all pool connections closed
+ *
+ * @event Pool#timeout
+ * @type {Pool}
+ */
+
+/**
+ * The driver experienced an invalid message, all pool connections closed
+ *
+ * @event Pool#parseError
+ * @type {Pool}
+ */
+
+/**
+ * The driver attempted to reconnect
+ *
+ * @event Pool#attemptReconnect
+ * @type {Pool}
+ */
+
+/**
+ * The driver exhausted all reconnect attempts
+ *
+ * @event Pool#reconnectFailed
+ * @type {Pool}
+ */
 
 module.exports = Pool;
