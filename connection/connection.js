@@ -50,7 +50,6 @@ var Connection = function(messageHandler, options) {
   this.options = options || {};
   // Identification information
   this.id = _id++;
-  // console.log("============= CREATE connection :: " + this.id)
   // Logger instance
   this.logger = Logger('Connection', options);
   // No bson parser passed in
@@ -144,10 +143,7 @@ Connection.connections = function() {
 // Connection handlers
 var errorHandler = function(self) {
   return function(err) {
-    // console.log("== Connection :: error :: " + self.id)
     if(connectionAccounting) delete connections[self.id];
-    // console.log("============= DESTROY connection :: " + self.id + " " + self.host)
-    // console.log("connection::error " + self.id)
     // Debug information
     if(self.logger.isDebug()) self.logger.debug(f('connection %s for [%s:%s] errored out with [%s]', self.id, self.host, self.port, JSON.stringify(err)));
     // Emit the error
@@ -157,10 +153,7 @@ var errorHandler = function(self) {
 
 var timeoutHandler = function(self) {
   return function(err) {
-    // console.log("============= DESTROY connection :: " + self.id)
-    // console.log("== Connection :: timeout :: " + self.id)
     if(connectionAccounting) delete connections[self.id];
-    // console.log("connection::timeout " + self.id + " " + self.host)
     // Debug information
     if(self.logger.isDebug()) self.logger.debug(f('connection %s for [%s:%s] timed out', self.id, self.host, self.port));
     // Emit timeout error
@@ -172,13 +165,9 @@ var timeoutHandler = function(self) {
 
 var closeHandler = function(self) {
   return function(hadError) {
-    // console.log("============= DESTROY connection :: " + self.id)
-    // console.log("== Connection :: closeHandler :: " + self.id)
     if(connectionAccounting) delete connections[self.id];
-    // console.log("connection::close " + self.id + " " + self.host)
     // Debug information
     if(self.logger.isDebug()) self.logger.debug(f('connection %s with for [%s:%s] closed', self.id, self.host, self.port));
-    // if(hadError) console.log("==== had error " + self.id)
 
     // Emit close event
     if(!hadError) {
@@ -227,7 +216,6 @@ var dataHandler = function(self) {
               sizeOfMessage:self.sizeOfMessage,
               bytesRead:self.bytesRead,
               stubBuffer:self.stubBuffer}};
-              // console.log("=== connection parseError 0")
             // We got a parse Error fire it off then keep going
             self.emit("parseError", errorObject, self);
           }
@@ -274,7 +262,6 @@ var dataHandler = function(self) {
                 bytesRead: self.bytesRead,
                 stubBuffer: self.stubBuffer}};
               // We got a parse Error fire it off then keep going
-              // console.log("=== connection parseError 1")
               self.emit("parseError", errorObject, self);
               return;
             }
@@ -306,8 +293,6 @@ var dataHandler = function(self) {
                 // Emit the message
                 self.messageHandler(new Response(self.bson, emitBuffer, self.responseOptions), self);
               } catch (err) {
-                // console.log("=== connection parseError 2")
-                // console.log(err.stack)
                 self.emit("parseError", err, self);
               }
             } else if(sizeOfMessage <= 4 || sizeOfMessage > self.maxBsonMessageSize) {
@@ -317,7 +302,6 @@ var dataHandler = function(self) {
                 buffer:null,
                 stubBuffer:null}};
               // We got a parse Error fire it off then keep going
-              // console.log("=== connection parseError 3")
               self.emit("parseError", errorObject, self);
 
               // Clear out the state of the parser
@@ -362,7 +346,6 @@ Connection.prototype.connect = function(_options) {
   _options = _options || {};
   // Set the connections
   if(connectionAccounting) connections[this.id] = this;
-  // console.log("connection create :: " + this.id)
   // Check if we are overriding the promoteLongs
   if(typeof _options.promoteLongs == 'boolean') {
     self.responseOptions.promoteLongs = _options.promoteLongs;
@@ -452,9 +435,6 @@ Connection.prototype.unref = function() {
 Connection.prototype.destroy = function() {
   // Set the connections
   if(connectionAccounting) delete connections[this.id];
-  // console.log("============= DESTROY connection :: " + this.id)
-  // console.log("connection::destroy " + this.id)
-  // console.log("=== connection destroy")
   if(this.connection) {
     this.connection.end();
     this.connection.destroy();
