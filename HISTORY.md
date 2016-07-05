@@ -1,4 +1,4 @@
-2.0.0
+2.0.0 2016-07-05
 -----------------
 * Moved all authentication and handling of growing/shrinking of pool connections into actual pool.
 * All authentication methods now handle both auth/reauthenticate and logout events.
