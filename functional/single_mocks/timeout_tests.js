@@ -89,7 +89,7 @@ exports['Should correctly timeout socket operation and then correctly re-execute
     var replset = new Server({
       host: 'localhost',
       port: '37019',
-      connectionTimeout: 3000,
+      connectionTimeout: 5000,
       socketTimeout: 1000,
       size: 1
     });
