@@ -14,7 +14,7 @@ Let's take a look at the CRUD operations from the perspective of ECMAScript 6. I
 
 - [CRUD]({{<relref "tutorials/crud.md">}}): CRUD Specification.
 
-This reference also obmits methods that no longer make sense when using ECMAScript 6 such as the `each` and `forEach` methods.
+This reference also omits methods that no longer make sense when using ECMAScript 6 such as the `each` and `forEach` methods.
 
 ## Inserting Documents
 The *insertOne* and *insertMany* methods exists on the *Collection* class and is used to insert documents into MongoDB. Code speaks a thousand words so let's see two simple examples of inserting documents.
