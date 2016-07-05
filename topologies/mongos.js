@@ -1,4 +1,4 @@
-// "use strict"
+"use strict"
 
 var inherits = require('util').inherits,
   f = require('util').format,
@@ -332,6 +332,11 @@ function pickProxy(self) {
     }
   });
 
+  // We have no connectedProxies pick first of the connected ones
+  if(connectedProxies.length == 0) {
+    return self.connectedProxies[0];
+  }
+
   // Get proxy
   var proxy = connectedProxies[self.index % connectedProxies.length];
   // Update the index
@@ -622,6 +627,8 @@ var executeWriteOperation = function(self, op, ns, ops, options, callback) {
   options = options || {};
   // Pick a server
   var server = pickProxy(self);
+  // No server found error out
+  if(!server) return callback(new MongoError('no mongos proxy available'));
   // Execute the command
   server[op](ns, ops, options, callback);
 }

@@ -1,3 +1,5 @@
+"use strict"
+
 /**
  * Emit event if it exists
  * @method
