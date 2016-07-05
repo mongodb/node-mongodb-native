@@ -1,3 +1,14 @@
+2.2.0 2016-07-05
+----------------
+* Updated mongodb-core to 2.0.1.
+* Moved all authentication and handling of growing/shrinking of pool connections into actual pool.
+* All authentication methods now handle both auth/reauthenticate and logout events.
+* Introduced logout method to get rid of onAll option for logout command.
+* Updated bson to 0.5.0 that includes Decimal128 support.
+* Added missing logout method on mongos proxy topology.
+* Fixed logger error serialization issue.
+* Documentation fixes. 
+
 2.1.21 2016-05-30
 -----------------
 * Updated mongodb-core to 1.3.21.

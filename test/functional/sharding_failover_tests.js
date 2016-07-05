@@ -104,7 +104,7 @@ exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = {
       numberOfJoins += 1;
     });
 
-    console.log("+++++++++++++++++++++++++++++++++++++ 0")
+    // console.log("+++++++++++++++++++++++++++++++++++++ 0")
     // Connect using the mongos connections
     var db = new Db('integration_test_', mongos, {w:0});
     db.open(function(err, db) {

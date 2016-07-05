@@ -1720,12 +1720,12 @@ exports['cursor stream errors'] = {
           var stream = collection.find({}, { batchSize: 5 }).stream();
 
           stream.on('data', function (doc) {
-            console.dir(doc)
+            // console.dir(doc)
             if (++i === 4) {
-              console.log("---------- data 0")
+              // console.log("---------- data 0")
               // Force restart
               configuration.manager.stop(9).then(function() {
-                console.log("---------- data 1")
+                // console.log("---------- data 1")
               });
             }
           });
@@ -1736,8 +1736,8 @@ exports['cursor stream errors'] = {
 
           function done (e) {
             return function(err) {
-              console.log("---- done")
-              console.dir(err)
+              // console.log("---- done")
+              // console.dir(err)
               ++finished;
 
               if(finished == 2) {

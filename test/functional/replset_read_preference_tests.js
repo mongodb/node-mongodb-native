@@ -457,7 +457,6 @@ exports['Should Set read preference at collection level using createCollection m
 
         // Grab the collection
         db.createCollection("read_preferences_all_levels_1", {readPreference:ReadPreference.SECONDARY}, function(err, collection) {
-          console.dir(err)
           test.equal(null, err);
 
           // Pick the server
