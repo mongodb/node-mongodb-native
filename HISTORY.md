@@ -1,6 +1,7 @@
 2.0.1 2016-07-05
 -----------------
 * Added missing logout method on mongos proxy topology.
+* Fixed logger error serialization issue.
 * Documentation fixes.
 
 2.0.0 2016-07-05
