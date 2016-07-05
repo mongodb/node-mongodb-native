@@ -219,6 +219,10 @@ function attemptReconnect(self) {
                 topologyMonitor(self);
               });
             } else {
+              if(self.listeners("close").length > 0) {
+                self.emit('close', self);
+              }
+
               attemptReconnect(self);
             }
           }
@@ -400,6 +404,10 @@ function topologyMonitor(self, options) {
     var count = connectingServers.length;
     // If we have no servers connected
     if(count == 0 && !options.haInterval) {
+      if(self.listeners("close").length > 0) {
+        self.emit('close', self);
+      }
+
       return attemptReconnect(self);
     } else if(count == 0 && options.haInterval){
       self.destroy();
