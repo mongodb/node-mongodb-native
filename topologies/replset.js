@@ -124,7 +124,8 @@ var ReplSet = function(seedlist, options) {
     seedlist: seedlist,
     // Replicaset state
     replicaSetState: new ReplSetState({
-      id: this.id, setName: options.setName
+      id: this.id, setName: options.setName,
+      acceptableLatency: options.acceptableLatency || 15
     }),
     // Current servers we are connecting to
     connectingServers: [],
@@ -143,7 +144,7 @@ var ReplSet = function(seedlist, options) {
     // Are we running in debug mode
     debug: typeof options.debug == 'boolean' ? options.debug : false
   }
- 
+
   // Add handler for topology change
   this.s.replicaSetState.on('topologyDescriptionChanged', function(r) { self.emit('topologyDescriptionChanged', r); });
 
@@ -177,7 +178,6 @@ Object.defineProperty(ReplSet.prototype, 'type', {
 
 function attemptReconnect(self) {
   self.haTimeoutId = setTimeout(function() {
-    // console.log("--- attemptReconnect")
     if(self.state == DESTROYED) return;
     // Get all known hosts
     var keys = Object.keys(self.s.replicaSetState.set);
@@ -389,7 +389,6 @@ function topologyMonitor(self, options) {
 
   // Set momitoring timeout
   self.haTimeoutId = setTimeout(function() {
-    // console.log("--- topologyMonitor")
     if(self.state == DESTROYED) return;
 
     // If we have a primary and a disconnect handler, execute
@@ -421,7 +420,6 @@ function topologyMonitor(self, options) {
 
       // Emit the server heartbeat start
       emitSDAMEvent(self, 'serverHeartbeatStarted', { connectionId: _server.name });
-
       // Execute ismaster
       _server.command('admin.$cmd', {ismaster:true}, {monitoring: true}, function(err, r) {
         if(self.state == DESTROYED) {
@@ -441,7 +439,19 @@ function topologyMonitor(self, options) {
         } else {
           // Update the server ismaster
           _server.ismaster = r.result;
-          _server.lastIsMasterMS = latencyMS;
+          if(_server.lastIsMasterMS == -1) {
+            _server.lastIsMasterMS = latencyMS;
+          } else if(_server.lastIsMasterMS) {
+            // After the first measurement, average RTT MUST be computed using an
+            // exponentially-weighted moving average formula, with a weighting factor (alpha) of 0.2.
+            // If the prior average is denoted old_rtt, then the new average (new_rtt) is
+            // computed from a new RTT measurement (x) using the following formula:
+            // alpha = 0.2
+            // new_rtt = alpha * x + (1 - alpha) * old_rtt
+            _server.lastIsMasterMS = 0.2 * latencyMS + (1 - 0.2) * _server.lastIsMasterMS;
+          }
+
+          // _server.lastIsMasterMS = !latencyMS;
           _self.s.replicaSetState.update(_server);
 
           // Server heart beat event
@@ -459,6 +469,7 @@ function topologyMonitor(self, options) {
 
         if(count == 0) {
           if(self.state == DESTROYED) return;
+
           // Attempt to connect to any unknown servers
           connectNewServers(self, self.s.replicaSetState.unknownServers, function(err, cb) {
             if(self.state == DESTROYED) return;
@@ -743,7 +754,8 @@ ReplSet.prototype.getServer = function(options) {
   // Ensure we have no options
   options = options || {};
   // Pick the right server baspickServerd on readPreference
-  var server = pickServer(this, this.s, options.readPreference);
+  // var server = pickServer(this, this.s, options.readPreference);
+  var server = self.s.replicaSetState.pickServer(options.readPreference);
   if(this.s.debug) this.emit('pickedServer', options.readPreference, server);
   return server;
 }
@@ -851,154 +863,154 @@ ReplSet.prototype.remove = function(ns, ops, options, callback) {
   executeWriteOperation(this, 'remove', ns, ops, options, callback);
 }
 
+// //
+// // Filter serves by tags
+// var filterByTags = function(readPreference, servers) {
+//   if(readPreference.tags == null) return servers;
+//   var filteredServers = [];
+//   var tagsArray = Array.isArray(readPreference.tags) ? readPreference.tags : [readPreference.tags];
 //
-// Filter serves by tags
-var filterByTags = function(readPreference, servers) {
-  if(readPreference.tags == null) return servers;
-  var filteredServers = [];
-  var tagsArray = Array.isArray(readPreference.tags) ? readPreference.tags : [readPreference.tags];
-
-  // Iterate over the tags
-  for(var j = 0; j < tagsArray.length; j++) {
-    var tags = tagsArray[j];
-
-    // Iterate over all the servers
-    for(var i = 0; i < servers.length; i++) {
-      var serverTag = servers[i].lastIsMaster().tags || {};
-      // Did we find the a matching server
-      var found = true;
-      // Check if the server is valid
-      for(var name in tags) {
-        if(serverTag[name] != tags[name]) found = false;
-      }
-
-      // Add to candidate list
-      if(found) {
-        filteredServers.push(servers[i]);
-      }
-    }
-
-    // We found servers by the highest priority
-    if(found) break;
-  }
-
-  // Returned filtered servers
-  return filteredServers;
-}
-
-function pickNearest(self, set, readPreference) {
-  // Only get primary and secondaries as seeds
-  var seeds = {};
-  var servers = [];
-  if(set.primary) {
-    servers.push(set.primary);
-  }
-
-  for(var i = 0; i < set.secondaries.length; i++) {
-    servers.push(set.secondaries[i]);
-  }
-
-  // Filter by tags
-  servers = filterByTags(readPreference, servers);
-
-  // Sort by time
-  servers.sort(function(a, b) {
-    // return a.time > b.time;
-    return a.lastIsMasterMS > b.lastIsMasterMS
-  });
-
-  // Locate lowest time (picked servers are lowest time + acceptable Latency margin)
-  var lowest = servers.length > 0 ? servers[0].lastIsMasterMS : 0;
-
-  // Filter by latency
-  servers = servers.filter(function(s) {
-    return s.lastIsMasterMS <= lowest + self.s.acceptableLatency;
-  });
-
-  // No servers, default to primary
-  if(servers.length == 0 && set.primary) {
-    return set.primary;
-  } else if(servers.length == 0) {
-    return null
-  }
-
-  // Add to the index
-  self.s.index = self.s.index + 1;
-  // Select the index
-  self.s.index = self.s.index % servers.length;
-
-  // Return the first server of the sorted and filtered list
-  return servers[self.s.index];
-}
-
+//   // Iterate over the tags
+//   for(var j = 0; j < tagsArray.length; j++) {
+//     var tags = tagsArray[j];
 //
-// Pick a server based on readPreference
-function pickServer(self, s, readPreference) {
-  // If no read Preference set to primary by default
-  readPreference = readPreference || ReadPreference.primary;
+//     // Iterate over all the servers
+//     for(var i = 0; i < servers.length; i++) {
+//       var serverTag = servers[i].lastIsMaster().tags || {};
+//       // Did we find the a matching server
+//       var found = true;
+//       // Check if the server is valid
+//       for(var name in tags) {
+//         if(serverTag[name] != tags[name]) found = false;
+//       }
+//
+//       // Add to candidate list
+//       if(found) {
+//         filteredServers.push(servers[i]);
+//       }
+//     }
+//
+//     // We found servers by the highest priority
+//     if(found) break;
+//   }
+//
+//   // Returned filtered servers
+//   return filteredServers;
+// }
 
-  // Do we have the nearest readPreference
-  if(readPreference.preference == 'nearest') {
-    return pickNearest(self, s.replicaSetState, readPreference);
-  }
+// function pickNearest(self, set, readPreference) {
+//   // Only get primary and secondaries as seeds
+//   var seeds = {};
+//   var servers = [];
+//   if(set.primary) {
+//     servers.push(set.primary);
+//   }
+//
+//   for(var i = 0; i < set.secondaries.length; i++) {
+//     servers.push(set.secondaries[i]);
+//   }
+//
+//   // Filter by tags
+//   servers = filterByTags(readPreference, servers);
+//
+//   // Sort by time
+//   servers.sort(function(a, b) {
+//     // return a.time > b.time;
+//     return a.lastIsMasterMS > b.lastIsMasterMS
+//   });
+//
+//   // Locate lowest time (picked servers are lowest time + acceptable Latency margin)
+//   var lowest = servers.length > 0 ? servers[0].lastIsMasterMS : 0;
+//
+//   // Filter by latency
+//   servers = servers.filter(function(s) {
+//     return s.lastIsMasterMS <= lowest + self.s.acceptableLatency;
+//   });
+//
+//   // No servers, default to primary
+//   if(servers.length == 0 && set.primary) {
+//     return set.primary;
+//   } else if(servers.length == 0) {
+//     return null
+//   }
+//
+//   // Add to the index
+//   self.s.index = self.s.index + 1;
+//   // Select the index
+//   self.s.index = self.s.index % servers.length;
+//
+//   // Return the first server of the sorted and filtered list
+//   return servers[self.s.index];
+// }
 
-  // Get all the secondaries
-  var secondaries = s.replicaSetState.secondaries;
-
-  // Check if we can satisfy and of the basic read Preferences
-  if(readPreference.equals(ReadPreference.secondary)
-    && secondaries.length == 0) {
-      return new MongoError("no secondary server available");
-    }
-
-  if(readPreference.equals(ReadPreference.secondaryPreferred)
-    && secondaries.length == 0
-    && s.replicaSetState.primary == null) {
-      return new MongoError("no secondary or primary server available");
-    }
-
-  if(readPreference.equals(ReadPreference.primary)
-    && s.replicaSetState.primary == null) {
-      return new MongoError("no primary server available");
-    }
-
-  // Secondary preferred or just secondaries
-  if(readPreference.equals(ReadPreference.secondaryPreferred)
-    || readPreference.equals(ReadPreference.secondary)) {
-    if(secondaries.length > 0) {
-      // Apply tags if present
-      var servers = filterByTags(readPreference, secondaries);
-      // If have a matching server pick one otherwise fall through to primary
-      if(servers.length > 0) {
-        s.index = (s.index + 1) % servers.length;
-        return servers[s.index];
-      }
-    }
-
-    return readPreference.equals(ReadPreference.secondaryPreferred) ? s.replicaSetState.primary : null;
-  }
-
-  // Primary preferred
-  if(readPreference.equals(ReadPreference.primaryPreferred)) {
-    if(s.replicaSetState.primary) return s.replicaSetState.primary;
-
-    if(secondaries.length > 0) {
-      // Apply tags if present
-      var servers = filterByTags(readPreference, secondaries);
-      // If have a matching server pick one otherwise fall through to primary
-      if(servers.length > 0) {
-        s.index = (s.index + 1) % servers.length;
-        return servers[s.index];
-      }
-
-      // Throw error a we have not valid secondary or primary servers
-      return new MongoError("no secondary or primary server available");
-    }
-  }
-
-  // Return the primary
-  return s.replicaSetState.primary;
-}
+// //
+// // Pick a server based on readPreference
+// function pickServer(self, s, readPreference) {
+//   // If no read Preference set to primary by default
+//   readPreference = readPreference || ReadPreference.primary;
+//
+//   // Do we have the nearest readPreference
+//   if(readPreference.preference == 'nearest') {
+//     return pickNearest(self, s.replicaSetState, readPreference);
+//   }
+//
+//   // Get all the secondaries
+//   var secondaries = s.replicaSetState.secondaries;
+//
+//   // Check if we can satisfy and of the basic read Preferences
+//   if(readPreference.equals(ReadPreference.secondary)
+//     && secondaries.length == 0) {
+//       return new MongoError("no secondary server available");
+//     }
+//
+//   if(readPreference.equals(ReadPreference.secondaryPreferred)
+//     && secondaries.length == 0
+//     && s.replicaSetState.primary == null) {
+//       return new MongoError("no secondary or primary server available");
+//     }
+//
+//   if(readPreference.equals(ReadPreference.primary)
+//     && s.replicaSetState.primary == null) {
+//       return new MongoError("no primary server available");
+//     }
+//
+//   // Secondary preferred or just secondaries
+//   if(readPreference.equals(ReadPreference.secondaryPreferred)
+//     || readPreference.equals(ReadPreference.secondary)) {
+//     if(secondaries.length > 0) {
+//       // Apply tags if present
+//       var servers = filterByTags(readPreference, secondaries);
+//       // If have a matching server pick one otherwise fall through to primary
+//       if(servers.length > 0) {
+//         s.index = (s.index + 1) % servers.length;
+//         return servers[s.index];
+//       }
+//     }
+//
+//     return readPreference.equals(ReadPreference.secondaryPreferred) ? s.replicaSetState.primary : null;
+//   }
+//
+//   // Primary preferred
+//   if(readPreference.equals(ReadPreference.primaryPreferred)) {
+//     if(s.replicaSetState.primary) return s.replicaSetState.primary;
+//
+//     if(secondaries.length > 0) {
+//       // Apply tags if present
+//       var servers = filterByTags(readPreference, secondaries);
+//       // If have a matching server pick one otherwise fall through to primary
+//       if(servers.length > 0) {
+//         s.index = (s.index + 1) % servers.length;
+//         return servers[s.index];
+//       }
+//
+//       // Throw error a we have not valid secondary or primary servers
+//       return new MongoError("no secondary or primary server available");
+//     }
+//   }
+//
+//   // Return the primary
+//   return s.replicaSetState.primary;
+// }
 
 /**
  * Execute a command
@@ -1019,7 +1031,9 @@ ReplSet.prototype.command = function(ns, cmd, options, callback) {
   // Establish readPreference
   var readPreference = options.readPreference ? options.readPreference : ReadPreference.primary;
   // Pick a server
-  var server = pickServer(self, self.s, readPreference);
+  // var server = pickServer(self, self.s, readPreference);
+  // var server = self.s.replicaSetState.pickServer(readPreference);
+  var server = self.s.replicaSetState.pickServer(readPreference);
   if(!(server instanceof Server)) return callback(server);
   if(self.s.debug) self.emit('pickedServer', ReadPreference.primary, server);
 
