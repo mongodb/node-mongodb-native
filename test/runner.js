@@ -199,7 +199,6 @@ var testFiles = [
   '/test/tests/functional/pool_tests.js',
   '/test/tests/functional/server_tests.js',
   '/test/tests/functional/cursor_tests.js',
-  '/test/tests/functional/replset_state_tests.js',
   '/test/tests/functional/extend_cursor_tests.js',
   '/test/tests/functional/undefined_tests.js',
   '/test/tests/functional/tailable_cursor_tests.js',
@@ -208,7 +207,11 @@ var testFiles = [
   '/test/tests/functional/operation_example_tests.js',
   '/test/tests/functional/basic_single_server_auth_tests.js',
   '/test/tests/functional/basic_replset_server_auth_tests.js',
-  '/test/tests/functional/replset_tests.js'
+  '/test/tests/functional/replset_tests.js',
+  // Replicaset SDAM tests
+  '/test/tests/functional/replset_state_tests.js',
+  // Replicaset Server selection tests
+  '/test/tests/functional/server_selection_tests.js'
 ]
 
 // Check if we support es6 generators

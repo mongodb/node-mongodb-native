@@ -2,7 +2,7 @@
 -----------------
 * Mongos emits close event on no proxies available or when reconnect attempt fails.
 * Replset emits close event when no servers available or when attemptReconnect fails to reconnect.
-* Don't throw in auth methods but return error in callback.
+* Don't throw in auth methods but return error in callback. 
 
 2.0.1 2016-07-05
 -----------------
