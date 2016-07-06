@@ -175,6 +175,7 @@ function disconnectHandler(self, type, ns, cmd, options, callback) {
 
 function monitoringProcess(self) {
   return function() {
+    // console.log("---- monitoringProcess")
     // Pool was destroyed do not continue process
     if(self.s.pool.isDestroyed()) return;
     // Emit monitoring Process event

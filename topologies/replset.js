@@ -143,7 +143,7 @@ var ReplSet = function(seedlist, options) {
     // Are we running in debug mode
     debug: typeof options.debug == 'boolean' ? options.debug : false
   }
-
+ 
   // Add handler for topology change
   this.s.replicaSetState.on('topologyDescriptionChanged', function(r) { self.emit('topologyDescriptionChanged', r); });
 
@@ -177,6 +177,7 @@ Object.defineProperty(ReplSet.prototype, 'type', {
 
 function attemptReconnect(self) {
   self.haTimeoutId = setTimeout(function() {
+    // console.log("--- attemptReconnect")
     if(self.state == DESTROYED) return;
     // Get all known hosts
     var keys = Object.keys(self.s.replicaSetState.set);
@@ -388,6 +389,7 @@ function topologyMonitor(self, options) {
 
   // Set momitoring timeout
   self.haTimeoutId = setTimeout(function() {
+    // console.log("--- topologyMonitor")
     if(self.state == DESTROYED) return;
 
     // If we have a primary and a disconnect handler, execute
