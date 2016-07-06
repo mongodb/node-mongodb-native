@@ -467,7 +467,7 @@ exports['Should finish cursor correctly after all sockets to pool destroyed'] = 
         });
       });
     })
-
+ 
     // Start connection
     server.connect();
   }
