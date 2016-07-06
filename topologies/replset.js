@@ -362,8 +362,6 @@ function connectNewServers(self, servers, callback) {
         authProviders: self.authProviders, reconnect:false, monitoring: false, inTopology: true
       }));
 
-      // console.log("^^ ReplSet::connectNewServers create server :: " + server.id + " " + server.name)
-
       // Add temp handlers
       server.once('connect', _handleEvent(self, 'connect'));
       server.once('close', _handleEvent(self, 'close'));
@@ -1054,12 +1052,12 @@ ReplSet.prototype.auth = function(mechanism, db) {
 
   // If we don't have the mechanism fail
   if(this.authProviders[mechanism] == null && mechanism != 'default') {
-    throw new MongoError(f("auth provider %s does not exist", mechanism));
+    return callback(new MongoError(f("auth provider %s does not exist", mechanism)));
   }
 
   // Are we already authenticating, throw
   if(this.authenticating) {
-    throw new MongoError('authentication or logout allready in process');
+    return callback(new MongoError('authentication or logout allready in process'));
   }
 
   // Topology is not connected, save the call in the provided store to be
@@ -1105,9 +1103,12 @@ ReplSet.prototype.auth = function(mechanism, db) {
       }
     }]);
 
-    // Execute the auth only against non arbiter servers
     if(!server.lastIsMaster().arbiterOnly) {
+      // Execute the auth only against non arbiter servers
       server.auth.apply(server, finalArguments);
+    } else {
+      // If we are authenticating against an arbiter just ignore it
+      finalArguments.pop()(null);
     }
   }
 
