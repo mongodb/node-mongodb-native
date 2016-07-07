@@ -758,7 +758,7 @@ ReplSet.prototype.getServer = function(options) {
   options = options || {};
   // Pick the right server baspickServerd on readPreference
   // var server = pickServer(this, this.s, options.readPreference);
-  var server = self.s.replicaSetState.pickServer(options.readPreference);
+  var server = this.s.replicaSetState.pickServer(options.readPreference);
   if(this.s.debug) this.emit('pickedServer', options.readPreference, server);
   return server;
 }
@@ -887,7 +887,7 @@ ReplSet.prototype.command = function(ns, cmd, options, callback) {
   // Pick a server
   // var server = pickServer(self, self.s, readPreference);
   // var server = self.s.replicaSetState.pickServer(readPreference);
-  var server = self.s.replicaSetState.pickServer(readPreference);
+  var server = this.s.replicaSetState.pickServer(readPreference);
   if(!(server instanceof Server)) return callback(server);
   if(self.s.debug) self.emit('pickedServer', ReadPreference.primary, server);
 
