@@ -211,7 +211,8 @@ var testFiles = [
   // Replicaset SDAM tests
   '/test/tests/functional/replset_state_tests.js',
   // Replicaset Server selection tests
-  '/test/tests/functional/server_selection_tests.js'
+  '/test/tests/functional/replset_server_selection_tests.js',
+  '/test/tests/functional/mongos_server_selection_tests.js'
 ]
 
 // Check if we support es6 generators
