@@ -137,6 +137,15 @@ var Mongos = function(seedlist, options) {
     localThresholdMS: options.localThresholdMS || 15,
   }
 
+  // Log info warning if the socketTimeout < haInterval as it will cause
+  // a lot of recycled connections to happen.
+  if(this.s.logger.isWarn()
+    && this.s.options.socketTimeout != 0
+    && this.s.options.socketTimeout < this.s.haInterval) {
+      this.s.logger.warn(f('warning socketTimeout %s is less than haInterval %s. This might cause unnecessary server reconnections due to socket timeouts'
+        , this.s.options.socketTimeout, this.s.haInterval));
+  }
+
   // All the authProviders
   this.authProviders = options.authProviders || {
       'mongocr': new MongoCR(this.s.bson), 'x509': new X509(this.s.bson)
