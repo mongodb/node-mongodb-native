@@ -3,12 +3,11 @@
   "source": {
     "include": [
       "test/tests/functional/operation_example_tests.js",
+      "lib/connection/command_result.js",
       "lib/topologies/mongos.js",
-      "lib/topologies/command_result.js",
       "lib/topologies/read_preference.js",
       "lib/topologies/replset.js",
       "lib/topologies/server.js",
-      "lib/topologies/session.js",
       "lib/topologies/replset_state.js",
       "lib/connection/logger.js",
       "lib/connection/connection.js",
@@ -24,7 +23,7 @@
       "node_modules/bson/lib/bson/timestamp.js",
       "node_modules/bson/lib/bson/max_key.js",
       "node_modules/bson/lib/bson/min_key.js"
-    ]     
+    ]
   },
   "templates": {
     "cleverLinks": true,
@@ -48,7 +47,7 @@
       "keyword": ""
     },
     "linenums": true
-  },  
+  },
   "markdown": {
     "parser": "gfm",
     "hardwrap": true,
