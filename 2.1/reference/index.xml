@@ -44,7 +44,7 @@
 &lt;li&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/tutorials/crud/&#34;&gt;CRUD&lt;/a&gt;: CRUD Specification.&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;This reference also obmits methods that no longer make sense when using ECMAScript 6 such as the &lt;code&gt;each&lt;/code&gt; and &lt;code&gt;forEach&lt;/code&gt; methods.&lt;/p&gt;
+&lt;p&gt;This reference also omits methods that no longer make sense when using ECMAScript 6 such as the &lt;code&gt;each&lt;/code&gt; and &lt;code&gt;forEach&lt;/code&gt; methods.&lt;/p&gt;
 
 &lt;h2 id=&#34;inserting-documents&#34;&gt;Inserting Documents&lt;/h2&gt;
 

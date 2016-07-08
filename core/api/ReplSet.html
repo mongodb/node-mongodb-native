@@ -172,6 +172,8 @@
             
                 <li data-name="Connection#toString"><a href="Connection.html#toString">toString</a></li>
             
+                <li data-name="Connection#unref"><a href="Connection.html#unref">unref</a></li>
+            
                 <li data-name="Connection#write"><a href="Connection.html#write">write</a></li>
             
             </ul>
@@ -309,6 +311,10 @@
                 <li data-name="Logger#isError"><a href="Logger.html#isError">isError</a></li>
             
                 <li data-name="Logger#isInfo"><a href="Logger.html#isInfo">isInfo</a></li>
+            
+                <li data-name="Logger#isWarn"><a href="Logger.html#isWarn">isWarn</a></li>
+            
+                <li data-name="Logger#warn"><a href="Logger.html#warn">warn</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -495,10 +501,6 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="Mongos#addAuthProvider"><a href="Mongos.html#addAuthProvider">addAuthProvider</a></li>
-            
-                <li data-name="Mongos#addReadPreferenceStrategy"><a href="Mongos.html#addReadPreferenceStrategy">addReadPreferenceStrategy</a></li>
-            
                 <li data-name="Mongos#auth"><a href="Mongos.html#auth">auth</a></li>
             
                 <li data-name="Mongos#command"><a href="Mongos.html#command">command</a></li>
@@ -511,8 +513,6 @@
             
                 <li data-name="Mongos#destroy"><a href="Mongos.html#destroy">destroy</a></li>
             
-                <li data-name="Mongos#getConnection"><a href="Mongos.html#getConnection">getConnection</a></li>
-            
                 <li data-name="Mongos#getServer"><a href="Mongos.html#getServer">getServer</a></li>
             
                 <li data-name="Mongos#insert"><a href="Mongos.html#insert">insert</a></li>
@@ -523,11 +523,11 @@
             
                 <li data-name="Mongos#lastIsMaster"><a href="Mongos.html#lastIsMaster">lastIsMaster</a></li>
             
-                <li data-name="Mongos#parserType"><a href="Mongos.html#parserType">parserType</a></li>
+                <li data-name="Mongos#logout"><a href="Mongos.html#logout">logout</a></li>
             
                 <li data-name="Mongos#remove"><a href="Mongos.html#remove">remove</a></li>
             
-                <li data-name="Mongos#setBSONParserType"><a href="Mongos.html#setBSONParserType">setBSONParserType</a></li>
+                <li data-name="Mongos#unref"><a href="Mongos.html#unref">unref</a></li>
             
                 <li data-name="Mongos#update"><a href="Mongos.html#update">update</a></li>
             
@@ -536,11 +536,35 @@
             
             <span class="subtitle">Events</span>
             
+                <li data-name="Mongos#event:all"><a href="Mongos.html#event:all">all</a></li>
+            
                 <li data-name="Mongos#event:connect"><a href="Mongos.html#event:connect">connect</a></li>
+            
+                <li data-name="Mongos#event:fullsetup"><a href="Mongos.html#event:fullsetup">fullsetup</a></li>
             
                 <li data-name="Mongos#event:joined"><a href="Mongos.html#event:joined">joined</a></li>
             
                 <li data-name="Mongos#event:left"><a href="Mongos.html#event:left">left</a></li>
+            
+                <li data-name="Mongos#event:reconnect"><a href="Mongos.html#event:reconnect">reconnect</a></li>
+            
+                <li data-name="Mongos#event:serverClosed"><a href="Mongos.html#event:serverClosed">serverClosed</a></li>
+            
+                <li data-name="Mongos#event:serverDescriptionChanged"><a href="Mongos.html#event:serverDescriptionChanged">serverDescriptionChanged</a></li>
+            
+                <li data-name="Mongos#event:serverHearbeatFailed"><a href="Mongos.html#event:serverHearbeatFailed">serverHearbeatFailed</a></li>
+            
+                <li data-name="Mongos#event:serverHeartbeatStarted"><a href="Mongos.html#event:serverHeartbeatStarted">serverHeartbeatStarted</a></li>
+            
+                <li data-name="Mongos#event:serverHeartbeatSucceeded"><a href="Mongos.html#event:serverHeartbeatSucceeded">serverHeartbeatSucceeded</a></li>
+            
+                <li data-name="Mongos#event:serverOpening"><a href="Mongos.html#event:serverOpening">serverOpening</a></li>
+            
+                <li data-name="Mongos#event:topologyClosed"><a href="Mongos.html#event:topologyClosed">topologyClosed</a></li>
+            
+                <li data-name="Mongos#event:topologyDescriptionChanged"><a href="Mongos.html#event:topologyDescriptionChanged">topologyDescriptionChanged</a></li>
+            
+                <li data-name="Mongos#event:topologyOpening"><a href="Mongos.html#event:topologyOpening">topologyOpening</a></li>
             
             </ul>
         </li>
@@ -632,10 +656,6 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="ReplSet#addAuthProvider"><a href="ReplSet.html#addAuthProvider">addAuthProvider</a></li>
-            
-                <li data-name="ReplSet#addReadPreferenceStrategy"><a href="ReplSet.html#addReadPreferenceStrategy">addReadPreferenceStrategy</a></li>
-            
                 <li data-name="ReplSet#auth"><a href="ReplSet.html#auth">auth</a></li>
             
                 <li data-name="ReplSet#command"><a href="ReplSet.html#command">command</a></li>
@@ -648,9 +668,9 @@
             
                 <li data-name="ReplSet#destroy"><a href="ReplSet.html#destroy">destroy</a></li>
             
-                <li data-name="ReplSet#getConnection"><a href="ReplSet.html#getConnection">getConnection</a></li>
-            
                 <li data-name="ReplSet#getServer"><a href="ReplSet.html#getServer">getServer</a></li>
+            
+                <li data-name="ReplSet#getServers"><a href="ReplSet.html#getServers">getServers</a></li>
             
                 <li data-name="ReplSet#insert"><a href="ReplSet.html#insert">insert</a></li>
             
@@ -660,11 +680,11 @@
             
                 <li data-name="ReplSet#lastIsMaster"><a href="ReplSet.html#lastIsMaster">lastIsMaster</a></li>
             
-                <li data-name="ReplSet#parserType"><a href="ReplSet.html#parserType">parserType</a></li>
+                <li data-name="ReplSet#logout"><a href="ReplSet.html#logout">logout</a></li>
             
                 <li data-name="ReplSet#remove"><a href="ReplSet.html#remove">remove</a></li>
             
-                <li data-name="ReplSet#setBSONParserType"><a href="ReplSet.html#setBSONParserType">setBSONParserType</a></li>
+                <li data-name="ReplSet#unref"><a href="ReplSet.html#unref">unref</a></li>
             
                 <li data-name="ReplSet#update"><a href="ReplSet.html#update">update</a></li>
             
@@ -673,13 +693,37 @@
             
             <span class="subtitle">Events</span>
             
+                <li data-name="ReplSet#event:all"><a href="ReplSet.html#event:all">all</a></li>
+            
                 <li data-name="ReplSet#event:connect"><a href="ReplSet.html#event:connect">connect</a></li>
             
-                <li data-name="ReplSet#event:ha"><a href="ReplSet.html#event:ha">ha</a></li>
+                <li data-name="ReplSet#event:failed"><a href="ReplSet.html#event:failed">failed</a></li>
+            
+                <li data-name="ReplSet#event:fullsetup"><a href="ReplSet.html#event:fullsetup">fullsetup</a></li>
             
                 <li data-name="ReplSet#event:joined"><a href="ReplSet.html#event:joined">joined</a></li>
             
                 <li data-name="ReplSet#event:left"><a href="ReplSet.html#event:left">left</a></li>
+            
+                <li data-name="ReplSet#event:reconnect"><a href="ReplSet.html#event:reconnect">reconnect</a></li>
+            
+                <li data-name="ReplSet#event:serverClosed"><a href="ReplSet.html#event:serverClosed">serverClosed</a></li>
+            
+                <li data-name="ReplSet#event:serverDescriptionChanged"><a href="ReplSet.html#event:serverDescriptionChanged">serverDescriptionChanged</a></li>
+            
+                <li data-name="ReplSet#event:serverHearbeatFailed"><a href="ReplSet.html#event:serverHearbeatFailed">serverHearbeatFailed</a></li>
+            
+                <li data-name="ReplSet#event:serverHeartbeatStarted"><a href="ReplSet.html#event:serverHeartbeatStarted">serverHeartbeatStarted</a></li>
+            
+                <li data-name="ReplSet#event:serverHeartbeatSucceeded"><a href="ReplSet.html#event:serverHeartbeatSucceeded">serverHeartbeatSucceeded</a></li>
+            
+                <li data-name="ReplSet#event:serverOpening"><a href="ReplSet.html#event:serverOpening">serverOpening</a></li>
+            
+                <li data-name="ReplSet#event:topologyClosed"><a href="ReplSet.html#event:topologyClosed">topologyClosed</a></li>
+            
+                <li data-name="ReplSet#event:topologyDescriptionChanged"><a href="ReplSet.html#event:topologyDescriptionChanged">topologyDescriptionChanged</a></li>
+            
+                <li data-name="ReplSet#event:topologyOpening"><a href="ReplSet.html#event:topologyOpening">topologyOpening</a></li>
             
             </ul>
         </li>
@@ -699,13 +743,7 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="Server#addAuthProvider"><a href="Server.html#addAuthProvider">addAuthProvider</a></li>
-            
-                <li data-name="Server#addReadPreferenceStrategy"><a href="Server.html#addReadPreferenceStrategy">addReadPreferenceStrategy</a></li>
-            
                 <li data-name="Server#auth"><a href="Server.html#auth">auth</a></li>
-            
-                <li data-name="Server#capConnections"><a href="Server.html#capConnections">capConnections</a></li>
             
                 <li data-name="Server#command"><a href="Server.html#command">command</a></li>
             
@@ -719,9 +757,9 @@
             
                 <li data-name="Server#equals"><a href="Server.html#equals">equals</a></li>
             
-                <li data-name="Server#getCallbacks"><a href="Server.html#getCallbacks">getCallbacks</a></li>
-            
                 <li data-name="Server#getConnection"><a href="Server.html#getConnection">getConnection</a></li>
+            
+                <li data-name="Server#getDescription"><a href="Server.html#getDescription">getDescription</a></li>
             
                 <li data-name="Server#getServer"><a href="Server.html#getServer">getServer</a></li>
             
@@ -733,11 +771,11 @@
             
                 <li data-name="Server#lastIsMaster"><a href="Server.html#lastIsMaster">lastIsMaster</a></li>
             
-                <li data-name="Server#parserType"><a href="Server.html#parserType">parserType</a></li>
+                <li data-name="Server#logout"><a href="Server.html#logout">logout</a></li>
             
                 <li data-name="Server#remove"><a href="Server.html#remove">remove</a></li>
             
-                <li data-name="Server#setBSONParserType"><a href="Server.html#setBSONParserType">setBSONParserType</a></li>
+                <li data-name="Server#unref"><a href="Server.html#unref">unref</a></li>
             
                 <li data-name="Server#update"><a href="Server.html#update">update</a></li>
             
@@ -750,103 +788,25 @@
             
                 <li data-name="Server#event:connect"><a href="Server.html#event:connect">connect</a></li>
             
-                <li data-name="Server#event:error"><a href="Server.html#event:error">error</a></li>
+                <li data-name="Server#event:destroy"><a href="Server.html#event:destroy">destroy</a></li>
             
-                <li data-name="Server#event:parseError"><a href="Server.html#event:parseError">parseError</a></li>
+                <li data-name="Server#event:error"><a href="Server.html#event:error">error</a></li>
             
                 <li data-name="Server#event:reconnect"><a href="Server.html#event:reconnect">reconnect</a></li>
             
-                <li data-name="Server#event:timeout"><a href="Server.html#event:timeout">timeout</a></li>
+                <li data-name="Server#event:reconnectFailed"><a href="Server.html#event:reconnectFailed">reconnectFailed</a></li>
             
-            </ul>
-        </li>
-    
-        <li class="item" data-name="Session">
-            <span class="title">
-                <a href="Session.html">Session</a>
-                
-            </span>
-            <ul class="members itemMembers">
+                <li data-name="Server#event:serverClosed"><a href="Server.html#event:serverClosed">serverClosed</a></li>
             
-            </ul>
-            <ul class="typedefs itemMembers">
+                <li data-name="Server#event:serverDescriptionChanged"><a href="Server.html#event:serverDescriptionChanged">serverDescriptionChanged</a></li>
             
-            </ul>
-            <ul class="methods itemMembers">
+                <li data-name="Server#event:serverOpening"><a href="Server.html#event:serverOpening">serverOpening</a></li>
             
-            <span class="subtitle">Methods</span>
+                <li data-name="Server#event:topologyClosed"><a href="Server.html#event:topologyClosed">topologyClosed</a></li>
             
-                <li data-name="Session#command"><a href="Session.html#command">command</a></li>
+                <li data-name="Server#event:topologyDescriptionChanged"><a href="Server.html#event:topologyDescriptionChanged">topologyDescriptionChanged</a></li>
             
-                <li data-name="Session#cursor"><a href="Session.html#cursor">cursor</a></li>
-            
-                <li data-name="Session#insert"><a href="Session.html#insert">insert</a></li>
-            
-                <li data-name="Session#remove"><a href="Session.html#remove">remove</a></li>
-            
-                <li data-name="Session#update"><a href="Session.html#update">update</a></li>
-            
-            </ul>
-            <ul class="events itemMembers">
-            
-            </ul>
-        </li>
-    
-        <li class="item" data-name="State">
-            <span class="title">
-                <a href="State.html">State</a>
-                
-            </span>
-            <ul class="members itemMembers">
-            
-            </ul>
-            <ul class="typedefs itemMembers">
-            
-            </ul>
-            <ul class="methods itemMembers">
-            
-            <span class="subtitle">Methods</span>
-            
-                <li data-name="State#addArbiter"><a href="State.html#addArbiter">addArbiter</a></li>
-            
-                <li data-name="State#addPassive"><a href="State.html#addPassive">addPassive</a></li>
-            
-                <li data-name="State#addSecondary"><a href="State.html#addSecondary">addSecondary</a></li>
-            
-                <li data-name="State#clean"><a href="State.html#clean">clean</a></li>
-            
-                <li data-name="State#contains"><a href="State.html#contains">contains</a></li>
-            
-                <li data-name="State#destroy"><a href="State.html#destroy">destroy</a></li>
-            
-                <li data-name="State#get"><a href="State.html#get">get</a></li>
-            
-                <li data-name="State#getAll"><a href="State.html#getAll">getAll</a></li>
-            
-                <li data-name="State#getAllConnections"><a href="State.html#getAllConnections">getAllConnections</a></li>
-            
-                <li data-name="State#isPassive"><a href="State.html#isPassive">isPassive</a></li>
-            
-                <li data-name="State#isPrimary"><a href="State.html#isPrimary">isPrimary</a></li>
-            
-                <li data-name="State#isPrimaryConnected"><a href="State.html#isPrimaryConnected">isPrimaryConnected</a></li>
-            
-                <li data-name="State#isSecondary"><a href="State.html#isSecondary">isSecondary</a></li>
-            
-                <li data-name="State#isSecondaryConnected"><a href="State.html#isSecondaryConnected">isSecondaryConnected</a></li>
-            
-                <li data-name="State#lastIsMaster"><a href="State.html#lastIsMaster">lastIsMaster</a></li>
-            
-                <li data-name="State#promotePrimary"><a href="State.html#promotePrimary">promotePrimary</a></li>
-            
-                <li data-name="State#remove"><a href="State.html#remove">remove</a></li>
-            
-                <li data-name="State#toJSON"><a href="State.html#toJSON">toJSON</a></li>
-            
-                <li data-name="State#update"><a href="State.html#update">update</a></li>
-            
-            </ul>
-            <ul class="events itemMembers">
+                <li data-name="Server#event:topologyOpening"><a href="Server.html#event:topologyOpening">topologyOpening</a></li>
             
             </ul>
         </li>
@@ -1170,7 +1130,7 @@
             
                 <td class="default">
                 
-                    5000
+                    10000
                 
                 </td>
             
@@ -1834,7 +1794,7 @@
 	
         <tr>
             
-                <td class="name"><code>options.acceptableLatency</code></td>
+                <td class="name"><code>options.localThresholdMS</code></td>
             
             
             <td class="type">
@@ -1849,7 +1809,7 @@
             
                 <td class="default">
                 
-                    250
+                    15
                 
                 </td>
             
@@ -1863,7 +1823,7 @@
                         
                     
                 
-                <p>Acceptable latency for selecting a server for reading (in milliseconds)</p></td>
+                <p>Cutoff latency point in MS for MongoS proxy selection</p></td>
         </tr>
 	
 	
@@ -1902,11 +1862,31 @@
     <ul>
         <li><a href="ReplSet.html#event:connect">ReplSet#event:connect</a></li>
     
-        <li><a href="ReplSet.html#event:ha">ReplSet#event:ha</a></li>
+        <li>ReplSet#event:ha</li>
     
         <li><a href="ReplSet.html#event:joined">ReplSet#event:joined</a></li>
     
         <li><a href="ReplSet.html#event:left">ReplSet#event:left</a></li>
+    
+        <li><a href="ReplSet.html#event:failed">ReplSet#event:failed</a></li>
+    
+        <li><a href="ReplSet.html#event:fullsetup">ReplSet#event:fullsetup</a></li>
+    
+        <li><a href="ReplSet.html#event:all">ReplSet#event:all</a></li>
+    
+        <li>ReplSet#event:error</li>
+    
+        <li><a href="ReplSet.html#event:serverHeartbeatStarted">ReplSet#event:serverHeartbeatStarted</a></li>
+    
+        <li><a href="ReplSet.html#event:serverHeartbeatSucceeded">ReplSet#event:serverHeartbeatSucceeded</a></li>
+    
+        <li>ReplSet#event:serverHeartbeatFailed</li>
+    
+        <li><a href="ReplSet.html#event:topologyOpening">ReplSet#event:topologyOpening</a></li>
+    
+        <li><a href="ReplSet.html#event:topologyClosed">ReplSet#event:topologyClosed</a></li>
+    
+        <li><a href="ReplSet.html#event:topologyDescriptionChanged">ReplSet#event:topologyDescriptionChanged</a></li>
     </ul>
     
 
@@ -1952,284 +1932,6 @@ cursor instance
             
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="addAuthProvider">
-            
-            addAuthProvider<span class="signature">(name, provider)</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line251">line 251</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Add custom authentication mechanism</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>name</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>Name of the authentication mechanism</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>provider</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>Authentication object instance</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="addReadPreferenceStrategy">
-            
-            addReadPreferenceStrategy<span class="signature">(name, strategy)</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line241">line 241</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Add custom read preference strategy</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>name</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>Name of the read preference strategy</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>strategy</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>Strategy object instance</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
         <h4 class="name" id="auth">
             
             auth<span class="signature">(mechanism, db, param, callback)</span>
@@ -2237,7 +1939,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line541">line 541</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line926">line 926</a>
         </div>
         
     </div>
@@ -2371,7 +2073,7 @@ cursor instance
             <td class="type">
             
                 
-<span class="param-type"><a href="global.html#authResultCallback">authResultCallback</a></span>
+<span class="param-type">authResultCallback</span>
 
 
             
@@ -2444,7 +2146,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line398">line 398</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line889">line 889</a>
         </div>
         
     </div>
@@ -2698,7 +2400,7 @@ cursor instance
             <td class="type">
             
                 
-<span class="param-type"><a href="global.html#opResultCallback">opResultCallback</a></span>
+<span class="param-type">opResultCallback</span>
 
 
             
@@ -2798,7 +2500,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line618">line 618</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line626">line 626</a>
         </div>
         
     </div>
@@ -2817,6 +2519,66 @@ server.connect();</code></pre>
     
     
     
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		<th>Default</th>
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>options.auth</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Array of auth options to apply on connect</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
     
     
     
@@ -2869,7 +2631,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line316">line 316</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line697">line 697</a>
         </div>
         
     </div>
@@ -2945,7 +2707,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line345">line 345</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1063">line 1063</a>
         </div>
         
     </div>
@@ -3240,7 +3002,7 @@ server.connect();</code></pre>
             <td class="type">
             
                 
-<span class="param-type"><a href="global.html#opResultCallback">opResultCallback</a></span>
+<span class="param-type">opResultCallback</span>
 
 
             
@@ -3356,7 +3118,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line726">line 726</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line650">line 650</a>
         </div>
         
     </div>
@@ -3420,134 +3182,6 @@ server.connect();</code></pre>
             
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="getConnection">
-            
-            getConnection<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="Connection.html">Connection</a>}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line301">line 301</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Get connection</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>options.readPreference</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type"><a href="ReadPreference.html">ReadPreference</a></span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Specify read preference if command supports it</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
         <h4 class="name" id="getServer">
             
             getServer<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="Server.html">Server</a>}</span>
@@ -3555,7 +3189,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line326">line 326</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line765">line 765</a>
         </div>
         
     </div>
@@ -3676,6 +3310,82 @@ server.connect();</code></pre>
             
 <dt>
     <div class="nameContainer">
+        <h4 class="name" id="getServers">
+            
+            getServers<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{Array.&lt;<a href="Server.html">Server</a>>}</span>
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line780">line 780</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>Get all connected servers</p>
+    </div>
+    
+
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+
+
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
         <h4 class="name" id="insert">
             
             insert<span class="signature">(ns, ops, callback)</span>
@@ -3683,7 +3393,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line496">line 496</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line817">line 817</a>
         </div>
         
     </div>
@@ -3941,7 +3651,7 @@ server.connect();</code></pre>
             <td class="type">
             
                 
-<span class="param-type"><a href="global.html#opResultCallback">opResultCallback</a></span>
+<span class="param-type">opResultCallback</span>
 
 
             
@@ -4045,7 +3755,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line687">line 687</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line713">line 713</a>
         </div>
         
     </div>
@@ -4064,6 +3774,58 @@ server.connect();</code></pre>
     
     
     
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>options.readPreference</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type"><a href="ReadPreference.html">ReadPreference</a></span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Specify read preference if command supports it</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
     
     
     
@@ -4121,7 +3883,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line718">line 718</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line755">line 755</a>
         </div>
         
     </div>
@@ -4197,7 +3959,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line291">line 291</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line687">line 687</a>
         </div>
         
     </div>
@@ -4266,14 +4028,14 @@ server.connect();</code></pre>
             
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="parserType">
+        <h4 class="name" id="logout">
             
-            parserType<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{string}</span>
+            logout<span class="signature">(db, callback)</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line261">line 261</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1008">line 1008</a>
         </div>
         
     </div>
@@ -4284,7 +4046,7 @@ server.connect();</code></pre>
     
     
     <div class="description">
-        <p>Name of BSON parser currently used</p>
+        <p>Logout from a database</p>
     </div>
     
 
@@ -4292,6 +4054,74 @@ server.connect();</code></pre>
     
     
     
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>db</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>The db we are logging out from</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">authResultCallback</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>A callback function</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
     
     
     
@@ -4331,11 +4161,6 @@ server.connect();</code></pre>
     
     
     
-
-
-    
-    
-    
 </dd>
 
         
@@ -4349,7 +4174,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line472">line 472</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line865">line 865</a>
         </div>
         
     </div>
@@ -4607,7 +4432,7 @@ server.connect();</code></pre>
             <td class="type">
             
                 
-<span class="param-type"><a href="global.html#opResultCallback">opResultCallback</a></span>
+<span class="param-type">opResultCallback</span>
 
 
             
@@ -4714,14 +4539,14 @@ server.connect();</code></pre>
             
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="setBSONParserType">
+        <h4 class="name" id="unref">
             
-            setBSONParserType<span class="signature">(type)</span>
+            unref<span class="signature">()</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line272">line 272</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line671">line 671</a>
         </div>
         
     </div>
@@ -4732,7 +4557,7 @@ server.connect();</code></pre>
     
     
     <div class="description">
-        <p>Execute a command</p>
+        <p>Unref all connections belong to this server</p>
     </div>
     
 
@@ -4740,51 +4565,6 @@ server.connect();</code></pre>
     
     
     
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>type</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>Type of BSON parser to use (c++ or js)</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
     
     
     
@@ -4837,7 +4617,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line520">line 520</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line841">line 841</a>
         </div>
         
     </div>
@@ -5095,7 +4875,7 @@ server.connect();</code></pre>
             <td class="type">
             
                 
-<span class="param-type"><a href="global.html#opResultCallback">opResultCallback</a></span>
+<span class="param-type">opResultCallback</span>
 
 
             
@@ -5210,6 +4990,87 @@ server.connect();</code></pre>
             
 <dt>
     <div class="nameContainer">
+        <h4 class="name" id="event:all">
+            
+            all
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1090">line 1090</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>A replset all event, used to signal that all topology members have been contacted.</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type"><a href="ReplSet.html">ReplSet</a></span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
         <h4 class="name" id="event:connect">
             
             connect
@@ -5217,7 +5078,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line746">line 746</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1069">line 1069</a>
         </div>
         
     </div>
@@ -5291,14 +5152,14 @@ server.connect();</code></pre>
             
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="event:ha">
+        <h4 class="name" id="event:failed">
             
-            ha
+            failed
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line753">line 753</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1097">line 1097</a>
         </div>
         
     </div>
@@ -5309,7 +5170,7 @@ server.connect();</code></pre>
     
     
     <div class="description">
-        <p>The replset high availability event</p>
+        <p>A replset failed event, used to signal that initial replset connection failed.</p>
     </div>
     
 
@@ -5318,7 +5179,7 @@ server.connect();</code></pre>
         <ul>
             <li>
                 
-<span class="param-type">function</span>
+<span class="param-type"><a href="ReplSet.html">ReplSet</a></span>
 
 
             </li>
@@ -5328,119 +5189,86 @@ server.connect();</code></pre>
     
     
     
+    
+    
+<dl class="details">
+    
         
+    
+    
+    
 
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
             
-                <td class="name"><code>type</code></td>
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:fullsetup">
             
-            
-            <td class="type">
-            
+            fullsetup
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1083">line 1083</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>A replset fullsetup event, used to signal that all topology members have been contacted.</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
                 
-<span class="param-type">string</span>
+<span class="param-type"><a href="ReplSet.html">ReplSet</a></span>
 
 
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>The stage in the high availability event (start|end)</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>data.norepeat</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>This is a repeating high availability process or a single execution only</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>data.id</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>The id for this high availability request</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>data.state</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>An object containing the information about the current replicaset</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
+            </li>
+        </ul>
+    
+    
+    
+    
     
     
     
@@ -5493,7 +5321,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line773">line 773</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1113">line 1113</a>
         </div>
         
     </div>
@@ -5642,7 +5470,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line764">line 764</a>
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1104">line 1104</a>
         </div>
         
     </div>
@@ -5780,6 +5608,816 @@ server.connect();</code></pre>
     
 </dd>
 
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:reconnect">
+            
+            reconnect
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1076">line 1076</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>A replset reconnect event, used to verify that the topology reconnected</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type"><a href="ReplSet.html">ReplSet</a></span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:serverClosed">
+            
+            serverClosed
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1129">line 1129</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>A server closed SDAM monitoring event</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:serverDescriptionChanged">
+            
+            serverDescriptionChanged
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1136">line 1136</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>A server description SDAM change monitoring event</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:serverHearbeatFailed">
+            
+            serverHearbeatFailed
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1171">line 1171</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>A topology serverHearbeatFailed SDAM event</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:serverHeartbeatStarted">
+            
+            serverHeartbeatStarted
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1164">line 1164</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>A topology serverHeartbeatStarted SDAM event</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:serverHeartbeatSucceeded">
+            
+            serverHeartbeatSucceeded
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1178">line 1178</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>A topology serverHeartbeatSucceeded SDAM change event</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:serverOpening">
+            
+            serverOpening
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1122">line 1122</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>A server opening SDAM monitoring event</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:topologyClosed">
+            
+            topologyClosed
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1150">line 1150</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>A topology closed SDAM event</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:topologyDescriptionChanged">
+            
+            topologyDescriptionChanged
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1157">line 1157</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>A topology structure SDAM change event</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:topologyOpening">
+            
+            topologyOpening
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_replset.js.html">lib/topologies/replset.js</a>, <a href="lib_topologies_replset.js.html#line1143">line 1143</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>A topology open SDAM event</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
         </dl>
     
 </article>
@@ -5810,7 +6448,7 @@ server.connect();</code></pre>
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Mon May 30 2016 18:28:06 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Fri Jul 08 2016 13:30:24 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

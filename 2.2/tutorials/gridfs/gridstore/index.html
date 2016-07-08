@@ -1,0 +1,1902 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="">
+<meta name="author" content="">
+<meta name="keyword" content="">
+
+    <link rel="shortcut icon" href="/node-mongodb-native/2.2//img/favicon.png">
+
+    <title>Legacy GridStore</title>
+
+    <link rel="stylesheet" href="/node-mongodb-native/2.2//lib/bootstrap.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.2//lib/font-awesome/css/font-awesome.min.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.2//css/mongodb-docs.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.2//css/overrides.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.2//lib/highlight/styles/idea.css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.2//lib/bootstrap-toggle/bootstrap-toggle.min.css" type="text/css" />
+<link rel="stylesheet" href="/node-mongodb-native/2.2//css/java.css" type="text/css" />
+
+
+  </head>
+
+  <body>
+  
+  <section id="container" class="">
+      
+      <header id="header-db" class="row" role="navigation">
+  <div class="header-content">
+    <div class="toggle-nav pull-left">
+        <i class="fa fa-bars"></i>
+        <div class="icon-reorder tooltips" data-original-title="Toggle Navigation" data-placement="bottom"></div>
+    </div>
+    
+    <div class="logo pull-left">
+      <a href="/node-mongodb-native/2.2//../">
+        <img src="/node-mongodb-native/2.2//img/logo-mongodb-header.png", alt="MongoDB.org" />
+      </a>
+    </div>
+    
+    <div>
+<div class="nav-items pull-right">
+  <a href="https://university.mongodb.com" data-toggle="tooltip" data-placement="bottom" title="Free Online Classes">MongoDB University</a>
+  <a href="http://www.mongodb.org/downloads" data-toggle="tooltip" data-placement="bottom" title="Download MongoDB">Downloads</a>
+  <a href="http://www.mongodb.org/get-involved" data-toggle="tooltip" data-placement="bottom" title="Get involved with MongoDB">Community</a>
+  <a href="http://docs.mongodb.org" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Documentation">Docs</a>
+  <a href="http://blog.mongodb.org" data-toggle="tooltip" data-placement="bottom" title="The MongoDB Blog">Blog</a>
+  <div id="search">
+<form method="get" action="//www.google.com/search" target="_blank">
+    <input type="text" name="searchQuery" size="20" value="" autocomplete="off" placeholder="Search docs">
+    <input type="hidden" name="site" value="/node-mongodb-native/2.2/">
+    <input type="hidden" name="q" value="">
+    <label for="searchQuery"><i class="fa fa-search fa-1"></i></label>
+</form>
+</div>
+
+</div>
+</div>
+
+  </div>
+</header>
+
+      
+
+      
+<aside id="sidebar" class="sidebar">
+    <div class="ssidebar nav-collapse">
+      <div class="ssidebarwrapper">
+        <h3>
+          <a class="index-link" href="/node-mongodb-native/2.2//../">MongoDB Node.js Driver</a>
+          <a class="version pull-right" href="/node-mongodb-native/2.2/">2.2</a>
+        </h3>
+
+        
+        <ul class="sidebar-menu">
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+
+          
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+    
+      
+    
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+
+  
+    
+    
+    
+      
+      
+      
+    
+    
+  
+  
+
+
+        
+      
+    
+    
+  
+
+
+        
+      
+    
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+      
+      
+    
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+    
+    
+      
+      
+    
+    
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+  
+
+
+          
+
+          
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/2.2/quick-start/">
+        <i class='fa fa-road'></i>
+        Quick Start
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/2.2/installation-guide/">
+        <i class='fa fa-puzzle-piece'></i>
+        Installation Guide
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<li class="toctree-l1  current">
+  <a href="/node-mongodb-native/2.2/tutorials/" class="">
+      <i class='fa fa-thumb-tack'></i>
+      <span>Tutorials</span>
+      <span class="menu-arrow fa fa-angle-down"></span>
+  </a>
+    <ul  class="current">
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/2.2/tutorials/connect/" class="">
+      <i class='fa'></i>
+      <span>Connect to MongoDB</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.2/tutorials/connect/authenticating/">
+        <i class='fa'></i>
+        Authentication
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.2/tutorials/connect/ssl/">
+        <i class='fa'></i>
+        SSL Settings
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.2/tutorials/crud/">
+        <i class='fa'></i>
+        CRUD Operations
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.2/tutorials/create-indexes/">
+        <i class='fa'></i>
+        Create Indexes
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.2/tutorials/text-search/">
+        <i class='fa'></i>
+        Text Search
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.2/tutorials/geospatial-search/">
+        <i class='fa'></i>
+        Geospatial Search
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.2/tutorials/commands/">
+        <i class='fa'></i>
+        Database Commands
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+<li class="toctree-l2  current">
+  <a href="/node-mongodb-native/2.2/tutorials/gridfs/" class="">
+      <i class='fa'></i>
+      <span>GridFS</span>
+      
+  </a>
+    <ul  class="current">
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.2/tutorials/gridfs/streaming/">
+        <i class='fa'></i>
+        GridFS API
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.2/tutorials/gridfs/gridstore/">
+        <i class='fa'></i>
+        Legacy GridStore
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l1 ">
+  <a href="/node-mongodb-native/2.2/reference/" class="">
+      <i class='fa fa-book'></i>
+      <span>Reference</span>
+      <span class="menu-arrow fa fa-angle-right"></span>
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/2.2/reference/connecting/" class="">
+      <i class='fa'></i>
+      <span>Connection Options</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.2/reference/connecting/connection-settings/">
+        <i class='fa'></i>
+        Connection Settings
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.2/reference/connecting/legacy-connection-settings/">
+        <i class='fa'></i>
+        Legacy Connection Settings
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/2.2/reference/ecmascript6/" class="">
+      <i class='fa'></i>
+      <span>ECMAScript 6</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.2/reference/ecmascript6/connecting/">
+        <i class='fa'></i>
+        Connecting
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.2/reference/ecmascript6/crud/">
+        <i class='fa'></i>
+        CRUD Operations
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l2 ">
+  <a href="/node-mongodb-native/2.2/reference/management/" class="">
+      <i class='fa'></i>
+      <span>Management</span>
+      
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.2/reference/management/logging/">
+        <i class='fa'></i>
+        Logging
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.2/reference/management/apm/">
+        <i class='fa'></i>
+        APM
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l3">
+    <a href="/node-mongodb-native/2.2/reference/management/sdam-monitoring/">
+        <i class='fa'></i>
+        Topology Monitoring
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.2/reference/pool/">
+        <i class='fa'></i>
+        Pool Design
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.2/reference/faq/">
+        <i class='fa'></i>
+        Frequently Asked Questions
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<li class="toctree-l1 ">
+  <a href="/node-mongodb-native/2.2/upgrade-migration/" class="">
+      <i class='fa fa-cog'></i>
+      <span>Upgrade Guide</span>
+      <span class="menu-arrow fa fa-angle-right"></span>
+  </a>
+    <ul >
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.2/upgrade-migration/upgrading/">
+        <i class='fa fa-wrench'></i>
+        Upgrading to 2.0
+    </a>
+  </li>
+
+
+        
+        
+    </ul>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/2.2/api/">
+        <i class='fa fa-file-text-o'></i>
+        API Documentation
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="https://github.com/mongodb/node-mongodb-native">
+        <i class='fa fa-github'></i>
+        Source Code
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="/node-mongodb-native/2.2/issues-help/">
+        <i class='fa fa-life-ring'></i>
+        Issues &amp; Help
+    </a>
+  </li>
+
+
+          
+            
+            
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l1">
+    <a href="https://gitter.im/mongodb/node-mongodb-native?utm_source=badge&amp;utm_medium=badge&amp;utm_campaign=pr-badge">
+        <img src='https://badges.gitter.im/Join Chat.svg'/>
+        
+    </a>
+  </li>
+
+
+          
+        </ul>
+        
+    </div>
+  </div>
+  
+</aside>
+
+<div class="option-popup closed hidden" id="optionsVersionsPopup">
+<div class="option-header">
+  <i class="fa fa-gear"></i>
+  <span>OPTIONS</span>
+  <i class="fa fa-angle-up pull-right"></i>
+</div>
+<div class="option-body">
+  <ul>
+      
+      <li>
+        <label>Version</label>
+        <div class="btn-group btn-group-xs pull-right">
+          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+            Select Version <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" role="menu" id="optionsVersionsMenu">
+          </ul>
+        </div>
+      </li>
+
+   
+
+
+    
+
+  </ul>
+</div>
+</div>
+
+
+
+      
+      <section id="main-content" class="content">
+          <section class="main-column pull-left">
+            <div class="document">
+              <div class="documentwrapper">
+                <div class="bodywrapper">
+                  <div class="body">
+                    <p><div class="admonition note">
+                    <h5 class="admonition-title">Survey</h5>
+                    <p>Please help us improve by answering a few questions at our
+						<a href="https://www.research.net/r/BPJSGJC"><strong> user survey</strong></a>.
+                    </p>
+                    </div>
+                    </p>
+
+
+   
+<a class="edit-link" href="https://github.com/mongodb/node-mongodb-native/blob/2.2/docs/reference/content/tutorials/gridfs/gridstore.md" target="_blank" title="Edit tutorials/gridfs/gridstore.md on GitHub"><i class="fa fa-pencil-square-o"></i></a>
+
+
+
+
+
+
+
+
+
+
+<div class="bc">
+<ul>
+  
+  
+  
+  
+  <li><a href="/node-mongodb-native/2.2/tutorials/">Tutorials</a> <i class="fa fa-angle-right"></i></li>
+  <li><a href="/node-mongodb-native/2.2/tutorials/gridfs/">GridFS</a> <i class="fa fa-angle-right"></i></li>
+  <li>Legacy GridStore</li>
+</ul>
+</div>
+
+
+
+
+<p><div class="admonition warning">
+<h5 class="admonition-title">Note</h5>
+<p>The GridStore API is deprecated. Driver version 2.0 and later uses the
+<a href="/node-mongodb-native/2.2/tutorials/gridfs/streaming/">GridFS API</a>.</p>
+
+</div>
+</p>
+
+<h1 id="gridstore">GridStore</h1>
+
+<p>GridStore is a single file inside GridFS that can be managed by the script.</p>
+
+<h2 id="open-a-gridfs-file">Open a GridFS file</h2>
+
+<p>Opening a GridStore is similar to opening a database. First you create a GridStore object, then <code>open</code> it.</p>
+
+<pre><code class="language-js">var gs = new GridStore(db, filename, mode[, options])
+</code></pre>
+
+<p>Where:</p>
+
+<ul>
+<li><code>db</code> is the database object</li>
+<li><code>filename</code> is the name of the file in GridFS that needs to be accessed/created</li>
+<li><code>mode</code> indicates the operation, can be one of:
+
+<ul>
+<li>&ldquo;r&rdquo; (Read): Looks for the file information in fs.files collection, or creates a new id for this object.</li>
+<li>&ldquo;w&rdquo; (Write): Erases all chunks if the file already exist.</li>
+</ul></li>
+<li><code>options</code> can be used to specify metadata for the file, such as <code>content_type</code>, <code>metadata</code> and <code>chunk_size</code></li>
+</ul>
+
+<p>Example:</p>
+
+<pre><code class="language-js">var gs = new GridStore(db, &quot;test.png&quot;, &quot;w&quot;, {
+  &quot;content_type&quot;: &quot;image/png&quot;,
+  &quot;metadata&quot;:{
+      &quot;author&quot;: &quot;Daniel&quot;
+  },
+  &quot;chunk_size&quot;: 1024*4
+});
+</code></pre>
+
+<p>After a GridStore object is created, it can be opened.</p>
+
+<pre><code class="language-js">gs.open(function(err, gs) {
+  // gs is the intialized GridStore object
+});
+</code></pre>
+
+<p>Opened GridStore objects have a set of useful exposed properties:</p>
+
+<ul>
+<li><code>gs.length</code> - length of the file in bytes</li>
+<li><code>gs.contentType</code> - the content type for the file</li>
+<li><code>gs.uploadDate</code> - when the file was uploaded</li>
+<li><code>gs.metadata</code> - metadata that was saved with the file</li>
+<li><code>gs.chunkSize</code> - chunk size</li>
+</ul>
+
+<p>Example</p>
+
+<pre><code class="language-js">gs.open(function(err, gs){
+  console.log(&quot;this file was uploaded at &quot;+gs.uploadDate);
+});
+</code></pre>
+
+<h2 id="writing-to-gridfs">Writing to GridFS</h2>
+
+<p>Write to the GridStore object with the <code>write</code> function:</p>
+
+<pre><code class="language-js">gs.write(data, callback)
+</code></pre>
+
+<p><code>data</code> is a <code>Buffer</code> or a string. Callback gets two parameters - an error object (if an error occured) and a
+result value which indicates if the write was successful or not.</p>
+
+<p>While the GridStore is not closed, every write is appended to the opened GridStore.</p>
+
+<h2 id="writing-a-file-to-gridfs">Writing a file to GridFS</h2>
+
+<p>The <code>writeFile</code> function opens the GridStore, streams the contents of the file into GridStore, and closes the GridStore.</p>
+
+<pre><code class="language-js">gs.writeFile( file, callback )
+</code></pre>
+
+<p>where:</p>
+
+<ul>
+<li><code>file</code> is a file descriptor, or a string file path</li>
+<li><code>callback</code> is a function with two parameters - an error object (if an error occured) and the GridStore object.</li>
+</ul>
+
+<h2 id="reading-from-a-gridfs-file">Reading from a GridFS file</h2>
+
+<p>Use the <code>read</code> function to read from a GridStore object.</p>
+
+<pre><code class="language-js">gs.read([size], callback)
+</code></pre>
+
+<p>Where:</p>
+
+<ul>
+<li><code>size</code> is the length of the data to be read</li>
+<li><code>callback</code> is a callback function with two parameters - an error object (if an error occured) and data (binary string)</li>
+</ul>
+
+<h2 id="streaming-from-gridfs">Streaming from GridFS</h2>
+
+<p>You can stream data as it comes from the database using <code>stream</code>.</p>
+
+<pre><code class="language-js">gs.stream()
+</code></pre>
+
+<p>The function returns a <a href="http://nodejs.org/docs/v0.4.12/api/streams.html#readable_Stream">read stream</a> based on this GridStore file. It supports the events &lsquo;read&rsquo;, &lsquo;error&rsquo;, &lsquo;close&rsquo; and &lsquo;end&rsquo;.</p>
+
+<h2 id="delete-a-gridfs-file">Delete a GridFS file</h2>
+
+<p>Use the <code>unlink</code> function to delete GridStore files.</p>
+
+<pre><code class="language-js">GridStore.unlink(db, name, callback)
+</code></pre>
+
+<p>Where:</p>
+
+<ul>
+<li><code>db</code> is the database object</li>
+<li><code>name</code> is either the name of a GridStore object or an array of GridStore object names</li>
+<li><code>callback</code> is the callback function</li>
+</ul>
+
+<h2 id="closing-a-gridfs-file">Closing a GridFS file</h2>
+
+<p>GridStore needs to be closed after usage. Use the <code>close</code> function:</p>
+
+<pre><code class="language-js">gs.close(callback)
+</code></pre>
+
+<h2 id="check-if-a-gridfs-file-exists">Check if a GridFS file exists</h2>
+
+<p>Use the <code>exist</code> function to check if a file exists:</p>
+
+<pre><code class="language-js">GridStore.exist(db, filename, callback)
+</code></pre>
+
+<p>Where:</p>
+
+<ul>
+<li><code>db</code> is the database object</li>
+<li><code>filename</code> is the name of the file to be checked or a regular expression</li>
+<li><code>callback</code> is a callback function with two parameters - an error object (if an error occured) and a boolean value indicating if the file exists or not</li>
+</ul>
+
+<h2 id="seek-to-a-specific-position-for-reading">Seek to a specific position for reading</h2>
+
+<p>Seeking within a file can be done with <code>seek</code>:</p>
+
+<pre><code class="language-js">gs.seek(position);
+</code></pre>
+
+<p>This function moves the internal pointer to the specified position.</p>
+
+
+
+
+
+
+<div id="btnv">
+  
+  <div class="pull-left">
+  <a class="navigation prev" href="/node-mongodb-native/2.2/tutorials/gridfs/streaming/">
+      <i class="fa fa-long-arrow-left"> </i> GridFS API
+  </a>
+  </div>
+  
+  
+</div>
+</div>
+
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+     
+    var disqus_shortname = 'nodejsmongodbdriver'; 
+     
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+
+
+</div>
+<div class="right-column">
+<div class="wrapper">
+  
+  <div class="toc">
+    <span class="toc-header">On this page</span>
+    <nav id="TableOfContents">
+<ul>
+<li><a href="#gridstore">GridStore</a>
+<ul>
+<li><a href="#open-a-gridfs-file">Open a GridFS file</a></li>
+<li><a href="#writing-to-gridfs">Writing to GridFS</a></li>
+<li><a href="#writing-a-file-to-gridfs">Writing a file to GridFS</a></li>
+<li><a href="#reading-from-a-gridfs-file">Reading from a GridFS file</a></li>
+<li><a href="#streaming-from-gridfs">Streaming from GridFS</a></li>
+<li><a href="#delete-a-gridfs-file">Delete a GridFS file</a></li>
+<li><a href="#closing-a-gridfs-file">Closing a GridFS file</a></li>
+<li><a href="#check-if-a-gridfs-file-exists">Check if a GridFS file exists</a></li>
+<li><a href="#seek-to-a-specific-position-for-reading">Seek to a specific position for reading</a></li>
+</ul></li>
+</ul>
+</nav>
+  </div>
+  
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</section>
+</section>
+
+</section>
+
+
+<script type="text/javascript">
+  var DOCUMENTATION_OPTIONS = {
+   URL_ROOT:    "/node-mongodb-native/2.2/",
+   VERSION:     "2.2",
+   COLLAPSE_INDEX: false,
+   FILE_SUFFIX: '.html',
+   HAS_SOURCE:  true
+  };
+</script>
+<script type="text/javascript" src="/node-mongodb-native/2.2/js/jquery.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.2/lib/bootstrap.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.2/js/navbar.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.2/lib/highlight/highlight.pack.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.2/js/scripts.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.2//lib/bootstrap-toggle/bootstrap-toggle.min.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.2//js/java.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.2//js/toggle-switch.js"></script>
+
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-29229787-1', 'auto');
+  ga('send', 'pageview');
+</script>
+</body>
+</html>
+

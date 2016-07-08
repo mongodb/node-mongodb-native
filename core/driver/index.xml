@@ -557,6 +557,76 @@ server.connect();
     </item>
     
     <item>
+      <title>Pool Design</title>
+      <link>/node-mongodb-native/core/driver/reference/pool/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/core/driver/reference/pool/</guid>
+      <description>
+
+&lt;h1 id=&#34;driver-pool-design&#34;&gt;Driver Pool Design&lt;/h1&gt;
+
+&lt;p&gt;The 2.0 series of the mongodb-core module introduces a newly re-designed pool that will grow and contract based on the usage pattern. This reference outlines how the growing/shrinking of the pool works, how authentication is handled and how operations are executed.&lt;/p&gt;
+
+&lt;p&gt;Operations are executed using a work-queue. That means the Pool is responsible for scheduling the execution of operations on connections. The benefit of this is that one avoids slow operations holding up fast operations as long as the following holds true.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;numberOfSlowOps &amp;lt; numberOfConnectionsInPool
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;pool-growth-shrinking&#34;&gt;Pool Growth/Shrinking&lt;/h2&gt;
+
+&lt;p&gt;This covers the basics of how the pool grows and shrinks.&lt;/p&gt;
+
+&lt;h3 id=&#34;initial-pool-connection&#34;&gt;Initial Pool connection&lt;/h3&gt;
+
+&lt;ol&gt;
+&lt;li&gt;Single connection is created and put in the &lt;code&gt;connectingConnections&lt;/code&gt; array.&lt;/li&gt;
+&lt;li&gt;On Successful connect, reapply any existing authentication credentials on the connection.&lt;/li&gt;
+&lt;li&gt;If the user passed in credentials through the &lt;code&gt;Pool.connect&lt;/code&gt; method these are then applied to the connection and stored in the credentials store if successful.&lt;/li&gt;
+&lt;li&gt;Finally the connection is moved from the &lt;code&gt;connectingConnections&lt;/code&gt;
+to &lt;code&gt;availableConnections&lt;/code&gt; and the &lt;code&gt;connect&lt;/code&gt; event is emitted.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;If the initial connection fails the server returns the associated failure event (close, error, timeout, parseError). The &lt;code&gt;Pool.connect&lt;/code&gt; method will also fail if the authentication fails for any existing or given credentials.&lt;/p&gt;
+
+&lt;h3 id=&#34;growing-the-pool&#34;&gt;Growing the Pool&lt;/h3&gt;
+
+&lt;ol&gt;
+&lt;li&gt;A new operation is scheduled to be executed.&lt;/li&gt;
+&lt;li&gt;Pool checks if there are any connections in &lt;code&gt;availableConnections&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;No connections available in &lt;code&gt;availableConnections&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;If we have not reached the max pool &lt;code&gt;size&lt;/code&gt;, the Pool creates a new connection and puts it in the &lt;code&gt;connectingConnections&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Any credentials are applied to the new connection and if the connection process is successful, the connection is then moved to &lt;code&gt;availableConnections&lt;/code&gt; and the operation is re-scheduled for execution.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&#34;shrinking-the-pool&#34;&gt;Shrinking the Pool&lt;/h3&gt;
+
+&lt;p&gt;The pool shrinks when a connection is idle for longer than the specified socket timeout. When the connection closes it gets removed from the pool.&lt;/p&gt;
+
+&lt;h2 id=&#34;operation-life-cycle&#34;&gt;Operation Life-cycle&lt;/h2&gt;
+
+&lt;p&gt;The Life-cycle of an operation is as follows.&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;User calls the &lt;code&gt;Pool.write&lt;/code&gt; method.&lt;/li&gt;
+&lt;li&gt;The operation is put at the end of the internal operations &lt;code&gt;queue&lt;/code&gt; array.&lt;/li&gt;
+&lt;li&gt;The internal &lt;code&gt;_execute&lt;/code&gt; method is called which picks the first operation of the queue and attempts to execute it against an available connection.&lt;/li&gt;
+&lt;li&gt;The operation is associated with a specific connection for the duration of the operation.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;The &lt;code&gt;Pool.write&lt;/code&gt; options provide for a special &lt;code&gt;monitoring&lt;/code&gt; options that will schedule the operation at the start of the &lt;code&gt;queue&lt;/code&gt; array to give it priority over any other operations currently queued up. This is used to execute the &lt;code&gt;ismaster&lt;/code&gt; commands for things like &lt;code&gt;Replicaset&lt;/code&gt; monitoring.&lt;/p&gt;
+
+&lt;h2 id=&#34;error-handling&#34;&gt;Error handling&lt;/h2&gt;
+
+&lt;p&gt;When a single connection fails (closes, times out) and there is an operation in flight on that connection the pool will flush out that operation as an error to the end user by calling its associated callback.&lt;/p&gt;
+
+&lt;h2 id=&#34;pool-destruction&#34;&gt;Pool destruction&lt;/h2&gt;
+
+&lt;p&gt;When the &lt;code&gt;Pool.destroy&lt;/code&gt; method is called the pool will go into the &lt;code&gt;destroying&lt;/code&gt; state and will drain the reminder of the operation queue before moving to the &lt;code&gt;destroy&lt;/code&gt; state.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
       <title>Logging</title>
       <link>/node-mongodb-native/core/driver/reference/management/logging/</link>
       <pubDate>Wed, 18 Mar 2015 21:14:20 -0400</pubDate>

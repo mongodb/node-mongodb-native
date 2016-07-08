@@ -172,6 +172,8 @@
             
                 <li data-name="Connection#toString"><a href="Connection.html#toString">toString</a></li>
             
+                <li data-name="Connection#unref"><a href="Connection.html#unref">unref</a></li>
+            
                 <li data-name="Connection#write"><a href="Connection.html#write">write</a></li>
             
             </ul>
@@ -309,6 +311,10 @@
                 <li data-name="Logger#isError"><a href="Logger.html#isError">isError</a></li>
             
                 <li data-name="Logger#isInfo"><a href="Logger.html#isInfo">isInfo</a></li>
+            
+                <li data-name="Logger#isWarn"><a href="Logger.html#isWarn">isWarn</a></li>
+            
+                <li data-name="Logger#warn"><a href="Logger.html#warn">warn</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -495,10 +501,6 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="Mongos#addAuthProvider"><a href="Mongos.html#addAuthProvider">addAuthProvider</a></li>
-            
-                <li data-name="Mongos#addReadPreferenceStrategy"><a href="Mongos.html#addReadPreferenceStrategy">addReadPreferenceStrategy</a></li>
-            
                 <li data-name="Mongos#auth"><a href="Mongos.html#auth">auth</a></li>
             
                 <li data-name="Mongos#command"><a href="Mongos.html#command">command</a></li>
@@ -511,8 +513,6 @@
             
                 <li data-name="Mongos#destroy"><a href="Mongos.html#destroy">destroy</a></li>
             
-                <li data-name="Mongos#getConnection"><a href="Mongos.html#getConnection">getConnection</a></li>
-            
                 <li data-name="Mongos#getServer"><a href="Mongos.html#getServer">getServer</a></li>
             
                 <li data-name="Mongos#insert"><a href="Mongos.html#insert">insert</a></li>
@@ -523,11 +523,11 @@
             
                 <li data-name="Mongos#lastIsMaster"><a href="Mongos.html#lastIsMaster">lastIsMaster</a></li>
             
-                <li data-name="Mongos#parserType"><a href="Mongos.html#parserType">parserType</a></li>
+                <li data-name="Mongos#logout"><a href="Mongos.html#logout">logout</a></li>
             
                 <li data-name="Mongos#remove"><a href="Mongos.html#remove">remove</a></li>
             
-                <li data-name="Mongos#setBSONParserType"><a href="Mongos.html#setBSONParserType">setBSONParserType</a></li>
+                <li data-name="Mongos#unref"><a href="Mongos.html#unref">unref</a></li>
             
                 <li data-name="Mongos#update"><a href="Mongos.html#update">update</a></li>
             
@@ -536,11 +536,35 @@
             
             <span class="subtitle">Events</span>
             
+                <li data-name="Mongos#event:all"><a href="Mongos.html#event:all">all</a></li>
+            
                 <li data-name="Mongos#event:connect"><a href="Mongos.html#event:connect">connect</a></li>
+            
+                <li data-name="Mongos#event:fullsetup"><a href="Mongos.html#event:fullsetup">fullsetup</a></li>
             
                 <li data-name="Mongos#event:joined"><a href="Mongos.html#event:joined">joined</a></li>
             
                 <li data-name="Mongos#event:left"><a href="Mongos.html#event:left">left</a></li>
+            
+                <li data-name="Mongos#event:reconnect"><a href="Mongos.html#event:reconnect">reconnect</a></li>
+            
+                <li data-name="Mongos#event:serverClosed"><a href="Mongos.html#event:serverClosed">serverClosed</a></li>
+            
+                <li data-name="Mongos#event:serverDescriptionChanged"><a href="Mongos.html#event:serverDescriptionChanged">serverDescriptionChanged</a></li>
+            
+                <li data-name="Mongos#event:serverHearbeatFailed"><a href="Mongos.html#event:serverHearbeatFailed">serverHearbeatFailed</a></li>
+            
+                <li data-name="Mongos#event:serverHeartbeatStarted"><a href="Mongos.html#event:serverHeartbeatStarted">serverHeartbeatStarted</a></li>
+            
+                <li data-name="Mongos#event:serverHeartbeatSucceeded"><a href="Mongos.html#event:serverHeartbeatSucceeded">serverHeartbeatSucceeded</a></li>
+            
+                <li data-name="Mongos#event:serverOpening"><a href="Mongos.html#event:serverOpening">serverOpening</a></li>
+            
+                <li data-name="Mongos#event:topologyClosed"><a href="Mongos.html#event:topologyClosed">topologyClosed</a></li>
+            
+                <li data-name="Mongos#event:topologyDescriptionChanged"><a href="Mongos.html#event:topologyDescriptionChanged">topologyDescriptionChanged</a></li>
+            
+                <li data-name="Mongos#event:topologyOpening"><a href="Mongos.html#event:topologyOpening">topologyOpening</a></li>
             
             </ul>
         </li>
@@ -632,10 +656,6 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="ReplSet#addAuthProvider"><a href="ReplSet.html#addAuthProvider">addAuthProvider</a></li>
-            
-                <li data-name="ReplSet#addReadPreferenceStrategy"><a href="ReplSet.html#addReadPreferenceStrategy">addReadPreferenceStrategy</a></li>
-            
                 <li data-name="ReplSet#auth"><a href="ReplSet.html#auth">auth</a></li>
             
                 <li data-name="ReplSet#command"><a href="ReplSet.html#command">command</a></li>
@@ -648,9 +668,9 @@
             
                 <li data-name="ReplSet#destroy"><a href="ReplSet.html#destroy">destroy</a></li>
             
-                <li data-name="ReplSet#getConnection"><a href="ReplSet.html#getConnection">getConnection</a></li>
-            
                 <li data-name="ReplSet#getServer"><a href="ReplSet.html#getServer">getServer</a></li>
+            
+                <li data-name="ReplSet#getServers"><a href="ReplSet.html#getServers">getServers</a></li>
             
                 <li data-name="ReplSet#insert"><a href="ReplSet.html#insert">insert</a></li>
             
@@ -660,11 +680,11 @@
             
                 <li data-name="ReplSet#lastIsMaster"><a href="ReplSet.html#lastIsMaster">lastIsMaster</a></li>
             
-                <li data-name="ReplSet#parserType"><a href="ReplSet.html#parserType">parserType</a></li>
+                <li data-name="ReplSet#logout"><a href="ReplSet.html#logout">logout</a></li>
             
                 <li data-name="ReplSet#remove"><a href="ReplSet.html#remove">remove</a></li>
             
-                <li data-name="ReplSet#setBSONParserType"><a href="ReplSet.html#setBSONParserType">setBSONParserType</a></li>
+                <li data-name="ReplSet#unref"><a href="ReplSet.html#unref">unref</a></li>
             
                 <li data-name="ReplSet#update"><a href="ReplSet.html#update">update</a></li>
             
@@ -673,13 +693,37 @@
             
             <span class="subtitle">Events</span>
             
+                <li data-name="ReplSet#event:all"><a href="ReplSet.html#event:all">all</a></li>
+            
                 <li data-name="ReplSet#event:connect"><a href="ReplSet.html#event:connect">connect</a></li>
             
-                <li data-name="ReplSet#event:ha"><a href="ReplSet.html#event:ha">ha</a></li>
+                <li data-name="ReplSet#event:failed"><a href="ReplSet.html#event:failed">failed</a></li>
+            
+                <li data-name="ReplSet#event:fullsetup"><a href="ReplSet.html#event:fullsetup">fullsetup</a></li>
             
                 <li data-name="ReplSet#event:joined"><a href="ReplSet.html#event:joined">joined</a></li>
             
                 <li data-name="ReplSet#event:left"><a href="ReplSet.html#event:left">left</a></li>
+            
+                <li data-name="ReplSet#event:reconnect"><a href="ReplSet.html#event:reconnect">reconnect</a></li>
+            
+                <li data-name="ReplSet#event:serverClosed"><a href="ReplSet.html#event:serverClosed">serverClosed</a></li>
+            
+                <li data-name="ReplSet#event:serverDescriptionChanged"><a href="ReplSet.html#event:serverDescriptionChanged">serverDescriptionChanged</a></li>
+            
+                <li data-name="ReplSet#event:serverHearbeatFailed"><a href="ReplSet.html#event:serverHearbeatFailed">serverHearbeatFailed</a></li>
+            
+                <li data-name="ReplSet#event:serverHeartbeatStarted"><a href="ReplSet.html#event:serverHeartbeatStarted">serverHeartbeatStarted</a></li>
+            
+                <li data-name="ReplSet#event:serverHeartbeatSucceeded"><a href="ReplSet.html#event:serverHeartbeatSucceeded">serverHeartbeatSucceeded</a></li>
+            
+                <li data-name="ReplSet#event:serverOpening"><a href="ReplSet.html#event:serverOpening">serverOpening</a></li>
+            
+                <li data-name="ReplSet#event:topologyClosed"><a href="ReplSet.html#event:topologyClosed">topologyClosed</a></li>
+            
+                <li data-name="ReplSet#event:topologyDescriptionChanged"><a href="ReplSet.html#event:topologyDescriptionChanged">topologyDescriptionChanged</a></li>
+            
+                <li data-name="ReplSet#event:topologyOpening"><a href="ReplSet.html#event:topologyOpening">topologyOpening</a></li>
             
             </ul>
         </li>
@@ -699,13 +743,7 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="Server#addAuthProvider"><a href="Server.html#addAuthProvider">addAuthProvider</a></li>
-            
-                <li data-name="Server#addReadPreferenceStrategy"><a href="Server.html#addReadPreferenceStrategy">addReadPreferenceStrategy</a></li>
-            
                 <li data-name="Server#auth"><a href="Server.html#auth">auth</a></li>
-            
-                <li data-name="Server#capConnections"><a href="Server.html#capConnections">capConnections</a></li>
             
                 <li data-name="Server#command"><a href="Server.html#command">command</a></li>
             
@@ -719,9 +757,9 @@
             
                 <li data-name="Server#equals"><a href="Server.html#equals">equals</a></li>
             
-                <li data-name="Server#getCallbacks"><a href="Server.html#getCallbacks">getCallbacks</a></li>
-            
                 <li data-name="Server#getConnection"><a href="Server.html#getConnection">getConnection</a></li>
+            
+                <li data-name="Server#getDescription"><a href="Server.html#getDescription">getDescription</a></li>
             
                 <li data-name="Server#getServer"><a href="Server.html#getServer">getServer</a></li>
             
@@ -733,11 +771,11 @@
             
                 <li data-name="Server#lastIsMaster"><a href="Server.html#lastIsMaster">lastIsMaster</a></li>
             
-                <li data-name="Server#parserType"><a href="Server.html#parserType">parserType</a></li>
+                <li data-name="Server#logout"><a href="Server.html#logout">logout</a></li>
             
                 <li data-name="Server#remove"><a href="Server.html#remove">remove</a></li>
             
-                <li data-name="Server#setBSONParserType"><a href="Server.html#setBSONParserType">setBSONParserType</a></li>
+                <li data-name="Server#unref"><a href="Server.html#unref">unref</a></li>
             
                 <li data-name="Server#update"><a href="Server.html#update">update</a></li>
             
@@ -750,103 +788,25 @@
             
                 <li data-name="Server#event:connect"><a href="Server.html#event:connect">connect</a></li>
             
-                <li data-name="Server#event:error"><a href="Server.html#event:error">error</a></li>
+                <li data-name="Server#event:destroy"><a href="Server.html#event:destroy">destroy</a></li>
             
-                <li data-name="Server#event:parseError"><a href="Server.html#event:parseError">parseError</a></li>
+                <li data-name="Server#event:error"><a href="Server.html#event:error">error</a></li>
             
                 <li data-name="Server#event:reconnect"><a href="Server.html#event:reconnect">reconnect</a></li>
             
-                <li data-name="Server#event:timeout"><a href="Server.html#event:timeout">timeout</a></li>
+                <li data-name="Server#event:reconnectFailed"><a href="Server.html#event:reconnectFailed">reconnectFailed</a></li>
             
-            </ul>
-        </li>
-    
-        <li class="item" data-name="Session">
-            <span class="title">
-                <a href="Session.html">Session</a>
-                
-            </span>
-            <ul class="members itemMembers">
+                <li data-name="Server#event:serverClosed"><a href="Server.html#event:serverClosed">serverClosed</a></li>
             
-            </ul>
-            <ul class="typedefs itemMembers">
+                <li data-name="Server#event:serverDescriptionChanged"><a href="Server.html#event:serverDescriptionChanged">serverDescriptionChanged</a></li>
             
-            </ul>
-            <ul class="methods itemMembers">
+                <li data-name="Server#event:serverOpening"><a href="Server.html#event:serverOpening">serverOpening</a></li>
             
-            <span class="subtitle">Methods</span>
+                <li data-name="Server#event:topologyClosed"><a href="Server.html#event:topologyClosed">topologyClosed</a></li>
             
-                <li data-name="Session#command"><a href="Session.html#command">command</a></li>
+                <li data-name="Server#event:topologyDescriptionChanged"><a href="Server.html#event:topologyDescriptionChanged">topologyDescriptionChanged</a></li>
             
-                <li data-name="Session#cursor"><a href="Session.html#cursor">cursor</a></li>
-            
-                <li data-name="Session#insert"><a href="Session.html#insert">insert</a></li>
-            
-                <li data-name="Session#remove"><a href="Session.html#remove">remove</a></li>
-            
-                <li data-name="Session#update"><a href="Session.html#update">update</a></li>
-            
-            </ul>
-            <ul class="events itemMembers">
-            
-            </ul>
-        </li>
-    
-        <li class="item" data-name="State">
-            <span class="title">
-                <a href="State.html">State</a>
-                
-            </span>
-            <ul class="members itemMembers">
-            
-            </ul>
-            <ul class="typedefs itemMembers">
-            
-            </ul>
-            <ul class="methods itemMembers">
-            
-            <span class="subtitle">Methods</span>
-            
-                <li data-name="State#addArbiter"><a href="State.html#addArbiter">addArbiter</a></li>
-            
-                <li data-name="State#addPassive"><a href="State.html#addPassive">addPassive</a></li>
-            
-                <li data-name="State#addSecondary"><a href="State.html#addSecondary">addSecondary</a></li>
-            
-                <li data-name="State#clean"><a href="State.html#clean">clean</a></li>
-            
-                <li data-name="State#contains"><a href="State.html#contains">contains</a></li>
-            
-                <li data-name="State#destroy"><a href="State.html#destroy">destroy</a></li>
-            
-                <li data-name="State#get"><a href="State.html#get">get</a></li>
-            
-                <li data-name="State#getAll"><a href="State.html#getAll">getAll</a></li>
-            
-                <li data-name="State#getAllConnections"><a href="State.html#getAllConnections">getAllConnections</a></li>
-            
-                <li data-name="State#isPassive"><a href="State.html#isPassive">isPassive</a></li>
-            
-                <li data-name="State#isPrimary"><a href="State.html#isPrimary">isPrimary</a></li>
-            
-                <li data-name="State#isPrimaryConnected"><a href="State.html#isPrimaryConnected">isPrimaryConnected</a></li>
-            
-                <li data-name="State#isSecondary"><a href="State.html#isSecondary">isSecondary</a></li>
-            
-                <li data-name="State#isSecondaryConnected"><a href="State.html#isSecondaryConnected">isSecondaryConnected</a></li>
-            
-                <li data-name="State#lastIsMaster"><a href="State.html#lastIsMaster">lastIsMaster</a></li>
-            
-                <li data-name="State#promotePrimary"><a href="State.html#promotePrimary">promotePrimary</a></li>
-            
-                <li data-name="State#remove"><a href="State.html#remove">remove</a></li>
-            
-                <li data-name="State#toJSON"><a href="State.html#toJSON">toJSON</a></li>
-            
-                <li data-name="State#update"><a href="State.html#update">update</a></li>
-            
-            </ul>
-            <ul class="events itemMembers">
+                <li data-name="Server#event:topologyOpening"><a href="Server.html#event:topologyOpening">topologyOpening</a></li>
             
             </ul>
         </li>
@@ -989,461 +949,33 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code> "use strict";
+            <pre class="prettyprint source linenums"><code>"use strict"
 
-var inherits = require('util').inherits
-  , f = require('util').format
-  , bindToCurrentDomain = require('../connection/utils').bindToCurrentDomain
-  , EventEmitter = require('events').EventEmitter
-  , Pool = require('../connection/pool')
-  , b = require('bson')
-  , crypto = require('crypto')
-  , Query = require('../connection/commands').Query
-  , MongoError = require('../error')
-  , ReadPreference = require('./read_preference')
-  , BasicCursor = require('../cursor')
-  , CommandResult = require('./command_result')
-  , getSingleProperty = require('../connection/utils').getSingleProperty
-  , getProperty = require('../connection/utils').getProperty
-  , debugOptions = require('../connection/utils').debugOptions
-  , BSON = require('bson').native().BSON
-  , PreTwoSixWireProtocolSupport = require('../wireprotocol/2_4_support')
-  , TwoSixWireProtocolSupport = require('../wireprotocol/2_6_support')
-  , ThreeTwoWireProtocolSupport = require('../wireprotocol/3_2_support')
-  , Session = require('./session')
-  , Logger = require('../connection/logger')
-  , MongoCR = require('../auth/mongocr')
-  , X509 = require('../auth/x509')
-  , Plain = require('../auth/plain')
-  , GSSAPI = require('../auth/gssapi')
-  , SSPI = require('../auth/sspi')
-  , ScramSHA1 = require('../auth/scram');
+var inherits = require('util').inherits,
+  f = require('util').format,
+  EventEmitter = require('events').EventEmitter,
+  BSON = require('bson').native().BSON,
+  ReadPreference = require('./read_preference'),
+  Logger = require('../connection/logger'),
+  debugOptions = require('../connection/utils').debugOptions,
+  Pool = require('../connection/pool'),
+  Query = require('../connection/commands').Query,
+  MongoError = require('../error'),
+  PreTwoSixWireProtocolSupport = require('../wireprotocol/2_4_support'),
+  TwoSixWireProtocolSupport = require('../wireprotocol/2_6_support'),
+  ThreeTwoWireProtocolSupport = require('../wireprotocol/3_2_support'),
+  BasicCursor = require('../cursor'),
+  sdam = require('./shared');
 
-/**
- * @fileOverview The **Server** class is a class that represents a single server topology and is
- * used to construct connections.
- *
- * @example
- * var Server = require('mongodb-core').Server
- *   , ReadPreference = require('mongodb-core').ReadPreference
- *   , assert = require('assert');
- *
- * var server = new Server({host: 'localhost', port: 27017});
- * // Wait for the connection event
- * server.on('connect', function(server) {
- *   server.destroy();
- * });
- *
- * // Start connecting
- * server.connect();
- */
-
-// All bson types
-var bsonTypes = [b.Long, b.ObjectID, b.Binary, b.Code, b.DBRef, b.Symbol, b.Double, b.Timestamp, b.MaxKey, b.MinKey];
-// BSON parser
-var bsonInstance = null;
-// Server instance id
-var serverId = 0;
-// Callbacks instance id
-var callbackId = 0;
-
-// Single store for all callbacks
-var Callbacks = function() {
-  // EventEmitter.call(this);
-  var self = this;
-  // Callbacks
-  this.callbacks = {};
-  // Set the callbacks id
-  this.id = callbackId++;
-  // Set the type to server
-  this.type = 'server';
-}
-
-//
-// Clone the options
-var cloneOptions = function(options) {
-  var opts = {};
-  for(var name in options) {
-    opts[name] = options[name];
-  }
-  return opts;
-}
-
-//
-// Flush all callbacks
-Callbacks.prototype.flush = function(err) {
-  for(var id in this.callbacks) {
-    if(!isNaN(parseInt(id, 10))) {
-      var callback = this.callbacks[id];
-      delete this.callbacks[id];
-      callback(err, null);
-    }
-  }
-}
-
-Callbacks.prototype.emit = function(id, err, value) {
-  var callback = this.callbacks[id];
-  delete this.callbacks[id];
-  callback(err, value);
-}
-
-Callbacks.prototype.raw = function(id) {
-  if(this.callbacks[id] == null) return false;
-  return this.callbacks[id].raw == true ? true : false
-}
-
-Callbacks.prototype.documentsReturnedIn = function(id) {
-  if(this.callbacks[id] == null) return false;
-  return typeof this.callbacks[id].documentsReturnedIn == 'string' ? this.callbacks[id].documentsReturnedIn : null;
-}
-
-Callbacks.prototype.unregister = function(id) {
-  delete this.callbacks[id];
-}
-
-Callbacks.prototype.register = function(id, callback) {
-  this.callbacks[id] = bindToCurrentDomain(callback);
-}
-
-var DISCONNECTED = 'disconnected';
-var CONNECTING = 'connecting';
-var CONNECTED = 'connected';
-var DESTROYED = 'destroyed';
-
-// Supports server
-var supportsServer = function(_s) {
-  return _s.ismaster &amp;&amp; typeof _s.ismaster.minWireVersion == 'number';
-}
-
-//
-// createWireProtocolHandler
-var createWireProtocolHandler = function(result) {
-  // 3.2 wire protocol handler
-  if(result &amp;&amp; result.maxWireVersion >= 4) {
-    return new ThreeTwoWireProtocolSupport(new TwoSixWireProtocolSupport());
-  }
-
-  // 2.6 wire protocol handler
-  if(result &amp;&amp; result.maxWireVersion >= 2) {
-    return new TwoSixWireProtocolSupport();
-  }
-
-  // 2.4 or earlier wire protocol handler
-  return new PreTwoSixWireProtocolSupport();
-}
-
-//
-// Reconnect server
-var reconnectServer = function(self, state) {
-  // Flush out any left over callbacks
-  if(self &amp;&amp; state &amp;&amp; state.callbacks) {
-    state.callbacks.flush(new MongoError(f("server %s received a broken socket pipe error", self.name)));
-  }
-
-  // If the current reconnect retries is 0 stop attempting to reconnect
-  if(state.currentReconnectRetry == 0) {
-    return self.destroy(true, true);
-  }
-
-  // Adjust the number of retries
-  state.currentReconnectRetry = state.currentReconnectRetry - 1;
-
-  // Set status to connecting
-  state.state = CONNECTING;
-  // Create a new Pool
-  state.pool = new Pool(state.options);
-  // error handler
-  var reconnectErrorHandler = function(err) {
-    // Set the state to disconnected so we can peform a proper reconnect
-    state.state = DISCONNECTED;
-    // Destroy the pool
-    state.pool.destroy();
-    // Adjust the number of retries
-    state.currentReconnectRetry = state.currentReconnectRetry - 1;
-    // No more retries
-    if(state.currentReconnectRetry &lt;= 0) {
-      self.state = DESTROYED;
-      self.emit('error', f('failed to connect to %s:%s after %s retries', state.options.host, state.options.port, state.reconnectTries));
-    } else {
-      setTimeout(function() {
-        reconnectServer(self, state);
-      }, state.reconnectInterval);
-    }
-  }
-
-  //
-  // Attempt to connect
-  state.pool.once('connect', function() {
-    // Reset retries
-    state.currentReconnectRetry = state.reconnectTries;
-
-    // Remove any non used handlers
-    var events = ['error', 'close', 'timeout', 'parseError'];
-    events.forEach(function(e) {
-      state.pool.removeAllListeners(e);
-    });
-
-    // Set connected state
-    state.state = CONNECTED;
-
-    // Add proper handlers
-    state.pool.once('error', reconnectErrorHandler);
-    state.pool.once('close', closeHandler(self, state));
-    state.pool.once('timeout', timeoutHandler(self, state));
-    state.pool.once('parseError', fatalErrorHandler(self, state));
-
-    // We need to ensure we have re-authenticated
-    var keys = Object.keys(state.authProviders);
-    if(keys.length == 0) return self.emit('reconnect', self);
-
-    // Execute all providers
-    var count = keys.length;
-    // Iterate over keys
-    for(var i = 0; i &lt; keys.length; i++) {
-      state.authProviders[keys[i]].reauthenticate(self, state.pool, function(err, r) {
-        count = count - 1;
-        // We are done, emit reconnect event
-        if(count == 0) {
-          return self.emit('reconnect', self);
-        }
-      });
-    }
-  });
-
-  //
-  // Handle connection failure
-  state.pool.once('error', errorHandler(self, state));
-  state.pool.once('close', errorHandler(self, state));
-  state.pool.once('timeout', errorHandler(self, state));
-  state.pool.once('parseError', errorHandler(self, state));
-
-  // Connect pool
-  state.pool.connect();
-}
-
-//
-// Handlers
-var messageHandler = function(self, state) {
-  return function(response, connection) {
-    try {
-      // Parse the message
-      response.parse({raw: state.callbacks.raw(response.responseTo), documentsReturnedIn: state.callbacks.documentsReturnedIn(response.responseTo)});
-      if(state.logger.isDebug()) state.logger.debug(f('message [%s] received from %s', response.raw.toString('hex'), self.name));
-      state.callbacks.emit(response.responseTo, null, response);
-    } catch (err) {
-      state.callbacks.flush(new MongoError(err));
-      self.destroy();
-    }
-  }
-}
-
-var errorHandler = function(self, state) {
-  return function(err, connection) {
-    if(state.state == DISCONNECTED || state.state == DESTROYED) return;
-    // Set disconnected state
-    state.state = DISCONNECTED;
-    if(state.readPreferenceStrategies != null) notifyStrategies(self, self.s, 'error', [self]);
-    if(state.logger.isInfo()) state.logger.info(f('server %s errored out with %s', self.name, JSON.stringify(err)));
-    // Flush out all the callbacks
-    if(state.callbacks) state.callbacks.flush(new MongoError(f("server %s received an error %s", self.name, JSON.stringify(err))));
-    // Destroy all connections
-    self.destroy();
-    // Emit error event
-    if(state.emitError &amp;&amp; self.listeners('error').length > 0) self.emit('error', err, self);
-    // If we specified the driver to reconnect perform it
-    if(state.reconnect) setTimeout(function() {
-      reconnectServer(self, state)
-    }, state.reconnectInterval);
-  }
-}
-
-var fatalErrorHandler = function(self, state) {
-  return function(err, connection) {
-    if(state.state == DISCONNECTED || state.state == DESTROYED) return;
-    // Set disconnected state
-    state.state = DISCONNECTED;
-
-    if(state.readPreferenceStrategies != null) notifyStrategies(self, self.s, 'error', [self]);
-    if(state.logger.isInfo()) state.logger.info(f('server %s errored out with %s', self.name, JSON.stringify(err)));
-    // Flush out all the callbacks
-    if(state.callbacks) state.callbacks.flush(new MongoError(f("server %s received an error %s", self.name, JSON.stringify(err))));
-    // Emit error event
-    if(self.listeners('error').length > 0) self.emit('error', err, self);
-    // If we specified the driver to reconnect perform it
-    if(state.reconnect) setTimeout(function() {
-      // state.currentReconnectRetry = state.reconnectTries,
-      reconnectServer(self, state)
-    }, state.reconnectInterval);
-    // Destroy all connections
-    self.destroy();
-  }
-}
-
-var timeoutHandler = function(self, state) {
-  return function(err, connection) {
-    if(state.state == DISCONNECTED || state.state == DESTROYED) return;
-    // Set disconnected state
-    state.state = DISCONNECTED;
-
-    if(state.readPreferenceStrategies != null) notifyStrategies(self, self.s, 'timeout', [self]);
-    if(state.logger.isInfo()) state.logger.info(f('server %s timed out', self.name));
-    // Flush out all the callbacks
-    if(state.callbacks) state.callbacks.flush(new MongoError(f("server %s timed out", self.name)));
-    // Emit error event
-    self.emit('timeout', err, self);
-    // If we specified the driver to reconnect perform it
-    if(state.reconnect) setTimeout(function() {
-      // state.currentReconnectRetry = state.reconnectTries,
-      reconnectServer(self, state)
-    }, state.reconnectInterval);
-    // Destroy all connections
-    self.destroy();
-  }
-}
-
-var closeHandler = function(self, state) {
-  return function(err, connection) {
-    if(state.state == DISCONNECTED || state.state == DESTROYED) return;
-    // Set disconnected state
-    state.state = DISCONNECTED;
-
-    if(state.readPreferenceStrategies != null) notifyStrategies(self, self.s, 'close', [self]);
-    if(state.logger.isInfo()) state.logger.info(f('server %s closed', self.name));
-    // Flush out all the callbacks
-    if(state.callbacks) state.callbacks.flush(new MongoError(f("server %s sockets closed", self.name)));
-    // Emit error event
-    self.emit('close', err, self);
-    // If we specified the driver to reconnect perform it
-    if(state.reconnect) setTimeout(function() {
-      // state.currentReconnectRetry = state.reconnectTries,
-      reconnectServer(self, state)
-    }, state.reconnectInterval);
-    // Destroy all connections
-    self.destroy();
-  }
-}
-
-var connectHandler = function(self, state) {
-  // Apply all stored authentications
-  var applyAuthentications = function(callback) {
-    // We need to ensure we have re-authenticated
-    var keys = Object.keys(state.authProviders);
-    if(keys.length == 0) return callback(null, null);
-
-    // Execute all providers
-    var count = keys.length;
-    // Iterate over keys
-    for(var i = 0; i &lt; keys.length; i++) {
-      state.authProviders[keys[i]].reauthenticate(self, state.pool, function(err, r) {
-        count = count - 1;
-        // We are done, emit reconnect event
-        if(count == 0) {
-          return callback(null, null);
-        }
-      });
-    }
-  }
-
-  return function(connection) {
-    // Apply any applyAuthentications
-    applyAuthentications(function() {
-      // Get the actual latency of the ismaster
-      var start = new Date().getTime();
-      // Execute an ismaster
-      self.command('admin.$cmd', {ismaster:true}, function(err, r) {
-        if(err) {
-          state.state = DISCONNECTED;
-          return self.emit('close', err, self);
-        }
-
-        // Set the latency for this instance
-        state.isMasterLatencyMS = new Date().getTime() - start;
-
-        // Set the current ismaster
-        if(!err) {
-          state.ismaster = r.result;
-        }
-
-        // Emit the ismaster
-        self.emit('ismaster', r.result, self);
-
-        // Determine the wire protocol handler
-        state.wireProtocolHandler = createWireProtocolHandler(state.ismaster);
-
-        // Set the wireProtocolHandler
-        state.options.wireProtocolHandler = state.wireProtocolHandler;
-
-        // Log the ismaster if available
-        if(state.logger.isInfo()) state.logger.info(f('server %s connected with ismaster [%s]', self.name, JSON.stringify(r.result)));
-
-        // Validate if we it's a server we can connect to
-        if(!supportsServer(state) &amp;&amp; state.wireProtocolHandler == null) {
-          state.state = DISCONNECTED
-          return self.emit('error', new MongoError("non supported server version"), self);
-        }
-
-        // Set the details
-        if(state.ismaster &amp;&amp; state.ismaster.me) state.serverDetails.name = state.ismaster.me;
-
-        // No read preference strategies just emit connect
-        if(state.readPreferenceStrategies == null) {
-          state.state = CONNECTED;
-          return self.emit('connect', self);
-        }
-
-        // Signal connect to all readPreferences
-        notifyStrategies(self, self.s, 'connect', [self], function(err, result) {
-          state.state = CONNECTED;
-          return self.emit('connect', self);
-        });
-      });
-    });
-  }
-}
-
-var slaveOk = function(r) {
-  if(r) return r.slaveOk()
-  return false;
-}
-
-//
-// Execute readPreference Strategies
-var notifyStrategies = function(self, state, op, params, callback) {
-  if(typeof callback != 'function') {
-    // Notify query start to any read Preference strategies
-    for(var name in state.readPreferenceStrategies) {
-      if(state.readPreferenceStrategies[name][op]) {
-        var strat = state.readPreferenceStrategies[name];
-        strat[op].apply(strat, params);
-      }
-    }
-    // Finish up
-    return;
-  }
-
-  // Execute the async callbacks
-  var nPreferences = Object.keys(state.readPreferenceStrategies).length;
-  if(nPreferences == 0) return callback(null, null);
-  for(var name in state.readPreferenceStrategies) {
-    if(state.readPreferenceStrategies[name][op]) {
-      var strat = state.readPreferenceStrategies[name];
-      // Add a callback to params
-      var cParams = params.slice(0);
-      cParams.push(function(err, r) {
-        nPreferences = nPreferences - 1;
-        if(nPreferences == 0) {
-          callback(null, null);
-        }
-      })
-      // Execute the readPreference
-      strat[op].apply(strat, cParams);
-    }
-  }
-}
-
+// Used for filtering out fields for loggin
 var debugFields = ['reconnect', 'reconnectTries', 'reconnectInterval', 'emitError', 'cursorFactory', 'host'
   , 'port', 'size', 'keepAlive', 'keepAliveInitialDelay', 'noDelay', 'connectionTimeout', 'checkServerIdentity'
   , 'socketTimeout', 'singleBufferSerializtion', 'ssl', 'ca', 'cert', 'key', 'rejectUnauthorized', 'promoteLongs'];
+
+// Server instance id
+var id = 0;
+var serverAccounting = false;
+var servers = {};
 
 /**
  * Creates a new Server instance
@@ -1451,7 +983,8 @@ var debugFields = ['reconnect', 'reconnectTries', 'reconnectInterval', 'emitErro
  * @param {boolean} [options.reconnect=true] Server will attempt to reconnect on loss of connection
  * @param {number} [options.reconnectTries=30] Server attempt to reconnect #times
  * @param {number} [options.reconnectInterval=1000] Server will wait # milliseconds between retries
- * @param {boolean} [options.emitError=false] Server will emit errors events
+ * @param {number} [options.monitoring=true] Enable the server state monitoring (calling ismaster at monitoringInterval)
+ * @param {number} [options.monitoringInterval=5000] The interval of calling ismaster when monitoring is enabled.
  * @param {Cursor} [options.cursorFactory=Cursor] The cursor factory class used for all query cursors
  * @param {string} options.host The server host
  * @param {number} options.port The server port
@@ -1476,127 +1009,313 @@ var debugFields = ['reconnect', 'reconnectTries', 'reconnectInterval', 'emitErro
  * @fires Server#timeout
  * @fires Server#parseError
  * @fires Server#reconnect
+ * @fires Server#reconnectFailed
+ * @fires Server#serverHeartbeatStarted
+ * @fires Server#serverHeartbeatSucceeded
+ * @fires Server#serverHeartbeatFailed
+ * @fires Server#topologyOpening
+ * @fires Server#topologyClosed
+ * @fires Server#topologyDescriptionChanged
  */
 var Server = function(options) {
-  var self = this;
+  options = options || {};
 
   // Add event listener
   EventEmitter.call(this);
 
-  // BSON Parser, ensure we have a single instance
-  if(bsonInstance == null) {
-    bsonInstance = new BSON(bsonTypes);
-  }
+  // Server instance id
+  this.id = id++;
 
   // Reconnect retries
   var reconnectTries = options.reconnectTries || 30;
 
-  // Keeps all the internal state of the server
+  // Internal state
   this.s = {
     // Options
-      options: options
-    // Contains all the callbacks
-    , callbacks: new Callbacks()
+    options: options,
     // Logger
-    , logger: Logger('Server', options)
-    // Server state
-    , state: DISCONNECTED
-    // Reconnect option
-    , reconnect: typeof options.reconnect == 'boolean' ? options.reconnect :  true
-    , reconnectTries: reconnectTries
-    , reconnectInterval: options.reconnectInterval || 1000
-    // Swallow or emit errors
-    , emitError: typeof options.emitError == 'boolean' ? options.emitError : false
-    // Current state
-    , currentReconnectRetry: reconnectTries
-    // Contains the ismaster
-    , ismaster: null
-    // Contains any alternate strategies for picking
-    , readPreferenceStrategies: options.readPreferenceStrategies
-    // Auth providers
-    , authProviders: options.authProviders || {}
-    // Server instance id
-    , id: serverId++
-    // Grouping tag used for debugging purposes
-    , tag: options.tag
-    // Do we have a not connected handler
-    , disconnectHandler: options.disconnectHandler
-    // wireProtocolHandler methods
-    , wireProtocolHandler: options.wireProtocolHandler || new PreTwoSixWireProtocolSupport()
+    logger: Logger('Server', options),
     // Factory overrides
-    , Cursor: options.cursorFactory || BasicCursor
-    // BSON Parser, ensure we have a single instance
-    , bsonInstance: bsonInstance
-    // Pick the right bson parser
-    , bson: options.bson ? options.bson : bsonInstance
-    // Internal connection pool
-    , pool: null
-    // Is master latency
-    , isMasterLatencyMS: 0
-    // Server details
-    , serverDetails: {
-        host: options.host
-      , port: options.port
-      , name: options.port ? f("%s:%s", options.host, options.port) : options.host
-    }
+    Cursor: options.cursorFactory || BasicCursor,
+    // BSON instance
+    bson: options.bson || new BSON(),
+    // Pool
+    pool: null,
+    // Disconnect handler
+    disconnectHandler: options.disconnectHandler,
+    // Monitor thread (keeps the connection alive)
+    monitoring: typeof options.monitoring == 'boolean' ? options.monitoring : true,
+    // Is the server in a topology
+    inTopology: typeof options.inTopology == 'boolean' ? options.inTopology : false,
+    // Monitoring timeout
+    monitoringInterval: typeof options.monitoringInterval == 'number'
+      ? options.monitoringInterval
+      : 5000,
+    // Topology id
+    topologyId: -1
   }
 
-  // Create hash method
-  var hash = crypto.createHash('sha1');
-  hash.update(f('%s:%s', this.host, this.port));
-
-  // Create a hash name
-  this.hashedName = hash.digest('hex');
-
-  // Reference state
-  var s = this.s;
-
-  // Add bson parser to options
-  options.bson = s.bson;
-
-  // Set error properties
-  getProperty(this, 'name', 'name', s.serverDetails, {});
-  getProperty(this, 'bson', 'bson', s.options, {});
-  getProperty(this, 'wireProtocolHandler', 'wireProtocolHandler', s.options, {});
-  getSingleProperty(this, 'id', s.id);
-
-  // Add auth providers
-  this.addAuthProvider('mongocr', new MongoCR());
-  this.addAuthProvider('x509', new X509());
-  this.addAuthProvider('plain', new Plain());
-  this.addAuthProvider('gssapi', new GSSAPI());
-  this.addAuthProvider('sspi', new SSPI());
-  this.addAuthProvider('scram-sha-1', new ScramSHA1());
+  // Curent ismaster
+  this.ismaster = null;
+  // Current ping time
+  this.lastIsMasterMS = -1;
+  // The monitoringProcessId
+  this.monitoringProcessId = null;
+  // Initial connection
+  this.initalConnect = true;
+  // Wire protocol handler, default to oldest known protocol handler
+  // this gets changed when the first ismaster is called.
+  this.wireProtocolHandler = new PreTwoSixWireProtocolSupport();
 }
 
 inherits(Server, EventEmitter);
 
-/**
- * Execute a command
- * @method
- * @param {string} type Type of BSON parser to use (c++ or js)
- */
-Server.prototype.setBSONParserType = function(type) {
-  var nBSON = null;
+Object.defineProperty(Server.prototype, 'type', {
+  enumerable:true, get: function() { return 'server'; }
+});
 
-  if(type == 'c++') {
-    nBSON = require('bson').native().BSON;
-  } else if(type == 'js') {
-    nBSON = require('bson').pure().BSON;
-  } else {
-    throw new MongoError(f("% parser not supported", type));
+Server.enableServerAccounting = function() {
+  serverAccounting = true;
+  servers = {};
+}
+
+Server.disableServerAccounting = function() {
+  serverAccounting = false;
+}
+
+Server.servers = function() {
+  return servers;
+}
+
+Object.defineProperty(Server.prototype, 'name', {
+  enumerable:true,
+  get: function() { return this.s.options.host + ":" + this.s.options.port; }
+});
+
+function configureWireProtocolHandler(self, ismaster) {
+  // 3.2 wire protocol handler
+  if(ismaster.maxWireVersion >= 4) {
+    return new ThreeTwoWireProtocolSupport(new TwoSixWireProtocolSupport());
   }
 
-  this.s.options.bson = new nBSON(bsonTypes);
+  // 2.6 wire protocol handler
+  if(ismaster.maxWireVersion >= 2) {
+    return new TwoSixWireProtocolSupport();
+  }
+
+  // 2.4 or earlier wire protocol handler
+  return new PreTwoSixWireProtocolSupport();
+}
+
+function disconnectHandler(self, type, ns, cmd, options, callback) {
+  // Topology is not connected, save the call in the provided store to be
+  // Executed at some point when the handler deems it's reconnected
+  if(!self.s.pool.isConnected() &amp;&amp; self.s.disconnectHandler != null &amp;&amp; !options.monitoring) {
+    self.s.disconnectHandler.add(type, ns, cmd, options, callback);
+    return true;
+  }
+
+  // If we have no connection error
+  if(!self.s.pool.isConnected()) {
+    callback(MongoError.create(f("no connection available to server %s", self.name)));
+    return true;
+  }
+}
+
+function monitoringProcess(self) {
+  return function() {
+    // console.log("---- monitoringProcess")
+    // Pool was destroyed do not continue process
+    if(self.s.pool.isDestroyed()) return;
+    // Emit monitoring Process event
+    self.emit('monitoring', self);
+    // Perform ismaster call
+    // Query options
+    var queryOptions = { numberToSkip: 0, numberToReturn: -1, checkKeys: false, slaveOk: true };
+    // Create a query instance
+    var query = new Query(self.s.bson, 'admin.$cmd', {ismaster:true}, queryOptions);
+    // Get start time
+    var start = new Date().getTime();
+    // Execute the ismaster query
+    self.s.pool.write(query.toBin(), {}, function(err, result) {
+      // Set initial lastIsMasterMS
+      self.lastIsMasterMS = new Date().getTime() - start;
+      if(self.s.pool.isDestroyed()) return;
+      // Update the ismaster view if we have a result
+      if(result) {
+        self.ismaster = result.result;
+      }
+      // Re-schedule the monitoring process
+      self.monitoringProcessId = setTimeout(monitoringProcess(self), self.s.monitoringInterval);
+    });
+  }
+}
+
+var eventHandler = function(self, event) {
+  return function(err) {
+    // Log information of received information if in info mode
+    if(self.s.logger.isInfo()) {
+      var object = err instanceof MongoError ? JSON.stringify(err) : {}
+      self.s.logger.info(f('server %s fired event %s out with message %s'
+        , self.name, event, object));
+    }
+
+    // Handle connect event
+    if(event == 'connect') {
+      // Issue an ismaster command at connect
+      // Query options
+      var queryOptions = { numberToSkip: 0, numberToReturn: -1, checkKeys: false, slaveOk: true };
+      // Create a query instance
+      var query = new Query(self.s.bson, 'admin.$cmd', {ismaster:true}, queryOptions);
+      // Get start time
+      var start = new Date().getTime();
+      // Execute the ismaster query
+      self.s.pool.write(query.toBin(), {}, function(err, result) {
+        // Set initial lastIsMasterMS
+        self.lastIsMasterMS = new Date().getTime() - start;
+        if(err) {
+          self.destroy();
+          if(self.listeners('error').length > 0) self.emit('error', err);
+          return;
+        }
+
+        // Ensure no error emitted after initial connect when reconnecting
+        self.initalConnect = false;
+        // Save the ismaster
+        self.ismaster = result.result;
+        // Add the correct wire protocol handler
+        self.wireProtocolHandler = configureWireProtocolHandler(self, self.ismaster);
+        // Have we defined self monitoring
+        if(self.s.monitoring) {
+          self.monitoringProcessId = setTimeout(monitoringProcess(self), self.s.monitoringInterval);
+        }
+
+        // Emit server description changed if something listening
+        sdam.emitServerDescriptionChanged(self, {
+          address: self.name, arbiters: [], hosts: [], passives: [], type: !self.s.inTopology ? 'Standalone' : sdam.getTopologyType(self)
+        });
+
+        // Emit topology description changed if something listening
+        sdam.emitTopologyDescriptionChanged(self, {
+          topologyType: 'Single', servers: [{address: self.name, arbiters: [], hosts: [], passives: [], type: 'Standalone'}]
+        });
+
+        // Log the ismaster if available
+        if(self.s.logger.isInfo()) {
+          self.s.logger.info(f('server %s connected with ismaster [%s]', self.name, JSON.stringify(self.ismaster)));
+        }
+
+        // Emit connect
+        self.emit('connect', self);
+      });
+    } else if(event == 'error' || event == 'parseError'
+      || event == 'close' || event == 'timeout' || event == 'reconnect'
+      || event == 'attemptReconnect' || 'reconnectFailed') {
+
+      // Remove server instance from accounting
+      if(serverAccounting &amp;&amp; ['close', 'timeout', 'error', 'parseError', 'reconnectFailed'].indexOf(event) != -1) {
+        // Emit toplogy opening event if not in topology
+        if(!self.s.inTopology) {
+          self.emit('topologyOpening', { topologyId: self.id });
+        }
+
+        delete servers[self.id];
+      }
+
+      // Reconnect failed return error
+      if(event == 'reconnectFailed') {
+        self.emit('reconnectFailed', err);
+        // Emit error if any listeners
+        if(self.listeners('error').length > 0) {
+          self.emit('error', err);
+        }
+        // Terminate
+        return;
+      }
+
+      // On first connect fail
+      if(self.s.pool.state == 'disconnected' &amp;&amp; self.initalConnect &amp;&amp; ['close', 'timeout', 'error', 'parseError'].indexOf(event) != -1) {
+        self.initalConnect = false;
+        return self.emit('error', new MongoError(f('failed to connect to server [%s] on first connect', self.name)));
+      }
+
+      // Reconnect event, emit the server
+      if(event == 'reconnect') {
+        return self.emit(event, self);
+      }
+
+      // Emit the event
+      self.emit(event, err);
+    }
+  }
 }
 
 /**
- * Reduce the poolSize to the provided max connections value
+ * Initiate server connect
  * @method
- * @param {number} maxConnections reduce the poolsize to maxConnections
+ * @param {array} [options.auth=null] Array of auth options to apply on connect
  */
-Server.prototype.capConnections = function(maxConnections) {
-  this.s.pool.capConnections(maxConnections);
+Server.prototype.connect = function(options) {
+  var self = this;
+  options = options || {};
+
+  // Set the connections
+  if(serverAccounting) servers[this.id] = this;
+
+  // Do not allow connect to be called on anything that's not disconnected
+  if(self.s.pool &amp;&amp; !self.s.pool.isDisconnected() &amp;&amp; !self.s.pool.isDestroyed()) {
+    throw MongoError.create(f('server instance in invalid state %s', self.s.state));
+  }
+
+  // Create a pool
+  self.s.pool = new Pool(Object.assign(self.s.options, options, {bson: this.s.bson}));
+
+  // Set up listeners
+  self.s.pool.on('close', eventHandler(self, 'close'));
+  self.s.pool.on('error', eventHandler(self, 'error'));
+  self.s.pool.on('timeout', eventHandler(self, 'timeout'));
+  self.s.pool.on('parseError', eventHandler(self, 'parseError'));
+  self.s.pool.on('connect', eventHandler(self, 'connect'));
+  self.s.pool.on('reconnect', eventHandler(self, 'reconnect'));
+  self.s.pool.on('reconnectFailed', eventHandler(self, 'reconnectFailed'));
+
+  // Emit toplogy opening event if not in topology
+  if(!self.s.inTopology) {
+    this.emit('topologyOpening', { topologyId: self.id });
+  }
+
+  // Emit opening server event
+  self.emit('serverOpening', {
+    topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.id,
+    address: self.name
+  });
+
+  // Connect with optional auth settings
+  if(options.auth) {
+    self.s.pool.connect.apply(self.s.pool, options.auth);
+  } else {
+    self.s.pool.connect();
+  }
+}
+
+/**
+ * Get the server description
+ * @method
+ * @return {object}
+*/
+Server.prototype.getDescription = function() {
+  var ismaster = this.ismaster || {};
+  var description = {
+    type: sdam.getTopologyType(this),
+    address: this.name,
+  };
+
+  // Add fields if available
+  if(ismaster.hosts) description.hosts = ismaster.hosts;
+  if(ismaster.arbiters) description.arbiters = ismaster.arbiters;
+  if(ismaster.passives) description.passives = ismaster.passives;
+  if(ismaster.setName) description.setName = ismaster.setName;
+  return description;
 }
 
 /**
@@ -1605,68 +1324,15 @@ Server.prototype.capConnections = function(maxConnections) {
  * @return {object}
  */
 Server.prototype.lastIsMaster = function() {
-  return this.s.ismaster;
+  return this.ismaster;
 }
 
 /**
- * Initiate server connect
+ * Unref all connections belong to this server
  * @method
  */
-Server.prototype.connect = function(_options) {
-  var self = this;
-  // Set server specific settings
-  _options = _options || {}
-  // Set the promotion
-  if(typeof _options.promoteLongs == 'boolean')  {
-    self.s.options.promoteLongs = _options.promoteLongs;
-  }
-
-  // Destroy existing pool
-  if(self.s.pool) {
-    self.s.pool.destroy();
-    self.s.pool = null;
-  }
-
-  // Set the state to connection
-  self.s.state = CONNECTING;
-  // Create a new connection pool
-  if(!self.s.pool) {
-    self.s.options.messageHandler = messageHandler(self, self.s);
-    self.s.pool = new Pool(self.s.options);
-  }
-
-  // Add all the event handlers
-  self.s.pool.once('timeout', timeoutHandler(self, self.s));
-  self.s.pool.once('close', closeHandler(self, self.s));
-  self.s.pool.once('error', errorHandler(self, self.s));
-  self.s.pool.once('connect', connectHandler(self, self.s));
-  self.s.pool.once('parseError', fatalErrorHandler(self, self.s));
-
-  // Connect the pool
-  self.s.pool.connect();
-}
-
-/**
- * Destroy the server connection
- * @method
- */
-Server.prototype.destroy = function(emitClose, emitDestroy) {
-  var self = this;
-  if(self.s.logger.isDebug()) self.s.logger.debug(f('destroy called on server %s', self.name));
-
-  // Emit close
-  if(emitClose &amp;&amp; self.listeners('close').length > 0) {
-    self.emit('close', null, self);
-  }
-
-  // Emit destroy event
-  if(emitDestroy) self.emit('destroy', self);
-  // Set state as destroyed
-  self.s.state = DESTROYED;
-  // Close the pool
-  self.s.pool.destroy();
-  // Flush out all the callbacks
-  if(self.s.callbacks) self.s.callbacks.flush(new MongoError(f("server %s sockets closed", self.name)));
+Server.prototype.unref = function() {
+  this.s.pool.unref();
 }
 
 /**
@@ -1675,9 +1341,8 @@ Server.prototype.destroy = function(emitClose, emitDestroy) {
  * @return {boolean}
  */
 Server.prototype.isConnected = function() {
-  var self = this;
-  if(self.s.pool) return self.s.pool.isConnected();
-  return false;
+  if(!this.s.pool) return false;
+  return this.s.pool.isConnected();
 }
 
 /**
@@ -1686,113 +1351,21 @@ Server.prototype.isConnected = function() {
  * @return {boolean}
  */
 Server.prototype.isDestroyed = function() {
-  return this.s.state == DESTROYED;
+  if(!this.s.pool) return false;
+  return this.s.pool.isDestroyed();
 }
 
-var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAll, callback) {
-  // Create a query instance
-  var query = new Query(self.s.bson, ns, cmd, queryOptions);
-  // Set slave OK
-  query.slaveOk = slaveOk(options.readPreference);
+function basicWriteValidations(self, options) {
+  if(!self.s.pool) return MongoError.create('server instance is not connected');
+  if(self.s.pool.isDestroyed()) return MongoError.create('server instance pool was destroyed');
+}
 
-  // Notify query start to any read Preference strategies
-  if(self.s.readPreferenceStrategies != null)
-    notifyStrategies(self, self.s, 'startOperation', [self, query, new Date()]);
+function basicReadValidations(self, options) {
+  basicWriteValidations(self, options);
 
-  // Get a connection (either passed or from the pool)
-  var connection = options.connection || self.s.pool.get(options);
-
-  // Raw BSON response
-  var raw = typeof options.raw == 'boolean' ? options.raw : false;
-
-  // Double check if we have a valid connection
-  // Checking that the connection exists to avoid an uncaught exception in case there is an issue with the pool
-  if(!(connection &amp;&amp; connection.isConnected())) {
-    return callback(new MongoError(f("no connection available to server %s", self.name)));
+  if(options.readPreference &amp;&amp; !(options.readPreference instanceof ReadPreference)) {
+    throw new Error("readPreference must be an instance of ReadPreference");
   }
-
-  // Print cmd and execution connection if in debug mode for logging
-  if(self.s.logger.isDebug()) {
-    var json = connection.toJSON();
-    self.s.logger.debug(f('cmd [%s] about to be executed on connection with id %s at %s:%s', JSON.stringify(cmd), json.id, json.host, json.port));
-  }
-
-  // Execute multiple queries
-  if(onAll) {
-    var connections = self.s.pool.getAll();
-    var total = connections.length;
-    // We have an error
-    var error = null;
-    // Execute on all connections
-    for(var i = 0; i &lt; connections.length; i++) {
-      try {
-        query.incRequestId();
-        connections[i].write(query.toBin());
-      } catch(err) {
-        total = total - 1;
-        if(total == 0) return callback(MongoError.create(err));
-      }
-
-      // Command callback
-      var commandCallback = function(err, result) {
-        if(err) error = err;
-        total = total - 1;
-
-        // Done
-        if(total == 0) {
-          // Notify end of command
-          notifyStrategies(self, self.s, 'endOperation', [self, error, result, new Date()]);
-          if(error) return callback(MongoError.create(error));
-
-          // Add the connection details
-          result.hashedName = connection.hashedName;
-
-          // Execute callback, catch and rethrow if needed
-          try { callback(null, new CommandResult(options.fullResult ? result : result.documents[0], connections)); }
-          catch(err) { process.nextTick(function() { throw err}); }
-        }
-      };
-
-      // Return raw BSON docs
-      if(raw) commandCallback.raw = true;
-
-      // Register the callback
-      self.s.callbacks.register(query.requestId, callback);
-    }
-
-    return;
-  }
-
-  // Execute a single command query
-  try {
-    connection.write(query.toBin());
-  } catch(err) {
-    return callback(MongoError.create(err));
-  }
-
-  // Command callback
-  var commandCallback = function(err, result) {
-    // Notify end of command
-    notifyStrategies(self, self.s, 'endOperation', [self, err, result, new Date()]);
-    if(err) return callback(err);
-    if(result.documents[0]['$err']
-      || result.documents[0]['errmsg']
-      || result.documents[0]['err']
-      || result.documents[0]['code']) return callback(MongoError.create(result.documents[0]));
-
-      // Add the connection details
-      result.hashedName = connection.hashedName;
-
-      // Execute callback, catch and rethrow if needed
-      try { callback(null, new CommandResult(options.fullResult ? result : result.documents[0], connection)); }
-      catch(err) { process.nextTick(function() { throw err}); }
-  };
-
-  // Return raw BSON docs
-  if(raw) commandCallback.raw = true;
-
-  // Register the callback
-  self.s.callbacks.register(query.requestId, commandCallback);
 }
 
 /**
@@ -1801,169 +1374,49 @@ var executeSingleOperation = function(self, ns, cmd, queryOptions, options, onAl
  * @param {string} ns The MongoDB fully qualified namespace (ex: db1.collection1)
  * @param {object} cmd The command hash
  * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
- * @param {Connection} [options.connection] Specify connection object to execute command against
  * @param {Boolean} [options.serializeFunctions=false] Specify if functions on an object should be serialized.
  * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {Boolean} [options.fullResult=false] Return the full envelope instead of just the result document.
  * @param {opResultCallback} callback A callback function
  */
 Server.prototype.command = function(ns, cmd, options, callback) {
-  if(typeof options == 'function') callback = options, options = {};
   var self = this;
-  if(this.s.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
-  // Ensure we have no options
-  options = options || {};
-
-  // Do we have a read Preference it need to be of type ReadPreference
-  if(options.readPreference &amp;&amp; !(options.readPreference instanceof ReadPreference)) {
-    throw new Error("readPreference must be an instance of ReadPreference");
-  }
+  if(typeof options == 'function') callback = options, options = {}, options = options || {};
+  var result = basicReadValidations(self, options);
+  if(result) return callback(result);
 
   // Debug log
   if(self.s.logger.isDebug()) self.s.logger.debug(f('executing command [%s] against %s', JSON.stringify({
     ns: ns, cmd: cmd, options: debugOptions(debugFields, options)
   }), self.name));
 
-  // Topology is not connected, save the call in the provided store to be
-  // Executed at some point when the handler deems it's reconnected
-  if(!self.isConnected() &amp;&amp; self.s.disconnectHandler != null) {
-    callback = bindToCurrentDomain(callback);
-    return self.s.disconnectHandler.add('command', ns, cmd, options, callback);
-  }
-
-  // If we have no connection error
-  if(!self.s.pool.isConnected()) {
-    return callback(new MongoError(f("no connection available to server %s", self.name)));
-  }
-
-  // Execute on all connections
-  var onAll = typeof options.onAll == 'boolean' ? options.onAll : false;
-
-  // Check keys
-  var checkKeys = typeof options.checkKeys == 'boolean' ? options.checkKeys: false;
-
-  // Serialize function
-  var serializeFunctions = typeof options.serializeFunctions == 'boolean' ? options.serializeFunctions : false;
-
-  // Ignore undefined values
-  var ignoreUndefined = typeof options.ignoreUndefined == 'boolean' ? options.ignoreUndefined : false;
-
-  // Raw BSON response
-  var raw = typeof options.raw == 'boolean' ? options.raw : false;
+  // If we are not connected or have a disconnectHandler specified
+  if(disconnectHandler(self, 'command', ns, cmd, options, callback)) return;
 
   // Query options
   var queryOptions = {
-    numberToSkip: 0, numberToReturn: -1, checkKeys: checkKeys
+    numberToSkip: 0,
+    numberToReturn: -1,
+    checkKeys: typeof options.checkKeys == 'boolean' ? options.checkKeys: false,
+    serializeFunctions: typeof options.serializeFunctions == 'boolean' ? options.serializeFunctions : false,
+    ignoreUndefined: typeof options.ignoreUndefined == 'boolean' ? options.ignoreUndefined : false
   };
 
-  // Set up the serialize functions and ignore undefined
-  if(serializeFunctions) queryOptions.serializeFunctions = serializeFunctions;
-  if(ignoreUndefined) queryOptions.ignoreUndefined = ignoreUndefined;
+  // Create a query instance
+  var query = new Query(self.s.bson, ns, cmd, queryOptions);
+  // Set slave OK of the query
+  query.slaveOk = options.readPreference ? options.readPreference.slaveOk() : false;
 
-  // Single operation execution
-  if(!Array.isArray(cmd)) {
-    return executeSingleOperation(self, ns, cmd, queryOptions, options, onAll, callback);
-  }
+  // Write options
+  var writeOptions = {
+    raw: typeof options.raw == 'boolean' ? options.raw : false,
+    promoteLongs: typeof options.promoteLongs == 'boolean' ? options.promoteLongs : true,
+    command: true,
+    monitoring: typeof options.monitoring == 'boolean' ? options.monitoring : false,
+  };
 
-  // Build commands for each of the instances
-  var queries = new Array(cmd.length);
-  for(var i = 0; i &lt; cmd.length; i++) {
-    queries[i] = new Query(self.s.bson, ns, cmd[i], queryOptions);
-    queries[i].slaveOk = slaveOk(options.readPreference);
-  }
-
-  // Notify query start to any read Preference strategies
-  if(self.s.readPreferenceStrategies != null) {
-    notifyStrategies(self, self.s, 'startOperation', [self, queries, new Date()]);
-  }
-
-  // Get a connection (either passed or from the pool)
-  var connection = options.connection || self.s.pool.get(options);
-
-  // Double check if we have a valid connection
-  if(!connection.isConnected()) {
-    return callback(new MongoError(f("no connection available to server %s", self.name)));
-  }
-
-  // Print cmd and execution connection if in debug mode for logging
-  if(self.s.logger.isDebug()) {
-    var json = connection.toJSON();
-    self.s.logger.debug(f('cmd [%s] about to be executed on connection with id %s at %s:%s', JSON.stringify(queries), json.id, json.host, json.port));
-  }
-
-  // Canceled operations
-  var canceled = false;
-  // Number of operations left
-  var operationsLeft = queries.length;
-  // Results
-  var results = [];
-
-  // We need to nest the callbacks
-  for(var i = 0; i &lt; queries.length; i++) {
-    // Get the query object
-    var query = queries[i];
-
-    // Execute a single command query
-    try {
-      connection.write(query.toBin());
-    } catch(err) {
-      return callback(MongoError.create(err));
-    }
-
-    // Command callback
-    var commandCallback = function(err, result) {
-      // If it's canceled ignore the operation
-      if(canceled) return;
-      // Update the current index
-      operationsLeft = operationsLeft - 1;
-
-      // If we have an error cancel the operation
-      if(err) {
-        canceled = true;
-        return callback(err);
-      }
-
-      // Return the result
-      if(result.documents[0]['$err']
-        || result.documents[0]['errmsg']
-        || result.documents[0]['err']
-        || result.documents[0]['code']) {
-
-        // Set to canceled
-        canceled = true;
-        // Return the error
-        return callback(MongoError.create(result.documents[0]));
-      }
-
-      // Add the connection details
-      result.hashedName = connection.hashedName;
-
-      // Push results
-      results.push(options.fullResult ? result : result.documents[0]);
-
-      // We are done, return the result
-      if(operationsLeft == 0) {
-        // Notify end of command
-        notifyStrategies(self, self.s, 'endOperation', [self, err, result, new Date()]);
-
-        // Turn into command results
-        var commandResults = new Array(results.length);
-        for(var i = 0; i &lt; results.length; i++) {
-          commandResults[i] = new CommandResult(results[i], connection);
-        }
-
-        // Execute callback, catch and rethrow if needed
-        try { callback(null, commandResults); }
-        catch(err) { process.nextTick(function() { throw err}); }
-      }
-    };
-
-    // Do we want raw BSON returned
-    if(raw) commandResults.raw = true;
-
-    // Register the callback
-    self.s.callbacks.register(query.requestId, commandCallback);
-  }
+  // Write the operation to the pool
+  self.s.pool.write(query.toBin(), writeOptions, callback);
 }
 
 /**
@@ -1978,20 +1431,19 @@ Server.prototype.command = function(ns, cmd, options, callback) {
  * @param {opResultCallback} callback A callback function
  */
 Server.prototype.insert = function(ns, ops, options, callback) {
-  if(typeof options == 'function') callback = options, options = {};
   var self = this;
-  if(this.s.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
-  // Topology is not connected, save the call in the provided store to be
-  // Executed at some point when the handler deems it's reconnected
-  if(!self.isConnected() &amp;&amp; self.s.disconnectHandler != null) {
-    callback = bindToCurrentDomain(callback);
-    return self.s.disconnectHandler.add('insert', ns, ops, options, callback);
-  }
+  if(typeof options == 'function') callback = options, options = {}, options = options || {};
+  var result = basicWriteValidations(self, options);
+  if(result) return callback(result);
+
+  // If we are not connected or have a disconnectHandler specified
+  if(disconnectHandler(self, 'insert', ns, ops, options, callback)) return;
 
   // Setup the docs as an array
   ops = Array.isArray(ops) ? ops : [ops];
+
   // Execute write
-  return self.s.wireProtocolHandler.insert(self, self.s.ismaster, ns, self.s.bson, self.s.pool, self.s.callbacks, ops, options, callback);
+  return self.wireProtocolHandler.insert(self.s.pool, self.ismaster, ns, self.s.bson, ops, options, callback);
 }
 
 /**
@@ -2006,22 +1458,18 @@ Server.prototype.insert = function(ns, ops, options, callback) {
  * @param {opResultCallback} callback A callback function
  */
 Server.prototype.update = function(ns, ops, options, callback) {
-  if(typeof options == 'function') callback = options, options = {};
   var self = this;
-  if(this.s.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
+  if(typeof options == 'function') callback = options, options = {}, options = options || {};
+  var result = basicWriteValidations(self, options);
+  if(result) return callback(result);
 
-  // Topology is not connected, save the call in the provided store to be
-  // Executed at some point when the handler deems it's reconnected
-  if(!self.isConnected() &amp;&amp; self.s.disconnectHandler != null) {
-    callback = bindToCurrentDomain(callback);
-    return self.s.disconnectHandler.add('update', ns, ops, options, callback);
-  }
+  // If we are not connected or have a disconnectHandler specified
+  if(disconnectHandler(self, 'update', ns, ops, options, callback)) return;
 
   // Setup the docs as an array
   ops = Array.isArray(ops) ? ops : [ops];
-
   // Execute write
-  return self.s.wireProtocolHandler.update(self, self.s.ismaster, ns, self.s.bson, self.s.pool, self.s.callbacks, ops, options, callback);
+  return self.wireProtocolHandler.update(self.s.pool, self.ismaster, ns, self.s.bson, ops, options, callback);
 }
 
 /**
@@ -2036,178 +1484,19 @@ Server.prototype.update = function(ns, ops, options, callback) {
  * @param {opResultCallback} callback A callback function
  */
 Server.prototype.remove = function(ns, ops, options, callback) {
-  if(typeof options == 'function') callback = options, options = {};
   var self = this;
-  if(this.s.state == DESTROYED) return callback(new MongoError(f('topology was destroyed')));
-  // Topology is not connected, save the call in the provided store to be
-  // Executed at some point when the handler deems it's reconnected
-  if(!self.isConnected() &amp;&amp; self.s.disconnectHandler != null) {
-    callback = bindToCurrentDomain(callback);
-    return self.s.disconnectHandler.add('remove', ns, ops, options, callback);
-  }
+  if(typeof options == 'function') callback = options, options = {}, options = options || {};
+  var result = basicWriteValidations(self, options);
+  if(result) return callback(result);
+
+  // If we are not connected or have a disconnectHandler specified
+  if(disconnectHandler(self, 'remove', ns, ops, options, callback)) return;
 
   // Setup the docs as an array
   ops = Array.isArray(ops) ? ops : [ops];
   // Execute write
-  return self.s.wireProtocolHandler.remove(self, self.s.ismaster, ns, self.s.bson, self.s.pool, self.s.callbacks, ops, options, callback);
+  return self.wireProtocolHandler.remove(self.s.pool, self.ismaster, ns, self.s.bson, ops, options, callback);
 }
-
-/**
- * Authenticate using a specified mechanism
- * @method
- * @param {string} mechanism The Auth mechanism we are invoking
- * @param {string} db The db we are invoking the mechanism against
- * @param {...object} param Parameters for the specific mechanism
- * @param {authResultCallback} callback A callback function
- */
-Server.prototype.auth = function(mechanism, db) {
-  var self = this;
-  var args = Array.prototype.slice.call(arguments, 2);
-  var callback = args.pop();
-
-  // If we don't have the mechanism fail
-  if(self.s.authProviders[mechanism] == null &amp;&amp; mechanism != 'default')
-    throw new MongoError(f("auth provider %s does not exist", mechanism));
-
-  // If we have the default mechanism we pick mechanism based on the wire
-  // protocol max version. If it's >= 3 then scram-sha1 otherwise mongodb-cr
-  if(mechanism == 'default' &amp;&amp; self.s.ismaster &amp;&amp; self.s.ismaster.maxWireVersion >= 3) {
-    mechanism = 'scram-sha-1';
-  } else if(mechanism == 'default') {
-    mechanism = 'mongocr';
-  }
-
-  // Actual arguments
-  var finalArguments = [self, self.s.pool, db].concat(args.slice(0)).concat([function(err, r) {
-    if(err) return callback(err);
-    if(!r) return callback(new MongoError('could not authenticate'));
-    callback(null, new Session({}, self));
-  }]);
-
-  // Let's invoke the auth mechanism
-  self.s.authProviders[mechanism].auth.apply(self.s.authProviders[mechanism], finalArguments);
-}
-
-//
-// Plugin methods
-//
-
-/**
- * Add custom read preference strategy
- * @method
- * @param {string} name Name of the read preference strategy
- * @param {object} strategy Strategy object instance
- */
-Server.prototype.addReadPreferenceStrategy = function(name, strategy) {
-  var self = this;
-  if(self.s.readPreferenceStrategies == null) self.s.readPreferenceStrategies = {};
-  self.s.readPreferenceStrategies[name] = strategy;
-}
-
-/**
- * Add custom authentication mechanism
- * @method
- * @param {string} name Name of the authentication mechanism
- * @param {object} provider Authentication object instance
- */
-Server.prototype.addAuthProvider = function(name, provider) {
-  var self = this;
-  self.s.authProviders[name] = provider;
-}
-
-/**
- * Compare two server instances
- * @method
- * @param {Server} server Server to compare equality against
- * @return {boolean}
- */
-Server.prototype.equals = function(server) {
-  if(typeof server == 'string') return server == this.name;
-
-  if(server &amp;&amp; server.name) {
-    return server.name == this.name;
-  }
-
-  return false;
-}
-
-/**
- * All raw connections
- * @method
- * @return {Connection[]}
- */
-Server.prototype.connections = function() {
-  return this.s.pool.getAll();
-}
-
-/**
- * Get server
- * @method
- * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
- * @return {Server}
- */
-Server.prototype.getServer = function(options) {
-  return this;
-}
-
-/**
- * Get connection
- * @method
- * @param {ReadPreference} [options.readPreference] Specify read preference if command supports it
- * @return {Connection}
- */
-Server.prototype.getConnection = function(options) {
-  return this.s.pool.get();
-}
-
-/**
- * Get callbacks object
- * @method
- * @return {Callbacks}
- */
-Server.prototype.getCallbacks = function() {
-  return this.s.callbacks;
-}
-
-/**
- * Name of BSON parser currently used
- * @method
- * @return {string}
- */
-Server.prototype.parserType = function() {
-  var s = this.s;
-  if(s.options.bson.serialize.toString().indexOf('[native code]') != -1)
-    return 'c++';
-  return 'js';
-}
-
-// // Command
-// {
-//     find: ns
-//   , query: &lt;object>
-//   , limit: &lt;n>
-//   , fields: &lt;object>
-//   , skip: &lt;n>
-//   , hint: &lt;string>
-//   , explain: &lt;boolean>
-//   , snapshot: &lt;boolean>
-//   , batchSize: &lt;n>
-//   , returnKey: &lt;boolean>
-//   , maxScan: &lt;n>
-//   , min: &lt;n>
-//   , max: &lt;n>
-//   , showDiskLoc: &lt;boolean>
-//   , comment: &lt;string>
-//   , maxTimeMS: &lt;n>
-//   , raw: &lt;boolean>
-//   , readPreference: &lt;ReadPreference>
-//   , tailable: &lt;boolean>
-//   , oplogReplay: &lt;boolean>
-//   , noCursorTimeout: &lt;boolean>
-//   , awaitdata: &lt;boolean>
-//   , exhaust: &lt;boolean>
-//   , partial: &lt;boolean>
-// }
 
 /**
  * Get a new cursor
@@ -2231,6 +1520,149 @@ Server.prototype.cursor = function(ns, cmd, cursorOptions) {
 }
 
 /**
+ * Logout from a database
+ * @method
+ * @param {string} db The db we are logging out from
+ * @param {authResultCallback} callback A callback function
+ */
+Server.prototype.logout = function(dbName, callback) {
+  this.s.pool.logout(dbName, callback);
+}
+
+/**
+ * Authenticate using a specified mechanism
+ * @method
+ * @param {string} mechanism The Auth mechanism we are invoking
+ * @param {string} db The db we are invoking the mechanism against
+ * @param {...object} param Parameters for the specific mechanism
+ * @param {authResultCallback} callback A callback function
+ */
+Server.prototype.auth = function(mechanism, db) {
+  var self = this;
+
+  // If we have the default mechanism we pick mechanism based on the wire
+  // protocol max version. If it's >= 3 then scram-sha1 otherwise mongodb-cr
+  if(mechanism == 'default' &amp;&amp; self.ismaster &amp;&amp; self.ismaster.maxWireVersion >= 3) {
+    mechanism = 'scram-sha-1';
+  } else if(mechanism == 'default') {
+    mechanism = 'mongocr';
+  }
+
+  // Slice all the arguments off
+  var args = Array.prototype.slice.call(arguments, 0);
+  // Set the mechanism
+  args[0] = mechanism;
+  // Get the callback
+  var callback = args[args.length - 1];
+
+  // If we are not connected or have a disconnectHandler specified
+  //function disconnectHandler(self, type, ns, cmd, options, callback) {
+  if(disconnectHandler(self, 'auth', db, args, {}, callback)) {
+    return;
+  }
+
+  // Do not authenticate if we are an arbiter
+  if(this.lastIsMaster() &amp;&amp; this.lastIsMaster().arbiterOnly) {
+    return callback(null, true);
+  }
+
+  // Apply the arguments to the pool
+  self.s.pool.auth.apply(self.s.pool, args);
+}
+
+/**
+ * Compare two server instances
+ * @method
+ * @param {Server} server Server to compare equality against
+ * @return {boolean}
+ */
+Server.prototype.equals = function(server) {
+  if(typeof server == 'string') return this.name == server;
+  if(server.name) return this.name == server.name;
+  return false;
+}
+
+/**
+ * All raw connections
+ * @method
+ * @return {Connection[]}
+ */
+Server.prototype.connections = function() {
+  return this.s.pool.allConnections();
+}
+
+/**
+ * Get server
+ * @method
+ * @return {Server}
+ */
+Server.prototype.getServer = function() {
+  return this;
+}
+
+/**
+ * Get connection
+ * @method
+ * @return {Connection}
+ */
+Server.prototype.getConnection = function() {
+  return this.s.pool.get();
+}
+
+var listeners = ['close', 'error', 'timeout', 'parseError', 'connect'];
+
+/**
+ * Destroy the server connection
+ * @method
+ * @param {boolean} [options.emitClose=false] Emit close event on destroy
+ * @param {boolean} [options.emitDestroy=false] Emit destroy event on destroy
+ */
+Server.prototype.destroy = function(options) {
+  options = options || {};
+  var self = this;
+
+  // Set the connections
+  if(serverAccounting) delete servers[this.id];
+
+  // Destroy the monitoring process if any
+  if(this.monitoringProcessId) {
+    clearTimeout(this.monitoringProcessId);
+  }
+
+  // Emit close event
+  if(options.emitClose) {
+    self.emit('close', self);
+  }
+
+  // Emit destroy event
+  if(options.emitDestroy) {
+    self.emit('destroy', self);
+  }
+
+  // Remove all listeners
+  listeners.forEach(function(event) {
+    self.s.pool.removeAllListeners(event);
+  });
+
+  // Emit opening server event
+  if(self.listeners('serverClosed').length > 0) self.emit('serverClosed', {
+    topologyId: self.s.topologyId != -1 ? self.s.topologyId : self.id, address: self.name
+  });
+
+  // Emit toplogy opening event if not in topology
+  if(self.listeners('topologyClosed').length > 0 &amp;&amp; !self.s.inTopology) {
+    self.emit('topologyClosed', { topologyId: self.id });
+  }
+
+  if(self.s.logger.isDebug()) {
+    self.s.logger.debug(f('destroy called on server %s', self.name));
+  }
+
+  // Destroy the pool
+  this.s.pool.destroy();
+}
+
+/**
  * A server connect event, used to verify that the connection is up and running
  *
  * @event Server#connect
@@ -2238,54 +1670,80 @@ Server.prototype.cursor = function(ns, cmd, cursorOptions) {
  */
 
 /**
- * The server connection closed, all pool connections closed
- *
- * @event Server#close
- * @type {Server}
- */
-
-/**
- * The server connection caused an error, all pool connections closed
- *
- * @event Server#error
- * @type {Server}
- */
-
-/**
- * The server connection timed out, all pool connections closed
- *
- * @event Server#timeout
- * @type {Server}
- */
-
-/**
- * The driver experienced an invalid message, all pool connections closed
- *
- * @event Server#parseError
- * @type {Server}
- */
-
-/**
- * The server reestablished the connection
+ * A server reconnect event, used to verify that the server topology has reconnected
  *
  * @event Server#reconnect
  * @type {Server}
  */
 
 /**
- * This is an insert result callback
+ * A server opening SDAM monitoring event
  *
- * @callback opResultCallback
- * @param {error} error An error object. Set to null if no error present
- * @param {CommandResult} command result
+ * @event Server#serverOpening
+ * @type {object}
  */
 
 /**
- * This is an authentication result callback
+ * A server closed SDAM monitoring event
  *
- * @callback authResultCallback
- * @param {error} error An error object. Set to null if no error present
- * @param {Session} an authenticated session
+ * @event Server#serverClosed
+ * @type {object}
+ */
+
+/**
+ * A server description SDAM change monitoring event
+ *
+ * @event Server#serverDescriptionChanged
+ * @type {object}
+ */
+
+/**
+ * A topology open SDAM event
+ *
+ * @event Server#topologyOpening
+ * @type {object}
+ */
+
+/**
+ * A topology closed SDAM event
+ *
+ * @event Server#topologyClosed
+ * @type {object}
+ */
+
+/**
+ * A topology structure SDAM change event
+ *
+ * @event Server#topologyDescriptionChanged
+ * @type {object}
+ */
+
+/**
+ * Server reconnect failed
+ *
+ * @event Server#reconnectFailed
+ * @type {Error}
+ */
+
+/**
+ * Server connection pool closed
+ *
+ * @event Server#close
+ * @type {object}
+ */
+
+/**
+ * Server connection pool caused an error
+ *
+ * @event Server#error
+ * @type {Error}
+ */
+
+/**
+ * Server destroyed was called
+ *
+ * @event Server#destroy
+ * @type {Server}
  */
 
 module.exports = Server;
@@ -2318,7 +1776,7 @@ module.exports = Server;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Mon May 30 2016 18:28:06 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Fri Jul 08 2016 13:30:24 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

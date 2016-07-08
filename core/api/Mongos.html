@@ -172,6 +172,8 @@
             
                 <li data-name="Connection#toString"><a href="Connection.html#toString">toString</a></li>
             
+                <li data-name="Connection#unref"><a href="Connection.html#unref">unref</a></li>
+            
                 <li data-name="Connection#write"><a href="Connection.html#write">write</a></li>
             
             </ul>
@@ -309,6 +311,10 @@
                 <li data-name="Logger#isError"><a href="Logger.html#isError">isError</a></li>
             
                 <li data-name="Logger#isInfo"><a href="Logger.html#isInfo">isInfo</a></li>
+            
+                <li data-name="Logger#isWarn"><a href="Logger.html#isWarn">isWarn</a></li>
+            
+                <li data-name="Logger#warn"><a href="Logger.html#warn">warn</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -495,10 +501,6 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="Mongos#addAuthProvider"><a href="Mongos.html#addAuthProvider">addAuthProvider</a></li>
-            
-                <li data-name="Mongos#addReadPreferenceStrategy"><a href="Mongos.html#addReadPreferenceStrategy">addReadPreferenceStrategy</a></li>
-            
                 <li data-name="Mongos#auth"><a href="Mongos.html#auth">auth</a></li>
             
                 <li data-name="Mongos#command"><a href="Mongos.html#command">command</a></li>
@@ -511,8 +513,6 @@
             
                 <li data-name="Mongos#destroy"><a href="Mongos.html#destroy">destroy</a></li>
             
-                <li data-name="Mongos#getConnection"><a href="Mongos.html#getConnection">getConnection</a></li>
-            
                 <li data-name="Mongos#getServer"><a href="Mongos.html#getServer">getServer</a></li>
             
                 <li data-name="Mongos#insert"><a href="Mongos.html#insert">insert</a></li>
@@ -523,11 +523,11 @@
             
                 <li data-name="Mongos#lastIsMaster"><a href="Mongos.html#lastIsMaster">lastIsMaster</a></li>
             
-                <li data-name="Mongos#parserType"><a href="Mongos.html#parserType">parserType</a></li>
+                <li data-name="Mongos#logout"><a href="Mongos.html#logout">logout</a></li>
             
                 <li data-name="Mongos#remove"><a href="Mongos.html#remove">remove</a></li>
             
-                <li data-name="Mongos#setBSONParserType"><a href="Mongos.html#setBSONParserType">setBSONParserType</a></li>
+                <li data-name="Mongos#unref"><a href="Mongos.html#unref">unref</a></li>
             
                 <li data-name="Mongos#update"><a href="Mongos.html#update">update</a></li>
             
@@ -536,11 +536,35 @@
             
             <span class="subtitle">Events</span>
             
+                <li data-name="Mongos#event:all"><a href="Mongos.html#event:all">all</a></li>
+            
                 <li data-name="Mongos#event:connect"><a href="Mongos.html#event:connect">connect</a></li>
+            
+                <li data-name="Mongos#event:fullsetup"><a href="Mongos.html#event:fullsetup">fullsetup</a></li>
             
                 <li data-name="Mongos#event:joined"><a href="Mongos.html#event:joined">joined</a></li>
             
                 <li data-name="Mongos#event:left"><a href="Mongos.html#event:left">left</a></li>
+            
+                <li data-name="Mongos#event:reconnect"><a href="Mongos.html#event:reconnect">reconnect</a></li>
+            
+                <li data-name="Mongos#event:serverClosed"><a href="Mongos.html#event:serverClosed">serverClosed</a></li>
+            
+                <li data-name="Mongos#event:serverDescriptionChanged"><a href="Mongos.html#event:serverDescriptionChanged">serverDescriptionChanged</a></li>
+            
+                <li data-name="Mongos#event:serverHearbeatFailed"><a href="Mongos.html#event:serverHearbeatFailed">serverHearbeatFailed</a></li>
+            
+                <li data-name="Mongos#event:serverHeartbeatStarted"><a href="Mongos.html#event:serverHeartbeatStarted">serverHeartbeatStarted</a></li>
+            
+                <li data-name="Mongos#event:serverHeartbeatSucceeded"><a href="Mongos.html#event:serverHeartbeatSucceeded">serverHeartbeatSucceeded</a></li>
+            
+                <li data-name="Mongos#event:serverOpening"><a href="Mongos.html#event:serverOpening">serverOpening</a></li>
+            
+                <li data-name="Mongos#event:topologyClosed"><a href="Mongos.html#event:topologyClosed">topologyClosed</a></li>
+            
+                <li data-name="Mongos#event:topologyDescriptionChanged"><a href="Mongos.html#event:topologyDescriptionChanged">topologyDescriptionChanged</a></li>
+            
+                <li data-name="Mongos#event:topologyOpening"><a href="Mongos.html#event:topologyOpening">topologyOpening</a></li>
             
             </ul>
         </li>
@@ -632,10 +656,6 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="ReplSet#addAuthProvider"><a href="ReplSet.html#addAuthProvider">addAuthProvider</a></li>
-            
-                <li data-name="ReplSet#addReadPreferenceStrategy"><a href="ReplSet.html#addReadPreferenceStrategy">addReadPreferenceStrategy</a></li>
-            
                 <li data-name="ReplSet#auth"><a href="ReplSet.html#auth">auth</a></li>
             
                 <li data-name="ReplSet#command"><a href="ReplSet.html#command">command</a></li>
@@ -648,9 +668,9 @@
             
                 <li data-name="ReplSet#destroy"><a href="ReplSet.html#destroy">destroy</a></li>
             
-                <li data-name="ReplSet#getConnection"><a href="ReplSet.html#getConnection">getConnection</a></li>
-            
                 <li data-name="ReplSet#getServer"><a href="ReplSet.html#getServer">getServer</a></li>
+            
+                <li data-name="ReplSet#getServers"><a href="ReplSet.html#getServers">getServers</a></li>
             
                 <li data-name="ReplSet#insert"><a href="ReplSet.html#insert">insert</a></li>
             
@@ -660,11 +680,11 @@
             
                 <li data-name="ReplSet#lastIsMaster"><a href="ReplSet.html#lastIsMaster">lastIsMaster</a></li>
             
-                <li data-name="ReplSet#parserType"><a href="ReplSet.html#parserType">parserType</a></li>
+                <li data-name="ReplSet#logout"><a href="ReplSet.html#logout">logout</a></li>
             
                 <li data-name="ReplSet#remove"><a href="ReplSet.html#remove">remove</a></li>
             
-                <li data-name="ReplSet#setBSONParserType"><a href="ReplSet.html#setBSONParserType">setBSONParserType</a></li>
+                <li data-name="ReplSet#unref"><a href="ReplSet.html#unref">unref</a></li>
             
                 <li data-name="ReplSet#update"><a href="ReplSet.html#update">update</a></li>
             
@@ -673,13 +693,37 @@
             
             <span class="subtitle">Events</span>
             
+                <li data-name="ReplSet#event:all"><a href="ReplSet.html#event:all">all</a></li>
+            
                 <li data-name="ReplSet#event:connect"><a href="ReplSet.html#event:connect">connect</a></li>
             
-                <li data-name="ReplSet#event:ha"><a href="ReplSet.html#event:ha">ha</a></li>
+                <li data-name="ReplSet#event:failed"><a href="ReplSet.html#event:failed">failed</a></li>
+            
+                <li data-name="ReplSet#event:fullsetup"><a href="ReplSet.html#event:fullsetup">fullsetup</a></li>
             
                 <li data-name="ReplSet#event:joined"><a href="ReplSet.html#event:joined">joined</a></li>
             
                 <li data-name="ReplSet#event:left"><a href="ReplSet.html#event:left">left</a></li>
+            
+                <li data-name="ReplSet#event:reconnect"><a href="ReplSet.html#event:reconnect">reconnect</a></li>
+            
+                <li data-name="ReplSet#event:serverClosed"><a href="ReplSet.html#event:serverClosed">serverClosed</a></li>
+            
+                <li data-name="ReplSet#event:serverDescriptionChanged"><a href="ReplSet.html#event:serverDescriptionChanged">serverDescriptionChanged</a></li>
+            
+                <li data-name="ReplSet#event:serverHearbeatFailed"><a href="ReplSet.html#event:serverHearbeatFailed">serverHearbeatFailed</a></li>
+            
+                <li data-name="ReplSet#event:serverHeartbeatStarted"><a href="ReplSet.html#event:serverHeartbeatStarted">serverHeartbeatStarted</a></li>
+            
+                <li data-name="ReplSet#event:serverHeartbeatSucceeded"><a href="ReplSet.html#event:serverHeartbeatSucceeded">serverHeartbeatSucceeded</a></li>
+            
+                <li data-name="ReplSet#event:serverOpening"><a href="ReplSet.html#event:serverOpening">serverOpening</a></li>
+            
+                <li data-name="ReplSet#event:topologyClosed"><a href="ReplSet.html#event:topologyClosed">topologyClosed</a></li>
+            
+                <li data-name="ReplSet#event:topologyDescriptionChanged"><a href="ReplSet.html#event:topologyDescriptionChanged">topologyDescriptionChanged</a></li>
+            
+                <li data-name="ReplSet#event:topologyOpening"><a href="ReplSet.html#event:topologyOpening">topologyOpening</a></li>
             
             </ul>
         </li>
@@ -699,13 +743,7 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="Server#addAuthProvider"><a href="Server.html#addAuthProvider">addAuthProvider</a></li>
-            
-                <li data-name="Server#addReadPreferenceStrategy"><a href="Server.html#addReadPreferenceStrategy">addReadPreferenceStrategy</a></li>
-            
                 <li data-name="Server#auth"><a href="Server.html#auth">auth</a></li>
-            
-                <li data-name="Server#capConnections"><a href="Server.html#capConnections">capConnections</a></li>
             
                 <li data-name="Server#command"><a href="Server.html#command">command</a></li>
             
@@ -719,9 +757,9 @@
             
                 <li data-name="Server#equals"><a href="Server.html#equals">equals</a></li>
             
-                <li data-name="Server#getCallbacks"><a href="Server.html#getCallbacks">getCallbacks</a></li>
-            
                 <li data-name="Server#getConnection"><a href="Server.html#getConnection">getConnection</a></li>
+            
+                <li data-name="Server#getDescription"><a href="Server.html#getDescription">getDescription</a></li>
             
                 <li data-name="Server#getServer"><a href="Server.html#getServer">getServer</a></li>
             
@@ -733,11 +771,11 @@
             
                 <li data-name="Server#lastIsMaster"><a href="Server.html#lastIsMaster">lastIsMaster</a></li>
             
-                <li data-name="Server#parserType"><a href="Server.html#parserType">parserType</a></li>
+                <li data-name="Server#logout"><a href="Server.html#logout">logout</a></li>
             
                 <li data-name="Server#remove"><a href="Server.html#remove">remove</a></li>
             
-                <li data-name="Server#setBSONParserType"><a href="Server.html#setBSONParserType">setBSONParserType</a></li>
+                <li data-name="Server#unref"><a href="Server.html#unref">unref</a></li>
             
                 <li data-name="Server#update"><a href="Server.html#update">update</a></li>
             
@@ -750,103 +788,25 @@
             
                 <li data-name="Server#event:connect"><a href="Server.html#event:connect">connect</a></li>
             
-                <li data-name="Server#event:error"><a href="Server.html#event:error">error</a></li>
+                <li data-name="Server#event:destroy"><a href="Server.html#event:destroy">destroy</a></li>
             
-                <li data-name="Server#event:parseError"><a href="Server.html#event:parseError">parseError</a></li>
+                <li data-name="Server#event:error"><a href="Server.html#event:error">error</a></li>
             
                 <li data-name="Server#event:reconnect"><a href="Server.html#event:reconnect">reconnect</a></li>
             
-                <li data-name="Server#event:timeout"><a href="Server.html#event:timeout">timeout</a></li>
+                <li data-name="Server#event:reconnectFailed"><a href="Server.html#event:reconnectFailed">reconnectFailed</a></li>
             
-            </ul>
-        </li>
-    
-        <li class="item" data-name="Session">
-            <span class="title">
-                <a href="Session.html">Session</a>
-                
-            </span>
-            <ul class="members itemMembers">
+                <li data-name="Server#event:serverClosed"><a href="Server.html#event:serverClosed">serverClosed</a></li>
             
-            </ul>
-            <ul class="typedefs itemMembers">
+                <li data-name="Server#event:serverDescriptionChanged"><a href="Server.html#event:serverDescriptionChanged">serverDescriptionChanged</a></li>
             
-            </ul>
-            <ul class="methods itemMembers">
+                <li data-name="Server#event:serverOpening"><a href="Server.html#event:serverOpening">serverOpening</a></li>
             
-            <span class="subtitle">Methods</span>
+                <li data-name="Server#event:topologyClosed"><a href="Server.html#event:topologyClosed">topologyClosed</a></li>
             
-                <li data-name="Session#command"><a href="Session.html#command">command</a></li>
+                <li data-name="Server#event:topologyDescriptionChanged"><a href="Server.html#event:topologyDescriptionChanged">topologyDescriptionChanged</a></li>
             
-                <li data-name="Session#cursor"><a href="Session.html#cursor">cursor</a></li>
-            
-                <li data-name="Session#insert"><a href="Session.html#insert">insert</a></li>
-            
-                <li data-name="Session#remove"><a href="Session.html#remove">remove</a></li>
-            
-                <li data-name="Session#update"><a href="Session.html#update">update</a></li>
-            
-            </ul>
-            <ul class="events itemMembers">
-            
-            </ul>
-        </li>
-    
-        <li class="item" data-name="State">
-            <span class="title">
-                <a href="State.html">State</a>
-                
-            </span>
-            <ul class="members itemMembers">
-            
-            </ul>
-            <ul class="typedefs itemMembers">
-            
-            </ul>
-            <ul class="methods itemMembers">
-            
-            <span class="subtitle">Methods</span>
-            
-                <li data-name="State#addArbiter"><a href="State.html#addArbiter">addArbiter</a></li>
-            
-                <li data-name="State#addPassive"><a href="State.html#addPassive">addPassive</a></li>
-            
-                <li data-name="State#addSecondary"><a href="State.html#addSecondary">addSecondary</a></li>
-            
-                <li data-name="State#clean"><a href="State.html#clean">clean</a></li>
-            
-                <li data-name="State#contains"><a href="State.html#contains">contains</a></li>
-            
-                <li data-name="State#destroy"><a href="State.html#destroy">destroy</a></li>
-            
-                <li data-name="State#get"><a href="State.html#get">get</a></li>
-            
-                <li data-name="State#getAll"><a href="State.html#getAll">getAll</a></li>
-            
-                <li data-name="State#getAllConnections"><a href="State.html#getAllConnections">getAllConnections</a></li>
-            
-                <li data-name="State#isPassive"><a href="State.html#isPassive">isPassive</a></li>
-            
-                <li data-name="State#isPrimary"><a href="State.html#isPrimary">isPrimary</a></li>
-            
-                <li data-name="State#isPrimaryConnected"><a href="State.html#isPrimaryConnected">isPrimaryConnected</a></li>
-            
-                <li data-name="State#isSecondary"><a href="State.html#isSecondary">isSecondary</a></li>
-            
-                <li data-name="State#isSecondaryConnected"><a href="State.html#isSecondaryConnected">isSecondaryConnected</a></li>
-            
-                <li data-name="State#lastIsMaster"><a href="State.html#lastIsMaster">lastIsMaster</a></li>
-            
-                <li data-name="State#promotePrimary"><a href="State.html#promotePrimary">promotePrimary</a></li>
-            
-                <li data-name="State#remove"><a href="State.html#remove">remove</a></li>
-            
-                <li data-name="State#toJSON"><a href="State.html#toJSON">toJSON</a></li>
-            
-                <li data-name="State#update"><a href="State.html#update">update</a></li>
-            
-            </ul>
-            <ul class="events itemMembers">
+                <li data-name="Server#event:topologyOpening"><a href="Server.html#event:topologyOpening">topologyOpening</a></li>
             
             </ul>
         </li>
@@ -1011,7 +971,7 @@
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line224">line 224</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line108">line 108</a>
         </div>
         
     </div>
@@ -1087,42 +1047,6 @@
 	
         <tr>
             
-                <td class="name"><code>options.reconnectTries</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">number</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                    30
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Reconnect retries for HA if no servers available</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
                 <td class="name"><code>options.haInterval</code></td>
             
             
@@ -1153,42 +1077,6 @@
                     
                 
                 <p>The High availability period for replicaset inquiry</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>options.emitError</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">boolean</span>
-
-
-            
-            </td>
-            
-            
-                <td class="default">
-                
-                    false
-                
-                </td>
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Server will emit errors events</p></td>
         </tr>
 	
 	
@@ -1834,9 +1722,29 @@
     <ul>
         <li><a href="Mongos.html#event:connect">Mongos#event:connect</a></li>
     
+        <li><a href="Mongos.html#event:reconnect">Mongos#event:reconnect</a></li>
+    
         <li><a href="Mongos.html#event:joined">Mongos#event:joined</a></li>
     
         <li><a href="Mongos.html#event:left">Mongos#event:left</a></li>
+    
+        <li>Mongos#event:failed</li>
+    
+        <li><a href="Mongos.html#event:fullsetup">Mongos#event:fullsetup</a></li>
+    
+        <li><a href="Mongos.html#event:all">Mongos#event:all</a></li>
+    
+        <li><a href="Mongos.html#event:serverHeartbeatStarted">Mongos#event:serverHeartbeatStarted</a></li>
+    
+        <li><a href="Mongos.html#event:serverHeartbeatSucceeded">Mongos#event:serverHeartbeatSucceeded</a></li>
+    
+        <li>Mongos#event:serverHeartbeatFailed</li>
+    
+        <li><a href="Mongos.html#event:topologyOpening">Mongos#event:topologyOpening</a></li>
+    
+        <li><a href="Mongos.html#event:topologyClosed">Mongos#event:topologyClosed</a></li>
+    
+        <li><a href="Mongos.html#event:topologyDescriptionChanged">Mongos#event:topologyDescriptionChanged</a></li>
     </ul>
     
 
@@ -1882,284 +1790,6 @@ cursor instance
             
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="addAuthProvider">
-            
-            addAuthProvider<span class="signature">(name, provider)</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line696">line 696</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Add custom authentication mechanism</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>name</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>Name of the authentication mechanism</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>provider</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>Authentication object instance</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
-        <h4 class="name" id="addReadPreferenceStrategy">
-            
-            addReadPreferenceStrategy<span class="signature">(name, strategy)</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line685">line 685</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Add custom read preference strategy</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>name</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>Name of the read preference strategy</p></td>
-        </tr>
-	
-	
-	
-        <tr>
-            
-                <td class="name"><code>strategy</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>Strategy object instance</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
         <h4 class="name" id="auth">
             
             auth<span class="signature">(mechanism, db, param, callback)</span>
@@ -2167,7 +1797,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line621">line 621</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line800">line 800</a>
         </div>
         
     </div>
@@ -2301,7 +1931,7 @@ cursor instance
             <td class="type">
             
                 
-<span class="param-type"><a href="global.html#authResultCallback">authResultCallback</a></span>
+<span class="param-type">authResultCallback</span>
 
 
             
@@ -2374,7 +2004,7 @@ cursor instance
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line540">line 540</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line748">line 748</a>
         </div>
         
     </div>
@@ -2628,7 +2258,7 @@ cursor instance
             <td class="type">
             
                 
-<span class="param-type"><a href="global.html#opResultCallback">opResultCallback</a></span>
+<span class="param-type">opResultCallback</span>
 
 
             
@@ -2728,7 +2358,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line371">line 371</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line201">line 201</a>
         </div>
         
     </div>
@@ -2747,6 +2377,66 @@ server.connect();</code></pre>
     
     
     
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		<th>Default</th>
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>options.auth</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+            
+            </td>
+            
+            
+                <td class="default">
+                
+                    null
+                
+                </td>
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Array of auth options to apply on connect</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
     
     
     
@@ -2799,7 +2489,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line734">line 734</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line939">line 939</a>
         </div>
         
     </div>
@@ -2875,7 +2565,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line607">line 607</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line786">line 786</a>
         </div>
         
     </div>
@@ -3170,7 +2860,7 @@ server.connect();</code></pre>
             <td class="type">
             
                 
-<span class="param-type"><a href="global.html#opResultCallback">opResultCallback</a></span>
+<span class="param-type">opResultCallback</span>
 
 
             
@@ -3286,7 +2976,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line427">line 427</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line598">line 598</a>
         </div>
         
     </div>
@@ -3350,134 +3040,6 @@ server.connect();</code></pre>
             
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="getConnection">
-            
-            getConnection<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="Connection.html">Connection</a>}</span>
-        </h4>
-    
-        
-        <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line706">line 706</a>
-        </div>
-        
-    </div>
-
-    
-</dt>
-<dd>
-    
-    
-    <div class="description">
-        <p>Get connection</p>
-    </div>
-    
-
-    
-    
-    
-    
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>options.readPreference</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type"><a href="ReadPreference.html">ReadPreference</a></span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                    
-                        <span class="optional">optional</span>
-                    
-                    
-                        
-                    
-                
-                <p>Specify read preference if command supports it</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
-    
-    
-    
-<dl class="details">
-    
-        
-    
-    
-    
-
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-</dl>
-
-    
-    
-
-    
-
-    
-    
-    
-    
-    
-    
-    
-
-
-    
-    
-    
-</dd>
-
-        
-            
-<dt>
-    <div class="nameContainer">
         <h4 class="name" id="getServer">
             
             getServer<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="Server.html">Server</a>}</span>
@@ -3485,7 +3047,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line722">line 722</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line928">line 928</a>
         </div>
         
     </div>
@@ -3613,7 +3175,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line468">line 468</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line661">line 661</a>
         </div>
         
     </div>
@@ -3871,7 +3433,7 @@ server.connect();</code></pre>
             <td class="type">
             
                 
-<span class="param-type"><a href="global.html#opResultCallback">opResultCallback</a></span>
+<span class="param-type">opResultCallback</span>
 
 
             
@@ -3975,7 +3537,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line440">line 440</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line620">line 620</a>
         </div>
         
     </div>
@@ -4051,7 +3613,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line449">line 449</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line629">line 629</a>
         </div>
         
     </div>
@@ -4127,7 +3689,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line361">line 361</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line574">line 574</a>
         </div>
         
     </div>
@@ -4196,14 +3758,14 @@ server.connect();</code></pre>
             
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="parserType">
+        <h4 class="name" id="logout">
             
-            parserType<span class="signature">()</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{string}</span>
+            logout<span class="signature">(db, callback)</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line331">line 331</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line879">line 879</a>
         </div>
         
     </div>
@@ -4214,7 +3776,7 @@ server.connect();</code></pre>
     
     
     <div class="description">
-        <p>Name of BSON parser currently used</p>
+        <p>Logout from a database</p>
     </div>
     
 
@@ -4222,6 +3784,74 @@ server.connect();</code></pre>
     
     
     
+    
+        
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>db</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>The db we are logging out from</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>callback</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">authResultCallback</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                <p>A callback function</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
     
     
     
@@ -4261,11 +3891,6 @@ server.connect();</code></pre>
     
     
     
-
-
-    
-    
-    
 </dd>
 
         
@@ -4279,7 +3904,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line516">line 516</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line719">line 719</a>
         </div>
         
     </div>
@@ -4537,7 +4162,7 @@ server.connect();</code></pre>
             <td class="type">
             
                 
-<span class="param-type"><a href="global.html#opResultCallback">opResultCallback</a></span>
+<span class="param-type">opResultCallback</span>
 
 
             
@@ -4644,14 +4269,14 @@ server.connect();</code></pre>
             
 <dt>
     <div class="nameContainer">
-        <h4 class="name" id="setBSONParserType">
+        <h4 class="name" id="unref">
             
-            setBSONParserType<span class="signature">(type)</span>
+            unref<span class="signature">()</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line342">line 342</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line582">line 582</a>
         </div>
         
     </div>
@@ -4662,7 +4287,7 @@ server.connect();</code></pre>
     
     
     <div class="description">
-        <p>Execute a command</p>
+        <p>Unref all connections belong to this server</p>
     </div>
     
 
@@ -4670,51 +4295,6 @@ server.connect();</code></pre>
     
     
     
-    
-        
-
-<table class="params">
-    <thead>
-	<tr>
-		
-		<th>Name</th>
-		
-		
-		<th>Type</th>
-		
-		
-		
-		<th class="last">Description</th>
-	</tr>
-	</thead>
-	
-	<tbody>
-	
-	
-        <tr>
-            
-                <td class="name"><code>type</code></td>
-            
-            
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-            
-            
-            
-            <td class="description last">
-                
-                <p>Type of BSON parser to use (c++ or js)</p></td>
-        </tr>
-	
-	
-	</tbody>
-</table>
     
     
     
@@ -4767,7 +4347,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line492">line 492</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line690">line 690</a>
         </div>
         
     </div>
@@ -5025,7 +4605,7 @@ server.connect();</code></pre>
             <td class="type">
             
                 
-<span class="param-type"><a href="global.html#opResultCallback">opResultCallback</a></span>
+<span class="param-type">opResultCallback</span>
 
 
             
@@ -5140,6 +4720,87 @@ server.connect();</code></pre>
             
 <dt>
     <div class="nameContainer">
+        <h4 class="name" id="event:all">
+            
+            all
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line970">line 970</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>A mongos all event, used to signal that all topology members have been contacted.</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type"><a href="Mongos.html">Mongos</a></span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
         <h4 class="name" id="event:connect">
             
             connect
@@ -5147,7 +4808,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1017">line 1017</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line949">line 949</a>
         </div>
         
     </div>
@@ -5221,6 +4882,87 @@ server.connect();</code></pre>
             
 <dt>
     <div class="nameContainer">
+        <h4 class="name" id="event:fullsetup">
+            
+            fullsetup
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line963">line 963</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>A mongos fullsetup event, used to signal that all topology members have been contacted.</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type"><a href="Mongos.html">Mongos</a></span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
         <h4 class="name" id="event:joined">
             
             joined
@@ -5228,7 +4970,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1033">line 1033</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line986">line 986</a>
         </div>
         
     </div>
@@ -5377,7 +5119,7 @@ server.connect();</code></pre>
     
         
         <div class="tag-source">
-            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1024">line 1024</a>
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line977">line 977</a>
         </div>
         
     </div>
@@ -5515,6 +5257,816 @@ server.connect();</code></pre>
     
 </dd>
 
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:reconnect">
+            
+            reconnect
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line956">line 956</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>A mongos reconnect event, used to verify that the mongos topology has reconnected</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type"><a href="Mongos.html">Mongos</a></span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:serverClosed">
+            
+            serverClosed
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1002">line 1002</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>A server closed SDAM monitoring event</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:serverDescriptionChanged">
+            
+            serverDescriptionChanged
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1009">line 1009</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>A server description SDAM change monitoring event</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:serverHearbeatFailed">
+            
+            serverHearbeatFailed
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1044">line 1044</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>A topology serverHearbeatFailed SDAM event</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:serverHeartbeatStarted">
+            
+            serverHeartbeatStarted
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1037">line 1037</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>A topology serverHeartbeatStarted SDAM event</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:serverHeartbeatSucceeded">
+            
+            serverHeartbeatSucceeded
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1051">line 1051</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>A topology serverHeartbeatSucceeded SDAM change event</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:serverOpening">
+            
+            serverOpening
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line995">line 995</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>A server opening SDAM monitoring event</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:topologyClosed">
+            
+            topologyClosed
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1023">line 1023</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>A topology closed SDAM event</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:topologyDescriptionChanged">
+            
+            topologyDescriptionChanged
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1030">line 1030</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>A topology structure SDAM change event</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
+        
+            
+<dt>
+    <div class="nameContainer">
+        <h4 class="name" id="event:topologyOpening">
+            
+            topologyOpening
+        </h4>
+    
+        
+        <div class="tag-source">
+            <a href="lib_topologies_mongos.js.html">lib/topologies/mongos.js</a>, <a href="lib_topologies_mongos.js.html#line1016">line 1016</a>
+        </div>
+        
+    </div>
+
+    
+</dt>
+<dd>
+    
+    
+    <div class="description">
+        <p>A topology open SDAM event</p>
+    </div>
+    
+
+    
+        <h5>Type:</h5>
+        <ul>
+            <li>
+                
+<span class="param-type">object</span>
+
+
+            </li>
+        </ul>
+    
+    
+    
+    
+    
+    
+    
+<dl class="details">
+    
+        
+    
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+</dl>
+
+    
+    
+
+    
+
+    
+    
+    
+    
+    
+    
+    
+</dd>
+
         </dl>
     
 </article>
@@ -5545,7 +6097,7 @@ server.connect();</code></pre>
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Mon May 30 2016 18:28:06 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Fri Jul 08 2016 13:30:24 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>
