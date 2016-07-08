@@ -1,6 +1,8 @@
 2.0.3 2016-07-08
 -----------------
 * Implemented Server Selection Specification test suite.
+* Added warning level to logger.
+* Added warning message when sockeTimeout < haInterval for Replset/Mongos.
 
 2.0.2 2016-07-06
 -----------------
