@@ -1,13 +1,18 @@
 2.2.0 2016-07-05
 ----------------
-* Updated mongodb-core to 2.0.1.
+* Updated mongodb-core to 2.0.3.
 * Moved all authentication and handling of growing/shrinking of pool connections into actual pool.
 * All authentication methods now handle both auth/reauthenticate and logout events.
 * Introduced logout method to get rid of onAll option for logout command.
 * Updated bson to 0.5.0 that includes Decimal128 support.
-* Added missing logout method on mongos proxy topology.
 * Fixed logger error serialization issue.
-* Documentation fixes. 
+* Documentation fixes.
+* Implemented Server Selection Specification test suite.
+* Added warning level to logger.
+* Added warning message when sockeTimeout < haInterval for Replset/Mongos.
+* Mongos emits close event on no proxies available or when reconnect attempt fails.
+* Replset emits close event when no servers available or when attemptReconnect fails to reconnect.
+* Don't throw in auth methods but return error in callback.
 
 2.1.21 2016-05-30
 -----------------
