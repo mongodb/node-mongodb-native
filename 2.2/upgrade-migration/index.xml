@@ -105,6 +105,15 @@ some behavior changes for the cursor streams).&lt;/p&gt;
       <guid>/node-mongodb-native/2.2/upgrade-migration/</guid>
       <description>
 
+&lt;h1 id=&#34;what-s-new-in-2-2&#34;&gt;What&amp;rsquo;s New in 2.2&lt;/h1&gt;
+
+&lt;p&gt;Key features of the 2.1 driver include:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;Redesigned Connection Pool.&lt;/li&gt;
+&lt;li&gt;Connection close will drain any outstanding operations.&lt;/li&gt;
+&lt;/ul&gt;
+
 &lt;h1 id=&#34;what-s-new-in-2-1&#34;&gt;What&amp;rsquo;s New in 2.1&lt;/h1&gt;
 
 &lt;p&gt;Key features of the 2.1 driver include:&lt;/p&gt;
