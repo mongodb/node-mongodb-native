@@ -7,6 +7,13 @@ title = "Upgrade Guide"
   pre = "<i class='fa fa-cog'></i>"
 +++
 
+# What's New in 2.2
+
+Key features of the 2.1 driver include:
+
+- Redesigned Connection Pool.
+- Connection close will drain any outstanding operations.
+
 # What's New in 2.1
 
 Key features of the 2.1 driver include:
