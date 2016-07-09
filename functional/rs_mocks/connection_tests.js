@@ -909,32 +909,27 @@ exports['Should connect with a replicaset with a single primary and secondary'] 
     });
 
     server.on('joined', function(_type, _server) {
-      console.log("!!!!!!!!!!!!!!!!! joined :: " + _type + " :: " + _server.name)
-      // if( _type == 'secondary' || _type == 'primary') {
-      //   // console.log("!!!!!!!!!!!!!!!!! joined :: " + _type)
-      //   // console.log("server.s.replicaSetState.secondaries = " + server.s.replicaSetState.secondaries.length)
-      //   // console.log("server.s.replicaSetState.arbiters = " + server.s.replicaSetState.arbiters.length)
-      //
-      //   if(server.s.replicaSetState.secondaries.length == 1
-      //     && server.s.replicaSetState.primary) {
-      //       test.equal(1, server.s.replicaSetState.secondaries.length);
-      //       test.equal('localhost:32001', server.s.replicaSetState.secondaries[0].name);
-      //
-      //       test.equal(1, server.s.replicaSetState.arbiters.length);
-      //       test.equal('localhost:32002', server.s.replicaSetState.arbiters[0].name);
-      //
-      //       primaryServer.destroy();
-      //       firstSecondaryServer.destroy();
-      //       server.destroy();
-      //       running = false;
-      //
-      //       setTimeout(function() {
-      //         test.equal(0, Object.keys(Connection.connections()).length);
-      //         Connection.disableConnectionAccounting();
-      //         test.done();
-      //       }, 1000);
-      //     }
-      // }
+      if( _type == 'secondary' || _type == 'primary') {
+        if(server.s.replicaSetState.secondaries.length == 1
+          && server.s.replicaSetState.primary) {
+            test.ok(server.s.replicaSetState.primary);
+            test.equal('localhost:32000', server.s.replicaSetState.primary.name);
+
+            test.equal(1, server.s.replicaSetState.secondaries.length);
+            test.equal('localhost:32001', server.s.replicaSetState.secondaries[0].name);
+
+            primaryServer.destroy();
+            firstSecondaryServer.destroy();
+            server.destroy();
+            running = false;
+
+            setTimeout(function() {
+              test.equal(0, Object.keys(Connection.connections()).length);
+              Connection.disableConnectionAccounting();
+              test.done();
+            }, 1000);
+          }
+      }
     });
 
     server.on('connect', function(e) {
