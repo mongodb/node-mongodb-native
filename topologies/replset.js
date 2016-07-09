@@ -578,7 +578,7 @@ function handleInitialConnectEvent(self, event) {
     if(event == 'connect') {
       // Update the state
       var result = self.s.replicaSetState.update(this);
-      if(result) {
+      if(result == true) {
         // Debug log
         if(self.s.logger.isDebug()) {
           self.s.logger.debug(f('handleInitialConnectEvent %s from server %s in replset with id %s has state [%s]', event, this.name, self.id, JSON.stringify(self.s.replicaSetState.set)));
@@ -594,6 +594,10 @@ function handleInitialConnectEvent(self, event) {
         this.on('close', handleEvent(self, 'close'));
         this.on('timeout', handleEvent(self, 'timeout'));
         this.on('parseError', handleEvent(self, 'parseError'));
+      } else if(result instanceof MongoError) {
+        this.destroy();
+        self.destroy();
+        return self.emit('error', result);
       } else {
         this.destroy();
       }

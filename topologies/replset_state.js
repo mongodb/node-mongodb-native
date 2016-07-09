@@ -242,7 +242,7 @@ ReplSetState.prototype.update = function(server) {
     var ismasterElectionId = server.lastIsMaster().electionId;
     if(this.setName && this.setName != ismaster.setName) {
       this.topologyType = TopologyType.ReplicaSetNoPrimary;
-      return false;
+      return new MongoError(f('setName from ismaster does not match provided connection setName [%s] != [%s]', ismaster.setName, this.setName));
     }
 
     if(!this.maxElectionId && ismasterElectionId) {
@@ -415,7 +415,6 @@ ReplSetState.prototype.update = function(server) {
   if(ismaster.secondary && ismaster.setName
     && !inList(ismaster, server, this.secondaries)
     && this.setName && this.setName == ismaster.setName) {
-
     addToList(self, ServerType.RSSecondary, ismaster, server, this.secondaries);
     // Set the topology
     this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.ReplicaSetNoPrimary;
@@ -601,12 +600,8 @@ function pickNearest(self, readPreference) {
     servers.push(self.secondaries[i]);
   }
 
-  // console.log("=============== FILTER BY TAG 0")
-
   // Filter by tags
   servers = filterByTags(readPreference, servers);
-  // console.log("=============== FILTER BY TAG 1")
-  // console.dir(servers)
 
   // Sort by time
   servers.sort(function(a, b) {
