@@ -14,7 +14,8 @@ var inherits = require('util').inherits,
   TwoSixWireProtocolSupport = require('../wireprotocol/2_6_support'),
   ThreeTwoWireProtocolSupport = require('../wireprotocol/3_2_support'),
   BasicCursor = require('../cursor'),
-  sdam = require('./shared');
+  sdam = require('./shared'),
+  assign = require('./shared').assign;
 
 // Used for filtering out fields for loggin
 var debugFields = ['reconnect', 'reconnectTries', 'reconnectInterval', 'emitError', 'cursorFactory', 'host'
@@ -317,7 +318,7 @@ Server.prototype.connect = function(options) {
   }
 
   // Create a pool
-  self.s.pool = new Pool(Object.assign(self.s.options, options, {bson: this.s.bson}));
+  self.s.pool = new Pool(assign(self.s.options, options, {bson: this.s.bson}));
 
   // Set up listeners
   self.s.pool.on('close', eventHandler(self, 'close'));

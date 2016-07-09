@@ -7,7 +7,8 @@ var inherits = require('util').inherits,
   Logger = require('./logger'),
   f = require('util').format,
   Query = require('./commands').Query,
-  CommandResult = require('./command_result');
+  CommandResult = require('./command_result'),
+  assign = require('../topologies/shared').assign;
 
 var MongoCR = require('../auth/mongocr')
   , X509 = require('../auth/x509')
@@ -59,7 +60,7 @@ var Pool = function(options) {
   // Add event listener
   EventEmitter.call(this);
   // Add the options
-  this.options = Object.assign({
+  this.options = assign({
     // Host and port settings
     host: 'localhost',
     port: 27017,
