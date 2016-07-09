@@ -819,3 +819,132 @@ exports['Should print socketTimeout warning due to socketTimeout < haInterval'] 
     }, 100)
   }
 }
+
+exports['Should connect with a replicaset with a single primary and secondary'] = {
+  metadata: {
+    requires: {
+      generators: true,
+      topology: "single"
+    }
+  },
+
+  test: function(configuration, test) {
+    var ReplSet = configuration.require.ReplSet,
+      ObjectId = configuration.require.BSON.ObjectId,
+      Connection = require('../../../../lib/connection/connection'),
+      ReadPreference = configuration.require.ReadPreference,
+      Long = configuration.require.BSON.Long,
+      co = require('co'),
+      mockupdb = require('../../../mock');
+
+    // Contain mock server
+    var primaryServer = null;
+    var firstSecondaryServer = null;
+    var arbiterServer = null;
+    var running = true;
+    var electionIds = [new ObjectId(), new ObjectId()];
+
+    // Default message fields
+    var defaultFields = {
+      "setName": "rs", "setVersion": 1, "electionId": electionIds[0],
+      "maxBsonObjectSize" : 16777216, "maxMessageSizeBytes" : 48000000,
+      "maxWriteBatchSize" : 1000, "localTime" : new Date(), "maxWireVersion" : 4,
+      "minWireVersion" : 0, "ok" : 1, "hosts": ["localhost:32000", "localhost:32001", "localhost:32002"], "arbiters": ["localhost:32002"]
+    }
+
+    // Primary server states
+    var primary = [extend(defaultFields, {
+      "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
+    })];
+
+    // Primary server states
+    var firstSecondary = [extend(defaultFields, {
+      "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
+    })];
+
+    // Boot the mock
+    co(function*() {
+      primaryServer = yield mockupdb.createServer(32000, 'localhost');
+      firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
+
+      // Primary state machine
+      co(function*() {
+        while(running) {
+          var request = yield primaryServer.receive();
+          var doc = request.document;
+
+          if(doc.ismaster) {
+            request.reply(primary[0]);
+          }
+        }
+      }).catch(function(err) {
+        console.log(err.stack);
+      });
+
+      // First secondary state machine
+      co(function*() {
+        while(running) {
+          var request = yield firstSecondaryServer.receive();
+          var doc = request.document;
+
+          if(doc.ismaster) {
+            request.reply(firstSecondary[0]);
+          }
+        }
+      }).catch(function(err) {
+        console.log(err.stack);
+      });
+    });
+
+    Connection.enableConnectionAccounting();
+    // Attempt to connect
+    var server = new ReplSet([
+      { host: 'localhost', port: 32000 },
+      { host: 'localhost', port: 32001 }], {
+        setName: 'rs',
+        connectionTimeout: 5000,
+        socketTimeout: 10000,
+        haInterval: 2000,
+        size: 1
+    });
+
+    server.on('joined', function(_type, _server) {
+      console.log("!!!!!!!!!!!!!!!!! joined :: " + _type + " :: " + _server.name)
+      // if( _type == 'secondary' || _type == 'primary') {
+      //   // console.log("!!!!!!!!!!!!!!!!! joined :: " + _type)
+      //   // console.log("server.s.replicaSetState.secondaries = " + server.s.replicaSetState.secondaries.length)
+      //   // console.log("server.s.replicaSetState.arbiters = " + server.s.replicaSetState.arbiters.length)
+      //
+      //   if(server.s.replicaSetState.secondaries.length == 1
+      //     && server.s.replicaSetState.primary) {
+      //       test.equal(1, server.s.replicaSetState.secondaries.length);
+      //       test.equal('localhost:32001', server.s.replicaSetState.secondaries[0].name);
+      //
+      //       test.equal(1, server.s.replicaSetState.arbiters.length);
+      //       test.equal('localhost:32002', server.s.replicaSetState.arbiters[0].name);
+      //
+      //       primaryServer.destroy();
+      //       firstSecondaryServer.destroy();
+      //       server.destroy();
+      //       running = false;
+      //
+      //       setTimeout(function() {
+      //         test.equal(0, Object.keys(Connection.connections()).length);
+      //         Connection.disableConnectionAccounting();
+      //         test.done();
+      //       }, 1000);
+      //     }
+      // }
+    });
+
+    server.on('connect', function(e) {
+      console.log("!!!!!!!!!!!!!!!!!!!!!! CONNECTED")
+      server.__connected = true;
+    });
+
+    // Gives proxies a chance to boot up
+    setTimeout(function() {
+      server.connect();
+    }, 100)
+  }
+}
