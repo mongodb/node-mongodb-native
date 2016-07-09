@@ -191,6 +191,12 @@ Object.defineProperty(ReplSet.prototype, 'type', {
 function attemptReconnect(self) {
   self.haTimeoutId = setTimeout(function() {
     if(self.state == DESTROYED) return;
+
+    // Debug log
+    if(self.s.logger.isDebug()) {
+      self.s.logger.debug(f('attemptReconnect for replset with id %s', self.id));
+    }
+
     // Get all known hosts
     var keys = Object.keys(self.s.replicaSetState.set);
     var servers = keys.map(function(x) {
@@ -212,6 +218,11 @@ function attemptReconnect(self) {
           return this.destroy();
         }
 
+        // Debug log
+        if(self.s.logger.isDebug()) {
+          self.s.logger.debug(f('attemptReconnect for replset with id %s using server %s ended with event %s', self.id, this.name, event));
+        }
+
         // Check if we are done
         function done() {
           // Done with the reconnection attempt
@@ -228,6 +239,10 @@ function attemptReconnect(self) {
 
               // Connect any missing servers
               connectNewServers(self, self.s.replicaSetState.unknownServers, function(err, cb) {
+                // Debug log
+                if(self.s.logger.isDebug()) {
+                  self.s.logger.debug(f('attemptReconnect for replset with id successful resuming topologyMonitor', self.id));
+                }
                 // Go back to normal topology monitoring
                 topologyMonitor(self);
               });
@@ -250,6 +265,11 @@ function attemptReconnect(self) {
 
         // Keep reference to server
         var _self = this;
+
+        // Debug log
+        if(self.s.logger.isDebug()) {
+          self.s.logger.debug(f('attemptReconnect in replset with id %s for', self.id));
+        }
 
         // Connect and not authenticating
         if(event == 'connect' && !self.authenticating) {
@@ -411,6 +431,14 @@ function topologyMonitor(self, options) {
 
     // Get the connectingServers
     var connectingServers = self.s.replicaSetState.allServers();
+    // Debug log
+    if(self.s.logger.isDebug()) {
+      self.s.logger.debug(f('topologyMonitor in replset with id %s connected servers [%s]'
+        , self.id
+        , connectingServers.map(function(x) {
+          return x.name;
+        })));
+    }
     // Get the count
     var count = connectingServers.length;
     // If we have no servers connected
@@ -525,12 +553,22 @@ function topologyMonitor(self, options) {
 function handleEvent(self, event) {
   return function(err) {
     if(self.state == DESTROYED) return;
+    // Debug log
+    if(self.s.logger.isDebug()) {
+      self.s.logger.debug(f('handleEvent %s from server %s in replset with id %s', event, self.name, self.id));
+    }
+
     self.s.replicaSetState.remove(this);
   }
 }
 
 function handleInitialConnectEvent(self, event) {
   return function(err) {
+    // Debug log
+    if(self.s.logger.isDebug()) {
+      self.s.logger.debug(f('handleInitialConnectEvent %s from server %s in replset with id %s', event, this.name, self.id));
+    }
+
     // Destroy the instance
     if(self.state == DESTROYED) {
       return this.destroy();
@@ -541,6 +579,11 @@ function handleInitialConnectEvent(self, event) {
       // Update the state
       var result = self.s.replicaSetState.update(this);
       if(result) {
+        // Debug log
+        if(self.s.logger.isDebug()) {
+          self.s.logger.debug(f('handleInitialConnectEvent %s from server %s in replset with id %s has state [%s]', event, this.name, self.id, JSON.stringify(self.s.replicaSetState.set)));
+        }
+
         // Remove the handlers
         for(var i = 0; i < handlers.length; i++) {
           this.removeAllListeners(handlers[i]);
