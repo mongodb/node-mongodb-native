@@ -1,3 +1,10 @@
+2.2.1 2016-07-11
+----------------
+* Updated mongodb-core to 2.0.4.
+* handle situation where user is providing seedlist names that do not match host list. fix allows for a single full discovery connection sweep before erroring out.
+* NODE-747 Polyfill for Object.assign for 0.12.x or 0.10.x.
+* NODE-746 Improves replicaset errors for wrong setName.
+
 2.2.0 2016-07-05
 ----------------
 * Updated mongodb-core to 2.0.3.
