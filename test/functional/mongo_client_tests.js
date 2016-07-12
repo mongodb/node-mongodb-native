@@ -510,3 +510,22 @@ exports["default keepAlive behavior"] = {
     });
   }
 }
+
+exports['should fail dure to garbage connection string'] = {
+  metadata: {
+    requires: {
+      node: ">0.8.0",
+      topology: ['single']
+    }
+  },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    MongoClient.connect('mongodb://unknownhost:36363/ddddd', {
+    }, function(err, db) {
+      test.ok(err != null);
+      test.done();
+    });
+  }
+}
