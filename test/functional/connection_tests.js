@@ -280,7 +280,6 @@ exports.testConnectBadAuth = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var connect = configuration.require;
-
     connect(configuration.url('slithy', 'toves'), function(err, db) {
       test.ok(err);
       test.equal(null, db);

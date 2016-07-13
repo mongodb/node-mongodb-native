@@ -1199,44 +1199,6 @@ exports['Should return single server direct connection when replicaSet not provi
   }
 }
 
-/**
- * @ignore
- */
-exports['Should not give an error when using a two server seeds and no setName'] = {
-  metadata: { requires: { topology: 'replicaset' } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var mongo = configuration.require
-      , MongoClient = mongo.MongoClient
-      , Db = configuration.require.Db
-      , CoreServer = configuration.require.CoreServer
-      , CoreConnection = configuration.require.CoreConnection;
-
-    var url = f("mongodb://localhost:%s,localhost:%s/%s"
-      , configuration.port
-      , configuration.port + 1
-      , "integration_test_");
-
-    // Accounting tests
-    CoreServer.enableServerAccounting();
-    CoreConnection.enableConnectionAccounting();
-
-    MongoClient.connect(url, function(err, db) {
-      test.equal(null, err);
-      db.close();
-
-      // Connection account tests
-      test.equal(0, Object.keys(CoreConnection.connections()).length);
-      test.equal(0, Object.keys(CoreServer.servers()).length);
-      CoreServer.disableServerAccounting();
-      CoreConnection.disableConnectionAccounting();
-
-      test.done();
-    });
-  }
-}
-
 var waitForPrimary = function(count, config, options, callback) {
   var ReplSet = require('mongodb-core').ReplSet;
   if(count == 0) return callback(new Error("could not connect"));

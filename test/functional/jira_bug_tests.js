@@ -158,11 +158,10 @@ exports['NODE-746 should correctly connect using MongoClient.connect to single p
             // managers[1].stop().then(function(err, result) {
             Logger.setLevel('debug');
               // Attempt to connect
-              MongoClient.connect('mongodb://root:root@localhost:31000,localhost:31001/admin?replSet=rs', function(err, db) {
+              MongoClient.connect('mongodb://root:root@localhost:31000,localhost:31001/admin?replicaSet=rs', function(err, db) {
                 console.log("--------------------- 6")
                 console.dir(err)
                 db.close();
-                process.exit(0)
 
                 replicasetManager.stop().then(function() {
                   console.log("--------------------- 7")
@@ -171,37 +170,6 @@ exports['NODE-746 should correctly connect using MongoClient.connect to single p
               });
             });
           });
-
-
-          // db.admin().authenticate("root", "root", function(err, result) {
-          //   console.log("--------------------- 3")
-          //   test.equal(null, err);
-          //   test.ok(result);
-          //
-          //   // replSetManager.shutdown('primary', function(err, result) {
-          //   replicasetManager.stepDownPrimary(false, {stepDownSecs: 1, force:true}, {
-          //     provider: 'default',
-          //     db: 'admin',
-          //     user: 'root',
-          //     password: 'root'
-          //   }).then(function() {
-          //     console.log("--------------------- 4")
-          //
-          //     db.collection('replicaset_test_auth').insert({a:1}, {w:1}, function(err, result) {
-          //       console.log("--------------------- 5")
-          //       test.equal(null, err);
-          //
-          //       db.close();
-          //
-          //       replicasetManager.stop().then(function() {
-          //         console.log("--------------------- 6")
-          //         test.done();
-          //       });
-          //     });
-          //   }).catch(function(e) {
-          //     // // console.log(e.stack);
-          //   });
-          // });
         });
       });
     })

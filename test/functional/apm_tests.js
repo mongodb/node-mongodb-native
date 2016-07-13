@@ -61,7 +61,7 @@ exports['Correctly receive the APM events for a listCollections command'] = {
     db.open(function(err, db) {
       test.equal(null, err);
 
-      db.collection('apm_test_list_collections').insertOne({a:1}).then(function(r) {
+      db.collection('apm_test_list_collections').insertOne({a:1}, configuration.writeConcernMax()).then(function(r) {
         test.equal(1, r.insertedCount);
 
         var listener = require('../..').instrument(function(err, instrumentations) {});
@@ -82,8 +82,8 @@ exports['Correctly receive the APM events for a listCollections command'] = {
           test.equal(null, err);
 
           db.listCollections({}, {readPreference: ReadPreference.SECONDARY}).toArray(function(err, cols) {
+            // console.log(JSON.stringify(started, null, 2))
             test.equal(null, err);
-
             // Ensure command was not sent to the primary
             test.ok(started[0].connectionId.port != started[1].connectionId.port);
 
@@ -132,9 +132,9 @@ exports['Correctly receive the APM events for a listIndexes command'] = {
           test.equal(null, err);
 
           db.collection('apm_test_list_collections').listIndexes({readPreference: ReadPreference.SECONDARY}).toArray(function(err, cols) {
-            console.dir(err)
-            console.log(started[0].connectionId.port)
-            console.log(started[1].connectionId.port)
+            // console.dir(err)
+            // console.log(started[0].connectionId.port)
+            // console.log(started[1].connectionId.port)
             test.equal(null, err);
 
             // Ensure command was not sent to the primary

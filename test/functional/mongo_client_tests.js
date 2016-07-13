@@ -245,6 +245,10 @@ exports['Should correctly pass through extra sharded options'] = {
         }
       }
     }, function(err, db) {
+      console.log("============================================")
+      console.dir(err)
+      console.dir(db.s.topology.s.clonedOptions)
+
       test.equal(false, db.s.topology.s.clonedOptions.ha);
       test.equal(10000, db.s.topology.s.clonedOptions.haInterval);
       test.equal(100, db.s.topology.s.clonedOptions.localThresholdMS);
@@ -524,6 +528,27 @@ exports['should fail dure to garbage connection string'] = {
     var MongoClient = configuration.require.MongoClient;
     MongoClient.connect('mongodb://unknownhost:36363/ddddd', {
     }, function(err, db) {
+      test.ok(err != null);
+      test.done();
+    });
+  }
+}
+
+exports['Should fail to connect due to instances not being mongos proxies'] = {
+  metadata: {
+    requires: {
+      node: ">0.8.0",
+      topology: ['replicaset']
+    }
+  },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var url = configuration.url()
+      .replace('rs_name=rs', '')
+      .replace('localhost:31000', 'localhost:31000,localhost:31001');
+    MongoClient.connect(url, function(err, db) {
       test.ok(err != null);
       test.done();
     });
