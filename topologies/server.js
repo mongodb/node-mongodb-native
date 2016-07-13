@@ -116,12 +116,14 @@ var Server = function(options) {
   // Wire protocol handler, default to oldest known protocol handler
   // this gets changed when the first ismaster is called.
   this.wireProtocolHandler = new PreTwoSixWireProtocolSupport();
+  // Default type
+  this._type = 'server';
 }
 
 inherits(Server, EventEmitter);
 
 Object.defineProperty(Server.prototype, 'type', {
-  enumerable:true, get: function() { return 'server'; }
+  enumerable:true, get: function() { return this._type; }
 });
 
 Server.enableServerAccounting = function() {
@@ -174,7 +176,6 @@ function disconnectHandler(self, type, ns, cmd, options, callback) {
 
 function monitoringProcess(self) {
   return function() {
-    // console.log("---- monitoringProcess")
     // Pool was destroyed do not continue process
     if(self.s.pool.isDestroyed()) return;
     // Emit monitoring Process event
@@ -194,6 +195,11 @@ function monitoringProcess(self) {
       // Update the ismaster view if we have a result
       if(result) {
         self.ismaster = result.result;
+        // It's a proxy change the type so
+        // the wireprotocol will send $readPreference
+        if(self.ismaster.msg == 'isdbgrid') {
+          self._type = 'mongos';
+        }
       }
       // Re-schedule the monitoring process
       self.monitoringProcessId = setTimeout(monitoringProcess(self), self.s.monitoringInterval);

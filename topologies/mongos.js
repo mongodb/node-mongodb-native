@@ -241,29 +241,39 @@ function handleInitialConnectEvent(self, event) {
       // Get last known ismaster
       self.ismaster = this.lastIsMaster();
 
-      // Add to the connectd list
-      for(var i = 0; i < self.connectedProxies.length; i++) {
-        if(self.connectedProxies[i].name == this.name) {
-          this.destroy();
-          return self.emit('failed', this);
+      // Is this not a proxy, remove t
+      if(self.ismaster.msg == 'isdbgrid') {
+        // Add to the connectd list
+        for(var i = 0; i < self.connectedProxies.length; i++) {
+          if(self.connectedProxies[i].name == this.name) {
+            this.destroy();
+            return self.emit('failed', this);
+          }
         }
+
+        // Remove the handlers
+        for(var i = 0; i < handlers.length; i++) {
+          this.removeAllListeners(handlers[i]);
+        }
+
+        // Add stable state handlers
+        this.on('error', handleEvent(self, 'error'));
+        this.on('close', handleEvent(self, 'close'));
+        this.on('timeout', handleEvent(self, 'timeout'));
+        this.on('parseError', handleEvent(self, 'parseError'));
+
+        // Move from connecting proxies connected
+        moveServerFrom(self.connectingProxies, self.connectedProxies, this);
+        // Emit the joined event
+        self.emit('joined', 'mongos', this);
+      } else {
+        // This is not a mongos proxy, remove it completely
+        removeProxyFrom(self.connectingProxies, this);
+        // Emit the left event
+        self.emit('left', 'server', this);
+        // Emit failed event
+        self.emit('failed', this);
       }
-
-      // Remove the handlers
-      for(var i = 0; i < handlers.length; i++) {
-        this.removeAllListeners(handlers[i]);
-      }
-
-      // Add stable state handlers
-      this.on('error', handleEvent(self, 'error'));
-      this.on('close', handleEvent(self, 'close'));
-      this.on('timeout', handleEvent(self, 'timeout'));
-      this.on('parseError', handleEvent(self, 'parseError'));
-
-      // Move from connecting proxies connected
-      moveServerFrom(self.connectingProxies, self.connectedProxies, this);
-      // Emit the joined event
-      self.emit('joined', 'mongos', this);
     } else {
       moveServerFrom(self.connectingProxies, self.disconnectedProxies, this);
       // Emit the left event
@@ -290,6 +300,8 @@ function handleInitialConnectEvent(self, event) {
         self.emit('connect', self);
         self.emit('fullsetup', self);
         self.emit('all', self);
+      } else if(self.disconnectedProxies.length == 0) {
+        return self.emit('error', new MongoError('no mongos proxies found in seed list'));
       }
 
       // Topology monitor
@@ -367,6 +379,14 @@ function moveServerFrom(from, to, proxy) {
   }
 
   to.push(proxy);
+}
+
+function removeProxyFrom(from, proxy) {
+  for(var i = 0; i < from.length; i++) {
+    if(from[i].name == proxy.name) {
+      from.splice(i, 1);
+    }
+  }
 }
 
 function reconnectProxies(self, proxies, callback) {
