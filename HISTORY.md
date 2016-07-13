@@ -1,3 +1,7 @@
+2.0.5
+-----------------
+* Minor fixes to handle faster MongoClient connectivity from the driver, allowing single server instances to detect if they are a proxy.
+
 2.0.4 2016-07-11
 -----------------
 * Updated bson to version 0.5.1.
