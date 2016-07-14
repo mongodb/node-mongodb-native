@@ -116,6 +116,8 @@ var Pool = function(options) {
   this.loggingout = false;
   this.nonAuthenticatedConnections = [];
   this.authenticatingTimestamp = null;
+  // Number of consecutive timeouts caught
+  this.numberOfConsecutiveTimeouts = 0;
 }
 
 inherits(Pool, EventEmitter);
@@ -216,6 +218,21 @@ function connectionFailureHandler(self, event) {
       var workItem = this.workItem;
       this.workItem = null;
       workItem.cb(err);
+    }
+
+    // Did we catch a timeout, increment the numberOfConsecutiveTimeouts
+    if(event == 'timeout') {
+      self.numberOfConsecutiveTimeouts = self.numberOfConsecutiveTimeouts + 1;
+
+      // Have we timed out more than reconnectTries in a row ?
+      // Force close the pool as we are trying to connect to tcp sink hole
+      if(self.numberOfConsecutiveTimeouts > self.options.reconnectTries) {
+        self.numberOfConsecutiveTimeouts = 0;
+        // Destroy all connections and pool
+        self.destroy(true);
+        // Emit close event
+        return self.emit('close', self);
+      }
     }
 
     // No more socket available propegate the event
@@ -331,6 +348,8 @@ function messageHandler(self) {
   return function(message, connection) {
     // Get the callback
     var workItem = connection.workItem;
+    // Reset timeout counter
+    self.numberOfConsecutiveTimeouts = 0;
 
     // Reset the connection timeout if we modified it for
     // this operation
@@ -705,16 +724,48 @@ Pool.prototype.unref = function() {
 // Events
 var events = ['error', 'close', 'timeout', 'parseError', 'connect'];
 
+// Destroy the connections
+function destroy(self, connections) {
+  // Destroy all connections
+  connections.forEach(function(c) {
+    // Remove all listeners
+    for(var i = 0; i < events.length; i++) {
+      c.removeAllListeners(events[i]);
+    }
+    // Destroy connection
+    c.destroy();
+  });
+
+  // Zero out all connections
+  self.inUseConnections = [];
+  self.availableConnections = [];
+  self.nonAuthenticatedConnections = [];
+  self.connectingConnections = [];
+
+  // Set state to destroyed
+  stateTransition(self, DESTROYED);
+}
+
 /**
  * Destroy pool
  * @method
  */
-Pool.prototype.destroy = function() {
+Pool.prototype.destroy = function(force) {
   var self = this;
   // Do not try again if the pool is already dead
   if(this.state == DESTROYED || self.state == DESTROYING) return;
   // Set state to destroyed
   stateTransition(this, DESTROYING);
+
+  // Are we force closing
+  if(force) {
+    // Get all the known connections
+    var connections = self.availableConnections
+      .concat(self.inUseConnections)
+      .concat(self.nonAuthenticatedConnections)
+      .concat(self.connectingConnections);
+    return destroy(self, connections);
+  }
 
   // Wait for the operations to drain before we close the pool
   function checkStatus() {
@@ -734,24 +785,7 @@ Pool.prototype.destroy = function() {
         }
       }
 
-      // Destroy all connections
-      connections.forEach(function(c) {
-        // Remove all listeners
-        for(var i = 0; i < events.length; i++) {
-          c.removeAllListeners(events[i]);
-        }
-        // Destroy connection
-        c.destroy();
-      });
-
-      // Zero out all connections
-      self.inUseConnections = [];
-      self.availableConnections = [];
-      self.nonAuthenticatedConnections = [];
-      self.connectingConnections = [];
-
-      // Set state to destroyed
-      stateTransition(self, DESTROYED);
+      destroy(self, connections);
     } else {
       setTimeout(checkStatus, 1);
     }
