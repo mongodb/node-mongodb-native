@@ -1380,3 +1380,46 @@ exports['Replicaset connection where a server is standalone'] = {
     });
   }
 }
+
+/**
+ * @ignore
+ */
+exports['Should correctly modify the server reconnectTries for all replset instances'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var mongo = configuration.require
+      , MongoClient = mongo.MongoClient
+      , Db = configuration.require.Db
+      , CoreServer = configuration.require.CoreServer
+      , CoreConnection = configuration.require.CoreConnection;
+
+    var url = f("mongodb://localhost:%s,localhost:%s,localhost:%s/integration_test_?replicaSet=%s"
+      , configuration.port, configuration.port + 1, configuration.port + 2, configuration.replicasetName)
+
+    // Accounting tests
+    CoreServer.enableServerAccounting();
+    CoreConnection.enableConnectionAccounting();
+
+    MongoClient.connect(url, {
+      reconnectTries: 10
+    }, function(err, db) {
+      test.equal(null, err);
+      test.ok(db != null);
+
+      var servers = db.serverConfig.s.replset.s.replicaSetState.allServers();
+      for (var i = 0; i < servers.length; i++) {
+        test.equal(10, servers[i].s.pool.options.reconnectTries);
+      }
+
+      // Connection account tests
+      test.equal(0, Object.keys(CoreConnection.connections()).length);
+      test.equal(0, Object.keys(CoreServer.servers()).length);
+      CoreServer.disableServerAccounting();
+      CoreConnection.disableConnectionAccounting();
+
+      test.done();
+    });
+  }
+}

@@ -173,3 +173,37 @@ exports['Should exercise all options on mongos topology'] = {
     });
   }
 }
+
+/**
+ * @ignore
+ */
+exports['Should correctly modify the server reconnectTries for all sharded proxy instances'] = {
+  metadata: { requires: { topology: 'sharded' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var mongo = configuration.require
+      , MongoClient = mongo.MongoClient
+      , Db = configuration.require.Db
+      , CoreServer = configuration.require.CoreServer
+      , CoreConnection = configuration.require.CoreConnection;
+
+    var url = f('mongodb://%s:%s,%s:%s/sharded_test_db?w=1&readPreference=secondaryPreferred&readPreferenceTags=sf%3A1&readPreferenceTags='
+      , configuration.host, configuration.port
+      , configuration.host, configuration.port + 1);
+
+    MongoClient.connect(url, {
+      reconnectTries: 10
+    }, function(err, db) {
+      test.equal(null, err);
+      test.ok(db != null);
+
+      var servers = db.serverConfig.s.mongos.connectedProxies;
+      for (var i = 0; i < servers.length; i++) {
+        test.equal(10, servers[i].s.pool.options.reconnectTries);
+      }
+
+      test.done();
+    });
+  }
+}
