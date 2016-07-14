@@ -62,6 +62,7 @@ exports['Should not fail with undefined id'] = {
     Logger.setLevel('debug');
 
     MongoClient.connect('mongodb://localhost:27017/test', {}, function(err, db) {
+      console.dir(err)
       test.equal(null, err);
 
       // perform any operation that gets logged
