@@ -624,11 +624,6 @@ function handleInitialConnectEvent(self, event) {
     if(event == 'connect') {
       // Update the state
       var result = self.s.replicaSetState.update(this);
-      // console.log("===================================== :: " + this.name + " :: " + event)
-      // console.dir(this.lastIsMaster())
-      // console.dir(self.s.replicaSetState.set)
-      // console.log("primary :: " + (self.s.replicaSetState.primary != null))
-      // console.log("secondaries :: " + (self.s.replicaSetState.secondaries.length))
       if(result == true) {
         // Debug log
         if(self.s.logger.isDebug()) {
