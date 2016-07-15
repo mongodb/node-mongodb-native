@@ -99,9 +99,7 @@ exports['Should correctly timeout socket operation and then correctly re-execute
 
     // Add event listeners
     replset.once('connect', function(_server) {
-      // console.log("======= 0")
       _server.insert('test.test', [{created:new Date()}], function(err, r) {
-        // console.log("======= 1")
         test.ok(err != null);
         // console.dir(err)
 
@@ -109,7 +107,6 @@ exports['Should correctly timeout socket operation and then correctly re-execute
           setTimeout(function() {
             _server.insert('test.test', [{created:new Date()}], function(err, r) {
               if(r && !done) {
-                // console.log("======= 3")
                 done = true;
                 test.equal(37019, r.connection.port);
                 replset.destroy();
