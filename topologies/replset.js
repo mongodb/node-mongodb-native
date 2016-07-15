@@ -117,6 +117,9 @@ var ReplSet = function(seedlist, options) {
   // Backward compatibility
   if(options.acceptableLatency) localThresholdMS = options.acceptableLatency;
 
+  // Create a logger
+  var logger = Logger('ReplSet', options);
+
   // Internal state
   this.s = {
     options: assign({}, options),
@@ -125,13 +128,14 @@ var ReplSet = function(seedlist, options) {
     // Factory overrides
     Cursor: options.cursorFactory || BasicCursor,
     // Logger instance
-    logger: Logger('ReplSet', options),
+    logger: logger,
     // Seedlist
     seedlist: seedlist,
     // Replicaset state
     replicaSetState: new ReplSetState({
       id: this.id, setName: options.setName,
-      acceptableLatency: localThresholdMS
+      acceptableLatency: localThresholdMS,
+      logger: logger
     }),
     // Current servers we are connecting to
     connectingServers: [],

@@ -3,6 +3,7 @@
 var inherits = require('util').inherits,
   f = require('util').format,
   EventEmitter = require('events').EventEmitter,
+  Logger = require('../connection/logger'),
   ObjectId = require('bson').ObjectId,
   ReadPreference = require('./read_preference'),
   MongoError = require('../error');
@@ -33,6 +34,9 @@ var ReplSetState = function(options) {
   // Unpacked options
   this.id = options.id;
   this.setName = options.setName;
+
+  // Replicaset logger
+  this.logger = options.logger || Logger('ReplSet', options);
 
   // Server selection index
   this.index = 0;
@@ -254,6 +258,11 @@ ReplSetState.prototype.update = function(server) {
   // If the .me field does not match the passed in server
   //
   if(ismaster.me && ismaster.me != server.name) {
+    if(this.logger.isWarn()) {
+      this.logger.warn(f('the seedlist server address %s does not match the required ismaster.me address %s', server.name, ismaster.me));
+    }
+
+    // Set the type of topology we have
     if(this.primary && !this.primary.equals(server)) {
       this.topologyType = TopologyType.ReplicaSetWithPrimary;
     } else {
