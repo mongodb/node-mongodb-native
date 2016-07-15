@@ -14,7 +14,7 @@
 * NODE-746 Improves replicaset errors for wrong setName.
 
 2.2.0 2016-07-05
-----------------
+---------------- 
 * Updated mongodb-core to 2.0.3.
 * Moved all authentication and handling of growing/shrinking of pool connections into actual pool.
 * All authentication methods now handle both auth/reauthenticate and logout events.
