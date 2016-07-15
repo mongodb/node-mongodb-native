@@ -3,7 +3,7 @@
 var format = require('util').format;
 
 var restartAndDone = function(configuration, test) {
-  // console.log("-- restartAndDone")
+  console.log("-- restartAndDone")
   configuration.manager.restart().then(function() {
     test.done();
   });

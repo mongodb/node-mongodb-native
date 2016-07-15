@@ -91,8 +91,6 @@ ulimit -n 6000
 The command above will set the maximum number of file descriptors for the process to `6000` descriptors allowing us to correctly connect with a pool size of `5000` sockets.
 
 # How can I avoid a very slow operation delaying other operations ?
-You have an operation that takes a fair bit of time to execute. As you execute them you find that other fast operations are affected due to the round-robin nature of the driver pool in the end leaving all the fast operations trapped behind slow executing operations.
-
 You have run into the `Slow Train` problem. It's tied to the fact that although the driver is Async, MongoDB is not. MongoDB as of 3.2 uses a single execution thread per socket. This means that it will only execute a single operation on a socket at any given point in time. Any operations sent to that socket will have to wait until the current operation is finished. This causes a slow train effect.
 
 ```
@@ -102,15 +100,13 @@ Socket 2 <- [S, F, F, F]
 Socket N <- [S, F, F, F]
 ```
 
-Unfortunately until MongoDB starts multiplexing threads on sockets or becomes an asynchronous there is only one reasonable strategy to avoid this problem.
-
 {{% note %}}
-Create a separate connection pool for the slow executing operations, thus isolating the slow operations from the fast operations.
+The driver is only affected by the slow train operations if the number of slow operations is larger than the max pool size.
 {{% /note %}}
 
 # Ensure you connection string is valid for Replica Set
 
-The connection string passed to the driver must use the fully qualified host names for the servers as set in the replicaset config. Given the following configuration settings for your replicaset.
+The connection string passed to the driver **MUST** use the fully qualified host names for the servers as set in the replicaset config. Given the following configuration settings for your replicaset.
 
 ```js
 {

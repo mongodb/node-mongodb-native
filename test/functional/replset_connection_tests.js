@@ -3,7 +3,7 @@
 var f = require('util').format;
 
 var restartAndDone = function(configuration, test) {
-  // console.log("-- restartAndDone")
+  console.log("-- restartAndDone")
   configuration.manager.restart().then(function() {
     test.done();
   });
@@ -1412,6 +1412,9 @@ exports['Should correctly modify the server reconnectTries for all replset insta
       for (var i = 0; i < servers.length; i++) {
         test.equal(10, servers[i].s.pool.options.reconnectTries);
       }
+
+      // Destroy the pool
+      db.close();
 
       // Connection account tests
       test.equal(0, Object.keys(CoreConnection.connections()).length);

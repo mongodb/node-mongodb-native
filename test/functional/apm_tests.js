@@ -108,7 +108,7 @@ exports['Correctly receive the APM events for a listIndexes command'] = {
     var failed = [];
 
     var db = configuration.newDbInstance({w:1}, {poolSize:1, auto_reconnect:false});
-    db.open(function(err, db) {
+    db.on('fullsetup', function(err, db) {
       test.equal(null, err);
 
       db.collection('apm_test_list_collections').insertOne({a:1}, configuration.writeConcernMax()).then(function(r) {
@@ -132,7 +132,7 @@ exports['Correctly receive the APM events for a listIndexes command'] = {
           test.equal(null, err);
 
           db.collection('apm_test_list_collections').listIndexes({readPreference: ReadPreference.SECONDARY}).toArray(function(err, cols) {
-            // console.dir(err)
+            console.dir(err)
             // console.log(started[0].connectionId.port)
             // console.log(started[1].connectionId.port)
             test.equal(null, err);
@@ -147,6 +147,8 @@ exports['Correctly receive the APM events for a listIndexes command'] = {
         });
       });
     });
+
+    db.open(function() {});
   }
 }
 
