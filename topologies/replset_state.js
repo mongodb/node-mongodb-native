@@ -259,7 +259,7 @@ ReplSetState.prototype.update = function(server) {
   //
   if(ismaster.me && ismaster.me != server.name) {
     if(this.logger.isWarn()) {
-      this.logger.warn(f('the seedlist server address %s does not match the required ismaster.me address %s', server.name, ismaster.me));
+      this.logger.warn(f('the seedlist server was removed due to its address %s not matching its ismaster.me address %s', server.name, ismaster.me));
     }
 
     // Set the type of topology we have
