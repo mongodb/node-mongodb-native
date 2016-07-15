@@ -503,3 +503,125 @@ exports['Member removed by reconfig'] = {
     });
   }
 }
+
+// ../topology_test_descriptions/rs/discovery.json
+exports['Should not leak any connections after hammering the replicaset with a mix of operations'] = {
+  metadata: { requires: { topology: "replicaset" } },
+
+  test: function(configuration, test) {
+    var Server = configuration.require.Server
+      , Connection = require('../../../lib/connection/connection')
+      , ReplSet = configuration.require.ReplSet
+      , ReadPreference = configuration.require.ReadPreference
+      , manager = configuration.manager;
+
+    // State
+    var state = {'primary':1, 'secondary': 2, 'arbiter': 1, 'passive': 1};
+    // Get the primary server
+    manager.primary().then(function(manager) {
+      // Enable connections accounting
+      Connection.enableConnectionAccounting();
+      Server.enableServerAccounting();
+      // Attempt to connect
+      var server = new ReplSet([{
+          host: manager.host
+        , port: manager.port
+      }], {
+        setName: configuration.setName
+      });
+
+      var donecount = 0;
+
+      function done() {
+        donecount = donecount + 1;
+
+        if(donecount == 2) {
+          // console.log("------------------------------------------------------------ state 0")
+          // console.log("number of connections :: " + Object.keys(Connection.connections()).length)
+          // console.log("number of servers :: " + Object.keys(Server.servers()).length)
+
+          server.destroy();
+
+          Connection.disableConnectionAccounting();
+          Server.disableServerAccounting();
+
+          setTimeout(function() {
+            // console.log("------------------------------------------------------------ state 1")
+            // console.log("number of connections :: " + Object.keys(Connection.connections()).length)
+            // console.log("number of servers :: " + Object.keys(Server.servers()).length)
+            test.equal(0, Object.keys(Connection.connections()).length);
+            test.equal(0, Object.keys(Server.servers()).length);
+            test.done();
+          }, 5000)
+        }
+      }
+
+      server.on('connect', function(_server) {
+        var insertcount = 10000;
+        var querycount = 10000;
+
+        for(var i = 0; i < 10000; i++) {
+          _server.insert(f("%s.inserts", configuration.db), [{a:1}], {
+            writeConcern: {w:1}, ordered:true
+          }, function(err, results) {
+            insertcount = insertcount - 1;
+
+            if(insertcount == 0) {
+              done();
+            }
+          });
+        }
+
+        for(var i = 0; i < 10000; i++) {
+          // Execute find
+          var cursor = _server.cursor(f("%s.inserts1", configuration.db), {
+              find: f("%s.inserts1", configuration.db)
+            , query: {}
+          }, {readPreference: ReadPreference.secondary})
+          cursor.setCursorLimit(1);
+          // Execute next
+          cursor.next(function(err, d) {
+            querycount = querycount - 1;
+
+            if(querycount == 0) {
+              done();
+            }
+          });
+
+          // _server.cursor(f("%s.inserts", configuration.db), [{a:1}], {
+          //   writeConcern: {w:1}, ordered:true
+          // }, function(err, results) {
+          //   insertcount = insertcount - 1;
+          //
+          //   if(insertcount == 0) {
+          //     done();
+          //   }
+          // });
+        }
+
+        // if(_type == 'secondary' && _server.lastIsMaster().passive) {
+        //   state['passive'] = state['passive'] - 1;
+        // } else {
+        //   state[_type] = state[_type] - 1;
+        // }
+        //
+        // if(state.primary == 0
+        //   && state.secondary == 0
+        //   && state.arbiter == 0
+        //   && state.passive == 0) {
+        //   server.destroy();
+        //
+        //   setTimeout(function() {
+        //     test.equal(0, Object.keys(Connection.connections()).length);
+        //     Connection.disableConnectionAccounting();
+        //     test.done();
+        //   }, 1000);
+        //   // restartAndDone(configuration, test);
+        // }
+      });
+
+      // Start connection
+      server.connect();
+    });
+  }
+}

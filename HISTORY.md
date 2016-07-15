@@ -1,5 +1,5 @@
-2.0.5
------------------
+2.0.5 2016-07-15
+----------------
 * Minor fixes to handle faster MongoClient connectivity from the driver, allowing single server instances to detect if they are a proxy.
 * Added numberOfConsecutiveTimeouts to pool that will destroy the pool if the number of consecutive timeouts > reconnectTries.
 * Print warning if seedlist servers host name does not match the one provided in it's ismaster.me field for Replicaset members.
