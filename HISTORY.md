@@ -1,6 +1,7 @@
 2.0.5
 -----------------
 * Minor fixes to handle faster MongoClient connectivity from the driver, allowing single server instances to detect if they are a proxy.
+* Added numberOfConsecutiveTimeouts to pool that will destroy the pool if the number of consecutive timeouts > reconnectTries.
 
 2.0.4 2016-07-11
 -----------------
@@ -27,7 +28,7 @@
 * Fixed logger error serialization issue.
 * Documentation fixes.
 
-2.0.0 2016-07-05 
+2.0.0 2016-07-05
 -----------------
 * Moved all authentication and handling of growing/shrinking of pool connections into actual pool.
 * All authentication methods now handle both auth/reauthenticate and logout events.
