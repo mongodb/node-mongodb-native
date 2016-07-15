@@ -298,6 +298,7 @@ var testFiles = [
   , '/test/functional/mongo_client_options_tests.js'
   , '/test/functional/decimal128_tests.js'
   , '/test/functional/find_and_modify_tests.js'
+  , '/test/functional/hang_tests.js'
 
   // Replicaset tests
   , '/test/functional/replset_read_preference_tests.js'
