@@ -1,3 +1,7 @@
+2.0.6 2016-07-19
+----------------
+* Destroy connection on socket timeout due to newer node versions not closing the socket.
+
 2.0.5 2016-07-15
 ----------------
 * Minor fixes to handle faster MongoClient connectivity from the driver, allowing single server instances to detect if they are a proxy.
