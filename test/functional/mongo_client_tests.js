@@ -554,3 +554,33 @@ exports['Should fail to connect due to instances not being mongos proxies'] = {
     });
   }
 }
+
+exports['Should correctly pass through appname'] = {
+  metadata: {
+    requires: {
+      node: ">0.8.0",
+      topology: ['single', 'replicaset', 'sharded']
+    }
+  },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    var url = configuration.url();
+    if(url.indexOf('rs_name') != -1) {
+      url = f('%s&appname=hello%20world', configuration.url());
+    } else {
+      url = f('%s?appname=hello%20world', configuration.url());
+    }
+
+    // var url = f('%s?appname=hello%20world', configuration.url());
+    // console.dir(url)
+    MongoClient.connect(url, function(err, db) {
+      test.equal(null, err);
+      test.equal('hello world', db.serverConfig.clientInfo.application.name);
+
+      db.close();
+      test.done();
+    });
+  }
+}

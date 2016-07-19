@@ -44,6 +44,20 @@ exports['Should correctly parse mongodb://localhost:27017'] = {
 /**
  * @ignore
  */
+exports['Should correctly parse mongodb://localhost:27017test?appname=hello%20world'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configure, test) {
+    var object = parse("mongodb://localhost:27017/test?appname=hello%20world");
+    test.equal("hello world", object.appname);
+    test.done();
+  }
+}
+
+/**
+ * @ignore
+ */
 exports['Should correctly parse mongodb://localhost/?safe=true&readPreference=secondary'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
