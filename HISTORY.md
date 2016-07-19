@@ -1,3 +1,7 @@
+2.2.4 2016-07-19
+----------------
+* NPM corrupted upload fix.
+
 2.2.3 2016-07-19
 ----------------
 * Updated mongodb-core to 2.0.6.
