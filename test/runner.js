@@ -212,7 +212,9 @@ var testFiles = [
   '/test/tests/functional/replset_state_tests.js',
   // Replicaset Server selection tests
   '/test/tests/functional/replset_server_selection_tests.js',
-  '/test/tests/functional/mongos_server_selection_tests.js'
+  '/test/tests/functional/mongos_server_selection_tests.js',
+  // Client Metadata test
+  '/test/tests/functional/client_metadata_tests.js'
 ]
 
 // Check if we support es6 generators
