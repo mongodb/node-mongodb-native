@@ -241,6 +241,7 @@ try {
   testFiles.push('/test/tests/functional/mongos_mocks/multiple_proxies_tests.js');
   testFiles.push('/test/tests/functional/mongos_mocks/proxy_failover_tests.js');
   testFiles.push('/test/tests/functional/mongos_mocks/proxy_read_preference_tests.js');
+  testFiles.push('/test/tests/functional/mongos_mocks/mixed_seed_list_tests.js');
 } catch(err) {}
 
 // Add all the tests to run
