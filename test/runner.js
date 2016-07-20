@@ -300,9 +300,6 @@ var testFiles = [
   , '/test/functional/find_and_modify_tests.js'
   , '/test/functional/hang_tests.js'
 
-  // Mock tests
-  , '/test/functional/command_write_concern_tests.js',
-
   // Replicaset tests
   , '/test/functional/replset_read_preference_tests.js'
   , '/test/functional/replset_operations_tests.js'
@@ -346,6 +343,8 @@ try {
   eval("(function *(){})");
   // Generator tests
   testFiles.push('/test/functional/operation_generators_example_tests.js');
+  // Mock tests
+  testFiles.push('/test/functional/command_write_concern_tests.js');
 } catch(err) {}
 
 // Add all the tests to run
