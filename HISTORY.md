@@ -1,3 +1,8 @@
+2.0.7
+----------------
+* Allow primary to be returned when secondaryPreferred is passed (Issue #117, https://github.com/dhendo).
+* Added better warnings when passing in illegal seed list members to a Mongos topology.
+
 2.0.6 2016-07-19
 ----------------
 * Destroy connection on socket timeout due to newer node versions not closing the socket.

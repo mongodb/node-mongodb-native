@@ -1236,3 +1236,116 @@ exports['Should correctly connect to a replicaset and perform correct nearness r
     }, 100)
   }
 }
+
+exports['Should correctly connect connect to single server replicaset and peform a secondaryPreferred'] = {
+  metadata: {
+    requires: {
+      generators: true,
+      topology: "single"
+    }
+  },
+
+  test: function(configuration, test) {
+    var ReplSet = configuration.require.ReplSet,
+      ObjectId = configuration.require.BSON.ObjectId,
+      Connection = require('../../../../lib/connection/connection'),
+      ReadPreference = configuration.require.ReadPreference,
+      Long = configuration.require.BSON.Long,
+      co = require('co'),
+      mockupdb = require('../../../mock');
+
+    // Contain mock server
+    var primaryServer = null;
+    var firstSecondaryServer = null;
+    var secondSecondaryServer = null;
+    var running = true;
+    var electionIds = [new ObjectId(), new ObjectId()];
+
+    // Extend the object
+    var extend = function(template, fields) {
+      for(var name in template) fields[name] = template[name];
+      return fields;
+    }
+
+    // Default message fields
+    var defaultFields = {
+      "setName": "rs", "setVersion": 1, "electionId": electionIds[0],
+      "maxBsonObjectSize" : 16777216, "maxMessageSizeBytes" : 48000000,
+      "maxWriteBatchSize" : 1000, "localTime" : new Date(), "maxWireVersion" : 4,
+      "minWireVersion" : 0, "ok" : 1, "hosts": []
+    }
+
+    // Primary server states
+    var primary = [extend(defaultFields, {
+      "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
+    })];
+
+    // Boot the mock
+    co(function*() {
+      primaryServer = yield mockupdb.createServer(32000, 'localhost');
+
+      // Primary state machine
+      co(function*() {
+        while(running) {
+          var request = yield primaryServer.receive();
+          // Get the document
+          var doc = request.document;
+          if(doc.ismaster) {
+            request.reply(primary[0]);
+          } else if(doc.count) {
+            request.reply({ "waitedMS" : Long.ZERO, "n" : 1, "ok" : 1});
+          }
+        }
+      });
+    });
+
+    Connection.enableConnectionAccounting();
+    // Attempt to connect
+    var server = new ReplSet([
+      { host: 'localhost', port: 32000 }], {
+        setName: 'rs',
+        connectionTimeout: 3000,
+        socketTimeout: 0,
+        haInterval: 2000,
+        size: 1
+    });
+
+    // Add event listeners
+    server.on('connect', function(_server) {
+      // Set up a write
+      function schedule() {
+        setTimeout(function() {
+          // Perform a find
+          _server.command('test.test', {
+              count: 'test.test'
+            , batchSize: 2
+          }, {
+            readPreference: new ReadPreference('secondaryPreferred')
+          }, function(err, r) {
+            test.equal(err, null);
+            test.equal(32000, r.connection.port);
+
+            primaryServer.destroy();
+            server.destroy();
+            running = false;
+
+            setTimeout(function() {
+              test.equal(0, Object.keys(Connection.connections()).length);
+              Connection.disableConnectionAccounting();
+              test.done();
+            }, 1000);
+            return;
+          });
+        }, 500);
+      }
+
+      // Schedule an insert
+      schedule();
+    });
+
+    // Gives proxies a chance to boot up
+    setTimeout(function() {
+      server.connect();
+    }, 100)
+  }
+}
