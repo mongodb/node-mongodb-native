@@ -1,5 +1,8 @@
 "use strict"
 
+var os = require('os'),
+  f = require('util').format;
+
 /**
  * Emit event if it exists
  * @method
@@ -8,6 +11,53 @@ function emitSDAMEvent(self, event, description) {
   if(self.listeners(event).length > 0) {
     self.emit(event, description);
   }
+}
+
+// Get package.json variable
+var driverVersion = require(__dirname + '/../../package.json').version;
+var nodejsversion = f('Node.js %s, %s', process.version, os.endianness());
+var type = os.type();
+var name = process.platform;
+var architecture = process.arch;
+var release = os.release();
+
+function createClientInfo(options) {
+  // Build default client information
+  var clientInfo = options.clientInfo ? clone(options.clientInfo) : {
+    driver: {
+      name: "nodejs-core",
+      version: driverVersion
+    },
+    os: {
+      type: type,
+      name: name,
+      architecture: architecture,
+      version: release
+    }
+  }
+
+  // Is platform specified
+  if(clientInfo.platform && clientInfo.platform.indexOf('mongodb-core') == -1) {
+    clientInfo.platform = f('%s, mongodb-core: %s', clientInfo.platform, driverVersion);
+  } else if(!clientInfo.platform){
+    clientInfo.platform = nodejsversion;
+  }
+
+  // Do we have an application specific string
+  if(options.appname) {
+    // Cut at 128 bytes
+    var buffer = new Buffer(options.appname);
+    // Return the truncated appname
+    var appname = buffer.length > 128 ? buffer.slice(0, 128).toString('utf8') : options.appname;
+    // Add to the clientInfo
+    clientInfo.application = { name: appname };
+  }
+
+  return clientInfo;
+}
+
+function clone(object) {
+  return JSON.parse(JSON.stringify(object));
 }
 
 var getPreviousDescription = function(self) {
@@ -171,3 +221,5 @@ module.exports.emitServerDescriptionChanged = emitServerDescriptionChanged;
 module.exports.emitTopologyDescriptionChanged = emitTopologyDescriptionChanged;
 module.exports.cloneOptions = cloneOptions;
 module.exports.assign = assign;
+module.exports.createClientInfo = createClientInfo;
+module.exports.clone = clone;

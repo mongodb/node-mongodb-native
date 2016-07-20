@@ -11,7 +11,9 @@ var inherits = require('util').inherits,
   MongoError = require('../error'),
   Server = require('./server'),
   ReplSetState = require('./replset_state'),
-  assign = require('./shared').assign;
+  assign = require('./shared').assign,
+  clone = require('./shared').clone,
+  createClientInfo = require('./shared').createClientInfo;
 
 /**
  * @fileOverview The **Mongos** class is a class that represents a Mongos Proxy topology and is
@@ -136,7 +138,12 @@ var Mongos = function(seedlist, options) {
     debug: typeof options.debug == 'boolean' ? options.debug : false,
     // localThresholdMS
     localThresholdMS: options.localThresholdMS || 15,
+    // Client info
+    clientInfo: createClientInfo(options)
   }
+
+  // Set the client info
+  this.s.options.clientInfo = createClientInfo(options);
 
   // Log info warning if the socketTimeout < haInterval as it will cause
   // a lot of recycled connections to happen.
@@ -209,6 +216,8 @@ Mongos.prototype.connect = function(options) {
   var servers = this.s.seedlist.map(function(x) {
     return new Server(assign({}, self.s.options, x, {
       authProviders: self.authProviders, reconnect:false, monitoring:false, inTopology: true
+    }, {
+      clientInfo: clone(self.s.clientInfo)
     }));
   });
 
@@ -475,6 +484,8 @@ function reconnectProxies(self, proxies, callback) {
         port: parseInt(_server.name.split(':')[1], 10)
       }, {
         authProviders: self.authProviders, reconnect:false, monitoring: false, inTopology: true
+      }, {
+        clientInfo: clone(self.s.clientInfo)
       }));
 
       // Add temp handlers

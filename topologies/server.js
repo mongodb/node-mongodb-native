@@ -15,7 +15,8 @@ var inherits = require('util').inherits,
   ThreeTwoWireProtocolSupport = require('../wireprotocol/3_2_support'),
   BasicCursor = require('../cursor'),
   sdam = require('./shared'),
-  assign = require('./shared').assign;
+  assign = require('./shared').assign,
+  createClientInfo = require('./shared').createClientInfo;
 
 // Used for filtering out fields for loggin
 var debugFields = ['reconnect', 'reconnectTries', 'reconnectInterval', 'emitError', 'cursorFactory', 'host'
@@ -52,6 +53,7 @@ var servers = {};
  * @param {string} [options.passphrase] SSL Certificate pass phrase
  * @param {boolean} [options.rejectUnauthorized=true] Reject unauthorized server certificates
  * @param {boolean} [options.promoteLongs=true] Convert Long values from the db into Numbers if they fit into 53 bits
+ * @param {string} [options.appname=null] Application name, passed in on ismaster call and logged in mongod server logs. Maximum size 128 bytes.
  * @return {Server} A cursor instance
  * @fires Server#connect
  * @fires Server#close
@@ -118,6 +120,8 @@ var Server = function(options) {
   this.wireProtocolHandler = new PreTwoSixWireProtocolSupport();
   // Default type
   this._type = 'server';
+  // Set the client info
+  this.clientInfo = createClientInfo(options);
 }
 
 inherits(Server, EventEmitter);
@@ -184,7 +188,7 @@ function monitoringProcess(self) {
     // Query options
     var queryOptions = { numberToSkip: 0, numberToReturn: -1, checkKeys: false, slaveOk: true };
     // Create a query instance
-    var query = new Query(self.s.bson, 'admin.$cmd', {ismaster:true}, queryOptions);
+    var query = new Query(self.s.bson, 'admin.$cmd', {ismaster:true, client: self.clientInfo}, queryOptions);
     // Get start time
     var start = new Date().getTime();
     // Execute the ismaster query
