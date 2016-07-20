@@ -15,6 +15,7 @@
   "dependencies": {
     "es6-promise": "3.0.2",
     "mongodb-core": "2.0.6",
+    "mongodb-core": "christkv/mongodb-core#2.0",
     "readable-stream": "1.0.31"
   },
   "devDependencies": {
