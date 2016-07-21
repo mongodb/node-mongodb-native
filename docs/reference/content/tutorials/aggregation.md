@@ -12,7 +12,7 @@ title = "Aggregation"
 
 ## Overview
 
-Aggregations operations process data records and return
+Aggregation operations process data records and return
 computed results. Aggregation operations group values from
 multiple documents together, and can perform a variety of
 operations on the grouped data to return a single result.
@@ -117,7 +117,7 @@ arguments:
 4. a reduce function
 
 The example groups the results by number of stars where the ``categories``
-array is ['Peruvian'].
+array is ``['Peruvian']``.
 
 ```js
 var MongoClient = require('mongodb').MongoClient
