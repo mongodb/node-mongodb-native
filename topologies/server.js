@@ -453,6 +453,11 @@ Server.prototype.command = function(ns, cmd, options, callback) {
   // If we are not connected or have a disconnectHandler specified
   if(disconnectHandler(self, 'command', ns, cmd, options, callback)) return;
 
+  // Check if we have collation support
+  if(this.ismaster && this.ismaster.maxWireVersion < 5 && cmd.collation) {
+    return callback(new MongoError(f('server %s does not support collation', this.name)));
+  }
+
   // Query options
   var queryOptions = {
     numberToSkip: 0,
@@ -526,6 +531,11 @@ Server.prototype.update = function(ns, ops, options, callback) {
   // If we are not connected or have a disconnectHandler specified
   if(disconnectHandler(self, 'update', ns, ops, options, callback)) return;
 
+  // Check if we have collation support
+  if(this.ismaster && this.ismaster.maxWireVersion < 5 && options.collation) {
+    return callback(new MongoError(f('server %s does not support collation', this.name)));
+  }
+
   // Setup the docs as an array
   ops = Array.isArray(ops) ? ops : [ops];
   // Execute write
@@ -551,6 +561,11 @@ Server.prototype.remove = function(ns, ops, options, callback) {
 
   // If we are not connected or have a disconnectHandler specified
   if(disconnectHandler(self, 'remove', ns, ops, options, callback)) return;
+
+  // Check if we have collation support
+  if(this.ismaster && this.ismaster.maxWireVersion < 5 && options.collation) {
+    return callback(new MongoError(f('server %s does not support collation', this.name)));
+  }
 
   // Setup the docs as an array
   ops = Array.isArray(ops) ? ops : [ops];

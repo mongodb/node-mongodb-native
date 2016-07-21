@@ -47,6 +47,11 @@ var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callba
     writeCommand.writeConcern = writeConcern;
   }
 
+  // If we have collation passed in
+  if(options.collation) {
+    writeCommand.collation = options.collation;
+  }
+
   // Do we have bypassDocumentValidation set, then enable it on the write command
   if(typeof options.bypassDocumentValidation == 'boolean') {
     writeCommand.bypassDocumentValidation = options.bypassDocumentValidation;
@@ -426,6 +431,9 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
 
   // If we have partial set
   if(cmd.partial) findCmd.partial = cmd.partial;
+
+  // If we have collation passed in
+  if(cmd.collation) findCmd.collation = cmd.collation;
 
   // If we have explain, we need to rewrite the find command
   // to wrap it in the explain command
