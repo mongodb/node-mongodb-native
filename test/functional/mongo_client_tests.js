@@ -584,3 +584,34 @@ exports['Should correctly pass through appname'] = {
     });
   }
 }
+
+exports['Should correctly pass through socketTimeoutMS and connectTimeoutMS'] = {
+  metadata: {
+    requires: {
+      node: ">0.8.0",
+      topology: ['single', 'replicaset', 'sharded']
+    }
+  },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    MongoClient.connect(configuration.url(), {
+      socketTimeoutMS: 0,
+      connectTimeoutMS: 0
+    }, function(err, db) {
+      test.equal(null, err);
+
+      if(db.s.topology.s.clonedOptions) {
+        test.equal(0, db.s.topology.s.clonedOptions.connectionTimeout);
+        test.equal(0, db.s.topology.s.clonedOptions.socketTimeout);
+      } else {
+        test.equal(0, db.s.topology.s.options.connectionTimeout);
+        test.equal(0, db.s.topology.s.options.socketTimeout);
+      }
+
+      db.close();
+      test.done();
+    });
+  }
+}
