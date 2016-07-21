@@ -44,6 +44,44 @@ exports['should fail due to illegal authentication mechanism'] = {
 }
 
 /**
+ * @ignore
+ */
+exports['should correctly authenticate with kay.kay'] = {
+  metadata: { requires: { topology: ['auth'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
+      , Server = configuration.require.Server;
+
+    // restart server
+    configuration.manager.restart(true).then(function() {
+      var db1 = new Db('test', new Server(configuration.host, configuration.port, {auto_reconnect: true}), {w:1});
+      db1.open(function(err, db) {
+        test.equal(null, err);
+
+        db.admin().addUser('kay:kay', 'abc123', function(err, result) {
+          test.equal(null, err);
+
+          // Login the user
+          db.admin().authenticate("kay:kay", "abc123", function(err, result) {
+            test.equal(null, err);
+
+            MongoClient.connect('mongodb://kay%3Akay:abc123@localhost:27017/admin', function(err, db) {
+              // restart server
+              configuration.manager.restart(true).then(function() {
+                test.done();
+              });
+            });
+          });
+        });
+      });
+    });
+  }
+}
+
+/**
  * Retrieve the current replicaset status if the server is running as part of a replicaset using a Promise.
  *
  * @example-class Admin
