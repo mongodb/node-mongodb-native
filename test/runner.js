@@ -346,6 +346,7 @@ try {
   // Mock tests
   testFiles.push('/test/functional/command_write_concern_tests.js');
   testFiles.push('/test/functional/replicaset_mock_tests.js');
+  testFiles.push('/test/functional/collations_tests.js');
 } catch(err) {}
 
 // Add all the tests to run
