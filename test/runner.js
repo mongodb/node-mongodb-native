@@ -213,6 +213,8 @@ var testFiles = [
   // Replicaset Server selection tests
   '/test/tests/functional/replset_server_selection_tests.js',
   '/test/tests/functional/mongos_server_selection_tests.js',
+  // Replicaset max staleness tests
+  '/test/tests/functional/max_staleness_tests.js',
   // Client Metadata test
   '/test/tests/functional/client_metadata_tests.js'
 ]
