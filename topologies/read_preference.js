@@ -32,6 +32,7 @@ var needSlaveOk = ['primaryPreferred', 'secondary', 'secondaryPreferred', 'neare
  * @param {string} preference A string describing the preference (primary|primaryPreferred|secondary|secondaryPreferred|nearest)
  * @param {object} tags The tags object
  * @param {object} [options] Additional read preference options
+ * @param {number} [options.maxStalenessMS] Max Secondary Read Stalleness in Miliseconds
  * @property {string} preference The preference string (primary|primaryPreferred|secondary|secondaryPreferred|nearest)
  * @property {object} tags The tags object
  * @property {object} options Additional read preference options
@@ -41,6 +42,11 @@ var ReadPreference = function(preference, tags, options) {
   this.preference = preference;
   this.tags = tags;
   this.options = options;
+
+  // Add the maxStalenessMS value to the read Preference
+  if(this.options && this.options.maxStalenessMS) {
+    this.maxStalenessMS = this.options.maxStalenessMS;
+  }
 }
 
 /**

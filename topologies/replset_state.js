@@ -43,6 +43,9 @@ var ReplSetState = function(options) {
   // Acceptable latency
   this.acceptableLatency = options.acceptableLatency || 15;
 
+  // heartbeatFrequencyMS
+  this.heartbeatFrequencyMS = options.heartbeatFrequencyMS || 10000;
+
   // Server side
   this.primary = null;
   this.secondaries = [];
@@ -502,13 +505,69 @@ ReplSetState.prototype.update = function(server) {
   return false;
 }
 
+/**
+ * Recalculate single server max staleness
+ * @method
+ * @return
+ */
+ReplSetState.prototype.updateServerMaxStaleness = function(server, haInterval) {
+  // Locate the max secondary lastwrite
+  var max = 0;
+  // Go over all secondaries
+  for(var i = 0; i < this.secondaries.length; i++) {
+    max = Math.max(max, this.secondaries[i].lastWriteDate);
+  }
+  // console.log("!!!!!!!!!!!!!!!! 0")
+  // console.dir(max)
+  // Perform this servers staleness calculation
+  if(server.ismaster.maxWireVersion >= 5
+    && server.ismaster.secondary
+    && this.hasPrimary()) {
+      // console.log("=========== updateServerMaxStaleness 0")
+    server.staleness = (server.lastUpdateTime - server.lastWriteDate)
+      - (this.primary.lastUpdateTime - this.primary.lastWriteDate)
+      + haInterval;
+  } else if(server.ismaster.maxWireVersion >= 5
+    && server.ismaster.secondary){
+      // console.log("=========== updateServerMaxStaleness 1")
+      // console.log("    max :: " + max)
+      // console.log("    server.lastWriteDate :: " + server.lastWriteDate)
+      // console.log("    haInterval :: " + haInterval)
+    server.staleness = max - server.lastWriteDate + haInterval;
+  }
+}
+
+/**
+ * Recalculate all the stalness values for secodaries
+ * @method
+ * @return
+ */
+ReplSetState.prototype.updateSecondariesMaxStaleness = function(haInterval) {
+  for(var i = 0; i < this.secondaries.length; i++) {
+    this.updateServerMaxStaleness(this.secondaries[i], haInterval);
+  }
+}
+
+/**
+ * Pick a server by the passed in ReadPreference
+ * @method
+ * @param {ReadPreference} readPreference The ReadPreference instance to use
+ * @return
+ */
 ReplSetState.prototype.pickServer = function(readPreference) {
   // If no read Preference set to primary by default
   readPreference = readPreference || ReadPreference.primary;
 
+  // maxStalenessMS is not allowed with a primary read
+  if(readPreference.preference == 'primary' && readPreference.maxStalenessMS) {
+    return new MongoError('primary readPreference incompatible with maxStalenessMS');
+  }
+
   // Do we have the nearest readPreference
-  if(readPreference.preference == 'nearest') {
+  if(readPreference.preference == 'nearest' && !readPreference.maxStalenessMS) {
     return pickNearest(this, readPreference);
+  } else if(readPreference.preference == 'nearest' && readPreference.maxStalenessMS) {
+    return pickNearestMaxStalenessMS(this, readPreference);
   }
 
   // Get all the secondaries
@@ -535,11 +594,16 @@ ReplSetState.prototype.pickServer = function(readPreference) {
   if(readPreference.equals(ReadPreference.secondaryPreferred)
     || readPreference.equals(ReadPreference.secondary)) {
 
-    if(secondaries.length > 0) {
-      // Apply tags if present
-      var servers = filterByTags(readPreference, secondaries);
+    if(secondaries.length > 0 && !readPreference.maxStalenessMS) {
       // Pick nearest of any other servers available
       var server = pickNearest(this, readPreference);
+      // No server in the window return primary
+      if(server) {
+        return server;
+      }
+    } else if(secondaries.length > 0 && readPreference.maxStalenessMS) {
+      // Pick nearest of any other servers available
+      var server = pickNearestMaxStalenessMS(this, readPreference);
       // No server in the window return primary
       if(server) {
         return server;
@@ -555,14 +619,16 @@ ReplSetState.prototype.pickServer = function(readPreference) {
 
   // Primary preferred
   if(readPreference.equals(ReadPreference.primaryPreferred)) {
-    if(this.primary) return this.primary;
+    var server = null;
 
-    if(secondaries.length > 0) {
-      // Apply tags if present
-      var servers = filterByTags(readPreference, secondaries);
-      // Pick nearest of any other servers available
-      return pickNearest(this, readPreference);
+    if(secondaries.length > 0 && !readPreference.maxStalenessMS) {
+      server = pickNearest(this, readPreference);
+    } else if(secondaries.length > 0 && readPreference.maxStalenessMS) {
+      server = pickNearestMaxStalenessMS(this, readPreference);
     }
+
+    //  Did we find a server
+    if(server) return server;
   }
 
   // Return the primary
@@ -604,6 +670,79 @@ var filterByTags = function(readPreference, servers) {
   return filteredServers;
 }
 
+function pickNearestMaxStalenessMS(self, readPreference) {
+  // console.log("=== pickNearestMaxStalenessMS 0")
+  // Only get primary and secondaries as seeds
+  var seeds = {};
+  var servers = [];
+  var heartbeatFrequencyMS = self.heartbeatFrequencyMS;
+
+  // console.log("=== readPreference.maxStalenessMS = " + readPreference.maxStalenessMS)
+  // console.log("=== (heartbeatFrequencyMS * 2) = " + (heartbeatFrequencyMS * 2))
+
+  // Check if the maxStalenessMS > heartbeatFrequencyMS * 2
+  if(readPreference.maxStalenessMS < (heartbeatFrequencyMS * 2)) {
+    return new MongoError('maxStalenessMS must be at least twice the haInterval');
+  }
+
+  // Add primary to list if not a secondary read preference
+  if(self.primary && readPreference.preference != 'secondary') {
+    servers.push(self.primary);
+  }
+
+  // Add all the secondaries
+  for(var i = 0; i < self.secondaries.length; i++) {
+    servers.push(self.secondaries[i]);
+  }
+
+  // Filter by tags
+  servers = filterByTags(readPreference, servers);
+  // console.log("=== pickNearestMaxStalenessMS 1 :: " + servers.length)
+
+  //
+  // // Locate lowest time (picked servers are lowest time + acceptable Latency margin)
+  // var lowest = servers.length > 0 ? servers[0].lastIsMasterMS : 0;
+
+  // Filter by latency
+  servers = servers.filter(function(s) {
+    // console.log("  == " + s.name + " :: " + s.staleness + " <= " + readPreference.maxStalenessMS)
+    return s.staleness <= readPreference.maxStalenessMS;
+  });
+  // console.log("=== pickNearestMaxStalenessMS 2 :: " + servers.length)
+
+  // Sort by time
+  servers.sort(function(a, b) {
+    // return a.time > b.time;
+    return a.lastIsMasterMS > b.lastIsMasterMS
+  });
+
+  // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ servers.length = " + servers.length)
+  // console.log(servers.map(function(x) { return x.name}))
+
+  // No servers, default to primary
+  if(servers.length == 0) {
+    return null
+  }
+
+  // Ensure index does not overflow the number of available servers
+  self.index = self.index % servers.length;
+
+  // Does any of the servers not support the right wire protocol version
+  // Then error out
+  for(var i = 0; i < servers.length; i++) {
+    if(servers[i].ismaster.maxWireVersion < 5) {
+      return new MongoError('maxStalenessMS not supported by at least one of the replicaset members');
+    }
+  }
+
+  // Get the server
+  var server = servers[self.index];
+  // Add to the index
+  self.index = self.index + 1;
+  // Return the first server of the sorted and filtered list
+  return server;
+}
+
 function pickNearest(self, readPreference) {
   // Only get primary and secondaries as seeds
   var seeds = {};
@@ -641,13 +780,14 @@ function pickNearest(self, readPreference) {
     return null
   }
 
+  // Ensure index does not overflow the number of available servers
+  self.index = self.index % servers.length;
+  // Get the server
+  var server = servers[self.index];
   // Add to the index
   self.index = self.index + 1;
-  // Select the index
-  self.index = self.index % servers.length;
-
   // Return the first server of the sorted and filtered list
-  return servers[self.index];
+  return server;
 }
 
 function inList(ismaster, server, list) {

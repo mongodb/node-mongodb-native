@@ -122,6 +122,14 @@ var Server = function(options) {
   this._type = 'server';
   // Set the client info
   this.clientInfo = createClientInfo(options);
+
+  // Max Stalleness values
+  // last time we updated the ismaster state
+  this.lastUpdateTime = 0;
+  // Last write time
+  this.lastWriteDate = 0;
+  // Stalleness
+  this.staleness = 0;
 }
 
 inherits(Server, EventEmitter);
