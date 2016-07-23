@@ -213,7 +213,6 @@ exports['Should correctly print warning and error when no mongos proxies in seed
         test.equal('seed list contains no mongos proxies, replicaset connections requires the parameter replicaSet to be supplied in the URI or options object, mongodb://server:port/db?replicaSet=name', err.message);
 
         running = false;
-        db.close();
         mongos1.destroy();
         mongos2.destroy();
         test.done();
