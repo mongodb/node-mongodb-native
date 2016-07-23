@@ -42,9 +42,9 @@ exports['Should correctly execute server selection tests ReplicaSetWithPrimary']
     console.dir(path)
     var entries = fs.readdirSync(path).filter(function(x) {
       return x.indexOf('.json') != -1;
-    });
+    })
     // .filter(function(x) {
-    //   return x.indexOf('SecondaryPreferred_non_matching.json') != -1;
+    //   return x.indexOf('PrimaryPreferred.json') != -1;
     // });
     // console.dir(entries)
     // console.dir(entries)
