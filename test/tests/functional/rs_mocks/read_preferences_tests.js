@@ -104,77 +104,77 @@ exports['Should correctly connect to a replicaset and select the correct tagged 
       }).catch(function(err) {
         console.log(err.stack);
       });
-    });
 
-    // console.log("--------------------------------------------- -2")
-    Connection.enableConnectionAccounting();
-    // Attempt to connect
-    var server = new ReplSet([
-      { host: 'localhost', port: 32000 },
-      { host: 'localhost', port: 32001 },
-      { host: 'localhost', port: 32002 }], {
-        setName: 'rs',
-        connectionTimeout: 3000,
-        socketTimeout: 0,
-        haInterval: 2000,
-        size: 1
-    });
+      // console.log("--------------------------------------------- -2")
+      Connection.enableConnectionAccounting();
+      // Attempt to connect
+      var server = new ReplSet([
+        { host: 'localhost', port: 32000 },
+        { host: 'localhost', port: 32001 },
+        { host: 'localhost', port: 32002 }], {
+          setName: 'rs',
+          connectionTimeout: 3000,
+          socketTimeout: 0,
+          haInterval: 2000,
+          size: 1
+      });
 
-    // console.log("--------------------------------------------- -1")
-    // Add event listeners
-    server.on('connect', function(_server) {
-      // console.log("--------------------------------------------- 0")
-      // Set up a write
-      function schedule() {
-        // console.log("--------------------------------------------- 1")
-        // Perform a find
-        _server.command('test.test', {
-            count: 'test.test'
-          , batchSize: 2
-        }, {
-          readPreference: new ReadPreference('secondary', {loc:'dc'})
-        }, function(err, r) {
-          // console.log("--------------------------------------------- 2")
-          // console.dir(err)
-          // console.dir(r)
-          // if(r) {
-          //   console.dir(r.connection.port)
-          //   console.dir(r.result)
-          // }
+      // console.log("--------------------------------------------- -1")
+      // Add event listeners
+      server.on('connect', function(_server) {
+        // console.log("--------------------------------------------- 0")
+        // Set up a write
+        function schedule() {
+          // console.log("--------------------------------------------- 1")
+          // Perform a find
+          _server.command('test.test', {
+              count: 'test.test'
+            , batchSize: 2
+          }, {
+            readPreference: new ReadPreference('secondary', {loc:'dc'})
+          }, function(err, r) {
+            // console.log("--------------------------------------------- 2")
+            // console.dir(err)
+            // console.dir(r)
+            // if(r) {
+            //   console.dir(r.connection.port)
+            //   console.dir(r.result)
+            // }
 
-          // // console.dir(err)
-          test.equal(err, null);
-          test.ok(r.connection.port == 32002);
-          // if(!r.connection.port == 32002) {
-          //   console.log(r.connection.port);
-          // }
-          //
+            // // console.dir(err)
+            test.equal(err, null);
+            test.ok(r.connection.port == 32002);
+            // if(!r.connection.port == 32002) {
+            //   console.log(r.connection.port);
+            // }
+            //
 
-          primaryServer.destroy();
-          firstSecondaryServer.destroy();
-          secondSecondaryServer.destroy();
-          server.destroy();
-          running = false;
+            primaryServer.destroy();
+            firstSecondaryServer.destroy();
+            secondSecondaryServer.destroy();
+            server.destroy();
+            running = false;
 
-          setTimeout(function() {
-            test.equal(0, Object.keys(Connection.connections()).length);
-            Connection.disableConnectionAccounting();
-            test.done();
-          }, 1000);
-          return;
-        });
-      }
+            setTimeout(function() {
+              test.equal(0, Object.keys(Connection.connections()).length);
+              Connection.disableConnectionAccounting();
+              test.done();
+            }, 1000);
+            return;
+          });
+        }
 
-      // Schedule an insert
+        // Schedule an insert
+        setTimeout(function() {
+          schedule();
+        }, 2000);
+      });
+
+      // Gives proxies a chance to boot up
       setTimeout(function() {
-        schedule();
-      }, 2000);
+        server.connect();
+      }, 100)
     });
-
-    // Gives proxies a chance to boot up
-    setTimeout(function() {
-      server.connect();
-    }, 100)
   }
 }
 
@@ -282,60 +282,60 @@ exports['Should correctly connect to a replicaset and select the primary server'
       }).catch(function(err) {
         console.log(err.stack);
       });
+
+      Connection.enableConnectionAccounting();
+      // Attempt to connect
+      var server = new ReplSet([
+        { host: 'localhost', port: 32000 },
+        { host: 'localhost', port: 32001 },
+        { host: 'localhost', port: 32002 }], {
+          setName: 'rs',
+          connectionTimeout: 3000,
+          socketTimeout: 0,
+          haInterval: 2000,
+          size: 1
+      });
+
+      // Add event listeners
+      server.on('connect', function(_server) {
+        // Set up a write
+        function schedule() {
+          setTimeout(function() {
+            // Perform a find
+            _server.command('test.test', {
+                count: 'test.test'
+              , batchSize: 2
+            }, {
+              readPreference: new ReadPreference('primaryPreferred')
+            }, function(err, r) {
+              test.equal(err, null);
+              test.equal(32000, r.connection.port);
+
+              primaryServer.destroy();
+              firstSecondaryServer.destroy();
+              secondSecondaryServer.destroy();
+              server.destroy();
+              running = false;
+
+              setTimeout(function() {
+                test.equal(0, Object.keys(Connection.connections()).length);
+                Connection.disableConnectionAccounting();
+                test.done();
+              }, 1000);
+              return;
+            });
+          }, 500);
+        }
+
+        // Schedule an insert
+        schedule();
+      });
+
+      // Gives proxies a chance to boot up
+      setTimeout(function() {
+        server.connect();
+      }, 100)
     });
-
-    Connection.enableConnectionAccounting();
-    // Attempt to connect
-    var server = new ReplSet([
-      { host: 'localhost', port: 32000 },
-      { host: 'localhost', port: 32001 },
-      { host: 'localhost', port: 32002 }], {
-        setName: 'rs',
-        connectionTimeout: 3000,
-        socketTimeout: 0,
-        haInterval: 2000,
-        size: 1
-    });
-
-    // Add event listeners
-    server.on('connect', function(_server) {
-      // Set up a write
-      function schedule() {
-        setTimeout(function() {
-          // Perform a find
-          _server.command('test.test', {
-              count: 'test.test'
-            , batchSize: 2
-          }, {
-            readPreference: new ReadPreference('primaryPreferred')
-          }, function(err, r) {
-            test.equal(err, null);
-            test.equal(32000, r.connection.port);
-
-            primaryServer.destroy();
-            firstSecondaryServer.destroy();
-            secondSecondaryServer.destroy();
-            server.destroy();
-            running = false;
-
-            setTimeout(function() {
-              test.equal(0, Object.keys(Connection.connections()).length);
-              Connection.disableConnectionAccounting();
-              test.done();
-            }, 1000);
-            return;
-          });
-        }, 500);
-      }
-
-      // Schedule an insert
-      schedule();
-    });
-
-    // Gives proxies a chance to boot up
-    setTimeout(function() {
-      server.connect();
-    }, 100)
   }
 }
 
@@ -443,36 +443,25 @@ exports['Should correctly round robin secondary reads'] = {
       }).catch(function(err) {
         console.log(err.stack);
       });
-    });
 
-    Connection.enableConnectionAccounting();
-    // Attempt to connect
-    var server = new ReplSet([
-      { host: 'localhost', port: 32000 },
-      { host: 'localhost', port: 32001 },
-      { host: 'localhost', port: 32002 }], {
-        setName: 'rs',
-        connectionTimeout: 3000,
-        socketTimeout: 0,
-        haInterval: 2000,
-        size: 1
-    });
+      Connection.enableConnectionAccounting();
+      // Attempt to connect
+      var server = new ReplSet([
+        { host: 'localhost', port: 32000 },
+        { host: 'localhost', port: 32001 },
+        { host: 'localhost', port: 32002 }], {
+          setName: 'rs',
+          connectionTimeout: 3000,
+          socketTimeout: 0,
+          haInterval: 2000,
+          size: 1
+      });
 
-    // Add event listeners
-    server.on('connect', function(_server) {
-      // Set up a write
-      function schedule() {
-        setTimeout(function() {
-          // Perform a find
-          _server.command('test.test', {
-              count: 'test.test'
-            , batchSize: 2
-          }, {
-            readPreference: new ReadPreference('secondary')
-          }, function(err, r) {
-            test.equal(err, null);
-            var port = r.connection.port;
-
+      // Add event listeners
+      server.on('connect', function(_server) {
+        // Set up a write
+        function schedule() {
+          setTimeout(function() {
             // Perform a find
             _server.command('test.test', {
                 count: 'test.test'
@@ -481,7 +470,6 @@ exports['Should correctly round robin secondary reads'] = {
               readPreference: new ReadPreference('secondary')
             }, function(err, r) {
               test.equal(err, null);
-              test.ok(r.connection.port != port);
               var port = r.connection.port;
 
               // Perform a find
@@ -493,33 +481,45 @@ exports['Should correctly round robin secondary reads'] = {
               }, function(err, r) {
                 test.equal(err, null);
                 test.ok(r.connection.port != port);
+                var port = r.connection.port;
 
-                primaryServer.destroy();
-                firstSecondaryServer.destroy();
-                secondSecondaryServer.destroy();
-                server.destroy();
-                running = false;
+                // Perform a find
+                _server.command('test.test', {
+                    count: 'test.test'
+                  , batchSize: 2
+                }, {
+                  readPreference: new ReadPreference('secondary')
+                }, function(err, r) {
+                  test.equal(err, null);
+                  test.ok(r.connection.port != port);
 
-                setTimeout(function() {
-                  test.equal(0, Object.keys(Connection.connections()).length);
-                  Connection.disableConnectionAccounting();
-                  test.done();
-                }, 1000);
-                return;
+                  primaryServer.destroy();
+                  firstSecondaryServer.destroy();
+                  secondSecondaryServer.destroy();
+                  server.destroy();
+                  running = false;
+
+                  setTimeout(function() {
+                    test.equal(0, Object.keys(Connection.connections()).length);
+                    Connection.disableConnectionAccounting();
+                    test.done();
+                  }, 1000);
+                  return;
+                });
               });
             });
-          });
-        }, 500);
-      }
+          }, 500);
+        }
 
-      // Schedule an insert
-      schedule();
+        // Schedule an insert
+        schedule();
+      });
+
+      // Gives proxies a chance to boot up
+      setTimeout(function() {
+        server.connect();
+      }, 100)
     });
-
-    // Gives proxies a chance to boot up
-    setTimeout(function() {
-      server.connect();
-    }, 100)
   }
 }
 
@@ -605,86 +605,86 @@ exports['Should correctly fall back to a secondary server if the readPreference 
       }).catch(function(err) {
         console.log(err.stack);
       });
+
+      // mock ops store from node-mongodb-native for handling repl set disconnects
+      mockDisconnectHandler = {
+        add: function(opType, ns, ops, options, callback) {
+          // Command issued to replSet will fail immediately if !server.isConnected()
+          return callback(MongoError.create({message: "no connection available", driver:true}));
+        },
+        execute: function() {
+          // method needs to be called, so provide a dummy version
+          return;
+        }
+      };
+
+      Connection.enableConnectionAccounting();
+      // Attempt to connect
+      var server = new ReplSet([
+        { host: 'localhost', port: 32000,
+          socketTimeout: 3000,
+          connectionTimeout: 3000 },
+        { host: 'localhost', port: 32001 }], {
+          setName: 'rs',
+          // connectionTimeout: 10000,
+          // socketTimeout: 10000,
+          haInterval: 10000,
+          disconnectHandler: mockDisconnectHandler,
+          size: 1
+      });
+
+      // Add event listeners
+      server.on('connect', function(_server) {
+        function schedule() {
+          setTimeout(function() {
+            // Perform a find
+            _server.command('test.test', {
+                count: 'test.test'
+              , batchSize: 2
+            }, {
+              readPreference: new ReadPreference('primaryPreferred')
+            }, function(err, r) {
+              test.equal(err, null);
+              test.equal(32000, r.connection.port);
+
+              primaryServer.destroy();
+
+              _server.on('left', function(t, s) {
+                // Perform another find, after primary is gone
+                _server.command('test.test', {
+                    count: 'test.test'
+                    , batchSize: 2
+                }, {
+                  readPreference: new ReadPreference('primaryPreferred')
+                }, function(err, r) {
+                  test.equal(err, null);
+                  test.equal(32001, r.connection.port); // reads from secondary while primary down
+
+                  firstSecondaryServer.destroy();
+                  _server.destroy();
+                  running = false;
+
+                  setTimeout(function() {
+                    test.equal(0, Object.keys(Connection.connections()).length);
+                    Connection.disableConnectionAccounting();
+                    test.done();
+                  }, 1000);
+                  return;
+                });
+              }, 2500);
+            });
+          }, 500);
+        }
+
+        // Schedule a commands
+        schedule();
+      });
+
+      // Gives proxies a chance to boot up
+      setTimeout(function() {
+        server.connect();
+      }, 100)
     });
-
-    // mock ops store from node-mongodb-native for handling repl set disconnects
-    mockDisconnectHandler = {
-      add: function(opType, ns, ops, options, callback) {
-        // Command issued to replSet will fail immediately if !server.isConnected()
-        return callback(MongoError.create({message: "no connection available", driver:true}));
-      },
-      execute: function() {
-        // method needs to be called, so provide a dummy version
-        return;
-      }
-    };
-
-    Connection.enableConnectionAccounting();
-    // Attempt to connect
-    var server = new ReplSet([
-      { host: 'localhost', port: 32000,
-        socketTimeout: 3000,
-        connectionTimeout: 3000 },
-      { host: 'localhost', port: 32001 }], {
-        setName: 'rs',
-        // connectionTimeout: 10000,
-        // socketTimeout: 10000,
-        haInterval: 10000,
-        disconnectHandler: mockDisconnectHandler,
-        size: 1
-    });
-
-    // Add event listeners
-    server.on('connect', function(_server) {
-      function schedule() {
-        setTimeout(function() {
-          // Perform a find
-          _server.command('test.test', {
-              count: 'test.test'
-            , batchSize: 2
-          }, {
-            readPreference: new ReadPreference('primaryPreferred')
-          }, function(err, r) {
-            test.equal(err, null);
-            test.equal(32000, r.connection.port);
-
-            primaryServer.destroy();
-
-            _server.on('left', function(t, s) {
-              // Perform another find, after primary is gone
-              _server.command('test.test', {
-                  count: 'test.test'
-                  , batchSize: 2
-              }, {
-                readPreference: new ReadPreference('primaryPreferred')
-              }, function(err, r) {
-                test.equal(err, null);
-                test.equal(32001, r.connection.port); // reads from secondary while primary down
-
-                firstSecondaryServer.destroy();
-                _server.destroy();
-                running = false;
-
-                setTimeout(function() {
-                  test.equal(0, Object.keys(Connection.connections()).length);
-                  Connection.disableConnectionAccounting();
-                  test.done();
-                }, 1000);
-                return;
-              });
-            }, 2500);
-          });
-        }, 500);
-      }
-
-      // Schedule a commands
-      schedule();
-    });
-
-    // Gives proxies a chance to boot up
-    setTimeout(function() {
-      server.connect();
-    }, 100)
   }
 }
 
@@ -793,78 +793,78 @@ exports['Should correctly fallback to secondaries when primary not available'] =
       }).catch(function(err) {
         console.log(err.stack);
       });
-    });
 
-    Connection.enableConnectionAccounting();
-    // Attempt to connect
-    var server = new ReplSet([
-      { host: 'localhost', port: 32000 },
-      { host: 'localhost', port: 32001 },
-      { host: 'localhost', port: 32002 }], {
-        setName: 'rs',
-        connectionTimeout: 3000,
-        socketTimeout: 0,
-        haInterval: 2000,
-        size: 1
-    });
+      Connection.enableConnectionAccounting();
+      // Attempt to connect
+      var server = new ReplSet([
+        { host: 'localhost', port: 32000 },
+        { host: 'localhost', port: 32001 },
+        { host: 'localhost', port: 32002 }], {
+          setName: 'rs',
+          connectionTimeout: 3000,
+          socketTimeout: 0,
+          haInterval: 2000,
+          size: 1
+      });
 
-    // Add event listeners
-    server.on('connect', function(_server) {
-      // Set up a write
-      function schedule() {
-        // Perform a find
-        _server.command('test.test', {
-            count: 'test.test'
-          , batchSize: 2
-        }, {
-          readPreference: new ReadPreference('primaryPreferred')
-        }, function(err, r) {
-          // Let all sockets properly close
-          process.nextTick(function() {
-            // Test primaryPreferred
-            _server.command('test.test', {
-                count: 'test.test'
-              , batchSize: 2
-            }, {
-              readPreference: new ReadPreference('primaryPreferred')
-            }, function(err, r) {
-              test.equal(null, err);
-              test.ok(r.connection.port != 32000);
-
-              // Test secondaryPreferred
+      // Add event listeners
+      server.on('connect', function(_server) {
+        // Set up a write
+        function schedule() {
+          // Perform a find
+          _server.command('test.test', {
+              count: 'test.test'
+            , batchSize: 2
+          }, {
+            readPreference: new ReadPreference('primaryPreferred')
+          }, function(err, r) {
+            // Let all sockets properly close
+            process.nextTick(function() {
+              // Test primaryPreferred
               _server.command('test.test', {
                   count: 'test.test'
                 , batchSize: 2
               }, {
-                readPreference: new ReadPreference('secondaryPreferred')
+                readPreference: new ReadPreference('primaryPreferred')
               }, function(err, r) {
                 test.equal(null, err);
                 test.ok(r.connection.port != 32000);
-                primaryServer.destroy();
-                firstSecondaryServer.destroy();
-                secondSecondaryServer.destroy();
-                server.destroy();
-                running = false;
 
-                setTimeout(function() {
-                  test.equal(0, Object.keys(Connection.connections()).length);
-                  Connection.disableConnectionAccounting();
-                  test.done();
-                }, 1000);
+                // Test secondaryPreferred
+                _server.command('test.test', {
+                    count: 'test.test'
+                  , batchSize: 2
+                }, {
+                  readPreference: new ReadPreference('secondaryPreferred')
+                }, function(err, r) {
+                  test.equal(null, err);
+                  test.ok(r.connection.port != 32000);
+                  primaryServer.destroy();
+                  firstSecondaryServer.destroy();
+                  secondSecondaryServer.destroy();
+                  server.destroy();
+                  running = false;
+
+                  setTimeout(function() {
+                    test.equal(0, Object.keys(Connection.connections()).length);
+                    Connection.disableConnectionAccounting();
+                    test.done();
+                  }, 1000);
+                });
               });
             });
           });
-        });
-      }
+        }
 
-      // Schedule an insert
-      schedule();
+        // Schedule an insert
+        schedule();
+      });
+
+      // Gives proxies a chance to boot up
+      setTimeout(function() {
+        server.connect();
+      }, 100)
     });
-
-    // Gives proxies a chance to boot up
-    setTimeout(function() {
-      server.connect();
-    }, 100)
   }
 }
 
@@ -974,82 +974,82 @@ exports['Should correctly connect to a replicaset and perform correct nearness r
       }).catch(function(err) {
         console.log(err.stack);
       });
-    });
 
-    // console.log("--------------------------------------------- -2")
-    Connection.enableConnectionAccounting();
-    // Attempt to connect
-    var server = new ReplSet([
-      { host: 'localhost', port: 32000 },
-      { host: 'localhost', port: 32001 },
-      { host: 'localhost', port: 32002 }], {
-        setName: 'rs',
-        connectionTimeout: 3000,
-        socketTimeout: 0,
-        haInterval: 1000,
-        size: 1
-    });
+      // console.log("--------------------------------------------- -2")
+      Connection.enableConnectionAccounting();
+      // Attempt to connect
+      var server = new ReplSet([
+        { host: 'localhost', port: 32000 },
+        { host: 'localhost', port: 32001 },
+        { host: 'localhost', port: 32002 }], {
+          setName: 'rs',
+          connectionTimeout: 3000,
+          socketTimeout: 0,
+          haInterval: 1000,
+          size: 1
+      });
 
-    // console.log("--------------------------------------------- -1")
-    // Add event listeners
-    server.on('connect', function(_server) {
-      // console.log("--------------------------------------------- 0")
-      // Set up a write
-      function schedule() {
-        _server.s.replicaSetState.secondaries = _server.s.replicaSetState.secondaries.map(function(x, i) {
-          x.lastIsMasterMS = i * 20;
-          return x;
-        });
+      // console.log("--------------------------------------------- -1")
+      // Add event listeners
+      server.on('connect', function(_server) {
+        // console.log("--------------------------------------------- 0")
+        // Set up a write
+        function schedule() {
+          _server.s.replicaSetState.secondaries = _server.s.replicaSetState.secondaries.map(function(x, i) {
+            x.lastIsMasterMS = i * 20;
+            return x;
+          });
 
-        // console.log("--------------------------------------------- 1")
-        // Perform a find
-        _server.command('test.test', {
-            count: 'test.test'
-          , batchSize: 2
-        }, {
-          readPreference: new ReadPreference('nearest')
-        }, function(err, r) {
-          // console.log("--------------------------------------------- 2")
-          // console.dir(err)
-          // // console.dir(r)
-          // if(r) {
-          //   console.dir(r.connection.port)
-          //   console.dir(r.result)
-          // }
+          // console.log("--------------------------------------------- 1")
+          // Perform a find
+          _server.command('test.test', {
+              count: 'test.test'
+            , batchSize: 2
+          }, {
+            readPreference: new ReadPreference('nearest')
+          }, function(err, r) {
+            // console.log("--------------------------------------------- 2")
+            // console.dir(err)
+            // // console.dir(r)
+            // if(r) {
+            //   console.dir(r.connection.port)
+            //   console.dir(r.result)
+            // }
 
-          // // console.dir(err)
-          test.equal(err, null);
-          test.ok(r.connection.port == 32000 || r.connection.port == 32001);
-          // if(!r.connection.port == 32002) {
-          //   console.log(r.connection.port);
-          // }
-          //
+            // // console.dir(err)
+            test.equal(err, null);
+            test.ok(r.connection.port == 32000 || r.connection.port == 32001);
+            // if(!r.connection.port == 32002) {
+            //   console.log(r.connection.port);
+            // }
+            //
 
-          primaryServer.destroy();
-          firstSecondaryServer.destroy();
-          secondSecondaryServer.destroy();
-          server.destroy();
-          running = false;
+            primaryServer.destroy();
+            firstSecondaryServer.destroy();
+            secondSecondaryServer.destroy();
+            server.destroy();
+            running = false;
 
-          setTimeout(function() {
-            test.equal(0, Object.keys(Connection.connections()).length);
-            Connection.disableConnectionAccounting();
-            test.done();
-          }, 1000);
-          return;
-        });
-      }
+            setTimeout(function() {
+              test.equal(0, Object.keys(Connection.connections()).length);
+              Connection.disableConnectionAccounting();
+              test.done();
+            }, 1000);
+            return;
+          });
+        }
 
-      // Schedule an insert
+        // Schedule an insert
+        setTimeout(function() {
+          schedule();
+        }, 2000);
+      });
+
+      // Gives proxies a chance to boot up
       setTimeout(function() {
-        schedule();
-      }, 2000);
+        server.connect();
+      }, 100)
     });
-
-    // Gives proxies a chance to boot up
-    setTimeout(function() {
-      server.connect();
-    }, 100)
   }
 }
 
@@ -1159,81 +1159,81 @@ exports['Should correctly connect to a replicaset and perform correct nearness r
       }).catch(function(err) {
         console.log(err.stack);
       });
-    });
 
-    // console.log("--------------------------------------------- -2")
-    Connection.enableConnectionAccounting();
-    // Attempt to connect
-    var server = new ReplSet([
-      { host: 'localhost', port: 32000 },
-      { host: 'localhost', port: 32001 },
-      { host: 'localhost', port: 32002 }], {
-        setName: 'rs',
-        connectionTimeout: 3000,
-        socketTimeout: 0,
-        haInterval: 1000,
-        size: 1
-    });
+      // console.log("--------------------------------------------- -2")
+      Connection.enableConnectionAccounting();
+      // Attempt to connect
+      var server = new ReplSet([
+        { host: 'localhost', port: 32000 },
+        { host: 'localhost', port: 32001 },
+        { host: 'localhost', port: 32002 }], {
+          setName: 'rs',
+          connectionTimeout: 3000,
+          socketTimeout: 0,
+          haInterval: 1000,
+          size: 1
+      });
 
-    // console.log("--------------------------------------------- -1")
-    // Add event listeners
-    server.on('connect', function(_server) {
-      // console.log("--------------------------------------------- 0")
-      // Set up a write
-      function schedule() {
-        _server.s.replicaSetState.secondaries = _server.s.replicaSetState.secondaries.map(function(x, i) {
-          x.lastIsMasterMS = i * 20;
-          return x;
-        });
+      // console.log("--------------------------------------------- -1")
+      // Add event listeners
+      server.on('connect', function(_server) {
+        // console.log("--------------------------------------------- 0")
+        // Set up a write
+        function schedule() {
+          _server.s.replicaSetState.secondaries = _server.s.replicaSetState.secondaries.map(function(x, i) {
+            x.lastIsMasterMS = i * 20;
+            return x;
+          });
 
-        // console.log("--------------------------------------------- 1")
-        // Perform a find
-        _server.command('test.test', {
-            count: 'test.test'
-          , batchSize: 2
-        }, {
-          readPreference: new ReadPreference('nearest', {loc: 'dc'})
-        }, function(err, r) {
-          // console.log("--------------------------------------------- 2")
-          // console.dir(err)
-          // // console.dir(r)
-          // if(r) {
-          //   console.dir(r.connection.port)
-          //   console.dir(r.result)
-          // }
+          // console.log("--------------------------------------------- 1")
+          // Perform a find
+          _server.command('test.test', {
+              count: 'test.test'
+            , batchSize: 2
+          }, {
+            readPreference: new ReadPreference('nearest', {loc: 'dc'})
+          }, function(err, r) {
+            // console.log("--------------------------------------------- 2")
+            // console.dir(err)
+            // // console.dir(r)
+            // if(r) {
+            //   console.dir(r.connection.port)
+            //   console.dir(r.result)
+            // }
 
-          // // console.dir(err)
-          test.equal(err, null);
-          test.ok(r.connection.port == 32001 || r.connection.port == 32002);
-          // if(!r.connection.port == 32002) {
-          //   console.log(r.connection.port);
-          // }
+            // // console.dir(err)
+            test.equal(err, null);
+            test.ok(r.connection.port == 32001 || r.connection.port == 32002);
+            // if(!r.connection.port == 32002) {
+            //   console.log(r.connection.port);
+            // }
 
-          primaryServer.destroy();
-          firstSecondaryServer.destroy();
-          secondSecondaryServer.destroy();
-          server.destroy();
-          running = false;
+            primaryServer.destroy();
+            firstSecondaryServer.destroy();
+            secondSecondaryServer.destroy();
+            server.destroy();
+            running = false;
 
-          setTimeout(function() {
-            test.equal(0, Object.keys(Connection.connections()).length);
-            Connection.disableConnectionAccounting();
-            test.done();
-          }, 1000);
-          return;
-        });
-      }
+            setTimeout(function() {
+              test.equal(0, Object.keys(Connection.connections()).length);
+              Connection.disableConnectionAccounting();
+              test.done();
+            }, 1000);
+            return;
+          });
+        }
 
-      // Schedule an insert
+        // Schedule an insert
+        setTimeout(function() {
+          schedule();
+        }, 2000);
+      });
+
+      // Gives proxies a chance to boot up
       setTimeout(function() {
-        schedule();
-      }, 2000);
+        server.connect();
+      }, 100)
     });
-
-    // Gives proxies a chance to boot up
-    setTimeout(function() {
-      server.connect();
-    }, 100)
   }
 }
 
@@ -1297,55 +1297,55 @@ exports['Should correctly connect connect to single server replicaset and peform
           }
         }
       });
+
+      Connection.enableConnectionAccounting();
+      // Attempt to connect
+      var server = new ReplSet([
+        { host: 'localhost', port: 32000 }], {
+          setName: 'rs',
+          connectionTimeout: 3000,
+          socketTimeout: 0,
+          haInterval: 2000,
+          size: 1
+      });
+
+      // Add event listeners
+      server.on('connect', function(_server) {
+        // Set up a write
+        function schedule() {
+          setTimeout(function() {
+            // Perform a find
+            _server.command('test.test', {
+                count: 'test.test'
+              , batchSize: 2
+            }, {
+              readPreference: new ReadPreference('secondaryPreferred')
+            }, function(err, r) {
+              test.equal(err, null);
+              test.equal(32000, r.connection.port);
+
+              primaryServer.destroy();
+              server.destroy();
+              running = false;
+
+              setTimeout(function() {
+                test.equal(0, Object.keys(Connection.connections()).length);
+                Connection.disableConnectionAccounting();
+                test.done();
+              }, 1000);
+              return;
+            });
+          }, 500);
+        }
+
+        // Schedule an insert
+        schedule();
+      });
+
+      // Gives proxies a chance to boot up
+      setTimeout(function() {
+        server.connect();
+      }, 100)
     });
-
-    Connection.enableConnectionAccounting();
-    // Attempt to connect
-    var server = new ReplSet([
-      { host: 'localhost', port: 32000 }], {
-        setName: 'rs',
-        connectionTimeout: 3000,
-        socketTimeout: 0,
-        haInterval: 2000,
-        size: 1
-    });
-
-    // Add event listeners
-    server.on('connect', function(_server) {
-      // Set up a write
-      function schedule() {
-        setTimeout(function() {
-          // Perform a find
-          _server.command('test.test', {
-              count: 'test.test'
-            , batchSize: 2
-          }, {
-            readPreference: new ReadPreference('secondaryPreferred')
-          }, function(err, r) {
-            test.equal(err, null);
-            test.equal(32000, r.connection.port);
-
-            primaryServer.destroy();
-            server.destroy();
-            running = false;
-
-            setTimeout(function() {
-              test.equal(0, Object.keys(Connection.connections()).length);
-              Connection.disableConnectionAccounting();
-              test.done();
-            }, 1000);
-            return;
-          });
-        }, 500);
-      }
-
-      // Schedule an insert
-      schedule();
-    });
-
-    // Gives proxies a chance to boot up
-    setTimeout(function() {
-      server.connect();
-    }, 100)
   }
 }
