@@ -12,7 +12,6 @@ var inherits = require('util').inherits,
   Server = require('./server'),
   ReplSetState = require('./replset_state'),
   assign = require('./shared').assign,
-  process = require('process'),
   clone = require('./shared').clone,
   createClientInfo = require('./shared').createClientInfo;
 

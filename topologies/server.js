@@ -207,11 +207,6 @@ function monitoringProcess(self) {
       // Update the ismaster view if we have a result
       if(result) {
         self.ismaster = result.result;
-        // It's a proxy change the type so
-        // the wireprotocol will send $readPreference
-        if(self.ismaster.msg == 'isdbgrid') {
-          self._type = 'mongos';
-        }
       }
       // Re-schedule the monitoring process
       self.monitoringProcessId = setTimeout(monitoringProcess(self), self.s.monitoringInterval);
@@ -251,6 +246,11 @@ var eventHandler = function(self, event) {
         self.initalConnect = false;
         // Save the ismaster
         self.ismaster = result.result;
+        // It's a proxy change the type so
+        // the wireprotocol will send $readPreference
+        if(self.ismaster.msg == 'isdbgrid') {
+          self._type = 'mongos';
+        }
         // Add the correct wire protocol handler
         self.wireProtocolHandler = configureWireProtocolHandler(self, self.ismaster);
         // Have we defined self monitoring
