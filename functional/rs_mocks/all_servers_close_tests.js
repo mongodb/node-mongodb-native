@@ -145,19 +145,19 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
         // console.log("------------------------------- step 0 ")
         // console.dir(_server)
 
-        for(var i = 0; i < 10000; i++) {
-          // console.log("------------------------------- step 0 : 1 ")
-          // console.log(server.insert)
-          // Execute the write
-          _server.insert(f("%s.inserts", configuration.db), [{a:1}], {
-            writeConcern: {w:1}, ordered:true
-          }, function(err, results) {
-            // if(results) console.log("insert success")
-            // console.log("!!!!!!!!! RESULt")
-            // if(results)console.dir(results.result)
-          });
-          // console.log("------------------------------- step 0 : 2 ")
-        }
+        // for(var i = 0; i < 10000; i++) {
+        //   // console.log("------------------------------- step 0 : 1 ")
+        //   // console.log(server.insert)
+        //   // Execute the write
+        //   _server.insert(f("%s.inserts", configuration.db), [{a:1}], {
+        //     writeConcern: {w:1}, ordered:true
+        //   }, function(err, results) {
+        //     // if(results) console.log("insert success")
+        //     // console.log("!!!!!!!!! RESULt")
+        //     // if(results)console.dir(results.result)
+        //   });
+        //   // console.log("------------------------------- step 0 : 2 ")
+        // }
         // console.log("------------------------------- step 0 : 1")
 
         setTimeout(function() {
@@ -218,7 +218,7 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
                   }, 1000);
                 // }, 10000)
               });
-            }, 10000);
+            }, 12000);
           }, 2500);
         }, 2500);
       });
