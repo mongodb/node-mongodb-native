@@ -126,110 +126,110 @@ exports['Successful reconnect when driver looses touch with entire replicaset'] 
       }).catch(function(err) {
         console.log(err.stack);
       });
-    });
 
-    Connection.enableConnectionAccounting();
-    // Attempt to connect
-    var server = new ReplSet([
-      { host: 'localhost', port: 32000 },
-      { host: 'localhost', port: 32001 },
-      { host: 'localhost', port: 32002 }], {
-        setName: 'rs',
-        connectionTimeout: 2000,
-        socketTimeout: 2000,
-        haInterval: 500,
-        size: 500
-    });
+      Connection.enableConnectionAccounting();
+      // Attempt to connect
+      var server = new ReplSet([
+        { host: 'localhost', port: 32000 },
+        { host: 'localhost', port: 32001 },
+        { host: 'localhost', port: 32002 }], {
+          setName: 'rs',
+          connectionTimeout: 2000,
+          socketTimeout: 2000,
+          haInterval: 500,
+          size: 500
+      });
 
-    server.on('connect', function(_server) {
-      // server.__connected = true;
-      // console.log("------------------------------- step 0 ")
-      // console.dir(_server)
+      server.on('connect', function(_server) {
+        // server.__connected = true;
+        // console.log("------------------------------- step 0 ")
+        // console.dir(_server)
 
-      for(var i = 0; i < 10000; i++) {
-        // console.log("------------------------------- step 0 : 1 ")
-        // console.log(server.insert)
-        // Execute the write
-        _server.insert(f("%s.inserts", configuration.db), [{a:1}], {
-          writeConcern: {w:1}, ordered:true
-        }, function(err, results) {
-          // if(results) console.log("insert success")
-          // console.log("!!!!!!!!! RESULt")
-          // if(results)console.dir(results.result)
-        });
-        // console.log("------------------------------- step 0 : 2 ")
-      }
-      // console.log("------------------------------- step 0 : 1")
-
-      setTimeout(function() {
-        // console.log("------------------------------- step 1 ")
-        die = true;
+        for(var i = 0; i < 10000; i++) {
+          // console.log("------------------------------- step 0 : 1 ")
+          // console.log(server.insert)
+          // Execute the write
+          _server.insert(f("%s.inserts", configuration.db), [{a:1}], {
+            writeConcern: {w:1}, ordered:true
+          }, function(err, results) {
+            // if(results) console.log("insert success")
+            // console.log("!!!!!!!!! RESULt")
+            // if(results)console.dir(results.result)
+          });
+          // console.log("------------------------------- step 0 : 2 ")
+        }
+        // console.log("------------------------------- step 0 : 1")
 
         setTimeout(function() {
-          // console.log("------------------------------- step 2 ")
-          die = false;
+          // console.log("------------------------------- step 1 ")
+          die = true;
 
           setTimeout(function() {
-            // console.log("------------------------------- step 5 : 0")
-            // console.dir(server.s.replicaSetState.primary)
-            // console.log("------------------------------- step 6 : 0")
-            // console.dir(server.s.replicaSetState.secondaries)
-            // console.log("------------------------------- step 7 : 0")
-            // console.dir(server.s.replicaSetState.arbiters)
+            // console.log("------------------------------- step 2 ")
+            die = false;
 
-            // console.log("------------------------------- step 3 ")
-            _server.command('admin.$cmd', {ismaster:true}, function(err, r) {
-              // console.dir(err)
-              // console.log("------------------------------- step 4 : 1")
-              // console.dir(err)
-              // console.log("------------------------------- step 5 : 1")
+            setTimeout(function() {
+              // console.log("------------------------------- step 5 : 0")
               // console.dir(server.s.replicaSetState.primary)
-              // console.log("------------------------------- step 6 : 1")
+              // console.log("------------------------------- step 6 : 0")
               // console.dir(server.s.replicaSetState.secondaries)
-              // console.log("------------------------------- step 7 : 1")
+              // console.log("------------------------------- step 7 : 0")
               // console.dir(server.s.replicaSetState.arbiters)
-              // console.log("============================================= 0")
-              // console.dir(err)
-              // if(r)console.dir(r.result)
-              // console.log("_server.s.replicaSetState.primary != null = " + (_server.s.replicaSetState.primary != null))
-              // console.log("_server.s.replicaSetState.secondaries.length = " + _server.s.replicaSetState.secondaries.length)
-              // console.log("_server.s.replicaSetState.arbiters.length = " + _server.s.replicaSetState.arbiters.length)
-              test.equal(null, err);
-              test.ok(_server.s.replicaSetState.primary != null);
-              test.equal(1, _server.s.replicaSetState.secondaries.length);
-              test.equal(1, _server.s.replicaSetState.arbiters.length);
 
-              // setTimeout(function() {
-              //   console.log("============================================= 1")
-              //   if(r)console.dir(r.result)
-              //   console.log("_server.s.replicaSetState.primary != null = " + (_server.s.replicaSetState.primary != null))
-              //   console.log("_server.s.replicaSetState.secondaries.length = " + _server.s.replicaSetState.secondaries.length)
-              //   console.log("_server.s.replicaSetState.arbiters.length = " + _server.s.replicaSetState.arbiters.length)
+              // console.log("------------------------------- step 3 ")
+              _server.command('admin.$cmd', {ismaster:true}, function(err, r) {
+                // console.dir(err)
+                // console.log("------------------------------- step 4 : 1")
+                // console.dir(err)
+                // console.log("------------------------------- step 5 : 1")
+                // console.dir(server.s.replicaSetState.primary)
+                // console.log("------------------------------- step 6 : 1")
+                // console.dir(server.s.replicaSetState.secondaries)
+                // console.log("------------------------------- step 7 : 1")
+                // console.dir(server.s.replicaSetState.arbiters)
+                // console.log("============================================= 0")
+                // console.dir(err)
+                // if(r)console.dir(r.result)
+                // console.log("_server.s.replicaSetState.primary != null = " + (_server.s.replicaSetState.primary != null))
+                // console.log("_server.s.replicaSetState.secondaries.length = " + _server.s.replicaSetState.secondaries.length)
+                // console.log("_server.s.replicaSetState.arbiters.length = " + _server.s.replicaSetState.arbiters.length)
+                test.equal(null, err);
+                test.ok(_server.s.replicaSetState.primary != null);
+                test.equal(1, _server.s.replicaSetState.secondaries.length);
+                test.equal(1, _server.s.replicaSetState.arbiters.length);
 
-                primaryServer.destroy();
-                firstSecondaryServer.destroy();
-                arbiterServer.destroy();
-                server.destroy();
-                running = false;
+                // setTimeout(function() {
+                //   console.log("============================================= 1")
+                //   if(r)console.dir(r.result)
+                //   console.log("_server.s.replicaSetState.primary != null = " + (_server.s.replicaSetState.primary != null))
+                //   console.log("_server.s.replicaSetState.secondaries.length = " + _server.s.replicaSetState.secondaries.length)
+                //   console.log("_server.s.replicaSetState.arbiters.length = " + _server.s.replicaSetState.arbiters.length)
 
-                setTimeout(function() {
-                  test.equal(0, Object.keys(Connection.connections()).length);
-                  Connection.disableConnectionAccounting();
-                  test.done();
-                }, 1000);
-              // }, 10000)
-            });
-          }, 10000);
+                  primaryServer.destroy();
+                  firstSecondaryServer.destroy();
+                  arbiterServer.destroy();
+                  server.destroy();
+                  running = false;
+
+                  setTimeout(function() {
+                    test.equal(0, Object.keys(Connection.connections()).length);
+                    Connection.disableConnectionAccounting();
+                    test.done();
+                  }, 1000);
+                // }, 10000)
+              });
+            }, 10000);
+          }, 2500);
         }, 2500);
-      }, 2500);
-    });
+      });
 
-    // Add event listeners
-    server.on('fullsetup', function(_server) {});
-    // Gives proxies a chance to boot up
-    setTimeout(function() {
-      server.connect();
-    }, 100)
+      // Add event listeners
+      server.on('fullsetup', function(_server) {});
+      // Gives proxies a chance to boot up
+      setTimeout(function() {
+        server.connect();
+      }, 100)
+    });
   }
 }
 
