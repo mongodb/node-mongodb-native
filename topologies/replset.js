@@ -196,6 +196,7 @@ var ReplSet = function(seedlist, options) {
   this.haTimeoutId = null;
   // Are we authenticating
   this.authenticating = false;
+  // Currently running attempReconnect
 }
 
 inherits(ReplSet, EventEmitter);
@@ -205,6 +206,10 @@ Object.defineProperty(ReplSet.prototype, 'type', {
 });
 
 function attemptReconnect(self) {
+  if(self.runningAttempReconnect) return;
+  // Set as running
+  self.runningAttempReconnect = true;
+  // Wait before execute
   self.haTimeoutId = setTimeout(function() {
     if(self.state == DESTROYED) return;
 
@@ -261,6 +266,9 @@ function attemptReconnect(self) {
                 if(self.s.logger.isDebug()) {
                   self.s.logger.debug(f('attemptReconnect for replset with id successful resuming topologyMonitor', self.id));
                 }
+
+                // Reset the running
+                self.runningAttempReconnect = false;
                 // Go back to normal topology monitoring
                 topologyMonitor(self);
               });
@@ -269,6 +277,9 @@ function attemptReconnect(self) {
                 self.emit('close', self);
               }
 
+              // Reset the running
+              self.runningAttempReconnect = false;
+              // Attempt a new reconnect
               attemptReconnect(self);
             }
           }
@@ -310,8 +321,6 @@ function attemptReconnect(self) {
           } else {
             _self.destroy();
           }
-
-          done();
         } else if(event == 'connect' && self.authenticating) {
           this.destroy();
         }
@@ -966,7 +975,7 @@ ReplSet.prototype.update = function(ns, ops, options, callback) {
 
   // Not connected but we have a disconnecthandler
   if(!this.s.replicaSetState.hasPrimary() && this.s.disconnectHandler != null) {
-    return this.s.disconnectHandler.add('insert', ns, ops, options, callback);
+    return this.s.disconnectHandler.add('update', ns, ops, options, callback);
   }
 
   // Execute write operation
@@ -990,7 +999,7 @@ ReplSet.prototype.remove = function(ns, ops, options, callback) {
 
   // Not connected but we have a disconnecthandler
   if(!this.s.replicaSetState.hasPrimary() && this.s.disconnectHandler != null) {
-    return this.s.disconnectHandler.add('insert', ns, ops, options, callback);
+    return this.s.disconnectHandler.add('remove', ns, ops, options, callback);
   }
 
   // Execute write operation
