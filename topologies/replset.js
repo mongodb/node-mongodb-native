@@ -966,7 +966,7 @@ ReplSet.prototype.update = function(ns, ops, options, callback) {
 
   // Not connected but we have a disconnecthandler
   if(!this.s.replicaSetState.hasPrimary() && this.s.disconnectHandler != null) {
-    return this.s.disconnectHandler.add('insert', ns, ops, options, callback);
+    return this.s.disconnectHandler.add('update', ns, ops, options, callback);
   }
 
   // Execute write operation
@@ -990,7 +990,7 @@ ReplSet.prototype.remove = function(ns, ops, options, callback) {
 
   // Not connected but we have a disconnecthandler
   if(!this.s.replicaSetState.hasPrimary() && this.s.disconnectHandler != null) {
-    return this.s.disconnectHandler.add('insert', ns, ops, options, callback);
+    return this.s.disconnectHandler.add('remove', ns, ops, options, callback);
   }
 
   // Execute write operation
