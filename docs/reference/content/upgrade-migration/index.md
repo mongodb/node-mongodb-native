@@ -13,6 +13,8 @@ Key features of the 2.1 driver include:
 
 - Redesigned Connection Pool.
 - Connection close will drain any outstanding operations.
+- replicaSet parameter **MUST** be specified if using MongoClient to connect to replicaset, due to SDAM specification implementation.
+- domain support disabled by default, enable with parameter **domainsEnabled** on MongoClient or on the Server/ReplSet/Mongos.
 
 # What's New in 2.1
 

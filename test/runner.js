@@ -335,7 +335,10 @@ var testFiles = [
   , '/test/functional/reconnect_tests.js',
 
   // Bug tests
-  , '/test/functional/jira_bug_tests.js'
+  , '/test/functional/jira_bug_tests.js',
+
+  // Domain tests
+  , '/test/functional/domain_tests.js'
 ]
 
 // Check if we support es6 generators
