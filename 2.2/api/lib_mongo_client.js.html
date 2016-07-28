@@ -580,6 +580,8 @@
             
                 <li data-name="Cursor#close"><a href="Cursor.html#close">close</a></li>
             
+                <li data-name="Cursor#collation"><a href="Cursor.html#collation">collation</a></li>
+            
                 <li data-name="Cursor#comment"><a href="Cursor.html#comment">comment</a></li>
             
                 <li data-name="Cursor#count"><a href="Cursor.html#count">count</a></li>
@@ -1822,6 +1824,7 @@ var parse = require('./url_parser')
   , Define = require('./metadata')
   , ReadPreference = require('./read_preference')
   , Logger = require('mongodb-core').Logger
+  , MongoError = require('mongodb-core').MongoError
   , Db = require('./db')
   , dns = require('dns')
   , f = require('util').format
@@ -1945,9 +1948,12 @@ var mergeOptions = function(target, source, flatten) {
 var createUnifiedOptions = function(finalOptions, options) {
   var childOptions = ['mongos', 'server', 'db'
     , 'replset', 'db_options', 'server_options', 'rs_options', 'mongos_options'];
+  var noMerge = ['collation'];
 
   for(var name in options) {
-    if(childOptions.indexOf(name.toLowerCase()) != -1) {
+    if(noMerge.indexOf(name.toLowerCase()) != -1) {
+      finalOptions[name] = options[name];
+    } else if(childOptions.indexOf(name.toLowerCase()) != -1) {
       finalOptions = mergeOptions(finalOptions, options[name], false);
     } else {
       if(options[name] &amp;&amp; typeof options[name] == 'object' &amp;&amp; !Buffer.isBuffer(options[name]) &amp;&amp; !Array.isArray(options[name])) {
@@ -1959,6 +1965,112 @@ var createUnifiedOptions = function(finalOptions, options) {
   }
 
   return finalOptions;
+}
+
+function translateOptions(options) {
+  // If we have a readPreference passed in by the db options
+  if(typeof options.readPreference == 'string' || typeof options.read_preference == 'string') {
+    options.readPreference = new ReadPreference(options.readPreference || options.read_preference);
+  }
+
+  // Do we have readPreference tags, add them
+  if(options.readPreference &amp;&amp; (options.readPreferenceTags || options.read_preference_tags)) {
+    options.readPreference.tags = options.readPreferenceTags || options.read_preference_tags;
+  }
+
+  // Do we have maxStalenessMS
+  if(options.maxStalenessMS) {
+    options.readPreference.maxStalenessMS = options.maxStalenessMS;
+  }
+
+  // Set the socket and connection timeouts
+  if(!options.socketTimeoutMS == null) options.socketTimeoutMS = 30000;
+  if(!options.connectTimeoutMS == null) options.connectTimeoutMS = 30000;
+
+  // Create server instances
+  return options.servers.map(function(serverObj) {
+    return serverObj.domain_socket ?
+      new Server(serverObj.domain_socket, 27017, options)
+    : new Server(serverObj.host, serverObj.port, options);
+  });
+}
+
+function createReplicaset(options, callback) {
+  // Set default options
+  var servers = translateOptions(options);
+  // Create Db instance
+  new Db(options.dbName, new ReplSet(servers, options), options).open(callback);
+}
+
+function createMongos(options, callback) {
+  // Set default options
+  var servers = translateOptions(options);
+  // Create Db instance
+  new Db(options.dbName, new Mongos(servers, options), options).open(callback);
+}
+
+function createServer(options, callback) {
+  // Set default options
+  var servers = translateOptions(options);
+  // Create Db instance
+  new Db(options.dbName, servers[0], options).open(callback);
+}
+
+function connectHandler(options, callback) {
+  return function (err, db) {
+    if(err) {
+      return process.nextTick(function() {
+        try {
+          callback(err, null);
+        } catch (err) {
+          if(db) db.close();
+          throw err
+        }
+      });
+    }
+
+    // No authentication just reconnect
+    if(!options.auth) {
+      return process.nextTick(function() {
+        try {
+          callback(err, db);
+        } catch (err) {
+          if(db) db.close();
+          throw err
+        }
+      })
+    }
+
+    // What db to authenticate against
+    var authentication_db = db;
+    if(options.authSource) {
+      authentication_db = db.db(options.authSource);
+    }
+
+    // Authenticate
+    authentication_db.authenticate(options.user, options.password, options, function(err, success){
+      if(success){
+        process.nextTick(function() {
+          try {
+            callback(null, db);
+          } catch (err) {
+            if(db) db.close();
+            throw err
+          }
+        });
+      } else {
+        if(db) db.close();
+        process.nextTick(function() {
+          try {
+            callback(err ? err : new Error('Could not authenticate user ' + options.auth[0]), null);
+          } catch (err) {
+            if(db) db.close();
+            throw err
+          }
+        });
+      }
+    });
+  }
 }
 
 /*
@@ -1979,297 +2091,40 @@ var connect = function(url, options, callback) {
   // Parse the string
   var object = parse(url, options);
   var _finalOptions = createUnifiedOptions({}, object);
+  _finalOptions = mergeOptions(_finalOptions, object, false);
   _finalOptions = createUnifiedOptions(_finalOptions, options);
 
   // Check if we have connection and socket timeout set
-  if(!_finalOptions.socketTimeoutMS) _finalOptions.socketTimeoutMS = 120000;
-  if(!_finalOptions.connectTimeoutMS) _finalOptions.connectTimeoutMS = 120000;
-
-  // We need to ensure that the list of servers are only either direct members or mongos
-  // they cannot be a mix of monogs and mongod's
-  var totalNumberOfServers = object.servers.length;
-  var totalNumberOfMongosServers = 0;
-  var totalNumberOfMongodServers = 0;
-  var serverConfig = null;
-  var errorServers = {};
+  if(!_finalOptions.socketTimeoutMS == null) _finalOptions.socketTimeoutMS = 120000;
+  if(!_finalOptions.connectTimeoutMS == null) _finalOptions.connectTimeoutMS = 120000;
 
   // Failure modes
   if(object.servers.length == 0) {
     throw new Error("connection string must contain at least one seed host");
   }
 
-  // If we have more than a server, it could be replicaset or mongos list
-  // need to verify that it's one or the other and fail if it's a mix
-  // Connect to all servers and run ismaster
-  for(var i = 0; i &lt; object.servers.length; i++) {
-    // Set up socket options
-    var _server_options = {
-        poolSize:1
-      , socketOptions: {
-          connectTimeoutMS: _finalOptions.connectTimeoutMS || (1000 * 120)
-        , socketTimeoutMS:  _finalOptions.socketTimeoutMS || (1000 * 120)
-      }
-      , auto_reconnect:false
-      , monitoring: false };
-
-    // Ensure we have ssl setup for the servers
-    if(_finalOptions.ssl) {
-      _server_options.ssl = _finalOptions.ssl;
-      _server_options.sslValidate = _finalOptions.sslValidate;
-      _server_options.checkServerIdentity = _finalOptions.checkServerIdentity;
-      _server_options.sslCA = _finalOptions.sslCA;
-      _server_options.sslCert = _finalOptions.sslCert;
-      _server_options.sslKey = _finalOptions.sslKey;
-      _server_options.sslPass = _finalOptions.sslPass;
-    }
-
-    // Error
-    var error = null;
-    // Set up the Server object
-    var _server = object.servers[i].domain_socket
-        ? new Server(object.servers[i].domain_socket, _server_options)
-        : new Server(object.servers[i].host, object.servers[i].port, _server_options);
-
-    var connectFunction = function(__server) {
-      // Attempt connect
-      new Db(object.dbName, __server, {w:1, native_parser:false}).open(function(err, db) {
-        // Update number of servers
-        totalNumberOfServers = totalNumberOfServers - 1;
-
-        // If no error do the correct checks
-        if(!err) {
-          // Close the connection
-          db.close();
-          // Get the last ismaster document
-          var isMasterDoc = db.serverConfig.isMasterDoc;
-
-          // Check what type of server we have
-          if(isMasterDoc.setName) {
-            totalNumberOfMongodServers++;
-          }
-
-          if(isMasterDoc.msg &amp;&amp; isMasterDoc.msg == "isdbgrid") totalNumberOfMongosServers++;
-        } else {
-          error = err;
-          errorServers[__server.host + ":" + __server.port] = __server;
-        }
-
-        if(totalNumberOfServers == 0) {
-          // Error out
-          if(totalNumberOfMongodServers == 0 &amp;&amp; totalNumberOfMongosServers == 0 &amp;&amp; error) {
-            return callback(error, null);
-          }
-
-          // If we have a mix of mongod and mongos, throw an error
-          if(totalNumberOfMongosServers > 0 &amp;&amp; totalNumberOfMongodServers > 0) {
-            if(db) db.close();
-            return process.nextTick(function() {
-              try {
-                callback(new Error("cannot combine a list of replicaset seeds and mongos seeds"));
-              } catch (err) {
-                throw err
-              }
-            })
-          }
-
-          if(totalNumberOfMongodServers == 0
-            &amp;&amp; totalNumberOfMongosServers == 0
-            &amp;&amp; object.servers.length == 1
-            &amp;&amp; (!_finalOptions.replicaSet || !_finalOptions.rs_name)) {
-
-            var obj = object.servers[0];
-            serverConfig = obj.domain_socket ?
-                new Server(obj.domain_socket, _finalOptions)
-              : new Server(obj.host, obj.port, _finalOptions);
-
-          } else if(totalNumberOfMongodServers > 0
-            || totalNumberOfMongosServers > 0
-            || _finalOptions.replicaSet || _finalOptions.rs_name) {
-
-            // No auto reconnect
-            _finalOptions.autoReconnect = false;
-            _finalOptions.monitoring = false;
-
-            // Map the final server instances
-            var finalServers = object.servers
-              .filter(function(serverObj) {
-                return errorServers[serverObj.host + ":" + serverObj.port] == null;
-              })
-              .map(function(serverObj) {
-                return serverObj.domain_socket ?
-                  new Server(serverObj.domain_socket, 27017, _finalOptions)
-                : new Server(serverObj.host, serverObj.port, _finalOptions);
-              });
-
-            // Clean out any error servers
-            errorServers = {};
-
-            // Set up the final configuration
-            if(totalNumberOfMongodServers > 0) {
-              try {
-                // If no replicaset name was provided, we wish to perform a
-                // direct connection
-                if(totalNumberOfMongodServers == 1
-                  &amp;&amp; (!_finalOptions.replicaSet &amp;&amp; !_finalOptions.rs_name)) {
-                  serverConfig = finalServers[0];
-                } else if(totalNumberOfMongodServers == 1) {
-                  _finalOptions.replicaSet = _finalOptions.replicaSet || _finalOptions.rs_name;
-                  serverConfig = new ReplSet(finalServers, _finalOptions);
-                } else {
-                  serverConfig = new ReplSet(finalServers, _finalOptions);
-                }
-
-              } catch(err) {
-                return callback(err, null);
-              }
-            } else {
-              serverConfig = new Mongos(finalServers, _finalOptions);
-            }
-          }
-
-          if(serverConfig == null) {
-            return process.nextTick(function() {
-              try {
-                callback(new Error("Could not locate any valid servers in initial seed list"));
-              } catch (err) {
-                if(db) db.close();
-                throw err
-              }
-            });
-          }
-
-          // Ensure no firing of open event before we are ready
-          serverConfig.emitOpen = false;
-
-          // Get ismaster
-          var ismaster = __server.lastIsMaster();
-
-          // No hosts list, connect directly to the server
-          if(!ismaster.hosts) {
-            return _finishConnecting(serverConfig, object, _finalOptions, callback)
-          }
-
-          var resolveDNS = function(host, callback) {
-            // Split the host address (get the domain only)
-            var host = host.split(/\:/)[0];
-            // Attempt to lookup the domain
-            dns.lookup(host, function(err, r) {
-              if(err &amp;&amp; logger.isError()) {
-                logger.error(f('failed to resolve host [%s]', err));
-              }
-
-              callback(err, r);
-            });
-          }
-
-          // Validate the DNS addresses passed back in the hosts list
-          var count = ismaster.hosts.length;
-          // Attempt to resolve the DNS address for each host
-          for(var i = 0; i &lt; ismaster.hosts.length; i++) {
-            resolveDNS(ismaster.hosts[i], function(err, r) {
-              count = count - 1;
-
-              if(count == 0) {
-                _finishConnecting(serverConfig, object, _finalOptions, callback);
-              }
-            });
-          }
-        }
-      });
-    }
-
-    // Wrap the context of the call
-    connectFunction(_server);
-  }
-}
-
-var _finishConnecting = function(serverConfig, object, options, callback) {
-  // If we have a readPreference passed in by the db options
-  if(typeof options.readPreference == 'string') {
-    options.readPreference = new ReadPreference(options.readPreference);
-  } else if(typeof options.read_preference == 'string') {
-    options.readPreference = new ReadPreference(options.read_preference);
-  }
-
-  // Do we have readPreference tags
-  if(options.readPreference &amp;&amp; options.readPreferenceTags) {
-    options.readPreference.tags = options.readPreferenceTags;
-  } else if(options.readPreference &amp;&amp; options.read_preference_tags) {
-    options.readPreference.tags = options.read_preference_tags;
-  }
-
-  // Get the socketTimeoutMS
-  var socketTimeoutMS = options.socketTimeoutMS || 0;
-
-  // If we have a replset, override with replicaset socket timeout option if available
-  if(serverConfig instanceof ReplSet) {
-    socketTimeoutMS = options.socketTimeoutMS || socketTimeoutMS;
-  }
-
-  // Set socketTimeout to the same as the connectTimeoutMS or 30 sec
-  serverConfig.connectTimeoutMS = serverConfig.connectTimeoutMS || 30000;
-  serverConfig.socketTimeoutMS = serverConfig.connectTimeoutMS;
-
-  // Set up the db options
-  var db = new Db(object.dbName, serverConfig, options);
-  // Open the db
-  db.open(function(err, db) {
-    if(err) {
-      return process.nextTick(function() {
-        try {
-          callback(err, null);
-        } catch (err) {
-          if(db) db.close();
-          throw err
-        }
-      });
-    }
-
-    // Reset the socket timeout
-    serverConfig.socketTimeoutMS = socketTimeoutMS || 0;
-
-    // Return object
-    if(err == null &amp;&amp; object.auth){
-      // What db to authenticate against
-      var authentication_db = db;
-      if(options.authSource) {
-        authentication_db = db.db(options.authSource);
+  function connectCallback(err, db) {
+    if(err &amp;&amp; err.message == 'no mongos proxies found in seed list') {
+      if(logger.isWarn()) {
+        logger.warn(f('seed list contains no mongos proxies, replicaset connections requires the parameter replicaSet to be supplied in the URI or options object, mongodb://server:port/db?replicaSet=name'));
       }
 
-      // Authenticate
-      authentication_db.authenticate(options.user, options.password, options, function(err, success){
-        if(success){
-          process.nextTick(function() {
-            try {
-              callback(null, db);
-            } catch (err) {
-              if(db) db.close();
-              throw err
-            }
-          });
-        } else {
-          if(db) db.close();
-          process.nextTick(function() {
-            try {
-              callback(err ? err : new Error('Could not authenticate user ' + object.auth[0]), null);
-            } catch (err) {
-              if(db) db.close();
-              throw err
-            }
-          });
-        }
-      });
-    } else {
-      process.nextTick(function() {
-        try {
-          callback(err, db);
-        } catch (err) {
-          if(db) db.close();
-          throw err
-        }
-      })
+      // Return a more specific error message for MongoClient.connect
+      return callback(new MongoError('seed list contains no mongos proxies, replicaset connections requires the parameter replicaSet to be supplied in the URI or options object, mongodb://server:port/db?replicaSet=name'));
     }
-  });
+
+    // Return the error and db instance
+    callback(err, db);
+  }
+
+  // Do we have a replicaset then skip discovery and go straight to connectivity
+  if(_finalOptions.replicaSet || _finalOptions.rs_name) {
+    return createReplicaset(_finalOptions, connectHandler(_finalOptions, connectCallback));
+  } else if(object.servers.length > 1) {
+    return createMongos(_finalOptions, connectHandler(_finalOptions, connectCallback));
+  } else {
+    return createServer(_finalOptions, connectHandler(_finalOptions, connectCallback));
+  }
 }
 
 module.exports = MongoClient
@@ -2302,7 +2157,7 @@ module.exports = MongoClient
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Fri Jul 08 2016 13:36:11 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Jul 28 2016 17:02:52 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

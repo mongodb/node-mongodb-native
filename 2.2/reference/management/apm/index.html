@@ -375,6 +375,87 @@
 
 
   
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
     
     
       
@@ -1061,6 +1142,35 @@
 
 
     <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.2/tutorials/projections/">
+        <i class='fa'></i>
+        Projections
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
     <a href="/node-mongodb-native/2.2/tutorials/create-indexes/">
         <i class='fa'></i>
         Create Indexes
@@ -1119,6 +1229,35 @@
 
 
     <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.2/tutorials/collections/">
+        <i class='fa'></i>
+        Collections
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
     <a href="/node-mongodb-native/2.2/tutorials/geospatial-search/">
         <i class='fa'></i>
         Geospatial Search
@@ -1151,6 +1290,35 @@
     <a href="/node-mongodb-native/2.2/tutorials/commands/">
         <i class='fa'></i>
         Database Commands
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.2/tutorials/aggregation/">
+        <i class='fa'></i>
+        Aggregation
     </a>
   </li>
 
@@ -1901,11 +2069,16 @@
 
 <h1 id="apm">APM</h1>
 
-<p>Application Performance Monitoring support is a driver feature that allows monitoring services to hook into the driver in a forward compatible and stable way. The API is not applied to the driver unless explicitly initialized to avoid any performance penalties.</p>
+<p>Application Performance Monitoring support is a driver
+feature that allows monitoring services to hook into the
+driver in a forward compatible and stable way. The API is
+not applied to the driver unless explicitly initialized to
+avoid any performance penalties.</p>
 
 <h2 id="api">API</h2>
 
-<p>Let&rsquo;s look at a code example that hooks into all the available features of the APM API.</p>
+<p>The following code example hooks into all the available features
+of the APM API.</p>
 
 <pre><code class="language-js">var listener = require('mongodb').instrument({
   operationIdGenerator: {
@@ -1949,9 +2122,9 @@ listener.on('failed', function(event) {
 
 <p>Command monitoring is based on the cross-driver specification for MongoDB found in the Command monitoring <a href="https://github.com/mongodb/specifications/blob/master/source/command-monitoring/command-monitoring.rst">specification</a>.</p>
 
-<p>The Command monitoring specification is a low level monitoring specification that tells you when a new command is being executed against MongoDb and if it fails or succeeds. For most cases this is straight forward and you will receive a single start and either a success or failure event. Let&rsquo;s look at an example.</p>
+<p>The Command monitoring specification is a low-level monitoring specification that sends a notification when a new command is executed against MongoDB and if it fails or succeeds. In most cases this is straightforward and you will receive a single start and either a success or failure event.</p>
 
-<p>The user executes an <code>isMaster</code> command against the server and we receive the following to messages (full objects are abbreviated to simplicities sake.). When the <code>isMaster</code> command starts execution we receive the following event (This result is from <code>JSON.stringify</code>, in the real event the connectionId is the actual connection object the command was executed against).</p>
+<p>In this example, the user executes the <code>isMaster</code> command against the server and receives the following messages (full objects are abbreviated for simplicity&rsquo;s sake). When the <code>isMaster</code> command starts execution we receive the following event (this result is from <code>JSON.stringify</code>; in the real event the connectionId is the actual connection object the command was executed against).</p>
 
 <pre><code class="language-js">{
   &quot;command&quot;: {
@@ -1969,9 +2142,11 @@ listener.on('failed', function(event) {
 }
 </code></pre>
 
-<p>Let&rsquo;s look at the the <code>requestId</code> and <code>operationId</code>. The <code>requestId</code> is the id used for the wire protocol message sent to MongoDB and allows you to correlate the commands executed on MongoDB with the commands from the driver.</p>
+<p><code>requestId</code> is the id used for the wire protocol message sent to MongoDB and allows you to correlate the commands executed on MongoDB with the commands from the driver.</p>
 
-<p>The <code>operationId</code> is an id that is used to group commands into a single logical command execution. The use case are queries and batch writes where a single logical operation might be executed as multiple commands to the server. For a query this might mean it gets executed as a <code>find</code> command and <em>n</em> number of <code>getMore</code> commands as well as a <code>killCursors</code> command. For bulk writes the logical grouping might contain <code>n</code> individual write operations. The goal of <code>operationId</code> is to allow APM providers to correlate the breakdown of a cursor or bulk operation with the method called by the user. The typical example is.</p>
+<p><code>operationId</code> is an id that is used to group commands into a single logical command execution. Use cases are queries and batch writes where a single logical operation might be executed as multiple commands to the server. For a query this might mean it gets executed as a <code>find</code> command and <em>n</em> number of <code>getMore</code> commands as well as a <code>killCursors</code> command. For bulk writes the logical grouping might contain <code>n</code> individual write operations. The goal of <code>operationId</code> is to allow APM providers to correlate the breakdown of a cursor or bulk operation with the method called by the user.</p>
+
+<p>A typical example:</p>
 
 <pre><code class="language-js">db.collection('data').find().batchSize(2).toArray(function(err, docs) {
 });
@@ -1979,7 +2154,7 @@ listener.on('failed', function(event) {
 
 <p>That might be translated to <code>1</code> find, <code>n</code> getMores and <code>0|1</code> killCursors.</p>
 
-<p>After the command executed successfully we receive the following result.</p>
+<p>After the command executed successfully it sends the following result:</p>
 
 <pre><code class="language-js">{
   &quot;duration&quot;: 0,
@@ -2004,7 +2179,9 @@ listener.on('failed', function(event) {
 }
 </code></pre>
 
-<p>Notice that the <code>requestId</code> and <code>operationId</code> matches up to the start message allowing the user of the API to correlated the two events. Next let&rsquo;s look at a complete <code>find</code> operation that results in <code>getMores</code>.</p>
+<p>Notice that the <code>requestId</code> and <code>operationId</code> match up to the start message, allowing the user of the API to correlate the two events.</p>
+
+<p>The next example shows a complete <code>find</code> operation that results in multiple <code>getMore</code> responses.</p>
 
 <pre><code class="language-js">{
   &quot;command&quot;: {
@@ -2135,11 +2312,20 @@ listener.on('failed', function(event) {
 }
 </code></pre>
 
-<p>The main thing to notice here is that they all share the same <code>operationId</code> allowing the APM API user to correctly map the low level commands to the logical command executed by the user (in this case <code>toArray</code> on a cursor).</p>
+<p><strong>Note:</strong> all the documents share the same <code>operationId</code>, allowing the
+APM API user to correctly map the low level commands to the logical
+command executed by the user (in this case <code>toArray</code> on a cursor).</p>
 
 <h3 id="operationidgenerator">operationIdGenerator</h3>
 
-<p>The <code>operationIdGenerator</code> option allows the API user to pass in a custom <code>operationId</code> generator object that can be used to synchronize internal request Id&rsquo;s in the APM client with the low level command monitoring API. This makes it possible to tie together the logical method called by the users code with the low level commands issues to MongoDB potentially allowing for a richer APM experience and performance breakdown. Below is a simple <code>operationIdGenerator</code> example.</p>
+<p>The <code>operationIdGenerator</code> option allows the API user to pass in a
+custom <code>operationId</code> generator object. You can use this object to
+synchronize internal request IDs in the APM client with the low-level
+command monitoring API. This synchronization makes it possible to
+associate the logical method called by the user&rsquo;s code with the
+low-level commands issued to MongoDB. This allows for a richer
+APM experience and performance breakdown. Below is a simple
+<code>operationIdGenerator</code> example.</p>
 
 <pre><code class="language-js">var generator = {
   operationId: 1,
@@ -2152,7 +2338,11 @@ listener.on('failed', function(event) {
 
 <h3 id="timestampgenerator">timestampGenerator</h3>
 
-<p>The <code>timestampGenerator</code> option lets the API user override the method used to timestamp the command monitoring events with a custom timestamp type. The generator contains two method. The first one <code>current</code> returns the current <code>timestamp</code> and <code>duration</code> calculates the total operation duration between the <code>start</code> and <code>end</code> time. Below is a simple example generator.</p>
+<p>The <code>timestampGenerator</code> option lets the API user to override the method
+used to timestamp the command monitoring events with a custom timestamp
+type. The generator contains two methods. <code>current</code> returns the current
+timestamp<code>and</code>duration<code>calculates the total operation duration
+between the</code>start<code>and</code>end` time. Below is a simple generator example.</p>
 
 <pre><code class="language-js">var generator = {
   current: function() {
@@ -2167,7 +2357,9 @@ listener.on('failed', function(event) {
 
 <h2 id="instrumentation">Instrumentation</h2>
 
-<p>The instrumentation callback returns the instrumentation points in the driver and it&rsquo;s associated metadata. Let&rsquo;s look at one of the examples. Notice that the result shown is the result from performing <code>JSON.stringify</code>. We will note where there are actual object instances.</p>
+<p>The <code>instrumentation</code> callback returns the instrumentation points in
+the driver and associated metadata. In the following example, the
+result shown is the result from performing <code>JSON.stringify</code>.</p>
 
 <pre><code class="language-js">{
   &quot;name&quot;: &quot;Gridstore&quot;,
@@ -2257,9 +2449,15 @@ listener.on('failed', function(event) {
 }
 </code></pre>
 
-<p>At the top level we have <code>name</code> of the class exposed for instrumentation. Next we have the <code>stream</code> value that tells the user if the object can operate as a node.js stream. Next the <code>instrumentations</code> array contains all the methods available for instrumentation. The methods are grouped by the method characteristics. All methods that support a callback as well as a promise will be grouped in a single instrumentation. This simplifies the code to perform the actual instrumentation.</p>
-
-<p>Let&rsquo;s look at an example instrumentation in more detail.</p>
+<ul>
+<li><code>name</code> the name of the class exposed for instrumentation.</li>
+<li><code>stream</code> tells the user if the object can operate as a Node.js stream.</li>
+<li><code>instrumentations</code> an array which contains all the methods available
+for instrumentation. The methods are grouped
+by method characteristics. All methods that support a callback as well
+as a promise will be grouped in a single instrumentation. This
+simplifies the code to perform the actual instrumentation.</li>
+</ul>
 
 <pre><code class="language-js">{
   &quot;methods&quot;: [
@@ -2283,7 +2481,9 @@ listener.on('failed', function(event) {
 }
 </code></pre>
 
-<p>The <code>methods</code> array contains all the methods that have the options <code>callback=true</code> and <code>promise=true</code> for the GridStore prototype. The available options are.</p>
+<p>The <code>methods</code> array contains all the methods that have the options
+<code>callback=true</code> and <code>promise=true</code> for the GridStore prototype.
+The available options are:</p>
 
 <table>
 <thead>
@@ -2316,7 +2516,7 @@ listener.on('failed', function(event) {
 </tbody>
 </table>
 
-<p>Let&rsquo;s look at a very basic instrumentation example.</p>
+<p>Below is a very basic instrumentation example.</p>
 
 <pre><code class="language-js">var listener = require('../..').instrument(function(err, instrumentations) {
   instrumentations.forEach(function(obj) {
@@ -2354,7 +2554,10 @@ listener.on('failed', function(event) {
 });
 </code></pre>
 
-<p>This instrumentation only overrides methods that have callbacks and ignores promises, so it&rsquo;s not a complete solution, but shows the way a user of the API can structure their code to tap into the exposed surface of the driver.</p>
+<p>This instrumentation only overrides methods that have callbacks and
+ignores promises, so it&rsquo;s not a complete solution, but shows how an
+API user can structure code to tap into the exposed surface of the
+driver.</p>
 
 
 
@@ -2437,11 +2640,11 @@ listener.on('failed', function(event) {
    HAS_SOURCE:  true
   };
 </script>
-<script type="text/javascript" src="/node-mongodb-native/2.2/js/jquery.js"></script>
-<script type="text/javascript" src="/node-mongodb-native/2.2/lib/bootstrap.js"></script>
-<script type="text/javascript" src="/node-mongodb-native/2.2/js/navbar.js"></script>
-<script type="text/javascript" src="/node-mongodb-native/2.2/lib/highlight/highlight.pack.js"></script>
-<script type="text/javascript" src="/node-mongodb-native/2.2/js/scripts.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.2//js/jquery.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.2//lib/bootstrap.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.2//js/navbar.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.2//lib/highlight/highlight.pack.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.2//js/scripts.js"></script>
 <script type="text/javascript" src="/node-mongodb-native/2.2//lib/bootstrap-toggle/bootstrap-toggle.min.js"></script>
 <script type="text/javascript" src="/node-mongodb-native/2.2//js/java.js"></script>
 <script type="text/javascript" src="/node-mongodb-native/2.2//js/toggle-switch.js"></script>

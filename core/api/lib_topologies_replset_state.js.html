@@ -172,6 +172,8 @@
             
                 <li data-name="Connection#toString"><a href="Connection.html#toString">toString</a></li>
             
+                <li data-name="Connection#unref"><a href="Connection.html#unref">unref</a></li>
+            
                 <li data-name="Connection#write"><a href="Connection.html#write">write</a></li>
             
             </ul>
@@ -309,6 +311,10 @@
                 <li data-name="Logger#isError"><a href="Logger.html#isError">isError</a></li>
             
                 <li data-name="Logger#isInfo"><a href="Logger.html#isInfo">isInfo</a></li>
+            
+                <li data-name="Logger#isWarn"><a href="Logger.html#isWarn">isWarn</a></li>
+            
+                <li data-name="Logger#warn"><a href="Logger.html#warn">warn</a></li>
             
             </ul>
             <ul class="events itemMembers">
@@ -495,10 +501,6 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="Mongos#addAuthProvider"><a href="Mongos.html#addAuthProvider">addAuthProvider</a></li>
-            
-                <li data-name="Mongos#addReadPreferenceStrategy"><a href="Mongos.html#addReadPreferenceStrategy">addReadPreferenceStrategy</a></li>
-            
                 <li data-name="Mongos#auth"><a href="Mongos.html#auth">auth</a></li>
             
                 <li data-name="Mongos#command"><a href="Mongos.html#command">command</a></li>
@@ -511,8 +513,6 @@
             
                 <li data-name="Mongos#destroy"><a href="Mongos.html#destroy">destroy</a></li>
             
-                <li data-name="Mongos#getConnection"><a href="Mongos.html#getConnection">getConnection</a></li>
-            
                 <li data-name="Mongos#getServer"><a href="Mongos.html#getServer">getServer</a></li>
             
                 <li data-name="Mongos#insert"><a href="Mongos.html#insert">insert</a></li>
@@ -523,11 +523,11 @@
             
                 <li data-name="Mongos#lastIsMaster"><a href="Mongos.html#lastIsMaster">lastIsMaster</a></li>
             
-                <li data-name="Mongos#parserType"><a href="Mongos.html#parserType">parserType</a></li>
+                <li data-name="Mongos#logout"><a href="Mongos.html#logout">logout</a></li>
             
                 <li data-name="Mongos#remove"><a href="Mongos.html#remove">remove</a></li>
             
-                <li data-name="Mongos#setBSONParserType"><a href="Mongos.html#setBSONParserType">setBSONParserType</a></li>
+                <li data-name="Mongos#unref"><a href="Mongos.html#unref">unref</a></li>
             
                 <li data-name="Mongos#update"><a href="Mongos.html#update">update</a></li>
             
@@ -536,11 +536,35 @@
             
             <span class="subtitle">Events</span>
             
+                <li data-name="Mongos#event:all"><a href="Mongos.html#event:all">all</a></li>
+            
                 <li data-name="Mongos#event:connect"><a href="Mongos.html#event:connect">connect</a></li>
+            
+                <li data-name="Mongos#event:fullsetup"><a href="Mongos.html#event:fullsetup">fullsetup</a></li>
             
                 <li data-name="Mongos#event:joined"><a href="Mongos.html#event:joined">joined</a></li>
             
                 <li data-name="Mongos#event:left"><a href="Mongos.html#event:left">left</a></li>
+            
+                <li data-name="Mongos#event:reconnect"><a href="Mongos.html#event:reconnect">reconnect</a></li>
+            
+                <li data-name="Mongos#event:serverClosed"><a href="Mongos.html#event:serverClosed">serverClosed</a></li>
+            
+                <li data-name="Mongos#event:serverDescriptionChanged"><a href="Mongos.html#event:serverDescriptionChanged">serverDescriptionChanged</a></li>
+            
+                <li data-name="Mongos#event:serverHearbeatFailed"><a href="Mongos.html#event:serverHearbeatFailed">serverHearbeatFailed</a></li>
+            
+                <li data-name="Mongos#event:serverHeartbeatStarted"><a href="Mongos.html#event:serverHeartbeatStarted">serverHeartbeatStarted</a></li>
+            
+                <li data-name="Mongos#event:serverHeartbeatSucceeded"><a href="Mongos.html#event:serverHeartbeatSucceeded">serverHeartbeatSucceeded</a></li>
+            
+                <li data-name="Mongos#event:serverOpening"><a href="Mongos.html#event:serverOpening">serverOpening</a></li>
+            
+                <li data-name="Mongos#event:topologyClosed"><a href="Mongos.html#event:topologyClosed">topologyClosed</a></li>
+            
+                <li data-name="Mongos#event:topologyDescriptionChanged"><a href="Mongos.html#event:topologyDescriptionChanged">topologyDescriptionChanged</a></li>
+            
+                <li data-name="Mongos#event:topologyOpening"><a href="Mongos.html#event:topologyOpening">topologyOpening</a></li>
             
             </ul>
         </li>
@@ -632,10 +656,6 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="ReplSet#addAuthProvider"><a href="ReplSet.html#addAuthProvider">addAuthProvider</a></li>
-            
-                <li data-name="ReplSet#addReadPreferenceStrategy"><a href="ReplSet.html#addReadPreferenceStrategy">addReadPreferenceStrategy</a></li>
-            
                 <li data-name="ReplSet#auth"><a href="ReplSet.html#auth">auth</a></li>
             
                 <li data-name="ReplSet#command"><a href="ReplSet.html#command">command</a></li>
@@ -648,9 +668,9 @@
             
                 <li data-name="ReplSet#destroy"><a href="ReplSet.html#destroy">destroy</a></li>
             
-                <li data-name="ReplSet#getConnection"><a href="ReplSet.html#getConnection">getConnection</a></li>
-            
                 <li data-name="ReplSet#getServer"><a href="ReplSet.html#getServer">getServer</a></li>
+            
+                <li data-name="ReplSet#getServers"><a href="ReplSet.html#getServers">getServers</a></li>
             
                 <li data-name="ReplSet#insert"><a href="ReplSet.html#insert">insert</a></li>
             
@@ -660,11 +680,11 @@
             
                 <li data-name="ReplSet#lastIsMaster"><a href="ReplSet.html#lastIsMaster">lastIsMaster</a></li>
             
-                <li data-name="ReplSet#parserType"><a href="ReplSet.html#parserType">parserType</a></li>
+                <li data-name="ReplSet#logout"><a href="ReplSet.html#logout">logout</a></li>
             
                 <li data-name="ReplSet#remove"><a href="ReplSet.html#remove">remove</a></li>
             
-                <li data-name="ReplSet#setBSONParserType"><a href="ReplSet.html#setBSONParserType">setBSONParserType</a></li>
+                <li data-name="ReplSet#unref"><a href="ReplSet.html#unref">unref</a></li>
             
                 <li data-name="ReplSet#update"><a href="ReplSet.html#update">update</a></li>
             
@@ -673,13 +693,37 @@
             
             <span class="subtitle">Events</span>
             
+                <li data-name="ReplSet#event:all"><a href="ReplSet.html#event:all">all</a></li>
+            
                 <li data-name="ReplSet#event:connect"><a href="ReplSet.html#event:connect">connect</a></li>
             
-                <li data-name="ReplSet#event:ha"><a href="ReplSet.html#event:ha">ha</a></li>
+                <li data-name="ReplSet#event:failed"><a href="ReplSet.html#event:failed">failed</a></li>
+            
+                <li data-name="ReplSet#event:fullsetup"><a href="ReplSet.html#event:fullsetup">fullsetup</a></li>
             
                 <li data-name="ReplSet#event:joined"><a href="ReplSet.html#event:joined">joined</a></li>
             
                 <li data-name="ReplSet#event:left"><a href="ReplSet.html#event:left">left</a></li>
+            
+                <li data-name="ReplSet#event:reconnect"><a href="ReplSet.html#event:reconnect">reconnect</a></li>
+            
+                <li data-name="ReplSet#event:serverClosed"><a href="ReplSet.html#event:serverClosed">serverClosed</a></li>
+            
+                <li data-name="ReplSet#event:serverDescriptionChanged"><a href="ReplSet.html#event:serverDescriptionChanged">serverDescriptionChanged</a></li>
+            
+                <li data-name="ReplSet#event:serverHearbeatFailed"><a href="ReplSet.html#event:serverHearbeatFailed">serverHearbeatFailed</a></li>
+            
+                <li data-name="ReplSet#event:serverHeartbeatStarted"><a href="ReplSet.html#event:serverHeartbeatStarted">serverHeartbeatStarted</a></li>
+            
+                <li data-name="ReplSet#event:serverHeartbeatSucceeded"><a href="ReplSet.html#event:serverHeartbeatSucceeded">serverHeartbeatSucceeded</a></li>
+            
+                <li data-name="ReplSet#event:serverOpening"><a href="ReplSet.html#event:serverOpening">serverOpening</a></li>
+            
+                <li data-name="ReplSet#event:topologyClosed"><a href="ReplSet.html#event:topologyClosed">topologyClosed</a></li>
+            
+                <li data-name="ReplSet#event:topologyDescriptionChanged"><a href="ReplSet.html#event:topologyDescriptionChanged">topologyDescriptionChanged</a></li>
+            
+                <li data-name="ReplSet#event:topologyOpening"><a href="ReplSet.html#event:topologyOpening">topologyOpening</a></li>
             
             </ul>
         </li>
@@ -699,13 +743,7 @@
             
             <span class="subtitle">Methods</span>
             
-                <li data-name="Server#addAuthProvider"><a href="Server.html#addAuthProvider">addAuthProvider</a></li>
-            
-                <li data-name="Server#addReadPreferenceStrategy"><a href="Server.html#addReadPreferenceStrategy">addReadPreferenceStrategy</a></li>
-            
                 <li data-name="Server#auth"><a href="Server.html#auth">auth</a></li>
-            
-                <li data-name="Server#capConnections"><a href="Server.html#capConnections">capConnections</a></li>
             
                 <li data-name="Server#command"><a href="Server.html#command">command</a></li>
             
@@ -719,9 +757,9 @@
             
                 <li data-name="Server#equals"><a href="Server.html#equals">equals</a></li>
             
-                <li data-name="Server#getCallbacks"><a href="Server.html#getCallbacks">getCallbacks</a></li>
-            
                 <li data-name="Server#getConnection"><a href="Server.html#getConnection">getConnection</a></li>
+            
+                <li data-name="Server#getDescription"><a href="Server.html#getDescription">getDescription</a></li>
             
                 <li data-name="Server#getServer"><a href="Server.html#getServer">getServer</a></li>
             
@@ -733,11 +771,11 @@
             
                 <li data-name="Server#lastIsMaster"><a href="Server.html#lastIsMaster">lastIsMaster</a></li>
             
-                <li data-name="Server#parserType"><a href="Server.html#parserType">parserType</a></li>
+                <li data-name="Server#logout"><a href="Server.html#logout">logout</a></li>
             
                 <li data-name="Server#remove"><a href="Server.html#remove">remove</a></li>
             
-                <li data-name="Server#setBSONParserType"><a href="Server.html#setBSONParserType">setBSONParserType</a></li>
+                <li data-name="Server#unref"><a href="Server.html#unref">unref</a></li>
             
                 <li data-name="Server#update"><a href="Server.html#update">update</a></li>
             
@@ -750,103 +788,25 @@
             
                 <li data-name="Server#event:connect"><a href="Server.html#event:connect">connect</a></li>
             
-                <li data-name="Server#event:error"><a href="Server.html#event:error">error</a></li>
+                <li data-name="Server#event:destroy"><a href="Server.html#event:destroy">destroy</a></li>
             
-                <li data-name="Server#event:parseError"><a href="Server.html#event:parseError">parseError</a></li>
+                <li data-name="Server#event:error"><a href="Server.html#event:error">error</a></li>
             
                 <li data-name="Server#event:reconnect"><a href="Server.html#event:reconnect">reconnect</a></li>
             
-                <li data-name="Server#event:timeout"><a href="Server.html#event:timeout">timeout</a></li>
+                <li data-name="Server#event:reconnectFailed"><a href="Server.html#event:reconnectFailed">reconnectFailed</a></li>
             
-            </ul>
-        </li>
-    
-        <li class="item" data-name="Session">
-            <span class="title">
-                <a href="Session.html">Session</a>
-                
-            </span>
-            <ul class="members itemMembers">
+                <li data-name="Server#event:serverClosed"><a href="Server.html#event:serverClosed">serverClosed</a></li>
             
-            </ul>
-            <ul class="typedefs itemMembers">
+                <li data-name="Server#event:serverDescriptionChanged"><a href="Server.html#event:serverDescriptionChanged">serverDescriptionChanged</a></li>
             
-            </ul>
-            <ul class="methods itemMembers">
+                <li data-name="Server#event:serverOpening"><a href="Server.html#event:serverOpening">serverOpening</a></li>
             
-            <span class="subtitle">Methods</span>
+                <li data-name="Server#event:topologyClosed"><a href="Server.html#event:topologyClosed">topologyClosed</a></li>
             
-                <li data-name="Session#command"><a href="Session.html#command">command</a></li>
+                <li data-name="Server#event:topologyDescriptionChanged"><a href="Server.html#event:topologyDescriptionChanged">topologyDescriptionChanged</a></li>
             
-                <li data-name="Session#cursor"><a href="Session.html#cursor">cursor</a></li>
-            
-                <li data-name="Session#insert"><a href="Session.html#insert">insert</a></li>
-            
-                <li data-name="Session#remove"><a href="Session.html#remove">remove</a></li>
-            
-                <li data-name="Session#update"><a href="Session.html#update">update</a></li>
-            
-            </ul>
-            <ul class="events itemMembers">
-            
-            </ul>
-        </li>
-    
-        <li class="item" data-name="State">
-            <span class="title">
-                <a href="State.html">State</a>
-                
-            </span>
-            <ul class="members itemMembers">
-            
-            </ul>
-            <ul class="typedefs itemMembers">
-            
-            </ul>
-            <ul class="methods itemMembers">
-            
-            <span class="subtitle">Methods</span>
-            
-                <li data-name="State#addArbiter"><a href="State.html#addArbiter">addArbiter</a></li>
-            
-                <li data-name="State#addPassive"><a href="State.html#addPassive">addPassive</a></li>
-            
-                <li data-name="State#addSecondary"><a href="State.html#addSecondary">addSecondary</a></li>
-            
-                <li data-name="State#clean"><a href="State.html#clean">clean</a></li>
-            
-                <li data-name="State#contains"><a href="State.html#contains">contains</a></li>
-            
-                <li data-name="State#destroy"><a href="State.html#destroy">destroy</a></li>
-            
-                <li data-name="State#get"><a href="State.html#get">get</a></li>
-            
-                <li data-name="State#getAll"><a href="State.html#getAll">getAll</a></li>
-            
-                <li data-name="State#getAllConnections"><a href="State.html#getAllConnections">getAllConnections</a></li>
-            
-                <li data-name="State#isPassive"><a href="State.html#isPassive">isPassive</a></li>
-            
-                <li data-name="State#isPrimary"><a href="State.html#isPrimary">isPrimary</a></li>
-            
-                <li data-name="State#isPrimaryConnected"><a href="State.html#isPrimaryConnected">isPrimaryConnected</a></li>
-            
-                <li data-name="State#isSecondary"><a href="State.html#isSecondary">isSecondary</a></li>
-            
-                <li data-name="State#isSecondaryConnected"><a href="State.html#isSecondaryConnected">isSecondaryConnected</a></li>
-            
-                <li data-name="State#lastIsMaster"><a href="State.html#lastIsMaster">lastIsMaster</a></li>
-            
-                <li data-name="State#promotePrimary"><a href="State.html#promotePrimary">promotePrimary</a></li>
-            
-                <li data-name="State#remove"><a href="State.html#remove">remove</a></li>
-            
-                <li data-name="State#toJSON"><a href="State.html#toJSON">toJSON</a></li>
-            
-                <li data-name="State#update"><a href="State.html#update">update</a></li>
-            
-            </ul>
-            <ul class="events itemMembers">
+                <li data-name="Server#event:topologyOpening"><a href="Server.html#event:topologyOpening">topologyOpening</a></li>
             
             </ul>
         </li>
@@ -989,364 +949,831 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>"use strict";
+            <pre class="prettyprint source linenums"><code>"use strict"
 
-var Logger = require('../connection/logger')
-  , f = require('util').format
-  , ObjectId = require('bson').ObjectId
-  , MongoError = require('../error');
+var inherits = require('util').inherits,
+  f = require('util').format,
+  EventEmitter = require('events').EventEmitter,
+  Logger = require('../connection/logger'),
+  ObjectId = require('bson').ObjectId,
+  ReadPreference = require('./read_preference'),
+  MongoError = require('../error');
 
-var DISCONNECTED = 'disconnected';
-var CONNECTING = 'connecting';
-var CONNECTED = 'connected';
-var DESTROYED = 'destroyed';
+var TopologyType = {
+  'Single': 'Single', 'ReplicaSetNoPrimary': 'ReplicaSetNoPrimary',
+  'ReplicaSetWithPrimary': 'ReplicaSetWithPrimary', 'Sharded': 'Sharded',
+  'Unknown': 'Unknown'
+};
 
-/**
- * Creates a new Replicaset State object
- * @class
- * @property {object} primary Primary property
- * @property {array} secondaries List of secondaries
- * @property {array} arbiters List of arbiters
- * @return {State} A cursor instance
- */
-var State = function(replSet, options) {
-  this.replSet = replSet;
-  this.options = options;
-  this.secondaries = [];
-  this.arbiters = [];
-  this.passives = [];
-  this.primary = null;
-  // Initial state is disconnected
-  this.state = DISCONNECTED;
-  // Current electionId
-  this.electionId = null;
-  // Get a logger instance
-  this.logger = Logger('ReplSet', options);
+var ServerType = {
+  'Standalone': 'Standalone', 'Mongos': 'Mongos', 'PossiblePrimary': 'PossiblePrimary',
+  'RSPrimary': 'RSPrimary', 'RSSecondary': 'RSSecondary', 'RSArbiter': 'RSArbiter',
+  'RSOther': 'RSOther', 'RSGhost': 'RSGhost', 'Unknown': 'Unknown'
+};
+
+var ReplSetState = function(options) {
+  options = options || {};
+  // Add event listener
+  EventEmitter.call(this);
+  // Topology state
+  this.topologyType = TopologyType.ReplicaSetNoPrimary;
+  this.setName = options.setName;
+
+  // Server set
+  this.set = {};
+
   // Unpacked options
   this.id = options.id;
   this.setName = options.setName;
-  this.connectingServers = options.connectingServers;
-  this.secondaryOnlyConnectionAllowed = options.secondaryOnlyConnectionAllowed;
+
+  // Replicaset logger
+  this.logger = options.logger || Logger('ReplSet', options);
+
+  // Server selection index
+  this.index = 0;
+  // Acceptable latency
+  this.acceptableLatency = options.acceptableLatency || 15;
+
+  // heartbeatFrequencyMS
+  this.heartbeatFrequencyMS = options.heartbeatFrequencyMS || 10000;
+
+  // Server side
+  this.primary = null;
+  this.secondaries = [];
+  this.arbiters = [];
+  this.passives = [];
+  this.ghosts = [];
+  // Current unknown hosts
+  this.unknownServers = [];
+  // In set status
+  this.set = {};
+  // Status
+  this.maxElectionId = null;
+  this.maxSetVersion = 0;
+  // Description of the Replicaset
+  this.replicasetDescription = {
+    "topologyType": "Unknown", "servers": []
+  };
 }
 
-/**
- * Is there a secondary connected
- * @method
- * @return {boolean}
- */
-State.prototype.isSecondaryConnected = function() {
-  for(var i = 0; i &lt; this.secondaries.length; i++) {
-    if(this.secondaries[i].isConnected()) return true;
-  }
+inherits(ReplSetState, EventEmitter);
 
-  return false;
+ReplSetState.prototype.hasPrimaryAndSecondary = function(server) {
+  return this.primary &amp;&amp; this.secondaries.length > 0;
 }
 
-/**
- * Is there a primary connection
- * @method
- * @return {boolean}
- */
-State.prototype.isPrimaryConnected = function() {
-  return this.primary != null &amp;&amp; this.primary.isConnected();
+ReplSetState.prototype.hasPrimary = function(server) {
+  return this.primary != null;
 }
 
-/**
- * Is the given address the primary
- * @method
- * @param {string} address Server address
- * @return {boolean}
- */
-State.prototype.isPrimary = function(address) {
-  if(this.primary == null) return false;
-  return this.primary &amp;&amp; this.primary.equals(address);
+ReplSetState.prototype.hasSecondary = function(server) {
+  return this.secondaries.length > 0;
 }
 
-/**
- * Is the given address a secondary
- * @method
- * @param {string} address Server address
- * @return {boolean}
- */
-State.prototype.isSecondary = function(address) {
-  // Check if the server is a secondary at the moment
-  for(var i = 0; i &lt; this.secondaries.length; i++) {
-    if(this.secondaries[i].equals(address)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-/**
- * Is the given address a secondary
- * @method
- * @param {string} address Server address
- * @return {boolean}
- */
-State.prototype.isPassive = function(address) {
-  // Check if the server is a secondary at the moment
-  for(var i = 0; i &lt; this.passives.length; i++) {
-    if(this.passives[i].equals(address)) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-/**
- * Does the replicaset contain this server
- * @method
- * @param {string} address Server address
- * @return {boolean}
- */
-State.prototype.contains = function(address) {
-  if(this.primary &amp;&amp; this.primary.equals(address)) return true;
-  for(var i = 0; i &lt; this.secondaries.length; i++) {
-    if(this.secondaries[i].equals(address)) return true;
-  }
-
-  for(var i = 0; i &lt; this.arbiters.length; i++) {
-    if(this.arbiters[i].equals(address)) return true;
-  }
-
-  for(var i = 0; i &lt; this.passives.length; i++) {
-    if(this.passives[i].equals(address)) return true;
-  }
-
-  return false;
-}
-
-/**
- * Clean out all dead connections
- * @method
- */
-State.prototype.clean = function() {
-  if(this.primary != null &amp;&amp; !this.primary.isConnected()) {
-    this.primary = null;
-  }
-
-  // Filter out disconnected servers
-  this.secondaries = this.secondaries.filter(function(s) {
-    return s.isConnected();
-  });
-
-  // Filter out disconnected servers
-  this.arbiters = this.arbiters.filter(function(s) {
-    return s.isConnected();
-  });
-}
-
-/**
- * Destroy state
- * @method
- */
-State.prototype.destroy = function() {
-  this.state = DESTROYED;
-  if(this.primary) this.primary.destroy();
-  this.secondaries.forEach(function(s) {
-    s.destroy();
-  });
-  this.arbiters.forEach(function(s) {
-    s.destroy();
-  });
-}
-
-/**
- * Remove server from state
- * @method
- * @param {Server} Server to remove
- * @return {string} Returns type of server removed (primary|secondary)
- */
-State.prototype.remove = function(server) {
-  if(this.primary &amp;&amp; this.primary.equals(server)) {
-    this.primary = null;
-  }
-
-  var length = this.arbiters.length;
-  // Filter out the server from the arbiters
-  this.arbiters = this.arbiters.filter(function(s) {
-    return !s.equals(server);
-  });
-  if(this.arbiters.length &lt; length) return 'arbiter';
-
-  var length = this.passives.length;
-  // Filter out the server from the passives
-  this.passives = this.passives.filter(function(s) {
-    return !s.equals(server);
-  });
-
-  // We have removed a passive
-  if(this.passives.length &lt; length)  {
-    // Ensure we removed it from the list of secondaries as well if it exists
-    this.secondaries = this.secondaries.filter(function(s) {
-      return !s.equals(server);
-    });
-  }
-
-  // Filter out the server from the secondaries
-  this.secondaries = this.secondaries.filter(function(s) {
-    return !s.equals(server);
-  });
-
-  // Get the isMaster
-  var isMaster = server.lastIsMaster();
-  // Return primary if the server was primary
-  if(isMaster.ismaster) return 'primary';
-  if(isMaster.secondary) return 'secondary';
-  if(isMaster.passive) return 'passive';
-  return 'arbiter';
-}
-
-/**
- * Get the server by name
- * @method
- * @param {string} address Server address
- * @return {Server}
- */
-State.prototype.get = function(server) {
-  var found = false;
-  // All servers to search
+ReplSetState.prototype.allServers = function(options) {
+  options = options || {};
   var servers = this.primary ? [this.primary] : [];
   servers = servers.concat(this.secondaries);
-  // Locate the server
-  for(var i = 0; i &lt; servers.length; i++) {
-    if(servers[i].equals(server)) {
-      return servers[i];
-    }
-  }
-}
-
-/**
- * Get all the servers in the set
- * @method
- * @param {boolean} [options.includeArbiters] Include Arbiters in returned server list
- * @return {array}
- */
-State.prototype.getAll = function(options) {
-  options = options || {};
-  var servers = [];
-  if(this.primary) servers.push(this.primary);
-  servers = servers.concat(this.secondaries);
-
-  // Include the arbiters
-  if(options.includeArbiters) {
-    servers = servers.concat(this.arbiters);
-  }
-
-  // return ;
+  if(!options.ignoreArbiters) servers = servers.concat(this.arbiters);
+  servers = servers.concat(this.passives);
   return servers;
 }
 
-/**
- * All raw connections
- * @method
- * @param {boolean} [options.includeArbiters] Include Arbiters in returned server list
- * @return {array}
- */
-State.prototype.getAllConnections = function(options) {
+ReplSetState.prototype.destroy = function() {
+  // Destroy all sockets
+  if(this.primary) this.primary.destroy();
+  this.secondaries.forEach(function(x) { x.destroy(); });
+  this.arbiters.forEach(function(x) { x.destroy(); });
+  this.passives.forEach(function(x) { x.destroy(); });
+  this.ghosts.forEach(function(x) { x.destroy(); });
+  // Clear out the complete state
+  this.secondaries = [];
+  this.arbiters = [];
+  this.passives = [];
+  this.ghosts = [];
+  this.unknownServers = [];
+  this.set = {};
+}
+
+ReplSetState.prototype.remove = function(server, options) {
   options = options || {};
-  var connections = [];
-  if(this.primary) connections = connections.concat(this.primary.connections());
-  this.secondaries.forEach(function(s) {
-    connections = connections.concat(s.connections());
-  })
 
-  // Include the arbiters
-  if(options.includeArbiters) {
-    this.arbiters.forEach(function(s) {
-      connections = connections.concat(s.connections());
-    })
+  // Only remove if the current server is not connected
+  var servers = this.primary ? [this.primary] : [];
+  servers = servers.concat(this.secondaries);
+  servers = servers.concat(this.arbiters);
+  servers = servers.concat(this.passives);
+
+  // Check if it's active and this is just a failed connection attempt
+  for(var i = 0; i &lt; servers.length; i++) {
+    if(!options.force &amp;&amp; servers[i].equals(server) &amp;&amp; servers[i].isConnected &amp;&amp; servers[i].isConnected()) {
+      return;
+    }
   }
 
-  return connections;
+  // If we have it in the set remove it
+  if(this.set[server.name]) {
+    this.set[server.name].type = ServerType.Unknown;
+    this.set[server.name].electionId = null;
+    this.set[server.name].setName = null;
+    this.set[server.name].setVersion = null;
+  }
+
+  // Remove type
+  var removeType = null;
+
+  // Remove from any lists
+  if(this.primary &amp;&amp; this.primary.equals(server)) {
+    this.primary = null;
+    this.topologyType = TopologyType.ReplicaSetNoPrimary;
+    removeType = 'primary';
+  }
+
+  // Remove from any other server lists
+  removeType = removeFrom(server, this.secondaries) ? 'secondary' : removeType;
+  removeType = removeFrom(server, this.arbiters) ? 'arbiter' : removeType;
+  removeType = removeFrom(server, this.passives) ? 'secondary' : removeType;
+  removeFrom(server, this.ghosts);
+  removeFrom(server, this.unknownServers);
+
+  // Do we have a removeType
+  if(removeType) {
+    this.emit('left', removeType, server);
+  }
+}
+
+ReplSetState.prototype.update = function(server) {
+  var self = this;
+  // Get the current ismaster
+  var ismaster = server.lastIsMaster();
+
+  //
+  // Add any hosts
+  //
+  if(ismaster) {
+    // Join all the possible new hosts
+    var hosts = Array.isArray(ismaster.hosts) ? ismaster.hosts : [];
+    hosts = hosts.concat(Array.isArray(ismaster.arbiters) ? ismaster.arbiters : []);
+    hosts = hosts.concat(Array.isArray(ismaster.passives) ? ismaster.passives : []);
+
+    // Add all hosts as unknownServers
+    for(var i = 0; i &lt; hosts.length; i++) {
+      // Add to the list of unknown server
+      if(this.unknownServers.indexOf(hosts[i]) == -1
+        &amp;&amp; (!this.set[hosts[i]] || this.set[hosts[i]].type == ServerType.Unknown)) {
+        this.unknownServers.push(hosts[i]);
+      }
+
+      if(!this.set[hosts[i]]) {
+        this.set[hosts[i]] = {
+          type: ServerType.Unknown,
+          electionId: null,
+          setName: null,
+          setVersion: null
+        }
+      }
+    }
+  }
+
+  //
+  // Unknown server
+  //
+  if(!ismaster &amp;&amp; !inList(ismaster, server, this.unknownServers)) {
+    self.set[server.name] = {
+      type: ServerType.Unknown, setVersion: null, electionId: null, setName: null
+    }
+    // Update set information about the server instance
+    self.set[server.name].type = ServerType.Unknown;
+    self.set[server.name].electionId = ismaster ? ismaster.electionId : ismaster;
+    self.set[server.name].setName = ismaster ? ismaster.setName : ismaster;
+    self.set[server.name].setVersion = ismaster ? ismaster.setVersion : ismaster;
+
+    if(self.unknownServers.indexOf(server.name) == -1) {
+      self.unknownServers.push(server.name);
+    }
+
+    // Set the topology
+    return false;
+  }
+
+  //
+  // Is this a mongos
+  //
+  if(ismaster &amp;&amp; ismaster.msg == 'isdbgrid') {
+    return false;
+  }
+
+  // A RSOther instance
+  if((ismaster.setName &amp;&amp; ismaster.hidden)
+    || (ismaster.setName &amp;&amp; !ismaster.ismaster &amp;&amp; !ismaster.secondary &amp;&amp; !ismaster.arbiterOnly &amp;&amp; !ismaster.passive)) {
+    self.set[server.name] = {
+      type: ServerType.RSOther, setVersion: null,
+      electionId: null, setName: ismaster.setName
+    }
+    // Set the topology
+    this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.ReplicaSetNoPrimary;
+    if(ismaster.setName) this.setName = ismaster.setName;
+    return false;
+  }
+
+  // A RSGhost instance
+  if(ismaster.isreplicaset) {
+    self.set[server.name] = {
+      type: ServerType.RSGhost, setVersion: null,
+      electionId: null, setName: null
+    }
+
+    // Set the topology
+    this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.ReplicaSetNoPrimary;
+    if(ismaster.setName) this.setName = ismaster.setName;
+
+    // Set the topology
+    return false;
+  }
+
+  //
+  // Standalone server, destroy and return
+  //
+  if(ismaster &amp;&amp; ismaster.ismaster &amp;&amp; !ismaster.setName) {
+    this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.Unknown;
+    this.remove(server, {force:true});
+    return false;
+  }
+
+  //
+  // Server in maintanance mode
+  //
+  if(ismaster &amp;&amp; !ismaster.ismaster &amp;&amp; !ismaster.secondary &amp;&amp; !ismaster.arbiterOnly) {
+    this.remove(server, {force:true});
+    return false;
+  }
+
+  //
+  // If the .me field does not match the passed in server
+  //
+  if(ismaster.me &amp;&amp; ismaster.me != server.name) {
+    if(this.logger.isWarn()) {
+      this.logger.warn(f('the seedlist server was removed due to its address %s not matching its ismaster.me address %s', server.name, ismaster.me));
+    }
+
+    // Set the type of topology we have
+    if(this.primary &amp;&amp; !this.primary.equals(server)) {
+      this.topologyType = TopologyType.ReplicaSetWithPrimary;
+    } else {
+      this.topologyType = TopologyType.ReplicaSetNoPrimary;
+    }
+
+    return false;
+  }
+
+  //
+  // Primary handling
+  //
+  if(!this.primary &amp;&amp; ismaster.ismaster &amp;&amp; ismaster.setName) {
+    var ismasterElectionId = server.lastIsMaster().electionId;
+    if(this.setName &amp;&amp; this.setName != ismaster.setName) {
+      this.topologyType = TopologyType.ReplicaSetNoPrimary;
+      return new MongoError(f('setName from ismaster does not match provided connection setName [%s] != [%s]', ismaster.setName, this.setName));
+    }
+
+    if(!this.maxElectionId &amp;&amp; ismasterElectionId) {
+      this.maxElectionId = ismasterElectionId;
+    } else if(this.maxElectionId &amp;&amp; ismasterElectionId) {
+      var result = compareObjectIds(this.maxElectionId, ismasterElectionId);
+      // Get the electionIds
+      var ismasterSetVersion = server.lastIsMaster().setVersion;
+
+      // if(result == 1 || result == 0) {
+      if(result == 1) {
+        this.topologyType = TopologyType.ReplicaSetNoPrimary;
+        return false;
+      } else if(result == 0 &amp;&amp; ismasterSetVersion) {
+        if(ismasterSetVersion &lt; this.maxSetVersion) {
+          this.topologyType = TopologyType.ReplicaSetNoPrimary;
+          return false;
+        }
+      }
+
+      this.maxSetVersion = ismasterSetVersion;
+      this.maxElectionId = ismasterElectionId;
+    }
+
+    self.primary = server;
+    self.set[server.name] = {
+      type: ServerType.RSPrimary,
+      setVersion: ismaster.setVersion,
+      electionId: ismaster.electionId,
+      setName: ismaster.setName
+    }
+
+    // Set the topology
+    this.topologyType = TopologyType.ReplicaSetWithPrimary;
+    if(ismaster.setName) this.setName = ismaster.setName;
+    removeFrom(server, self.unknownServers);
+    removeFrom(server, self.secondaries);
+    removeFrom(server, self.passives);
+    self.emit('joined', 'primary', server);
+    emitTopologyDescriptionChanged(self);
+    return true;
+  } else if(ismaster.ismaster &amp;&amp; ismaster.setName) {
+    // Get the electionIds
+    var currentElectionId = self.set[self.primary.name].electionId;
+    var currentSetVersion = self.set[self.primary.name].setVersion;
+    var currentSetName = self.set[self.primary.name].setName;
+    var ismasterElectionId = server.lastIsMaster().electionId;
+    var ismasterSetVersion = server.lastIsMaster().setVersion;
+    var ismasterSetName = server.lastIsMaster().setName;
+
+    // Is it the same server instance
+    if(this.primary.equals(server)
+      &amp;&amp; currentSetName == ismasterSetName) {
+        return false;
+    }
+
+    // If we do not have the same rs name
+    if(currentSetName &amp;&amp; currentSetName != ismasterSetName) {
+      if(!this.primary.equals(server)) {
+        this.topologyType = TopologyType.ReplicaSetWithPrimary;
+      } else {
+        this.topologyType = TopologyType.ReplicaSetNoPrimary;
+      }
+
+      return false;
+    }
+
+    // Check if we need to replace the server
+    if(currentElectionId &amp;&amp; ismasterElectionId) {
+      var result = compareObjectIds(currentElectionId, ismasterElectionId);
+
+      if(result == 1) {
+        return false;
+      } else if(result == 0 &amp;&amp; (currentSetVersion > ismasterSetVersion)) {
+        return false;
+      }
+    } else if(!currentElectionId &amp;&amp; ismasterElectionId
+      &amp;&amp; ismasterSetVersion) {
+        if(ismasterSetVersion &lt; this.maxSetVersion) {
+          return false;
+        }
+    }
+
+    if(!this.maxElectionId &amp;&amp; ismasterElectionId) {
+      this.maxElectionId = ismasterElectionId;
+    } else if(this.maxElectionId &amp;&amp; ismasterElectionId) {
+      var result = compareObjectIds(this.maxElectionId, ismasterElectionId);
+
+      if(result == 1) {
+        return false;
+      } else if(result == 0 &amp;&amp; currentSetVersion &amp;&amp; ismasterSetVersion) {
+        if(ismasterSetVersion &lt; this.maxSetVersion) {
+          return false;
+        }
+      } else {
+        if(ismasterSetVersion &lt; this.maxSetVersion) {
+          return false;
+        }
+      }
+
+      this.maxElectionId = ismasterElectionId;
+      this.maxSetVersion = ismasterSetVersion;
+    } else {
+      this.maxSetVersion = ismasterSetVersion;
+    }
+
+    // Modify the entry to unknown
+    self.set[self.primary.name] = {
+      type: ServerType.Unknown, setVersion: null,
+      electionId: null, setName: null
+    }
+
+    // Signal primary left
+    self.emit('left', 'primary', this.primary);
+    // Destroy the instance
+    self.primary.destroy();
+    // Set the new instance
+    self.primary = server;
+    // Set the set information
+    self.set[server.name] = {
+      type: ServerType.RSPrimary, setVersion: ismaster.setVersion,
+      electionId: ismaster.electionId, setName: ismaster.setName
+    }
+
+    // Set the topology
+    this.topologyType = TopologyType.ReplicaSetWithPrimary;
+    if(ismaster.setName) this.setName = ismaster.setName;
+    removeFrom(server, self.unknownServers);
+    removeFrom(server, self.secondaries);
+    removeFrom(server, self.passives);
+    self.emit('joined', 'primary', server);
+    emitTopologyDescriptionChanged(self);
+    return true;
+  }
+
+  // A possible instance
+  if(!this.primary &amp;&amp; ismaster.primary) {
+    self.set[ismaster.primary] = {
+      type: ServerType.PossiblePrimary, setVersion: null,
+      electionId: null, setName: null
+    }
+  }
+
+  //
+  // Secondary handling
+  //
+  if(ismaster.secondary &amp;&amp; ismaster.setName
+    &amp;&amp; !inList(ismaster, server, this.secondaries)
+    &amp;&amp; this.setName &amp;&amp; this.setName == ismaster.setName) {
+    addToList(self, ServerType.RSSecondary, ismaster, server, this.secondaries);
+    // Set the topology
+    this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.ReplicaSetNoPrimary;
+    if(ismaster.setName) this.setName = ismaster.setName;
+    removeFrom(server, self.unknownServers);
+
+    // Remove primary
+    if(this.primary &amp;&amp; this.primary.name == server.name) {
+      server.destroy();
+      this.primary = null;
+      self.emit('left', 'primary', server);
+    }
+
+    self.emit('joined', 'secondary', server);
+    emitTopologyDescriptionChanged(self);
+    return true;
+  }
+
+  //
+  // Arbiter handling
+  //
+  if(ismaster.arbiterOnly &amp;&amp; ismaster.setName
+    &amp;&amp; !inList(ismaster, server, this.arbiters)
+    &amp;&amp; this.setName &amp;&amp; this.setName == ismaster.setName) {
+    addToList(self, ServerType.RSArbiter, ismaster, server, this.arbiters);
+    // Set the topology
+    this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.ReplicaSetNoPrimary;
+    if(ismaster.setName) this.setName = ismaster.setName;
+    removeFrom(server, self.unknownServers);
+    self.emit('joined', 'arbiter', server);
+    emitTopologyDescriptionChanged(self);
+    return true;
+  }
+
+  //
+  // Passive handling
+  //
+  if(ismaster.passive &amp;&amp; ismaster.setName
+    &amp;&amp; !inList(ismaster, server, this.passives)
+    &amp;&amp; this.setName &amp;&amp; this.setName == ismaster.setName) {
+    addToList(self, ServerType.RSSecondary, ismaster, server, this.passives);
+    // Set the topology
+    this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.ReplicaSetNoPrimary;
+    if(ismaster.setName) this.setName = ismaster.setName;
+    removeFrom(server, self.unknownServers);
+
+    // Remove primary
+    if(this.primary &amp;&amp; this.primary.name == server.name) {
+      server.destroy();
+      this.primary = null;
+      self.emit('left', 'primary', server);
+    }
+
+    self.emit('joined', 'secondary', server);
+    emitTopologyDescriptionChanged(self);
+    return true;
+  }
+
+  //
+  // Remove the primary
+  //
+  if(this.set[server.name] &amp;&amp; this.set[server.name].type == ServerType.RSPrimary) {
+    self.emit('left', 'primary', this.primary);
+    this.primary.destroy();
+    this.primary = null;
+    this.topologyType = TopologyType.ReplicaSetNoPrimary;
+    return false;
+  }
+
+  this.topologyType = this.primary ? TopologyType.ReplicaSetWithPrimary : TopologyType.ReplicaSetNoPrimary;
+  return false;
 }
 
 /**
- * Return JSON object
+ * Recalculate single server max staleness
  * @method
- * @return {object}
  */
-State.prototype.toJSON = function() {
-  return {
-      primary: this.primary ? this.primary.lastIsMaster().me : null
-    , secondaries: this.secondaries.map(function(s) {
-      return s.lastIsMaster().me
-    })
+ReplSetState.prototype.updateServerMaxStaleness = function(server, haInterval) {
+  // Locate the max secondary lastwrite
+  var max = 0;
+  // Go over all secondaries
+  for(var i = 0; i &lt; this.secondaries.length; i++) {
+    max = Math.max(max, this.secondaries[i].lastWriteDate);
+  }
+
+  // Perform this servers staleness calculation
+  if(server.ismaster.maxWireVersion >= 5
+    &amp;&amp; server.ismaster.secondary
+    &amp;&amp; this.hasPrimary()) {
+    server.staleness = (server.lastUpdateTime - server.lastWriteDate)
+      - (this.primary.lastUpdateTime - this.primary.lastWriteDate)
+      + haInterval;
+  } else if(server.ismaster.maxWireVersion >= 5
+    &amp;&amp; server.ismaster.secondary){
+    server.staleness = max - server.lastWriteDate + haInterval;
   }
 }
 
 /**
- * Returns the last known ismaster document for this server
+ * Recalculate all the stalness values for secodaries
  * @method
- * @return {object}
  */
-State.prototype.lastIsMaster = function() {
-  if(this.primary) return this.primary.lastIsMaster();
-  if(this.secondaries.length > 0) return this.secondaries[0].lastIsMaster();
-  return {};
+ReplSetState.prototype.updateSecondariesMaxStaleness = function(haInterval) {
+  for(var i = 0; i &lt; this.secondaries.length; i++) {
+    this.updateServerMaxStaleness(this.secondaries[i], haInterval);
+  }
 }
 
 /**
- * Promote server to primary
+ * Pick a server by the passed in ReadPreference
  * @method
- * @param {Server} server Server we wish to promote
+ * @param {ReadPreference} readPreference The ReadPreference instance to use
  */
-State.prototype.promotePrimary = function(server) {
-  var currentServer = this.get(server);
-  // Server does not exist in the state, add it as new primary
-  if(currentServer == null) {
-    this.primary = server;
-    return;
+ReplSetState.prototype.pickServer = function(readPreference) {
+  // If no read Preference set to primary by default
+  readPreference = readPreference || ReadPreference.primary;
+
+  // maxStalenessMS is not allowed with a primary read
+  if(readPreference.preference == 'primary' &amp;&amp; readPreference.maxStalenessMS) {
+    return new MongoError('primary readPreference incompatible with maxStalenessMS');
   }
 
-  // We found a server, make it primary and remove it from the secondaries
-  // Remove the server first
-  this.remove(currentServer);
-  // Set as primary
-  this.primary = currentServer;
+  // Check if we have any non compatible servers for maxStalenessMS
+  var allservers = this.primary ? [this.primary] : [];
+  allservers = allservers.concat(this.secondaries);
+
+  // Does any of the servers not support the right wire protocol version
+  // for maxStalenessMS when maxStalenessMS specified on readPreference. Then error out
+  if(readPreference.maxStalenessMS) {
+    for(var i = 0; i &lt; allservers.length; i++) {
+      if(allservers[i].ismaster.maxWireVersion &lt; 5) {
+        return new MongoError('maxStalenessMS not supported by at least one of the replicaset members');
+      }
+    }
+  }
+
+  // Do we have the nearest readPreference
+  if(readPreference.preference == 'nearest' &amp;&amp; !readPreference.maxStalenessMS) {
+    return pickNearest(this, readPreference);
+  } else if(readPreference.preference == 'nearest' &amp;&amp; readPreference.maxStalenessMS) {
+    return pickNearestMaxStalenessMS(this, readPreference);
+  }
+
+  // Get all the secondaries
+  var secondaries = this.secondaries;
+
+  // Check if we can satisfy and of the basic read Preferences
+  if(readPreference.equals(ReadPreference.secondary)
+    &amp;&amp; secondaries.length == 0) {
+      return new MongoError("no secondary server available");
+    }
+
+  if(readPreference.equals(ReadPreference.secondaryPreferred)
+    &amp;&amp; secondaries.length == 0
+    &amp;&amp; this.primary == null) {
+      return new MongoError("no secondary or primary server available");
+    }
+
+  if(readPreference.equals(ReadPreference.primary)
+    &amp;&amp; this.primary == null) {
+      return new MongoError("no primary server available");
+    }
+
+  // Secondary preferred or just secondaries
+  if(readPreference.equals(ReadPreference.secondaryPreferred)
+    || readPreference.equals(ReadPreference.secondary)) {
+
+    if(secondaries.length > 0 &amp;&amp; !readPreference.maxStalenessMS) {
+      // Pick nearest of any other servers available
+      var server = pickNearest(this, readPreference);
+      // No server in the window return primary
+      if(server) {
+        return server;
+      }
+    } else if(secondaries.length > 0 &amp;&amp; readPreference.maxStalenessMS) {
+      // Pick nearest of any other servers available
+      var server = pickNearestMaxStalenessMS(this, readPreference);
+      // No server in the window return primary
+      if(server) {
+        return server;
+      }
+    }
+
+    if(readPreference.equals(ReadPreference.secondaryPreferred)){
+      return this.primary;
+    }
+
+    return null;
+  }
+
+  // Primary preferred
+  if(readPreference.equals(ReadPreference.primaryPreferred)) {
+    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! primaryPreferred")
+    var server = null;
+
+    // We prefer the primary if it's available
+    if(this.primary) {
+      return this.primary;
+    }
+
+    // Pick a secondary
+    if(secondaries.length > 0 &amp;&amp; !readPreference.maxStalenessMS) {
+      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! primaryPreferred 0")
+      server = pickNearest(this, readPreference);
+    } else if(secondaries.length > 0 &amp;&amp; readPreference.maxStalenessMS) {
+      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! primaryPreferred 1")
+      server = pickNearestMaxStalenessMS(this, readPreference);
+    }
+
+    //  Did we find a server
+    if(server) return server;
+  }
+
+  // Return the primary
+  return this.primary;
 }
 
-var add = function(list, server) {
-  // Check if the server is a secondary at the moment
+//
+// Filter serves by tags
+var filterByTags = function(readPreference, servers) {
+  if(readPreference.tags == null) return servers;
+  var filteredServers = [];
+  var tagsArray = Array.isArray(readPreference.tags) ? readPreference.tags : [readPreference.tags];
+
+  // Iterate over the tags
+  for(var j = 0; j &lt; tagsArray.length; j++) {
+    var tags = tagsArray[j];
+
+    // Iterate over all the servers
+    for(var i = 0; i &lt; servers.length; i++) {
+      var serverTag = servers[i].lastIsMaster().tags || {};
+      // Did we find the a matching server
+      var found = true;
+      // Check if the server is valid
+      for(var name in tags) {
+        if(serverTag[name] != tags[name]) found = false;
+      }
+
+      // Add to candidate list
+      if(found) {
+        filteredServers.push(servers[i]);
+      }
+    }
+
+    // We found servers by the highest priority
+    if(found) break;
+  }
+
+  // Returned filtered servers
+  return filteredServers;
+}
+
+function pickNearestMaxStalenessMS(self, readPreference) {
+  // console.log("=== pickNearestMaxStalenessMS 0")
+  // Only get primary and secondaries as seeds
+  var seeds = {};
+  var servers = [];
+  var heartbeatFrequencyMS = self.heartbeatFrequencyMS;
+
+  // console.log("=== readPreference.maxStalenessMS = " + readPreference.maxStalenessMS)
+  // console.log("=== (heartbeatFrequencyMS * 2) = " + (heartbeatFrequencyMS * 2))
+
+  // Check if the maxStalenessMS > heartbeatFrequencyMS * 2
+  if(readPreference.maxStalenessMS &lt; (heartbeatFrequencyMS * 2)) {
+    return new MongoError('maxStalenessMS must be at least twice the haInterval');
+  }
+
+  // Add primary to list if not a secondary read preference
+  if(self.primary &amp;&amp; readPreference.preference != 'secondary') {
+    servers.push(self.primary);
+  }
+
+  // Add all the secondaries
+  for(var i = 0; i &lt; self.secondaries.length; i++) {
+    servers.push(self.secondaries[i]);
+  }
+
+  // Filter by tags
+  servers = filterByTags(readPreference, servers);
+  // console.log("=== pickNearestMaxStalenessMS 1 :: " + servers.length)
+
+  //
+  // // Locate lowest time (picked servers are lowest time + acceptable Latency margin)
+  // var lowest = servers.length > 0 ? servers[0].lastIsMasterMS : 0;
+
+  // Filter by latency
+  servers = servers.filter(function(s) {
+    // console.log("  == " + s.name + " :: " + s.staleness + " &lt;= " + readPreference.maxStalenessMS)
+    return s.staleness &lt;= readPreference.maxStalenessMS;
+  });
+  // console.log("=== pickNearestMaxStalenessMS 2 :: " + servers.length)
+
+  // Sort by time
+  servers.sort(function(a, b) {
+    // return a.time > b.time;
+    return a.lastIsMasterMS > b.lastIsMasterMS
+  });
+
+  // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ servers.length = " + servers.length)
+  // console.log(servers.map(function(x) { return x.name}))
+
+  // No servers, default to primary
+  if(servers.length == 0) {
+    return null
+  }
+
+  // Ensure index does not overflow the number of available servers
+  self.index = self.index % servers.length;
+
+  // // Does any of the servers not support the right wire protocol version
+  // // Then error out
+  // for(var i = 0; i &lt; servers.length; i++) {
+  //   if(servers[i].ismaster.maxWireVersion &lt; 5) {
+  //     return new MongoError('maxStalenessMS not supported by at least one of the replicaset members');
+  //   }
+  // }
+
+  // Get the server
+  var server = servers[self.index];
+  // Add to the index
+  self.index = self.index + 1;
+  // Return the first server of the sorted and filtered list
+  return server;
+}
+
+function pickNearest(self, readPreference) {
+  // Only get primary and secondaries as seeds
+  var seeds = {};
+  var servers = [];
+
+  // Add primary to list if not a secondary read preference
+  if(self.primary &amp;&amp; readPreference.preference != 'secondary') {
+    servers.push(self.primary);
+  }
+
+  // Add all the secondaries
+  for(var i = 0; i &lt; self.secondaries.length; i++) {
+    servers.push(self.secondaries[i]);
+  }
+
+  // Filter by tags
+  servers = filterByTags(readPreference, servers);
+
+  // Sort by time
+  servers.sort(function(a, b) {
+    // return a.time > b.time;
+    return a.lastIsMasterMS > b.lastIsMasterMS
+  });
+
+  // Locate lowest time (picked servers are lowest time + acceptable Latency margin)
+  var lowest = servers.length > 0 ? servers[0].lastIsMasterMS : 0;
+
+  // Filter by latency
+  servers = servers.filter(function(s) {
+    return s.lastIsMasterMS &lt;= lowest + self.acceptableLatency;
+  });
+
+  // No servers, default to primary
+  if(servers.length == 0) {
+    return null
+  }
+
+  // Ensure index does not overflow the number of available servers
+  self.index = self.index % servers.length;
+  // Get the server
+  var server = servers[self.index];
+  // Add to the index
+  self.index = self.index + 1;
+  // Return the first server of the sorted and filtered list
+  return server;
+}
+
+function inList(ismaster, server, list) {
   for(var i = 0; i &lt; list.length; i++) {
-    if(list[i].equals(server)) return false;
+    if(list[i].name == server.name) return true;
   }
 
+  return false;
+}
+
+function addToList(self, type, ismaster, server, list) {
+  // Update set information about the server instance
+  self.set[server.name].type = type;
+  self.set[server.name].electionId = ismaster ? ismaster.electionId : ismaster;
+  self.set[server.name].setName = ismaster ? ismaster.setName : ismaster;
+  self.set[server.name].setVersion = ismaster ? ismaster.setVersion : ismaster;
+  // Add to the list
   list.push(server);
-  return true;
 }
 
-/**
- * Add server to list of secondaries
- * @method
- * @param {Server} server Server we wish to add
- */
-State.prototype.addSecondary = function(server) {
-  return add(this.secondaries, server);
-}
-
-/**
- * Add server to list of arbiters
- * @method
- * @param {Server} server Server we wish to add
- */
-State.prototype.addArbiter = function(server) {
-  return add(this.arbiters, server);
-}
-
-/**
- * Add server to list of passives
- * @method
- * @param {Server} server Server we wish to add
- */
-State.prototype.addPassive = function(server) {
-  return add(this.passives, server);
-}
-
-var compareObjectIds = function(id1, id2) {
+function compareObjectIds(id1, id2) {
   var a = new Buffer(id1.toHexString(), 'hex');
   var b = new Buffer(id2.toHexString(), 'hex');
 
@@ -1376,124 +1803,120 @@ var compareObjectIds = function(id1, id2) {
   return x &lt; y ? -1 : y &lt; x ? 1 : 0;
 }
 
-/**
- * Update the state given a specific ismaster result
- * @method
- * @param {object} ismaster IsMaster result
- * @param {Server} server IsMaster Server source
- */
-State.prototype.update = function(ismaster, server) {
-  var self = this;
-  // Not in a known connection valid state
-  if((!ismaster.ismaster &amp;&amp; !ismaster.secondary &amp;&amp; !ismaster.arbiterOnly) || !Array.isArray(ismaster.hosts)) {
-    // Remove the state
-    var result = self.remove(server);
-    if(self.state == CONNECTED)  {
-      if(self.logger.isInfo()) self.logger.info(f('[%s] removing %s from set', self.id, ismaster.me));
-      self.replSet.emit('left', self.remove(server), server);
+function removeFrom(server, list) {
+  for(var i = 0; i &lt; list.length; i++) {
+    if(list[i].equals &amp;&amp; list[i].equals(server)) {
+      list.splice(i, 1);
+      return true;
+    } else if(typeof list[i] == 'string' &amp;&amp; list[i] == server.name) {
+      list.splice(i, 1);
+      return true;
     }
-
-    return false;
   }
 
-  // Set the setName if it's not set from the first server
-  if(self.setName == null &amp;&amp; ismaster.setName) {
-    if(self.logger.isInfo()) self.logger.info(f('[%s] setting setName to %s', self.id, ismaster.setName));
-    self.setName = ismaster.setName;
-  }
-
-  // Check if the replicaset name matches the provided one
-  if(ismaster.setName &amp;&amp; self.setName != ismaster.setName) {
-    if(self.logger.isError()) self.logger.error(f('[%s] server in replset %s is not part of the specified setName %s', self.id, ismaster.setName, self.setName));
-    self.remove(server);
-    self.replSet.emit('error', new MongoError("provided setName for Replicaset Connection does not match setName found in server seedlist"));
-    return false;
-  }
-
-  // Log information
-  if(self.logger.isInfo()) self.logger.info(f('[%s] updating replicaset state %s', self.id, JSON.stringify(this)));
-
-  // It's a master set it
-  if(ismaster.ismaster &amp;&amp; self.setName == ismaster.setName &amp;&amp; !self.isPrimary(ismaster.me)) {
-    // Check if the electionId is not null
-    if(ismaster.electionId instanceof ObjectId &amp;&amp; self.electionId instanceof ObjectId) {
-      if(compareObjectIds(self.electionId, ismaster.electionId) == -1) {
-        self.electionId = ismaster.electionId;
-      } else if(compareObjectIds(self.electionId, ismaster.electionId) == 0) {
-        self.electionId = ismaster.electionId;
-      } else {
-        return false;
-      }
-    }
-
-    // Initial electionId
-    if(ismaster.electionId instanceof ObjectId &amp;&amp; self.electionId == null) {
-      self.electionId = ismaster.electionId;
-    }
-
-    // Promote to primary
-    self.promotePrimary(server);
-    // Log change of primary
-    if(self.logger.isInfo()) self.logger.info(f('[%s] promoting %s to primary', self.id, ismaster.me));
-    // Emit primary
-    self.replSet.emit('joined', 'primary', this.primary);
-
-    // We are connected
-    if(self.state == CONNECTING) {
-      self.state = CONNECTED;
-      self.replSet.emit('connect', self.replSet);
-    } else {
-      self.state = CONNECTED;
-      self.replSet.emit('reconnect', server);
-    }
-  } else if(!ismaster.ismaster &amp;&amp; self.setName == ismaster.setName
-    &amp;&amp; ismaster.arbiterOnly) {
-      if(self.addArbiter(server)) {
-        if(self.logger.isInfo()) self.logger.info(f('[%s] promoting %s to arbiter', self.id, ismaster.me));
-        self.replSet.emit('joined', 'arbiter', server);
-        return true;
-      };
-
-      return false;
-  } else if(!ismaster.ismaster &amp;&amp; self.setName == ismaster.setName
-    &amp;&amp; ismaster.secondary &amp;&amp; ismaster.passive) {
-      if(self.addPassive(server) &amp;&amp; self.addSecondary(server)) {
-        if(self.logger.isInfo()) self.logger.info(f('[%s] promoting %s to passive', self.id, ismaster.me));
-        self.replSet.emit('joined', 'passive', server);
-
-        // If we have secondaryOnlyConnectionAllowed and just a passive it's
-        // still a valid connection
-        if(self.secondaryOnlyConnectionAllowed &amp;&amp; self.state == CONNECTING) {
-          self.state = CONNECTED;
-          self.replSet.emit('connect', self.replSet);
-        }
-
-        return true;
-      };
-
-      return false;
-  } else if(!ismaster.ismaster &amp;&amp; self.setName == ismaster.setName
-    &amp;&amp; ismaster.secondary) {
-      if(self.addSecondary(server)) {
-        if(self.logger.isInfo()) self.logger.info(f('[%s] promoting %s to secondary', self.id, ismaster.me));
-        self.replSet.emit('joined', 'secondary', server);
-
-        if(self.secondaryOnlyConnectionAllowed &amp;&amp; self.state == CONNECTING) {
-          self.state = CONNECTED;
-          self.replSet.emit('connect', self.replSet);
-        }
-
-        return true;
-      };
-
-      return false;
-  }
-
-  // Return update applied
-  return true;
+  return false;
 }
 
-module.exports = State;
+function emitTopologyDescriptionChanged(self) {
+  if(self.listeners('topologyDescriptionChanged').length > 0) {
+    var topology = 'Unknown';
+    var setName = self.setName;
+
+    if(self.hasPrimaryAndSecondary()) {
+      topology = 'ReplicaSetWithPrimary';
+    } else if(!self.hasPrimary() &amp;&amp; self.hasSecondary()) {
+      topology = 'ReplicaSetNoPrimary';
+    }
+
+    // Generate description
+    var description = {
+      topologyType: topology,
+      setName: setName,
+      servers: []
+    }
+
+    // Add the primary to the list
+    if(self.hasPrimary()) {
+      var desc = self.primary.getDescription();
+      desc.type = 'RSPrimary';
+      description.servers.push(desc);
+    }
+
+    // Add all the secondaries
+    description.servers = description.servers.concat(self.secondaries.map(function(x) {
+      var description = x.getDescription();
+      description.type = 'RSSecondary';
+      return description;
+    }));
+
+    // Add all the arbiters
+    description.servers = description.servers.concat(self.arbiters.map(function(x) {
+      var description = x.getDescription();
+      description.type = 'RSArbiter';
+      return description;
+    }));
+
+    // Add all the passives
+    description.servers = description.servers.concat(self.passives.map(function(x) {
+      var description = x.getDescription();
+      description.type = 'RSSecondary';
+      return description;
+    }));
+
+    // Create the result
+    var result = {
+      topologyId: self.id,
+      previousDescription: self.replicasetDescription,
+      newDescription: description,
+      diff: diff(self.replicasetDescription, description)
+    };
+
+    // Emit the topologyDescription change
+    self.emit('topologyDescriptionChanged', result);
+
+    // Set the new description
+    self.replicasetDescription = description;
+  }
+}
+
+function diff(previous, current) {
+  // Difference document
+  var diff = {
+    servers: []
+  }
+
+  // Previous entry
+  if(!previous) {
+    previous = { servers: [] };
+  }
+
+  // Got through all the servers
+  for(var i = 0; i &lt; previous.servers.length; i++) {
+    var prevServer = previous.servers[i];
+
+    // Go through all current servers
+    for(var j = 0; j &lt; current.servers.length; j++) {
+      var currServer = current.servers[j];
+
+      // Matching server
+      if(prevServer.address === currServer.address) {
+        // We had a change in state
+        if(prevServer.type != currServer.type) {
+          diff.servers.push({
+            address: prevServer.address,
+            from: prevServer.type,
+            to: currServer.type
+          });
+        }
+      }
+    }
+  }
+
+  // Return difference
+  return diff;
+}
+
+module.exports = ReplSetState;
 </code></pre>
         </article>
     </section>
@@ -1523,7 +1946,7 @@ module.exports = State;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Mon May 30 2016 18:28:06 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Jul 28 2016 17:03:02 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

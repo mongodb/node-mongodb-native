@@ -965,7 +965,9 @@ var inherits = require('util').inherits,
   TwoSixWireProtocolSupport = require('../wireprotocol/2_6_support'),
   ThreeTwoWireProtocolSupport = require('../wireprotocol/3_2_support'),
   BasicCursor = require('../cursor'),
-  sdam = require('./shared');
+  sdam = require('./shared'),
+  assign = require('./shared').assign,
+  createClientInfo = require('./shared').createClientInfo;
 
 // Used for filtering out fields for loggin
 var debugFields = ['reconnect', 'reconnectTries', 'reconnectInterval', 'emitError', 'cursorFactory', 'host'
@@ -1002,6 +1004,8 @@ var servers = {};
  * @param {string} [options.passphrase] SSL Certificate pass phrase
  * @param {boolean} [options.rejectUnauthorized=true] Reject unauthorized server certificates
  * @param {boolean} [options.promoteLongs=true] Convert Long values from the db into Numbers if they fit into 53 bits
+ * @param {string} [options.appname=null] Application name, passed in on ismaster call and logged in mongod server logs. Maximum size 128 bytes.
+ * @param {boolean} [options.domainsEnabled=false] Enable the wrapping of the callback in the current domain, disabled by default to avoid perf hit.
  * @return {Server} A cursor instance
  * @fires Server#connect
  * @fires Server#close
@@ -1066,12 +1070,24 @@ var Server = function(options) {
   // Wire protocol handler, default to oldest known protocol handler
   // this gets changed when the first ismaster is called.
   this.wireProtocolHandler = new PreTwoSixWireProtocolSupport();
+  // Default type
+  this._type = 'server';
+  // Set the client info
+  this.clientInfo = createClientInfo(options);
+
+  // Max Stalleness values
+  // last time we updated the ismaster state
+  this.lastUpdateTime = 0;
+  // Last write time
+  this.lastWriteDate = 0;
+  // Stalleness
+  this.staleness = 0;
 }
 
 inherits(Server, EventEmitter);
 
 Object.defineProperty(Server.prototype, 'type', {
-  enumerable:true, get: function() { return 'server'; }
+  enumerable:true, get: function() { return this._type; }
 });
 
 Server.enableServerAccounting = function() {
@@ -1124,7 +1140,6 @@ function disconnectHandler(self, type, ns, cmd, options, callback) {
 
 function monitoringProcess(self) {
   return function() {
-    // console.log("---- monitoringProcess")
     // Pool was destroyed do not continue process
     if(self.s.pool.isDestroyed()) return;
     // Emit monitoring Process event
@@ -1133,7 +1148,7 @@ function monitoringProcess(self) {
     // Query options
     var queryOptions = { numberToSkip: 0, numberToReturn: -1, checkKeys: false, slaveOk: true };
     // Create a query instance
-    var query = new Query(self.s.bson, 'admin.$cmd', {ismaster:true}, queryOptions);
+    var query = new Query(self.s.bson, 'admin.$cmd', {ismaster:true, client: self.clientInfo}, queryOptions);
     // Get start time
     var start = new Date().getTime();
     // Execute the ismaster query
@@ -1183,6 +1198,11 @@ var eventHandler = function(self, event) {
         self.initalConnect = false;
         // Save the ismaster
         self.ismaster = result.result;
+        // It's a proxy change the type so
+        // the wireprotocol will send $readPreference
+        if(self.ismaster.msg == 'isdbgrid') {
+          self._type = 'mongos';
+        }
         // Add the correct wire protocol handler
         self.wireProtocolHandler = configureWireProtocolHandler(self, self.ismaster);
         // Have we defined self monitoring
@@ -1268,7 +1288,7 @@ Server.prototype.connect = function(options) {
   }
 
   // Create a pool
-  self.s.pool = new Pool(Object.assign(self.s.options, options, {bson: this.s.bson}));
+  self.s.pool = new Pool(assign(self.s.options, options, {bson: this.s.bson}));
 
   // Set up listeners
   self.s.pool.on('close', eventHandler(self, 'close'));
@@ -1393,6 +1413,11 @@ Server.prototype.command = function(ns, cmd, options, callback) {
   // If we are not connected or have a disconnectHandler specified
   if(disconnectHandler(self, 'command', ns, cmd, options, callback)) return;
 
+  // Check if we have collation support
+  if(this.ismaster &amp;&amp; this.ismaster.maxWireVersion &lt; 5 &amp;&amp; cmd.collation) {
+    return callback(new MongoError(f('server %s does not support collation', this.name)));
+  }
+
   // Query options
   var queryOptions = {
     numberToSkip: 0,
@@ -1466,6 +1491,11 @@ Server.prototype.update = function(ns, ops, options, callback) {
   // If we are not connected or have a disconnectHandler specified
   if(disconnectHandler(self, 'update', ns, ops, options, callback)) return;
 
+  // Check if we have collation support
+  if(this.ismaster &amp;&amp; this.ismaster.maxWireVersion &lt; 5 &amp;&amp; options.collation) {
+    return callback(new MongoError(f('server %s does not support collation', this.name)));
+  }
+
   // Setup the docs as an array
   ops = Array.isArray(ops) ? ops : [ops];
   // Execute write
@@ -1491,6 +1521,11 @@ Server.prototype.remove = function(ns, ops, options, callback) {
 
   // If we are not connected or have a disconnectHandler specified
   if(disconnectHandler(self, 'remove', ns, ops, options, callback)) return;
+
+  // Check if we have collation support
+  if(this.ismaster &amp;&amp; this.ismaster.maxWireVersion &lt; 5 &amp;&amp; options.collation) {
+    return callback(new MongoError(f('server %s does not support collation', this.name)));
+  }
 
   // Setup the docs as an array
   ops = Array.isArray(ops) ? ops : [ops];
@@ -1776,7 +1811,7 @@ module.exports = Server;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Fri Jul 08 2016 13:36:22 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Jul 28 2016 17:03:02 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

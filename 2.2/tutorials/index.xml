@@ -6,8 +6,89 @@
     <description>Recent content in Tutorials on MongoDB Node.js Driver</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Thu, 15 Oct 2015 14:27:51 -0400</lastBuildDate>
+    <lastBuildDate>Wed, 01 Jun 2016 12:53:30 -0400</lastBuildDate>
     <atom:link href="/node-mongodb-native/2.2/tutorials/index.xml" rel="self" type="application/rss+xml" />
+    
+    <item>
+      <title>Projections</title>
+      <link>/node-mongodb-native/2.2/tutorials/projections/</link>
+      <pubDate>Wed, 01 Jun 2016 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/2.2/tutorials/projections/</guid>
+      <description>
+
+&lt;h1 id=&#34;projections&#34;&gt;Projections&lt;/h1&gt;
+
+&lt;p&gt;By default, queries in MongoDB return all fields in matching
+documents. To limit the amount of data that MongoDB sends to
+applications, you can include a projection document in the query
+operation.&lt;/p&gt;
+
+&lt;h2 id=&#34;projection-document&#34;&gt;Projection Document&lt;/h2&gt;
+
+&lt;p&gt;The projection document limits the fields to return for all
+matching documents. The projection document can specify the
+inclusion of fields or the exclusion of field and has the
+following form:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{ field1: &amp;lt;value&amp;gt;, field2: &amp;lt;value&amp;gt; ... }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;&lt;code&gt;&amp;lt;value&amp;gt;&lt;/code&gt; may be &lt;code&gt;0&lt;/code&gt; (or &lt;code&gt;false&lt;/code&gt;) to exclude the field, or
+&lt;code&gt;1&lt;/code&gt; (or &lt;code&gt;true&lt;/code&gt;) to include it. With the exception of the &lt;code&gt;_id&lt;/code&gt;
+field, you may not have both inclusions and exclusions in the same
+projection document.&lt;/p&gt;
+
+&lt;h2 id=&#34;examples&#34;&gt;Examples&lt;/h2&gt;
+
+&lt;p&gt;The following code example uses the &lt;code&gt;restaurants&lt;/code&gt; sample dataset.&lt;/p&gt;
+
+&lt;p&gt;To return only the &lt;code&gt;name&lt;/code&gt;, &lt;code&gt;cuisine&lt;/code&gt; and &lt;code&gt;_id&lt;/code&gt; fields for documents
+which match the query filter, explicitly include the &lt;code&gt;name&lt;/code&gt; and
+&lt;code&gt;cuisine&lt;/code&gt; fields in the projection document. The &lt;code&gt;_id&lt;/code&gt; field is
+included automatically unless specifically excluded.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+
+// Connection URL
+var url = &#39;mongodb://localhost:27017/test&#39;;
+// Use connect method to connect to the server
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  console.log(&amp;quot;Connected correctly to server&amp;quot;);
+
+  findDocuments(db, function() {
+    db.close();
+  });  
+});
+
+
+var findDocuments = function(db, callback) {
+  // Get the documents collection
+  var collection = db.collection( &#39;restaurants&#39; );
+  // Find some documents
+  collection.find({ &#39;cuisine&#39; : &#39;Brazilian&#39; }, { &#39;name&#39; : 1, &#39;cuisine&#39; : 1 }).toArray(function(err, docs) {
+    assert.equal(err, null);
+    console.log(&amp;quot;Found the following records&amp;quot;);
+    console.log(docs)
+    callback(docs);
+  });
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To return &lt;code&gt;name&lt;/code&gt; and &lt;code&gt;cuisine&lt;/code&gt; but exclude all other fields,
+including &lt;code&gt;_id&lt;/code&gt;, use the following projection document:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{ &#39;name&#39; : 1, &#39;cuisine&#39; : 1, &#39;_id&#39;: 0 }
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;To return all fields &lt;em&gt;except&lt;/em&gt; the address field, use the following:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{ &#39;address&#39; : 0 }
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
     
     <item>
       <title>GridFS API</title>
@@ -450,6 +531,106 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;/div&gt;
 &lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Collections</title>
+      <link>/node-mongodb-native/2.2/tutorials/collections/</link>
+      <pubDate>Thu, 19 Mar 2015 14:27:51 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/2.2/tutorials/collections/</guid>
+      <description>
+
+&lt;h1 id=&#34;collections&#34;&gt;Collections&lt;/h1&gt;
+
+&lt;p&gt;MongoDB stores documents in collections. If a collection does not
+exist, MongoDB creates the collection when you first store data for
+that collection.&lt;/p&gt;
+
+&lt;p&gt;You can also explicitly create a collection with various options,
+such as setting the maximum size or the documentation validation rules.&lt;/p&gt;
+
+&lt;h2 id=&#34;capped-collection&#34;&gt;Capped Collection&lt;/h2&gt;
+
+&lt;p&gt;Capped collections have maximum size or document counts that prevent
+them from growing beyond maximum thresholds. All capped collections must
+specify a maximum size and may also specify a maximum document count.
+MongoDB removes older documents if a collection reaches the maximum size
+limit before it reaches the maximum document count.&lt;/p&gt;
+
+&lt;p&gt;To create a &lt;a href=&#34;https://docs.mongodb.com/manual/core/capped-collections/&#34;&gt;capped collection&lt;/a&gt;,
+use the &lt;code&gt;createCollection&lt;/code&gt; method and specify &lt;code&gt;&#39;capped&#39; : true&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+var url = &#39;mongodb://localhost:27017/test&#39;;
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  createCapped(db, function() {
+    db.close();
+  });
+});
+
+var createCapped = function(db, callback) {
+  db.createCollection(&amp;quot;myCollection&amp;quot;, { &amp;quot;capped&amp;quot;: true, &amp;quot;size&amp;quot;: 100000, &amp;quot;max&amp;quot;: 5000},
+    function(err, results) {
+      console.log(&amp;quot;Collection created.&amp;quot;);
+      callback();
+    }
+  );
+};
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h2 id=&#34;document-validation&#34;&gt;Document Validation&lt;/h2&gt;
+
+&lt;p&gt;Collections with &lt;a href=&#34;https://docs.mongodb.com/manual/core/document-validation/&#34;&gt;validation&lt;/a&gt;
+compare each inserted or updated
+document against the criteria specified in the validator option.
+Depending on the &lt;code&gt;validationLevel&lt;/code&gt; and &lt;code&gt;validationAction&lt;/code&gt;, MongoDB
+either returns a warning, or refuses to insert or update the document
+if it fails to meet the specified criteria.&lt;/p&gt;
+
+&lt;p&gt;The following example creates a &lt;code&gt;contacts&lt;/code&gt; collection with a validator
+that specifies that inserted or updated documents should match at
+least one of three following conditions:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;the &lt;code&gt;phone&lt;/code&gt; field is a string&lt;/li&gt;
+&lt;li&gt;the &lt;code&gt;email&lt;/code&gt; field matches the regular expression&lt;/li&gt;
+&lt;li&gt;the &lt;code&gt;status&lt;/code&gt; field is either &lt;code&gt;Unknown&lt;/code&gt; or &lt;code&gt;Incomplete&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+var url = &#39;mongodb://localhost:27017/test&#39;;
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  createValidated(db, function() {
+    db.close();
+  });
+});
+
+
+var createValidated = function(db, callback) {
+  db.createCollection(&amp;quot;contacts&amp;quot;, 
+	   {
+	      &#39;validator&#39;: { &#39;$or&#39;:
+	         [
+	            { &#39;phone&#39;: { &#39;$type&#39;: &amp;quot;string&amp;quot; } },
+	            { &#39;email&#39;: { &#39;$regex&#39;: /@mongodb\.com$/ } },
+	            { &#39;status&#39;: { &#39;$in&#39;: [ &amp;quot;Unknown&amp;quot;, &amp;quot;Incomplete&amp;quot; ] } }
+	         ]
+	      }
+	   },	   
+    function(err, results) {
+      console.log(&amp;quot;Collection created.&amp;quot;);
+      callback();
+    }
+  );
+};
+  
+&lt;/code&gt;&lt;/pre&gt;
 </description>
     </item>
     
@@ -2388,6 +2569,186 @@ MongoClient.connect(&#39;mongodb://server:27017/test?ssl=true&#39;, {
     </item>
     
     <item>
+      <title>Aggregation</title>
+      <link>/node-mongodb-native/2.2/tutorials/aggregation/</link>
+      <pubDate>Wed, 18 Mar 2015 21:14:20 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/2.2/tutorials/aggregation/</guid>
+      <description>
+
+&lt;h1 id=&#34;aggregation&#34;&gt;Aggregation&lt;/h1&gt;
+
+&lt;h2 id=&#34;overview&#34;&gt;Overview&lt;/h2&gt;
+
+&lt;p&gt;Aggregation operations process data records and return
+computed results. Aggregation operations group values from
+multiple documents together, and can perform a variety of
+operations on the grouped data to return a single result.&lt;/p&gt;
+
+&lt;h2 id=&#34;the-aggregation-pipeline&#34;&gt;The Aggregation Pipeline&lt;/h2&gt;
+
+&lt;p&gt;The aggregation pipeline is a framework for data aggregation
+modeled on the concept of data processing pipelines. Documents
+enter a multi-stage pipeline that transforms the documents into
+aggregated results.&lt;/p&gt;
+
+&lt;p&gt;For a full explanation and a complete list of pipeline stages
+and operators, see the
+&lt;a href=&#34;https://docs.mongodb.com/manual/core/aggregation-pipeline/&#34;&gt;manual:&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;The following example uses the aggregation pipeline on the
+&lt;code&gt;restaurants&lt;/code&gt; sample dataset to find
+a list of the total number of 5-star restaurants, grouped by restaurant
+category.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+var url = &#39;mongodb://localhost:27017/test&#39;;
+
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  simplePipeline(db, function() {
+    db.close();
+  });
+});
+
+var simplePipeline = function(db, callback) {
+  var collection = db.collection( &#39;restaurants&#39; );
+  collection.aggregate( 
+      [ { &#39;$match&#39;: { &amp;quot;stars&amp;quot;: 5 } },
+        { &#39;$unwind&#39;: &#39;$categories&#39;},
+        { &#39;$group&#39;: { &#39;_id&#39;: &amp;quot;$categories&amp;quot;, &#39;fiveStars&#39;: { &#39;$sum&#39;: 1 } } }		
+      ],	  
+	  function(err, results) {
+        assert.equal(err, null);
+
+        console.log(results)
+        callback(results);
+      }
+  );
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;Inside the &lt;code&gt;aggregate&lt;/code&gt; method, the first pipeline stage filters out
+all documents except those with &lt;code&gt;5&lt;/code&gt; in the &lt;code&gt;stars&lt;/code&gt; field. The
+second stage unwinds the &lt;code&gt;categories&lt;/code&gt; field, which is an array, and
+treats each item in the array as a separate document. The third stage
+groups the documents by category and adds up the number of matching
+5-star results.&lt;/p&gt;
+
+&lt;h2 id=&#34;single-purpose-aggregation-operations&#34;&gt;Single Purpose Aggregation Operations&lt;/h2&gt;
+
+&lt;p&gt;MongoDB provides helper methods for some aggregation functions,
+including &lt;a href=&#34;https://docs.mongodb.com/manual/reference/command/count/&#34;&gt;&lt;code&gt;count&lt;/code&gt;&lt;/a&gt;,
+&lt;a href=&#34;https://docs.mongodb.com/manual/reference/command/group/&#34;&gt;&lt;code&gt;group&lt;/code&gt;&lt;/a&gt;,
+and &lt;a href=&#34;https://docs.mongodb.com/manual/reference/command/distinct/&#34;&gt;&lt;code&gt;distinct&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+
+&lt;h3 id=&#34;count&#34;&gt;Count&lt;/h3&gt;
+
+&lt;p&gt;The following example demonstrates how to use the &lt;code&gt;count&lt;/code&gt; method to
+find the total number of documents which have the exact array
+&lt;code&gt;[ &#39;Chinese&#39;, &#39;Seafood&#39; ]&lt;/code&gt; in the &lt;code&gt;categories&lt;/code&gt; field.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+var url = &#39;mongodb://localhost:27017/test&#39;;
+
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  simpleCount(db, function() {
+    db.close();
+  });
+});
+
+var simpleCount = function(db, callback) {
+  var collection = db.collection( &#39;restaurants&#39; );
+  collection.count({ &#39;categories&#39;: [ &#39;Chinese&#39;, &#39;Seafood&#39; ] },	  
+	  function(err, result) {
+        assert.equal(err, null);
+        console.log(result)
+        callback(result);
+      }
+  );
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;group&#34;&gt;Group&lt;/h3&gt;
+
+&lt;p&gt;The following example uses the &lt;code&gt;group&lt;/code&gt; method with four
+arguments:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;an array of fields to group by&lt;/li&gt;
+&lt;li&gt;a document with conditions for filterings&lt;/li&gt;
+&lt;li&gt;an initial results document&lt;/li&gt;
+&lt;li&gt;a reduce function&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;p&gt;The example groups the results by number of stars where the &lt;code&gt;categories&lt;/code&gt;
+array is &lt;code&gt;[&#39;Peruvian&#39;]&lt;/code&gt;.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+var url = &#39;mongodb://localhost:27017/test&#39;;
+
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  simpleGroup(db, function() {
+    db.close();
+  });
+});
+
+var simpleGroup = function(db, callback) {
+    var collection = db.collection( &#39;restaurants&#39; );
+    collection.group( [&#39;stars&#39;], 
+                      { &#39;categories&#39;: [&#39;Peruvian&#39;] }, 
+                      { &#39;total&#39;: 0 },
+                      &amp;quot;function ( curr, result ) { result.total++ }&amp;quot;,  
+	  
+      function(err, result) {
+        assert.equal(err, null);
+        console.log(result)
+        callback(result);
+      }
+  );
+}
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;h3 id=&#34;distinct&#34;&gt;Distinct&lt;/h3&gt;
+
+&lt;p&gt;The &lt;code&gt;distinct&lt;/code&gt; helper method eliminates results which contain
+values and returns one record for each unique value.&lt;/p&gt;
+
+&lt;p&gt;The following example returns a list of unique values for the
+&lt;code&gt;categories&lt;/code&gt; field in the &lt;code&gt;restaurants&lt;/code&gt; collection:&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
+  , assert = require(&#39;assert&#39;);
+var url = &#39;mongodb://localhost:27017/test&#39;;
+
+MongoClient.connect(url, function(err, db) {
+  assert.equal(null, err);
+  simpleDistinct(db, function() {
+    db.close();
+  });
+});
+
+var simpleDistinct = function(db, callback) {
+	var collection = db.collection( &#39;restaurants&#39; );
+    collection.distinct( &#39;categories&#39;, 
+	  
+	  function(err, result) {
+        assert.equal(err, null);
+        console.log(result)
+        callback(result);
+      }
+  );
+}
+&lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
+    
+    <item>
       <title>Create Indexes</title>
       <link>/node-mongodb-native/2.2/tutorials/create-indexes/</link>
       <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
@@ -2613,6 +2974,12 @@ var createPartialIndex = function(db, callback) {
 &lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/connect/&#34;&gt;Connect to MongoDB&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/crud/&#34;&gt;CRUD Operations&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/collections/&#34;&gt;Collections&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/projections/&#34;&gt;Projections&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/aggregation/&#34;&gt;Aggregation&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/create-indexes/&#34;&gt;Create Indexes&lt;/a&gt;&lt;/p&gt;
 

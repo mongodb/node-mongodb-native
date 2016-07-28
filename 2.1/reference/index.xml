@@ -887,8 +887,6 @@ MongoClient.connect(url, {
 
 &lt;h1 id=&#34;what-is-the-difference-between-connecttimeoutms-sockettimeoutms-and-maxtimems&#34;&gt;What is the difference between connectTimeoutMS, socketTimeoutMS and maxTimeMS ?&lt;/h1&gt;
 
-&lt;p&gt;A lof of people run into a similar issue wich is what is the difference between &lt;code&gt;connectTimeoutMS&lt;/code&gt;, &lt;code&gt;socketTimeoutMS&lt;/code&gt; and &lt;code&gt;maxTimeMS&lt;/code&gt; and what values should be used for the different ones. Let&amp;rsquo;s first explain each setting individually setting before discussing the values they should be set to.&lt;/p&gt;
-
 &lt;table&gt;
 &lt;thead&gt;
 &lt;tr&gt;
@@ -902,59 +900,92 @@ MongoClient.connect(url, {
 &lt;tr&gt;
 &lt;td align=&#34;left&#34;&gt;connectTimeoutMS&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;30000&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The connectTimeoutMS sets the number of milliseconds a socket will stay inactive before closing during the connection phase of the driver. That is to say when the application initiates a connection or when a Replicaset conntects to new members or re-connect to new members. A value of &lt;code&gt;10000&lt;/code&gt; milliseconds would mean the driver would wait up to 10 seconds for a response from a MongoDB server.&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;The connectTimeoutMS sets the number of milliseconds a socket stays inactive before closing during the connection phase of the driver. That is to say, when the application initiates a connection, when a replica set connects to new members, or when a replica set reconnects to members. A value of 10000 milliseconds would mean the driver would wait up to 10 seconds for a response from a MongoDB server.&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
 &lt;td align=&#34;left&#34;&gt;socketTimeoutMS&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;30000&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The socketTimeoutMS sets the number of milliseconds a socket will stay inactive after the driver has successfully connected before closing. That is to say that if the value was set to &lt;code&gt;30000&lt;/code&gt; milliseconds the socket would close if there was no activity during a 30 seconds window.&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;The socketTimeoutMS sets the number of milliseconds a socket stays inactive after the driver has successfully connected before closing. If the value is set to 30000 milliseconds, the socket closes if there is no activity during a 30 seconds window.&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
 &lt;td align=&#34;left&#34;&gt;maxTimeMS&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;N/A&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;The maxTimeMS setting specifies how long MongoDB should run an operation before cancelling it. If you set the the maxTimeMS to &lt;code&gt;10000&lt;/code&gt; milliseconds, any operation that ran over that limit would return an timeout error&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;The maxTimeMS setting specifies how long MongoDB should run an operation before cancelling it. If the maxTimeMS is set to 10000 milliseconds, any operation that runs over that limit returns a timeout error.&lt;/td&gt;
 &lt;/tr&gt;
 &lt;/tbody&gt;
 &lt;/table&gt;
 
-&lt;p&gt;Now let&amp;rsquo;s look at how the different settings affect your experience of using the driver using some example scenarios and what resonable values might be for the settings outlined.&lt;/p&gt;
-
 &lt;h4 id=&#34;fail-fast-during-connection&#34;&gt;Fail fast during connection&lt;/h4&gt;
 
-&lt;p&gt;We want to ensure that the driver does not hang during the connection phase or spend an unnecessarily long time attempting to connect to Replicaset members who are not reachable.&lt;/p&gt;
+&lt;p&gt;In this scenario, the developer wants to ensure that the driver does not
+hang during the connection phase or spend an unnecessarily long time
+attempting to connect to replica set members who are not reachable.&lt;/p&gt;
 
-&lt;p&gt;As a general rule you need to ensure that the &lt;code&gt;connectTimeoutMS&lt;/code&gt; setting is not lower than the largest network latency you have to a member of the set. Say one of the &lt;code&gt;secondary&lt;/code&gt; members is on the other side of the planet and has a latency of &lt;code&gt;10000&lt;/code&gt; milliseconds setting the &lt;code&gt;connectTimeoutMS&lt;/code&gt; to anything lower will ensure the driver can never correctly connect to that member.&lt;/p&gt;
+&lt;p&gt;As a general rule you should ensure that the &lt;code&gt;connectTimeoutMS&lt;/code&gt; setting
+is not lower than the longest network latency you have to a member of
+the set. If one of the &lt;code&gt;secondary&lt;/code&gt; members is on the other side of the
+planet and has a latency of 10000 milliseconds, setting the
+&lt;code&gt;connectTimeoutMS&lt;/code&gt; to anything lower will prevent the driver from ever
+connecting to that member.&lt;/p&gt;
 
 &lt;h3 id=&#34;sockettimeoutms-as-a-way-to-abort-operations&#34;&gt;socketTimeoutMS as a way to abort operations&lt;/h3&gt;
 
-&lt;p&gt;One of the main ways people use socketTimeoutMS is to abort operations. This is in general a very bad idea. And there are a couple of reasons.&lt;/p&gt;
+&lt;p&gt;Developers sometimes try to use &lt;code&gt;socketTimeoutMS&lt;/code&gt;
+to end operations which may run for too long and slow
+down the application, but doing so may not achieve the intended result.&lt;/p&gt;
 
-&lt;ol&gt;
-&lt;li&gt;Closing the socket, will force a reconnect of the connection pool of the driver and introduce latency to any other operations queued up. Chronically slow operations will thus cause a reconnect storm impacting throughput and performance.&lt;/li&gt;
-&lt;li&gt;Closing the socket does not terminate the operation, it will still be running on MongoDB. This could cause data inconsistencies if your application retries the operation on failure for example.&lt;/li&gt;
-&lt;/ol&gt;
+&lt;p&gt;Closing the socket forces a reconnect of the driver&amp;rsquo;s connection pool
+and introduces latency to any other operations which are queued up.
+Chronically slow operations will therefore cause a large number of
+reconnect requests, negatively impacting throughput and performance.&lt;/p&gt;
 
-&lt;p&gt;That said the there is a very important usage for &lt;code&gt;socketTimeoutMS&lt;/code&gt;. If the MongoDB process dies or a misconfigured &lt;code&gt;firewall&lt;/code&gt; closes socket connections without sending a &lt;code&gt;FIN&lt;/code&gt; packet dropping all subsequent packets on the floor there is no way for the driver to detect if the connection has died. In this case the socketTimeoutMS is essential to ensure the sockets are closed correctly.&lt;/p&gt;
+&lt;p&gt;Also, closing the socket does not terminate the operation; it will continue
+to run on the MongoDB server, which could cause data inconsistencies
+if the application retries the operation on failure.&lt;/p&gt;
 
-&lt;p&gt;A general rule of thumb is to set &lt;code&gt;socketTimeoutMS&lt;/code&gt; to &lt;code&gt;2-3x&lt;/code&gt; the time of the slowest operation run through the driver.&lt;/p&gt;
+&lt;p&gt;That said, there are some important use cases for &lt;code&gt;socketTimeoutMS&lt;/code&gt;. It&amp;rsquo;s
+possible that a MongoDB process may error out, or that a misconfigured
+firewall may close a socket connection without sending a &lt;code&gt;FIN&lt;/code&gt; packet.
+In these cases there is no way for the driver to detect that the
+connection has died, and &lt;code&gt;socketTimeoutMS&lt;/code&gt; is essential to ensure that the
+sockets are closed correctly.&lt;/p&gt;
 
-&lt;h3 id=&#34;sockettimeoutms-and-big-connection-pools&#34;&gt;socketTimeoutMS and big connection pools&lt;/h3&gt;
+&lt;p&gt;A good rule of thumb is to set &lt;code&gt;socketTimeoutMS&lt;/code&gt; to two to three times the
+length of the slowest operation which runs through the driver.&lt;/p&gt;
 
-&lt;p&gt;One of the gotchas around socketTimeoutMS and a big pool seems to be experienced by a lot of people. Say you are performing a backend batch operation and storing the data in MongoDB. You &lt;code&gt;pool&lt;/code&gt; size if 5 sockets and you have set &lt;code&gt;socketTimeoutMS&lt;/code&gt; to &lt;code&gt;5000&lt;/code&gt; milliseconds. You have an operation happening on average every &lt;code&gt;3000&lt;/code&gt; milliseconds. You still get constant reconnects. Why ?&lt;/p&gt;
+&lt;h3 id=&#34;sockettimeoutms-and-large-connection-pools&#34;&gt;socketTimeoutMS and large connection pools&lt;/h3&gt;
 
-&lt;p&gt;Well each socket will timeout after &lt;code&gt;5000&lt;/code&gt; milliseconds. That means that all sockets must be exercised during that &lt;code&gt;5000&lt;/code&gt; milliseconds period to avoid them closing. One message every &lt;code&gt;3000&lt;/code&gt; milliseconds is not enough to keep the sockets active, meaning several of the sockets will timeout after &lt;code&gt;5000&lt;/code&gt; milliseconds.&lt;/p&gt;
+&lt;p&gt;Having a large connection pool does not always reduce reconnection
+requests. Consider the following example: an application has
+a connection pool size of 5 sockets and has &lt;code&gt;socketTimeoutMS&lt;/code&gt; set
+to 5000 milliseconds. Operations occur, on average, every 3000
+milliseconds, and reconnection requests are frequent.
+Each socket times out after 5000 milliseconds, which means that all
+sockets must do something during that 5000 millisecond period to
+avoid closing. One message every 3000 milliseconds is not enough to
+keep the sockets active, so several of the sockets will time out
+after 5000 milliseconds.&lt;/p&gt;
 
-&lt;p&gt;In this case you should reduce the pool size to &lt;code&gt;1&lt;/code&gt; to get the desired effect.&lt;/p&gt;
+&lt;p&gt;Reducing the pool size to 1 will fix the problem.&lt;/p&gt;
 
 &lt;h3 id=&#34;the-special-meaning-of-0&#34;&gt;The special meaning of 0&lt;/h3&gt;
 
-&lt;p&gt;Setting &lt;code&gt;connectTimeoutMS&lt;/code&gt; and &lt;code&gt;socketTimeoutMS&lt;/code&gt; to the value &lt;code&gt;0&lt;/code&gt; has a special meaning. On the face of it, it means never timeout. However this is a truth with some modifications. Setting it to &lt;code&gt;0&lt;/code&gt; actually means apply the operating system default socket timeout value.&lt;/p&gt;
+&lt;p&gt;Setting &lt;code&gt;connectTimeoutMS&lt;/code&gt; and &lt;code&gt;socketTimeoutMS&lt;/code&gt; to the value 0 has
+a special meaning. It causes the application to use the operating
+system&amp;rsquo;s default socket timeout value.&lt;/p&gt;
 
 &lt;h3 id=&#34;maxtimems-is-the-option-you-are-looking-for&#34;&gt;maxTimeMS is the option you are looking for&lt;/h3&gt;
 
-&lt;p&gt;Most people try to set a low &lt;code&gt;socketTimeoutMS&lt;/code&gt; value to abort server operations. As we have proved above this does not work. To work correctly you want to use the &lt;code&gt;maxTimeMS&lt;/code&gt; setting on server operations. This will make MongoDB itself abort the operation if it runs for more than &lt;code&gt;maxTimeMS&lt;/code&gt; milliseconds. A simple example is below performing a &lt;code&gt;find&lt;/code&gt; operation.&lt;/p&gt;
+&lt;p&gt;Many developers set a low &lt;code&gt;socketTimeoutMS&lt;/code&gt; value, intending
+to prevent long-running server operations from slowing down
+the application. &lt;code&gt;maxTimeMS&lt;/code&gt; is usually a better choice; it allows
+MongoDB itself to cancel operations which run for more than &lt;code&gt;maxTimeMS&lt;/code&gt;
+milliseconds.&lt;/p&gt;
+
+&lt;p&gt;The following example demonstrates how to use &lt;code&gt;MaxTimeMS&lt;/code&gt; with a &lt;code&gt;find&lt;/code&gt;
+operation.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;// Execute a find command
 col.find({&amp;quot;$where&amp;quot;: &amp;quot;sleep(100) || true&amp;quot;})
@@ -963,24 +994,30 @@ col.find({&amp;quot;$where&amp;quot;: &amp;quot;sleep(100) || true&amp;quot;})
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;h3 id=&#34;what-does-the-keepalive-setting-do&#34;&gt;What does the keepAlive setting do ?&lt;/h3&gt;
+&lt;h3 id=&#34;what-does-the-keepalive-setting-do&#34;&gt;What does the keepAlive setting do?&lt;/h3&gt;
 
-&lt;p&gt;Keep alive is a setting on the sockets available from Node.js that in theory will keep a socket alive by sending probes every once in a while to MongoDB keeping the connection alive.&lt;/p&gt;
-
-&lt;p&gt;However this only works if the operating system supports &lt;code&gt;SO_KEEPALIVE&lt;/code&gt; and might still not solve the issue of firewalls as they might still ignore or drop these packets meaning it has no effect.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;keepAlive&lt;/code&gt; is a socket setting available from Node.js that in theory
+will keep a socket alive by sending periodic probes to MongoDB.
+However, this only works if the operating system supports
+&lt;code&gt;SO_KEEPALIVE&lt;/code&gt;, and still might not work if a firewalls
+ignores or drops the &lt;code&gt;keepAlive&lt;/code&gt; packets.&lt;/p&gt;
 
 &lt;h3 id=&#34;on-misconfigured-firewalls&#34;&gt;On misconfigured firewalls&lt;/h3&gt;
 
-&lt;p&gt;Internal firewalls in between applications servers and MongoDB are in many cases misconfigured, being to aggressive in their culling of sockets connections. Many a problem have been diagnosed to a misconfiguration in a firewall between a DMC and internal MongoDB databases. If you are experiencing weird behavior it might be wise to investigate the settings on said firewall. Things to check for are.&lt;/p&gt;
+&lt;p&gt;Internal firewalls which exist between application servers and MongoDB
+are often misconfigured, and are overly aggressive in their culling of
+socket connections. If you experience unexpected network behavior, here
+are some things to check:&lt;/p&gt;
 
 &lt;ol&gt;
-&lt;li&gt;The firewall should send a FIN packet when closing a socket allowing the driver to detect the socket as closed.&lt;/li&gt;
-&lt;li&gt;The firewall should allow keepAlive probes to allow for persistent connections.&lt;/li&gt;
+&lt;li&gt;The firewall should send a FIN packet when closing a socket,
+allowing the driver to detect that the socket is closed.&lt;/li&gt;
+&lt;li&gt;The firewall should allow keepAlive probes.&lt;/li&gt;
 &lt;/ol&gt;
 
 &lt;h1 id=&#34;i-m-getting-econnreset-when-calling-mongoclient-connect&#34;&gt;I&amp;rsquo;m getting ECONNRESET when calling MongoClient.connect&lt;/h1&gt;
 
-&lt;p&gt;You might have decided to use a big connection pool with your node project.&lt;/p&gt;
+&lt;p&gt;This can occur if the connection pool is too large.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;MongoClient.connect(&#39;mongodb://localhost:27017/test?maxPoolSize=5000&#39;,
   function(err, db) {
@@ -988,32 +1025,24 @@ col.find({&amp;quot;$where&amp;quot;: &amp;quot;sleep(100) || true&amp;quot;})
   });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;When executing the operation you receive an error containg the &lt;code&gt;ECONNRESET&lt;/code&gt; message. You have run into the file descriptor limit for your node.js process.&lt;/p&gt;
+&lt;p&gt;If this operation causes an &lt;code&gt;ECONNRESET&lt;/code&gt; error, you may have run into
+the file descriptor limit for your Node.js process.&lt;/p&gt;
 
-&lt;p&gt;In most operating systems each socket connection is associated with a file descriptor. Many operating systems have a limit on how many such file descriptors can be used by a single process.&lt;/p&gt;
+&lt;p&gt;In most operating systems, each socket connection is associated with a
+file descriptor. Many operating systems have a limit on how many such
+file descriptors can be used by a single process.&lt;/p&gt;
 
-&lt;p&gt;For the example above let&amp;rsquo;s assume the limit of file descriptors for each process is &lt;code&gt;1000&lt;/code&gt;. Once the driver attempts to open it&amp;rsquo;s &lt;code&gt;1001&lt;/code&gt; socket the operating system returns an error as the process has exceeded the maximum file descriptors allowed for a single process.&lt;/p&gt;
-
-&lt;p&gt;The way to fix this issue is to increase the number of file descriptors for the Node.js process. On OSX and Linux you do this using the &lt;code&gt;ulimit&lt;/code&gt; method.&lt;/p&gt;
+&lt;p&gt;The way to fix the descriptor limit issue is to increase the number of
+file descriptors for the Node.js process. On Mac OS and Linux you do
+this with the &lt;code&gt;ulimit&lt;/code&gt; shell command.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code&gt;ulimit -n 6000
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The command above will set the maximum number of file descriptors for the process to &lt;code&gt;6000&lt;/code&gt; descriptors allowing us to correctly connect with a pool size of &lt;code&gt;5000&lt;/code&gt; sockets.&lt;/p&gt;
+&lt;p&gt;This sets the maximum number of file descriptors for the process to
+6000, allowing Node.js to connect with a pool size of 5000 sockets.&lt;/p&gt;
 
-&lt;h1 id=&#34;how-can-i-avoid-a-very-slow-operation-delaying-other-operations&#34;&gt;How can I avoid a very slow operation delaying other operations ?&lt;/h1&gt;
-
-&lt;p&gt;You have an operation that takes a fair bit of time to execute. As you execute them you find that other fast operations are affected due to the round-robin nature of the driver pool in the end leaving all the fast operations trapped behind slow executing operations.&lt;/p&gt;
-
-&lt;p&gt;You have run into the &lt;code&gt;Slow Train&lt;/code&gt; problem. It&amp;rsquo;s tied to the fact that although the driver is Async, MongoDB is not. MongoDB as of 3.2 uses a single execution thread per socket. This means that it will only execute a single operation on a socket at any given point in time. Any operations sent to that socket will have to wait until the current operation is finished. This causes a slow train effect.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code&gt;Socket 1 &amp;lt;- [S, F, F, F]
-Socket 2 &amp;lt;- [S, F, F, F]
-...
-Socket N &amp;lt;- [S, F, F, F]
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;Unfortunately until MongoDB starts multiplexing threads on sockets or becomes an asynchronous there is only one reasonable strategy to avoid this problem.&lt;/p&gt;
+&lt;h1 id=&#34;how-can-i-prevent-a-slow-operation-from-delaying-other-operations&#34;&gt;How can I prevent a slow operation from delaying other operations?&lt;/h1&gt;
 
 &lt;p&gt;&lt;div class=&#34;admonition note&#34;&gt;
 &lt;h5 class=&#34;admonition-title&#34;&gt;Note&lt;/h5&gt;
@@ -1022,7 +1051,11 @@ Socket N &amp;lt;- [S, F, F, F]
 &lt;/div&gt;
 &lt;/p&gt;
 
-&lt;h1 id=&#34;ensure-you-connection-string-is-valid-for-replica-set&#34;&gt;Ensure you connection string is valid for Replica Set&lt;/h1&gt;
+&lt;p&gt;While Node.js is asynchronous, MongoDB is not. Currently, MongoDB uses a single execution thread per socket. This means that it will only execute a single operation on a socket at any given point in time. Any other operations sent to that socket will have to wait until the current operation is finished. If you have a slow-running operation which holds up other operations,
+the best solution is to create a separate connection pool for the slow operation, isolating it from other, faster
+operations.&lt;/p&gt;
+
+&lt;h1 id=&#34;ensure-your-connection-string-is-valid-for-replica-set&#34;&gt;Ensure your connection string is valid for Replica Set&lt;/h1&gt;
 
 &lt;p&gt;The connection string passed to the driver must use the fully qualified host names for the servers as set in the replicaset config. Given the following configuration settings for your replicaset.&lt;/p&gt;
 
@@ -1788,11 +1821,16 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
 
 &lt;h1 id=&#34;apm&#34;&gt;APM&lt;/h1&gt;
 
-&lt;p&gt;Application Performance Monitoring support is a driver feature that allows monitoring services to hook into the driver in a forward compatible and stable way. The API is not applied to the driver unless explicitly initialized to avoid any performance penalties.&lt;/p&gt;
+&lt;p&gt;Application Performance Monitoring support is a driver
+feature that allows monitoring services to hook into the
+driver in a forward compatible and stable way. The API is
+not applied to the driver unless explicitly initialized to
+avoid any performance penalties.&lt;/p&gt;
 
 &lt;h2 id=&#34;api&#34;&gt;API&lt;/h2&gt;
 
-&lt;p&gt;Let&amp;rsquo;s look at a code example that hooks into all the available features of the APM API.&lt;/p&gt;
+&lt;p&gt;The following code example hooks into all the available features
+of the APM API.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var listener = require(&#39;mongodb&#39;).instrument({
   operationIdGenerator: {
@@ -1836,9 +1874,9 @@ listener.on(&#39;failed&#39;, function(event) {
 
 &lt;p&gt;Command monitoring is based on the cross-driver specification for MongoDB found in the Command monitoring &lt;a href=&#34;https://github.com/mongodb/specifications/blob/master/source/command-monitoring/command-monitoring.rst&#34;&gt;specification&lt;/a&gt;.&lt;/p&gt;
 
-&lt;p&gt;The Command monitoring specification is a low level monitoring specification that tells you when a new command is being executed against MongoDb and if it fails or succeeds. For most cases this is straight forward and you will receive a single start and either a success or failure event. Let&amp;rsquo;s look at an example.&lt;/p&gt;
+&lt;p&gt;The Command monitoring specification is a low-level monitoring specification that sends a notification when a new command is executed against MongoDB and if it fails or succeeds. In most cases this is straightforward and you will receive a single start and either a success or failure event.&lt;/p&gt;
 
-&lt;p&gt;The user executes an &lt;code&gt;isMaster&lt;/code&gt; command against the server and we receive the following to messages (full objects are abbreviated to simplicities sake.). When the &lt;code&gt;isMaster&lt;/code&gt; command starts execution we receive the following event (This result is from &lt;code&gt;JSON.stringify&lt;/code&gt;, in the real event the connectionId is the actual connection object the command was executed against).&lt;/p&gt;
+&lt;p&gt;In this example, the user executes the &lt;code&gt;isMaster&lt;/code&gt; command against the server and receives the following messages (full objects are abbreviated for simplicity&amp;rsquo;s sake). When the &lt;code&gt;isMaster&lt;/code&gt; command starts execution we receive the following event (this result is from &lt;code&gt;JSON.stringify&lt;/code&gt;; in the real event the connectionId is the actual connection object the command was executed against).&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{
   &amp;quot;command&amp;quot;: {
@@ -1856,9 +1894,11 @@ listener.on(&#39;failed&#39;, function(event) {
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Let&amp;rsquo;s look at the the &lt;code&gt;requestId&lt;/code&gt; and &lt;code&gt;operationId&lt;/code&gt;. The &lt;code&gt;requestId&lt;/code&gt; is the id used for the wire protocol message sent to MongoDB and allows you to correlate the commands executed on MongoDB with the commands from the driver.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;requestId&lt;/code&gt; is the id used for the wire protocol message sent to MongoDB and allows you to correlate the commands executed on MongoDB with the commands from the driver.&lt;/p&gt;
 
-&lt;p&gt;The &lt;code&gt;operationId&lt;/code&gt; is an id that is used to group commands into a single logical command execution. The use case are queries and batch writes where a single logical operation might be executed as multiple commands to the server. For a query this might mean it gets executed as a &lt;code&gt;find&lt;/code&gt; command and &lt;em&gt;n&lt;/em&gt; number of &lt;code&gt;getMore&lt;/code&gt; commands as well as a &lt;code&gt;killCursors&lt;/code&gt; command. For bulk writes the logical grouping might contain &lt;code&gt;n&lt;/code&gt; individual write operations. The goal of &lt;code&gt;operationId&lt;/code&gt; is to allow APM providers to correlate the breakdown of a cursor or bulk operation with the method called by the user. The typical example is.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;operationId&lt;/code&gt; is an id that is used to group commands into a single logical command execution. Use cases are queries and batch writes where a single logical operation might be executed as multiple commands to the server. For a query this might mean it gets executed as a &lt;code&gt;find&lt;/code&gt; command and &lt;em&gt;n&lt;/em&gt; number of &lt;code&gt;getMore&lt;/code&gt; commands as well as a &lt;code&gt;killCursors&lt;/code&gt; command. For bulk writes the logical grouping might contain &lt;code&gt;n&lt;/code&gt; individual write operations. The goal of &lt;code&gt;operationId&lt;/code&gt; is to allow APM providers to correlate the breakdown of a cursor or bulk operation with the method called by the user.&lt;/p&gt;
+
+&lt;p&gt;A typical example:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;db.collection(&#39;data&#39;).find().batchSize(2).toArray(function(err, docs) {
 });
@@ -1866,7 +1906,7 @@ listener.on(&#39;failed&#39;, function(event) {
 
 &lt;p&gt;That might be translated to &lt;code&gt;1&lt;/code&gt; find, &lt;code&gt;n&lt;/code&gt; getMores and &lt;code&gt;0|1&lt;/code&gt; killCursors.&lt;/p&gt;
 
-&lt;p&gt;After the command executed successfully we receive the following result.&lt;/p&gt;
+&lt;p&gt;After the command executed successfully it sends the following result:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{
   &amp;quot;duration&amp;quot;: 0,
@@ -1891,7 +1931,9 @@ listener.on(&#39;failed&#39;, function(event) {
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Notice that the &lt;code&gt;requestId&lt;/code&gt; and &lt;code&gt;operationId&lt;/code&gt; matches up to the start message allowing the user of the API to correlated the two events. Next let&amp;rsquo;s look at a complete &lt;code&gt;find&lt;/code&gt; operation that results in &lt;code&gt;getMores&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Notice that the &lt;code&gt;requestId&lt;/code&gt; and &lt;code&gt;operationId&lt;/code&gt; match up to the start message, allowing the user of the API to correlate the two events.&lt;/p&gt;
+
+&lt;p&gt;The next example shows a complete &lt;code&gt;find&lt;/code&gt; operation that results in multiple &lt;code&gt;getMore&lt;/code&gt; responses.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{
   &amp;quot;command&amp;quot;: {
@@ -2022,11 +2064,20 @@ listener.on(&#39;failed&#39;, function(event) {
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The main thing to notice here is that they all share the same &lt;code&gt;operationId&lt;/code&gt; allowing the APM API user to correctly map the low level commands to the logical command executed by the user (in this case &lt;code&gt;toArray&lt;/code&gt; on a cursor).&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; all the documents share the same &lt;code&gt;operationId&lt;/code&gt;, allowing the
+APM API user to correctly map the low level commands to the logical
+command executed by the user (in this case &lt;code&gt;toArray&lt;/code&gt; on a cursor).&lt;/p&gt;
 
 &lt;h3 id=&#34;operationidgenerator&#34;&gt;operationIdGenerator&lt;/h3&gt;
 
-&lt;p&gt;The &lt;code&gt;operationIdGenerator&lt;/code&gt; option allows the API user to pass in a custom &lt;code&gt;operationId&lt;/code&gt; generator object that can be used to synchronize internal request Id&amp;rsquo;s in the APM client with the low level command monitoring API. This makes it possible to tie together the logical method called by the users code with the low level commands issues to MongoDB potentially allowing for a richer APM experience and performance breakdown. Below is a simple &lt;code&gt;operationIdGenerator&lt;/code&gt; example.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;operationIdGenerator&lt;/code&gt; option allows the API user to pass in a
+custom &lt;code&gt;operationId&lt;/code&gt; generator object. You can use this object to
+synchronize internal request IDs in the APM client with the low-level
+command monitoring API. This synchronization makes it possible to
+associate the logical method called by the user&amp;rsquo;s code with the
+low-level commands issued to MongoDB. This allows for a richer
+APM experience and performance breakdown. Below is a simple
+&lt;code&gt;operationIdGenerator&lt;/code&gt; example.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var generator = {
   operationId: 1,
@@ -2039,7 +2090,11 @@ listener.on(&#39;failed&#39;, function(event) {
 
 &lt;h3 id=&#34;timestampgenerator&#34;&gt;timestampGenerator&lt;/h3&gt;
 
-&lt;p&gt;The &lt;code&gt;timestampGenerator&lt;/code&gt; option lets the API user override the method used to timestamp the command monitoring events with a custom timestamp type. The generator contains two method. The first one &lt;code&gt;current&lt;/code&gt; returns the current &lt;code&gt;timestamp&lt;/code&gt; and &lt;code&gt;duration&lt;/code&gt; calculates the total operation duration between the &lt;code&gt;start&lt;/code&gt; and &lt;code&gt;end&lt;/code&gt; time. Below is a simple example generator.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;timestampGenerator&lt;/code&gt; option lets the API user to override the method
+used to timestamp the command monitoring events with a custom timestamp
+type. The generator contains two methods. &lt;code&gt;current&lt;/code&gt; returns the current
+timestamp&lt;code&gt;and&lt;/code&gt;duration&lt;code&gt;calculates the total operation duration
+between the&lt;/code&gt;start&lt;code&gt;and&lt;/code&gt;end` time. Below is a simple generator example.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var generator = {
   current: function() {
@@ -2054,7 +2109,9 @@ listener.on(&#39;failed&#39;, function(event) {
 
 &lt;h2 id=&#34;instrumentation&#34;&gt;Instrumentation&lt;/h2&gt;
 
-&lt;p&gt;The instrumentation callback returns the instrumentation points in the driver and it&amp;rsquo;s associated metadata. Let&amp;rsquo;s look at one of the examples. Notice that the result shown is the result from performing &lt;code&gt;JSON.stringify&lt;/code&gt;. We will note where there are actual object instances.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;instrumentation&lt;/code&gt; callback returns the instrumentation points in
+the driver and associated metadata. In the following example, the
+result shown is the result from performing &lt;code&gt;JSON.stringify&lt;/code&gt;.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{
   &amp;quot;name&amp;quot;: &amp;quot;Gridstore&amp;quot;,
@@ -2144,9 +2201,15 @@ listener.on(&#39;failed&#39;, function(event) {
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;At the top level we have &lt;code&gt;name&lt;/code&gt; of the class exposed for instrumentation. Next we have the &lt;code&gt;stream&lt;/code&gt; value that tells the user if the object can operate as a node.js stream. Next the &lt;code&gt;instrumentations&lt;/code&gt; array contains all the methods available for instrumentation. The methods are grouped by the method characteristics. All methods that support a callback as well as a promise will be grouped in a single instrumentation. This simplifies the code to perform the actual instrumentation.&lt;/p&gt;
-
-&lt;p&gt;Let&amp;rsquo;s look at an example instrumentation in more detail.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;name&lt;/code&gt; the name of the class exposed for instrumentation.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;stream&lt;/code&gt; tells the user if the object can operate as a Node.js stream.&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;instrumentations&lt;/code&gt; an array which contains all the methods available
+for instrumentation. The methods are grouped
+by method characteristics. All methods that support a callback as well
+as a promise will be grouped in a single instrumentation. This
+simplifies the code to perform the actual instrumentation.&lt;/li&gt;
+&lt;/ul&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;{
   &amp;quot;methods&amp;quot;: [
@@ -2170,7 +2233,9 @@ listener.on(&#39;failed&#39;, function(event) {
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The &lt;code&gt;methods&lt;/code&gt; array contains all the methods that have the options &lt;code&gt;callback=true&lt;/code&gt; and &lt;code&gt;promise=true&lt;/code&gt; for the GridStore prototype. The available options are.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;methods&lt;/code&gt; array contains all the methods that have the options
+&lt;code&gt;callback=true&lt;/code&gt; and &lt;code&gt;promise=true&lt;/code&gt; for the GridStore prototype.
+The available options are:&lt;/p&gt;
 
 &lt;table&gt;
 &lt;thead&gt;
@@ -2203,7 +2268,7 @@ listener.on(&#39;failed&#39;, function(event) {
 &lt;/tbody&gt;
 &lt;/table&gt;
 
-&lt;p&gt;Let&amp;rsquo;s look at a very basic instrumentation example.&lt;/p&gt;
+&lt;p&gt;Below is a very basic instrumentation example.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var listener = require(&#39;../..&#39;).instrument(function(err, instrumentations) {
   instrumentations.forEach(function(obj) {
@@ -2241,7 +2306,10 @@ listener.on(&#39;failed&#39;, function(event) {
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This instrumentation only overrides methods that have callbacks and ignores promises, so it&amp;rsquo;s not a complete solution, but shows the way a user of the API can structure their code to tap into the exposed surface of the driver.&lt;/p&gt;
+&lt;p&gt;This instrumentation only overrides methods that have callbacks and
+ignores promises, so it&amp;rsquo;s not a complete solution, but shows how an
+API user can structure code to tap into the exposed surface of the
+driver.&lt;/p&gt;
 </description>
     </item>
     
@@ -2255,7 +2323,11 @@ listener.on(&#39;failed&#39;, function(event) {
 
 &lt;h1 id=&#34;topology-management&#34;&gt;Topology Management&lt;/h1&gt;
 
-&lt;p&gt;The node.js driver &lt;code&gt;2.1.10&lt;/code&gt; or higher introduces the SDAM Monitoring events allowing an application or tool to monitor changes in the drivers view of a single server, replicaset or mongos topology. This allows an application to react to changes such as a secondary joining or leaving a replicaset.&lt;/p&gt;
+&lt;p&gt;The Node.js driver &lt;code&gt;2.1.10&lt;/code&gt; or higher features SDAM Monitoring events,
+allowing an application or tool to monitor changes in the drivers
+view of a single server, replica set or &lt;code&gt;mongos&lt;/code&gt;. This allows an
+application to react to changes of topology, such as a secondary
+joining or leaving a replica set.&lt;/p&gt;
 
 &lt;h2 id=&#34;overview-of-sdam-events&#34;&gt;Overview of SDAM events&lt;/h2&gt;
 
@@ -2327,7 +2399,7 @@ listener.on(&#39;failed&#39;, function(event) {
 
 &lt;h2 id=&#34;simple-code-example&#34;&gt;Simple Code Example&lt;/h2&gt;
 
-&lt;p&gt;Let&amp;rsquo;s look at a simple script that connects to a replicaset and then monitors all the events that are emitted by the replicaset topology.&lt;/p&gt;
+&lt;p&gt;The following example demonstrates how to connect to a replica set and monitor all the events that are emitted by the replica set topology.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient;
 
@@ -2385,7 +2457,7 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;h2 id=&#34;example-documents-returned-for-each-event-type&#34;&gt;Example Documents Returned For Each Event Type&lt;/h2&gt;
 
-&lt;p&gt;The example documents are meant to serve as a guide to the format of the returned documents.&lt;/p&gt;
+&lt;p&gt;The following examples serve as a guide to the format of the returned documents.&lt;/p&gt;
 
 &lt;h3 id=&#34;serverdescriptionchanged&#34;&gt;serverDescriptionChanged&lt;/h3&gt;
 
@@ -2584,7 +2656,7 @@ MongoClient.connect(url, function(err, db) {
 }
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;The &lt;code&gt;type&lt;/code&gt; field in the server array documents can be one of the following values.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;type&lt;/code&gt; field in the server array documents can be one of the following values:&lt;/p&gt;
 
 &lt;table&gt;
 &lt;thead&gt;
@@ -2622,7 +2694,7 @@ MongoClient.connect(url, function(err, db) {
 &lt;/tbody&gt;
 &lt;/table&gt;
 
-&lt;p&gt;The &lt;code&gt;topologyType&lt;/code&gt; field can be one of the following values.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;topologyType&lt;/code&gt; field can be one of the following values:&lt;/p&gt;
 
 &lt;table&gt;
 &lt;thead&gt;
@@ -2635,12 +2707,12 @@ MongoClient.connect(url, function(err, db) {
 &lt;tbody&gt;
 &lt;tr&gt;
 &lt;td align=&#34;left&#34;&gt;ReplicaSetWithPrimary&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Replicaset with a primary&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Replica set with a primary&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
 &lt;td align=&#34;left&#34;&gt;ReplicaSetNoPrimary&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Replicaset with no primary&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Replica set with no primary&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;
@@ -2662,11 +2734,14 @@ MongoClient.connect(url, function(err, db) {
 
 &lt;h1 id=&#34;logging&#34;&gt;Logging&lt;/h1&gt;
 
-&lt;p&gt;The driver lets you log at 3 different levels. These are &lt;code&gt;debug&lt;/code&gt;, &lt;code&gt;info&lt;/code&gt; and &lt;code&gt;error&lt;/code&gt;. By default the log level is at &lt;code&gt;error&lt;/code&gt;. You can change the level, only allow specific classes to log and provide your own logger implementation. Let&amp;rsquo;s look at how we control the log level.&lt;/p&gt;
+&lt;p&gt;You can change the log level, filter on classes to allow only specific classes
+to log, and provide your own logger implementation.&lt;/p&gt;
 
 &lt;h2 id=&#34;setting-log-level&#34;&gt;Setting Log level&lt;/h2&gt;
 
-&lt;p&gt;Setting the log level is pretty easy. Let&amp;rsquo;s look at example of adjusting it for our application only logging the Db class.&lt;/p&gt;
+&lt;p&gt;The driver allows logging at three different levels: &lt;code&gt;debug&lt;/code&gt;,
+&lt;code&gt;info&lt;/code&gt; and &lt;code&gt;error&lt;/code&gt;. The default level is &lt;code&gt;error&lt;/code&gt;.
+The following example demonstrates how to set the logger to &lt;code&gt;debug&lt;/code&gt;.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
   , Logger = require(&#39;mongodb&#39;).Logger
@@ -2690,11 +2765,10 @@ MongoClient.connect(url, function(err, db) {
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Setting the level is as easy as calling the method &lt;code&gt;setLevel&lt;/code&gt; with the string value &lt;code&gt;debug&lt;/code&gt;, &lt;code&gt;info&lt;/code&gt; or &lt;code&gt;error&lt;/code&gt;. Log level is set globally.&lt;/p&gt;
-
 &lt;h2 id=&#34;filtering-on-specific-classes&#34;&gt;Filtering On specific classes&lt;/h2&gt;
 
-&lt;p&gt;Say you are only interested in logging a specific class. You can tell the Logger to only log specific class names. Let&amp;rsquo;s take an example Where we only log the &lt;code&gt;Db&lt;/code&gt; class.&lt;/p&gt;
+&lt;p&gt;You can set the Logger to only log specific class names. The following example
+demonstrates how to log only the &lt;code&gt;Db&lt;/code&gt; class.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
   , Logger = require(&#39;mongodb&#39;).Logger
@@ -2720,20 +2794,20 @@ MongoClient.connect(url, function(err, db) {
 });
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;This will only log statements on the &lt;code&gt;Db&lt;/code&gt; class. The available classes in the driver are.&lt;/p&gt;
+&lt;p&gt;Driver classes available for filtering:&lt;/p&gt;
 
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;Db&lt;/code&gt;: The Db instance log statements&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;Server&lt;/code&gt;: A server instance (either standalone, a mongos or replicaset member)&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ReplSet&lt;/code&gt;: Replicaset related log statements&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Server&lt;/code&gt;: A server instance (either standalone, a mongos or replica set member)&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;ReplSet&lt;/code&gt;: Replica set related log statements&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;Mongos&lt;/code&gt;: Mongos related log statements&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;Cursor&lt;/code&gt;: Cursor log statements&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;Pool&lt;/code&gt;: Connection Pool specific log statements&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;Connection&lt;/code&gt;: Singular connection specific log statements&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;Ping&lt;/code&gt;: Replicaset ping inquiry log statements&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;Ping&lt;/code&gt;: Replica set ping inquiry log statements&lt;/li&gt;
 &lt;/ul&gt;
 
-&lt;p&gt;You can add your own classes to the logger if you wish by creating your own logger instances. Let&amp;rsquo;s look at a simple example on how to add our custom class to the Logger.&lt;/p&gt;
+&lt;p&gt;You can add your own classes to the logger by creating your own logger instances.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var Logger = require(&#39;mongodb&#39;).Logger
   , assert = require(&#39;assert&#39;);
@@ -2751,11 +2825,9 @@ var a = new A();
 a.do();
 &lt;/code&gt;&lt;/pre&gt;
 
-&lt;p&gt;Pretty simple and straightforward.&lt;/p&gt;
-
 &lt;h2 id=&#34;custom-logger&#34;&gt;Custom logger&lt;/h2&gt;
 
-&lt;p&gt;Let&amp;rsquo;s say you don&amp;rsquo;t want the log statements to go to &lt;code&gt;console.log&lt;/code&gt; but want to send them to a new location or maybe transform them before you send them on. Let&amp;rsquo;s define our custom logger.&lt;/p&gt;
+&lt;p&gt;The following example demonstrates how to define a custom logger.&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient
   , Logger = require(&#39;mongodb&#39;).Logger
@@ -2783,8 +2855,6 @@ MongoClient.connect(url, function(err, db) {
   });
 });
 &lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;That wraps up the Logging support in the driver.&lt;/p&gt;
 </description>
     </item>
     

@@ -580,6 +580,8 @@
             
                 <li data-name="Cursor#close"><a href="Cursor.html#close">close</a></li>
             
+                <li data-name="Cursor#collation"><a href="Cursor.html#collation">collation</a></li>
+            
                 <li data-name="Cursor#comment"><a href="Cursor.html#comment">comment</a></li>
             
                 <li data-name="Cursor#count"><a href="Cursor.html#count">count</a></li>
@@ -1835,7 +1837,8 @@ var checkCollectionName = require('./utils').checkCollectionName
   , Define = require('./metadata')
   , Cursor = require('./cursor')
   , unordered = require('./bulk/unordered')
-  , ordered = require('./bulk/ordered');
+  , ordered = require('./bulk/ordered')
+  , assign = require('./utils').assign;
 
 /**
  * @fileOverview The **Collection** class is an internal class that embodies a MongoDB collection
@@ -1936,6 +1939,8 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
     , promiseLibrary: promiseLibrary
     // Read Concern
     , readConcern: options.readConcern
+    // Collation
+    , collation: options.collation
   }
 }
 
@@ -2094,6 +2099,7 @@ Collection.prototype.find = function() {
 
   // Add read preference if needed
   newOptions = getReadPreference(this, newOptions, this.s.db, this);
+
   // Set slave ok to true if read preference different from primary
   if(newOptions.readPreference != null
     &amp;&amp; (newOptions.readPreference != 'primary' || newOptions.readPreference.mode != 'primary')) {
@@ -2164,6 +2170,9 @@ Collection.prototype.find = function() {
   if(this.s.readConcern) {
     findCommand.readConcern = this.s.readConcern;
   }
+
+  // Decorate find command with collation options
+  decorateWithCollation(findCommand, this, options);
 
   // Create the cursor
   if(typeof callback == 'function') return handleCallback(callback, null, this.s.topology.cursor(this.s.namespace, findCommand, newOptions));
@@ -2321,9 +2330,7 @@ Collection.prototype.insertMany = function(docs, options, callback) {
 
   // Return a Promise
   return new this.s.promiseLibrary(function(resolve, reject) {
-    // console.log("########## insertMany 0")
     bulkWrite(self, operations, options, function(err, r) {
-      // console.log("########## insertMany 1")
       if(err) return reject(err);
       resolve(mapInserManyResults(docs, r));
     });
@@ -2415,9 +2422,25 @@ var bulkWrite = function(self, operations, options, callback) {
   // Create the bulk operation
   var bulk = options.ordered == true || options.ordered == null ? self.initializeOrderedBulkOp(options) : self.initializeUnorderedBulkOp(options);
 
+  // Do we have a collation
+  var collation = false;
+
   // for each op go through and add to the bulk
   try {
     for(var i = 0; i &lt; operations.length; i++) {
+      // Get the operation type
+      var key = Object.keys(operations[i])[0];
+      // Check if we have a collation
+      if(operations[i][key].collation) {
+        collation = true;
+      }
+
+      // // Have we specified collation, apply it
+      // decorateWithCollation(operations[i], self, options);
+      // console.log("================ bulkWrite")
+      // console.dir(operations[i])
+
+      // Pass to the raw bulk
       bulk.raw(operations[i]);
     }
   } catch(err) {
@@ -2427,6 +2450,12 @@ var bulkWrite = function(self, operations, options, callback) {
   // Final options for write concern
   var finalOptions = writeConcern(shallowClone(options), self.s.db, self, options);
   var writeCon = finalOptions.writeConcern ? finalOptions.writeConcern : {};
+  var capabilities = self.s.topology.capabilities();
+
+  // Did the user pass in a collation, check if our write server supports it
+  if(collation &amp;&amp; capabilities &amp;&amp; !capabilities.commandsTakeCollation) {
+    return callback(new MongoError(f('server/primary/mongos does not support collation')));
+  }
 
   // Execute the bulk
   bulk.execute(writeCon, function(err, r) {
@@ -2437,11 +2466,6 @@ var bulkWrite = function(self, operations, options, callback) {
       return callback(toError(r.getWriteErrorAt(0)), r);
     }
 
-    // console.log("!!!!!! BULK EXECUTE FINISHED")
-    // console.dir(err)
-    // console.dir(r)
-
-    // if(err) return callback(err);
     r.insertedCount = r.nInserted;
     r.matchedCount = r.nMatched;
     r.modifiedCount = r.nModified || 0;
@@ -2820,6 +2844,9 @@ var updateDocuments = function(self, selector, document, options, callback) {
   op.upsert = typeof options.upsert == 'boolean' ? options.upsert : false;
   op.multi = typeof options.multi == 'boolean' ? options.multi : false;
 
+  // Have we specified collation
+  decorateWithCollation(finalOptions, self, options);
+
   // Update options
   self.s.topology.update(self.s.namespace, [op], finalOptions, function(err, result) {
     if(callback == null) return;
@@ -2975,6 +3002,7 @@ Collection.prototype.deleteMany = function(filter, options, callback) {
 
 var deleteMany = function(self, filter, options, callback) {
   options.single = false;
+
   removeDocuments(self, filter, options, function(err, r) {
     if(callback == null) return;
     if(err &amp;&amp; callback) return callback(err);
@@ -3005,6 +3033,9 @@ var removeDocuments = function(self, selector, options, callback) {
   // Build the op
   var op = {q: selector, limit: 0};
   if(options.single) op.limit = 1;
+
+  // Have we specified collation
+  decorateWithCollation(finalOptions, self, options);
 
   // Execute the remove
   self.s.topology.remove(self.s.namespace, [op], finalOptions, function(err, result) {
@@ -3201,7 +3232,7 @@ define.classMethod('findOne', {callback: true, promise:true});
 Collection.prototype.rename = function(newName, opt, callback) {
   var self = this;
   if(typeof opt == 'function') callback = opt, opt = {};
-  opt = Object.assign({}, opt, {readPreference: ReadPreference.PRIMARY});
+  opt = assign({}, opt, {readPreference: ReadPreference.PRIMARY});
 
   // Execute using callback
   if(typeof callback == 'function') return rename(self, newName, opt, callback);
@@ -3223,6 +3254,9 @@ var rename = function(self, newName, opt, callback) {
   var toCollection =  f("%s.%s", self.s.dbName, newName);
   var dropTarget = typeof opt.dropTarget == 'boolean' ? opt.dropTarget : false;
   var cmd = {'renameCollection':renameCollection, 'to':toCollection, 'dropTarget':dropTarget};
+
+  // Decorate command with writeConcern if supported
+  decorateWithWriteConcern(cmd, self, opt);
 
   // Execute against admin
   self.s.db.admin().command(cmd, opt, function(err, doc) {
@@ -3250,10 +3284,10 @@ define.classMethod('rename', {callback: true, promise:true});
 Collection.prototype.drop = function(options, callback) {
   var self = this;
   if(typeof options == 'function') callback = options, options = {};
-  options = options | {};
+  options = options || {};
 
   // Execute using callback
-  if(typeof callback == 'function') return self.s.db.dropCollection(self.s.name, callback);
+  if(typeof callback == 'function') return self.s.db.dropCollection(self.s.name, options, callback);
   // Return a Promise
   return new this.s.promiseLibrary(function(resolve, reject) {
     self.s.db.dropCollection(self.s.name, options, function(err, r) {
@@ -3403,10 +3437,17 @@ Collection.prototype.createIndexes = function(indexSpecs, callback) {
 }
 
 var createIndexes = function(self, indexSpecs, callback) {
+  var capabilities = self.s.topology.capabilities();
+
   // Ensure we generate the correct name if the parameter is not set
   for(var i = 0; i &lt; indexSpecs.length; i++) {
     if(indexSpecs[i].name == null) {
       var keys = [];
+
+      // Did the user pass in a collation, check if our write server supports it
+      if(indexSpecs[i].collation &amp;&amp; capabilities &amp;&amp; !capabilities.commandsTakeCollation) {
+        return callback(new MongoError(f('server/primary/mongos does not support collation')));
+      }
 
       for(var name in indexSpecs[i].key) {
         keys.push(f('%s_%s', name, indexSpecs[i].key[name]));
@@ -3459,7 +3500,10 @@ Collection.prototype.dropIndex = function(indexName, options, callback) {
 
 var dropIndex = function(self, indexName, options, callback) {
   // Delete index command
-  var cmd = {'deleteIndexes':self.s.name, 'index':indexName};
+  var cmd = {'dropIndexes':self.s.name, 'index':indexName};
+
+  // Decorate command with writeConcern if supported
+  decorateWithWriteConcern(cmd, self, options);
 
   // Execute command
   self.s.db.command(cmd, options, function(err, result) {
@@ -3477,11 +3521,15 @@ define.classMethod('dropIndex', {callback: true, promise:true});
  * @param {Collection~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
-Collection.prototype.dropIndexes = function(callback) {
+Collection.prototype.dropIndexes = function(options, callback) {
   var self = this;
 
+  // Do we have options
+  if(typeof options == 'function') callback = options, options = {};
+  options = options || {};
+
   // Execute using callback
-  if(typeof callback == 'function') return dropIndexes(self, callback);
+  if(typeof callback == 'function') return dropIndexes(self, options, callback);
 
   // Return a Promise
   return new this.s.promiseLibrary(function(resolve, reject) {
@@ -3492,8 +3540,8 @@ Collection.prototype.dropIndexes = function(callback) {
   });
 }
 
-var dropIndexes = function(self, callback) {
-  self.dropIndex('*', function (err, result) {
+var dropIndexes = function(self, options, callback) {
+  self.dropIndex('*', options, function(err, result) {
     if(err) return handleCallback(callback, err, false);
     handleCallback(callback, null, true);
   });
@@ -3540,6 +3588,9 @@ var reIndex = function(self, options, callback) {
   // Reindex
   var cmd = {'reIndex':self.s.name};
 
+  // Decorate command with writeConcern if supported
+  decorateWithWriteConcern(cmd, self, options);
+
   // Execute the command
   self.s.db.command(cmd, options, function(err, result) {
     if(callback == null) return;
@@ -3574,25 +3625,20 @@ Collection.prototype.listIndexes = function(options) {
     throw new MongoError('cannot connect to server');
   }
 
-  // console.log("!!!!!!!!!!!!!! HEY 0")
   // We have a list collections command
   if(this.s.topology.capabilities().hasListIndexesCommand) {
-    // console.log("!!!!!!!!!!!!!! HEY 0:1")
     // Cursor options
     var cursor = options.batchSize ? {batchSize: options.batchSize} : {}
     // Build the command
     var command = { listIndexes: this.s.name, cursor: cursor };
-    // console.log("!!!!!!!!!!!!!! HEY 0:2")
     // Execute the cursor
     var cursor = this.s.topology.cursor(f('%s.$cmd', this.s.dbName), command, options);
     // Do we have a readPreference, apply it
     if(options.readPreference) cursor.setReadPreference(options.readPreference);
-    // console.log("!!!!!!!!!!!!!! HEY 0:3")
     // Return the cursor
     return cursor;
   }
 
-  // console.log("!!!!!!!!!!!!!! HEY 1")
   // Get the namespace
   var ns = f('%s.system.indexes', this.s.dbName);
   // Get the query
@@ -3795,6 +3841,9 @@ var count = function(self, query, options, callback) {
     cmd.readConcern = self.s.readConcern;
   }
 
+  // Have we specified collation
+  decorateWithCollation(cmd, self, options);
+
   // Execute command
   self.s.db.command(cmd, options, function(err, result) {
     if(err) return handleCallback(callback, err);
@@ -3855,6 +3904,9 @@ var distinct = function(self, key, query, options, callback) {
   if(self.s.readConcern) {
     cmd.readConcern = self.s.readConcern;
   }
+
+  // Have we specified collation
+  decorateWithCollation(cmd, self, options);
 
   // Execute the command
   self.s.db.command(cmd, options, function(err, result) {
@@ -4214,6 +4266,9 @@ var findAndModify = function(self, query, sort, doc, options, callback) {
     queryObject.bypassDocumentValidation = finalOptions.bypassDocumentValidation;
   }
 
+  // Have we specified collation
+  decorateWithCollation(queryObject, self, options);
+
   // Execute the command
   self.s.db.command(queryObject
     , options, function(err, result) {
@@ -4266,6 +4321,35 @@ var findAndRemove = function(self, query, sort, options, callback) {
 
 define.classMethod('findAndRemove', {callback: true, promise:true});
 
+function decorateWithWriteConcern(command, self, options) {
+  // Do we support collation 3.4 and higher
+  var capabilities = self.s.topology.capabilities();
+  // Do we support write concerns 3.4 and higher
+  if(capabilities &amp;&amp; capabilities.commandsTakeWriteConcern) {
+    // Get the write concern settings
+    var finalOptions = writeConcern(shallowClone(options), self.s.db, self, options);
+    // Add the write concern to the command
+    if(finalOptions.writeConcern) {
+      command.writeConcern = finalOptions.writeConcern;
+    }
+  }
+}
+
+function decorateWithCollation(command, self, options) {
+  // Do we support collation 3.4 and higher
+  var capabilities = self.s.topology.capabilities();
+  // Do we support write concerns 3.4 and higher
+  if(capabilities &amp;&amp; capabilities.commandsTakeCollation) {
+    if(options.collation &amp;&amp; typeof options.collation == 'object') {
+      command.collation = options.collation;
+    } else if(self.s.collation &amp;&amp; typeof self.s.collation == 'object') {
+      command.collation = self.s.collation;
+    } else if(self.s.db.s.collation &amp;&amp; typeof self.s.db.s.collation == 'object') {
+      command.collation = self.s.db.s.collation;
+    }
+  }
+}
+
 /**
  * Execute an aggregation framework pipeline against the collection, needs MongoDB >= 2.2
  * @method
@@ -4283,6 +4367,7 @@ define.classMethod('findAndRemove', {callback: true, promise:true});
  */
 Collection.prototype.aggregate = function(pipeline, options, callback) {
   var self = this;
+
   if(Array.isArray(pipeline)) {
     // Set up callback if one is provided
     if(typeof options == 'function') {
@@ -4323,6 +4408,11 @@ Collection.prototype.aggregate = function(pipeline, options, callback) {
 
   // Build the command
   var command = { aggregate : this.s.name, pipeline : pipeline};
+
+  // Decorate command with writeConcern if supported
+  decorateWithWriteConcern(command, self, options);
+  // Have we specified collation
+  decorateWithCollation(command, self, options);
 
   // If we have bypassDocumentValidation set
   if(typeof options.bypassDocumentValidation == 'boolean') {
@@ -4557,6 +4647,9 @@ var geoNear = function(self, x, y, point, options, callback) {
     commandObject.readConcern = self.s.readConcern;
   }
 
+  // Have we specified collation
+  decorateWithCollation(commandObject, self, options);
+
   // Execute the command
   self.s.db.command(commandObject, options, function (err, res) {
     if(err) return handleCallback(callback, err);
@@ -4766,6 +4859,9 @@ var group = function(self, keys, condition, initial, reduce, finalize, command, 
       selector.readConcern = self.s.readConcern;
     }
 
+    // Have we specified collation
+    decorateWithCollation(selector, self, options);
+
     // Execute command
     self.s.db.command(selector, options, function(err, result) {
       if(err) return handleCallback(callback, err, null);
@@ -4899,7 +4995,10 @@ var mapReduce = function(self, map, reduce, options, callback) {
   // If we have a read preference and inline is not set as output fail hard
   if((options.readPreference != false &amp;&amp; options.readPreference != 'primary')
     &amp;&amp; options['out'] &amp;&amp; (options['out'].inline != 1 &amp;&amp; options['out'] != 'inline')) {
+      // Force readPreference to primary
       options.readPreference = 'primary';
+      // Decorate command with writeConcern if supported
+      decorateWithWriteConcern(mapCommandHash, self, options);
   } else if(self.s.readConcern) {
     mapCommandHash.readConcern = self.s.readConcern;
   }
@@ -4908,6 +5007,9 @@ var mapReduce = function(self, map, reduce, options, callback) {
   if(typeof options.bypassDocumentValidation == 'boolean') {
     mapCommandHash.bypassDocumentValidation = options.bypassDocumentValidation;
   }
+
+  // Have we specified collation
+  decorateWithCollation(mapCommandHash, self, options);
 
   // Execute command
   self.s.db.command(mapCommandHash, {readPreference:options.readPreference}, function (err, result) {
@@ -5019,18 +5121,18 @@ var getReadPreference = function(self, options, db, coll) {
     r = options.readPreference
   } else if(self.s.readPreference) {
     r = self.s.readPreference
-  } else if(db.readPreference) {
-    r = db.readPreference;
+  } else if(db.s.readPreference) {
+    r = db.s.readPreference;
   }
 
   if(r instanceof ReadPreference) {
-    options.readPreference = new CoreReadPreference(r.mode, r.tags);
+    options.readPreference = new CoreReadPreference(r.mode, r.tags, {maxStalenessMS: r.maxStalenessMS});
   } else if(typeof r == 'string') {
     options.readPreference = new CoreReadPreference(r);
   } else if(r &amp;&amp; !(r instanceof ReadPreference) &amp;&amp; typeof r == 'object') {
     var mode = r.mode || r.preference;
     if (mode &amp;&amp; typeof mode == 'string') {
-      options.readPreference = new CoreReadPreference(mode, r.tags);
+      options.readPreference = new CoreReadPreference(mode, r.tags, {maxStalenessMS: r.maxStalenessMS});
     }
   }
 
@@ -5041,6 +5143,7 @@ var testForFields = {
     limit: 1, sort: 1, fields:1, skip: 1, hint: 1, explain: 1, snapshot: 1, timeout: 1, tailable: 1, tailableRetryInterval: 1
   , numberOfRetries: 1, awaitdata: 1, awaitData: 1, exhaust: 1, batchSize: 1, returnKey: 1, maxScan: 1, min: 1, max: 1, showDiskLoc: 1
   , comment: 1, raw: 1, readPreference: 1, partial: 1, read: 1, dbName: 1, oplogReplay: 1, connection: 1, maxTimeMS: 1, transforms: 1
+  , collation: 1
 }
 
 module.exports = Collection;
@@ -5073,7 +5176,7 @@ module.exports = Collection;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Fri Jul 08 2016 13:36:11 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Jul 28 2016 17:02:52 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

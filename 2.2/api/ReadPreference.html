@@ -580,6 +580,8 @@
             
                 <li data-name="Cursor#close"><a href="Cursor.html#close">close</a></li>
             
+                <li data-name="Cursor#collation"><a href="Cursor.html#collation">collation</a></li>
+            
                 <li data-name="Cursor#comment"><a href="Cursor.html#comment">comment</a></li>
             
                 <li data-name="Cursor#count"><a href="Cursor.html#count">count</a></li>
@@ -1830,12 +1832,12 @@
     <div class="nameContainer">
         <h4 class="name" id="ReadPreference">
             
-            new ReadPreference<span class="signature">(mode, tags)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="ReadPreference.html">ReadPreference</a>}</span>
+            new ReadPreference<span class="signature">(mode, tags, <span class="optional">options</span>)</span><span class="glyphicon glyphicon-circle-arrow-right"></span><span class="type-signature returnType">{<a href="ReadPreference.html">ReadPreference</a>}</span>
         </h4>
     
         
         <div class="tag-source">
-            <a href="lib_read_preference.js.html">lib/read_preference.js</a>, <a href="lib_read_preference.js.html#line45">line 45</a>
+            <a href="lib_read_preference.js.html">lib/read_preference.js</a>, <a href="lib_read_preference.js.html#line49">line 49</a>
         </div>
         
     </div>
@@ -1901,6 +1903,11 @@
             
             <td class="description last">
                 
+                    
+                    
+                        
+                    
+                
                 <p>The ReadPreference mode as listed above.</p></td>
         </tr>
 	
@@ -1909,6 +1916,34 @@
         <tr>
             
                 <td class="name"><code>tags</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">array</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                    
+                        
+                    
+                
+                <p>An object representing read preference tags.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>options</code></td>
             
             
             <td class="type">
@@ -1924,7 +1959,66 @@
             
             <td class="description last">
                 
-                <p>An object representing read preference tags.</p></td>
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Additional read preference options</p>
+                
+
+<table class="params">
+    <thead>
+	<tr>
+		
+		<th>Name</th>
+		
+		
+		<th>Type</th>
+		
+		
+		
+		<th class="last">Description</th>
+	</tr>
+	</thead>
+	
+	<tbody>
+	
+	
+        <tr>
+            
+                <td class="name"><code>maxStalenessMS</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+            
+            <td class="description last">
+                
+                    
+                        <span class="optional">optional</span>
+                    
+                    
+                        
+                    
+                
+                <p>Max Secondary Read Stalleness in Miliseconds</p></td>
+        </tr>
+	
+	
+	</tbody>
+</table>
+            </td>
         </tr>
 	
 	
@@ -1991,7 +2085,7 @@
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">array</span>
 
 
             
@@ -2002,6 +2096,52 @@
             
             
             <td class="description last"><p>The ReadPreference tags.</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"><p>Additional read preference options</p></td>
+        </tr>
+	
+	
+	
+        <tr>
+            
+                <td class="name"><code>maxStalenessMS</code></td>
+            
+            
+            <td class="type">
+            
+                
+<span class="param-type">number</span>
+
+
+            
+            </td>
+            
+            
+            
+            
+            
+            <td class="description last"><p>MaxStalenessMS value for the read preference</p></td>
         </tr>
 	
 	
@@ -2083,7 +2223,7 @@ ReadPreference instance.
     
         
         <div class="tag-source">
-            <a href="lib_read_preference.js.html">lib/read_preference.js</a>, <a href="lib_read_preference.js.html#line60">line 60</a>
+            <a href="lib_read_preference.js.html">lib/read_preference.js</a>, <a href="lib_read_preference.js.html#line77">line 77</a>
         </div>
         
     </div>
@@ -2204,7 +2344,7 @@ ReadPreference instance.
     
         
         <div class="tag-source">
-            <a href="lib_read_preference.js.html">lib/read_preference.js</a>, <a href="lib_read_preference.js.html#line74">line 74</a>
+            <a href="lib_read_preference.js.html">lib/read_preference.js</a>, <a href="lib_read_preference.js.html#line91">line 91</a>
         </div>
         
     </div>
@@ -2348,7 +2488,7 @@ ReadPreference instance.
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Fri Jul 08 2016 13:36:12 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Jul 28 2016 17:02:52 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

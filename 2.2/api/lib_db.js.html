@@ -580,6 +580,8 @@
             
                 <li data-name="Cursor#close"><a href="Cursor.html#close">close</a></li>
             
+                <li data-name="Cursor#collation"><a href="Cursor.html#collation">collation</a></li>
+            
                 <li data-name="Cursor#comment"><a href="Cursor.html#comment">comment</a></li>
             
                 <li data-name="Cursor#count"><a href="Cursor.html#count">count</a></li>
@@ -1835,7 +1837,8 @@ var EventEmitter = require('events').EventEmitter
   , Define = require('./metadata')
   , Logger = require('mongodb-core').Logger
   , Collection = require('./collection')
-  , crypto = require('crypto');
+  , crypto = require('crypto')
+  , assign = require('./utils').assign;
 
 var debugFields = ['authSource', 'w', 'wtimeout', 'j', 'native_parser', 'forceServerObjectId'
   , 'serializeFunctions', 'raw', 'promoteLongs', 'bufferMaxEntries', 'numberOfRetries', 'retryMiliSeconds'
@@ -1861,7 +1864,7 @@ var debugFields = ['authSource', 'w', 'wtimeout', 'j', 'native_parser', 'forceSe
 var legalOptionNames = ['w', 'wtimeout', 'fsync', 'j', 'readPreference', 'readPreferenceTags', 'native_parser'
   , 'forceServerObjectId', 'pkFactory', 'serializeFunctions', 'raw', 'bufferMaxEntries', 'authSource'
   , 'ignoreUndefined', 'promoteLongs', 'promiseLibrary', 'readConcern', 'retryMiliSeconds', 'numberOfRetries'
-  , 'parentDb', 'noListener', 'loggerLevel', 'logger'];
+  , 'parentDb', 'noListener', 'loggerLevel', 'logger', 'collation'];
 
 /**
  * Creates a new Db instance
@@ -1957,6 +1960,8 @@ var Db = function(databaseName, topology, options) {
     , noListener: typeof options.noListener == 'boolean' ? options.noListener : false
     // ReadConcern
     , readConcern: options.readConcern
+    // Collation
+    , collation: options.collation
   }
 
   // Ensure we have a valid db name
@@ -2076,11 +2081,11 @@ var convertReadPreference = function(readPreference) {
   if(readPreference &amp;&amp; typeof readPreference == 'string') {
     return new CoreReadPreference(readPreference);
   } else if(readPreference instanceof ReadPreference) {
-    return new CoreReadPreference(readPreference.mode, readPreference.tags);
+    return new CoreReadPreference(readPreference.mode, readPreference.tags, {maxStalenessMS: readPreference.maxStalenessMS});
   } else if(readPreference &amp;&amp; typeof readPreference == 'object') {
     var mode = readPreference.mode || readPreference.preference;
     if (mode &amp;&amp; typeof mode == 'string') {
-      readPreference = new CoreReadPreference(mode, readPreference.tags);
+      readPreference = new CoreReadPreference(mode, readPreference.tags, {maxStalenessMS: readPreference.maxStalenessMS});
     }
   }
   return readPreference;
@@ -2251,6 +2256,11 @@ Db.prototype.collection = function(name, options, callback) {
   // If we have not set a collection level readConcern set the db level one
   options.readConcern = options.readConcern || this.s.readConcern;
 
+  // Do we have a db level collation but not one for the collection
+  if(!options.collation &amp;&amp; this.s.collation &amp;&amp; typeof this.s.collation == 'object') {
+    options.collation = this.s.collation;
+  }
+
   // Do we have ignoreUndefined set
   if(this.s.options.ignoreUndefined) {
     options.ignoreUndefined = this.s.options.ignoreUndefined;
@@ -2293,6 +2303,18 @@ Db.prototype.collection = function(name, options, callback) {
 
 define.classMethod('collection', {callback: true, promise:false, returns: [Collection]});
 
+function decorateWithWriteConcern(command, self, options) {
+  // Do we support write concerns 3.4 and higher
+  if(self.s.topology.capabilities().commandsTakeWriteConcern) {
+    // Get the write concern settings
+    var finalOptions = writeConcern(shallowClone(options), self, options);
+    // Add the write concern to the command
+    if(finalOptions.writeConcern) {
+      command.writeConcern = finalOptions.writeConcern;
+    }
+  }
+}
+
 var createCollection = function(self, name, options, callback) {
   // Get the write concern options
   var finalOptions = writeConcern(shallowClone(options), self, options);
@@ -2313,6 +2335,9 @@ var createCollection = function(self, name, options, callback) {
 
       // Create collection command
       var cmd = {'create':name};
+
+      // Decorate command with writeConcern if supported
+      decorateWithWriteConcern(cmd, self, options);
 
       // Add all optional parameters
       for(var n in options) {
@@ -2613,13 +2638,16 @@ define.classMethod('renameCollection', {callback: true, promise:true});
 Db.prototype.dropCollection = function(name, options, callback) {
   var self = this;
   if(typeof options == 'function') callback = options, options = {};
-  options = options | {};
+  options = options || {};
 
   // Command to execute
   var cmd = {'drop':name}
 
+  // Decorate with write concern
+  decorateWithWriteConcern(cmd, self, options);
+
   // options
-  options = Object.assign({}, this.s.options, {readPreference: ReadPreference.PRIMARY});
+  options = assign({}, this.s.options, {readPreference: ReadPreference.PRIMARY});
 
   // Check if the callback is in fact a string
   if(typeof callback == 'function') return this.command(cmd, options, function(err, result) {
@@ -2657,12 +2685,17 @@ define.classMethod('dropCollection', {callback: true, promise:true});
  * @param {Db~resultCallback} [callback] The results callback
  * @return {Promise} returns Promise if no callback passed
  */
-Db.prototype.dropDatabase = function(callback) {
+Db.prototype.dropDatabase = function(options, callback) {
   var self = this;
+  if(typeof options == 'function') callback = options, options = {};
   // Drop database command
   var cmd = {'dropDatabase':1};
+
+  // Decorate with write concern
+  decorateWithWriteConcern(cmd, self, options);
+
   // Ensure primary only
-  var options = Object.assign({}, this.s.options, {readPreference: ReadPreference.PRIMARY});
+  var options = assign({}, this.s.options, {readPreference: ReadPreference.PRIMARY});
 
   // Check if the callback is in fact a string
   if(typeof callback == 'function') return this.command(cmd, options, function(err, result) {
@@ -2946,29 +2979,28 @@ Db.prototype.addChild = function(db) {
  */
 Db.prototype.db = function(dbName, options) {
   options = options || {};
+
   // Copy the options and add out internal override of the not shared flag
-  for(var key in this.options) {
-    options[key] = this.options[key];
-  }
+  var finalOptions = assign({}, this.options, options);
 
   // Do we have the db in the cache already
-  if(this.s.dbCache[dbName] &amp;&amp; options.returnNonCachedInstance !== true) {
+  if(this.s.dbCache[dbName] &amp;&amp; finalOptions.returnNonCachedInstance !== true) {
     return this.s.dbCache[dbName];
   }
 
   // Add current db as parentDb
-  if(options.noListener == null || options.noListener == false) {
-    options.parentDb = this;
+  if(finalOptions.noListener == null || finalOptions.noListener == false) {
+    finalOptions.parentDb = this;
   }
 
   // Add promiseLibrary
-  options.promiseLibrary = this.s.promiseLibrary;
+  finalOptions.promiseLibrary = this.s.promiseLibrary;
 
   // Return the db object
-  var db = new Db(dbName, this.s.topology, options)
+  var db = new Db(dbName, this.s.topology, finalOptions)
 
   // Add as child
-  if(options.noListener == null || options.noListener == false) {
+  if(finalOptions.noListener == null || finalOptions.noListener == false) {
     this.addChild(db);
   }
 
@@ -3514,8 +3546,23 @@ var createIndexUsingCreateIndexes = function(self, name, fieldOrSpec, options, c
     }
   }
 
+  // Get capabilities
+  var capabilities = self.s.topology.capabilities();
+
+  // Did the user pass in a collation, check if our write server supports it
+  if(indexes[0].collation &amp;&amp; capabilities &amp;&amp; !capabilities.commandsTakeCollation) {
+    // Create a new error
+    var error = new MongoError(f('server/primary/mongos does not support collation'));
+    error.code = 67;
+    // Return the error
+    return callback(error);
+  }
+
   // Create command, apply write concern to command
   var cmd = writeConcern({createIndexes: name, indexes: indexes}, self, options);
+
+  // Decorate command with writeConcern if supported
+  decorateWithWriteConcern(cmd, self, options);
 
   // ReadPreference primary
   options.readPreference = ReadPreference.PRIMARY;
@@ -3686,7 +3733,7 @@ module.exports = Db;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Fri Jul 08 2016 13:36:11 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Jul 28 2016 17:02:52 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

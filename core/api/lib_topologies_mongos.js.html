@@ -961,7 +961,10 @@ var inherits = require('util').inherits,
   debugOptions = require('../connection/utils').debugOptions,
   MongoError = require('../error'),
   Server = require('./server'),
-  ReplSetState = require('./replset_state');
+  ReplSetState = require('./replset_state'),
+  assign = require('./shared').assign,
+  clone = require('./shared').clone,
+  createClientInfo = require('./shared').createClientInfo;
 
 /**
  * @fileOverview The **Mongos** class is a class that represents a Mongos Proxy topology and is
@@ -1041,6 +1044,7 @@ var handlers = ['connect', 'close', 'error', 'timeout', 'parseError'];
  * @param {string} [options.passphrase] SSL Certificate pass phrase
  * @param {boolean} [options.rejectUnauthorized=true] Reject unauthorized server certificates
  * @param {boolean} [options.promoteLongs=true] Convert Long values from the db into Numbers if they fit into 53 bits
+ * @param {boolean} [options.domainsEnabled=false] Enable the wrapping of the callback in the current domain, disabled by default to avoid perf hit.
  * @return {Mongos} A cursor instance
  * @fires Mongos#connect
  * @fires Mongos#reconnect
@@ -1065,7 +1069,7 @@ var Mongos = function(seedlist, options) {
 
   // Internal state
   this.s = {
-    options: Object.assign({}, options),
+    options: assign({}, options),
     // BSON instance
     bson: options.bson || new BSON(),
     // Factory overrides
@@ -1086,7 +1090,12 @@ var Mongos = function(seedlist, options) {
     debug: typeof options.debug == 'boolean' ? options.debug : false,
     // localThresholdMS
     localThresholdMS: options.localThresholdMS || 15,
+    // Client info
+    clientInfo: createClientInfo(options)
   }
+
+  // Set the client info
+  this.s.options.clientInfo = createClientInfo(options);
 
   // Log info warning if the socketTimeout &lt; haInterval as it will cause
   // a lot of recycled connections to happen.
@@ -1157,8 +1166,10 @@ Mongos.prototype.connect = function(options) {
   stateTransition(this, CONNECTING);
   // Create server instances
   var servers = this.s.seedlist.map(function(x) {
-    return new Server(Object.assign({}, self.s.options, x, {
+    return new Server(assign({}, self.s.options, x, {
       authProviders: self.authProviders, reconnect:false, monitoring:false, inTopology: true
+    }, {
+      clientInfo: clone(self.s.clientInfo)
     }));
   });
 
@@ -1191,29 +1202,51 @@ function handleInitialConnectEvent(self, event) {
       // Get last known ismaster
       self.ismaster = this.lastIsMaster();
 
-      // Add to the connectd list
-      for(var i = 0; i &lt; self.connectedProxies.length; i++) {
-        if(self.connectedProxies[i].name == this.name) {
-          this.destroy();
-          return self.emit('failed', this);
+      // Is this not a proxy, remove t
+      if(self.ismaster.msg == 'isdbgrid') {
+        // Add to the connectd list
+        for(var i = 0; i &lt; self.connectedProxies.length; i++) {
+          if(self.connectedProxies[i].name == this.name) {
+            this.destroy();
+            return self.emit('failed', this);
+          }
         }
+
+        // Remove the handlers
+        for(var i = 0; i &lt; handlers.length; i++) {
+          this.removeAllListeners(handlers[i]);
+        }
+
+        // Add stable state handlers
+        this.on('error', handleEvent(self, 'error'));
+        this.on('close', handleEvent(self, 'close'));
+        this.on('timeout', handleEvent(self, 'timeout'));
+        this.on('parseError', handleEvent(self, 'parseError'));
+
+        // Move from connecting proxies connected
+        moveServerFrom(self.connectingProxies, self.connectedProxies, this);
+        // Emit the joined event
+        self.emit('joined', 'mongos', this);
+      } else {
+
+        // Print warning if we did not find a mongos proxy
+        if(self.s.logger.isWarn()) {
+          var message = 'expected mongos proxy, but found replicaset member mongod for server %s';
+          // We have a standalone server
+          if(!self.ismaster.hosts) {
+            message = 'expected mongos proxy, but found standalone mongod for server %s';
+          }
+
+          self.s.logger.warn(f(message, this.name));
+        }
+
+        // This is not a mongos proxy, remove it completely
+        removeProxyFrom(self.connectingProxies, this);
+        // Emit the left event
+        self.emit('left', 'server', this);
+        // Emit failed event
+        self.emit('failed', this);
       }
-
-      // Remove the handlers
-      for(var i = 0; i &lt; handlers.length; i++) {
-        this.removeAllListeners(handlers[i]);
-      }
-
-      // Add stable state handlers
-      this.on('error', handleEvent(self, 'error'));
-      this.on('close', handleEvent(self, 'close'));
-      this.on('timeout', handleEvent(self, 'timeout'));
-      this.on('parseError', handleEvent(self, 'parseError'));
-
-      // Move from connecting proxies connected
-      moveServerFrom(self.connectingProxies, self.connectedProxies, this);
-      // Emit the joined event
-      self.emit('joined', 'mongos', this);
     } else {
       moveServerFrom(self.connectingProxies, self.disconnectedProxies, this);
       // Emit the left event
@@ -1240,6 +1273,14 @@ function handleInitialConnectEvent(self, event) {
         self.emit('connect', self);
         self.emit('fullsetup', self);
         self.emit('all', self);
+      } else if(self.disconnectedProxies.length == 0) {
+        // Print warning if we did not find a mongos proxy
+        if(self.s.logger.isWarn()) {
+          self.s.logger.warn(f('no mongos proxies found in seed list, did you mean to connect to a replicaset'));
+        }
+
+        // Emit the error that no proxies were found
+        return self.emit('error', new MongoError('no mongos proxies found in seed list'));
       }
 
       // Topology monitor
@@ -1319,6 +1360,14 @@ function moveServerFrom(from, to, proxy) {
   to.push(proxy);
 }
 
+function removeProxyFrom(from, proxy) {
+  for(var i = 0; i &lt; from.length; i++) {
+    if(from[i].name == proxy.name) {
+      from.splice(i, 1);
+    }
+  }
+}
+
 function reconnectProxies(self, proxies, callback) {
   // Count lefts
   var count = proxies.length;
@@ -1380,11 +1429,13 @@ function reconnectProxies(self, proxies, callback) {
       }
 
       // Create a new server instance
-      var server = new Server(Object.assign({}, self.s.options, {
+      var server = new Server(assign({}, self.s.options, {
         host: _server.name.split(':')[0],
         port: parseInt(_server.name.split(':')[1], 10)
       }, {
         authProviders: self.authProviders, reconnect:false, monitoring: false, inTopology: true
+      }, {
+        clientInfo: clone(self.s.clientInfo)
       }));
 
       // Add temp handlers
@@ -1644,7 +1695,7 @@ Mongos.prototype.update = function(ns, ops, options, callback) {
 
   // Not connected but we have a disconnecthandler
   if(!this.isConnected() &amp;&amp; this.s.disconnectHandler != null) {
-    return this.s.disconnectHandler.add('insert', ns, ops, options, callback);
+    return this.s.disconnectHandler.add('update', ns, ops, options, callback);
   }
 
   // No mongos proxy available
@@ -1673,7 +1724,7 @@ Mongos.prototype.remove = function(ns, ops, options, callback) {
 
   // Not connected but we have a disconnecthandler
   if(!this.isConnected() &amp;&amp; this.s.disconnectHandler != null) {
-    return this.s.disconnectHandler.add('insert', ns, ops, options, callback);
+    return this.s.disconnectHandler.add('remove', ns, ops, options, callback);
   }
 
   // No mongos proxy available
@@ -2036,7 +2087,7 @@ module.exports = Mongos;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Fri Jul 08 2016 13:36:22 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Jul 28 2016 17:03:02 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

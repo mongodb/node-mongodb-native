@@ -112,6 +112,8 @@ some behavior changes for the cursor streams).&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Redesigned Connection Pool.&lt;/li&gt;
 &lt;li&gt;Connection close will drain any outstanding operations.&lt;/li&gt;
+&lt;li&gt;replicaSet parameter &lt;strong&gt;MUST&lt;/strong&gt; be specified if using MongoClient to connect to replicaset, due to SDAM specification implementation.&lt;/li&gt;
+&lt;li&gt;domain support disabled by default, enable with parameter &lt;strong&gt;domainsEnabled&lt;/strong&gt; on MongoClient or on the Server/ReplSet/Mongos.&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h1 id=&#34;what-s-new-in-2-1&#34;&gt;What&amp;rsquo;s New in 2.1&lt;/h1&gt;

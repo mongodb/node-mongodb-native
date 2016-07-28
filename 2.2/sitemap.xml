@@ -3,8 +3,13 @@
   
   <url>
     <loc>/node-mongodb-native/2.2/</loc>
-    <lastmod>2015-10-15T14:27:51-04:00</lastmod>
+    <lastmod>2016-06-01T12:53:30-04:00</lastmod>
     <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.2/tutorials/projections/</loc>
+    <lastmod>2016-06-01T12:53:30-04:00</lastmod>
   </url>
   
   <url>
@@ -23,6 +28,11 @@
   </url>
   
   <url>
+    <loc>/node-mongodb-native/2.2/tutorials/collections/</loc>
+    <lastmod>2015-03-19T14:27:51-04:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/node-mongodb-native/2.2/tutorials/commands/</loc>
     <lastmod>2015-03-19T14:27:51-04:00</lastmod>
   </url>
@@ -33,12 +43,12 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/tutorials/gridfs/gridstore/</loc>
+    <loc>/node-mongodb-native/2.2/tutorials/geospatial-search/</loc>
     <lastmod>2015-03-19T14:27:51-04:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/tutorials/geospatial-search/</loc>
+    <loc>/node-mongodb-native/2.2/tutorials/gridfs/gridstore/</loc>
     <lastmod>2015-03-19T14:27:51-04:00</lastmod>
   </url>
   
@@ -68,12 +78,12 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/reference/ecmascript6/crud/</loc>
+    <loc>/node-mongodb-native/2.2/reference/connecting/legacy-connection-settings/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/reference/connecting/</loc>
+    <loc>/node-mongodb-native/2.2/reference/ecmascript6/crud/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
@@ -83,7 +93,7 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/reference/connecting/legacy-connection-settings/</loc>
+    <loc>/node-mongodb-native/2.2/reference/connecting/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
@@ -123,6 +133,11 @@
   </url>
   
   <url>
+    <loc>/node-mongodb-native/2.2/tutorials/aggregation/</loc>
+    <lastmod>2015-03-18T21:14:20-04:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/node-mongodb-native/2.2/reference/management/logging/</loc>
     <lastmod>2015-03-18T21:14:20-04:00</lastmod>
   </url>
@@ -133,17 +148,17 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/quick-start/</loc>
-    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/node-mongodb-native/2.2/</loc>
     <lastmod>2015-03-17T15:36:56+00:00</lastmod>
   </url>
   
   <url>
     <loc>/node-mongodb-native/2.2/installation-guide/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.2/quick-start/</loc>
     <lastmod>2015-03-17T15:36:56+00:00</lastmod>
   </url>
   

@@ -375,6 +375,87 @@
 
 
   
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
+
+
+        
+          
+        
+      
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+  
     
     
       
@@ -1037,6 +1118,35 @@
 
 
     <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.2/tutorials/projections/">
+        <i class='fa'></i>
+        Projections
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
     <a href="/node-mongodb-native/2.2/tutorials/create-indexes/">
         <i class='fa'></i>
         Create Indexes
@@ -1095,6 +1205,35 @@
 
 
     <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.2/tutorials/collections/">
+        <i class='fa'></i>
+        Collections
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
     <a href="/node-mongodb-native/2.2/tutorials/geospatial-search/">
         <i class='fa'></i>
         Geospatial Search
@@ -1127,6 +1266,35 @@
     <a href="/node-mongodb-native/2.2/tutorials/commands/">
         <i class='fa'></i>
         Database Commands
+    </a>
+  </li>
+
+
+        
+        
+        
+        
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <li class="toctree-l2">
+    <a href="/node-mongodb-native/2.2/tutorials/aggregation/">
+        <i class='fa'></i>
+        Aggregation
     </a>
   </li>
 
@@ -1877,11 +2045,14 @@
 
 <h1 id="logging">Logging</h1>
 
-<p>The driver lets you log at 3 different levels. These are <code>debug</code>, <code>info</code> and <code>error</code>. By default the log level is at <code>error</code>. You can change the level, only allow specific classes to log and provide your own logger implementation. Let&rsquo;s look at how we control the log level.</p>
+<p>You can change the log level, filter on classes to allow only specific classes
+to log, and provide your own logger implementation.</p>
 
 <h2 id="setting-log-level">Setting Log level</h2>
 
-<p>Setting the log level is pretty easy. Let&rsquo;s look at example of adjusting it for our application only logging the Db class.</p>
+<p>The driver allows logging at three different levels: <code>debug</code>,
+<code>info</code> and <code>error</code>. The default level is <code>error</code>.
+The following example demonstrates how to set the logger to <code>debug</code>.</p>
 
 <pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
   , Logger = require('mongodb').Logger
@@ -1905,11 +2076,10 @@ MongoClient.connect(url, function(err, db) {
 });
 </code></pre>
 
-<p>Setting the level is as easy as calling the method <code>setLevel</code> with the string value <code>debug</code>, <code>info</code> or <code>error</code>. Log level is set globally.</p>
-
 <h2 id="filtering-on-specific-classes">Filtering On specific classes</h2>
 
-<p>Say you are only interested in logging a specific class. You can tell the Logger to only log specific class names. Let&rsquo;s take an example Where we only log the <code>Db</code> class.</p>
+<p>You can set the Logger to only log specific class names. The following example
+demonstrates how to log only the <code>Db</code> class.</p>
 
 <pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
   , Logger = require('mongodb').Logger
@@ -1935,20 +2105,20 @@ MongoClient.connect(url, function(err, db) {
 });
 </code></pre>
 
-<p>This will only log statements on the <code>Db</code> class. The available classes in the driver are.</p>
+<p>Driver classes available for filtering:</p>
 
 <ul>
 <li><code>Db</code>: The Db instance log statements</li>
-<li><code>Server</code>: A server instance (either standalone, a mongos or replicaset member)</li>
-<li><code>ReplSet</code>: Replicaset related log statements</li>
+<li><code>Server</code>: A server instance (either standalone, a mongos or replica set member)</li>
+<li><code>ReplSet</code>: Replica set related log statements</li>
 <li><code>Mongos</code>: Mongos related log statements</li>
 <li><code>Cursor</code>: Cursor log statements</li>
 <li><code>Pool</code>: Connection Pool specific log statements</li>
 <li><code>Connection</code>: Singular connection specific log statements</li>
-<li><code>Ping</code>: Replicaset ping inquiry log statements</li>
+<li><code>Ping</code>: Replica set ping inquiry log statements</li>
 </ul>
 
-<p>You can add your own classes to the logger if you wish by creating your own logger instances. Let&rsquo;s look at a simple example on how to add our custom class to the Logger.</p>
+<p>You can add your own classes to the logger by creating your own logger instances.</p>
 
 <pre><code class="language-js">var Logger = require('mongodb').Logger
   , assert = require('assert');
@@ -1966,11 +2136,9 @@ var a = new A();
 a.do();
 </code></pre>
 
-<p>Pretty simple and straightforward.</p>
-
 <h2 id="custom-logger">Custom logger</h2>
 
-<p>Let&rsquo;s say you don&rsquo;t want the log statements to go to <code>console.log</code> but want to send them to a new location or maybe transform them before you send them on. Let&rsquo;s define our custom logger.</p>
+<p>The following example demonstrates how to define a custom logger.</p>
 
 <pre><code class="language-js">var MongoClient = require('mongodb').MongoClient
   , Logger = require('mongodb').Logger
@@ -1998,8 +2166,6 @@ MongoClient.connect(url, function(err, db) {
   });
 });
 </code></pre>
-
-<p>That wraps up the Logging support in the driver.</p>
 
 
 
@@ -2078,11 +2244,11 @@ MongoClient.connect(url, function(err, db) {
    HAS_SOURCE:  true
   };
 </script>
-<script type="text/javascript" src="/node-mongodb-native/2.2/js/jquery.js"></script>
-<script type="text/javascript" src="/node-mongodb-native/2.2/lib/bootstrap.js"></script>
-<script type="text/javascript" src="/node-mongodb-native/2.2/js/navbar.js"></script>
-<script type="text/javascript" src="/node-mongodb-native/2.2/lib/highlight/highlight.pack.js"></script>
-<script type="text/javascript" src="/node-mongodb-native/2.2/js/scripts.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.2//js/jquery.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.2//lib/bootstrap.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.2//js/navbar.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.2//lib/highlight/highlight.pack.js"></script>
+<script type="text/javascript" src="/node-mongodb-native/2.2//js/scripts.js"></script>
 <script type="text/javascript" src="/node-mongodb-native/2.2//lib/bootstrap-toggle/bootstrap-toggle.min.js"></script>
 <script type="text/javascript" src="/node-mongodb-native/2.2//js/java.js"></script>
 <script type="text/javascript" src="/node-mongodb-native/2.2//js/toggle-switch.js"></script>
