@@ -1,7 +1,12 @@
-2.0.7
+2.0.7 2016-07-28
 ----------------
 * Allow primary to be returned when secondaryPreferred is passed (Issue #117, https://github.com/dhendo).
 * Added better warnings when passing in illegal seed list members to a Mongos topology.
+* Minor attemptReconnect bug that would cause multiple attemptReconnect to run in parallel.
+* Fix wrong opType passed to disconnectHandler.add (Issue #121, https://github.com/adrian-gierakowski)
+* Implemented domain backward comp support enabled via domainsEnabled options on Server/ReplSet/Mongos and MongoClient.connect.
+* Initial max staleness implementation for ReplSet and Mongos for 3.4 support.
+* Added handling of collation for 3.4 support.
 
 2.0.6 2016-07-19
 ----------------
