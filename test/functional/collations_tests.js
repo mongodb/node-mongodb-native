@@ -1233,3 +1233,451 @@ exports['Fail command due to no support for collation'] = {
     });
   }
 }
+
+// exports['Successfully pass through collation to bulkWrite command'] = {
+//   metadata: { requires: { generators: true, topology: "single" } },
+//
+//   test: function(configuration, test) {
+//     var MongoClient = configuration.require.MongoClient,
+//       co = require('co'),
+//       mockupdb = require('../mock');
+//
+//     // Contain mock server
+//     var singleServer = null;
+//     var running = true;
+//
+//     // Default message fields
+//     var defaultFields = {
+//       "ismaster" : true, "maxBsonObjectSize" : 16777216,
+//       "maxMessageSizeBytes" : 48000000, "maxWriteBatchSize" : 1000,
+//       "localTime" : new Date(), "maxWireVersion" : 5, "minWireVersion" : 0, "ok" : 1
+//     }
+//
+//     // Primary server states
+//     var primary = [extend(defaultFields, {})];
+//
+//     // Boot the mock
+//     co(function*() {
+//       singleServer = yield mockupdb.createServer(32000, 'localhost');
+//
+//       // Primary state machine
+//       co(function*() {
+//         while(running) {
+//           var request = yield singleServer.receive();
+//           var doc = request.document;
+//           console.log("========================== cmd")
+//           console.dir(doc)
+//
+//           if(doc.ismaster) {
+//             request.reply(primary[0]);
+//           } else if(doc.update) {
+//             commandResult = doc;
+//             request.reply({ok:1});
+//           }
+//         }
+//       }).catch(function(err) {
+//         console.log(err.stack);
+//       });
+//
+//       var commandResult = null;
+//
+//       // Connect to the mocks
+//       MongoClient.connect('mongodb://localhost:32000/test', {collation: { caseLevel: true }}, function(err, db) {
+//         test.equal(null, err);
+//
+//         console.log("!!!!!!!!!!!!!!!!!!! 0")
+//         db.collection('test').bulkWrite([
+//             { updateOne: { q: {a:2}, u: {$set: {a:2}}, upsert:true } }
+//             , { deleteOne: { q: {c:1} } }
+//           ], {ordered:true}, function(err, r) {
+//             console.log("!!!!!!!!!!!!!!!!!!! 1")
+//             console.dir(err)
+//             singleServer.destroy();
+//             running = false;
+//
+//             db.close();
+//             test.done();
+//         });
+//       });
+//     });
+//   }
+// }
+
+exports['Successfully fail bulkWrite due to unsupported collation'] = {
+  metadata: { requires: { generators: true, topology: "single" } },
+
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient,
+      co = require('co'),
+      mockupdb = require('../mock');
+
+    // Contain mock server
+    var singleServer = null;
+    var running = true;
+
+    // Default message fields
+    var defaultFields = {
+      "ismaster" : true, "maxBsonObjectSize" : 16777216,
+      "maxMessageSizeBytes" : 48000000, "maxWriteBatchSize" : 1000,
+      "localTime" : new Date(), "maxWireVersion" : 4, "minWireVersion" : 0, "ok" : 1
+    }
+
+    // Primary server states
+    var primary = [extend(defaultFields, {})];
+
+    // Boot the mock
+    co(function*() {
+      singleServer = yield mockupdb.createServer(32000, 'localhost');
+
+      // Primary state machine
+      co(function*() {
+        while(running) {
+          var request = yield singleServer.receive();
+          var doc = request.document;
+          // console.log("========================== cmd")
+          // console.dir(doc)
+
+          if(doc.ismaster) {
+            request.reply(primary[0]);
+          } else if(doc.update) {
+            commandResult = doc;
+            request.reply({ok:1});
+          }
+        }
+      }).catch(function(err) {
+        console.log(err.stack);
+      });
+
+      var commandResult = null;
+
+      // Connect to the mocks
+      MongoClient.connect('mongodb://localhost:32000/test', function(err, db) {
+        test.equal(null, err);
+
+        db.collection('test').bulkWrite([
+              { updateOne: { q: {a:2}, u: {$set: {a:2}}, upsert:true, collation: {caseLevel: true} } }
+            , { deleteOne: { q: {c:1} } }
+          ], {ordered:true}, function(err, r) {
+            test.ok(err);
+            test.equal('server/primary/mongos does not support collation', err.message)
+            singleServer.destroy();
+            running = false;
+
+            db.close();
+            test.done();
+        });
+      });
+    });
+  }
+}
+
+exports['Successfully fail bulkWrite due to unsupported collation using replset'] = {
+  metadata: { requires: { generators: true, topology: "single" } },
+
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient,
+      co = require('co'),
+      ObjectId = configuration.require.ObjectId,
+      mockupdb = require('../mock');
+
+    // Contain mock server
+    var primaryServer = null;
+    var firstSecondaryServer = null;
+    var arbiterServer = null;
+    var running = true;
+    var electionIds = [new ObjectId(), new ObjectId()];
+
+    // Default message fields
+    var defaultFields = {
+      "setName": "rs", "setVersion": 1, "electionId": electionIds[0],
+      "maxBsonObjectSize" : 16777216, "maxMessageSizeBytes" : 48000000,
+      "maxWriteBatchSize" : 1000, "localTime" : new Date(), "maxWireVersion" : 4,
+      "minWireVersion" : 0, "ok" : 1, "hosts": ["localhost:32000", "localhost:32001", "localhost:32002"], "arbiters": ["localhost:32002"]
+    }
+
+    // Primary server states
+    var primary = [extend(defaultFields, {
+      "ismaster":true, "secondary":false, "me": "localhost:32000", "primary": "localhost:32000", "tags" : { "loc" : "ny" }
+    })];
+
+    // Primary server states
+    var firstSecondary = [extend(defaultFields, {
+      "ismaster":false, "secondary":true, "me": "localhost:32001", "primary": "localhost:32000", "tags" : { "loc" : "sf" }
+    })];
+
+    // Primary server states
+    var arbiter = [extend(defaultFields, {
+      "ismaster":false, "secondary":false, "arbiterOnly": true, "me": "localhost:32002", "primary": "localhost:32000"
+    })];
+
+    // Boot the mock
+    co(function*() {
+      primaryServer = yield mockupdb.createServer(32000, 'localhost');
+      firstSecondaryServer = yield mockupdb.createServer(32001, 'localhost');
+      arbiterServer = yield mockupdb.createServer(32002, 'localhost');
+
+      // Primary state machine
+      co(function*() {
+        while(running) {
+          var request = yield primaryServer.receive();
+          var doc = request.document;
+
+          if(doc.ismaster) {
+            request.reply(primary[0]);
+          }
+        }
+      }).catch(function(err) {
+        console.log(err.stack);
+      });
+
+      // First secondary state machine
+      co(function*() {
+        while(running) {
+          var request = yield firstSecondaryServer.receive();
+          var doc = request.document;
+
+          if(doc.ismaster) {
+            request.reply(firstSecondary[0]);
+          }
+        }
+      }).catch(function(err) {
+        console.log(err.stack);
+      });
+
+      // Second secondary state machine
+      co(function*() {
+        while(running) {
+          var request = yield arbiterServer.receive();
+          var doc = request.document;
+
+          if(doc.ismaster) {
+            request.reply(arbiter[0]);
+          }
+        }
+      }).catch(function(err) {
+        console.log(err.stack);
+      });
+    });
+
+    // Connect to the mocks
+    MongoClient.connect('mongodb://localhost:32000,localhost:32001/test?replicaSet=rs', function(err, db) {
+      test.equal(null, err);
+
+      db.collection('test').bulkWrite([
+            { updateOne: { q: {a:2}, u: {$set: {a:2}}, upsert:true, collation: {caseLevel: true} } }
+          , { deleteOne: { q: {c:1} } }
+        ], {ordered:true}, function(err, r) {
+          test.ok(err);
+          test.equal('server/primary/mongos does not support collation', err.message)
+          primaryServer.destroy();
+          firstSecondaryServer.destroy();
+          arbiterServer.destroy();
+          running = false;
+
+          db.close();
+          test.done();
+      });
+    });
+  }
+}
+
+exports['Successfully create index with collation'] = {
+  metadata: { requires: { generators: true, topology: "single" } },
+
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient,
+      co = require('co'),
+      mockupdb = require('../mock');
+
+    // Contain mock server
+    var singleServer = null;
+    var running = true;
+
+    // Default message fields
+    var defaultFields = {
+      "ismaster" : true, "maxBsonObjectSize" : 16777216,
+      "maxMessageSizeBytes" : 48000000, "maxWriteBatchSize" : 1000,
+      "localTime" : new Date(), "maxWireVersion" : 5, "minWireVersion" : 0, "ok" : 1
+    }
+
+    // Primary server states
+    var primary = [extend(defaultFields, {})];
+
+    // Boot the mock
+    co(function*() {
+      singleServer = yield mockupdb.createServer(32000, 'localhost');
+
+      // Primary state machine
+      co(function*() {
+        while(running) {
+          var request = yield singleServer.receive();
+          var doc = request.document;
+          // console.log("========================== cmd")
+          // console.dir(doc)
+
+          if(doc.ismaster) {
+            request.reply(primary[0]);
+          } else if(doc.createIndexes) {
+            commandResult = doc;
+            request.reply({ok:1});
+          }
+        }
+      }).catch(function(err) {
+        console.log(err.stack);
+      });
+
+      var commandResult = null;
+
+      // Connect to the mocks
+      MongoClient.connect('mongodb://localhost:32000/test', function(err, db) {
+        test.equal(null, err);
+
+        // Simple findAndModify command returning the new document
+        db.collection('test').createIndex({a:1}, {collation: { caseLevel: true }}, function(err, r) {
+          test.equal(null, err);
+          test.deepEqual({"createIndexes":"test","indexes":[{"name":"a_1","key":{"a":1},"collation":{"caseLevel":true}}]}, commandResult);
+
+          singleServer.destroy();
+          running = false;
+
+          db.close();
+          test.done();
+        });
+      });
+    });
+  }
+}
+
+exports['Fail to create index with collation due to no capabilities'] = {
+  metadata: { requires: { generators: true, topology: "single" } },
+
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient,
+      co = require('co'),
+      mockupdb = require('../mock');
+
+    // Contain mock server
+    var singleServer = null;
+    var running = true;
+
+    // Default message fields
+    var defaultFields = {
+      "ismaster" : true, "maxBsonObjectSize" : 16777216,
+      "maxMessageSizeBytes" : 48000000, "maxWriteBatchSize" : 1000,
+      "localTime" : new Date(), "maxWireVersion" : 4, "minWireVersion" : 0, "ok" : 1
+    }
+
+    // Primary server states
+    var primary = [extend(defaultFields, {})];
+
+    // Boot the mock
+    co(function*() {
+      singleServer = yield mockupdb.createServer(32000, 'localhost');
+
+      // Primary state machine
+      co(function*() {
+        while(running) {
+          var request = yield singleServer.receive();
+          var doc = request.document;
+          // console.log("========================== cmd")
+          // console.dir(doc)
+
+          if(doc.ismaster) {
+            request.reply(primary[0]);
+          } else if(doc.createIndexes) {
+            commandResult = doc;
+            request.reply({ok:1});
+          }
+        }
+      }).catch(function(err) {
+        console.log(err.stack);
+      });
+
+      var commandResult = null;
+
+      // Connect to the mocks
+      MongoClient.connect('mongodb://localhost:32000/test', function(err, db) {
+        test.equal(null, err);
+
+        // Simple findAndModify command returning the new document
+        db.collection('test').createIndex({a:1}, {collation: { caseLevel: true }}, function(err, r) {
+          test.ok(err);
+          test.equal('server/primary/mongos does not support collation', err.message)
+
+          singleServer.destroy();
+          running = false;
+
+          db.close();
+          test.done();
+        });
+      });
+    });
+  }
+}
+
+exports['Fail to create indexs with collation due to no capabilities'] = {
+  metadata: { requires: { generators: true, topology: "single" } },
+
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient,
+      co = require('co'),
+      mockupdb = require('../mock');
+
+    // Contain mock server
+    var singleServer = null;
+    var running = true;
+
+    // Default message fields
+    var defaultFields = {
+      "ismaster" : true, "maxBsonObjectSize" : 16777216,
+      "maxMessageSizeBytes" : 48000000, "maxWriteBatchSize" : 1000,
+      "localTime" : new Date(), "maxWireVersion" : 4, "minWireVersion" : 0, "ok" : 1
+    }
+
+    // Primary server states
+    var primary = [extend(defaultFields, {})];
+
+    // Boot the mock
+    co(function*() {
+      singleServer = yield mockupdb.createServer(32000, 'localhost');
+
+      // Primary state machine
+      co(function*() {
+        while(running) {
+          var request = yield singleServer.receive();
+          var doc = request.document;
+          // console.log("========================== cmd")
+          // console.dir(doc)
+
+          if(doc.ismaster) {
+            request.reply(primary[0]);
+          } else if(doc.createIndexes) {
+            commandResult = doc;
+            request.reply({ok:1});
+          }
+        }
+      }).catch(function(err) {
+        console.log(err.stack);
+      });
+
+      var commandResult = null;
+
+      // Connect to the mocks
+      MongoClient.connect('mongodb://localhost:32000/test', function(err, db) {
+        test.equal(null, err);
+
+        // Simple findAndModify command returning the new document
+        db.collection('test').createIndexes([{key: {a:1}, collation: { caseLevel: true }}], function(err, r) {
+          test.ok(err);
+          test.equal('server/primary/mongos does not support collation', err.message)
+
+          singleServer.destroy();
+          running = false;
+
+          db.close();
+          test.done();
+        });
+      });
+    });
+  }
+}
