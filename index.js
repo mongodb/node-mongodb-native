@@ -22,6 +22,9 @@ connect.Chunk = require('./lib/gridfs/chunk');
 connect.Logger = core.Logger;
 connect.Cursor = require('./lib/cursor');
 connect.GridFSBucket = require('./lib/gridfs-stream');
+// Exported to be used in tests not to be used anywhere else
+connect.CoreServer = require('mongodb-core').Server;
+connect.CoreConnection = require('mongodb-core').Connection;
 
 // BSON types exported
 connect.Binary = core.BSON.Binary;
@@ -36,6 +39,7 @@ connect.ObjectID = core.BSON.ObjectID;
 connect.ObjectId = core.BSON.ObjectID;
 connect.Symbol = core.BSON.Symbol;
 connect.Timestamp = core.BSON.Timestamp;
+connect.Decimal128 = core.BSON.Decimal128;
 
 // Add connect method
 connect.connect = connect;

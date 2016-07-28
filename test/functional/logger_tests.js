@@ -6,7 +6,7 @@
  */
 exports['Should correctly Enable logging'] = {
   metadata: { requires: { topology: ['single'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var Logger = configuration.require.Logger
@@ -51,7 +51,7 @@ exports['Should correctly Enable logging'] = {
  */
 exports['Should not fail with undefined id'] = {
   metadata: { requires: { topology: ['single'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient
@@ -83,7 +83,7 @@ exports['Should not fail with undefined id'] = {
  */
 exports['Should correctly log cursor'] = {
   metadata: { requires: { topology: ['single'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var MongoClient = configuration.require.MongoClient
@@ -100,7 +100,7 @@ exports['Should correctly log cursor'] = {
         test.ok(msg != null);
         test.equal('debug', context.type);
         test.equal('Cursor', context.className);
-        logged = true;        
+        logged = true;
       });
 
       // Set the filter
@@ -109,6 +109,40 @@ exports['Should correctly log cursor'] = {
 
       // perform any operation that gets logged
       db.collection('logging').find().toArray(function(err, d) {
+        test.equal(null, err);
+        test.ok(logged);
+
+        // Clean up
+        Logger.reset();
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
+
+/**
+ * Should No fail with undefined id
+ * @ignore
+ */
+exports['Pass the logLevel down through the options'] = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient
+      , Logger = configuration.require.Logger;
+
+    Logger.filter('class', ['Cursor']);
+    var logged = false;
+
+    MongoClient.connect('mongodb://localhost:27017/test', {
+      loggerLevel: 'debug', logger: function() { logged = true; }
+    }, function(err, db) {
+      test.equal(null, err);
+
+      // perform any operation that gets logged
+      db.collection('foo').findOne({}, function(err) {
         test.equal(null, err);
         test.ok(logged);
 

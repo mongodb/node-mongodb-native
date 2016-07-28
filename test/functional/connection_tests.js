@@ -3,6 +3,45 @@
 /**
  * @ignore
  */
+exports['Should correctly start monitoring for single server connection'] = {
+  metadata: { requires: { topology: 'single' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstanceWithDomainSocket({w:1}, {poolSize: 1, host: "/tmp/mongodb-27017.sock"});
+    db.open(function(err, db) {
+      test.equal(null, err);
+
+      db.serverConfig.once('monitoring', function() {
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['Should correctly disable monitoring for single server connection'] = {
+  metadata: { requires: { topology: 'single' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstanceWithDomainSocket({w:1}, {poolSize: 1, host: "/tmp/mongodb-27017.sock", monitoring: false});
+    db.open(function(err, db) {
+      test.equal(null, err);
+      test.equal(false, db.serverConfig.s.server.s.monitoring);
+
+      db.close();
+      test.done();
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
 exports['Should correctly connect to server using domain socket'] = {
   metadata: { requires: { topology: 'single' } },
 
@@ -121,13 +160,15 @@ exports['Should fail to connect using non-domain socket with undefined port'] = 
 function connectionTester(test, testName, callback) {
   return function(err, db) {
     test.equal(err, null);
+
     db.collection(testName, function(err, collection) {
       test.equal(err, null);
       var doc = {foo:123};
+
       collection.insert({foo:123}, {w:1}, function(err, docs) {
         test.equal(err, null);
+
         db.dropDatabase(function(err, done) {
-          db.close();
           test.equal(err, null);
           test.ok(done);
           if(callback) return callback(db);
@@ -149,6 +190,7 @@ exports.testConnectNoOptions = {
     var connect = configuration.require;
 
     connect(configuration.url(), connectionTester(test, 'testConnectNoOptions', function(db) {
+      db.close();
       test.done();
     }));
   }
@@ -170,6 +212,7 @@ exports.testConnectServerOptions = {
       test.equal(1, db.serverConfig.poolSize);
       test.equal(4, db.serverConfig.s.server.s.pool.size);
       test.equal(true, db.serverConfig.autoReconnect);
+      db.close();
       test.done();
     }));
   }
@@ -192,6 +235,7 @@ exports.testConnectAllOptions = {
       test.equal(1, db.serverConfig.poolSize);
       test.equal(4, db.serverConfig.s.server.s.pool.size);
       test.equal(true, db.serverConfig.autoReconnect);
+      db.close();
       test.done();
     }));
   }
@@ -220,6 +264,7 @@ exports.testConnectGoodAuth = {
 
     function restOfTest() {
       connect(configuration.url(user, password), connectionTester(test, 'testConnectGoodAuth', function(db) {
+        db.close();
         test.done();
       }));
     }
@@ -235,7 +280,6 @@ exports.testConnectBadAuth = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var connect = configuration.require;
-
     connect(configuration.url('slithy', 'toves'), function(err, db) {
       test.ok(err);
       test.equal(null, db);

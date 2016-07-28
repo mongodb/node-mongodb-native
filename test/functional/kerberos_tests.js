@@ -26,7 +26,37 @@ exports['Should Correctly Authenticate using kerberos with MongoClient'] = {
 
     // Let's write the actual connection code
     MongoClient.connect(format("mongodb://%s@%s/kerberos?authMechanism=GSSAPI&gssapiServiceName=mongodb&maxPoolSize=1", urlEncodedPrincipal, server), function(err, db) {
-      console.dir(err)
+      test.equal(null, err);
+      test.ok(db != null);
+
+      db.collection('test').find().toArray(function(err, docs) {
+        test.equal(null, err);
+        test.ok(true, docs[0].kerberos);
+        test.done();
+      });
+    });
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['Validate that SERVICE_REALM and CANONICALIZE_HOST_NAME is passed in'] = {
+  metadata: { requires: { topology: 'kerberos', os: "!win32"  } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
+      , Server = configuration.require.Server;
+
+    // KDC Server
+    var server = "ldaptest.10gen.cc";
+    var principal = "drivers@LDAPTEST.10GEN.CC";
+    var urlEncodedPrincipal = encodeURIComponent(principal);
+
+    // Let's write the actual connection code
+    MongoClient.connect(format("mongodb://%s@%s/kerberos?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:false,SERVICE_REALM:windows&maxPoolSize=1", urlEncodedPrincipal, server), function(err, db) {
       test.equal(null, err);
       test.ok(db != null);
 
@@ -57,7 +87,7 @@ exports['Should Correctly Authenticate using kerberos with MongoClient and authe
     var urlEncodedPrincipal = encodeURIComponent(principal);
 
     // Let's write the actual connection code
-    MongoClient.connect(format("mongodb://%s@%s/kerberos?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:true&maxPoolSize=1", urlEncodedPrincipal, server), function(err, db) {
+    MongoClient.connect(format("mongodb://%s@%s/kerberos?authMechanism=GSSAPI&authMechanismProperties=SERVICE_NAME:mongodb,CANONICALIZE_HOST_NAME:false&maxPoolSize=1", urlEncodedPrincipal, server), function(err, db) {
       test.equal(null, err);
       test.ok(db != null);
 
@@ -197,6 +227,7 @@ exports['Should Correctly Authenticate on Win32 using kerberos with MongoClient'
     var server = "ldaptest.10gen.cc";
     var principal = "drivers@LDAPTEST.10GEN.CC";
     var pass = process.env['LDAPTEST_PASSWORD'];
+
     if(pass == null) throw new Error("The env parameter LDAPTEST_PASSWORD must be set");
     var urlEncodedPrincipal = encodeURIComponent(principal);
 
@@ -320,6 +351,7 @@ exports['Should Fail to Authenticate due to illegal service name on win32'] = {
     var server = "ldaptest.10gen.cc";
     var principal = "drivers@LDAPTEST.10GEN.CC";
     var pass = process.env['LDAPTEST_PASSWORD'];
+
     if(pass == null) throw new Error("The env parameter LDAPTEST_PASSWORD must be set");
     var urlEncodedPrincipal = encodeURIComponent(principal);
 

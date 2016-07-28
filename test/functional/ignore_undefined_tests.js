@@ -10,7 +10,12 @@ exports['Should correctly insert document ignoring undefined field'] = {
     var db = configuration.newDbInstance({ignoreUndefined:true}, {poolSize:1});
     db.open(function(err, db) {
       var collection = db.collection('shouldCorrectlyIgnoreUndefinedValue');
+      // console.log("!!!!!!!!!!!!!!!!! IGNORE")
+
+      // Ignore the undefined field
       collection.insert({a:1, b:undefined}, configuration.writeConcernMax(), function(err, result) {
+
+        // Locate the doument
         collection.findOne(function(err, item) {
           test.equal(1, item.a);
           test.ok(item.b === undefined);

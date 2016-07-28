@@ -5,7 +5,7 @@
  */
 exports.shouldCorrectlyGenerateObjectID = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
@@ -67,12 +67,12 @@ exports.shouldCorrectlyGenerateObjectID = {
  */
 exports.shouldCorrectlyRetrieve24CharacterHexStringFromToString = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
     // Create a new ObjectID
-    var objectId = new ObjectID();  
+    var objectId = new ObjectID();
     // Verify that the hex string is 24 characters long
     test.equal(24, objectId.toString().length);
     test.done();
@@ -84,12 +84,12 @@ exports.shouldCorrectlyRetrieve24CharacterHexStringFromToString = {
  */
 exports.shouldCorrectlyRetrieve24CharacterHexStringFromToJSON = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
     // Create a new ObjectID
-    var objectId = new ObjectID();  
+    var objectId = new ObjectID();
     // Verify that the hex string is 24 characters long
     test.equal(24, objectId.toJSON().length);
     test.done();
@@ -101,13 +101,13 @@ exports.shouldCorrectlyRetrieve24CharacterHexStringFromToJSON = {
  */
 exports.shouldCorrectlyCreateOIDNotUsingObjectID = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
 
     var db = configuration.newDbInstance({w:1}, {poolSize:1});
-    db.open(function(err, db) {  
+    db.open(function(err, db) {
       var collection = db.collection('test_non_oid_id');
       var date = new Date();
       date.setUTCDate(12);
@@ -135,7 +135,7 @@ exports.shouldCorrectlyCreateOIDNotUsingObjectID = {
  */
 exports.shouldCorrectlyGenerateObjectIDFromTimestamp = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
@@ -153,7 +153,7 @@ exports.shouldCorrectlyGenerateObjectIDFromTimestamp = {
  */
 exports.shouldCorrectlyCreateAnObjectIDAndOverrideTheTimestamp = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var ObjectID = configuration.require.ObjectID;
@@ -163,9 +163,15 @@ exports.shouldCorrectlyCreateAnObjectIDAndOverrideTheTimestamp = {
     var id1 = objectID.id;
     // Override the timestamp
     objectID.generationTime = timestamp
-    var id2 = objectID.id;  
-    // Check the strings
-    test.equal(id1.substr(4), id2.substr(4));
+    var id2 = objectID.id;
+
+    // Check the timestamp
+    if(id1 instanceof Buffer && id2 instanceof Buffer) {
+      test.deepEqual(id1.slice(0, 4), id2.slice(0, 4));
+    } else {
+      test.equal(id1.substr(4), id2.substr(4));
+    }
+
     test.done();
   }
 }
@@ -175,7 +181,7 @@ exports.shouldCorrectlyCreateAnObjectIDAndOverrideTheTimestamp = {
  */
 exports.shouldCorrectlyInsertWithObjectId = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
-  
+
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance({w:1}, {poolSize:1});
@@ -186,7 +192,7 @@ exports.shouldCorrectlyInsertWithObjectId = {
           collection.insert({}, {w:1}, function(err, ids) {
             collection.find().toArray(function(err, items) {
               var compareDate = new Date();
-              
+
               // Date 1
               var date1 = new Date();
               date1.setTime(items[0]._id.generationTime * 1000);
@@ -209,7 +215,7 @@ exports.shouldCorrectlyInsertWithObjectId = {
               test.done();
             });
           });
-        }, 2000);        
+        }, 2000);
       });
     });
   }

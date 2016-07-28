@@ -2807,7 +2807,6 @@ exports.shouldCorrectlyLogoutFromTheDatabaseWithPromises = {
         // Authenticate
         db.authenticate('user3', 'name').then(function(result) {
           test.equal(true, result);
-
           // Logout the db
           db.logout().then(function(result) {
             test.equal(true, result);
@@ -6226,6 +6225,31 @@ exports['Should correctly execute bulkWrite operation With Promises'] = {
 }
 
 /**
+ * Duplicate key error
+ */
+exports['Should correctly handle duplicate key error with bulkWrite'] = {
+  metadata: { requires: { promises:true, topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    db.open().then(function(db) {
+      // Get the collection
+      var col = db.collection('bulk_write_with_promise_write_error');
+      col.bulkWrite([
+          { insertOne: { document: { _id: 1 } } },
+          { insertOne: { document: { _id: 1 } } }]
+      , {ordered:true, w:1}).then(function(r) {
+        test.equal(true, r.hasWriteErrors());
+        // Ordered bulk operation
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
+
+/**
  * Example of a simple findOneAndDelete operation using a Promise.
  *
  * @example-class Collection
@@ -6381,24 +6405,28 @@ exports['Should correctly add capped collection options to cursor With Promises'
     // REMOVE-LINE test.done();
     // BEGIN
       // Create a capped collection with a maximum of 1000 documents
-      db.createCollection("a_simple_collection_2_with_promise", {capped:true, size:10000, max:1000, w:1}).then(function(collection) {
+      db.createCollection("a_simple_collection_2_with_promise", {capped:true, size:100000, max:10000, w:1}).then(function(collection) {
         var docs = [];
         for(var i = 0; i < 1000; i++) docs.push({a:i});
 
         // Insert a document in the capped collection
         collection.insertMany(docs, configuration.writeConcernMax()).then(function(result) {
-
           // Start date
           var s = new Date();
+          var total = 0;
 
           // Get the cursor
-          var cursor = collection.find({})
+          var cursor = collection.find({a: {$gte:0}})
             .addCursorFlag('tailable', true)
             .addCursorFlag('awaitData', true)
-            .setCursorOption('numberOfRetries', 5)
-            .setCursorOption('tailableRetryInterval', 100);
 
-          cursor.on('data', function() {});
+          cursor.on('data', function(d) {
+            total = total + 1;
+
+            if(total == 1000) {
+              cursor.kill();
+            }
+          });
 
           cursor.on('end', function() {
             test.ok((new Date().getTime() - s.getTime()) > 1000);

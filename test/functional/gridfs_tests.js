@@ -467,12 +467,13 @@ exports.shouldCorrectlyWriteFileToGridStoreUsingObjectId = {
       gridStore.open(function(err, gridStore) {
         gridStore.writeFile('./test/functional/data/test_gs_weird_bug.png', function(err, doc) {
 
-          GridStore.read(db, doc._id, function(err, fileData) {
+          GridStore.read(db, doc.fileId, function(err, fileData) {
+            console.dir(err)
             test.equal(data.toString('base64'), fileData.toString('base64'));
             test.equal(fileSize, fileData.length);
 
             // Ensure we have a md5
-            var gridStore2 = new GridStore(db, doc._id, 'r');
+            var gridStore2 = new GridStore(db, doc.fileId, 'r');
             gridStore2.open(function(err, gridStore2) {
               test.ok(gridStore2.md5 != null)
               db.close();
@@ -3160,36 +3161,6 @@ exports['should not attempt to delete chunks when no file exists'] = {
           });
         });
       });
-
-      // // Execute findOneAndUpdate
-      // collection.findOneAndUpdate({}, {$set: {a:1}}, {fsync:1}, function(err, r) {
-      //   test.equal(null, err);
-      //   test.deepEqual({fsync:1}, started[0].command.writeConcern);
-
-      //   // Cleanup
-      //   started = [];
-      //   succeeded = [];
-
-      //   // Execute findOneAndReplace
-      //   collection.findOneAndReplace({}, {b:1}, {fsync:1}, function(err, r) {
-      //     test.equal(null, err);
-      //     test.deepEqual({fsync:1}, started[0].command.writeConcern);
-
-      //     // Cleanup
-      //     started = [];
-      //     succeeded = [];
-
-      //     // Execute findOneAndReplace
-      //     collection.findOneAndDelete({}, {fsync:1}, function(err, r) {
-      //       test.equal(null, err);
-      //       test.deepEqual({fsync:1}, started[0].command.writeConcern);
-
-      //       listener.uninstrument();
-      //       db.close();
-      //       test.done();
-      //     });
-      //   });
-      // });
     });
   }
 }

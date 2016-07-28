@@ -11,6 +11,7 @@ var Runner = require('integra').Runner
   , MongoDBTopologyFilter = require('./filters/mongodb_topology_filter')
   , ES6PromisesSupportedFilter = require('./filters/es6_promises_supported_filter')
   , ES6GeneratorsSupportedFilter = require('./filters/es6_generators_supported_filter')
+  , OSFilter = require('./filters/os_filter')
   , TravisFilter = require('./filters/travis_filter')
   , FileFilter = require('integra').FileFilter
   , TestNameFilter = require('integra').TestNameFilter;
@@ -93,8 +94,10 @@ var Configuration = function(options) {
   return function(context) {
     return {
       start: function(callback) {
+        // console.log("------------ start 0")
         var self = this;
         if(skipStart) return callback();
+        // console.log("------------ start 1")
 
         // Purge the database
         manager.purge().then(function() {
@@ -123,19 +126,28 @@ var Configuration = function(options) {
       },
 
       stop: function(callback) {
+        // console.log("=================== STOP 0")
         if(skipTermination) return callback();
+        // console.log("=================== STOP 1")
         // Stop the servers
-        manager.stop().then(function() {
+        manager.stop(9).then(function() {
+          // console.log("=================== STOP 1")
           callback();
         });
       },
 
       restart: function(options, callback) {
+        // console.log("------------ restart 0")
+        // console.log("=================== RESTART 0")
         if(typeof options == 'function') callback = options, options = {purge:true, kill:true};
+        // console.log("=================== RESTART 1")
         if(skipTermination) return callback();
+        // console.log("=================== RESTART 2")
+        // console.log("------------ restart 1")
 
         // Stop the servers
         manager.restart().then(function() {
+          // console.log("=================== RESTART 3")
           callback();
         });
       },
@@ -228,7 +240,8 @@ var Configuration = function(options) {
 
 // Set up the runner
 var runner = new Runner({
-    logLevel:'error'
+    // logLevel:'error'
+    logLevel:'info'
   , runners: 1
   , failFast: true
 });
@@ -263,7 +276,6 @@ var testFiles = [
   , '/test/functional/connection_tests.js'
   , '/test/functional/cursorstream_tests.js'
   , '/test/functional/custom_pk_tests.js'
-  , '/test/functional/domain_tests.js'
   , '/test/functional/error_tests.js'
   , '/test/functional/find_tests.js'
   , '/test/functional/index_tests.js'
@@ -281,10 +293,13 @@ var testFiles = [
   , '/test/functional/bulk_tests.js'
   , '/test/functional/operation_example_tests.js'
   , '/test/functional/crud_api_tests.js'
-  , '/test/functional/reconnect_tests.js'
-  , '/test/functional/find_and_modify_tests.js'
   , '/test/functional/document_validation_tests.js'
   , '/test/functional/ignore_undefined_tests.js'
+  , '/test/functional/mongo_client_options_tests.js'
+  , '/test/functional/decimal128_tests.js'
+  , '/test/functional/find_and_modify_tests.js'
+  , '/test/functional/hang_tests.js',
+  , '/test/functional/disconnect_handler_tests.js',
 
   // Replicaset tests
   , '/test/functional/replset_read_preference_tests.js'
@@ -316,6 +331,15 @@ var testFiles = [
 
   // GridFS
   , '/test/functional/gridfs_stream_tests.js'
+
+  // Reconnection tests
+  , '/test/functional/reconnect_tests.js',
+
+  // Bug tests
+  , '/test/functional/jira_bug_tests.js',
+
+  // Domain tests
+  , '/test/functional/domain_tests.js'
 ]
 
 // Check if we support es6 generators
@@ -323,6 +347,11 @@ try {
   eval("(function *(){})");
   // Generator tests
   testFiles.push('/test/functional/operation_generators_example_tests.js');
+  // Mock tests
+  testFiles.push('/test/functional/command_write_concern_tests.js');
+  testFiles.push('/test/functional/replicaset_mock_tests.js');
+  testFiles.push('/test/functional/collations_tests.js');
+  testFiles.push('/test/functional/max_staleness_tests.js');
 } catch(err) {}
 
 // Add all the tests to run
@@ -352,6 +381,8 @@ testFiles.forEach(function(t) {
 //  ]
 // }));
 
+// Filter by OS
+runner.plugin(new OSFilter());
 // Add a Node version plugin
 runner.plugin(new NodeVersionFilter(startupOptions));
 // Add a MongoDB version plugin
@@ -359,9 +390,9 @@ runner.plugin(new MongoDBVersionFilter(startupOptions));
 // Add a Topology filter plugin
 runner.plugin(new MongoDBTopologyFilter(startupOptions));
 // Add a Filter allowing us to specify that a function requires Promises
-runner.plugin(new ES6PromisesSupportedFilter())
+runner.plugin(new ES6PromisesSupportedFilter());
 // Add a Filter allowing us to validate if generators are available
-runner.plugin(new ES6GeneratorsSupportedFilter())
+runner.plugin(new ES6GeneratorsSupportedFilter());
 
 // Exit when done
 runner.on('exit', function(errors, results) {
@@ -416,12 +447,15 @@ if(argv.t == 'functional') {
       return runner.run(Configuration(_config));
     }
 
+    console.log("!!!!!!!!!!! RUN 0")
     // Kill any running MongoDB processes and
     // `install $MONGODB_VERSION` || `use existing installation` || `install stable`
     m(function(err){
+      console.log("!!!!!!!!!!! RUN 1")
       if(err) return console.error(err) && process.exit(1);
 
       m.current(function(err, version){
+        console.log("!!!!!!!!!!! RUN 2")
         if(err) return console.error(err) && process.exit(1);
         console.log('Running tests against MongoDB version `%s`', version);
         // Run the configuration
@@ -433,6 +467,7 @@ if(argv.t == 'functional') {
   //
   // Replicaset configuration
   if(argv.e == 'replicaset') {
+    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
     // Establish the server version
     new ServerManager('mongod').discover().then(function(r) {
       // The individual nodes
@@ -501,8 +536,9 @@ if(argv.t == 'functional') {
             serverOptions = clone(serverOptions);
             serverOptions.rs_name = 'rs';
             serverOptions.poolSize = 1;
+            serverOptions.autoReconnect = false;
             return new mongo.ReplSet([
-              new mongo.Server(host, port)
+              new mongo.Server(host, port, serverOptions)
             ], serverOptions);
           }
         , manager: new ReplSetManager('mongod', nodes, {
@@ -528,8 +564,11 @@ if(argv.t == 'functional') {
       , skipStart: startupOptions.skipStartup
       , skipTermination: startupOptions.skipShutdown
       , topology: function(host, port, options) {
+        var options = options || {};
+        options.autoReconnect = false;
+
         return new mongo.Mongos([
-          new mongo.Server(host, port, options || {})
+          new mongo.Server(host, port, options)
         ]);
       }, manager: new ShardingManager({
       })
@@ -546,13 +585,13 @@ if(argv.t == 'functional') {
         sslOnNormalPorts: null
       , fork:null
       , sslPEMKeyFile: __dirname + "/functional/ssl/server.pem"
-      , url: "mongodb://%slocalhost:27017/integration_tests?ssl=true"
+      , url: "mongodb://%slocalhost:27017/integration_tests?ssl=true&sslValidate=false"
       , topology: function(host, port, serverOptions) {
         host = host || 'localhost';
         port = port || 27017;
         serverOptions = clone(serverOptions);
         serverOptions.poolSize = 1;
-        serverOptions.ssl = true
+        serverOptions.ssl = true;
         serverOptions.sslValidate = false;
         return new mongo.Server(host, port, serverOptions);
       }, manager: new ServerManager('mongod', {
@@ -617,8 +656,8 @@ if(argv.t == 'functional') {
       , skipStart: startupOptions.skipStartup
       , skipTermination: startupOptions.skipShutdown
       , manager: new ServerManager('mongod', {
-        dbpath: path.join(path.resolve('db'), f("data-%d", 27017)),
-        setParameter: ['enableTestCommands=1']
+          dbpath: path.join(path.resolve('db'), f("data-%d", 27017)),
+          setParameter: ['enableTestCommands=1']
       })
     }
 

@@ -85,6 +85,88 @@ exports.shouldUploadFromFileStream = {
 };
 
 /**
+ * Correctly stream a file from disk into GridFS using openUploadStream
+ *
+ * @example-class GridFSBucket
+ * @example-method openUploadStreamWithId
+ * @ignore
+ */
+exports.shouldUploadFromFileStreamWithCustomId = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var GridFSBucket = configuration.require.GridFSBucket;
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(),
+      { poolSize:1 });
+    db.open(function(error, db) {
+      test.equal(error, null);
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
+      db.dropDatabase(function(error) {
+        test.equal(error, null);
+
+        var bucket = new GridFSBucket(db);
+        var readStream = fs.createReadStream('./LICENSE');
+
+        var uploadStream = bucket.openUploadStreamWithId(1, 'test.dat');
+
+        var license = fs.readFileSync('./LICENSE');
+        var id = uploadStream.id;
+        test.equal(1, id);
+
+        // Wait for stream to finish
+        uploadStream.once('finish', function() {
+          var chunksColl = db.collection('fs.chunks');
+          var chunksQuery = chunksColl.find({ files_id: id });
+
+          // Get all the chunks
+          chunksQuery.toArray(function(error, docs) {
+            test.equal(error, null);
+            test.equal(docs.length, 1);
+            test.equal(docs[0].data.toString('hex'), license.toString('hex'));
+
+            var filesColl = db.collection('fs.files');
+            var filesQuery = filesColl.find({ _id: id });
+
+            filesQuery.toArray(function(error, docs) {
+              test.equal(error, null);
+              test.equal(docs.length, 1);
+
+              var hash = crypto.createHash('md5');
+              hash.update(license);
+              test.equal(docs[0].md5, hash.digest('hex'));
+
+              // make sure we created indexes
+              filesColl.listIndexes().toArray(function(error, indexes) {
+                test.equal(error, null);
+                test.equal(indexes.length, 2);
+                test.equal(indexes[1].name, 'filename_1_uploadDate_1');
+
+                chunksColl.listIndexes().toArray(function(error, indexes) {
+                  test.equal(error, null);
+                  test.equal(indexes.length, 2);
+                  test.equal(indexes[1].name, 'files_id_1_n_1');
+                  test.done();
+                });
+              });
+            });
+          });
+        });
+
+        readStream.pipe(uploadStream);
+      });
+    });
+    // END
+  }
+};
+
+/**
  * Correctly upload a file to GridFS and then retrieve it as a stream
  *
  * @example-class GridFSBucket
@@ -146,6 +228,37 @@ exports.shouldDownloadToUploadStream = {
       readStream.pipe(uploadStream);
     });
     // END
+  }
+};
+
+/**
+ * Correctly return file not found error
+ * @ignore
+ */
+exports['should fail to locate gridfs stream'] = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var GridFSBucket = configuration.require.GridFSBucket,
+      ObjectId = configuration.require.ObjectID;
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(),
+      { poolSize:1 });
+    db.open(function(error, db) {
+      var bucket = new GridFSBucket(db, { bucketName: 'gridfsdownload' });
+      // Get an unknown file
+      var downloadStream = bucket.openDownloadStream(new ObjectId());
+      downloadStream.on('data', function() {
+      });
+
+      downloadStream.on('error', function(err) {
+        test.equal('ENOENT', err.code);
+
+        db.close();
+        test.done();
+      });
+    });
   }
 };
 
@@ -332,6 +445,197 @@ exports['Deleting a file'] = {
 };
 
 /**
+ * Aborting an upload
+ *
+ * @example-class GridFSBucketWriteStream
+ * @example-method abort
+ * @ignore
+ */
+exports['Aborting an upload'] = {
+  metadata: { requires: { topology: ['single'], node: ">12.0.0" } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var GridFSBucket = configuration.require.GridFSBucket;
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(),
+      { poolSize:1 });
+    db.open(function(error, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
+      var bucket = new GridFSBucket(db,
+        { bucketName: 'gridfsabort', chunkSizeBytes: 1 });
+      var CHUNKS_COLL = 'gridfsabort.chunks';
+      var FILES_COLL = 'gridfsabort.files';
+      var uploadStream = bucket.openUploadStream('test.dat');
+
+      var id = uploadStream.id;
+      var query = { files_id: id };
+      uploadStream.write('a', 'utf8', function(error) {
+        test.equal(error, null);
+        db.collection(CHUNKS_COLL).count(query, function(error, c) {
+          test.equal(error, null);
+          test.equal(c, 1);
+          uploadStream.abort(function(error) {
+            test.equal(error, null);
+            db.collection(CHUNKS_COLL).count(query, function(error, c) {
+              test.equal(error, null);
+              test.equal(c, 0);
+              uploadStream.write('b', 'utf8', function(error) {
+                test.equal(error.toString(),
+                  'Error: this stream has been aborted');
+                uploadStream.end('c', 'utf8', function(error) {
+                  test.equal(error.toString(),
+                    'Error: this stream has been aborted');
+                  // Fail if user tries to abort an aborted stream
+                  uploadStream.abort().then(null, function(error) {
+                    test.equal(error.toString(),
+                      'Error: Cannot call abort() on a stream twice');
+                    test.done();
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+    // END
+  }
+};
+
+/**
+ * Aborting an upload
+ *
+ * @ignore
+ */
+exports['Destroy an upload'] = {
+  metadata: { requires: { topology: ['single'], node: ">12.0.0" } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var GridFSBucket = configuration.require.GridFSBucket;
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(),
+      { poolSize:1 });
+    db.open(function(error, db) {
+    // LINE var MongoClient = require('mongodb').MongoClient,
+    // LINE   test = require('assert');
+    // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+    // REPLACE configuration.writeConcernMax() WITH {w:1}
+    // REMOVE-LINE test.done();
+    // BEGIN
+      var bucket = new GridFSBucket(db,
+        { bucketName: 'gridfsabort', chunkSizeBytes: 1 });
+      var CHUNKS_COLL = 'gridfsabort.chunks';
+      var FILES_COLL = 'gridfsabort.files';
+      var uploadStream = bucket.openUploadStream('test.dat');
+
+      var id = uploadStream.id;
+      var query = { files_id: id };
+      uploadStream.write('a', 'utf8', function(error) {
+        test.equal(error, null);
+        db.collection(CHUNKS_COLL).count(query, function(error, c) {
+          test.equal(error, null);
+          test.equal(c, 1);
+          uploadStream.abort(function(error) {
+            test.equal(error, null);
+            db.collection(CHUNKS_COLL).count(query, function(error, c) {
+              test.equal(error, null);
+              test.equal(c, 0);
+              uploadStream.write('b', 'utf8', function(error) {
+                test.equal(error.toString(),
+                  'Error: this stream has been aborted');
+                uploadStream.end('c', 'utf8', function(error) {
+                  test.equal(error.toString(),
+                    'Error: this stream has been aborted');
+                  // Fail if user tries to abort an aborted stream
+                  uploadStream.abort().then(null, function(error) {
+                    test.equal(error.toString(),
+                      'Error: Cannot call abort() on a stream twice');
+                    test.done();
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+    // END
+  }
+};
+
+/**
+ * Calling abort() on a GridFSBucketReadStream
+ *
+ * @example-class GridFSBucketReadStream
+ * @example-method abort
+ * @ignore
+ */
+exports['Destroying a download stream'] = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var GridFSBucket = configuration.require.GridFSBucket;
+
+    var db = configuration.newDbInstance(configuration.writeConcernMax(),
+      { poolSize:1 });
+    db.open(function(error, db) {
+      // LINE var MongoClient = require('mongodb').MongoClient,
+      // LINE   test = require('assert');
+      // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
+      // REPLACE configuration.writeConcernMax() WITH {w:1}
+      // REMOVE-LINE test.done();
+      // BEGIN
+      var bucket = new GridFSBucket(db,
+        { bucketName: 'gridfsdestroy', chunkSizeBytes: 10 });
+      var readStream = fs.createReadStream('./LICENSE');
+      var uploadStream = bucket.openUploadStream('test.dat');
+
+      var id = uploadStream.id;
+
+      // Wait for stream to finish
+      uploadStream.once('finish', function() {
+        var id = uploadStream.id;
+        var downloadStream = bucket.openDownloadStream(id);
+        var done = {};
+        downloadStream.on('data', function() {
+          test.ok(false);
+        });
+        downloadStream.on('error', function() {
+          test.ok(false);
+        });
+        downloadStream.on('end', function() {
+          test.equal(downloadStream.s.cursor, null);
+          if (done.close) {
+            return test.done();
+          }
+          done.end = true;
+        });
+        downloadStream.on('close', function() {
+          if (done.end) {
+            return test.done();
+          }
+          done.close = true;
+        });
+        downloadStream.abort(function(error) {
+          test.equal(error, null);
+        });
+      });
+
+      readStream.pipe(uploadStream);
+      // END
+    });
+  }
+};
+
+/**
  * Deleting a file from GridFS using promises
  *
  * @example-class GridFSBucket
@@ -339,7 +643,7 @@ exports['Deleting a file'] = {
  * @ignore
  */
 exports['Deleting a file using promises'] = {
-  metadata: { requires: { topology: ['single'] } },
+  metadata: { requires: { topology: ['single'], node: ">12.0.0" } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -489,7 +793,7 @@ exports['drop example'] = {
  * @ignore
  */
 exports['drop using promises'] = {
-  metadata: { requires: { topology: ['single'] } },
+  metadata: { requires: { topology: ['single'], node: ">12.0.0" } },
 
   // The actual test we wish to run
   test: function(configuration, test) {
@@ -539,7 +843,7 @@ exports['drop using promises'] = {
 };
 
 
-/**
+/*
  * Find all associates files with a bucket
  *
  * @example-class GridFSBucket

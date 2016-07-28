@@ -164,16 +164,12 @@ exports['Should correctly receive ping and ha events using ssl'] = {
         var ha = false;
         var ping = false;
 
-        db.serverConfig.once('ha', function(e) {
+        db.serverConfig.once('serverHeartbeatSucceeded', function(e) {
           ha = true;
         });
 
-        db.serverConfig.once('ping', function(e) {
-          ping = true;
-        });
-
         var interval = setInterval(function() {
-          if(ha && ping) {
+          if(ha) {
             clearInterval(interval);
             db.close();
 

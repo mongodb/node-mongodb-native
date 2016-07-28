@@ -4519,10 +4519,10 @@ exports.shouldCorrectlyExecuteGridStoreExistsByObjectIdWithGenerators = {
       yield gridStore.write("hello world!");
 
       // Flush the file to GridFS
-      var result = yield gridStore.close();
+      var file = yield gridStore.close();
 
       // Check if the file exists using the id returned from the close function
-      var result = yield GridStore.exist(db, result._id);
+      var result = yield GridStore.exist(db, file._id);
       test.equal(true, result);
 
       // Show that the file does not exist for a random ObjectID
@@ -4530,11 +4530,13 @@ exports.shouldCorrectlyExecuteGridStoreExistsByObjectIdWithGenerators = {
       test.equal(false, result);
 
       // Show that the file does not exist for a different file root
-      var result = yield GridStore.exist(db, result._id, 'another_root');
+      var result = yield GridStore.exist(db, file._id, 'another_root');
       test.equal(false, result);
 
       db.close();
       test.done();
+    }).catch(function(e) {
+      console.dir(e)
     });
     // END
   }
@@ -6347,7 +6349,7 @@ exports['Should correctly add capped collection options to cursor with Generator
     // REMOVE-LINE test.done();
     // BEGIN
       // Create a capped collection with a maximum of 1000 documents
-      var collection = yield db.createCollection("a_simple_collection_2_with_generators", {capped:true, size:10000, max:1000, w:1});
+      var collection = yield db.createCollection("a_simple_collection_2_with_generators", {capped:true, size:100000, max:10000, w:1});
       var docs = [];
       for(var i = 0; i < 1000; i++) docs.push({a:i});
 
@@ -6355,23 +6357,100 @@ exports['Should correctly add capped collection options to cursor with Generator
       yield collection.insertMany(docs, configuration.writeConcernMax());
       // Start date
       var s = new Date();
+      var total = 0;
 
       // Get the cursor
       var cursor = collection.find({})
         .addCursorFlag('tailable', true)
         .addCursorFlag('awaitData', true)
-        .setCursorOption('numberOfRetries', 2)
-        .setCursorOption('tailableRetryInterval', 100);
 
-      cursor.on('data', function() {});
+      cursor.on('data', function() {
+        total = total + 1;
+
+        if(total == 1000) {
+          cursor.kill();
+        }
+      });
 
       cursor.on('end', function() {
-        test.ok((new Date().getTime() - s.getTime()) > 1000);
-
         db.close();
         test.done();
       });
     });
     // END
+  }
+}
+
+/**
+ * Correctly call the aggregation framework to return a cursor with batchSize 1 and get the first result using next
+ *
+ * @ignore
+ */
+exports['Correctly handle sample aggregation'] = {
+  // Add a tag that our runner can trigger on
+  // in this case we are setting that node needs to be higher than 0.10.X to run
+  metadata: {
+    requires: {
+      node: ">0.12.0",
+      generators:true,
+      mongodb: ">=3.2.0",
+      topology: 'single'
+    },
+    ignore: { travis:true }
+  },
+
+  // The actual test we wish to run
+  test: function(configure, test) {
+    var co = require('co');
+
+    co(function*() {
+      var db = configure.newDbInstance({w:1}, {poolSize:1});
+      db = yield db.open();
+      var string = new Array(6000000).join('x');
+      // Get the collection
+      var collection = db.collection('bigdocs_aggregate_sample_issue');
+
+      // Go over the number of
+      for(var i = 0; i < 100; i++) {
+        var r = yield collection.insertOne({
+          s: string
+        });
+      }
+
+      // count just to make sure we're getting something back
+      var count = yield collection.count();
+      console.log('counting %d docs.', count);
+
+      var options = {
+        maxTimeMS: 10000,
+        allowDiskUse: true
+      };
+
+      var index = 0;
+
+      collection.aggregate([{
+          $sample: {
+            size: 100
+          }
+        }], options)
+        .batchSize(10)
+
+        .on('error', function(err) {
+          db.close();
+        })
+
+        .on('data', function(data) {
+          index = index + 1;
+        })
+
+        // `end` sometimes emits before any `data` events have been emitted,
+        // depending on document size.
+        .on('end', function() {
+          test.equal(100, index);
+
+          db.close();
+          test.done();
+        });
+    });
   }
 }

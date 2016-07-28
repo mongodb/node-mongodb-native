@@ -214,10 +214,13 @@ exports['Should correctly rename and drop collection using Promise'] = {
       db.createCollection('promiseCollection1').then(function(col) {
         test.ok(col != null);
 
+        // console.log("--- 0")
         db.renameCollection('promiseCollection1', 'promiseCollection2').then(function(col) {
+          // console.log("--- 1")
           test.ok(col != null);
 
           db.dropCollection('promiseCollection2').then(function(r) {
+            // console.log("--- 2")
             test.ok(r);
 
             db.close();

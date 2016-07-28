@@ -491,3 +491,20 @@ exports['Should correctly pass readPreferences specified as objects to collectio
     });
   }
 }
+
+exports['Should correctly pass readPreferences on the Collection to listIndexes'] = {
+  metadata: { requires: { mongodb: ">=2.6.0", topology: ['single', 'ssl'] } },
+
+  test: function(configuration, test) {
+    var mongo = configuration.require
+      , SecondaryPreferred = mongo.ReadPreference.SECONDARY_PREFERRED;
+
+    configuration.newDbInstance({ w: 1 }, { poolSize: 1 }).open(function(err, db) {
+      test.equal(null, err);
+      var cursor = db.collection('test', { readPreference: SecondaryPreferred }).listIndexes();
+      test.equal(cursor.s.options.readPreference.preference, 'secondaryPreferred');
+      db.close();
+      test.done();
+    });
+  }
+}

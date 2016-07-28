@@ -44,6 +44,44 @@ exports['should fail due to illegal authentication mechanism'] = {
 }
 
 /**
+ * @ignore
+ */
+exports['should correctly authenticate with kay.kay'] = {
+  metadata: { requires: { topology: ['auth'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
+      , Server = configuration.require.Server;
+
+    // restart server
+    configuration.manager.restart(true).then(function() {
+      var db1 = new Db('test', new Server(configuration.host, configuration.port, {auto_reconnect: true}), {w:1});
+      db1.open(function(err, db) {
+        test.equal(null, err);
+
+        db.admin().addUser('kay:kay', 'abc123', function(err, result) {
+          test.equal(null, err);
+
+          // Login the user
+          db.admin().authenticate("kay:kay", "abc123", function(err, result) {
+            test.equal(null, err);
+
+            MongoClient.connect('mongodb://kay%3Akay:abc123@localhost:27017/admin', function(err, db) {
+              // restart server
+              configuration.manager.restart(true).then(function() {
+                test.done();
+              });
+            });
+          });
+        });
+      });
+    });
+  }
+}
+
+/**
  * Retrieve the current replicaset status if the server is running as part of a replicaset using a Promise.
  *
  * @example-class Admin
@@ -93,10 +131,10 @@ exports.shouldCorrectlyRetrieveReplSetGetStatusWithPromises = {
                 test.done();
               });
             }).catch(function(err) {
-              console.dir(err)
+              // // console.dir(err)
             });
           }).catch(function(err) {
-            console.dir(err)
+            // // console.dir(err)
           });
         });
       });
@@ -228,6 +266,8 @@ exports['Should correctly authenticate against admin db'] = {
 
                   // Attempt to save a document
                   db.collection('test').insert({a:1}, function(err, result) {
+                    // console.log("++++++++++++++++++ logout")
+                    // console.dir(err)
                     test.ok(err != null);
                     db1.close();
 
@@ -312,6 +352,80 @@ exports['Should correctly authenticate against normal db'] = {
   }
 }
 
+exports['Should correctly authenticate against normal db with large connection pool'] = {
+  metadata: { requires: { topology: ['auth'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var Db = configuration.require.Db
+      , MongoClient = configuration.require.MongoClient
+      , Server = configuration.require.Server;
+
+    // restart server
+    configuration.manager.restart(true).then(function() {
+      var db1 = new Db('mongo-ruby-test-auth1', new Server("127.0.0.1", 27017, {
+        auto_reconnect: true,
+        poolSize:500,
+        socketOptions: {
+          connectTimeoutMS: 20000,
+          socketTimeoutMS: 20000
+        }
+      }), {w:1});
+      db1.open(function(err, db) {
+        // // console.dir(err)
+        test.equal(null, err);
+
+        // An admin user must be defined for db level authentication to work correctly
+        db.admin().addUser('admin', 'admin', function(err, result) {
+
+          // Authenticate against admin
+          db.admin().authenticate('admin', 'admin', function(err, result) {
+
+            db.addUser('user', 'user', function(err, result) {
+              test.equal(null, err);
+
+              // Logout admin
+              db.admin().logout(function(err, result) {
+
+                // Attempt to save a document
+                db.collection('test').insert({a:1}, function(err, result) {
+                  test.ok(err != null);
+
+                  // Login the user
+                  db.authenticate("user", "user", function(err, result) {
+                    test.equal(null, err);
+                    test.ok(result);
+
+                    db.collection('test').insert({a:1}, function(err, result) {
+                      test.equal(null, err);
+
+                      // Logout the user
+                      db.logout(function(err, result) {
+                        test.equal(null, err);
+
+                        // Attempt to save a document
+                        db.collection('test').insert({a:1}, function(err, result) {
+                          test.ok(err != null);
+                          db1.close();
+
+                          // restart server
+                          configuration.manager.restart(true).then(function() {
+                            test.done();
+                          });
+                        });
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  }
+}
+
 exports['Should correctly reapply the authentications'] = {
   metadata: { requires: { topology: ['auth'] } },
 
@@ -343,16 +457,31 @@ exports['Should correctly reapply the authentications'] = {
                 test.equal(null, err);
 
                 // Bounce server
-                configuration.manager.restart(true).then(function() {
+                configuration.manager.restart(false).then(function() {
+                  db.admin().authenticate("admin", "admin", function(err, result) {
+                    // Reconnect should reapply the credentials
+                    db.collection('test').insert({a:1}, function(err, result) {
+                      test.equal(null, err);
+                    });
 
-                  // Reconnect should reapply the credentials
-                  db.collection('test').insert({a:1}, function(err, result) {
-                    // test.equal(null, err);
-                    db1.close();
+                    db.collection('test').insert({a:1}, function(err, result) {
+                      test.equal(null, err);
+                    });
 
-                    // restart server
-                    configuration.manager.restart(true).then(function() {
-                      test.done();
+                    db.collection('test').insert({a:1}, function(err, result) {
+                      test.equal(null, err);
+                    });
+
+                    // Reconnect should reapply the credentials
+                    db.collection('test').insert({a:1}, function(err, result) {
+                      test.equal(null, err);
+
+                      db1.close();
+
+                      // restart server
+                      configuration.manager.restart(true).then(function() {
+                        test.done();
+                      });
                     });
                   });
                 });
@@ -520,6 +649,7 @@ var setUp = function(configuration, options, callback) {
     }
   }]
 
+  // console.log("--------------------- setup 0")
   // Merge in any node start up options
   for(var i = 0; i < nodes.length; i++) {
     for(var name in rsOptions.server) {
@@ -529,15 +659,21 @@ var setUp = function(configuration, options, callback) {
 
   // Create a manager
   var replicasetManager = new ReplSetManager('mongod', nodes, rsOptions.client);
+  // console.log("--------------------- setup 1")
   // Purge the set
   replicasetManager.purge().then(function() {
+    // console.log("--------------------- setup 2")
     // Start the server
     replicasetManager.start().then(function() {
+      // console.log("--------------------- setup 3")
       setTimeout(function() {
+        // console.log("--------------------- setup 4")
         callback(null, replicasetManager);
       }, 10000);
     }).catch(function(e) {
-      console.dir(e);
+      console.log(e.stack)
+      process.exit(0);
+      // // console.dir(e);
     });
   });
 }
@@ -554,7 +690,9 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
       , Server = configuration.require.Server
       , ReplSet = configuration.require.ReplSet;
 
+      console.log("--------------------- -2")
     setUp(configuration, function(err, replicasetManager) {
+      console.log("--------------------- -1")
       var replSet = new ReplSet( [
           new Server( 'localhost', 31000),
           new Server( 'localhost', 31001)
@@ -562,13 +700,17 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
         {rs_name: 'rs', poolSize:1}
       );
 
+      console.log("--------------------- 0")
       // Connect
       new Db('replicaset_test_auth', replSet, {w:1}).open(function(err, db) {
+        console.log("--------------------- 1")
         // Add a user
         db.admin().addUser("root", "root", {w:3, wtimeout: 25000}, function(err, result) {
+          console.log("--------------------- 2")
           test.equal(null, err);
 
           db.admin().authenticate("root", "root", function(err, result) {
+            console.log("--------------------- 3")
             test.equal(null, err);
             test.ok(result);
 
@@ -579,18 +721,21 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
               user: 'root',
               password: 'root'
             }).then(function() {
+              console.log("--------------------- 4")
 
               db.collection('replicaset_test_auth').insert({a:1}, {w:1}, function(err, result) {
+                console.log("--------------------- 5")
                 test.equal(null, err);
 
                 db.close();
 
                 replicasetManager.stop().then(function() {
+                  console.log("--------------------- 6")
                   test.done();
                 });
               });
             }).catch(function(e) {
-              console.log(e.stack);
+              // // console.log(e.stack);
             });
           });
         });
@@ -748,17 +893,21 @@ exports.shouldCorrectlyAuthenticateWithOnlySecondarySeed = {
       );
 
       var p_db = new Db('node-native-test', replSet, {w:1});
-      p_db.on('fullsetup', function() {
+      p_db.on('all', function() {
         test.equal(null, err);
 
+        // // console.log("------------------------------------------- 0")
         // Add a user
         p_db.admin().addUser("admin", "admin", {w:3, wtimeout: 25000}, function(err, result) {
+          // // console.log("------------------------------------------- 1")
 
           // Log in to admin
           p_db.admin().authenticate("admin", "admin", function(err, result) {
+            // // console.log("------------------------------------------- 2")
             test.equal(null, err);
 
             p_db.admin().addUser("me", "secret", {w:3, wtimeout: 25000}, function(err, result) {
+              // // console.log("------------------------------------------- 3")
               // Close the connection
               p_db.close();
 
@@ -768,57 +917,90 @@ exports.shouldCorrectlyAuthenticateWithOnlySecondarySeed = {
 
               // Connect
               MongoClient.connect(config, function(error, client) {
+                // // console.log("------------------------------------------- 4")
                 client.collection('test').insert({a:1}, function(err, r) {
+                  // // console.log("------------------------------------------- 5")
                   test.equal(null, err);
 
                   // Logout
                   client.logout(function() {
+                    // // console.log("------------------------------------------- 6")
 
                     // Should fail
                     client.collection('test').findOne(function(err, r) {
+                      // // console.log("------------------------------------------- 7")
                       test.ok(err != null);
 
                       // Authenticate
                       client.admin().authenticate("me", "secret", function(err, r) {
+                        // // console.log("------------------------------------------- 8")
+                        // // console.dir(err)
                         test.equal(null, err);
                         test.ok(r);
 
                         replicasetManager.secondaries().then(function(managers) {
+                          // // console.log("------------------------------------------- 9")
                           // Shutdown the first secondary
                           managers[0].stop().then(function(err, result) {
+                            // // console.log("------------------------------------------- 10")
 
                             // Shutdown the second secondary
                             managers[1].stop().then(function(err, result) {
+                              // // console.log("------------------------------------------- 11")
 
                               // Let's restart a secondary
                               managers[0].start().then(function(err, result) {
+                                // // console.log("------------------------------------------- 12")
 
                                 // Let's restart a secondary
                                 managers[1].start().then(function(err, result) {
-                                  // Should fail
-                                  client.collection('test').findOne(function(err) {
-                                    test.equal(null, err);
+                                  client.serverConfig.once('joined', function() {
+                                    // // console.log("------------------------------------------- 13")
+                                    // // console.dir(err)
+                                    // Should fail
+                                    client.collection('test').findOne(function(err) {
+                                      // // console.log("------------------------------------------- 14")
+                                      // // console.dir(err)
+                                      test.equal(null, err);
 
-                                    client.close();
+                                      client.close();
 
-                                    replicasetManager.stop().then(function() {
-                                      test.done();
+                                      replicasetManager.stop().then(function() {
+                                        test.done();
+                                      });
                                     });
                                   });
+
+                                  // setTimeout(function() {
+                                    // // // console.log("------------------------------------------- 13")
+                                    // // // console.dir(err)
+                                    // // Should fail
+                                    // client.collection('test').findOne(function(err) {
+                                    //   // // console.log("------------------------------------------- 14")
+                                    //   // // console.dir(err)
+                                    //   test.equal(null, err);
+                                    //
+                                    //   client.close();
+                                    //
+                                    //   replicasetManager.stop().then(function() {
+                                    //     test.done();
+                                    //   });
+                                    // });
+                                  // }, 1000);
                                 }).catch(function(e) {
-                                  console.log(e.stack);
+                                  // // console.log(e.stack);
                                 });
                               }).catch(function(e) {
-                                console.log(e.stack);
+                                // // console.log(e.stack);
                               });
                             }).catch(function(e) {
-                              console.log(e.stack);
+                              // // console.log(e.stack);
                             });
                           }).catch(function(e) {
-                            console.log(e.stack);
+                            // // console.log(e.stack);
                           });
                         }).catch(function(e) {
-                          console.log(e.stack);
+                          // // console.log(e.stack);
                         });
                       });
                     });
@@ -1117,27 +1299,35 @@ exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary =
 
       var db = new Db('foo', replSet, {w:1});
       db.open(function(err, db_p) {});
-      db.on('fullsetup', function(err, db_p) {
+      db.on('all', function(err, db_p) {
         test.ok(db_p != null);
-
+        // console.log("-------------------------------------------------- 0")
         db_p.admin().addUser("me", "secret", {w:3, wtimeout:25000}, function runWhatever(err, result) {
+          // console.log("-------------------------------------------------- 1")
           db_p.admin().authenticate("me", "secret", function(err, result) {
+            // console.log("-------------------------------------------------- 2")
             test.equal(null, err);
 
             db_p.collection('test').insert({a:1}, {w:1}, function(err, result) {
+              // console.log("-------------------------------------------------- 3")
               test.equal(null, err);
 
               db_p.addUser('test', 'test', {w:3, wtimeout:25000}, function(err, result) {
+                // console.log("-------------------------------------------------- 4")
                 test.equal(null, err);
                 test.ok(result != null);
 
-                db.serverConfig.on('joined', function(t, s) {
+                db.serverConfig.on('joined', function(t, o, s) {
+                  // console.log("-------------------------------------------------- joined 5 :: " + t + " :: " + s.name)
                   if(t == 'primary') {
-                    var counter = 100;
+                    // console.log("-------------------------------------------------- 6")
+                    var counter = 10;
                     var errors = 0;
 
                     for(var i = 0; i < counter; i++) {
                       db_p.collection('test').find({a:1}).setReadPreference(ReadPreference.SECONDARY).toArray(function(err, r) {
+                        // console.log("-------------------------------------------------- 7")
+                        // console.dir(err)
                         counter = counter - 1;
 
                         if(err != null) {
@@ -1159,15 +1349,22 @@ exports.shouldCorrectlyBringReplicasetStepDownPrimaryAndStillReadFromSecondary =
                 });
 
                 db.serverConfig.on('left', function(t, s) {
+                  // console.log("-------------------------------------------------- left 5 :: " + t + " :: " + s.name)
                 });
 
+                // // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SHUTDOWN 0")
                 // Step down the primary
-                replicasetManager.stepDownPrimary(false, {stepDownSecs: 1, force:true}, {
+                replicasetManager.stepDownPrimary(false, {
+                  stepDownSecs: 1,
+                  force: true,
+                  returnImmediately: true
+                }, {
                   provider: 'default',
                   db: 'admin',
                   user: 'me',
                   password: 'secret'
                 }).then(function() {
+                  // // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ SHUTDOWN 1")
                 }).catch(function(e) {
                 });
               });
@@ -1282,38 +1479,48 @@ exports.shouldCorrectlyAuthAgainstReplicaSetAdminDbUsingMongoClient = {
         {rs_name: 'rs', poolSize:1}
       );
 
+      // console.log("--------------------------------------------- 0")
       var dbName = 'admin';
       var db = new Db(dbName, replSet, {w:3});
       db.open(function(err, db_p) {
+        // console.log("--------------------------------------------- 1")
         test.equal(null, err);
 
         db_p.admin().addUser("me", "secret", {w:3, wtimeout:25000}, function runWhatever(err, result) {
+          // console.log("--------------------------------------------- 2")
 
           db_p.close();
 
           MongoClient.connect(f("mongodb://me:secret@%s:%s/%s?rs_name=%s&readPreference=secondary&w=3"
             , 'localhost', 31000, dbName, 'rs'), function(err, db) {
-              db.on('fullsetup', function(err, db) {
+              // console.log("--------------------------------------------- 3")
+              // console.dir(err)
+
+              // db.on('all', function(err, db) {
+                // console.log("--------------------------------------------- 4")
                 test.ok(db != null);
 
                 // Insert document
                 db.collection('authcollectiontest').insert({a:1}, {w:3, wtimeout: 25000}, function(err, result) {
+                  // console.log("--------------------------------------------- 5")
                   test.equal(null, err);
 
                   // Find the document
                   db.collection('authcollectiontest').find().toArray(function(err, docs) {
-                    test.equal(null, err);
+                    // console.log("--------------------------------------------- 6")
+                    // test.equal(null, err);
                     test.equal(1, docs.length);
                     test.equal(1, docs[0].a);
 
                     db.close();
 
                     replicasetManager.stop().then(function() {
+                      // console.log("--------------------------------------------- 7")
                       test.done();
                     });
                   });
                 });
-              });
+              // });
           });
         });
       });
@@ -1336,6 +1543,7 @@ exports.shouldCorrectlyAuthAgainstNormalDbUsingMongoClient = {
       , ReplSet = configuration.require.ReplSet;
 
     setUp(configuration, function(err, replicasetManager) {
+      // console.log("------------------------------------0")
       var replSet = new ReplSet( [
           new Server( 'localhost', 31000),
           new Server( 'localhost', 31001)
@@ -1346,30 +1554,40 @@ exports.shouldCorrectlyAuthAgainstNormalDbUsingMongoClient = {
       var dbName = 'foo';
 
       new Db(dbName, replSet, {w:3}).open(function(err, db_p) {
-        db_p.on('fullsetup', function(err, db) {
+        // console.log("------------------------------------1")
+        // db_p.on('all', function(err, db) {
+          // console.log("------------------------------------2")
           // Add a user
           db_p.admin().addUser("admin", "admin", {w:3, wtimeout: 25000}, function(err, result) {
+            // console.log("------------------------------------3")
 
             // Log in to admin
             db_p.admin().authenticate("admin", "admin", function(err, result) {
+              // console.log("------------------------------------4")
               test.equal(null, err);
 
               db_p.addUser("me", "secret", {w:3, wtimeout: 25000}, function runWhatever(err, result) {
+                // console.log("------------------------------------5")
 
                 db_p.close();
 
+                // console.log("------------------------------------6")
                 MongoClient.connect(f("mongodb://me:secret@%s:%s/%s?rs_name=%s&readPreference=secondary&w=3"
                   , 'localhost', 31000, dbName, 'rs'), function(err, db) {
+                    // console.log("------------------------------------7")
                     test.equal(null, err);
-                    db.on('fullsetup', function(err, db) {
+                    // db.on('all', function(err, db) {
+                      // console.log("------------------------------------8")
                       test.ok(db != null);
 
                       // Insert document
                       db.collection('authcollectiontest1').insert({a:1}, {w:3, wtimeout:25000}, function(err, result) {
+                        // console.log("------------------------------------9")
                         test.equal(null, err);
 
                         // Find the document
                         db.collection('authcollectiontest1').find().toArray(function(err, docs) {
+                          // console.log("------------------------------------10")
                           test.equal(null, err);
                           test.equal(1, docs.length);
                           test.equal(1, docs[0].a);
@@ -1377,16 +1595,17 @@ exports.shouldCorrectlyAuthAgainstNormalDbUsingMongoClient = {
                           db.close();
 
                           replicasetManager.stop().then(function() {
+                            // console.log("------------------------------------11")
                             test.done();
                           });
                         });
                       });
-                    });
+                    // });
                 });
               });
             });
           });
-        });
+        // });
       });
     });
   }
@@ -1471,7 +1690,7 @@ exports['Should correctly reauthenticating against multiple databases'] = {
                           password: 'root'
                         }).then(function() {
                         }).catch(function(e) {
-                          console.log(e.stack);
+                          // // console.log(e.stack);
                         });
                       });
                     });
@@ -1533,7 +1752,7 @@ var setUpSharded = function(configuration, options, callback) {
     shardedManager.start().then(function() {
       callback(null, shardedManager);
     }).catch(function(e) {
-      console.log(e.stack)
+      // // console.log(e.stack)
     });
   });
 }

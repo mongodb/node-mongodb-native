@@ -4,6 +4,7 @@ var format = require('util').format,
   f = require('util').format;
 
 var restartAndDone = function(configuration, test) {
+  console.log("-- restartAndDone")
   configuration.manager.restart(9, {waitMS: 5000}).then(function() {
     test.done();
   });
@@ -30,6 +31,7 @@ exports['Should correctly remove and re-add secondary and detect removal and re-
       test.equal(null, err);
 
       db.serverConfig.on('joined', function(t, d, s) {
+        console.log("---- joined :: " + t + " :: " + s.name)
         if(t == 'secondary'
           && secondaryServerManager
           && s.name == f('%s:%s', secondaryServerManager.host, secondaryServerManager.port)) {
@@ -39,6 +41,7 @@ exports['Should correctly remove and re-add secondary and detect removal and re-
       });
 
       db.serverConfig.on('left', function(t, s) {
+        console.log("---- left :: " + t + " :: " + s.name)
         if(t == 'secondary'
           && secondaryServerManager
           && s.name == f('%s:%s', secondaryServerManager.host, secondaryServerManager.port)) {
@@ -46,20 +49,26 @@ exports['Should correctly remove and re-add secondary and detect removal and re-
         }
       });
 
+      console.log("--------- 0")
       db.once('fullsetup', function() {
+        console.log("--------- 1")
         // Get the secondary server
         manager.secondaries().then(function(managers) {
           secondaryServerManager = managers[0];
+          console.log("--------- 2 :: " + secondaryServerManager.port)
 
           // Remove the secondary server
           manager.removeMember(secondaryServerManager, {
             returnImmediately: false, force: false, skipWait:true
           }).then(function() {
+            console.log("--------- 3")
             setTimeout(function() {
+              console.log("--------- 4")
               // Add a new member to the set
               manager.addMember(secondaryServerManager, {
                 returnImmediately: false, force:false
               }).then(function(x) {
+                console.log("--------- 5")
               });
             }, 10000)
           });
@@ -69,25 +78,28 @@ exports['Should correctly remove and re-add secondary and detect removal and re-
   }
 }
 
-/**
- * @ignore
- */
-exports['Should correctly receive ha'] = {
-  metadata: { requires: { topology: 'replicaset' } },
-
-  // The actual test we wish to run
-  test: function(configuration, test) {
-    var db = configuration.newDbInstance({w:0}, {poolSize:1});
-    db.open(function(err, db) {
-      test.equal(null, err);
-
-      db.serverConfig.on('ha', function(e, options) {
-        db.close();
-        restartAndDone(configuration, test);
-      });
-    });
-  }
-}
+// REMOVE REMOVE REMOVE REMOVE REMOVE REMOVE REMOVE REMOVE REMOVE REMOVE
+// REMOVE REMOVE REMOVE REMOVE REMOVE REMOVE REMOVE REMOVE REMOVE REMOVE
+// REMOVE REMOVE REMOVE REMOVE REMOVE REMOVE REMOVE REMOVE REMOVE REMOVE
+// /**
+//  * @ignore
+//  */
+// exports['Should correctly receive ha'] = {
+//   metadata: { requires: { topology: 'replicaset' } },
+//
+//   // The actual test we wish to run
+//   test: function(configuration, test) {
+//     var db = configuration.newDbInstance({w:0}, {poolSize:1});
+//     db.open(function(err, db) {
+//       test.equal(null, err);
+//
+//       db.serverConfig.on('ha', function(e, options) {
+//         db.close();
+//         restartAndDone(configuration, test);
+//       });
+//     });
+//   }
+// }
 
 /**
  * @ignore
@@ -102,7 +114,6 @@ exports['Should correctly handle primary stepDown'] = {
 
     var db = configuration.newDbInstance({w:0}, {poolSize:1});
     db.open(function(err, db) {
-      db.serverConfig.on('ha', function(e, options) {});
       // Wait for close event due to primary stepdown
       db.serverConfig.on('joined', function(t, d, s) {
         if(t == 'primary') state++;
@@ -206,24 +217,30 @@ exports['Should correctly remove and re-add secondary with new priority and dete
     var state = 0;
     var leftServer = null;
 
+    console.log('start')
     // Get a new instance
     var db = configuration.newDbInstance({w:0}, {poolSize:1});
     db.open(function(err, db) {
+      console.log('open')
       test.equal(null, err);
 
       // Add event listeners
       db.serverConfig.on('joined', function(t, d, s) {
+        console.log("joined - " + t + " - " + s.name)
         if(t == 'primary' && leftServer && s.name == f('%s:%s', leftServer.host, leftServer.port)) {
+          console.log("done")
           db.close();
           restartAndDone(configuration, test);
         }
       });
 
       db.serverConfig.on('left', function(t, s) {
+        console.log("left - " + t + " - " + s.name)
         if(t == 'secondary' && leftServer && s.name == f('%s:%s', leftServer.host, leftServer.port)) state++;
       });
 
       db.once('fullsetup', function() {
+        console.log("fullsetup")
         configuration.manager.secondaries().then(function(managers) {
           leftServer = managers[0];
 
@@ -231,6 +248,7 @@ exports['Should correctly remove and re-add secondary with new priority and dete
           configuration.manager.removeMember(managers[0], {
             returnImmediately: false, force: false, skipWait:true
           }).then(function() {
+            console.log("removed member")
             var config = JSON.parse(JSON.stringify(configuration.manager.configurations[0]));
             var members = config.members;
             // Update the right configuration
@@ -248,8 +266,10 @@ exports['Should correctly remove and re-add secondary with new priority and dete
             configuration.manager.reconfigure(config, {
               returnImmediately:false, force:false
             }).then(function() {
+              console.log("reconfigure")
               setTimeout(function() {
                 managers[0].start().then(function() {
+                  console.log("started")
                 });
               }, 10000)
             })
@@ -285,25 +305,32 @@ exports['Should work correctly with inserts after bringing master back'] = {
     // Get a new instance
     var db = new Db('integration_test_', replSet, {w:1});
     db.on('fullsetup', function(err, db) {
+      // console.log("---------------------- 0")
       // Drop collection on replicaset
       db.dropCollection('shouldWorkCorrectlyWithInserts', function(err, r) {
+        // console.log("---------------------- 1")
 
         var collection = db.collection('shouldWorkCorrectlyWithInserts');
         // Insert a dummy document
         collection.insert({a:20}, {w:'majority', wtimeout: 30000}, function(err, r) {
+          // console.log("---------------------- 2")
           test.equal(null, err);
 
           // Execute a count
           collection.count(function(err, c) {
+            // console.log("---------------------- 3")
             test.equal(null, err);
             test.equal(1, c);
 
             manager.primary().then(function(primary) {
+              // console.log("---------------------- 4")
 
               primary.stop().then(function() {
+                // console.log("---------------------- 5")
 
                 // Execute a set of inserts
                 function inserts(callback) {
+                  // console.log("---------------------- 5")
                   var a = 30;
                   var totalCount = 5;
 
@@ -312,6 +339,7 @@ exports['Should work correctly with inserts after bringing master back'] = {
                       totalCount = totalCount - 1;
 
                       if(totalCount == 0) {
+                        // console.log("---------------------- 6")
                         callback();
                       }
                     });
@@ -320,13 +348,16 @@ exports['Should work correctly with inserts after bringing master back'] = {
                 }
 
                 inserts(function(err) {
+                  // console.log("---------------------- 7")
                   // Restart the old master and wait for the sync to happen
                   primary.start().then(function(result) {
+                    // console.log("---------------------- 8")
                     // Contains the results
                     var results = [];
 
                     collection.find().each(function(err, item) {
                       if(item == null) {
+                        // console.log("---------------------- 9")
                         // Ensure we have the correct values
                         test.equal(6, results.length);
                         [20, 30, 40, 50, 60, 70].forEach(function(a) {
@@ -337,9 +368,11 @@ exports['Should work correctly with inserts after bringing master back'] = {
 
                         // Run second check
                         collection.save({a:80}, {w:1}, function(err, r) {
+                          // console.log("---------------------- 10")
                           if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
 
                           collection.find().toArray(function(err, items) {
+                            // console.log("---------------------- 11")
                             if(err != null) debug("shouldWorkCorrectlyWithInserts :: " + inspect(err));
 
                             // Ensure we have the correct values

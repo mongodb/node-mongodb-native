@@ -22,6 +22,12 @@ test_boot/
 t.js
 .DS_Store
 test/benchmarks/performance-data
+.nyc_output/
+typings/
+jsconfig.json
+manual_tests/
+docs/build
+docs/Makefile
 
 # Directory for dbs
 db

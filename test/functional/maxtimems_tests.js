@@ -60,6 +60,7 @@ exports['Should Correctly respect the maxtimeMs property on toArray'] = {
         col.find({"$where": "sleep(100) || true"})
           .maxTimeMS(50)
           .toArray(function(err, items) {
+            console.dir(err)
             test.ok(err != null);
             db.close();
             test.done();

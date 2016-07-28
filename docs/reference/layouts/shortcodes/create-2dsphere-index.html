@@ -1,0 +1,10 @@
+var create2dSphereIndex = function(db, callback) {
+  // Get the documents collection
+  var collection = db.collection('users');
+  // Create the index
+  collection.createIndex(
+    { location : "2dsphere" }, function(err, result) {
+    console.log(result);
+    callback(result);
+  });
+};

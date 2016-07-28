@@ -10,11 +10,13 @@ title = "Logging"
 
 # Logging
 
-The driver lets you log at 3 different levels. These are `debug`, `info` and `error`. By default the log level is at `error`. You can change the level, only allow specific classes to log and provide your own logger implementation. Let's look at how we control the log level.
+You can change the log level, filter on classes to allow only specific classes
+to log, and provide your own logger implementation.
 
 ## Setting Log level
-
-Setting the log level is pretty easy. Let's look at example of adjusting it for our application only logging the Db class.
+The driver allows logging at three different levels: `debug`,
+`info` and `error`. The default level is `error`.
+The following example demonstrates how to set the logger to `debug`.
 
 ```js
 var MongoClient = require('mongodb').MongoClient
@@ -39,11 +41,10 @@ MongoClient.connect(url, function(err, db) {
 });
 ```
 
-Setting the level is as easy as calling the method `setLevel` with the string value `debug`, `info` or `error`. Log level is set globally.
-
 ## Filtering On specific classes
 
-Say you are only interested in logging a specific class. You can tell the Logger to only log specific class names. Let's take an example Where we only log the `Db` class.
+You can set the Logger to only log specific class names. The following example
+demonstrates how to log only the `Db` class.
 
 ```js
 var MongoClient = require('mongodb').MongoClient
@@ -70,18 +71,18 @@ MongoClient.connect(url, function(err, db) {
 });
 ```
 
-This will only log statements on the `Db` class. The available classes in the driver are.
+Driver classes available for filtering:
 
 * `Db`: The Db instance log statements
-* `Server`: A server instance (either standalone, a mongos or replicaset member)
-* `ReplSet`: Replicaset related log statements
+* `Server`: A server instance (either standalone, a mongos or replica set member)
+* `ReplSet`: Replica set related log statements
 * `Mongos`: Mongos related log statements
 * `Cursor`: Cursor log statements
 * `Pool`: Connection Pool specific log statements
 * `Connection`: Singular connection specific log statements
-* `Ping`: Replicaset ping inquiry log statements
+* `Ping`: Replica set ping inquiry log statements
 
-You can add your own classes to the logger if you wish by creating your own logger instances. Let's look at a simple example on how to add our custom class to the Logger.
+You can add your own classes to the logger by creating your own logger instances. 
 
 ```js
 var Logger = require('mongodb').Logger
@@ -100,11 +101,9 @@ var a = new A();
 a.do();
 ```
 
-Pretty simple and straightforward.
-
 ## Custom logger
 
-Let's say you don't want the log statements to go to `console.log` but want to send them to a new location or maybe transform them before you send them on. Let's define our custom logger.
+The following example demonstrates how to define a custom logger.
 
 ```js
 var MongoClient = require('mongodb').MongoClient
@@ -133,5 +132,3 @@ MongoClient.connect(url, function(err, db) {
   });
 });
 ```
-
-That wraps up the Logging support in the driver.

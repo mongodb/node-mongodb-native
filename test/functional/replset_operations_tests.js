@@ -3,6 +3,7 @@
 var format = require('util').format;
 
 var restartAndDone = function(configuration, test) {
+  console.log("-- restartAndDone")
   configuration.manager.restart().then(function() {
     test.done();
   });
@@ -456,6 +457,43 @@ exports['Should Correctly group using replicaset'] = {
             })
           });
         });
+      });
+    });
+  }
+}
+
+exports['Should Correctly execute createIndex with secondary readPreference'] = {
+  metadata: { requires: { topology: 'replicaset' } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var mongo = configuration.require
+      , MongoClient = mongo.MongoClient
+      , ReadPreference = mongo.ReadPreference;
+
+    // Create url
+    var url = format("mongodb://%s,%s/%s?replicaSet=%s&readPreference=%s"
+      , format("%s:%s", configuration.host, configuration.port)
+      , format("%s:%s", configuration.host, configuration.port + 1)
+      , "integration_test_"
+      , configuration.replicasetName
+      , "secondary");
+
+    var manager = configuration.manager;
+
+    MongoClient.connect(url, function(err, db) {
+      test.equal(null, err);
+
+      var collection = db.collection('testgroup_replicaset_2', {
+            readPreference: ReadPreference.SECONDARY
+          , w:2, wtimeout: 10000
+        });
+
+      collection.createIndexes([{name: 'a_1', key: {a:1}}], function(err, r) {
+        test.equal(null, err);
+
+        db.close();
+        restartAndDone(configuration, test);
       });
     });
   }

@@ -28,7 +28,7 @@ var MongoDBVersionFilter = function(options) {
   }
 
   this.filter = function(test) {
-    if(options.skip) return false;    
+    if(options.skip) return false;
     if(test.metadata == null) return false;
     if(test.metadata.requires == null) return false;
     if(test.metadata.requires.mongodb == null) return false;

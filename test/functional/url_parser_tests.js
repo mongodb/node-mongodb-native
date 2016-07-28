@@ -44,6 +44,20 @@ exports['Should correctly parse mongodb://localhost:27017'] = {
 /**
  * @ignore
  */
+exports['Should correctly parse mongodb://localhost:27017test?appname=hello%20world'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configure, test) {
+    var object = parse("mongodb://localhost:27017/test?appname=hello%20world");
+    test.equal("hello world", object.appname);
+    test.done();
+  }
+}
+
+/**
+ * @ignore
+ */
 exports['Should correctly parse mongodb://localhost/?safe=true&readPreference=secondary'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 
@@ -595,6 +609,51 @@ exports['Should correctly parse mongodb://localhost,[::1]:27018,[2607:f0d0:1002:
     test.equal("2607:f0d0:1002:51::41", object.servers[2].host);
     test.equal('27017', object.servers[2].port);
     test.equal('admin', object.dbName);
+    test.done();
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['Should correctly parse mongodb://k?y:foo@/tmp/mongodb-27017.sock/somedb?safe=true'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configure, test) {
+    // console.dir(parse)
+    var object = parse("mongodb://k%3Fy:foo@/tmp/mongodb-27017.sock/somedb?safe=true");
+    test.equal('k?y', object.auth.user);
+    test.done();
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['Should correctly parse uriencoded k?y mongodb://k%3Fy:foo@/tmp/mongodb-27017.sock/somedb?safe=true'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configure, test) {
+    // console.dir(parse)
+    var object = parse("mongodb://k%3Fy:foo@/tmp/mongodb-27017.sock/somedb?safe=true");
+    test.equal('k?y', object.auth.user);
+    test.done();
+  }
+}
+
+/**
+ * @ignore
+ */
+exports['Should correctly parse username kay:kay mongodb://kay%3Akay:foo@/tmp/mongodb-27017.sock/somedb?safe=true'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configure, test) {
+    // console.dir(parse)
+    var object = parse("mongodb://kay%3Akay:foo@/tmp/mongodb-27017.sock/somedb?safe=true");
+    test.equal('kay:kay', object.auth.user);
     test.done();
   }
 }

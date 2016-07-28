@@ -22,7 +22,7 @@ exports.shouldCorrectlySaveDocumentsAndReturnAsRaw = {
             var objects = [];
 
             for(var i = 0; i < items.length; i++) {
-              test.ok(Buffer.isBuffer(items[i]));
+              test.ok(Buffer.isBuffer(items[i])); 
               objects.push(new BSON().deserialize(items[i]));
             }
 

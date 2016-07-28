@@ -21,25 +21,35 @@ exports['Should correctly connect and then handle a mongos failure'] = {
     var url = f('mongodb://%s:%s,%s:%s/sharded_test_db?w=1'
       , configuration.host, configuration.port
       , configuration.host, configuration.port + 1);
+    // console.log("----------------------------- 0")
+    // console.log(url)
     MongoClient.connect(url, {}, function(err, db) {
+      // console.log("----------------------------- 1")
       test.equal(null, err);
       test.ok(db != null);
 
       db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
+        // console.log("----------------------------- 2")
         test.equal(null, err);
         test.equal(1, result.result.n);
         var numberOfTicks = 10;
 
         var ticker = function() {
+          // console.log("----------------------------- 4")
           numberOfTicks = numberOfTicks - 1;
 
           db.collection('replicaset_mongo_client_collection').findOne(function(err, doc) {
+            // console.log("----------------------------- 5")
+            // console.dir(err)
             if(numberOfTicks == 0) {
+              // console.log("----------------------------- 5:1")
               mongos.start().then(function() {
+                // console.log("----------------------------- 5:2")
                 db.close();
                 test.done();
               });
             } else {
+              // console.log("----------------------------- 5:2")
               setTimeout(ticker, 1000);
             }
           });
@@ -48,6 +58,7 @@ exports['Should correctly connect and then handle a mongos failure'] = {
         // Get first proxy
         var mongos = manager.proxies()[0];
         mongos.stop().then(function() {
+          // console.log("----------------------------- 3")
           serverDetails = mongos;
           setTimeout(ticker, 1000);
         });
@@ -84,16 +95,20 @@ exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = {
 
     // Add some listeners
     mongos.on("left", function(_server_type, _server) {
+      // console.log("----------------------------- left :: " + _server.name)
       numberLeaving += 1;
     });
 
-    mongos.on("joined", function(_server_type, _doc, _server) {
+    mongos.on("joined", function(_server_type, _server) {
+      // console.log("----------------------------- joined :: " + _server.name)
       numberOfJoins += 1;
     });
 
+    // console.log("+++++++++++++++++++++++++++++++++++++ 0")
     // Connect using the mongos connections
     var db = new Db('integration_test_', mongos, {w:0});
     db.open(function(err, db) {
+      // console.log("+++++++++++++++++++++++++++++++++++++ 1")
       test.equal(null, err);
       test.ok(db != null);
 
@@ -145,7 +160,10 @@ exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = {
                               // Wait for the ha process to pick up the existing new server
                               setTimeout(function() {
                                 test.equal(2, mongos.connections().length);
-                                test.equal(4, numberOfJoins);
+                                // console.log("=========== numberOfJoins :: " + numberOfJoins)
+                                // console.log("=========== numberLeaving :: " + numberLeaving)
+
+                                test.equal(5, numberOfJoins);
                                 test.equal(3, numberLeaving);
                                 db.close();
                                 test.done();

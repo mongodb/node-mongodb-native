@@ -1,27 +1,196 @@
-2.1.4 01-12-2015
+2.2.4 2016-07-19
 ----------------
-- Restricted node engine to >0.10.3 (https://jira.mongodb.org/browse/NODE-635).
-- Multiple database names ignored without a warning (https://jira.mongodb.org/browse/NODE-636, Issue #1324, https://github.com/yousefhamza).
-- Convert custom readPreference objects in collection.js (Issue #1326, https://github.com/Machyne).
+* NPM corrupted upload fix.
 
-2.1.3 01-04-2015
+2.2.3 2016-07-19
+----------------
+* Updated mongodb-core to 2.0.6.
+* Destroy connection on socket timeout due to newer node versions not closing the socket.
+
+2.2.2 2016-07-15
+----------------
+* Updated mongodb-core to 2.0.5.
+* Minor fixes to handle faster MongoClient connectivity from the driver, allowing single server instances to detect if they are a proxy.
+* Added numberOfConsecutiveTimeouts to pool that will destroy the pool if the number of consecutive timeouts > reconnectTries.
+* Print warning if seedlist servers host name does not match the one provided in it's ismaster.me field for Replicaset members.
+* Fix issue where Replicaset connection would not succeeed if there the replicaset was a single primary server setup.
+
+2.2.1 2016-07-11
+----------------
+* Updated mongodb-core to 2.0.4.
+* handle situation where user is providing seedlist names that do not match host list. fix allows for a single full discovery connection sweep before erroring out.
+* NODE-747 Polyfill for Object.assign for 0.12.x or 0.10.x.
+* NODE-746 Improves replicaset errors for wrong setName.
+
+2.2.0 2016-07-05
+----------------
+* Updated mongodb-core to 2.0.3.
+* Moved all authentication and handling of growing/shrinking of pool connections into actual pool.
+* All authentication methods now handle both auth/reauthenticate and logout events.
+* Introduced logout method to get rid of onAll option for logout command.
+* Updated bson to 0.5.0 that includes Decimal128 support.
+* Fixed logger error serialization issue.
+* Documentation fixes.
+* Implemented Server Selection Specification test suite.
+* Added warning level to logger.
+* Added warning message when sockeTimeout < haInterval for Replset/Mongos.
+* Mongos emits close event on no proxies available or when reconnect attempt fails.
+* Replset emits close event when no servers available or when attemptReconnect fails to reconnect.
+* Don't throw in auth methods but return error in callback.
+
+2.1.21 2016-05-30
+-----------------
+* Updated mongodb-core to 1.3.21.
+* Pool gets stuck if a connection marked for immediateRelease times out (Issue #99, https://github.com/nbrachet).
+* Make authentication process retry up to authenticationRetries at authenticationRetryIntervalMS interval.
+* Made ismaster replicaset calls operate with connectTimeout or monitorSocketTimeout to lower impact of big socketTimeouts on monitoring performance.
+* Make sure connections mark as "immediateRelease" don't linger the inUserConnections list. Otherwise, after that connection times out, getAll() incorrectly returns more connections than are effectively present, causing the pool to not get restarted by reconnectServer. (Issue #99, https://github.com/nbrachet).
+* Make cursor getMore or killCursor correctly trigger pool reconnect to single server if pool has not been destroyed.
+* Make ismaster monitoring for single server connection default to avoid user confusion due to change in behavior.
+
+2.1.20 2016-05-25
+-----------------
+* Refactored MongoClient options handling to simplify the logic, unifying it.
+* NODE-707 Implemented openUploadStreamWithId on GridFS to allow for custom fileIds so users are able to customize shard key and shard distribution.
+* NODE-710 Allow setting driver loggerLevel and logger function from MongoClient options.
+* Updated mongodb-core to 1.3.20.
+* Minor fix for SSL errors on connection attempts, minor fix to reconnect handler for the server.
+* Don't write to socket before having registered the callback for commands, work around for windows issuing error events twice on node.js when socket gets destroyed by firewall.
+* Fix minor issue where connectingServers would not be removed correctly causing single server connections to not auto-reconnect.
+
+2.1.19 2016-05-17
+----------------
+* Handle situation where a server connection in a replicaset sometimes fails to be destroyed properly due to being in the middle of authentication when the destroy method is called on the replicaset causing it to be orphaned and never collected.
+* Ensure replicaset topology destroy is never called by SDAM.
+* Ensure all paths are correctly returned on inspectServer in replset.
+* Updated mongodb-core to 1.3.19 to fix minor connectivity issue on quick open/close of MongoClient connections on auth enabled mongodb Replicasets.
+
+2.1.18 2016-04-27
+-----------------
+* Updated mongodb-core to 1.3.18 to fix Node 6.0 issues.
+
+2.1.17 2016-04-26
+-----------------
+* Updated mongodb-core to 1.3.16 to work around issue with early versions of node 0.10.x due to missing unref method on ClearText streams.
+* INT-1308: Allow listIndexes to inherit readPreference from Collection or DB.
+* Fix timeout issue using new flags #1361.
+* Updated mongodb-core to 1.3.17.
+* Better handling of unique createIndex error.
+* Emit error only if db instance has an error listener.
+* DEFAULT authMechanism; don't throw error if explicitly set by user.
+
+2.1.16 2016-04-06
+-----------------
+* Updated mongodb-core to 1.3.16.
+
+2.1.15 2016-04-06
+-----------------
+* Updated mongodb-core to 1.3.15.
+* Set ssl, sslValidate etc to mongosOptions on url_parser (Issue #1352, https://github.com/rubenstolk).
+- NODE-687 Fixed issue where a server object failed to be destroyed if the replicaset state did not update successfully. This could leave active connections accumulating over time.
+- Fixed some situations where all connections are flushed due to a single connection in the connection pool closing.
+
+2.1.14 2016-03-29
+-----------------
+* Updated mongodb-core to 1.3.13.
+* Handle missing cursor on getMore when going through a mongos proxy by pinning to socket connection and not server.
+
+2.1.13 2016-03-29
+-----------------
+* Updated mongodb-core to 1.3.12.
+
+2.1.12 2016-03-29
+-----------------
+* Updated mongodb-core to 1.3.11.
+* Mongos setting acceptableLatencyMS exposed to control the latency women for mongos selection.
+* Mongos pickProxies fall back to closest mongos if no proxies meet latency window specified.
+* isConnected method for mongos uses same selection code as getServer.
+* Exceptions in cursor getServer trapped and correctly delegated to high level handler.
+
+2.1.11 2016-03-23
+-----------------
+* Updated mongodb-core to 1.3.10.
+* Introducing simplified connections settings.
+
+2.1.10 2016-03-21
+-----------------
+* Updated mongodb-core to 1.3.9.
+* Fixing issue that prevented mapReduce stats from being resolved (Issue #1351, https://github.com/davidgtonge)
+* Forwards SDAM monitoring events from mongodb-core.
+
+2.1.9 2016-03-16
+----------------
+* Updated mongodb-core to 1.3.7 to fix intermittent race condition that causes some users to experience big amounts of socket connections.
+* Makde bson parser in ordered/unordered bulk be directly from mongodb-core to avoid intermittent null error on mongoose.
+
+2.1.8 2016-03-14
+----------------
+* Updated mongodb-core to 1.3.5.
+* NODE-660 TypeError: Cannot read property 'noRelease' of undefined.
+* Harden MessageHandler in server.js to avoid issues where we cannot find a callback for an operation.
+* Ensure RequestId can never be larger than Max Number integer size.
+* NODE-661 typo in url_parser.js resulting in replSetServerOptions is not defined when connecting over ssl.
+* Confusing error with invalid partial index filter (Issue #1341, https://github.com/vkarpov15).
+* NODE-669 Should only error out promise for bulkWrite when error is a driver level error not a write error or write concern error.
+* NODE-662 shallow copy options on methods that are not currently doing it to avoid passed in options mutiation.
+* NODE-663 added lookup helper on aggregation cursor.
+* NODE-585 Result object specified incorrectly for findAndModify?.
+* NODE-666 harden validation for findAndModify CRUD methods.
+
+2.1.7 2016-02-09
+----------------
+* NODE-656 fixed corner case where cursor count command could be left without a connection available.
+* NODE-658 Work around issue that bufferMaxEntries:-1 for js gets interpreted wrongly due to double nature of Javascript numbers.
+* Fix: GridFS always returns the oldest version due to incorrect field name (Issue #1338, https://github.com/mdebruijne).
+* NODE-655 GridFS stream support for cancelling upload streams and download streams (Issue #1339, https://github.com/vkarpov15).
+* NODE-657 insertOne don`t return promise in some cases.
+* Added destroy alias for abort function on GridFSBucketWriteStream.
+
+2.1.6 2016-02-05
+----------------
+* Updated mongodb-core to 1.3.1.
+
+2.1.5 2016-02-04
+----------------
+* Updated mongodb-core to 1.3.0.
+* Added raw support for the command function on topologies.
+* Fixed issue where raw results that fell on batchSize boundaries failed (Issue #72)
+* Copy over all the properties to the callback returned from bindToDomain, (Issue #72)
+* Added connection hash id to be able to reference connection host/name without leaking it outside of driver.
+* NODE-638, Cannot authenticate database user with utf-8 password.
+* Refactored pool to be worker queue based, minimizing the impact a slow query have on throughput as long as # slow queries < # connections in the pool.
+* Pool now grows and shrinks correctly depending on demand not causing a full pool reconnect.
+* Improvements in monitoring of a Replicaset where in certain situations the inquiry process could get exited.
+* Switched to using Array.push instead of concat for use cases of a lot of documents.
+* Fixed issue where re-authentication could loose the credentials if whole Replicaset disconnected at once.
+* Added peer optional dependencies support using require_optional module.
+* Bug is listCollections for collection names that start with db name (Issue #1333, https://github.com/flyingfisher)
+* Emit error before closing stream (Issue #1335, https://github.com/eagleeye)
+
+2.1.4 2016-01-12
+----------------
+* Restricted node engine to >0.10.3 (https://jira.mongodb.org/browse/NODE-635).
+* Multiple database names ignored without a warning (https://jira.mongodb.org/browse/NODE-636, Issue #1324, https://github.com/yousefhamza).
+* Convert custom readPreference objects in collection.js (Issue #1326, https://github.com/Machyne).
+
+2.1.3 2016-01-04
 ----------------
 * Updated mongodb-core to 1.2.31.
-- Allow connection to secondary if primaryPreferred or secondaryPreferred (Issue #70, https://github.com/leichter)
+* Allow connection to secondary if primaryPreferred or secondaryPreferred (Issue #70, https://github.com/leichter)
 
-2.1.2 12-23-2015
+2.1.2 2015-12-23
 ----------------
 * Updated mongodb-core to 1.2.30.
 * Pool allocates size + 1 connections when using replicasets, reserving additional pool connection for monitoring exclusively.
 * Fixes bug when all replicaset members are down, that would cause it to fail to reconnect using the originally provided seedlist.
 
-2.1.1 12-13-2015
+2.1.1 2015-12-13
 ----------------
 * Surfaced checkServerIdentity options for MongoClient, Server, ReplSet and Mongos to allow for control of the checkServerIdentity method available in Node.s 0.12.x or higher.
 * Added readPreference support to listCollections and listIndexes helpers.
 * Updated mongodb-core to 1.2.28.
 
-2.1.0 12-06-2015
+2.1.0 2015-12-06
 ----------------
 * Implements the connection string specification, https://github.com/mongodb/specifications/blob/master/source/connection-string/connection-string-spec.rst.
 * Implements the new GridFS specification, https://github.com/mongodb/specifications/blob/master/source/gridfs/gridfs-spec.rst.
@@ -33,27 +202,27 @@
 * Added isDestroyed method to server, replset and mongos topologies.
 * Upgraded test suite to run using mongodb-topology-manager.
 
-2.0.53 12-23-2015
+2.0.53 2015-12-23
 -----------------
 * Updated mongodb-core to 1.2.30.
 * Pool allocates size + 1 connections when using replicasets, reserving additional pool connection for monitoring exclusively.
 * Fixes bug when all replicaset members are down, that would cause it to fail to reconnect using the originally provided seedlist.
 
-2.0.52 12-14-2015
+2.0.52 2015-12-14
 -----------------
 * removed remove from Gridstore.close.
 
-2.0.51 12-13-2015
+2.0.51 2015-12-13
 -----------------
 * Surfaced checkServerIdentity options for MongoClient, Server, ReplSet and Mongos to allow for control of the checkServerIdentity method available in Node.s 0.12.x or higher.
 * Added readPreference support to listCollections and listIndexes helpers.
 * Updated mongodb-core to 1.2.28.
 
-2.0.50 12-06-2015
+2.0.50 2015-12-06
 -----------------
 * Updated mongodb-core to 1.2.26.
 
-2.0.49 11-20-2015
+2.0.49 2015-11-20
 -----------------
 * Updated mongodb-core to 1.2.24 with several fixes.
   * Fix Automattic/mongoose#3481; flush callbacks on error, (Issue #57, https://github.com/vkarpov15).
@@ -62,7 +231,7 @@
   * Fixes to handle getMore command errors for MongoDB 3.2
   * Allows the process to properly close upon a Db.close() call on the replica set by shutting down the haTimer and closing arbiter connections.
 
-2.0.48 11-07-2015
+2.0.48 2015-11-07
 -----------------
 * GridFS no longer performs any deletes when writing a brand new file that does not have any previous <db>.fs.chunks or <db>.fs.files documents.
 * Updated mongodb-core to 1.2.21.
@@ -71,7 +240,7 @@
 * Mongos load balancing added, introduced localThresholdMS to control the feature.
 * Kerberos now a peerDependency, making it not install it by default in Node 5.0 or higher.
 
-2.0.47 10-28-2015
+2.0.47 2015-10-28
 -----------------
 * Updated mongodb-core to 1.2.20.
 * Fixed bug in arbiter connection capping code.
@@ -80,18 +249,18 @@
 * Added maxAwaitTimeMS support for 3.2 getMore to allow for custom timeouts on tailable cursors.
 * Make CoreCursor check for $err before saying that 'next' succeeded (Issue #53, https://github.com/vkarpov15).
 
-2.0.46 10-15-2015
+2.0.46 2015-10-15
 -----------------
 * Updated mongodb-core to 1.2.19.
 * NODE-578 Order of sort fields is lost for numeric field names.
 * Expose BSON Map (ES6 Map or polyfill).
 * Minor fixes for APM support to pass extended APM test suite.
 
-2.0.45 09-30-2015
+2.0.45 2015-09-30
 -----------------
 * NODE-566 Fix issue with rewind on capped collections causing cursor state to be reset on connection loss.
 
-2.0.44 09-28-2015
+2.0.44 2015-09-28
 -----------------
 * Bug fixes for APM upconverting of legacy INSERT/UPDATE/REMOVE wire protocol messages.
 * NODE-562, fixed issue where a Replicaset MongoDB URI with a single seed and replSet name set would cause a single direct connection instead of topology discovery.
@@ -102,7 +271,7 @@
 * NODE-571 added code 59 to legacy server errors when SCRAM-SHA-1 mechanism fails.
 * NODE-572 Remove examples that use the second parameter to `find()`.
 
-2.0.43 09-14-2015
+2.0.43 2015-09-14
 -----------------
 * Propagate timeout event correctly to db instances.
 * Application Monitoring API (APM) implemented.
@@ -113,16 +282,16 @@
 * fixed forceServerObjectId calls (Issue #1292, https://github.com/d-mon-)
 * Pass promise library through to DB function (Issue #1294, https://github.com/RovingCodeMonkey)
 
-2.0.42 08-18-2015
+2.0.42 2015-08-18
 -----------------
 * Added test case to exercise all non-crud methods on mongos topologies, fixed numberOfConnectedServers on mongos topology instance.
 
-2.0.41 08-14-2015
+2.0.41 2015-08-14
 -----------------
 * Added missing Mongos.prototype.parserType function.
 * Updated mongodb-core to 1.2.10.
 
-2.0.40 07-14-2015
+2.0.40 2015-07-14
 -----------------
 * Updated mongodb-core to 1.2.9 for 2.4 wire protocol error handler fix.
 * NODE-525 Reset connectionTimeout after it's overwritten by tls.connect.
@@ -132,30 +301,30 @@
 * NODE-528 Ignore undefined fields in Collection.find().
 * NODE-527 The API example for collection.createIndex shows Db.createIndex functionality.
 
-2.0.39 07-14-2015
+2.0.39 2015-07-14
 -----------------
 * Updated mongodb-core to 1.2.6 for NODE-505.
 
-2.0.38 07-14-2015
+2.0.38 2015-07-14
 -----------------
 * NODE-505 Query fails to find records that have a 'result' property with an array value.
 
-2.0.37 07-14-2015
+2.0.37 2015-07-14
 -----------------
 * NODE-504 Collection * Default options when using promiseLibrary.
 * NODE-500 Accidental repeat of hostname in seed list multiplies total connections persistently.
 * Updated mongodb-core to 1.2.5 to fix NODE-492.
 
-2.0.36 07-07-2015
+2.0.36 2015-07-07
 -----------------
 * Fully promisified allowing the use of ES6 generators and libraries like co. Also allows for BYOP (Bring your own promises).
 * NODE-493 updated mongodb-core to 1.2.4 to ensure we cannot DDOS the mongod or mongos process on large connection pool sizes.
 
-2.0.35 06-17-2015
+2.0.35 2015-06-17
 -----------------
 * Upgraded to mongodb-core 1.2.2 including removing warnings when C++ bson parser is not available and a fix for SCRAM authentication.
 
-2.0.34 06-17-2015
+2.0.34 2015-06-17
 -----------------
 * Upgraded to mongodb-core 1.2.1 speeding up serialization and removing the need for the c++ bson extension.
 * NODE-486 fixed issue related to limit and skip when calling toArray in 2.0 driver.
@@ -163,31 +332,31 @@
 * NODE-482 fixed issue where MongoClient.connect would incorrectly identify a replset seed list server as a non replicaset member.
 * NODE-487 fixed issue where killcursor command was not being sent correctly on limit and skip queries.
 
-2.0.33 05-20-2015
+2.0.33 2015-05-20
 -----------------
 * Bumped mongodb-core to 1.1.32.
 
-2.0.32 05-19-2015
+2.0.32 2015-05-19
 -----------------
 * NODE-463 db.close immediately executes its callback.
 * Don't only emit server close event once (Issue #1276, https://github.com/vkarpov15).
 * NODE-464 Updated mongodb-core to 1.1.31 that uses a single socket connection to arbiters and hidden servers as well as emitting all event correctly.
 
-2.0.31 05-08-2015
+2.0.31 2015-05-08
 -----------------
 * NODE-461 Tripping on error "no chunks found for file, possibly corrupt" when there is no error.
 
-2.0.30 05-07-2015
+2.0.30 2015-05-07
 -----------------
 * NODE-460 fix; don't set authMechanism for user in db.authenticate() to avoid mongoose authentication issue.
 
-2.0.29 05-07-2015
+2.0.29 2015-05-07
 -----------------
 * NODE-444 Possible memory leak, too many listeners added.
 * NODE-459 Auth failure using Node 0.8.28, MongoDB 3.0.2 & mongodb-node-native 1.4.35.
 * Bumped mongodb-core to 1.1.26.
 
-2.0.28 04-24-2015
+2.0.28 2015-04-24
 -----------------
 * Bumped mongodb-core to 1.1.25
 * Added Cursor.prototype.setCursorOption to allow for setting node specific cursor options for tailable cursors.
@@ -200,20 +369,20 @@
 * Always use readPreference = primary for findAndModify command (ignore passed in read preferences) (Issue #1274, https://github.com/vkarpov15).
 * Minor fix in GridStore.exists for dealing with regular expressions searches.
 
-2.0.27 04-07-2015
+2.0.27 2015-04-07
 -----------------
 * NODE-410 Correctly handle issue with pause/resume in Node 0.10.x that causes exceptions when using the Node 0.12.0 style streams.
 
-2.0.26 04-07-2015
+2.0.26 2015-04-07
 -----------------
 * Implements the Common Index specification Standard API at https://github.com/mongodb/specifications/blob/master/source/index-management.rst.
 * NODE-408 Expose GridStore.currentChunk.chunkNumber.
 
-2.0.25 03-26-2015
+2.0.25 2015-03-26
 -----------------
 * Upgraded mongodb-core to 1.1.21, making the C++ bson code an optional dependency to the bson module.
 
-2.0.24 03-24-2015
+2.0.24 2015-03-24
 -----------------
 * NODE-395 Socket Not Closing, db.close called before full set finished initalizing leading to server connections in progress not being closed properly.
 * Upgraded mongodb-core to 1.1.20.
