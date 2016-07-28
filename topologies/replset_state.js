@@ -508,7 +508,6 @@ ReplSetState.prototype.update = function(server) {
 /**
  * Recalculate single server max staleness
  * @method
- * @return
  */
 ReplSetState.prototype.updateServerMaxStaleness = function(server, haInterval) {
   // Locate the max secondary lastwrite
@@ -517,22 +516,16 @@ ReplSetState.prototype.updateServerMaxStaleness = function(server, haInterval) {
   for(var i = 0; i < this.secondaries.length; i++) {
     max = Math.max(max, this.secondaries[i].lastWriteDate);
   }
-  // console.log("!!!!!!!!!!!!!!!! 0")
-  // console.dir(max)
+
   // Perform this servers staleness calculation
   if(server.ismaster.maxWireVersion >= 5
     && server.ismaster.secondary
     && this.hasPrimary()) {
-      // console.log("=========== updateServerMaxStaleness 0")
     server.staleness = (server.lastUpdateTime - server.lastWriteDate)
       - (this.primary.lastUpdateTime - this.primary.lastWriteDate)
       + haInterval;
   } else if(server.ismaster.maxWireVersion >= 5
     && server.ismaster.secondary){
-      // console.log("=========== updateServerMaxStaleness 1")
-      // console.log("    max :: " + max)
-      // console.log("    server.lastWriteDate :: " + server.lastWriteDate)
-      // console.log("    haInterval :: " + haInterval)
     server.staleness = max - server.lastWriteDate + haInterval;
   }
 }
@@ -540,7 +533,6 @@ ReplSetState.prototype.updateServerMaxStaleness = function(server, haInterval) {
 /**
  * Recalculate all the stalness values for secodaries
  * @method
- * @return
  */
 ReplSetState.prototype.updateSecondariesMaxStaleness = function(haInterval) {
   for(var i = 0; i < this.secondaries.length; i++) {
@@ -552,7 +544,6 @@ ReplSetState.prototype.updateSecondariesMaxStaleness = function(haInterval) {
  * Pick a server by the passed in ReadPreference
  * @method
  * @param {ReadPreference} readPreference The ReadPreference instance to use
- * @return
  */
 ReplSetState.prototype.pickServer = function(readPreference) {
   // If no read Preference set to primary by default
