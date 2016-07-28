@@ -1002,3 +1002,24 @@ exports['error on duplicate key index'] = {
 //     });
 //   }
 // }
+
+/**
+ * @ignore
+ */
+exports['should correctly create Index with sub element'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      // insert a doc
+      db.collection('messed_up_index').createIndex({ temporary: 1, 'store.addressLines': 1, lifecycleStatus: 1 }, configuration.writeConcernMax(), function(err, r) {
+        test.equal(null, err);
+
+        db.close();
+        test.done();
+      });
+    });
+  }
+}
