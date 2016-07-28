@@ -1,3 +1,12 @@
+2.2.5 2016-07-28
+----------------
+* Updated mongodb-core to 2.0.7.
+* Allow primary to be returned when secondaryPreferred is passed (Issue #117, https://github.com/dhendo).
+* Added better warnings when passing in illegal seed list members to a Mongos topology.
+* Minor attemptReconnect bug that would cause multiple attemptReconnect to run in parallel.
+* Fix wrong opType passed to disconnectHandler.add (Issue #121, https://github.com/adrian-gierakowski)
+* Implemented domain backward comp support enabled via domainsEnabled options on Server/ReplSet/Mongos and MongoClient.connect.
+
 2.2.4 2016-07-19
 ----------------
 * NPM corrupted upload fix.
