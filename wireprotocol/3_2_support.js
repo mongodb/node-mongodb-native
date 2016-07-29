@@ -49,7 +49,11 @@ var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callba
 
   // If we have collation passed in
   if(options.collation) {
-    writeCommand.collation = options.collation;
+    for(var i = 0; i < writeCommand[opsField].length; i++) {
+      if(!writeCommand[opsField][i].collation) {
+        writeCommand[opsField][i].collation = options.collation;
+      }
+    }
   }
 
   // Do we have bypassDocumentValidation set, then enable it on the write command
