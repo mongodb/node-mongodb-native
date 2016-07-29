@@ -1,3 +1,7 @@
+2.0.8
+----------------
+* Throw exceptions using process.nextTick when user provided callback throws.
+
 2.0.7 2016-07-28
 ----------------
 * Allow primary to be returned when secondaryPreferred is passed (Issue #117, https://github.com/dhendo).
