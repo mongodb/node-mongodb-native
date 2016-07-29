@@ -98,6 +98,26 @@ exports['should handle error throw in user callback'] = {
   }
 }
 
+exports['should handle error throw in user callbackwhen calling count'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance({w:1}, {poolSize:1});
+    process.once("uncaughtException", function(err) {
+      db.close();
+      test.done();
+    })
+
+    db.open(function(err, client) {
+      var c = db.collection('test_error_object_should_include_message');
+      c.find({}).count(function() {
+        ggg
+      });
+    });
+  }
+}
+
 exports['Should handle uncaught error correctly'] = {
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
 

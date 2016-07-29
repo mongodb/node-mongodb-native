@@ -548,7 +548,7 @@ exports['Successfully pass through collation to remove command'] = {
         // Simple findAndModify command returning the new document
         db.collection('test').deleteMany({}, {collation: {caseLevel:true}}, function(err, results) {
           test.equal(null, err);
-          test.deepEqual({ caseLevel: true }, commandResult.collation);
+          test.deepEqual({ caseLevel: true }, commandResult.deletes[0].collation);
 
           singleServer.destroy();
           running = false;
@@ -615,7 +615,7 @@ exports['Successfully pass through collation to update command'] = {
         // Simple findAndModify command returning the new document
         db.collection('test').updateOne({a:1}, {$set:{b:1}}, {collation: {caseLevel:true}}, function(err, results) {
           test.equal(null, err);
-          test.deepEqual({ caseLevel: true }, commandResult.collation);
+          test.deepEqual({ caseLevel: true }, commandResult.updates[0].collation);
 
           singleServer.destroy();
           running = false;
