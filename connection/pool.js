@@ -421,6 +421,24 @@ function messageHandler(self) {
       }
     }
 
+    function handleOperationCallback(self, cb, err, result) {
+      // No domain enabled
+      if(!self.options.domainsEnabled) {
+        try {
+          cb(err, result);
+        } catch(err) {
+          process.nextTick(function() {
+            throw err;
+          });
+        }
+
+        return;
+      }
+
+      // Domain enabled just call the callback
+      cb(err, result);
+    }
+
     authenticateStragglers(self, connection, function(err) {
       // Keep executing, ensure current message handler does not stop execution
       process.nextTick(function() {
@@ -433,17 +451,20 @@ function messageHandler(self) {
           // Parse the message according to the provided options
           message.parse(workItem);
         } catch(err) {
-          return workItem.cb(MongoError.create(err));
+          return handleOperationCallback(self, workItem.cb, MongoError.create(err));
+          // return workItem.cb(MongoError.create(err));
         }
 
         // Establish if we have an error
         if(workItem.command && message.documents[0] && (message.documents[0].ok == 0 || message.documents[0]['$err']
         || message.documents[0]['errmsg'] || message.documents[0]['code'])) {
-          return workItem.cb(MongoError.create(message.documents[0]));
+          // return workItem.cb(MongoError.create(message.documents[0]));
+          return handleOperationCallback(self, workItem.cb, MongoError.create(message.documents[0]));
         }
 
         // Return the documents
-        workItem.cb(null, new CommandResult(message.documents[0], connection, message));
+        // workItem.cb(null, new CommandResult(message.documents[0], connection, message));
+        handleOperationCallback(self, workItem.cb, null, new CommandResult(message.documents[0], connection, message));
       }
     });
   }
@@ -822,7 +843,14 @@ Pool.prototype.write = function(buffer, options, cb) {
   // Pool was destroyed error out
   if(this.state == DESTROYED || this.state == DESTROYING) {
     // Callback with an error
-    if(cb) cb(new MongoError('pool destroyed'));
+    if(cb) {
+      try {
+        cb(new MongoError('pool destroyed'));
+      } catch(err) {
+        process.nextTick(function() { throw err; });
+      }
+    }
+
     return;
   }
 
@@ -854,8 +882,6 @@ Pool.prototype.write = function(buffer, options, cb) {
   // Optional per operation socketTimeout
   operation.socketTimeout = options.socketTimeout;
   operation.monitoring = options.monitoring;
-  // // debug
-  // operation.cmd = options.cmd;
 
   // We need to have a callback function unless the message returns no response
   if(!(typeof cb == 'function') && !options.noResponse) {
