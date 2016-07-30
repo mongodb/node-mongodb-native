@@ -424,15 +424,9 @@ function messageHandler(self) {
     function handleOperationCallback(self, cb, err, result) {
       // No domain enabled
       if(!self.options.domainsEnabled) {
-        try {
+        return process.nextTick(function() {
           cb(err, result);
-        } catch(err) {
-          process.nextTick(function() {
-            throw err;
-          });
-        }
-
-        return;
+        });
       }
 
       // Domain enabled just call the callback
