@@ -4,7 +4,7 @@ title = "Aggregation"
 [menu.main]
   parent = "Tutorials"
   identifier = "Aggregation"
-  weight = 70
+  weight = 38
   pre = "<i class='fa'></i>"
 +++
 

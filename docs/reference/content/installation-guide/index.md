@@ -3,13 +3,13 @@ date = "2015-03-17T15:36:56Z"
 title = "Installation Guide"
 [menu.main]
   identifier = "Installation Guide"
-  weight = 15
+  weight = 10
   pre = "<i class='fa fa-puzzle-piece'></i>"
 +++
 
 # Installation
 
-The recommended way to get started using the Node.js 2.0 driver is by using `NPM` (Node Package Manager) to install the dependency in your project.
+The recommended way to get started using the Node.js 2.1 driver is by using `NPM` (Node Package Manager) to install the dependency in your project.
 
 ## MongoDB Driver
 
