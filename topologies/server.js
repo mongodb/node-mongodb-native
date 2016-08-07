@@ -487,6 +487,7 @@ Server.prototype.command = function(ns, cmd, options, callback) {
     promoteLongs: typeof options.promoteLongs == 'boolean' ? options.promoteLongs : true,
     command: true,
     monitoring: typeof options.monitoring == 'boolean' ? options.monitoring : false,
+    fullResult: typeof options.fullResult == 'boolean' ? options.fullResult : false
   };
 
   // Write the operation to the pool
