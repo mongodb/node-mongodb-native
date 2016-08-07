@@ -10,13 +10,13 @@ GridStore is a single file inside GridFS that can be managed by the script.
 Opening a GridStore (a single file in GridFS) is a bit similar to opening a database. At first you need to create a GridStore object and then `open` it. 
 
 ```javascript
-  var gs = new mongodb.GridStore(db, filename, mode[, options])
+  var gs = new mongodb.GridStore(db, filenameOrId, mode[, options])
 ```
 
 Where
 
   * `db` is the database object
-  * `filename` is the name of the file in GridFS that needs to be accessed/created
+  * `filenameOrId` is either the string filename or the ObjectId `_id` that needs to be accessed/created in GridFS.
   * `mode` indicates the operation, can be one of:
     * "r" (Read): Looks for the file information in fs.files collection, or creates a new id for this object. 
     * "w" (Write): Erases all chunks if the file already exist. 
