@@ -642,7 +642,6 @@ Server.prototype.auth = function(mechanism, db) {
   var callback = args[args.length - 1];
 
   // If we are not connected or have a disconnectHandler specified
-  //function disconnectHandler(self, type, ns, cmd, options, callback) {
   if(disconnectHandler(self, 'auth', db, args, {}, callback)) {
     return;
   }
@@ -742,6 +741,11 @@ Server.prototype.destroy = function(options) {
 
   if(self.s.logger.isDebug()) {
     self.s.logger.debug(f('destroy called on server %s', self.name));
+  }
+
+  // Flush any non played operations
+  if(this.s.disconnectHandler) {
+    this.s.disconnectHandler.flush(new MongoError('topology was destroyed'));
   }
 
   // Destroy the pool
