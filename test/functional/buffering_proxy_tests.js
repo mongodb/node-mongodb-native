@@ -189,11 +189,11 @@ exports['Successfully handle buffering store execution for primary server'] = {
                 die = false;
 
                 setTimeout(function() {
-                  test.deepEqual(['insertOne', 'aggregate'], results);
+                  test.deepEqual(['insertOne', 'aggregate'].sort(), results.sort());
 
                   running = false;
                   db.close();
-                  test.deepEqual(['insertOne', 'aggregate', 'count', 'find'], results);
+                  test.deepEqual(['insertOne', 'aggregate', 'count', 'find'].sort(), results.sort());
 
                   primaryServer.destroy();
                   firstSecondaryServer.destroy();
@@ -411,12 +411,12 @@ exports['Successfully handle buffering store execution for secondary server'] = 
                 setTimeout(function() {
                   // console.log("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ 4")
                   // console.dir(results)
-                  test.deepEqual(['count', 'find'], results);
+                  test.deepEqual(['count', 'find'].sort(), results.sort());
 
                   running = false;
                   db.close();
 
-                  test.deepEqual(['count', 'find', 'insertOne', 'aggregate'], results);
+                  test.deepEqual(['count', 'find', 'insertOne', 'aggregate'].sort(), results.sort());
 
                   primaryServer.destroy();
                   firstSecondaryServer.destroy();
