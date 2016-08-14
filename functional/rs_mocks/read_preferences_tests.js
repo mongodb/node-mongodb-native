@@ -615,6 +615,10 @@ exports['Should correctly fall back to a secondary server if the readPreference 
         execute: function() {
           // method needs to be called, so provide a dummy version
           return;
+        },
+        flush: function() {
+          // method needs to be called, so provide a dummy version
+          return;
         }
       };
 
