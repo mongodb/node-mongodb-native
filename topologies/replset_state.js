@@ -68,7 +68,7 @@ var ReplSetState = function(options) {
 inherits(ReplSetState, EventEmitter);
 
 ReplSetState.prototype.hasPrimaryAndSecondary = function(server) {
-  return this.primary && this.secondaries.length > 0;
+  return this.primary != null && this.secondaries.length > 0;
 }
 
 ReplSetState.prototype.hasPrimary = function(server) {
@@ -624,7 +624,6 @@ ReplSetState.prototype.pickServer = function(readPreference) {
 
   // Primary preferred
   if(readPreference.equals(ReadPreference.primaryPreferred)) {
-    // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! primaryPreferred")
     var server = null;
 
     // We prefer the primary if it's available
@@ -634,10 +633,8 @@ ReplSetState.prototype.pickServer = function(readPreference) {
 
     // Pick a secondary
     if(secondaries.length > 0 && !readPreference.maxStalenessMS) {
-      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! primaryPreferred 0")
       server = pickNearest(this, readPreference);
     } else if(secondaries.length > 0 && readPreference.maxStalenessMS) {
-      // console.log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! primaryPreferred 1")
       server = pickNearestMaxStalenessMS(this, readPreference);
     }
 
@@ -685,14 +682,10 @@ var filterByTags = function(readPreference, servers) {
 }
 
 function pickNearestMaxStalenessMS(self, readPreference) {
-  // console.log("=== pickNearestMaxStalenessMS 0")
   // Only get primary and secondaries as seeds
   var seeds = {};
   var servers = [];
   var heartbeatFrequencyMS = self.heartbeatFrequencyMS;
-
-  // console.log("=== readPreference.maxStalenessMS = " + readPreference.maxStalenessMS)
-  // console.log("=== (heartbeatFrequencyMS * 2) = " + (heartbeatFrequencyMS * 2))
 
   // Check if the maxStalenessMS > heartbeatFrequencyMS * 2
   if(readPreference.maxStalenessMS < (heartbeatFrequencyMS * 2)) {
@@ -711,27 +704,21 @@ function pickNearestMaxStalenessMS(self, readPreference) {
 
   // Filter by tags
   servers = filterByTags(readPreference, servers);
-  // console.log("=== pickNearestMaxStalenessMS 1 :: " + servers.length)
 
   //
-  // // Locate lowest time (picked servers are lowest time + acceptable Latency margin)
+  // Locate lowest time (picked servers are lowest time + acceptable Latency margin)
   // var lowest = servers.length > 0 ? servers[0].lastIsMasterMS : 0;
 
   // Filter by latency
   servers = servers.filter(function(s) {
-    // console.log("  == " + s.name + " :: " + s.staleness + " <= " + readPreference.maxStalenessMS)
     return s.staleness <= readPreference.maxStalenessMS;
   });
-  // console.log("=== pickNearestMaxStalenessMS 2 :: " + servers.length)
 
   // Sort by time
   servers.sort(function(a, b) {
     // return a.time > b.time;
     return a.lastIsMasterMS > b.lastIsMasterMS
   });
-
-  // console.log("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ servers.length = " + servers.length)
-  // console.log(servers.map(function(x) { return x.name}))
 
   // No servers, default to primary
   if(servers.length == 0) {
@@ -740,14 +727,6 @@ function pickNearestMaxStalenessMS(self, readPreference) {
 
   // Ensure index does not overflow the number of available servers
   self.index = self.index % servers.length;
-
-  // // Does any of the servers not support the right wire protocol version
-  // // Then error out
-  // for(var i = 0; i < servers.length; i++) {
-  //   if(servers[i].ismaster.maxWireVersion < 5) {
-  //     return new MongoError('maxStalenessMS not supported by at least one of the replicaset members');
-  //   }
-  // }
 
   // Get the server
   var server = servers[self.index];
