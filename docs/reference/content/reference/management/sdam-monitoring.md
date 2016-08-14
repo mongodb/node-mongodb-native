@@ -20,7 +20,7 @@ joining or leaving a replica set.
 
 | Event | Applies To | Description |
 | :----------| :------------- | :------------- |
-| serverOpening | Server, Replicaset, Mongos| Emitted when before server connection is established. |
+| serverOpening | Server, Replicaset, Mongos| Emitted when server connection is established. |
 | serverClosed | Server, Replicaset, Mongos | Emitted when server connection gets closed. |
 | serverDescriptionChanged | Server, Replicaset, Mongos| Emitted when server state changes (such as from secondary to primary). |
 | topologyOpening | Server, Replicaset, Mongos| Emitted before any server connections are performed. |
