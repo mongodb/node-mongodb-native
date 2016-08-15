@@ -654,11 +654,6 @@ Mongos.prototype.destroy = function(emitClose) {
   // Clear out any monitoring process
   if(this.haTimeoutId) clearTimeout(this.haTimeoutId);
 
-  // Flush any non played operations
-  if(this.s.disconnectHandler) {
-    this.s.disconnectHandler.flush(new MongoError('topology was destroyed'));
-  }
-
   // Destroy all connecting servers
   proxies.forEach(function(x) {
     x.destroy();
