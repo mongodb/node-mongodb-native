@@ -924,7 +924,7 @@ exports['Should correctly connect to a replicaset with additional options'] = {
       test.ok(db != null);
 
       test.equal(500, db.serverConfig.connections()[0].connectionTimeout);
-      test.equal(120000, db.serverConfig.connections()[0].socketTimeout);
+      test.equal(30000, db.serverConfig.connections()[0].socketTimeout);
 
       db.collection("replicaset_mongo_client_collection").update({a:1}, {b:1}, {upsert:true}, function(err, result) {
         test.equal(null, err);

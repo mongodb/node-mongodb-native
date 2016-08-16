@@ -1,3 +1,13 @@
+2.2.6 2016-08-16
+----------------
+* Updated mongodb-core to 2.0.8.
+* Allow execution of store operations independent of having both a primary and secondary available (Issue #123).
+* Fixed command execution issue for mongos to ensure buffering of commands when no mongos available.
+* Allow passing in an array of tags to ReadPreference constructor (Issue #1382, https://github.com/vkarpov15)
+* Added hashed connection names and fullResult.
+* Updated bson library to 0.5.3.
+* Enable maxTimeMS in count, distinct, findAndModify.
+
 2.2.5 2016-07-28
 ----------------
 * Updated mongodb-core to 2.0.7.
