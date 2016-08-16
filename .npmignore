@@ -10,6 +10,7 @@
 *.dat
 *.png
 *.txt
+test*.*
 
 HISTORY
 Readme.md
