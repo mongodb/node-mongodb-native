@@ -4,6 +4,7 @@
 * Fixed command execution issue for mongos to ensure buffering of commands when no mongos available.
 * Added hashed connection names and fullResult.
 * Updated bson library to 0.5.3.
+* Wrap callback in nextTick to ensure exceptions are thrown correctly.
 
 2.0.7 2016-07-28
 ----------------
