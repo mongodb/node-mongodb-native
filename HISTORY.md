@@ -1,6 +1,9 @@
-2.0.8
+2.0.8 2016-08-16
 ----------------
-* Throw exceptions using process.nextTick when user provided callback throws.
+* Allow execution of store operations indepent of having both a primary and secondary available (Issue #123).
+* Fixed command execution issue for mongos to ensure buffering of commands when no mongos available.
+* Added hashed connection names and fullResult.
+* Updated bson library to 0.5.3.
 
 2.0.7 2016-07-28
 ----------------
