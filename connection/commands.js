@@ -474,6 +474,9 @@ Response.prototype.parse = function(options) {
   // Allow the return of raw documents instead of parsing
   var raw = options.raw || false;
   var documentsReturnedIn = options.documentsReturnedIn || null;
+  var promoteLongs = typeof options.promoteLongs == 'boolean'
+    ? options.promoteLongs
+    : this.opts.promoteLongs;
 
   //
   // Single document and documentsReturnedIn set
@@ -487,7 +490,10 @@ Response.prototype.parse = function(options) {
     var fieldsAsRaw = {}
     fieldsAsRaw[documentsReturnedIn] = true;
     // Set up the options
-    var _options = {promoteLongs: this.opts.promoteLongs, fieldsAsRaw: fieldsAsRaw};
+    var _options = {
+      promoteLongs: promoteLongs,
+      fieldsAsRaw: fieldsAsRaw
+    };
 
     // Deserialize but keep the array of documents in non-parsed form
     var doc = this.bson.deserialize(document, _options);
@@ -514,7 +520,7 @@ Response.prototype.parse = function(options) {
   for(var i = 0; i < this.numberReturned; i++) {
     var bsonSize = this.data[this.index] | this.data[this.index + 1] << 8 | this.data[this.index + 2] << 16 | this.data[this.index + 3] << 24;
     // Parse options
-    var _options = {promoteLongs: this.opts.promoteLongs};
+    var _options = {promoteLongs: promoteLongs};
 
     // If we have raw results specified slice the return document
     if(raw) {
