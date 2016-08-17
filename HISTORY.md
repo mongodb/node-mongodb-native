@@ -1,3 +1,7 @@
+2.2.7
+----------------
+* If only a single mongos is provided in the seedlist, fix issue where it would be assigned as single standalone server instead of mongos topology (Issue #130).
+
 2.2.6 2016-08-16
 ----------------
 * Updated mongodb-core to 2.0.8.
