@@ -1,3 +1,7 @@
+2.0.9
+----------------
+* Allow promoteLongs to be passed in through Response.parse method and overrides default set on the connection.
+
 2.0.8 2016-08-16
 ----------------
 * Allow execution of store operations indepent of having both a primary and secondary available (Issue #123).
