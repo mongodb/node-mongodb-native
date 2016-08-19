@@ -1,6 +1,11 @@
-2.2.7
+2.2.7 2016-08-19
 ----------------
 * If only a single mongos is provided in the seedlist, fix issue where it would be assigned as single standalone server instead of mongos topology (Issue #130).
+* Updated mongodb-core to 2.0.9.
+* Allow promoteLongs to be passed in through Response.parse method and overrides default set on the connection.
+* NODE-798 Driver hangs on count command in replica set with one member.
+* Allow promoteLongs to be passed in through Response.parse method and overrides default set on the connection.
+* Allow passing in servername for TLS connections for SNI support.
 
 2.2.6 2016-08-16
 ----------------
