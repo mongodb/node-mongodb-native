@@ -1,4 +1,4 @@
-2.0.9
+2.0.9 2016-08-19
 ----------------
 * Allow promoteLongs to be passed in through Response.parse method and overrides default set on the connection.
 * NODE-798 Driver hangs on count command in replica set with one member.
