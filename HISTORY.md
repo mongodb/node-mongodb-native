@@ -1,6 +1,9 @@
 2.0.9
 ----------------
 * Allow promoteLongs to be passed in through Response.parse method and overrides default set on the connection.
+* NODE-798 Driver hangs on count command in replica set with one member.
+* Allow promoteLongs to be passed in through Response.parse method and overrides default set on the connection.
+* Allow passing in servername for TLS connections for SNI support.
 
 2.0.8 2016-08-16
 ----------------
