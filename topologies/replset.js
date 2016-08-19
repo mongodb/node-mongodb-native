@@ -1060,9 +1060,11 @@ ReplSet.prototype.command = function(ns, cmd, options, callback) {
   var readPreference = options.readPreference ? options.readPreference : ReadPreference.primary;
 
   // If the readPreference is primary and we have no primary, store it
-  if(readPreference.mode == 'primary' && !this.s.replicaSetState.hasPrimary() && this.s.disconnectHandler != null) {
+  if(readPreference.preference == 'primary' && !this.s.replicaSetState.hasPrimary() && this.s.disconnectHandler != null) {
+    console.log("!!!!!!!!!!!!!!!!! command 1")
     return this.s.disconnectHandler.add('command', ns, cmd, options, callback);
-  } else if(!this.s.replicaSetState.hasSecondary() && this.s.disconnectHandler != null) {
+  } else if(readPreference.preference != 'primary' && !this.s.replicaSetState.hasSecondary() && this.s.disconnectHandler != null) {
+    console.log("!!!!!!!!!!!!!!!!! command 2")
     // Otherwise secondary is allowed
     return this.s.disconnectHandler.add('command', ns, cmd, options, callback);
   }
