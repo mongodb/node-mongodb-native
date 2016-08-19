@@ -235,6 +235,7 @@ try {
   testFiles.push('/test/tests/functional/rs_mocks/read_preferences_tests.js');
   testFiles.push('/test/tests/functional/rs_mocks/monitoring_tests.js');
   testFiles.push('/test/tests/functional/rs_mocks/maintanance_mode_tests.js');
+  testFiles.push('/test/tests/functional/rs_mocks/operation_tests.js');
 
   // SDAM Tests
   testFiles.push('/test/tests/functional/sdam_monitoring_mocks/single_topology_tests.js');
