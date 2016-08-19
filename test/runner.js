@@ -353,6 +353,7 @@ try {
   testFiles.push('/test/functional/collations_tests.js');
   testFiles.push('/test/functional/max_staleness_tests.js');
   testFiles.push('/test/functional/buffering_proxy_tests.js');
+  testFiles.push('/test/functional/view_tests.js');
 } catch(err) {}
 
 // Add all the tests to run
