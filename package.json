@@ -13,32 +13,31 @@
     "official"
   ],
   "dependencies": {
-    "es6-promise": "3.0.2",
-    "mongodb-core": "2.0.8",
+    "es6-promise": "3.2.1",
     "mongodb-core": "christkv/mongodb-core#2.0",
-    "readable-stream": "1.0.31"
+    "readable-stream": "2.1.5"
   },
   "devDependencies": {
     "JSONStream": "^1.0.7",
     "betterbenchmarks": "^0.1.0",
-    "bluebird": "2.9.27",
+    "bluebird": "3.4.1",
     "bson": "^0.5.1",
     "cli-table": "^0.3.1",
-    "co": "4.5.4",
+    "co": "4.6.0",
     "colors": "^1.1.2",
     "coveralls": "^2.11.6",
     "event-stream": "^3.3.2",
     "gleak": "0.5.0",
     "integra": "0.1.8",
-    "jsdoc": "3.3.0-beta3",
+    "jsdoc": "3.4.0",
     "ldjson-stream": "^1.2.1",
-    "mongodb-extended-json": "1.3.0",
+    "mongodb-extended-json": "1.7.0",
     "mongodb-topology-manager": "1.0.x",
-    "mongodb-version-manager": "^0.8.10",
-    "nyc": "^5.5.0",
+    "mongodb-version-manager": "^1.0.6",
+    "nyc": "^8.1.0",
     "optimist": "0.6.1",
-    "rimraf": "2.2.6",
-    "semver": "5.1.0",
+    "rimraf": "2.5.4",
+    "semver": "5.3.0",
     "worker-farm": "^1.3.1"
   },
   "author": "Christian Kvalheim",
@@ -54,7 +53,9 @@
     "coverage": "node_modules/.bin/nyc node test/runner.js -t functional && node_modules/.bin/nyc report --reporter=text-lcov | node_modules/.bin/coveralls"
   },
   "nyc": {
-    "include": ["lib/**/*.js"]
+    "include": [
+      "lib/**/*.js"
+    ]
   },
   "homepage": "https://github.com/mongodb/node-mongodb-native"
 }
