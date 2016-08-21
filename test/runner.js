@@ -571,9 +571,8 @@ if(argv.t == 'functional') {
 
         return new mongo.Mongos([
           new mongo.Server(host, port, options)
-        ]);
-      }, manager: new ShardingManager({
-      })
+        ], options);
+      }, manager: new ShardingManager({})
     }
 
     executeTestSuite(config);

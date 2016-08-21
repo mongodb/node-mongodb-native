@@ -250,7 +250,7 @@ exports['Should correctly connect to MongoS using single server instance'] = {
       collection.insert({test:1}, {w:'majority', wtimeout:10000}, function(err, result) {
         test.equal(null, err);
 
-        collection.findOne({test:1}, {}, {readPreference:new ReadPreference(ReadPreference.SECONDARY, [{"dc2":"sf"}, {"dc1":"ny"}])}, function(err, item) {
+        collection.findOne({test:1}, {}, {readPreference:new ReadPreference(ReadPreference.SECONDARY)}, function(err, item) {
           test.equal(null, err);
           test.equal(1, item.test);
 

@@ -1466,8 +1466,6 @@ exports.handleBSONTypeInsertsCorrectly = {
                     test.ok(doc.maxkey instanceof MaxKey);
 
                     collection.findOne({"code": new Code("function () {}", {a: 77})}, function(err, doc) {
-                      console.dir(err)
-                      console.dir(doc)
                       test.equal(null, err);
                       test.ok(doc != null);
                       db.close();
@@ -1728,7 +1726,7 @@ exports.shouldCorrectlyHonorPromoteLongFalseNativeBSON = {
 
     var o = configuration.writeConcernMax();
     o.promoteLongs = false;
-    var db = configuration.newDbInstance(o, {native_parser:true})
+    var db = configuration.newDbInstance(o, {native_parser:true, promoteLongs: false})
     db.open(function(err, db) {
       db.collection('shouldCorrectlyHonorPromoteLong').insert({
             doc: Long.fromNumber(10)
@@ -1759,6 +1757,7 @@ exports.shouldCorrectlyHonorPromoteLongFalseNativeBSONWithGetMore = {
 
     var o = configuration.writeConcernMax();
     o.promoteLongs = false;
+    // var db = configuration.newDbInstance(o, {native_parser:true, promoteLongs:false})
     var db = configuration.newDbInstance(o, {native_parser:true})
     db.open(function(err, db) {
       db.collection('shouldCorrectlyHonorPromoteLongFalseNativeBSONWithGetMore').insertMany([
@@ -2135,7 +2134,6 @@ exports['Correctly allow forceServerObjectId for insertOne'] = {
       test.equal(null, err);
 
       db.collection('apm_test').insertOne({a:1}, {forceServerObjectId:true}).then(function(r) {
-        // console.dir(r)
         test.equal(null, err);
         test.equal(undefined, started[0].command.documents[0]._id);
         listener.uninstrument();
