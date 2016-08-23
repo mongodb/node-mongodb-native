@@ -1,3 +1,9 @@
+2.2.8 2016-08-23
+----------------
+* Updated mongodb-core to 2.0.10.
+* Added promoteValues flag (default to true) to allow user to specify they only want wrapped BSON values back instead of promotion to native types.
+* Do not close mongos proxy connection on failed ismaster check in ha process (Issue #130).
+
 2.2.7 2016-08-19
 ----------------
 * If only a single mongos is provided in the seedlist, fix issue where it would be assigned as single standalone server instead of mongos topology (Issue #130).

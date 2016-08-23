@@ -300,6 +300,7 @@ var testFiles = [
   , '/test/functional/find_and_modify_tests.js'
   , '/test/functional/hang_tests.js',
   , '/test/functional/disconnect_handler_tests.js',
+  , '/test/functional/promote_values_tests.js',
 
   // Replicaset tests
   , '/test/functional/replset_read_preference_tests.js'

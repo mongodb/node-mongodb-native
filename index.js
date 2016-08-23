@@ -32,6 +32,7 @@ connect.Code = core.BSON.Code;
 connect.Map = core.BSON.Map;
 connect.DBRef = core.BSON.DBRef;
 connect.Double = core.BSON.Double;
+connect.Int32 = core.BSON.Int32;
 connect.Long = core.BSON.Long;
 connect.MinKey = core.BSON.MinKey;
 connect.MaxKey = core.BSON.MaxKey;
