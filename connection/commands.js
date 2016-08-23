@@ -394,7 +394,7 @@ KillCursor.prototype.toBin = function() {
 }
 
 var Response = function(bson, data, opts) {
-  opts = opts || {promoteLongs: true};
+  opts = opts || {promoteLongs: true, promoteValues: true};
   this.parsed = false;
 
   //
@@ -450,6 +450,7 @@ var Response = function(bson, data, opts) {
   this.shardConfigStale = (this.responseFlags & SHARD_CONFIG_STALE) != 0;
   this.awaitCapable = (this.responseFlags & AWAIT_CAPABLE) != 0;
   this.promoteLongs = typeof opts.promoteLongs == 'boolean' ? opts.promoteLongs : true;
+  this.promoteValues = typeof opts.promoteValues == 'boolean' ? opts.promoteValues : true;
 }
 
 Response.prototype.isParsed = function() {
@@ -477,6 +478,9 @@ Response.prototype.parse = function(options) {
   var promoteLongs = typeof options.promoteLongs == 'boolean'
     ? options.promoteLongs
     : this.opts.promoteLongs;
+  var promoteValues = typeof options.promoteValues == 'boolean'
+    ? options.promoteValues
+    : this.opts.promoteValues;
 
   //
   // Single document and documentsReturnedIn set
@@ -492,6 +496,7 @@ Response.prototype.parse = function(options) {
     // Set up the options
     var _options = {
       promoteLongs: promoteLongs,
+      promoteValues: promoteValues,
       fieldsAsRaw: fieldsAsRaw
     };
 
@@ -520,7 +525,7 @@ Response.prototype.parse = function(options) {
   for(var i = 0; i < this.numberReturned; i++) {
     var bsonSize = this.data[this.index] | this.data[this.index + 1] << 8 | this.data[this.index + 2] << 16 | this.data[this.index + 3] << 24;
     // Parse options
-    var _options = {promoteLongs: promoteLongs};
+    var _options = {promoteLongs: promoteLongs, promoteValues: promoteValues};
 
     // If we have raw results specified slice the return document
     if(raw) {

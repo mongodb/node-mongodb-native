@@ -232,6 +232,10 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
     queryOptions.promoteLongs = cursorState.promoteLongs;
   }
 
+  if(typeof cursorState.promoteValues == 'boolean') {
+    queryCallback.promoteValues = cursorState.promoteValues;
+  }
+
   // Write out the getMore command
   connection.write(query.toBin(), queryOptions, queryCallback);
 }
