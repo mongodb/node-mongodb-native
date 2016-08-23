@@ -1,3 +1,8 @@
+2.0.10 2016-08-23
+-----------------
+* Added promoteValues flag (default to true) to allow user to specify they only want wrapped BSON values back instead of promotion to native types.
+* Do not close mongos proxy connection on failed ismaster check in ha process (Issue #130).
+
 2.0.9 2016-08-19
 ----------------
 * Allow promoteLongs to be passed in through Response.parse method and overrides default set on the connection.
