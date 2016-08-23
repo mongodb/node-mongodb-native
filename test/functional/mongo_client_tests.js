@@ -437,6 +437,19 @@ exports["correctly error out when no socket available on MongoClient.connect"] =
   }
 }
 
+exports["should correctly connect to mongodb using domain socket"] = {
+  metadata: { requires: { topology: ['single'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var MongoClient = configuration.require.MongoClient;
+    MongoClient.connect('mongodb:///tmp/mongodb-27017.sock/test', function(err, db) {
+      test.equal(null, err);
+      test.done();
+    });
+  }
+}
+
 /**
  * @ignore
  */
