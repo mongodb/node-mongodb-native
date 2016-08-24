@@ -4,7 +4,7 @@ title = "Text Search"
 [menu.main]
   parent = "Tutorials"
   identifier = "Text Search"
-  weight = 40
+  weight = 50
   pre = "<i class='fa'></i>"
 +++
 
