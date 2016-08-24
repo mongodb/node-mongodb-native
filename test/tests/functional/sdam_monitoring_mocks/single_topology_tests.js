@@ -124,7 +124,7 @@ exports['Should correctly emit sdam monitoring events for single server'] = {
 
     server.on('error', function(){});
     server.on('close', function(){
-      process.nextTick(function() {
+      setTimeout(function() {
         console.log("----------------------------------------- 0")
         test.deepEqual({ topologyId: id, address: 'localhost:37018' }, flags[0]);
         console.log("----------------------------------------- 1")
@@ -180,7 +180,7 @@ exports['Should correctly emit sdam monitoring events for single server'] = {
         }, flags[5]);
         console.log("----------------------------------------- 6")
         test.done();
-      });
+      }, 100);
     });
     server.connect();
   }
