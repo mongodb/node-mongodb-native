@@ -3,7 +3,7 @@ date = "2015-03-17T15:36:56Z"
 title = "Quick Start"
 [menu.main]
   identifier = "Quick Start"
-  weight = 10
+  weight = 15
   pre = "<i class='fa fa-road'></i>"
 +++
 

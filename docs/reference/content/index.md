@@ -9,7 +9,7 @@ type = "index"
 Welcome to the MongoDB Node.js 2.x driver documentation.
 
 
-## What's New in 2.1
+## What's New
 
 The [What's New]({{< relref "upgrade-migration/index.md" >}}) guide explains the major new features of the driver.
 

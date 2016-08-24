@@ -9,7 +9,7 @@ title = "Upgrade Guide"
 
 # What's New in 2.2
 
-Key features of the 2.1 driver include:
+Key features of the 2.2 driver include:
 
 - Redesigned Connection Pool.
 - Connection close will drain any outstanding operations.

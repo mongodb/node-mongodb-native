@@ -3,7 +3,7 @@ date = "2015-03-17T15:36:56Z"
 title = "Installation Guide"
 [menu.main]
   identifier = "Installation Guide"
-  weight = 15
+  weight = 10
   pre = "<i class='fa fa-puzzle-piece'></i>"
 +++
 
