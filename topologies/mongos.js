@@ -181,8 +181,6 @@ var Mongos = function(seedlist, options) {
   this.haTimeoutId = null;
   // Last ismaster
   this.ismaster = null;
-  // Lower bound latency
-  this.lowerBoundLatency = Number.MAX_VALUE;
 
   // Add event listener
   EventEmitter.call(this);
@@ -314,14 +312,6 @@ function handleInitialConnectEvent(self, event) {
     if(self.connectingProxies.length == 0) {
       // Emit connected if we are connected
       if(self.connectedProxies.length > 0) {
-        // Set initial lowerBoundLatency
-        for(var i = 0; i < self.connectedProxies.length; i++) {
-          // Adjust lower bound
-          if(self.lowerBoundLatency > self.connectedProxies[i].lastIsMasterMS) {
-            self.lowerBoundLatency = self.connectedProxies[i].lastIsMasterMS;
-          }
-        }
-
         // Set the state to connected
         stateTransition(self, CONNECTED);
         // Emit the connect event
@@ -378,9 +368,19 @@ function pickProxy(self) {
   // Get the currently connected Proxies
   var connectedProxies = self.connectedProxies.slice(0);
 
+  // Set lower bound
+  var lowerBoundLatency = Number.MAX_VALUE;
+
+  // Determine the lower bound for the Proxies
+  for(var i = 0; i < connectedProxies.length; i++) {
+    if(connectedProxies[i].lastIsMasterMS < lowerBoundLatency) {
+      lowerBoundLatency = connectedProxies[i].lastIsMasterMS;
+    }
+  }
+
   // Filter out the possible servers
   connectedProxies = connectedProxies.filter(function(server) {
-    if((server.lastIsMasterMS <= (self.lowerBoundLatency + self.s.localThresholdMS))
+    if((server.lastIsMasterMS <= (lowerBoundLatency + self.s.localThresholdMS))
       && server.isConnected()) {
       return true;
     }
@@ -554,11 +554,6 @@ function topologyMonitor(self, options) {
 
         // Calculate latency
         var latencyMS = new Date().getTime() - start;
-
-        // Adjust lower bound
-        if(self.lowerBoundLatency > _server.lastIsMasterMS) {
-          self.lowerBoundLatency = _server.lastIsMasterMS;
-        }
 
         // We had an error, remove it from the state
         if(err) {
