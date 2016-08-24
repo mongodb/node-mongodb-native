@@ -135,13 +135,14 @@ exports.shouldCorrectlyConnectToMongoSShardedSetupAndKillTheMongoSProxy = {
               // Wait for the ha process to pick up the existing new server
               setTimeout(function() {
                 test.equal(2, mongos.connections().length);
-
+                global.debug = false
                 // // Kill the mongos proxy
                 // manager.remove('mongos', {index: 1}, function(err, serverDetails2) {
                 proxies[1].stop().then(function() {
                   // Attempt another insert
                   collection.insert({test:3}, {w:1}, function(err, result) {
                     test.equal(null, err);
+                    global.debug = false
                     test.equal(1, mongos.connections().length);
 
                     // Restart the other mongos
