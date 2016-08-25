@@ -255,7 +255,7 @@ MongoClient.connect(url, function(err, db) {
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var removeDocument = function(db, callback) {
   // Get the documents collection
   var collection = db.collection(&#39;documents&#39;);
-  // Insert some documents
+  // Delete some documents
   collection.deleteOne({ a : 3 }, function(err, result) {
     assert.equal(err, null);
     assert.equal(1, result.result.n);

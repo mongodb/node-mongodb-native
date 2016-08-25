@@ -10,14 +10,14 @@
     <atom:link href="/node-mongodb-native/2.2/upgrade-migration/index.xml" rel="self" type="application/rss+xml" />
     
     <item>
-      <title>Upgrading to 2.0</title>
+      <title>Upgrading to 2.x</title>
       <link>/node-mongodb-native/2.2/upgrade-migration/upgrading/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:39 -0400</pubDate>
       
       <guid>/node-mongodb-native/2.2/upgrade-migration/upgrading/</guid>
       <description>
 
-&lt;h1 id=&#34;migrating-your-application-to-2-0&#34;&gt;Migrating Your Application To 2.0&lt;/h1&gt;
+&lt;h1 id=&#34;migrating-your-application-to-2-x&#34;&gt;Migrating Your Application To 2.x&lt;/h1&gt;
 
 &lt;p&gt;There are some key changes in the driver that you should be aware of before migrating your application from version 1.x to 2.x.
 Some APIs are cleaned up, and some 1.x features have been deprecated.&lt;/p&gt;
@@ -107,7 +107,7 @@ some behavior changes for the cursor streams).&lt;/p&gt;
 
 &lt;h1 id=&#34;what-s-new-in-2-2&#34;&gt;What&amp;rsquo;s New in 2.2&lt;/h1&gt;
 
-&lt;p&gt;Key features of the 2.1 driver include:&lt;/p&gt;
+&lt;p&gt;Key features of the 2.2 driver include:&lt;/p&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Redesigned Connection Pool.&lt;/li&gt;

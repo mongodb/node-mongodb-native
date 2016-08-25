@@ -38,12 +38,12 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.1/tutorials/geospatial-search/</loc>
+    <loc>/node-mongodb-native/2.1/tutorials/connect/authenticating/</loc>
     <lastmod>2015-03-19T14:27:51-04:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.1/tutorials/connect/authenticating/</loc>
+    <loc>/node-mongodb-native/2.1/tutorials/geospatial-search/</loc>
     <lastmod>2015-03-19T14:27:51-04:00</lastmod>
   </url>
   
@@ -73,16 +73,6 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.1/reference/ecmascript6/connecting/</loc>
-    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/2.1/reference/connecting/legacy-connection-settings/</loc>
-    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/node-mongodb-native/2.1/reference/connecting/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
@@ -99,6 +89,16 @@
   
   <url>
     <loc>/node-mongodb-native/2.1/reference/faq/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/reference/connecting/legacy-connection-settings/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/reference/ecmascript6/connecting/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   

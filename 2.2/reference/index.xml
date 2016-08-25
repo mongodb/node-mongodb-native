@@ -2414,7 +2414,7 @@ joining or leaving a replica set.&lt;/p&gt;
 &lt;tr&gt;
 &lt;td align=&#34;left&#34;&gt;serverOpening&lt;/td&gt;
 &lt;td align=&#34;left&#34;&gt;Server, Replicaset, Mongos&lt;/td&gt;
-&lt;td align=&#34;left&#34;&gt;Emitted when before server connection is established.&lt;/td&gt;
+&lt;td align=&#34;left&#34;&gt;Emitted when server connection is established.&lt;/td&gt;
 &lt;/tr&gt;
 
 &lt;tr&gt;

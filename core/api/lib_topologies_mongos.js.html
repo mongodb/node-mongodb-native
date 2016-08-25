@@ -1042,8 +1042,10 @@ var handlers = ['connect', 'close', 'error', 'timeout', 'parseError'];
  * @param {Buffer} [options.cert] SSL Certificate binary buffer
  * @param {Buffer} [options.key] SSL Key file binary buffer
  * @param {string} [options.passphrase] SSL Certificate pass phrase
+ * @param {string} [options.servername=null] String containing the server name requested via TLS SNI.
  * @param {boolean} [options.rejectUnauthorized=true] Reject unauthorized server certificates
  * @param {boolean} [options.promoteLongs=true] Convert Long values from the db into Numbers if they fit into 53 bits
+ * @param {boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types.
  * @param {boolean} [options.domainsEnabled=false] Enable the wrapping of the callback in the current domain, disabled by default to avoid perf hit.
  * @return {Mongos} A cursor instance
  * @fires Mongos#connect
@@ -1130,8 +1132,6 @@ var Mongos = function(seedlist, options) {
   this.haTimeoutId = null;
   // Last ismaster
   this.ismaster = null;
-  // Lower bound latency
-  this.lowerBoundLatency = Number.MAX_VALUE;
 
   // Add event listener
   EventEmitter.call(this);
@@ -1194,6 +1194,8 @@ function handleInitialConnectEvent(self, event) {
   return function(err) {
     // Destroy the instance
     if(self.state == DESTROYED) {
+      // Move from connectingProxies
+      moveServerFrom(self.connectingProxies, self.disconnectedProxies, this);
       return this.destroy();
     }
 
@@ -1207,6 +1209,8 @@ function handleInitialConnectEvent(self, event) {
         // Add to the connectd list
         for(var i = 0; i &lt; self.connectedProxies.length; i++) {
           if(self.connectedProxies[i].name == this.name) {
+            // Move from connectingProxies
+            moveServerFrom(self.connectingProxies, self.disconnectedProxies, this);
             this.destroy();
             return self.emit('failed', this);
           }
@@ -1259,14 +1263,6 @@ function handleInitialConnectEvent(self, event) {
     if(self.connectingProxies.length == 0) {
       // Emit connected if we are connected
       if(self.connectedProxies.length > 0) {
-        // Set initial lowerBoundLatency
-        for(var i = 0; i &lt; self.connectedProxies.length; i++) {
-          // Adjust lower bound
-          if(self.lowerBoundLatency > self.connectedProxies[i].lastIsMasterMS) {
-            self.lowerBoundLatency = self.connectedProxies[i].lastIsMasterMS;
-          }
-        }
-
         // Set the state to connected
         stateTransition(self, CONNECTED);
         // Emit the connect event
@@ -1323,9 +1319,19 @@ function pickProxy(self) {
   // Get the currently connected Proxies
   var connectedProxies = self.connectedProxies.slice(0);
 
+  // Set lower bound
+  var lowerBoundLatency = Number.MAX_VALUE;
+
+  // Determine the lower bound for the Proxies
+  for(var i = 0; i &lt; connectedProxies.length; i++) {
+    if(connectedProxies[i].lastIsMasterMS &lt; lowerBoundLatency) {
+      lowerBoundLatency = connectedProxies[i].lastIsMasterMS;
+    }
+  }
+
   // Filter out the possible servers
   connectedProxies = connectedProxies.filter(function(server) {
-    if((server.lastIsMasterMS &lt;= (self.lowerBoundLatency + self.s.localThresholdMS))
+    if((server.lastIsMasterMS &lt;= (lowerBoundLatency + self.s.localThresholdMS))
       &amp;&amp; server.isConnected()) {
       return true;
     }
@@ -1380,12 +1386,14 @@ function reconnectProxies(self, proxies, callback) {
 
       // Destroyed
       if(self.state == DESTROYED) {
+        moveServerFrom(self.connectingProxies, self.disconnectedProxies, _self);
         return this.destroy();
       }
 
       if(event == 'connect' &amp;&amp; !self.authenticating) {
         // Destroyed
         if(self.state == DESTROYED) {
+          moveServerFrom(self.connectingProxies, self.disconnectedProxies, _self);
           return _self.destroy();
         }
 
@@ -1405,6 +1413,8 @@ function reconnectProxies(self, proxies, callback) {
         // Emit joined event
         self.emit('joined', 'mongos', _self);
       } else if(event == 'connect' &amp;&amp; self.authenticating) {
+        // Move from connectingProxies
+        moveServerFrom(self.connectingProxies, self.disconnectedProxies, _self);
         this.destroy();
       }
 
@@ -1487,6 +1497,8 @@ function topologyMonitor(self, options) {
       // Execute ismaster
       _server.command('admin.$cmd', {ismaster:true}, {monitoring: true}, function(err, r) {
         if(self.state == DESTROYED) {
+          // Move from connectingProxies
+          moveServerFrom(self.connectedProxies, self.disconnectedProxies, _server);
           _server.destroy();
           return cb(err, r);
         }
@@ -1494,20 +1506,12 @@ function topologyMonitor(self, options) {
         // Calculate latency
         var latencyMS = new Date().getTime() - start;
 
-        // Adjust lower bound
-        if(self.lowerBoundLatency > _server.lastIsMasterMS) {
-          self.lowerBoundLatency = _server.lastIsMasterMS;
-        }
-
         // We had an error, remove it from the state
         if(err) {
           // Emit the server heartbeat failure
           emitSDAMEvent(self, 'serverHearbeatFailed', { durationMS: latencyMS, failure: err, connectionId: _server.name });
           // Move from connected proxies to disconnected proxies
           moveServerFrom(self.connectedProxies, self.disconnectedProxies, _server);
-          // Emit left event
-          self.emit('left', 'mongos', _server);
-          _server.destroy();
         } else {
           // Update the server ismaster
           _server.ismaster = r.result;
@@ -1604,6 +1608,7 @@ Mongos.prototype.destroy = function(emitClose) {
   var proxies = this.connectedProxies.concat(this.connectingProxies);
   // Clear out any monitoring process
   if(this.haTimeoutId) clearTimeout(this.haTimeoutId);
+
   // Destroy all connecting servers
   proxies.forEach(function(x) {
     x.destroy();
@@ -1611,7 +1616,6 @@ Mongos.prototype.destroy = function(emitClose) {
 
   // Emit toplogy closing event
   emitSDAMEvent(this, 'topologyClosed', { topologyId: this.id });
-
 }
 
 /**
@@ -1758,15 +1762,15 @@ Mongos.prototype.command = function(ns, cmd, options, callback) {
   // Pick a proxy
   var server = pickProxy(self);
 
-  // No server returned we had an error
-  if(server == null) {
-    return callback(new MongoError('no mongos proxy available'));
-  }
-
   // Topology is not connected, save the call in the provided store to be
   // Executed at some point when the handler deems it's reconnected
   if((server == null || !server.isConnected()) &amp;&amp; this.s.disconnectHandler != null) {
     return this.s.disconnectHandler.add('command', ns, cmd, options, callback);
+  }
+
+  // No server returned we had an error
+  if(server == null) {
+    return callback(new MongoError('no mongos proxy available'));
   }
 
   // Execute the command
@@ -2087,7 +2091,7 @@ module.exports = Mongos;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Jul 28 2016 17:03:02 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Aug 25 2016 10:46:18 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>

@@ -2188,10 +2188,11 @@ var url = &#39;mongodb://localhost:27017/myproject&#39;;
 // Use connect method to connect to the server
 MongoClient.connect(url, function(err, db) {
   assert.equal(null, err);
-  console.log(&#34;Connected succesfully to server&#34;);
+  console.log(&#34;Connected successfully to server&#34;);
 
   db.close();
 });
+
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;For more information on the URI connection string, see
@@ -2973,23 +2974,23 @@ var createPartialIndex = function(db, callback) {
 
 &lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/connect/&#34;&gt;Connect to MongoDB&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/crud/&#34;&gt;CRUD Operations&lt;/a&gt;&lt;/p&gt;
-
 &lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/collections/&#34;&gt;Collections&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/create-indexes/&#34;&gt;Create Indexes&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/crud/&#34;&gt;CRUD Operations&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/projections/&#34;&gt;Projections&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/aggregation/&#34;&gt;Aggregation&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/create-indexes/&#34;&gt;Create Indexes&lt;/a&gt;&lt;/p&gt;
-
 &lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/text-search/&#34;&gt;Text Search&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/geospatial-search/&#34;&gt;Geospatial Search&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/gridfs/&#34;&gt;GridFS&lt;/a&gt;&lt;/p&gt;
-
 &lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/commands/&#34;&gt;Database Commands&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.2/node-mongodb-native/2.2/tutorials/gridfs/&#34;&gt;GridFS&lt;/a&gt;&lt;/p&gt;
 </description>
     </item>
     

@@ -72,10 +72,11 @@ var url = &#39;mongodb://localhost:27017/myproject&#39;;
 // Use connect method to connect to the server
 MongoClient.connect(url, function(err, db) {
   assert.equal(null, err);
-  console.log(&#34;Connected succesfully to server&#34;);
+  console.log(&#34;Connected successfully to server&#34;);
 
   db.close();
 });
+
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;Run your app from the command line with:&lt;/p&gt;

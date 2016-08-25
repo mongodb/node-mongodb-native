@@ -19,7 +19,7 @@
 
 &lt;h1 id=&#34;installation&#34;&gt;Installation&lt;/h1&gt;
 
-&lt;p&gt;The recommended way to get started using the Node.js 2.0 driver is by using &lt;code&gt;NPM&lt;/code&gt; (Node Package Manager) to install the dependency in your project.&lt;/p&gt;
+&lt;p&gt;The recommended way to get started using the Node.js 2.1 driver is by using &lt;code&gt;NPM&lt;/code&gt; (Node Package Manager) to install the dependency in your project.&lt;/p&gt;
 
 &lt;h2 id=&#34;mongodb-driver&#34;&gt;MongoDB Driver&lt;/h2&gt;
 

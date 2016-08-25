@@ -1097,14 +1097,14 @@ MongoClient.connect(url, function(err, db) {
     </item>
     
     <item>
-      <title>Upgrading to 2.0</title>
+      <title>Upgrading to 2.x</title>
       <link>/node-mongodb-native/2.2/upgrade-migration/upgrading/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:39 -0400</pubDate>
       
       <guid>/node-mongodb-native/2.2/upgrade-migration/upgrading/</guid>
       <description>
 
-&lt;h1 id=&#34;migrating-your-application-to-2-0&#34;&gt;Migrating Your Application To 2.0&lt;/h1&gt;
+&lt;h1 id=&#34;migrating-your-application-to-2-x&#34;&gt;Migrating Your Application To 2.x&lt;/h1&gt;
 
 &lt;p&gt;There are some key changes in the driver that you should be aware of before migrating your application from version 1.x to 2.x.
 Some APIs are cleaned up, and some 1.x features have been deprecated.&lt;/p&gt;
@@ -1194,7 +1194,7 @@ some behavior changes for the cursor streams).&lt;/p&gt;
 
 &lt;h1 id=&#34;what-s-new-in-2-2&#34;&gt;What&amp;rsquo;s New in 2.2&lt;/h1&gt;
 
-&lt;p&gt;Key features of the 2.1 driver include:&lt;/p&gt;
+&lt;p&gt;Key features of the 2.2 driver include:&lt;/p&gt;
 
 &lt;ul&gt;
 &lt;li&gt;Redesigned Connection Pool.&lt;/li&gt;
@@ -1579,38 +1579,6 @@ MongoClient.connect(url, {
 &lt;/code&gt;&lt;/pre&gt;
 
 &lt;p&gt;You must ensure &lt;code&gt;server1&lt;/code&gt;, &lt;code&gt;server2&lt;/code&gt; and &lt;code&gt;server3&lt;/code&gt; are resolvable from the driver for the Replicaset discovery and failover to work correctly.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Connecting</title>
-      <link>/node-mongodb-native/2.2/reference/ecmascript6/connecting/</link>
-      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
-      
-      <guid>/node-mongodb-native/2.2/reference/ecmascript6/connecting/</guid>
-      <description>
-
-&lt;h1 id=&#34;connecting&#34;&gt;Connecting&lt;/h1&gt;
-
-&lt;p&gt;The MongoClient connection method returns a Promise if no callback is passed to it. Below is an example using the &lt;a href=&#34;https://www.npmjs.com/package/co&#34;&gt;co&lt;/a&gt; package to run a &lt;code&gt;generator&lt;/code&gt; function, which is one of the most exciting innovations of ECMAScript 6.&lt;/p&gt;
-
-&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
-  co = require(&#39;co&#39;),
-  assert = require(&#39;assert&#39;);
-
-co(function*() {
-  // Connection URL
-  var url = &#39;mongodb://localhost:27017/myproject&#39;;
-  // Use connect method to connect to the Server
-  var db = yield MongoClient.connect(url);
-  // Close the connection
-  db.close();
-}).catch(function(err) {
-  console.log(err.stack);
-});
-&lt;/code&gt;&lt;/pre&gt;
-
-&lt;p&gt;The &lt;code&gt;MongoClient.connect&lt;/code&gt; function returns a &lt;code&gt;Promise&lt;/code&gt; that we then execute using the &lt;code&gt;yield&lt;/code&gt; keyword of the &lt;code&gt;generator&lt;/code&gt; function. If an error happens during the &lt;code&gt;MongoClient.connect&lt;/code&gt; the error is caught by &lt;code&gt;co&lt;/code&gt; and can be inspected by attaching a function to the &lt;code&gt;catch&lt;/code&gt; method as shown above.&lt;/p&gt;
 </description>
     </item>
     
@@ -2338,6 +2306,38 @@ MongoClient.connect(f(&#39;mongodb://%s@server:27017/test&#39;), {
 });
 
 &lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Connecting</title>
+      <link>/node-mongodb-native/2.2/reference/ecmascript6/connecting/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/2.2/reference/ecmascript6/connecting/</guid>
+      <description>
+
+&lt;h1 id=&#34;connecting&#34;&gt;Connecting&lt;/h1&gt;
+
+&lt;p&gt;The MongoClient connection method returns a Promise if no callback is passed to it. Below is an example using the &lt;a href=&#34;https://www.npmjs.com/package/co&#34;&gt;co&lt;/a&gt; package to run a &lt;code&gt;generator&lt;/code&gt; function, which is one of the most exciting innovations of ECMAScript 6.&lt;/p&gt;
+
+&lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
+  co = require(&#39;co&#39;),
+  assert = require(&#39;assert&#39;);
+
+co(function*() {
+  // Connection URL
+  var url = &#39;mongodb://localhost:27017/myproject&#39;;
+  // Use connect method to connect to the Server
+  var db = yield MongoClient.connect(url);
+  // Close the connection
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+&lt;/code&gt;&lt;/pre&gt;
+
+&lt;p&gt;The &lt;code&gt;MongoClient.connect&lt;/code&gt; function returns a &lt;code&gt;Promise&lt;/code&gt; that we then execute using the &lt;code&gt;yield&lt;/code&gt; keyword of the &lt;code&gt;generator&lt;/code&gt; function. If an error happens during the &lt;code&gt;MongoClient.connect&lt;/code&gt; the error is caught by &lt;code&gt;co&lt;/code&gt; and can be inspected by attaching a function to the &lt;code&gt;catch&lt;/code&gt; method as shown above.&lt;/p&gt;
 </description>
     </item>
     

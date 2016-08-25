@@ -2973,15 +2973,15 @@ var createPartialIndex = function(db, callback) {
 
 &lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/tutorials/connect/&#34;&gt;Connect to MongoDB&lt;/a&gt;&lt;/p&gt;
 
-&lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/tutorials/crud/&#34;&gt;CRUD Operations&lt;/a&gt;&lt;/p&gt;
-
 &lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/tutorials/collections/&#34;&gt;Collections&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/tutorials/create-indexes/&#34;&gt;Create Indexes&lt;/a&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/tutorials/crud/&#34;&gt;CRUD Operations&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/tutorials/projections/&#34;&gt;Projections&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/tutorials/aggregation/&#34;&gt;Aggregation&lt;/a&gt;&lt;/p&gt;
-
-&lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/tutorials/create-indexes/&#34;&gt;Create Indexes&lt;/a&gt;&lt;/p&gt;
 
 &lt;p&gt;&lt;a href=&#34;/node-mongodb-native/2.1/node-mongodb-native/2.1/tutorials/text-search/&#34;&gt;Text Search&lt;/a&gt;&lt;/p&gt;
 
