@@ -51,6 +51,24 @@
     </item>
     
     <item>
+      <title>Connecting</title>
+      <link>/node-mongodb-native/core/driver/reference/connecting/</link>
+      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
+      
+      <guid>/node-mongodb-native/core/driver/reference/connecting/</guid>
+      <description>
+
+&lt;h2 id=&#34;connecting&#34;&gt;Connecting&lt;/h2&gt;
+
+&lt;p&gt;The reference documentation for connecting to a MongoDB server deployment is divided into three sections:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/driver/reference/connecting/connection-settings/&#34;&gt;Connection Settings&lt;/a&gt;: documentation of the ways to specify authentication credentials&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+    </item>
+    
+    <item>
       <title>Connection Settings</title>
       <link>/node-mongodb-native/core/driver/reference/connecting/connection-settings/</link>
       <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
@@ -218,24 +236,6 @@ server.connect();
 &lt;li&gt;&lt;code&gt;gssapi&lt;/code&gt; Linux Kerberos authentication using MIT library.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;sspi&lt;/code&gt; Windows Kerberos authentication using SSPI.&lt;/li&gt;
 &lt;li&gt;&lt;code&gt;scram-sha-1&lt;/code&gt; 2.8 or higher default authentication mechanism.&lt;/li&gt;
-&lt;/ul&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>Connecting</title>
-      <link>/node-mongodb-native/core/driver/reference/connecting/</link>
-      <pubDate>Thu, 19 Mar 2015 12:53:30 -0400</pubDate>
-      
-      <guid>/node-mongodb-native/core/driver/reference/connecting/</guid>
-      <description>
-
-&lt;h2 id=&#34;connecting&#34;&gt;Connecting&lt;/h2&gt;
-
-&lt;p&gt;The reference documentation for connecting to a MongoDB server deployment is divided into three sections:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/driver/reference/connecting/connection-settings/&#34;&gt;Connection Settings&lt;/a&gt;: documentation of the ways to specify authentication credentials&lt;/li&gt;
 &lt;/ul&gt;
 </description>
     </item>
@@ -832,52 +832,6 @@ $ git checkout -b myNewFeature
     </item>
     
     <item>
-      <title>Getting Started</title>
-      <link>/node-mongodb-native/core/driver/getting-started/</link>
-      <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
-      
-      <guid>/node-mongodb-native/core/driver/getting-started/</guid>
-      <description>
-
-&lt;h2 id=&#34;getting-started&#34;&gt;Getting Started&lt;/h2&gt;
-
-&lt;p&gt;To help you get started quickly on the new driver, follow:&lt;/p&gt;
-
-&lt;ul&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/driver/getting-started/installation-guide/&#34;&gt;Installation&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/driver/getting-started/quick-tour/&#34;&gt;Quick Tour&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-</description>
-    </item>
-    
-    <item>
-      <title>MongoDB Core</title>
-      <link>/node-mongodb-native/core/driver/</link>
-      <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
-      
-      <guid>/node-mongodb-native/core/driver/</guid>
-      <description>
-
-&lt;h2 id=&#34;mongodb-driver-core-documentation&#34;&gt;MongoDB Driver Core Documentation&lt;/h2&gt;
-
-&lt;p&gt;Welcome to the MongoDB Core Driver documentation hub.&lt;/p&gt;
-
-&lt;h3 id=&#34;what-s-new-in-2-0&#34;&gt;What&amp;rsquo;s New in 2.0&lt;/h3&gt;
-
-&lt;p&gt;The &lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/whats-new/&#34;&gt;What&amp;rsquo;s New&lt;/a&gt; guide explains the major new features of the driver.&lt;/p&gt;
-
-&lt;h3 id=&#34;getting-started&#34;&gt;Getting Started&lt;/h3&gt;
-
-&lt;p&gt;The &lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/driver/getting-started/&#34;&gt;Getting Started&lt;/a&gt; guide contains installation instructions
-and a simple tutorial to get up and running quickly.&lt;/p&gt;
-
-&lt;h3 id=&#34;reference&#34;&gt;Reference&lt;/h3&gt;
-
-&lt;p&gt;For more detailed documentation, see the &lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/driver/reference/&#34;&gt;Reference&lt;/a&gt; guide.&lt;/p&gt;
-</description>
-    </item>
-    
-    <item>
       <title>Installation Guide</title>
       <link>/node-mongodb-native/core/driver/getting-started/installation-guide/</link>
       <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
@@ -974,6 +928,25 @@ node-gyp rebuild
 &lt;p&gt;Your python installation might be hosed making gyp break. I always recommend that you test your deployment environment first by trying to build node itself on the server in question as this should unearth any issues with broken packages (and there are a lot of broken packages out there).&lt;/p&gt;
 
 &lt;p&gt;Another thing is to ensure your user has write permission to wherever the node modules are being installed.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Getting Started</title>
+      <link>/node-mongodb-native/core/driver/getting-started/</link>
+      <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
+      
+      <guid>/node-mongodb-native/core/driver/getting-started/</guid>
+      <description>
+
+&lt;h2 id=&#34;getting-started&#34;&gt;Getting Started&lt;/h2&gt;
+
+&lt;p&gt;To help you get started quickly on the new driver, follow:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/driver/getting-started/installation-guide/&#34;&gt;Installation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/driver/getting-started/quick-tour/&#34;&gt;Quick Tour&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
 </description>
     </item>
     
@@ -1156,6 +1129,33 @@ server.connect();
 &lt;h2 id=&#34;next-steps&#34;&gt;Next steps&lt;/h2&gt;
 
 &lt;p&gt;The next step is to get more in depth information about how the different aspects of the core driver works and how to leverage them to extend the functionality of the cursors. Please view the tutorials for more detailed information.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>MongoDB Core</title>
+      <link>/node-mongodb-native/core/driver/</link>
+      <pubDate>Tue, 17 Mar 2015 15:36:56 +0000</pubDate>
+      
+      <guid>/node-mongodb-native/core/driver/</guid>
+      <description>
+
+&lt;h2 id=&#34;mongodb-driver-core-documentation&#34;&gt;MongoDB Driver Core Documentation&lt;/h2&gt;
+
+&lt;p&gt;Welcome to the MongoDB Core Driver documentation hub.&lt;/p&gt;
+
+&lt;h3 id=&#34;what-s-new-in-2-0&#34;&gt;What&amp;rsquo;s New in 2.0&lt;/h3&gt;
+
+&lt;p&gt;The &lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/whats-new/&#34;&gt;What&amp;rsquo;s New&lt;/a&gt; guide explains the major new features of the driver.&lt;/p&gt;
+
+&lt;h3 id=&#34;getting-started&#34;&gt;Getting Started&lt;/h3&gt;
+
+&lt;p&gt;The &lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/driver/getting-started/&#34;&gt;Getting Started&lt;/a&gt; guide contains installation instructions
+and a simple tutorial to get up and running quickly.&lt;/p&gt;
+
+&lt;h3 id=&#34;reference&#34;&gt;Reference&lt;/h3&gt;
+
+&lt;p&gt;For more detailed documentation, see the &lt;a href=&#34;/node-mongodb-native/core/node-mongodb-native/core/driver/reference/&#34;&gt;Reference&lt;/a&gt; guide.&lt;/p&gt;
 </description>
     </item>
     
