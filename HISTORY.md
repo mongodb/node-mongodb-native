@@ -1,3 +1,9 @@
+2.0.11 2016-08-29
+-----------------
+* NODE-803, Fixed issue in how the latency window is calculated for Mongos topology causing issues for single proxy connections.
+* Avoid timeout in attemptReconnect causing multiple attemptReconnect attempts to happen (Issue #134, https://github.com/dead-horse).
+* Ensure promoteBuffers is propegated in same fashion as promoteValues and promoteLongs
+
 2.0.10 2016-08-23
 -----------------
 * Added promoteValues flag (default to true) to allow user to specify they only want wrapped BSON values back instead of promotion to native types.
