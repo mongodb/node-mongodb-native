@@ -31,7 +31,7 @@ exports['should correctly honor promoteBuffers when creating an instance using D
   }
 }
 
-exports['should correctly honor promoteValues when creating an instance using MongoClient'] = {
+exports['should correctly honor promoteBuffers when creating an instance using MongoClient'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -46,12 +46,12 @@ exports['should correctly honor promoteValues when creating an instance using Mo
     MongoClient.connect(configuration.url(), {
       promoteBuffers: true,
     }, function(err, db) {
-      db.collection('shouldCorrectlyHonorPromoteValues2').insert({
+      db.collection('shouldCorrectlyHonorPromoteBuffer2').insert({
           doc: new Buffer(256)
         }, function(err, doc) {
           test.equal(null, err);
 
-          db.collection('shouldCorrectlyHonorPromoteValues2').findOne(function(err, doc) {
+          db.collection('shouldCorrectlyHonorPromoteBuffer2').findOne(function(err, doc) {
             test.equal(null, err);
             test.ok(doc.doc instanceof Buffer);
 
@@ -63,7 +63,7 @@ exports['should correctly honor promoteValues when creating an instance using Mo
   }
 }
 
-exports['should correctly honor promoteValues at cursor level'] = {
+exports['should correctly honor promoteBuffers at cursor level'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -78,12 +78,12 @@ exports['should correctly honor promoteValues at cursor level'] = {
     MongoClient.connect(configuration.url(), {
       promoteBuffers: true,
     }, function(err, db) {
-      db.collection('shouldCorrectlyHonorPromoteValues3').insert({
+      db.collection('shouldCorrectlyHonorPromoteBuffer3').insert({
           doc: new Buffer(256)
         }, function(err, doc) {
           test.equal(null, err);
 
-          db.collection('shouldCorrectlyHonorPromoteValues3').find().next(function(err, doc) {
+          db.collection('shouldCorrectlyHonorPromoteBuffer3').find().next(function(err, doc) {
             test.equal(null, err);
             test.ok(doc.doc instanceof Buffer);
 
@@ -95,7 +95,7 @@ exports['should correctly honor promoteValues at cursor level'] = {
   }
 }
 
-exports['should correctly honor promoteValues at cursor find level'] = {
+exports['should correctly honor promoteBuffers at cursor find level'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -109,12 +109,12 @@ exports['should correctly honor promoteValues at cursor find level'] = {
 
     MongoClient.connect(configuration.url(), {
     }, function(err, db) {
-      db.collection('shouldCorrectlyHonorPromoteValues4').insert({
+      db.collection('shouldCorrectlyHonorPromoteBuffer4').insert({
           doc: new Buffer(256)
         }, function(err, doc) {
           test.equal(null, err);
 
-          db.collection('shouldCorrectlyHonorPromoteValues4').find({}, {}, {promoteBuffers: true}).next(function(err, doc) {
+          db.collection('shouldCorrectlyHonorPromoteBuffer4').find({}, {}, {promoteBuffers: true}).next(function(err, doc) {
             test.equal(null, err);
             test.ok(doc.doc instanceof Buffer);
 
@@ -126,7 +126,7 @@ exports['should correctly honor promoteValues at cursor find level'] = {
   }
 }
 
-exports['should correctly honor promoteValues at aggregate level'] = {
+exports['should correctly honor promoteBuffers at aggregate level'] = {
   // Add a tag that our runner can trigger on
   // in this case we are setting that node needs to be higher than 0.10.X to run
   metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'] } },
@@ -140,12 +140,12 @@ exports['should correctly honor promoteValues at aggregate level'] = {
 
     MongoClient.connect(configuration.url(), {
     }, function(err, db) {
-      db.collection('shouldCorrectlyHonorPromoteValues5').insert({
+      db.collection('shouldCorrectlyHonorPromoteBuffer5').insert({
           doc: new Buffer(256)
         }, function(err, doc) {
           test.equal(null, err);
 
-          db.collection('shouldCorrectlyHonorPromoteValues5').aggregate([{$match: {}}], {promoteBuffers: true}).next(function(err, doc) {
+          db.collection('shouldCorrectlyHonorPromoteBuffer5').aggregate([{$match: {}}], {promoteBuffers: true}).next(function(err, doc) {
             test.equal(null, err);
             test.ok(doc.doc instanceof Buffer);
 
