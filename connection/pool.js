@@ -218,6 +218,8 @@ function reauthenticate(pool, connection, cb) {
 
 function connectionFailureHandler(self, event) {
   return function(err) {
+    if (this._connectionFailHandled) return;
+    this._connectionFailHandled = true;
     // Destroy the connection
     this.destroy();
 
@@ -279,6 +281,8 @@ function attemptReconnect(self) {
     // If we have failure schedule a retry
     function _connectionFailureHandler(self, event) {
       return function() {
+        if (this._connectionFailHandled) return;
+        this._connectionFailHandled = true;
         // Destroy the connection
         this.destroy();
         // Count down the number of reconnects
