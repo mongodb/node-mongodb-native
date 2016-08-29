@@ -394,7 +394,7 @@ KillCursor.prototype.toBin = function() {
 }
 
 var Response = function(bson, data, opts) {
-  opts = opts || {promoteLongs: true, promoteValues: true};
+  opts = opts || {promoteLongs: true, promoteValues: true, promoteBuffers: false};
   this.parsed = false;
 
   //
@@ -451,6 +451,7 @@ var Response = function(bson, data, opts) {
   this.awaitCapable = (this.responseFlags & AWAIT_CAPABLE) != 0;
   this.promoteLongs = typeof opts.promoteLongs == 'boolean' ? opts.promoteLongs : true;
   this.promoteValues = typeof opts.promoteValues == 'boolean' ? opts.promoteValues : true;
+  this.promoteBuffers = typeof opts.promoteBuffers == 'boolean' ? opts.promoteBuffers : false;
 }
 
 Response.prototype.isParsed = function() {
@@ -500,6 +501,7 @@ Response.prototype.parse = function(options) {
     var _options = {
       promoteLongs: promoteLongs,
       promoteValues: promoteValues,
+      promoteBuffers: promoteBuffers,
       fieldsAsRaw: fieldsAsRaw
     };
 

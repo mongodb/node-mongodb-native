@@ -49,6 +49,7 @@ var _id = 0;
  * @param {boolean} [options.rejectUnauthorized=false] Reject unauthorized server certificates
  * @param {boolean} [options.promoteLongs=true] Convert Long values from the db into Numbers if they fit into 53 bits
  * @param {boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types.
+ * @param {boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers.
  * @param {boolean} [options.domainsEnabled=false] Enable the wrapping of the callback in the current domain, disabled by default to avoid perf hit.
  * @fires Pool#connect
  * @fires Pool#close
@@ -80,6 +81,7 @@ var Pool = function(options) {
     rejectUnauthorized: false,
     promoteLongs: true,
     promoteValues: true,
+    promoteBuffers: false,
     // Reconnection options
     reconnect: true,
     reconnectInterval: 1000,
@@ -866,12 +868,13 @@ Pool.prototype.write = function(buffer, options, cb) {
 
   // Do we have an operation
   var operation = {
-    buffer:buffer, cb: cb, raw: false, promoteLongs: true, promoteValues: true, fullResult: false
+    buffer:buffer, cb: cb, raw: false, promoteLongs: true, promoteValues: true, promoteBuffers: false, fullResult: false
   };
 
   // Set the options for the parsing
   operation.promoteLongs = typeof options.promoteLongs == 'boolean' ? options.promoteLongs : true;
   operation.promoteValues = typeof options.promoteValues == 'boolean' ? options.promoteValues : true;
+  operation.promoteBuffers = typeof options.promoteBuffers == 'boolean' ? options.promoteBuffers : false;
   operation.raw = typeof options.raw == 'boolean' ? options.raw : false;
   operation.immediateRelease = typeof options.immediateRelease == 'boolean' ? options.immediateRelease : false;
   operation.documentsReturnedIn = options.documentsReturnedIn;

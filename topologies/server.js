@@ -22,7 +22,7 @@ var inherits = require('util').inherits,
 var debugFields = ['reconnect', 'reconnectTries', 'reconnectInterval', 'emitError', 'cursorFactory', 'host'
   , 'port', 'size', 'keepAlive', 'keepAliveInitialDelay', 'noDelay', 'connectionTimeout', 'checkServerIdentity'
   , 'socketTimeout', 'singleBufferSerializtion', 'ssl', 'ca', 'cert', 'key', 'rejectUnauthorized', 'promoteLongs', 'promoteValues'
-  , 'servername'];
+  , 'promoteBuffers', 'servername'];
 
 // Server instance id
 var id = 0;
@@ -56,6 +56,7 @@ var servers = {};
  * @param {string} [options.servername=null] String containing the server name requested via TLS SNI.
  * @param {boolean} [options.promoteLongs=true] Convert Long values from the db into Numbers if they fit into 53 bits
  * @param {boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types.
+ * @param {boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers.
  * @param {string} [options.appname=null] Application name, passed in on ismaster call and logged in mongod server logs. Maximum size 128 bytes.
  * @param {boolean} [options.domainsEnabled=false] Enable the wrapping of the callback in the current domain, disabled by default to avoid perf hit.
  * @return {Server} A cursor instance
@@ -490,6 +491,7 @@ Server.prototype.command = function(ns, cmd, options, callback) {
     raw: typeof options.raw == 'boolean' ? options.raw : false,
     promoteLongs: typeof options.promoteLongs == 'boolean' ? options.promoteLongs : true,
     promoteValues: typeof options.promoteValues == 'boolean' ? options.promoteValues : true,
+    promoteBuffers: typeof options.promoteBuffers == 'boolean' ? options.promoteBuffers : false,
     command: true,
     monitoring: typeof options.monitoring == 'boolean' ? options.monitoring : false,
     fullResult: typeof options.fullResult == 'boolean' ? options.fullResult : false
