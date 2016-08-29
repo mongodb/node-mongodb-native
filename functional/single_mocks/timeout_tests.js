@@ -284,3 +284,129 @@ exports['Should correctly recover from an immediate shutdown mid insert'] = {
     server.connect();
   }
 }
+
+// exports['Should not start double reconnect timeouts due to socket timeout during attemptReconnect'] = {
+//   metadata: {
+//     requires: {
+//       generators: true,
+//       topology: "single"
+//     }
+//   },
+//
+//   test: function(configuration, test) {
+//     var Server = configuration.require.Server,
+//       ObjectId = configuration.require.BSON.ObjectId,
+//       co = require('co'),
+//       mockupdb = require('../../../mock');
+//
+//     // Contain mock server
+//     var server = null;
+//     var running = true;
+//     // Current index for the ismaster
+//     var currentStep = 0;
+//     // Primary stop responding
+//     var stopRespondingPrimary = false;
+//
+//     // Extend the object
+//     var extend = function(template, fields) {
+//       for(var name in template) fields[name] = template[name];
+//       return fields;
+//     }
+//
+//     // Default message fields
+//     var defaultFields = {
+//       "ismaster" : true,
+//       "maxBsonObjectSize" : 16777216,
+//       "maxMessageSizeBytes" : 48000000,
+//       "maxWriteBatchSize" : 1000,
+//       "localTime" : new Date(),
+//       "maxWireVersion" : 3,
+//       "minWireVersion" : 0,
+//       "ok" : 1
+//     }
+//
+//     // Primary server states
+//     var serverIsMaster = [extend(defaultFields, {})];
+//     var timeoutPromise = function(timeout) {
+//       return new Promise(function(resolve, reject) {
+//         setTimeout(function() {
+//           resolve();
+//         }, timeout);
+//       });
+//     }
+//
+//     // Boot the mock
+//     co(function*() {
+//       server = yield mockupdb.createServer(37019, 'localhost');
+//
+//       // Primary state machine
+//       co(function*() {
+//         while(running) {
+//           if(currentStep == 1) {
+//             console.log("--- timeout 0")
+//             yield timeoutPromise(5000);
+//             console.log("--- timeout 1")
+//             continue;
+//           }
+//
+//           var request = yield server.receive();
+//
+//           // Get the document
+//           var doc = request.document;
+//           if(doc.ismaster && currentStep == 0) {
+//             request.reply(serverIsMaster[0]);
+//             currentStep += 1;
+//           }
+//         }
+//       });
+//
+//       // // Start dropping the packets
+//       // setTimeout(function() {
+//       //   stopRespondingPrimary = true;
+//       //   currentIsMasterState = 1;
+//       // }, 5000);
+//     });
+//
+//     // Attempt to connect
+//     var server = new Server({
+//       host: 'localhost',
+//       port: 37019,
+//       connectionTimeout: 2000,
+//       socketTimeout: 1000,
+//       size: 1
+//     });
+//
+//     // Not done
+//     var done = false;
+//
+//     // Add event listeners
+//     server.once('connect', function(_server) {
+//       console.log("=============== connect")
+//       // _server.insert('test.test', [{created:new Date()}], function(err, r) {
+//       //   test.ok(err != null);
+//       //   // console.dir(err)
+//       //
+//       //   function wait() {
+//       //     setTimeout(function() {
+//       //       _server.insert('test.test', [{created:new Date()}], function(err, r) {
+//       //         if(r && !done) {
+//       //           done = true;
+//       //           test.equal(37019, r.connection.port);
+//       //           replset.destroy();
+//       //           running = false;
+//       //           test.done();
+//       //         } else {
+//       //           wait();
+//       //         }
+//       //       });
+//       //     }, 500);
+//       //   }
+//       //
+//       //   wait();
+//       // });
+//     });
+//
+//     server.on('error', function(){});
+//     server.connect();
+//   }
+// }
