@@ -1,3 +1,11 @@
+2.2.9 2016-08-29
+----------------
+* Updated mongodb-core to 2.0.11.
+* NODE-803, Fixed issue in how the latency window is calculated for Mongos topology causing issues for single proxy connections.
+* Avoid timeout in attemptReconnect causing multiple attemptReconnect attempts to happen (Issue #134, https://github.com/dead-horse).
+* Ensure promoteBuffers is propegated in same fashion as promoteValues and promoteLongs.
+* Don't treat ObjectId as object for mapReduce scope (Issue #1397, https://github.com/vkarpov15).
+
 2.2.8 2016-08-23
 ----------------
 * Updated mongodb-core to 2.0.10.
