@@ -33,12 +33,12 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/tutorials/commands/</loc>
+    <loc>/node-mongodb-native/2.2/tutorials/connect/authenticating/</loc>
     <lastmod>2015-03-19T14:27:51-04:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/tutorials/connect/authenticating/</loc>
+    <loc>/node-mongodb-native/2.2/tutorials/commands/</loc>
     <lastmod>2015-03-19T14:27:51-04:00</lastmod>
   </url>
   
@@ -78,7 +78,7 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/reference/connecting/</loc>
+    <loc>/node-mongodb-native/2.2/reference/ecmascript6/crud/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
@@ -88,12 +88,12 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/reference/faq/</loc>
+    <loc>/node-mongodb-native/2.2/reference/connecting/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.2/reference/ecmascript6/crud/</loc>
+    <loc>/node-mongodb-native/2.2/reference/faq/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
@@ -148,17 +148,17 @@
   </url>
   
   <url>
+    <loc>/node-mongodb-native/2.2/quick-start/</loc>
+    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/node-mongodb-native/2.2/installation-guide/</loc>
     <lastmod>2015-03-17T15:36:56+00:00</lastmod>
   </url>
   
   <url>
     <loc>/node-mongodb-native/2.2/</loc>
-    <lastmod>2015-03-17T15:36:56+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/2.2/quick-start/</loc>
     <lastmod>2015-03-17T15:36:56+00:00</lastmod>
   </url>
   

@@ -38,11 +38,6 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.0/reference/connecting/connection-settings/</loc>
-    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/node-mongodb-native/2.0/reference/connecting/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
@@ -58,17 +53,22 @@
   </url>
   
   <url>
+    <loc>/node-mongodb-native/2.0/reference/connecting/connection-settings/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.0/reference/ecmascript6/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/node-mongodb-native/2.0/reference/ecmascript6/crud/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
   <url>
     <loc>/node-mongodb-native/2.0/reference/faq/</loc>
-    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/2.0/reference/ecmascript6/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   

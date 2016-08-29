@@ -1883,7 +1883,8 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
   var serializeFunctions = options == null || options.serializeFunctions == null ? db.s.options.serializeFunctions : options.serializeFunctions;
   var raw = options == null || options.raw == null ? db.s.options.raw : options.raw;
   var promoteLongs = options == null || options.promoteLongs == null ? db.s.options.promoteLongs : options.promoteLongs;
-  var promoteValues = options == null || options.raw == promoteValues ? db.s.options.promoteValues : options.promoteValues;
+  var promoteValues = options == null || options.promoteValues == null ? db.s.options.promoteValues : options.promoteValues;
+  var promoteBuffers = options == null || options.promoteBuffers == null ? db.s.options.promoteBuffers : options.promoteBuffers;
   var readPreference = null;
   var collectionHint = null;
   var namespace = f("%s.%s", dbName, name);
@@ -1935,6 +1936,8 @@ var Collection = function(db, topology, dbName, name, pkFactory, options) {
     , promoteLongs: promoteLongs
     // promoteValues
     , promoteValues: promoteValues
+    // promoteBuffers
+    , promoteBuffers: promoteBuffers
     // internalHint
     , internalHint: internalHint
     // collectionHint
@@ -2168,6 +2171,7 @@ Collection.prototype.find = function() {
   // Set promoteLongs if available at collection level
   if(newOptions.promoteLongs == null &amp;&amp; typeof this.s.promoteLongs == 'boolean') newOptions.promoteLongs = this.s.promoteLongs;
   if(newOptions.promoteValues == null &amp;&amp; typeof this.s.promoteValues == 'boolean') newOptions.promoteValues = this.s.promoteValues;
+  if(newOptions.promoteBuffers == null &amp;&amp; typeof this.s.promoteBuffers == 'boolean') newOptions.promoteBuffers = this.s.promoteBuffers;
 
   // Sort options
   if(findCommand.sort) {
@@ -3178,13 +3182,15 @@ define.classMethod('save', {callback: true, promise:true});
  * @param {number} [options.max=null] Set index bounds.
  * @param {boolean} [options.showDiskLoc=false] Show disk location of results.
  * @param {string} [options.comment=null] You can put a $comment field on a query to make looking in the profiler logs simpler.
- * @param {boolean} [options.raw=false] Return all BSON documents as Raw Buffer documents.
+ * @param {boolean} [options.raw=false] Return document results as raw BSON buffers.
+ * @param {boolean} [options.promoteLongs=true] Promotes Long values to number if they fit inside the 53 bits resolution.
+ * @param {boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types.
+ * @param {boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers.
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  * @param {boolean} [options.partial=false] Specify if the cursor should return partial results when querying against a sharded system
  * @param {number} [options.maxTimeMS=null] Number of miliseconds to wait before aborting the query.
  * @param {Collection~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
- * @deprecated use find().limit(1).next(function(err, doc){})
  */
 Collection.prototype.findOne = function() {
   var self = this;
@@ -4371,6 +4377,10 @@ function decorateWithCollation(command, self, options) {
  * @param {boolean} [options.allowDiskUse=false] allowDiskUse lets the server know if it can use disk to store temporary results for the aggregation (requires mongodb 2.6 >).
  * @param {number} [options.maxTimeMS=null] maxTimeMS specifies a cumulative time limit in milliseconds for processing operations on the cursor. MongoDB interrupts the operation at the earliest following interrupt point.
  * @param {boolean} [options.bypassDocumentValidation=false] Allow driver to bypass schema validation in MongoDB 3.2 or higher.
+ * @param {boolean} [options.raw=false] Return document results as raw BSON buffers.
+ * @param {boolean} [options.promoteLongs=true] Promotes Long values to number if they fit inside the 53 bits resolution.
+ * @param {boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types.
+ * @param {boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers.
  * @param {Collection~resultCallback} callback The command result callback
  * @return {(null|AggregationCursor)}
  */
@@ -4905,7 +4915,7 @@ define.classMethod('group', {callback: true, promise:true});
  * @ignore
  */
 function processScope (scope) {
-  if(!isObject(scope)) {
+  if(!isObject(scope) || scope instanceof ObjectID) {
     return scope;
   }
 
@@ -5185,7 +5195,7 @@ module.exports = Collection;
                     
 
                     <footer>
-                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Thu Aug 25 2016 10:56:49 GMT+0200 (CEST)
+                        Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.3.0-beta3</a> on Mon Aug 29 2016 14:08:58 GMT+0200 (CEST)
                     </footer>
                 </div>
             </td>
