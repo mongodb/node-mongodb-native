@@ -1,14 +1,14 @@
 +++
 date = "2015-03-19T12:53:39-04:00"
-title = "Upgrading to 2.0"
+title = "Upgrading to 2.x"
 [menu.main]
   parent = "Upgrade Guide"
-  identifier = "Upgrading to 2.0"
+  identifier = "Upgrading to 2.x"
   weight = 40
   pre = "<i class='fa fa-wrench'></i>"
 +++
 
-# Migrating Your Application To 2.0
+# Migrating Your Application To 2.x
 
 There are some key changes in the driver that you should be aware of before migrating your application from version 1.x to 2.x.
 Some APIs are cleaned up, and some 1.x features have been deprecated.

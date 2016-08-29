@@ -4,7 +4,7 @@ title = "Collections"
 [menu.main]
   parent = "Tutorials"
   identifier = "Collections"
-  weight = 45
+  weight = 30
   pre = "<i class='fa'></i>"
 +++
 

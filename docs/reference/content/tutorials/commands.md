@@ -4,7 +4,7 @@ title = "Database Commands"
 [menu.main]
   parent = "Tutorials"
   identifier = "Database Commands"
-  weight = 50
+  weight = 70
   pre = "<i class='fa'></i>"
 +++
 

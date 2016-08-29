@@ -4,7 +4,7 @@ title = "Projections"
 [menu.main]
   parent = "Tutorials"
   identifier = "Projections"
-  weight = 30
+  weight = 45
   pre = "<i class='fa'></i>"
 +++
 

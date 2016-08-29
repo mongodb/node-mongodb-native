@@ -4,7 +4,7 @@ title = "Geospatial Search"
 [menu.main]
   parent = "Tutorials"
   identifier = "Geospatial Search"
-  weight = 45
+  weight = 55
   pre = "<i class='fa'></i>"
 +++
 

@@ -4,7 +4,7 @@ title = "CRUD Operations"
 [menu.main]
   parent = "Tutorials"
   identifier = "CRUD Operations"
-  weight = 30
+  weight = 40
   pre = "<i class='fa'></i>"
 +++
 
