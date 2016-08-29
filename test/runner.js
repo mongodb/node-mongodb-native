@@ -301,6 +301,7 @@ var testFiles = [
   , '/test/functional/hang_tests.js',
   , '/test/functional/disconnect_handler_tests.js',
   , '/test/functional/promote_values_tests.js',
+  , '/test/functional/promote_buffers_tests.js',
 
   // Replicaset tests
   , '/test/functional/replset_read_preference_tests.js'
