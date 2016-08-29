@@ -481,6 +481,9 @@ Response.prototype.parse = function(options) {
   var promoteValues = typeof options.promoteValues == 'boolean'
     ? options.promoteValues
     : this.opts.promoteValues;
+  var promoteBuffers = typeof options.promoteBuffers == 'boolean'
+    ? options.promoteBuffers
+    : this.opts.promoteBuffers
 
   //
   // Single document and documentsReturnedIn set
@@ -525,7 +528,7 @@ Response.prototype.parse = function(options) {
   for(var i = 0; i < this.numberReturned; i++) {
     var bsonSize = this.data[this.index] | this.data[this.index + 1] << 8 | this.data[this.index + 2] << 16 | this.data[this.index + 3] << 24;
     // Parse options
-    var _options = {promoteLongs: promoteLongs, promoteValues: promoteValues};
+    var _options = {promoteLongs: promoteLongs, promoteValues: promoteValues, promoteBuffers: promoteBuffers};
 
     // If we have raw results specified slice the return document
     if(raw) {
