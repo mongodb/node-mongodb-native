@@ -1023,3 +1023,30 @@ exports['should correctly create Index with sub element'] = {
     });
   }
 }
+
+/**
+ * @ignore
+ */
+exports['should correctly fail detect error code 85 when peforming createIndex'] = {
+  metadata: { requires: { topology: ['single', 'replicaset', 'sharded', 'ssl', 'heap', 'wiredtiger'], mongodb: ">=3.0.0" } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      var collection = db.collection('messed_up_options');
+
+      collection.ensureIndex({ 'a.one': 1, 'a.two': 1 }, { name: 'n1', partialFilterExpression: { 'a.two': { $exists: true } } }, function(err, r) {
+        test.equal(null, err);
+
+        collection.ensureIndex({ 'a.one': 1, 'a.two': 1 }, { name: 'n2', partialFilterExpression: { 'a.too': { $exists: true } } }, function(err, r) {
+          test.ok(err);
+          test.equal(85, err.code);
+
+          db.close();
+          test.done();
+        });
+      });
+    });
+  }
+}
