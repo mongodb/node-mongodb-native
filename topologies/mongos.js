@@ -560,8 +560,6 @@ function topologyMonitor(self, options) {
         if(err) {
           // Emit the server heartbeat failure
           emitSDAMEvent(self, 'serverHearbeatFailed', { durationMS: latencyMS, failure: err, connectionId: _server.name });
-          // Move from connected proxies to disconnected proxies
-          moveServerFrom(self.connectedProxies, self.disconnectedProxies, _server);
         } else {
           // Update the server ismaster
           _server.ismaster = r.result;
