@@ -24,7 +24,7 @@ document to the `createIndex()` method:
 For an ascending index type, specify ``1`` for ``<type>``.
 
 The following example creates an ascending index key for the
-``quantity`` field:
+``dateOfBirth`` field:
 
 ```js
 
