@@ -2530,7 +2530,7 @@ exports['should correctly apply hint to count command for cursor'] = {
                     test.equal(null, err);
                     test.equal(0, count);
 
-                    col.find({}, {hint: "x_1"}).count(function(err, count) {
+                    col.find({}, {hint: "i_1"}).count(function(err, count) {
                       test.equal(null, err);
                       test.equal(2, count);
 

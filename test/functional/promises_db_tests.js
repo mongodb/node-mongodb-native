@@ -255,6 +255,8 @@ exports['Should correctly drop database using Promise'] = {
 
         db.close();
         test.done();
+      }).catch(function(e) {
+        console.dir(e)
       });
     });
   }
