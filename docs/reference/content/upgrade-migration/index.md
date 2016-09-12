@@ -7,6 +7,17 @@ title = "Upgrade Guide"
   pre = "<i class='fa fa-cog'></i>"
 +++
 
+# What's New in 2.3
+
+Key features of the 2.3 driver include:
+
+- Implements [Decimal128](https://docs.mongodb.org), a decimal
+  floating-point numbering format that occupies 16 bytes (128 bits).
+  See the
+  [CRUD tutorial]({{< relref "tutorials/crud.md#specify-a-data-type" >}})
+  for an example.
+<!-- NOTE: placeholder link to manual entry -->
+
 # What's New in 2.2
 
 Key features of the 2.2 driver include:
@@ -14,7 +25,7 @@ Key features of the 2.2 driver include:
 - Redesigned Connection Pool.
 - Connection close will drain any outstanding operations.
 - replicaSet parameter **MUST** be specified if using MongoClient to connect to replicaset, due to SDAM specification implementation.
-- domain support disabled by default, enable with parameter **domainsEnabled** on MongoClient or on the Server/ReplSet/Mongos.
+- Domain support disabled by default, enable with parameter **domainsEnabled** on MongoClient or on the Server/ReplSet/Mongos.
 
 # What's New in 2.1
 
