@@ -23,17 +23,17 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.1/tutorials/commands/</loc>
-    <lastmod>2015-03-19T14:27:51-04:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/node-mongodb-native/2.1/reference/management/</loc>
     <lastmod>2015-03-19T14:27:51-04:00</lastmod>
   </url>
   
   <url>
     <loc>/node-mongodb-native/2.1/tutorials/collections/</loc>
+    <lastmod>2015-03-19T14:27:51-04:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/node-mongodb-native/2.1/tutorials/commands/</loc>
     <lastmod>2015-03-19T14:27:51-04:00</lastmod>
   </url>
   
@@ -78,6 +78,11 @@
   </url>
   
   <url>
+    <loc>/node-mongodb-native/2.1/reference/ecmascript6/connecting/</loc>
+    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/node-mongodb-native/2.1/reference/connecting/legacy-connection-settings/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
@@ -94,11 +99,6 @@
   
   <url>
     <loc>/node-mongodb-native/2.1/reference/faq/</loc>
-    <lastmod>2015-03-19T12:53:30-04:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/node-mongodb-native/2.1/reference/ecmascript6/connecting/</loc>
     <lastmod>2015-03-19T12:53:30-04:00</lastmod>
   </url>
   
@@ -148,12 +148,12 @@
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.1/installation-guide/</loc>
+    <loc>/node-mongodb-native/2.1/quick-start/</loc>
     <lastmod>2015-03-17T15:36:56+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/node-mongodb-native/2.1/quick-start/</loc>
+    <loc>/node-mongodb-native/2.1/installation-guide/</loc>
     <lastmod>2015-03-17T15:36:56+00:00</lastmod>
   </url>
   

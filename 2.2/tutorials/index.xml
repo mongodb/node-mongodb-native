@@ -356,12 +356,26 @@ collection that stores the file metadata.&lt;/p&gt;
 
 &lt;p&gt;In the following example, the connection string specifies the user &lt;code&gt;dave&lt;/code&gt;, password &lt;code&gt;abc123&lt;/code&gt;, authentication mechanism &lt;code&gt;DEFAULT&lt;/code&gt;, and authentication database &lt;code&gt;myproject&lt;/code&gt;.&lt;/p&gt;
 
+&lt;p&gt;&lt;div class=&#34;admonition important&#34;&gt;
+&lt;h5 class=&#34;admonition-title&#34;&gt;important&lt;/h5&gt;
+&lt;p&gt;The user and password should always be &lt;strong&gt;URI&lt;/strong&gt; encoded using &lt;code&gt;encodeURIComponent&lt;/code&gt; to ensure any non URI compliant user or password characters are correctly parsed.&lt;/p&gt;
+
+&lt;/div&gt;
+&lt;/p&gt;
+
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;var MongoClient = require(&#39;mongodb&#39;).MongoClient,
   f = require(&#39;util&#39;).format,
   assert = require(&#39;assert&#39;);
 
+var user = encodeURIComponent(&#39;dave&#39;);
+var password = encodeURIComponent(&#39;abc123&#39;);
+var authMechanism = &#39;DEFAULT&#39;;
+var authSource = &#39;myproject&#39;;
+
 // Connection URL
-var url = &#39;mongodb://dave:abc123@localhost:27017?authMechanism=DEFAULT&amp;amp;authSource=myproject&#39;;
+var url = f(&#39;mongodb://%s:%s@localhost:27017?authMechanism=%s&amp;amp;authSource=&#39;,
+  user, password, authMechanism, authSource);
+
 // Use connect method to connect to the Server
 MongoClient.connect(url, function(err, db) {
   assert.equal(null, err);
@@ -2772,7 +2786,7 @@ document to the &lt;code&gt;createIndex()&lt;/code&gt; method:&lt;/p&gt;
 &lt;p&gt;For an ascending index type, specify &lt;code&gt;1&lt;/code&gt; for &lt;code&gt;&amp;lt;type&amp;gt;&lt;/code&gt;.&lt;/p&gt;
 
 &lt;p&gt;The following example creates an ascending index key for the
-&lt;code&gt;quantity&lt;/code&gt; field:&lt;/p&gt;
+&lt;code&gt;dateOfBirth&lt;/code&gt; field:&lt;/p&gt;
 
 &lt;pre&gt;&lt;code class=&#34;language-js&#34;&gt;
 var createAscendingIndex = function(db, callback) {

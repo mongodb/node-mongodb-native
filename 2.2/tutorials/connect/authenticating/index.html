@@ -1528,12 +1528,26 @@
 
 <p>In the following example, the connection string specifies the user <code>dave</code>, password <code>abc123</code>, authentication mechanism <code>DEFAULT</code>, and authentication database <code>myproject</code>.</p>
 
+<p><div class="admonition important">
+<h5 class="admonition-title">important</h5>
+<p>The user and password should always be <strong>URI</strong> encoded using <code>encodeURIComponent</code> to ensure any non URI compliant user or password characters are correctly parsed.</p>
+
+</div>
+</p>
+
 <pre><code class="language-js">var MongoClient = require('mongodb').MongoClient,
   f = require('util').format,
   assert = require('assert');
 
+var user = encodeURIComponent('dave');
+var password = encodeURIComponent('abc123');
+var authMechanism = 'DEFAULT';
+var authSource = 'myproject';
+
 // Connection URL
-var url = 'mongodb://dave:abc123@localhost:27017?authMechanism=DEFAULT&amp;authSource=myproject';
+var url = f('mongodb://%s:%s@localhost:27017?authMechanism=%s&amp;authSource=',
+  user, password, authMechanism, authSource);
+
 // Use connect method to connect to the Server
 MongoClient.connect(url, function(err, db) {
   assert.equal(null, err);
