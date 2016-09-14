@@ -240,6 +240,7 @@ function attemptReconnect(self) {
     // Handle all events coming from servers
     function _handleEvent(self, event) {
       return function(err) {
+        // console.log(`_handleEvent() [${event}]-[${this.name}]`)
         // Destroy the instance
         if(self.state == DESTROYED) {
           return this.destroy();
@@ -470,6 +471,14 @@ function topologyMonitor(self, options) {
   self.haTimeoutId = setTimeout(function() {
     if(self.state == DESTROYED) return;
 
+    // Is this a on connect topology discovery
+    // Schedule a proper topology monitoring to happen
+    // To ensure any discovered servers do not timeout
+    // while waiting for the initial discovery to happen.
+    if(options.haInterval) {
+      topologyMonitor(self);
+    }
+
     // If we have a primary and a disconnect handler, execute
     // buffered operations
     if(self.s.replicaSetState.hasPrimaryAndSecondary() && self.s.disconnectHandler) {
@@ -573,10 +582,14 @@ function topologyMonitor(self, options) {
     function connectMissingServers() {
       if(self.state == DESTROYED) return;
 
+      // console.log("=========== connectMissingServers()")
+      // console.dir(self.s.replicaSetState.unknownServers)
       // Attempt to connect to any unknown servers
       connectNewServers(self, self.s.replicaSetState.unknownServers, function(err, cb) {
         if(self.state == DESTROYED) return;
         // Check if we have an options.haInterval (meaning it was triggered from connect)
+        // console.log("================================ options.haInterval = " + options.haInterval)
+        // console.dir(options)
         if(options.haInterval) {
           // Do we have a primary and secondary
           if(self.state == CONNECTING
@@ -630,7 +643,7 @@ function topologyMonitor(self, options) {
           }
         }
 
-        topologyMonitor(self);
+        if(!options.haInterval) topologyMonitor(self);
       });
     }
 
@@ -639,6 +652,10 @@ function topologyMonitor(self, options) {
       && self.s.replicaSetState.unknownServers.length > 0 && options.haInterval) {
         return connectMissingServers();
     } else if(connectingServers.length == 0 && options.haInterval) {
+      // console.log("===================== current state")
+      // console.log(`primary = ${self.s.replicaSetState.primary != null}`)
+      // console.log(`secondaries = ${self.s.replicaSetState.secondaries.length}`)
+      // console.log(`arbiters = ${self.s.replicaSetState.arbiters.length}`)
       self.destroy();
       return self.emit('error', new MongoError('no valid replicaset members found'));
     }
@@ -658,6 +675,7 @@ function topologyMonitor(self, options) {
 
 function handleEvent(self, event) {
   return function(err) {
+    // console.log(`handleEvent() [${event}]-[${this.name}]`)
     if(self.state == DESTROYED) return;
     // Debug log
     if(self.s.logger.isDebug()) {
@@ -670,6 +688,8 @@ function handleEvent(self, event) {
 
 function handleInitialConnectEvent(self, event) {
   return function(err) {
+    // console.log(`handleInitialConnectEvent [${event}]-[${this.name}]`)
+    // if(err) console.dir(err)
     // Debug log
     if(self.s.logger.isDebug()) {
       self.s.logger.debug(f('handleInitialConnectEvent %s from server %s in replset with id %s', event, this.name, self.id));
