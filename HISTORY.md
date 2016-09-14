@@ -1,3 +1,10 @@
+2.0.12
+-----------------
+* fix debug logging message not printing server name.
+* fixed application metadata being sent by wrong ismaster.
+* NODE-812 Fixed mongos stall due to proxy monitoring ismaster failure causing reconnect.
+* NODE-818 Replicaset timeouts in initial connect sequence can "no primary found".
+
 2.0.11 2016-08-29
 -----------------
 * NODE-803, Fixed issue in how the latency window is calculated for Mongos topology causing issues for single proxy connections.
