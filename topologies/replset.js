@@ -661,7 +661,7 @@ function handleEvent(self, event) {
     if(self.state == DESTROYED) return;
     // Debug log
     if(self.s.logger.isDebug()) {
-      self.s.logger.debug(f('handleEvent %s from server %s in replset with id %s', event, self.name, self.id));
+      self.s.logger.debug(f('handleEvent %s from server %s in replset with id %s', event, this.name, self.id));
     }
 
     self.s.replicaSetState.remove(this);
