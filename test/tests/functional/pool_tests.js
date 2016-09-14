@@ -388,11 +388,15 @@ exports['Should correctly recover from a longer server outage'] = {
         var query = new Query(new bson(), 'system.$cmd', {ismaster:true}, {numberToSkip: 0, numberToReturn: 1});
         pool.write(query.toBin(), messageHandler);
         if(i == 250) {
+          // console.log("----------------------------------- 0")
           configuration.manager.stop().then(function() {
+            // console.log("----------------------------------- 1")
             stopped = true;
 
             setTimeout(function() {
+              // console.log("----------------------------------- 2")
               configuration.manager.start().then(function() {
+                // console.log("----------------------------------- 3")
                 started = true;
               });
             }, 5000);
@@ -403,11 +407,13 @@ exports['Should correctly recover from a longer server outage'] = {
 
     // Add event listeners
     pool.on('connect', function(_pool) {
+      // console.log("----------------------------------- connect 0")
       for(var i = 0; i < 500; i++) {
         execute(i);
       }
     })
 
+    // console.log("----------------------------------- pool connect 0")
     // Start connection
     pool.connect();
   }
