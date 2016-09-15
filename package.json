@@ -1,6 +1,6 @@
 {
   "name": "mongodb-core",
-  "version": "2.0.11",
+  "version": "2.0.12",
   "description": "Core MongoDB driver functionality, no bells and whistles and meant for integration not end applications",
   "main": "index.js",
   "scripts": {
@@ -16,7 +16,7 @@
     "core"
   ],
   "dependencies": {
-    "bson": "~0.5.4",
+    "bson": "~0.5.5",
     "require_optional": "~1.0.0"
   },
   "devDependencies": {

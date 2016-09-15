@@ -1,15 +1,17 @@
-2.0.12
+2.0.12 2016-09-15
 -----------------
 * fix debug logging message not printing server name.
 * fixed application metadata being sent by wrong ismaster.
 * NODE-812 Fixed mongos stall due to proxy monitoring ismaster failure causing reconnect.
 * NODE-818 Replicaset timeouts in initial connect sequence can "no primary found".
+* Updated bson library to 0.5.5.
+* Added DBPointer up conversion to DBRef.
 
 2.0.11 2016-08-29
 -----------------
 * NODE-803, Fixed issue in how the latency window is calculated for Mongos topology causing issues for single proxy connections.
 * Avoid timeout in attemptReconnect causing multiple attemptReconnect attempts to happen (Issue #134, https://github.com/dead-horse).
-* Ensure promoteBuffers is propegated in same fashion as promoteValues and promoteLongs
+* Ensure promoteBuffers is propagated in same fashion as promoteValues and promoteLongs
 
 2.0.10 2016-08-23
 -----------------
