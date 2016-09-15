@@ -119,7 +119,8 @@ exports['Should correctly print warning and error when no mongos proxies in seed
     requires: {
       generators: true,
       topology: "single"
-    }
+    },
+    ignore: { travis:true }
   },
 
   test: function(configuration, test) {
