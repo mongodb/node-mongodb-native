@@ -13,7 +13,7 @@
     "official"
   ],
   "dependencies": {
-    "es6-promise": "3.2.1",
+    "es6-promise": "4.0.3",
     "mongodb-core": "2.0.12",
     "readable-stream": "2.1.5"
   },
