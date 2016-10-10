@@ -194,9 +194,9 @@ exports['Successful emit SDAM monitoring events for replicaset'] = {
       // console.log(JSON.stringify(event, null, 2))
     });
 
-    server.on('serverHearbeatFailed', function(event) {
+    server.on('serverHeartbeatFailed', function(event) {
       add({type: 'serverHeartbeatFailed', event: event});
-      // console.log("----------------------------- serverHearbeatFailed")
+      // console.log("----------------------------- serverHeartbeatFailed")
       // console.log(JSON.stringify(event, null, 2))
     });
 

@@ -229,7 +229,7 @@ exports['SDAM Monitoring Should correctly connect to two proxies'] = {
       add({type: 'serverHeartbeatSucceeded', event: event});
     });
 
-    server.on('serverHearbeatFailed', function(event) {
+    server.on('serverHeartbeatFailed', function(event) {
       add({type: 'serverHeartbeatFailed', event: event});
     });
 
@@ -460,7 +460,7 @@ exports['SDAM Monitoring Should correctly failover due to proxy going away causi
       add({type: 'serverHeartbeatSucceeded', event: event});
     });
 
-    server.on('serverHearbeatFailed', function(event) {
+    server.on('serverHeartbeatFailed', function(event) {
       add({type: 'serverHeartbeatFailed', event: event});
     });
 
@@ -617,7 +617,7 @@ exports['SDAM Monitoring Should correctly bring back proxy and use it'] = {
       add({type: 'serverHeartbeatSucceeded', event: event});
     });
 
-    server.on('serverHearbeatFailed', function(event) {
+    server.on('serverHeartbeatFailed', function(event) {
       add({type: 'serverHeartbeatFailed', event: event});
     });
 
