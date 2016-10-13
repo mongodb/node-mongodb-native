@@ -26,13 +26,24 @@ Include the name and password and the [authentication database] (https://docs.mo
 
 In the following example, the connection string specifies the user `dave`, password `abc123`, authentication mechanism `DEFAULT`, and authentication database `myproject`.
 
+{{% note class="important" %}}
+The user and password should always be **URI** encoded using `encodeURIComponent` to ensure any non URI compliant user or password characters are correctly parsed.
+{{% /note %}}
+
 ```js
 var MongoClient = require('mongodb').MongoClient,
   f = require('util').format,
   assert = require('assert');
 
+var user = encodeURIComponent('dave');
+var password = encodeURIComponent('abc123');
+var authMechanism = 'DEFAULT';
+var authSource = 'myproject';
+
 // Connection URL
-var url = 'mongodb://dave:abc123@localhost:27017?authMechanism=DEFAULT&authSource=myproject';
+var url = f('mongodb://%s:%s@localhost:27017?authMechanism=%s&authSource=',
+  user, password, authMechanism, authSource);
+
 // Use connect method to connect to the Server
 MongoClient.connect(url, function(err, db) {
   assert.equal(null, err);
