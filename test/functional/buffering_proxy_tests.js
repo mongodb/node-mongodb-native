@@ -109,7 +109,7 @@ exports['Successfully handle buffering store execution for primary server'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // First secondary state machine
@@ -129,7 +129,7 @@ exports['Successfully handle buffering store execution for primary server'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -149,7 +149,7 @@ exports['Successfully handle buffering store execution for primary server'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       MongoClient.connect('mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs'
@@ -309,7 +309,7 @@ exports['Successfully handle buffering store execution for secondary server'] = 
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // First secondary state machine
@@ -334,7 +334,7 @@ exports['Successfully handle buffering store execution for secondary server'] = 
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -359,7 +359,7 @@ exports['Successfully handle buffering store execution for secondary server'] = 
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       MongoClient.connect('mongodb://localhost:32000,localhost:32001,localhost:32002/test?replicaSet=rs'

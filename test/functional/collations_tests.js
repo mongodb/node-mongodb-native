@@ -54,7 +54,7 @@ exports['Successfully pass through collation to findAndModify command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       var commandResult = null;
@@ -121,7 +121,7 @@ exports['Successfully pass through collation to count command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       var commandResult = null;
@@ -188,7 +188,7 @@ exports['Successfully pass through collation to aggregation command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       var commandResult = null;
@@ -258,7 +258,7 @@ exports['Successfully pass through collation to distinct command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       var commandResult = null;
@@ -325,7 +325,7 @@ exports['Successfully pass through collation to geoNear command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       var commandResult = null;
@@ -392,7 +392,7 @@ exports['Successfully pass through collation to group command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       var commandResult = null;
@@ -462,7 +462,7 @@ exports['Successfully pass through collation to mapreduce command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       var commandResult = null;
@@ -536,7 +536,7 @@ exports['Successfully pass through collation to remove command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       var commandResult = null;
@@ -603,7 +603,7 @@ exports['Successfully pass through collation to update command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       var commandResult = null;
@@ -670,7 +670,7 @@ exports['Successfully pass through collation to find command via options'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       var commandResult = null;
@@ -737,7 +737,7 @@ exports['Successfully pass through collation to find command via cursor'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       var commandResult = null;
@@ -804,7 +804,7 @@ exports['Successfully pass through collation to findOne'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       var commandResult = null;
@@ -876,7 +876,7 @@ exports['Successfully pass through collation to createCollection'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       var commandResult = null;
@@ -943,7 +943,7 @@ exports['Fail due to no support for collation'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       var commandResult = null;
@@ -1009,7 +1009,7 @@ exports['Fail command due to no support for collation'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       var commandResult = null;
@@ -1077,7 +1077,7 @@ exports['Successfully pass through collation to bulkWrite command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       var commandResult = null;
@@ -1145,7 +1145,7 @@ exports['Successfully fail bulkWrite due to unsupported collation'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       var commandResult = null;
@@ -1227,7 +1227,7 @@ exports['Successfully fail bulkWrite due to unsupported collation using replset'
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // First secondary state machine
@@ -1241,7 +1241,7 @@ exports['Successfully fail bulkWrite due to unsupported collation using replset'
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -1255,7 +1255,7 @@ exports['Successfully fail bulkWrite due to unsupported collation using replset'
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 
@@ -1323,7 +1323,7 @@ exports['Successfully create index with collation'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       var commandResult = null;
@@ -1390,7 +1390,7 @@ exports['Fail to create index with collation due to no capabilities'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       var commandResult = null;
@@ -1457,7 +1457,7 @@ exports['Fail to create indexs with collation due to no capabilities'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       var commandResult = null;

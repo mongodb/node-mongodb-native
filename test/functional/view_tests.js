@@ -60,7 +60,7 @@ exports['Successfully pass through collation to findAndModify command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       var commandResult = null;

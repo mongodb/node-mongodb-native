@@ -80,7 +80,7 @@ exports['Successfully pass through writeConcern to aggregate command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // First secondary state machine
@@ -94,7 +94,7 @@ exports['Successfully pass through writeConcern to aggregate command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -108,7 +108,7 @@ exports['Successfully pass through writeConcern to aggregate command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 
@@ -207,7 +207,7 @@ exports['Successfully pass through writeConcern to create command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // First secondary state machine
@@ -221,7 +221,7 @@ exports['Successfully pass through writeConcern to create command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -235,7 +235,7 @@ exports['Successfully pass through writeConcern to create command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 
@@ -327,7 +327,7 @@ exports['Successfully pass through writeConcern to createIndexes command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // First secondary state machine
@@ -341,7 +341,7 @@ exports['Successfully pass through writeConcern to createIndexes command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -355,7 +355,7 @@ exports['Successfully pass through writeConcern to createIndexes command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 
@@ -449,7 +449,7 @@ exports['Successfully pass through writeConcern to drop command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // First secondary state machine
@@ -463,7 +463,7 @@ exports['Successfully pass through writeConcern to drop command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -477,7 +477,7 @@ exports['Successfully pass through writeConcern to drop command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 
@@ -573,7 +573,7 @@ exports['Successfully pass through writeConcern to dropDatabase command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // First secondary state machine
@@ -587,7 +587,7 @@ exports['Successfully pass through writeConcern to dropDatabase command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -601,7 +601,7 @@ exports['Successfully pass through writeConcern to dropDatabase command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 
@@ -697,7 +697,7 @@ exports['Successfully pass through writeConcern to dropIndexes command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // First secondary state machine
@@ -711,7 +711,7 @@ exports['Successfully pass through writeConcern to dropIndexes command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -725,7 +725,7 @@ exports['Successfully pass through writeConcern to dropIndexes command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 
@@ -822,7 +822,7 @@ exports['Successfully pass through writeConcern to dropIndexes command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // First secondary state machine
@@ -836,7 +836,7 @@ exports['Successfully pass through writeConcern to dropIndexes command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -850,7 +850,7 @@ exports['Successfully pass through writeConcern to dropIndexes command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 
@@ -953,7 +953,7 @@ exports['Successfully pass through writeConcern to createUser command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // First secondary state machine
@@ -967,7 +967,7 @@ exports['Successfully pass through writeConcern to createUser command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -981,7 +981,7 @@ exports['Successfully pass through writeConcern to createUser command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 
@@ -1076,7 +1076,7 @@ exports['Successfully pass through writeConcern to dropUser command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // First secondary state machine
@@ -1090,7 +1090,7 @@ exports['Successfully pass through writeConcern to dropUser command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -1104,7 +1104,7 @@ exports['Successfully pass through writeConcern to dropUser command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 
@@ -1199,7 +1199,7 @@ exports['Successfully pass through writeConcern to findAndModify command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // First secondary state machine
@@ -1213,7 +1213,7 @@ exports['Successfully pass through writeConcern to findAndModify command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
 
       // Second secondary state machine
@@ -1227,7 +1227,7 @@ exports['Successfully pass through writeConcern to findAndModify command'] = {
           }
         }
       }).catch(function(err) {
-        console.log(err.stack);
+        // console.log(err.stack);
       });
     });
 

@@ -2824,10 +2824,10 @@ exports.shouldCorrectlyLogoutFromTheDatabaseWithPromises = {
 
               db.close();
               test.done();
-            }).catch(function(err) { console.log(err.stack); })
-          }).catch(function(err) { console.log(err.stack); })
-        }).catch(function(err) { console.log(err.stack); })
-      }).catch(function(err) { console.log(err.stack); })
+            }).catch(function(err) {  })
+          }).catch(function(err) {  })
+        }).catch(function(err) {  })
+      }).catch(function(err) {  })
     });
     // END
   }
