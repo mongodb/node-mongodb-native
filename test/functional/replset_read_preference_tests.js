@@ -807,6 +807,8 @@ exports['Ensure tag read goes only to the correct servers using nearest'] = {
     // Trigger test once whole set is up
     db.on("fullsetup", function() {
       db.serverConfig.replset.once('pickedServer', function(readPreference, server) {
+        // console.log("==================== pickedServer")
+        // console.log(server.lastIsMaster());
         test.equal('ny', server.lastIsMaster().tags.loc);
         // Mark success
         success = true;

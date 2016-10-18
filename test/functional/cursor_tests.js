@@ -1770,7 +1770,9 @@ exports['cursor stream errors connection force closed'] = {
 
   // The actual test we wish to run
   test: function(configuration, test) {
-    var client = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
+    var client = configuration.newDbInstance(configuration.writeConcernMax(), {
+      poolSize:1, auto_reconnect:false
+    });
     client.open(function(err, db_p) {
       test.equal(null, err);
 
@@ -1791,8 +1793,10 @@ exports['cursor stream errors connection force closed'] = {
           var stream = collection.find({}, { batchSize: 5 }).stream();
 
           stream.on('data', function (doc) {
+            // console.log("==================== data")
             if (++i === 5) {
-              client.serverConfig.connections()[0].destroy();
+              client.serverConfig.connections()[0]
+                .write(new Buffer('312312321321askdjljsaNCKnablibh'))
             }
           });
 
@@ -1800,8 +1804,12 @@ exports['cursor stream errors connection force closed'] = {
 
           stream.on('error', done('error'));
 
+          // stream.on('end', done('end'));
+
           function done (e) {
             return function(err) {
+              // console.log("==================== done :: " + e)
+              // console.dir(err)
               ++finished;
 
               if(finished == 2) {

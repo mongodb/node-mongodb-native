@@ -2793,8 +2793,9 @@ exports.shouldCorrectlyLogoutFromTheDatabaseWithPromises = {
   // The actual test we wish to run
   test: function(configuration, test) {
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1, auto_reconnect:false});
-
+    // console.log("============================================= 0")
     db.open().then(function(db) {
+      // console.log("============================================= 1")
     // LINE var MongoClient = require('mongodb').MongoClient,
     // LINE   test = require('assert');
     // LINE MongoClient.connect('mongodb://localhost:27017/test', function(err, db) {
@@ -2803,26 +2804,30 @@ exports.shouldCorrectlyLogoutFromTheDatabaseWithPromises = {
     // BEGIN
       // Add a user to the database
       db.addUser('user3', 'name').then(function(result) {
+        // console.log("============================================= 2")
+        // console.dir(result)
 
         // Authenticate
         db.authenticate('user3', 'name').then(function(result) {
+          // console.log("============================================= 3")
           test.equal(true, result);
+
           // Logout the db
           db.logout().then(function(result) {
+            // console.log("============================================= 4")
             test.equal(true, result);
 
             // Remove the user
             db.removeUser('user3').then(function(result) {
+              // console.log("============================================= 5")
               test.equal(true, result);
 
               db.close();
               test.done();
-            }).catch(function(err) {
-              console.dir(err)
-            });
-          });
-        });
-      });
+            }).catch(function(err) { console.log(err.stack); })
+          }).catch(function(err) { console.log(err.stack); })
+        }).catch(function(err) { console.log(err.stack); })
+      }).catch(function(err) { console.log(err.stack); })
     });
     // END
   }

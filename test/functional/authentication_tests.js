@@ -690,9 +690,7 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
       , Server = configuration.require.Server
       , ReplSet = configuration.require.ReplSet;
 
-      console.log("--------------------- -2")
     setUp(configuration, function(err, replicasetManager) {
-      console.log("--------------------- -1")
       var replSet = new ReplSet( [
           new Server( 'localhost', 31000),
           new Server( 'localhost', 31001)
@@ -700,17 +698,13 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
         {rs_name: 'rs', poolSize:1}
       );
 
-      console.log("--------------------- 0")
       // Connect
       new Db('replicaset_test_auth', replSet, {w:1}).open(function(err, db) {
-        console.log("--------------------- 1")
         // Add a user
         db.admin().addUser("root", "root", {w:3, wtimeout: 25000}, function(err, result) {
-          console.log("--------------------- 2")
           test.equal(null, err);
 
           db.admin().authenticate("root", "root", function(err, result) {
-            console.log("--------------------- 3")
             test.equal(null, err);
             test.ok(result);
 
@@ -721,16 +715,13 @@ exports['Should correctly handle replicaset master stepdown and stepup without l
               user: 'root',
               password: 'root'
             }).then(function() {
-              console.log("--------------------- 4")
 
               db.collection('replicaset_test_auth').insert({a:1}, {w:1}, function(err, result) {
-                console.log("--------------------- 5")
                 test.equal(null, err);
 
                 db.close();
 
                 replicasetManager.stop().then(function() {
-                  console.log("--------------------- 6")
                   test.done();
                 });
               });
