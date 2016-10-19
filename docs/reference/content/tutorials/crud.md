@@ -128,6 +128,62 @@ The following example shows how to serialize a passed-in function when writing t
 });
 </code></pre></section>
 
+<a name='specify-data-type'></a>
+#### Specify a Data Type
+
+The following example specifies a numerical data type
+when inserting documents with the ``insertMany`` method.
+
+{{% note %}}
+The Decimal128 data type requires MongoDB server version 3.4 or higher.
+{{% /note %}}
+
+<section class="javascript5"><pre><code class="hljs">
+var Long = require('mongodb').Long;
+var Decimal = require('mongodb').Decimal128;
+
+{{% myproject-connect %}}
+
+  var longValue = Long(1787);
+  var decimalValue = Decimal.fromString("27.8892836");
+
+  // Insert multiple documents
+  db.collection('numbers').insertMany([ { a : longValue }, { b : decimalValue } ], function(err, r) {
+    assert.equal(null, err);
+    assert.equal(2, r.insertedCount);
+    db.close();
+  });
+});
+
+</code></pre></section>
+<section class="javascript6 hidden"><pre><code class="hljs">
+var Long = require('mongodb').Long;
+var Decimal = require('mongodb').Decimal128;
+
+{{% js6-connect %}}
+
+  var longValue = Long(1787);
+  var decimalValue = Decimal.fromString("27.8892836");
+
+  // Insert multiple documents
+  var r = yield db.collection('numbers').insertMany([ { a : longValue }, { b : decimalValue } ]);
+  assert.equal(2, r.insertedCount);
+
+  // Close connection
+  db.close();
+}).catch(function(err) {
+  console.log(err.stack);
+});
+</code></pre></section>
+
+The above operation inserts the following documents into the
+``numbers`` collection:
+
+```js
+{ "_id" : ObjectId("57d6f63a98724c65a5d7bd7a"), "a" : NumberLong(1787) }
+{ "_id" : ObjectId("57d6f63a98724c65a5d7bd7b"), "b" : NumberDecimal("27.8892836") }
+```
+
 ### Updating Documents
 
 The ``updateOne`` and ``updateMany`` methods exist on the ``Collection`` class and are used to update and upsert documents.
