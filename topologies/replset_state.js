@@ -570,10 +570,8 @@ ReplSetState.prototype.pickServer = function(readPreference) {
 
   // Do we have the nearest readPreference
   if(readPreference.preference == 'nearest' && !readPreference.maxStalenessMS) {
-    // console.log("================================= 0")
     return pickNearest(this, readPreference);
   } else if(readPreference.preference == 'nearest' && readPreference.maxStalenessMS) {
-    // console.log("================================= 1")
     return pickNearestMaxStalenessMS(this, readPreference);
   }
 
@@ -651,26 +649,18 @@ ReplSetState.prototype.pickServer = function(readPreference) {
 //
 // Filter serves by tags
 var filterByTags = function(readPreference, servers) {
-  // console.log("------ filterByTags 0")
-  // console.dir(readPreference)
   if(readPreference.tags == null) return servers;
-  // console.log("------ filterByTags 1")
   var filteredServers = [];
   var tagsArray = Array.isArray(readPreference.tags) ? readPreference.tags : [readPreference.tags];
-  // console.log("------ filterByTags 2")
-  //
-  // console.log("------ filterByTags 3")
-  // console.dir(tagsArray)
+
   // Iterate over the tags
   for(var j = 0; j < tagsArray.length; j++) {
     var tags = tagsArray[j];
 
-    // console.log("=========== filter tags")
     // Iterate over all the servers
     for(var i = 0; i < servers.length; i++) {
       var serverTag = servers[i].lastIsMaster().tags || {};
-      // console.log("server " + servers[i].name)
-      // console.dir(serverTag)
+
       // Did we find the a matching server
       var found = true;
       // Check if the server is valid
@@ -762,15 +752,8 @@ function pickNearest(self, readPreference) {
     servers.push(self.secondaries[i]);
   }
 
-  // console.log("=========================== servers 0")
-  // console.dir(servers)
-  // console.log(servers.map(function(x) { return x.name}));
-
-  // console.log("=========================== servers 1")
   // Filter by tags
   servers = filterByTags(readPreference, servers);
-  // console.log("=========================== servers 2")
-  // console.log(servers.map(function(x) { return x.name}));
 
   // Sort by time
   servers.sort(function(a, b) {

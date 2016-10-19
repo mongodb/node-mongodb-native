@@ -375,15 +375,11 @@ function moveConnectionBetween(connection, from, to) {
 
 function messageHandler(self) {
   return function(message, connection) {
-    // console.log(`============================== messageHandler ${connection.id}`)
-
     // workItem to execute
     var workItem = null;
 
-    // console.log("==== fine workItems responseTo " + message.responseTo)
     // Locate the workItem
     for(var i = 0; i < connection.workItems.length; i++) {
-      // console.log("  connection.workItems[i].requestId = " + connection.workItems[i].requestId)
       if(connection.workItems[i].requestId == message.responseTo) {
         // Get the callback
         var workItem = connection.workItems[i];
@@ -392,12 +388,6 @@ function messageHandler(self) {
       }
     }
 
-    // console.dir(workItem.requestId)
-    // //  console.log(`${connection.id} = connection.requestId=${connection.workItems.map(x => { return x.requestId; })}`)
-    // //  console.log(`============================= workItem :: ${workItem.requestId}`)
-
-    // // Get the callback
-    // var workItem = connection.workItem;
     // Reset timeout counter
     self.numberOfConsecutiveTimeouts = 0;
 

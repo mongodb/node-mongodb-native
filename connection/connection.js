@@ -383,8 +383,6 @@ Connection.prototype.connect = function(_options) {
     self.responseOptions.promoteBuffers = _options.promoteBuffers;
   }
 
-  // console.log(`=== connection connect ${self.port} - connection ${self.connectionTimeout} - socket ${self.socketTimeout}`)
-
   // Create new connection instance
   self.connection = self.domainSocket
     ? net.createConnection(self.host)
@@ -488,7 +486,6 @@ Connection.prototype.destroy = function() {
  * @param {Command} command Command to write out need to implement toBin and toBinUnified
  */
 Connection.prototype.write = function(buffer) {
-  // console.log("======= Connection.write")
   // Debug Log
   if(this.logger.isDebug()) {
     if(!Array.isArray(buffer)) {
