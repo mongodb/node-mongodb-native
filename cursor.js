@@ -539,6 +539,10 @@ var nextFunction = function(self, callback) {
     // Topology is not connected, save the call in the provided store to be
     // Executed at some point when the handler deems it's reconnected
     if(!self.topology.isConnected(self.options) && self.disconnectHandler != null) {
+      if (self.topology.isDestroyed()) {
+        // Topology was destroyed, so don't try to wait for it to reconnect
+        return callback(new MongoError('Topology was destroyed'));
+      }
       return self.disconnectHandler.addObjectAndMethod('cursor', self, 'next', [callback], callback);
     }
 
